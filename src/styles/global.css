@@ -1,0 +1,101 @@
+@tailwind base;
+
+@import url(./customModal.css);
+
+@font-face {
+  font-family: "SF Pro Display";
+  src: url('../assets/fonts/SFPRODISPLAYREGULAR.OTF');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "SF Pro Display";
+  src: url('../assets/fonts/SFPRODISPLAYSEMIBOLDITALIC.OTF');
+  font-weight: 600;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "SF Pro Display";
+  src: url('../assets/fonts/SFPRODISPLAYBLACKITALIC.OTF');
+  font-weight: 900;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "SF Pro Display";
+  src: url('../assets/fonts/SFPRODISPLAYBOLD.OTF');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "SF Pro Display";
+  src: url('../assets/fonts/SFPRODISPLAYHEAVYITALIC.OTF');
+  font-weight: 800;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "SF Pro Display";
+  src: url('../assets/fonts/SFPRODISPLAYMEDIUM.OTF');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "SF Pro Display";
+  src: url('../assets/fonts/SFPRODISPLAYTHINITALIC.OTF');
+  font-weight: 100;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "SF Pro Display";
+  src: url('../assets/fonts/SFPRODISPLAYULTRALIGHTITALIC.OTF');
+  font-weight: 200;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "SF Pro Display";
+  src: url('../assets/fonts/SFPRODISPLAYLIGHTITALIC.OTF');
+  font-weight: 300;
+  font-style: italic;
+}
+
+html {
+  font-family: 'SF Pro Display', sans-serif;
+}
+
+a {
+  @apply text-blue-700;
+}
+
+a:hover {
+  @apply border-b-2 border-blue-700;
+}
+
+@tailwind components;
+@tailwind utilities;
+
+div,
+p,
+span,
+a {
+  font-size: 14px;
+}
+
+.branch-menu {
+  min-width: 200px !important;
+  inset: 64px auto auto calc(100vw - 276px) !important;
+}
+
+.hidden-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.search-product {
+  width: 1000px !important;
+}

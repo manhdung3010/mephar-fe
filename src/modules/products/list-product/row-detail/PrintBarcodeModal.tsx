@@ -1,0 +1,62 @@
+import Image from 'next/image';
+
+import CloseCircleGrayIcon from '@/assets/closeCircleGrayIcon.svg';
+import { CustomButton } from '@/components/CustomButton';
+import { CustomInput } from '@/components/CustomInput';
+import { CustomModal } from '@/components/CustomModal';
+
+const PrintBarcode = ({
+  isOpen,
+  onCancel,
+}: {
+  isOpen: boolean;
+  onCancel: () => void;
+}) => {
+  return (
+    <CustomModal
+      closeIcon={<Image src={CloseCircleGrayIcon} alt="" />}
+      isOpen={isOpen}
+      onCancel={onCancel}
+      onSubmit={onCancel}
+      customFooter
+      width={420}
+    >
+      <div className="flex flex-col items-center justify-center gap-6 text-[#1C1C28]">
+        <div className="text-xl font-semibold">In mã vạch</div>
+        <div className="h-[1px] w-full bg-[#C7C9D9]" />
+        <div className="flex w-full items-center justify-around gap-1">
+          <div className="whitespace-nowrap text-lg text-[#000000]">
+            Số lượng bản in
+          </div>
+          <CustomInput
+            className="mt-0 h-[26px]"
+            bordered={false}
+            onChange={() => {}}
+          />
+          <div className="flex h-[28px] border border-[#F2F2F5]">
+            <div className="flex cursor-pointer items-center justify-center rounded-l bg-[#3E7BFA] p-2 text-base leading-5 text-white">
+              +
+            </div>
+            <div className="flex cursor-pointer items-center justify-center rounded-r bg-white p-2 text-base leading-5 text-[#3E7BFA]">
+              -
+            </div>
+          </div>
+        </div>
+        <div className="grid w-full grid-cols-2 gap-4">
+          <CustomButton
+            outline={true}
+            className="!h-11 w-full"
+            onClick={onCancel}
+          >
+            Hủy
+          </CustomButton>
+          <CustomButton className="!h-11 w-full" onClick={onCancel}>
+            In
+          </CustomButton>
+        </div>
+      </div>
+    </CustomModal>
+  );
+};
+
+export default PrintBarcode;
