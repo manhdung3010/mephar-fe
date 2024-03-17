@@ -25,6 +25,7 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
       })
   );
 
+  const { dehydratedState } = pageProps as { dehydratedState: unknown };
   return (
     <ConfigProvider
       theme={{
@@ -35,7 +36,7 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
     >
       <RecoilRoot>
         <QueryClientProvider client={queryClient}>
-          <Hydrate state={pageProps.dehydratedState}>
+          <Hydrate state={dehydratedState}>
             <Component {...pageProps} />
 
             <InitGlobalData />
