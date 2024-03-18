@@ -1,10 +1,10 @@
 export function getEnumKeyByValue(enumValue, value) {
-  return Object.keys(enumValue).find((key) => enumValue[key] === value) || '';
+  return Object.keys(enumValue).find((key) => enumValue[key] === value) || "";
 }
 
 export enum EStorageKey {
-  ACCESS_TOKEN = 'ACCESS_TOKEN',
-  REFRESH_TOKEN = 'REFRESH_TOKEN',
+  ACCESS_TOKEN = "ACCESS_TOKEN",
+  REFRESH_TOKEN = "REFRESH_TOKEN",
 }
 
 export enum EProductStatus {
@@ -13,92 +13,92 @@ export enum EProductStatus {
 }
 
 export enum EProductStatusLabel {
-  active = 'Đang kinh doanh',
-  inactive = 'Ngưng kinh doanh',
+  active = "Đang kinh doanh",
+  inactive = "Ngưng kinh doanh",
 }
 
 export enum EImportProductStatus {
-  DRAFT = 'DRAFT', // Lưu tạm
-  SUCCEED = 'SUCCEED', // Hoàn thành
+  DRAFT = "DRAFT", // Lưu tạm
+  SUCCEED = "SUCCEED", // Hoàn thành
 }
 
 export enum EImportProductStatusLabel {
-  DRAFT = 'Lưu tạm', // Lưu tạm
-  SUCCEED = 'Hoàn thành', // Hoàn thành
+  DRAFT = "Lưu tạm", // Lưu tạm
+  SUCCEED = "Hoàn thành", // Hoàn thành
 }
 
 export enum EBillStatus {
-  comleted = 'comleted',
-  CONNECTED = 'CONNECTED',
+  comleted = "comleted",
+  CONNECTED = "CONNECTED",
 }
 
 export enum EBillStatusLabel {
-  comleted = 'Đã hoàn thành',
-  CONNECTED = 'Đã liên thông',
+  comleted = "Đã hoàn thành",
+  CONNECTED = "Đã liên thông",
 }
 
 export enum EOrderStatus {
-  PENDING = 'PENDING', // Đang chờ duyệt / Duyệt
-  CONFIRMING = 'CONFIRMING', // Đang xác nhận / Xác nhận
-  SHIPPING = 'SHIPPING', // Đang vận chuyển/ Vận chuyển
-  DELIVERING = 'DELIVERING', // Đang giao hàng/Giao hàng
-  PAID = 'PAID', // Đã thanh toán
-  CANCELLED = 'CANCELLED', // Hủy đơn
-  SUCCEED = 'SUCCEED', // Đơn hàng thành công
+  PENDING = "PENDING", // Đang chờ duyệt / Duyệt
+  CONFIRMING = "CONFIRMING", // Đang xác nhận / Xác nhận
+  SHIPPING = "SHIPPING", // Đang vận chuyển/ Vận chuyển
+  DELIVERING = "DELIVERING", // Đang giao hàng/Giao hàng
+  PAID = "PAID", // Đã thanh toán
+  CANCELLED = "CANCELLED", // Hủy đơn
+  SUCCEED = "SUCCEED", // Đơn hàng thành công
 }
 
 export enum EOrderStatusLabel {
-  PENDING = 'Đang chờ duyệt', // Đang chờ duyệt / Duyệt
-  CONFIRMING = 'Đang xác nhận', // Đang xác nhận / Xác nhận
-  SHIPPING = 'Đang vận chuyển', // Đang vận chuyển/ Vận chuyển
-  DELIVERING = 'Đang giao hàng', // Đang giao hàng/Giao hàng
-  PAID = 'Đã thanh toán', // Đã thanh toán
-  CANCELLED = 'Hủy đơn', // Hủy đơn
-  SUCCEED = 'Đơn hàng thành công', // Đơn hàng thành công
+  PENDING = "Đang chờ duyệt", // Đang chờ duyệt / Duyệt
+  CONFIRMING = "Đang xác nhận", // Đang xác nhận / Xác nhận
+  SHIPPING = "Đang vận chuyển", // Đang vận chuyển/ Vận chuyển
+  DELIVERING = "Đang giao hàng", // Đang giao hàng/Giao hàng
+  PAID = "Đã thanh toán", // Đã thanh toán
+  CANCELLED = "Hủy đơn", // Hủy đơn
+  SUCCEED = "Đơn hàng thành công", // Đơn hàng thành công
 }
 
 export enum EReturnTransactionStatus {
-  comleted = 'comleted',
+  comleted = "comleted",
 }
 
 export enum EDeliveryTransactionStatus {
-  DELIVERING = 'DELIVERING',
-  STORE = 'STORE',
-  DELIVERED = 'DELIVERED',
+  DELIVERING = "DELIVERING",
+  STORE = "STORE",
+  DELIVERED = "DELIVERED",
 }
 
 export enum EDeliveryTransactionStatusLabel {
-  DELIVERING = 'Đang vận chuyển',
-  STORE = 'Lưu tạm',
-  DELIVERED = 'Hoàn thành',
+  DELIVERING = "Đang vận chuyển",
+  STORE = "Lưu tạm",
+  DELIVERED = "Hoàn thành",
 }
 
 export enum EReturnTransactionStatusLabel {
-  comleted = 'Đã hoàn thành',
+  comleted = "Đã hoàn thành",
 }
 
 export enum EProductSettingStatus {
-  SELLING = 'SELLING',
+  SELLING = "SELLING",
 }
 
 export enum EProductSettingStatusLabel {
-  SELLING = 'Đang bán',
+  SELLING = "Đang bán",
 }
 
 export enum EPaymentMethod {
-  CASH = 'CASH',
-  BANKING = 'BANK',
-  DEBT = 'DEBT',
+  CASH = "CASH",
+  BANKING = "BANK",
+  DEBT = "DEBT",
 }
 
 export enum ECustomerStatus {
-  active = 'active',
-  inactive = 'inactive',
+  active = "active",
+  inactive = "inactive",
 }
 
 export enum ECustomerStatusLabel {
-  active = 'Hoạt động',
-  inactive = 'Ngưng hoạt động',
+  active = "Hoạt động",
+  inactive = "Ngưng hoạt động",
 }
 
 export enum EDoctorStatus {
@@ -107,48 +107,48 @@ export enum EDoctorStatus {
 }
 
 export enum EDoctorStatusLabel {
-  active = 'Hoạt động',
-  inactive = 'Ngưng hoạt động',
+  active = "Hoạt động",
+  inactive = "Ngưng hoạt động",
 }
 
 export enum EBranchStatus {
-  active = 'active',
-  inactive = 'inactive',
+  active = "active",
+  inactive = "inactive",
 }
 
 export enum EBranchStatusLabel {
-  active = 'Đang hoạt động',
-  inactive = 'Ngưng hoạt động',
+  active = "Đang hoạt động",
+  inactive = "Ngưng hoạt động",
 }
 
 export enum EEmployeeStatus {
-  active = 'active',
-  inactive = 'inactive',
+  active = "active",
+  inactive = "inactive",
 }
 
 export enum EEmployeeStatusLabel {
-  active = 'Đang hoạt động',
-  inactive = 'Ngưng hoạt động',
+  active = "Đang hoạt động",
+  inactive = "Ngưng hoạt động",
 }
 
 export enum EDiscountStatus {
-  active = 'active',
-  inactive = 'inactive',
+  active = 1,
+  inactive = 0,
 }
 
 export enum EDiscountStatusLabel {
-  active = 'Kích hoạt',
-  inactive = 'Ngưng hoạt động',
+  active = "Kích hoạt",
+  inactive = "Ngưng hoạt động",
 }
 
 export enum EGender {
-  male = 'male',
-  female = 'female',
+  male = "male",
+  female = "female",
 }
 
 export enum EGenderLabel {
-  male = 'Nam',
-  female = 'Nữ',
+  male = "Nam",
+  female = "Nữ",
 }
 
 export enum ECustomerType {
@@ -162,20 +162,20 @@ export enum ECommonStatus {
 }
 
 export enum ECommonStatusLabel {
-  active = 'Hoạt động',
-  inactive = 'Ngưng hoạt động',
+  active = "Hoạt động",
+  inactive = "Ngưng hoạt động",
 }
 
 export enum EUserPositions {
-  admin = 'admin',
-  management = 'management',
-  staff = 'staff',
+  admin = "admin",
+  management = "management",
+  staff = "staff",
 }
 
 export enum EUserPositionsLabel {
-  admin = 'Admin',
-  management = 'Quản lý',
-  staff = 'Nhân viên',
+  admin = "Admin",
+  management = "Quản lý",
+  staff = "Nhân viên",
 }
 
 export enum EProductType {
@@ -185,9 +185,9 @@ export enum EProductType {
 }
 
 export enum EProductTypeLabel {
-  MEDICINE = 'Thuốc',
-  PACKAGE = 'Hàng hóa',
-  COMBO = 'Combo - đóng gói',
+  MEDICINE = "Thuốc",
+  PACKAGE = "Hàng hóa",
+  COMBO = "Combo - đóng gói",
 }
 
 export enum EDiscountType {
@@ -196,20 +196,20 @@ export enum EDiscountType {
 }
 
 export enum EDiscountLabel {
-  PERCENT = '%',
-  MONEY = 'đ',
+  PERCENT = "%",
+  MONEY = "đ",
 }
 
 export enum EReturnProductStatus {
-  DRAFT = 'DRAFT', // Lưu tạm
-  SUCCEED = 'SUCCEED', // Hoàn thành
-  CANCELLED = 'CANCELLED', // Hủy bỏ
+  DRAFT = "DRAFT", // Lưu tạm
+  SUCCEED = "SUCCEED", // Hoàn thành
+  CANCELLED = "CANCELLED", // Hủy bỏ
 }
 
 export enum EReturnProductStatusLabel {
-  DRAFT = 'Lưu tạm', // Lưu tạm
-  SUCCEED = 'Hoàn thành', // Hoàn thành
-  CANCELLED = 'Hủy bỏ', // Hủy bỏ
+  DRAFT = "Lưu tạm", // Lưu tạm
+  SUCCEED = "Hoàn thành", // Hoàn thành
+  CANCELLED = "Hủy bỏ", // Hủy bỏ
 }
 
 export enum EConnectSystemStatus {
@@ -218,6 +218,6 @@ export enum EConnectSystemStatus {
 }
 
 export enum EConnectSystemStatusLabel {
-  CONNECTED = 'Đã kết nối',
-  DISCONNECTED = 'Chưa kết nối',
+  CONNECTED = "Đã kết nối",
+  DISCONNECTED = "Chưa kết nối",
 }

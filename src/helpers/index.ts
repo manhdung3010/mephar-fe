@@ -1,11 +1,15 @@
-import dayjs from 'dayjs';
+import dayjs from "dayjs";
 
 export function formatDate(date?: Date | string, format?: string): string {
-  return dayjs(date).format(format ?? 'DD-MM-YYYY');
+  return dayjs(date).format(format ?? "DD-MM-YYYY");
+}
+
+export function formatDateTime(date?: Date | string, format?: string) {
+  return dayjs(date).format(format ?? "HH:mm, DD-MM-YYYY");
 }
 
 export function getImage(url?: string) {
-  return url ? `${process.env.NEXT_PUBLIC_BASE_API_URL}/${url}` : '';
+  return url ? `${process.env.NEXT_PUBLIC_BASE_API_URL}/${url}` : "";
 }
 
 export function hasMultiplePermission(
@@ -40,11 +44,11 @@ export function hasPermission(
 }
 
 export function formatMoney(value?: string | number) {
-  return value ? `${value.toLocaleString('en-US')}đ` : '0đ';
+  return value ? `${value.toLocaleString("en-US")}đ` : "0đ";
 }
 
 export function formatNumber(value?: string | number) {
-  return Number(value || 0)?.toLocaleString('en-US');
+  return Number(value || 0)?.toLocaleString("en-US");
 }
 
 export function roundNumber(value: number) {
@@ -52,9 +56,9 @@ export function roundNumber(value: number) {
 }
 
 export function randomString(length = 6) {
-  let result = '';
+  let result = "";
   const characters =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   const charactersLength = characters.length;
   let counter = 0;
   while (counter < length) {
@@ -74,8 +78,8 @@ export function cloneObject(object) {
 }
 
 export function formatBoolean(value: string) {
-  if (value === 'false') return false;
-  if (value === 'true') return true;
+  if (value === "false") return false;
+  if (value === "true") return true;
 
   return null;
 }
