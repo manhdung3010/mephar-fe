@@ -15,6 +15,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getDiscount } from '@/api/discount.service';
 import CustomPagination from '@/components/CustomPagination';
 import { formatDateTime } from '@/helpers';
+import { debounce } from 'lodash';
 
 interface IRecord {
   key: number;
@@ -43,21 +44,6 @@ export function Discount() {
     ['promotion-program', formFilter.page, formFilter.limit, formFilter.keyword],
     () => getDiscount(formFilter)
   );
-
-  console.log("discount", discount)
-
-  const record = {
-    key: 1,
-    id: 'KM231101093112',
-    name: 'Giảm giá sinh nhật',
-    fromDate: '02/08/2023 11:17:51',
-    toDate: '18/08/2023 00:00:00',
-    createdBy: 'Trường Nguyễn',
-    status: EDiscountStatus.active,
-    type: 'Giảm giá hoá đơn',
-  };
-
-  console.log(expandedRowKeys)
 
   const columns: ColumnsType<IRecord> = [
     {
@@ -128,6 +114,7 @@ export function Discount() {
       key: 'alt',
     },
   ];
+
   return (
     <div className="mb-2">
       <div className="my-3 flex items-center justify-end gap-4">
@@ -139,18 +126,25 @@ export function Discount() {
         </CustomButton>
       </div>
 
-      <Search />
+      <Search onChange={debounce((value) => {
+        setFormFilter((preValue) => ({
+          ...preValue,
+          keyword: value,
+        }));
+      }, 300)} />
 
       <CustomTable
-        rowSelection={{
-          type: 'checkbox',
-        }}
-        dataSource={discount?.data?.list_promotion_program || []}
+        dataSource={discount?.data?.list_promotion_program?.map((item, index) => ({
+          ...item,
+          key: index,
+        }))}
         columns={columns}
         loading={isLoading}
         expandable={{
           // eslint-disable-next-line @typescript-eslint/no-shadow
-          expandedRowRender: (record: IRecord) => <RowDetail record={record} />,
+          expandedRowRender: (record: IRecord) => {
+            return <RowDetail record={record} />;
+          },
           expandIcon: () => <></>,
           expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key),
         }}

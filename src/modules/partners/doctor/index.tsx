@@ -135,6 +135,11 @@ export function Doctor() {
       ),
     },
   ];
+
+  console.log(doctors?.data?.items?.map((item, index) => ({
+    ...item,
+    key: index,
+  })))
   return (
     <div className="mb-2">
       <div className="my-3 flex items-center justify-end gap-4">
@@ -175,9 +180,24 @@ export function Doctor() {
         }))}
         columns={columns}
         loading={isLoading}
+        onRow={(record, rowIndex) => {
+          return {
+            onClick: event => {
+              // Toggle expandedRowKeys state here
+              if (expandedRowKeys[record.key]) {
+                const { [record.key]: value, ...remainingKeys } = expandedRowKeys;
+                setExpandedRowKeys(remainingKeys);
+              } else {
+                setExpandedRowKeys({ ...expandedRowKeys, [record.key]: true });
+              }
+            }
+          };
+        }}
         expandable={{
           // eslint-disable-next-line @typescript-eslint/no-shadow
-          expandedRowRender: (record: IRecord) => <RowDetail record={record} />,
+          expandedRowRender: (record: IRecord) => {
+            return <RowDetail record={record} />;
+          },
           expandIcon: () => <></>,
           expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key),
         }}

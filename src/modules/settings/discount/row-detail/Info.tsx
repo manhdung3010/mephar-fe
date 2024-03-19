@@ -3,33 +3,46 @@ import Image from 'next/image';
 
 import DeleteIcon from '@/assets/deleteRed.svg';
 import { CustomButton } from '@/components/CustomButton';
+import { formatDateTime } from '@/helpers';
+import cx from 'classnames';
+import { EDiscountStatus, EDiscountStatusLabel } from '@/enums';
 
 const { TextArea } = Input;
 
 export function Info({ record }: { record: any }) {
+  console.log(record, 'record')
   return (
     <div className="gap-12 ">
       <div className="mb-4 grid grid-cols-2 gap-5">
         <div className="grid grid-cols-3 gap-5">
           <div className="col-span-1 text-gray-main">Mã chương trình:</div>
-          <div className="text-black-main">DQG00006601</div>
+          <div className="text-black-main">{record?.id}</div>
         </div>
 
         <div className="grid grid-cols-3 gap-5">
           <div className="col-span-1 text-gray-main">Tên chương trình:</div>
-          <div className="text-black-main">---</div>
+          <div className="text-black-main">{record?.title}</div>
         </div>
 
         <div className="grid grid-cols-3 gap-5">
           <div className="col-span-1 text-gray-main">Thời gian:</div>
           <div className="text-black-main">
-            02/08/2023 11:19 - 25/08/2023 00:00
+            {formatDateTime(record?.startTime) + " - " + formatDateTime(record?.endTime)}
           </div>
         </div>
 
         <div className="grid grid-cols-3 gap-5">
           <div className="col-span-1 text-gray-main">Trạng thái:</div>
-          <div className="text-[#00B63E]">Kích hoạt</div>
+          <div
+            className={cx(
+              record?.status === EDiscountStatus.active
+                ? 'text-[#00B63E]'
+                : 'text-[#6D6D6D]',
+              'w-max'
+            )}
+          >
+            {record?.status === EDiscountStatus.active ? EDiscountStatusLabel.active : EDiscountStatusLabel.inactive}
+          </div>
         </div>
 
         <div className="grid grid-cols-3 gap-5">
@@ -39,7 +52,7 @@ export function Info({ record }: { record: any }) {
 
         <div className="grid grid-cols-3 gap-5">
           <div className="col-span-1 text-gray-main">Ghi chú:</div>
-          <div className="text-black-main">Áp dụng sinh nhật chi nhánh</div>
+          <div className="text-black-main">{record?.description}</div>
         </div>
 
         <div className="grid grid-cols-3 gap-5">

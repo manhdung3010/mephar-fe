@@ -109,6 +109,19 @@ const SampleMedicine = () => {
         }))}
         columns={columns}
         loading={isLoading}
+        onRow={(record, rowIndex) => {
+          return {
+            onClick: event => {
+              // Toggle expandedRowKeys state here
+              if (expandedRowKeys[record.key]) {
+                const { [record.key]: value, ...remainingKeys } = expandedRowKeys;
+                setExpandedRowKeys(remainingKeys);
+              } else {
+                setExpandedRowKeys({ ...expandedRowKeys, [record.key]: true });
+              }
+            }
+          };
+        }}
         expandable={{
           // eslint-disable-next-line @typescript-eslint/no-shadow
           expandedRowRender: (record) => <ProductDetail record={record} />,

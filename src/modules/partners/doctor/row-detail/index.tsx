@@ -8,6 +8,7 @@ import { Info } from './Info';
 const RowDetail = ({ record }: { record: IRecord }) => {
   const [select, setSelect] = useState(0);
 
+
   const menu = ['Thông tin', 'Lịch sử đơn'];
 
   return (

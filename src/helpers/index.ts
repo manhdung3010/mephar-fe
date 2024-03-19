@@ -1,11 +1,11 @@
 import dayjs from "dayjs";
 
 export function formatDate(date?: Date | string, format?: string): string {
-  return dayjs(date).format(format ?? "DD-MM-YYYY");
+  return dayjs(date).format(format ?? "DD/MM/YYYY");
 }
 
 export function formatDateTime(date?: Date | string, format?: string) {
-  return dayjs(date).format(format ?? "HH:mm, DD-MM-YYYY");
+  return dayjs(date).format(format ?? "DD/MM/YYYY HH:mm:ss");
 }
 
 export function getImage(url?: string) {
