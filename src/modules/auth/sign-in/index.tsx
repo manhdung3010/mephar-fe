@@ -134,48 +134,49 @@ export function SignIn() {
       </div>
 
       <div className="w-full max-w-[400px]">
-        <div className="mb-4">
-          <Label label="Tên đăng nhập" hasInfoIcon={false} />
-          <CustomInput
-            className="h-11"
-            placeholder="Tên đăng nhập"
-            onChange={(e) => setValue('username', e, { shouldValidate: true })}
-          />
-          <InputError error={errors.username?.message} />
-        </div>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="mb-4">
+            <Label label="Tên đăng nhập" hasInfoIcon={false} />
+            <CustomInput
+              className="h-11"
+              placeholder="Tên đăng nhập"
+              onChange={(e) => setValue('username', e, { shouldValidate: true })}
+            />
+            <InputError error={errors.username?.message} />
+          </div>
 
-        <div className="mb-4">
-          <Label label="Mật khẩu" hasInfoIcon={false} />
-          <CustomInput
-            type={isHidePassword ? 'password' : 'text'}
-            className="h-11"
-            placeholder="Mật khẩu"
-            onChange={(e) => setValue('password', e, { shouldValidate: true })}
-            suffixIcon={
-              <Image
-                src={isHidePassword ? HidePassword : ViewPassword}
-                alt=""
-                onClick={() => setIsHidePassword((pre) => !pre)}
-                width={16}
-                height={16}
-                className=" cursor-pointer"
-              />
-            }
-          />
-          <InputError error={errors.password?.message} />
-        </div>
+          <div className="mb-4">
+            <Label label="Mật khẩu" hasInfoIcon={false} />
+            <CustomInput
+              type={isHidePassword ? 'password' : 'text'}
+              className="h-11"
+              placeholder="Mật khẩu"
+              onChange={(e) => setValue('password', e, { shouldValidate: true })}
+              suffixIcon={
+                <Image
+                  src={isHidePassword ? HidePassword : ViewPassword}
+                  alt=""
+                  onClick={() => setIsHidePassword((pre) => !pre)}
+                  width={16}
+                  height={16}
+                  className=" cursor-pointer"
+                />
+              }
+            />
+            <InputError error={errors.password?.message} />
+          </div>
 
-        <div className="mb-4">
-          <CustomButton
-            className="!h-11 w-full"
-            type="primary"
-            onClick={handleSubmit(onSubmit)}
-            disabled={isLoading}
-            onEnter={handleSubmit(onSubmit)}
-          >
-            Đăng nhập
-          </CustomButton>
-        </div>
+          <div className="mb-4">
+            <CustomButton
+              className="!h-11 w-full"
+              type="primary"
+              htmlType="submit"
+              disabled={isLoading}
+            >
+              Đăng nhập
+            </CustomButton>
+          </div>
+        </form>
       </div>
     </div>
   );

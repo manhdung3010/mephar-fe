@@ -184,6 +184,24 @@ export function Provider() {
         }))}
         loading={isLoading}
         columns={columns}
+        onRow={(record, rowIndex) => {
+          return {
+            onClick: event => {
+              // Check if the click came from the action column
+              if ((event.target as Element).closest('.ant-table-cell:last-child')) {
+                return;
+              }
+
+              // Toggle expandedRowKeys state here
+              if (expandedRowKeys[record.key - 1]) {
+                const { [record.key - 1]: value, ...remainingKeys } = expandedRowKeys;
+                setExpandedRowKeys(remainingKeys);
+              } else {
+                setExpandedRowKeys({ ...expandedRowKeys, [record.key - 1]: true });
+              }
+            }
+          };
+        }}
         expandable={{
           // eslint-disable-next-line @typescript-eslint/no-shadow
           expandedRowRender: (record: IRecord) => <RowDetail record={record} />,

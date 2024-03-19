@@ -5,7 +5,7 @@ import SearchIcon from '@/assets/searchIcon.svg';
 import { CustomButton } from '@/components/CustomButton';
 import { CustomInput } from '@/components/CustomInput';
 
-const Search = () => {
+const Search = ({ onChange }: { onChange: (value) => void }) => {
   return (
     <div className="bg-white">
       <div className="flex items-center gap-4 p-4">
@@ -14,7 +14,7 @@ const Search = () => {
             placeholder="Tìm kiếm mã, tên hoặc sđt nhà cung cấp"
             prefixIcon={<Image src={SearchIcon} alt="" />}
             className=""
-            onChange={() => {}}
+            onChange={onChange}
           />
         </div>
 

@@ -11,6 +11,11 @@ import { EDiscountStatus, EDiscountStatusLabel } from '@/enums';
 
 import RowDetail from './row-detail';
 import Search from './Search';
+import { useQuery } from '@tanstack/react-query';
+import { getDiscount } from '@/api/discount.service';
+import CustomPagination from '@/components/CustomPagination';
+import { formatDateTime } from '@/helpers';
+import { debounce } from 'lodash';
 
 interface IRecord {
   key: number;
@@ -29,21 +34,16 @@ export function Discount() {
   const [expandedRowKeys, setExpandedRowKeys] = useState<
     Record<string, boolean>
   >({});
+  const [formFilter, setFormFilter] = useState({
+    page: 1,
+    limit: 20,
+    keyword: '',
+  });
 
-  const record = {
-    key: 1,
-    id: 'KM231101093112',
-    name: 'Giảm giá sinh nhật',
-    fromDate: '02/08/2023 11:17:51',
-    toDate: '18/08/2023 00:00:00',
-    createdBy: 'Trường Nguyễn',
-    status: EDiscountStatus.active,
-    type: 'Giảm giá hoá đơn',
-  };
-
-  const dataSource: IRecord[] = Array(8)
-    .fill(0)
-    .map((_, index) => ({ ...record, key: index }));
+  const { data: discount, isLoading } = useQuery(
+    ['promotion-program', formFilter.page, formFilter.limit, formFilter.keyword],
+    () => getDiscount(formFilter)
+  );
 
   const columns: ColumnsType<IRecord> = [
     {
@@ -70,18 +70,20 @@ export function Discount() {
     },
     {
       title: 'Tên chương trình',
-      dataIndex: 'name',
-      key: 'name',
+      dataIndex: 'title',
+      key: 'title',
     },
     {
       title: 'Từ ngày',
-      dataIndex: 'fromDate',
-      key: 'fromDate',
+      dataIndex: 'startTime',
+      key: 'startTime',
+      render: (value) => <span>{formatDateTime(value)}</span>,
     },
     {
       title: 'Đến ngày',
-      dataIndex: 'toDate',
-      key: 'toDate',
+      dataIndex: 'endTime',
+      key: 'endTime',
+      render: (value) => <span>{formatDateTime(value)}</span>,
     },
     {
       title: 'Người tạo',
@@ -102,16 +104,17 @@ export function Discount() {
             'px-2 py-1 rounded-2xl w-max'
           )}
         >
-          {EDiscountStatusLabel[status]}
+          {status === EDiscountStatus.active ? EDiscountStatusLabel.active : EDiscountStatusLabel.inactive}
         </div>
       ),
     },
     {
       title: 'Hình thức khuyến mại',
-      dataIndex: 'type',
-      key: 'type',
+      dataIndex: 'alt',
+      key: 'alt',
     },
   ];
+
   return (
     <div className="mb-2">
       <div className="my-3 flex items-center justify-end gap-4">
@@ -123,17 +126,35 @@ export function Discount() {
         </CustomButton>
       </div>
 
-      <Search />
+      <Search onChange={debounce((value) => {
+        setFormFilter((preValue) => ({
+          ...preValue,
+          keyword: value,
+        }));
+      }, 300)} />
 
       <CustomTable
-        dataSource={dataSource}
+        dataSource={discount?.data?.list_promotion_program?.map((item, index) => ({
+          ...item,
+          key: index,
+        }))}
         columns={columns}
+        loading={isLoading}
         expandable={{
           // eslint-disable-next-line @typescript-eslint/no-shadow
-          expandedRowRender: (record: IRecord) => <RowDetail record={record} />,
+          expandedRowRender: (record: IRecord) => {
+            return <RowDetail record={record} />;
+          },
           expandIcon: () => <></>,
           expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key),
         }}
+      />
+      <CustomPagination
+        page={formFilter.page}
+        pageSize={formFilter.limit}
+        setPage={(value) => setFormFilter({ ...formFilter, page: value })}
+        setPerPage={(value) => setFormFilter({ ...formFilter, limit: value })}
+        total={discount?.data?.totalItem || 0}
       />
     </div>
   );

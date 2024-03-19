@@ -68,7 +68,7 @@ const Info = ({ record }) => {
       title: 'Đơn vị',
       dataIndex: 'units',
       key: 'units',
-      render: (_, { productUnit }) => productUnit.unitName,
+      render: (_, { productUnit }) => productUnit?.unitName,
     },
     {
       title: 'Số lượng',
@@ -80,14 +80,14 @@ const Info = ({ record }) => {
       title: 'Giá bán',
       dataIndex: 'price',
       key: 'price',
-      render: (_, { productUnit }) => formatMoney(productUnit.price),
+      render: (_, { productUnit }) => formatMoney(productUnit?.price),
     },
     {
       title: 'Thành tiền',
       dataIndex: 'price',
       key: 'price',
       render: (_value, { productUnit, quantity }) =>
-        formatMoney(productUnit.price * quantity),
+        formatMoney(productUnit?.price * quantity),
     },
   ];
 
@@ -116,15 +116,14 @@ const Info = ({ record }) => {
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Trạng thái:</div>
             <div
-              className={`${
-                record.status === ECommonStatus.active
-                  ? 'text-[#00B63E]'
-                  : 'text-gray-main'
-              }`}
+              className={`${record.status === ECommonStatus.active
+                ? 'text-[#00B63E]'
+                : 'text-gray-main'
+                }`}
             >
               {
                 ECommonStatusLabel[
-                  getEnumKeyByValue(ECommonStatus, record.status)
+                getEnumKeyByValue(ECommonStatus, record.status)
                 ]
               }
             </div>

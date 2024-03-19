@@ -9,7 +9,7 @@ module.exports = withBundleAnalyzer({
     ignoreDuringBuilds: true,
   },
   images: {
-    domains: ['45.32.106.84'],
+    domains: ['45.32.106.84', '157.10.44.228'],
   },
   poweredByHeader: false,
   trailingSlash: true,
