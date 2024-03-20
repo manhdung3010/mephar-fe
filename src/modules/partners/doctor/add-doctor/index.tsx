@@ -153,17 +153,19 @@ export function AddDoctor({ doctorId }: { doctorId?: string }) {
                 className="h-11"
                 onChange={(e) => setValue('code', e, { shouldValidate: true })}
                 value={getValues('code')}
+                disabled={doctorDetail ? true : false}
               />
             </div>
 
             <div>
-              <Label infoText="" label="Số điện thoại" />
+              <Label infoText="" label="Số điện thoại" required />
               <CustomInput
                 placeholder="Nhập số điện thoại"
                 className="h-11"
                 onChange={(e) => setValue('phone', e, { shouldValidate: true })}
                 value={getValues('phone')}
               />
+              <InputError error={errors.phone?.message} />
             </div>
 
             <div>

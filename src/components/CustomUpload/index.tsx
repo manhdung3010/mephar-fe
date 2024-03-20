@@ -67,9 +67,9 @@ export function CustomUpload({
 
         {!files.length && values?.length && (
           <div className="mt-3">
-            {values.map((file) => (
-              <>
-                {file && (
+            {values.map((file) => {
+              if (file) {
+                return (
                   <div
                     key={file}
                     className=" relative -mt-2 flex h-[102px] w-[102px] items-center justify-center rounded-lg !border !border-[#d9d9d9] p-1"
@@ -82,9 +82,10 @@ export function CustomUpload({
                       alt=""
                     />
                   </div>
-                )}
-              </>
-            ))}
+                )
+              }
+              return null;
+            })}
           </div>
         )}
       </>

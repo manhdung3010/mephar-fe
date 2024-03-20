@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 
-import { deleteCustomer } from '@/api/customer.service';
+import { deleteCustomer, updateCustomer } from '@/api/customer.service';
 import DeleteIcon from '@/assets/deleteRed.svg';
 import EditIcon from '@/assets/editWhite.svg';
 import LockIcon from '@/assets/lockGray.svg';
@@ -12,6 +12,7 @@ import { CustomButton } from '@/components/CustomButton';
 import DeleteModal from '@/components/CustomModal/ModalDeleteItem';
 
 import type { ICustomer } from '../type';
+import { ECustomerStatus, ECustomerStatusLabel } from '@/enums';
 
 const { TextArea } = Input;
 
@@ -26,6 +27,15 @@ export function Info({ record }: { record: ICustomer }) {
       onSuccess: async () => {
         await queryClient.invalidateQueries(['CUSTOMER_LIST']);
         setDeletedId(undefined);
+      },
+      onError: (err: any) => {
+        message.error(err?.message);
+      },
+    });
+  const { mutate: mutateUpdateCustomer, isLoading: isLoadingUpdateCustomer } =
+    useMutation(() => updateCustomer(Number(deletedId), { sattus: "active" }), {
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(['CUSTOMER_LIST']);
       },
       onError: (err: any) => {
         message.error(err?.message);
@@ -122,11 +132,12 @@ export function Info({ record }: { record: ICustomer }) {
 
       <div className="flex justify-end gap-4">
         <CustomButton
-          type="disable"
+          type={"disable"}
           outline={true}
           prefixIcon={<Image src={LockIcon} alt="" />}
+          onClick={() => mutateUpdateCustomer(record.id as any)}
         >
-          Ngưng hoạt động
+          {String(record?.status) === "active" ? ECustomerStatusLabel.inactive : ECustomerStatusLabel.active}
         </CustomButton>
 
         <CustomButton
