@@ -4,13 +4,14 @@ import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 
-import { deleteCustomer } from '@/api/customer.service';
+import { deleteCustomer, updateCustomer } from '@/api/customer.service';
 import DeleteIcon from '@/assets/deleteRed.svg';
 import EditIcon from '@/assets/editWhite.svg';
 import LockIcon from '@/assets/lockGray.svg';
 import { CustomButton } from '@/components/CustomButton';
 import DeleteModal from '@/components/CustomModal/ModalDeleteItem';
 
+import { ECustomerStatus, ECustomerStatusLabel } from '@/enums';
 import type { ICustomer } from '../type';
 
 const { TextArea } = Input;
@@ -20,6 +21,8 @@ export function Info({ record }: { record: ICustomer }) {
   const queryClient = useQueryClient();
 
   const [deletedId, setDeletedId] = useState<number>();
+  const [statusId, setStatusId] = useState<number>();
+  const [status, setStatus] = useState<ECustomerStatus>();
 
   const { mutate: mutateDeleteCustomer, isLoading: isLoadingDeleteCustomer } =
     useMutation(() => deleteCustomer(Number(deletedId)), {
@@ -31,10 +34,23 @@ export function Info({ record }: { record: ICustomer }) {
         message.error(err?.message);
       },
     });
+  const { mutate: mutateUpdateCustomer, isLoading: isLoadingUpdateCustomer } =
+    useMutation((data: { id: number, status: ECustomerStatus }) => updateCustomer(Number(data.id), { status: data?.status }), {
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(['CUSTOMER_LIST']);
+      },
+      onError: (err: any) => {
+        message.error(err?.message);
+      },
+    });
 
   const onSubmit = () => {
     mutateDeleteCustomer();
   };
+
+  const handleUpdateStatus = (id: number, status: ECustomerStatus) => {
+    mutateUpdateCustomer({ id, status });
+  }
 
   return (
     <div className="gap-12 ">
@@ -96,15 +112,8 @@ export function Info({ record }: { record: ICustomer }) {
           </div>
 
           <div className="grid grid-cols-3 gap-5">
-            <div className="col-span-1 text-gray-main">Chi nhánh:</div>
-            <div className="text-black-main">---</div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-5"></div>
-
-          <div className="grid grid-cols-3 gap-5">
             <div className="col-span-1 text-gray-main">Người tạo:</div>
-            <div className="text-black-main">---</div>
+            <div className="text-black-main">{record?.created_by?.username}</div>
           </div>
 
           <div className="grid grid-cols-3 gap-5"></div>
@@ -122,11 +131,12 @@ export function Info({ record }: { record: ICustomer }) {
 
       <div className="flex justify-end gap-4">
         <CustomButton
-          type="disable"
+          type={"disable"}
           outline={true}
           prefixIcon={<Image src={LockIcon} alt="" />}
+          onClick={() => handleUpdateStatus(record.id as any, String(record?.status) === "active" ? ECustomerStatus.inactive : ECustomerStatus.active)}
         >
-          Ngưng hoạt động
+          {String(record?.status) === "active" ? ECustomerStatusLabel.inactive : ECustomerStatusLabel.active}
         </CustomButton>
 
         <CustomButton

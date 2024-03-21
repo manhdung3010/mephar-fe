@@ -37,6 +37,9 @@ export interface IRecord {
   ward?: {
     name: string;
   };
+  created_by?: {
+    username: string;
+  }
   companyName: string;
   taxCode: string;
   createdAt: string;

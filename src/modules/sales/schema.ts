@@ -1,17 +1,17 @@
-import * as yup from 'yup';
+import * as yup from "yup";
 
-import { regexPhoneNumber } from '@/constants';
-import { EPaymentMethod } from '@/enums';
-import { roundNumber } from '@/helpers';
+import { regexPhoneNumber } from "@/constants";
+import { EPaymentMethod } from "@/enums";
+import { roundNumber } from "@/helpers";
 
 export const schema = yup.object().shape({
   products: yup.array(
     yup.object({
-      productId: yup.number().required('Đây là trường bắt buộc!'),
-      productUnitId: yup.number().required('Đây là trường bắt buộc!'),
-      originProductUnitId: yup.number().required('Đây là trường bắt buộc!'),
-      productType: yup.number().required('Đây là trường bắt buộc!'),
-      quantity: yup.number().required('Đây là trường bắt buộc!'),
+      productId: yup.number().required("Đây là trường bắt buộc!"),
+      productUnitId: yup.number().required("Đây là trường bắt buộc!"),
+      originProductUnitId: yup.number().required("Đây là trường bắt buộc!"),
+      productType: yup.number().required("Đây là trường bắt buộc!"),
+      quantity: yup.number().required("Đây là trường bắt buộc!"),
       isBatchExpireControl: yup.boolean(),
       batches: yup
         .array(
@@ -20,8 +20,8 @@ export const schema = yup.object().shape({
             quantity: yup
               .number()
               .test(
-                'check-quantity',
-                'Số lượng sản phẩm chọn phải nhỏ hơn hoặc bằng số lượng tồn',
+                "check-quantity",
+                "Số lượng sản phẩm chọn phải nhỏ hơn hoặc bằng số lượng tồn",
                 (value, context) => {
                   if (Number(value || 0) > context.parent.inventory) {
                     return false;
@@ -34,8 +34,8 @@ export const schema = yup.object().shape({
           })
         )
         .test(
-          'sum-quantity',
-          'Số lượng sản phẩm khác với số lượng sản phẩm trong từng lô',
+          "sum-quantity",
+          "Số lượng sản phẩm khác với số lượng sản phẩm trong từng lô",
           (batches, context) => {
             if (!batches?.length) return true;
 
@@ -51,8 +51,8 @@ export const schema = yup.object().shape({
           }
         )
         .test(
-          'is-required',
-          'Vui lòng nhập lô cho sản phẩm',
+          "is-required",
+          "Vui lòng nhập lô cho sản phẩm",
           (value, context) => {
             if (context.parent.isBatchExpireControl && !value?.length)
               return false;
@@ -62,27 +62,27 @@ export const schema = yup.object().shape({
         ),
     })
   ),
-  totalPrice: yup.number().required('Đây là trường bắt buộc!'),
+  totalPrice: yup.number().required("Đây là trường bắt buộc!"),
   discount: yup.number(),
   discountType: yup.number(),
   cashOfCustomer: yup
     .string()
-    .test('isRequire', 'Đây là trường bắt buộc!', (value, context) => {
-      if (context.parent.paymentType !== EPaymentMethod.DEBT && !value)
+    .test("isRequire", "Đây là trường bắt buộc!", (value, context) => {
+      if (context.parent.paymentType === EPaymentMethod.CASH && !value?.length)
         return false;
 
       return true;
     }),
-  paymentType: yup.string().required('Đây là trường bắt buộc!'),
+  paymentType: yup.string().required("Đây là trường bắt buộc!"),
   description: yup.string(),
-  userId: yup.number().required('Đây là trường bắt buộc!'),
-  customerId: yup.number().required('Đây là trường bắt buộc!'),
+  userId: yup.number().required("Đây là trường bắt buộc!"),
+  customerId: yup.number().required("Đây là trường bắt buộc!"),
   branchId: yup.number(),
   prescriptionId: yup.number(),
 });
 
 export const prescriptionSchema = yup.object().shape({
-  name: yup.string().required('Đây là trường bắt buộc!'),
+  name: yup.string().required("Đây là trường bắt buộc!"),
   code: yup.string(),
   branchId: yup.number(),
   doctorId: yup.number(),
@@ -95,7 +95,7 @@ export const prescriptionSchema = yup.object().shape({
   supervisor: yup.string(),
   phone: yup
     .string()
-    .matches(regexPhoneNumber, 'Vui lòng nhập đúng định dạng số điện thoại'),
+    .matches(regexPhoneNumber, "Vui lòng nhập đúng định dạng số điện thoại"),
   diagnostic: yup.string(),
   healthFacilityId: yup.number(),
 });

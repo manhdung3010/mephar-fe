@@ -1,11 +1,11 @@
-import axiosClient from './index';
+import axiosClient from "./index";
 
 export function getCustomer(params: {
   page: number;
   limit: number;
   keyword?: string;
 }) {
-  return axiosClient.get('customer', { params });
+  return axiosClient.get("customer", { params });
 }
 
 export function getCustomerDetail(id: number) {
@@ -13,7 +13,7 @@ export function getCustomerDetail(id: number) {
 }
 
 export function updateCustomer(id: number, payload) {
-  return axiosClient.put(`customer/${id}`, payload);
+  return axiosClient.patch(`customer/${id}/status`, payload);
 }
 
 export function createCustomer(payload) {

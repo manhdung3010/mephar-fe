@@ -1,14 +1,15 @@
-import * as yup from 'yup';
+import * as yup from "yup";
 
-import { regexPhoneNumber } from '@/constants';
+import { regexPhoneNumber } from "@/constants";
 
 export const schema = yup.object().shape({
   code: yup.string(),
-  fullName: yup.string().required('Đây là trường bắt buộc!'),
-  email: yup.string().email('Vui lòng nhập đúng định dạng form email'),
+  fullName: yup.string().required("Đây là trường bắt buộc!"),
+  email: yup.string().email("Vui lòng nhập đúng định dạng form email"),
   phone: yup
     .string()
-    .matches(regexPhoneNumber, 'Vui lòng nhập đúng định dạng số điện thoại'),
+    .required("Đây là trường bắt buộc!")
+    .matches(regexPhoneNumber, "Vui lòng nhập đúng định dạng số điện thoại"),
   address: yup.string(),
   provinceId: yup.number(),
   districtId: yup.number(),

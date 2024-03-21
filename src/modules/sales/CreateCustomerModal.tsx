@@ -20,9 +20,13 @@ import { CustomUpload } from '@/components/CustomUpload';
 import InputError from '@/components/InputError';
 import { ECustomerStatus, ECustomerType, EGender } from '@/enums';
 import { formatDate } from '@/helpers';
+import PlusIcon from '@/assets/plusIcon.svg';
+
 import { useAddress } from '@/hooks/useAddress';
 
 import { schema } from '../partners/customer/add-customer/schema';
+import { fa } from '@faker-js/faker';
+import { AddGroupCustomerModal } from '../partners/group-customer/AddGroupCustomerModal';
 
 export function CreateCustomerModal({
   isOpen,
@@ -49,6 +53,7 @@ export function CreateCustomerModal({
   });
 
   const [groupCustomerKeyword, setGroupCustomerKeyword] = useState();
+  const [groupCustomer, setGroupCustomer] = useState<boolean>(false);
 
   const { provinces, districts, wards } = useAddress(
     getValues('provinceId'),
@@ -83,10 +88,7 @@ export function CreateCustomerModal({
       onSubmit={handleSubmit(onSubmit)}
       title={
         <div className="text-xl">
-          Thêm khách hàng{' '}
-          <span className="font-normal text-[#8F90A6]">
-            | Chi nhánh tạo: Chi nhánh trung tâm
-          </span>
+          Thêm khách hàng
         </div>
       }
       width={950}
@@ -226,6 +228,7 @@ export function CreateCustomerModal({
                 }
                 className="border-underline"
                 placeholder="Chọn Tỉnh/TP"
+                showSearch={true}
                 options={provinces?.data?.items?.map((item) => ({
                   value: item.id,
                   label: item.name,
@@ -248,6 +251,7 @@ export function CreateCustomerModal({
                   value: item.id,
                   label: item.name,
                 }))}
+                showSearch={true}
                 className="border-underline"
                 placeholder="Chọn Phường/Xã"
               />
@@ -324,7 +328,7 @@ export function CreateCustomerModal({
               bordered={false}
               wrapClassName="grow"
               className="border-[#E4E4EB]"
-              onChange={() => {}}
+              onChange={() => { }}
             />
           </div>
 
@@ -345,6 +349,16 @@ export function CreateCustomerModal({
                 onSearch={debounce((value) => {
                   setGroupCustomerKeyword(value);
                 }, 300)}
+                suffixIcon={
+                  <Image
+                    src={PlusIcon}
+                    onClick={(e) => {
+                      setGroupCustomer(true);
+                      e.stopPropagation();
+                    }}
+                    alt=""
+                  />
+                }
                 value={getValues('groupCustomerId')}
                 className="border-underline"
                 placeholder="Chọn nhóm khách hàng"
@@ -366,6 +380,7 @@ export function CreateCustomerModal({
                   value: item.id,
                   label: item.name,
                 }))}
+                showSearch={true}
                 className="border-underline"
                 placeholder="Chọn quận/huyện"
               />
@@ -388,6 +403,13 @@ export function CreateCustomerModal({
           </div>
         </div>
       </div>
+
+      <AddGroupCustomerModal
+        isOpen={groupCustomer}
+        onCancel={() => {
+          setGroupCustomer(false);
+        }}
+      />
     </CustomModal>
   );
 }

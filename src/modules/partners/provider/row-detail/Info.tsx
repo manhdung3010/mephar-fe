@@ -85,7 +85,7 @@ export function Info({ record }: { record: IRecord }) {
 
           <div className="grid grid-cols-3 gap-5">
             <div className="col-span-1 text-gray-main">Người tạo:</div>
-            <div className="text-black-main">---</div>
+            <div className="text-black-main">{record?.created_by?.username}</div>
           </div>
 
           <div className="grid grid-cols-3 gap-5">

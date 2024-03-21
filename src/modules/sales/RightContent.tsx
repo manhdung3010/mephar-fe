@@ -109,7 +109,7 @@ export function RightContent({ useForm }: { useForm: any }) {
       );
       const discountType =
         EDiscountLabel[
-          getEnumKeyByValue(EDiscountType, getValues('discountType'))
+        getEnumKeyByValue(EDiscountType, getValues('discountType'))
         ];
 
       return `${discountValue}${discountType}`;
@@ -326,6 +326,7 @@ export function RightContent({ useForm }: { useForm: any }) {
                     type="number"
                     hideArrow={true}
                     value={getValues('cashOfCustomer')}
+                    disabled={getValues('paymentType') !== EPaymentMethod.CASH}
                   />
                 </div>
               </div>
@@ -349,7 +350,7 @@ export function RightContent({ useForm }: { useForm: any }) {
                 Phương thức thanh toán
               </div>
               <div className="text-lg leading-normal text-[#19191C]">
-                Tiền mặt
+                {getValues('paymentType') === EPaymentMethod.CASH ? "Tiền mặt" : getValues('paymentType') === EPaymentMethod.BANKING ? "Chuyển khoản" : "Khách nợ"}
               </div>
             </div>
 

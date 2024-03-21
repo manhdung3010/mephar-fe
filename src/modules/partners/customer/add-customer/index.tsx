@@ -144,7 +144,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
             </div>
 
             <div>
-              <Label infoText="" label="Số điện thoại" />
+              <Label infoText="" label="Số điện thoại" required />
               <CustomInput
                 placeholder="Nhập số điện thoại"
                 className="h-11"
