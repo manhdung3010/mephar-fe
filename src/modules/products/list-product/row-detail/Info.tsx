@@ -92,6 +92,8 @@ const Info = ({ record }: { record: IProduct }) => {
     }
   };
 
+  console.log("record", record)
+
   return (
     <>
       <div className="bg-[#F5F5F5] p-4 text-lg font-medium text-[#0070F4]">
@@ -217,15 +219,14 @@ const Info = ({ record }: { record: IProduct }) => {
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Trạng thái:</div>
             <div
-              className={`${
-                record.status === EProductStatus.active
+              className={`${record.status === EProductStatus.active
                   ? 'text-[#00B63E]'
                   : 'text-gray-main'
-              }`}
+                }`}
             >
               {
                 EProductStatusLabel[
-                  getEnumKeyByValue(EProductStatus, record.status)
+                getEnumKeyByValue(EProductStatus, record.status)
                 ]
               }
             </div>

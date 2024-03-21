@@ -1,4 +1,4 @@
-import type { ECommonStatus, EGender, EUserPositions } from '@/enums';
+import type { ECommonStatus, EGender, EUserPositions } from "@/enums";
 
 export interface ICustomer {
   id: number;
@@ -17,6 +17,9 @@ export interface ICustomer {
   type: 1;
   status: ECommonStatus;
   createdAt: string;
+  created_by?: {
+    username: string;
+  };
   avatar?: {
     path: string;
   };

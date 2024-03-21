@@ -15,6 +15,7 @@ import Header from './Header';
 import ProductDetail from './row-detail';
 import Search from './Search';
 import type { IProduct } from './types';
+import { CustomUnitSelect } from '@/components/CustomUnitSelect';
 
 const ProductList = () => {
   const branchId = useRecoilValue(branchState);
@@ -24,6 +25,8 @@ const ProductList = () => {
     limit: 20,
     keyword: '',
   });
+
+  const [valueUnit, setValueUnit] = useState<number | undefined>(undefined);
 
   const { data: products, isLoading } = useQuery(
     [
@@ -70,8 +73,22 @@ const ProductList = () => {
     },
     {
       title: 'Đơn vị',
-      dataIndex: 'baseUnit',
-      key: 'baseUnit',
+      dataIndex: 'productUnit',
+      key: 'productUnit',
+      className: 'unit-col',
+      render: (data) => {
+        setValueUnit(data?.find((unit) => unit.isBaseUnit)?.id || data[0]?.id)
+        return <CustomUnitSelect
+          options={data?.map((item) => ({
+            value: item.id,
+            label: item.unitName,
+          }))}
+          value={
+            valueUnit
+          }
+          onChange={(value) => setValueUnit(value)}
+        />
+      },
     },
     {
       title: 'Nhóm hàng',
@@ -124,6 +141,10 @@ const ProductList = () => {
         onRow={(record, rowIndex) => {
           return {
             onClick: event => {
+              // Check if the click came from the action column
+              if ((event.target as Element).closest('.ant-table-cell.unit-col') || (event.target as Element).closest('.rc-virtual-list-holder-inner')) {
+                return;
+              }
               // Toggle expandedRowKeys state here
               if (expandedRowKeys[record.key]) {
                 const { [record.key]: value, ...remainingKeys } = expandedRowKeys;
