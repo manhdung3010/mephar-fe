@@ -27,6 +27,11 @@ import { useAddress } from '@/hooks/useAddress';
 import { schema } from '../partners/customer/add-customer/schema';
 import { fa } from '@faker-js/faker';
 import { AddGroupCustomerModal } from '../partners/group-customer/AddGroupCustomerModal';
+import {
+  branchState,
+} from '@/recoil/state';
+import { useRecoilState } from 'recoil';
+import { getBranch } from '@/api/branch.service';
 
 export function CreateCustomerModal({
   isOpen,
@@ -36,6 +41,10 @@ export function CreateCustomerModal({
   onCancel: () => void;
 }) {
   const queryClient = useQueryClient();
+
+  const [branchId, setBranch] = useRecoilState(branchState);
+
+  const { data: branches } = useQuery(['SETTING_BRANCH'], () => getBranch());
 
   const {
     getValues,
@@ -88,7 +97,12 @@ export function CreateCustomerModal({
       onSubmit={handleSubmit(onSubmit)}
       title={
         <div className="text-xl">
-          Thêm khách hàng
+          Thêm khách hàng{' '}
+          <span className="font-normal text-[#8F90A6]">
+            | Chi nhánh tạo: {branches?.data?.items?.find((item) => item.id === branchId)
+              ?.name}
+          </span>
+
         </div>
       }
       width={950}

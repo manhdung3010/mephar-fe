@@ -284,6 +284,7 @@ const AddMedicine = ({
                 })
               }
               value={getValues('registerNumber')}
+              disabled={true}
             />
           </div>
           <div>
@@ -297,6 +298,7 @@ const AddMedicine = ({
                 })
               }
               value={getValues('activeElement')}
+              disabled={true}
             />
           </div>
           <div>
@@ -310,6 +312,7 @@ const AddMedicine = ({
                 })
               }
               value={getValues('content')}
+              disabled={true}
             />
           </div>
           <div>
@@ -325,6 +328,7 @@ const AddMedicine = ({
                 })
               }
               value={getValues('packingSpecification')}
+              disabled={true}
             />
           </div>
           <div>
@@ -354,6 +358,7 @@ const AddMedicine = ({
                 </div>
               }
               value={getValues('manufactureId')}
+              disabled={true}
             />
           </div>
           <div>
@@ -373,6 +378,7 @@ const AddMedicine = ({
               className="h-11 !rounded"
               placeholder="Nhập tên nước"
               value={getValues('countryId')}
+              disabled={true}
             />
           </div>
         </div>

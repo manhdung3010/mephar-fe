@@ -88,3 +88,32 @@ export function isVietnamesePhoneNumber(number) {
   // eslint-disable-next-line no-useless-escape
   return /^([\+84|84|0]+(3|5|7|8|9|1[2|6|8|9]))+([0-9]{8})\b/.test(number);
 }
+
+export const getCharByCode = (str: string, position: number) => {
+  return String.fromCharCode(str.charCodeAt(0) + position);
+};
+
+export const removeAccents = (str: string) => {
+  const AccentsMap: any[] = [
+    "aàảãáạăằẳẵắặâầẩẫấậ",
+    "AÀẢÃÁẠĂẰẲẴẮẶÂẦẨẪẤẬ",
+    "dđ",
+    "DĐ",
+    "eèẻẽéẹêềểễếệ",
+    "EÈẺẼÉẸÊỀỂỄẾỆ",
+    "iìỉĩíị",
+    "IÌỈĨÍỊ",
+    "oòỏõóọôồổỗốộơờởỡớợ",
+    "OÒỎÕÓỌÔỒỔỖỐỘƠỜỞỠỚỢ",
+    "uùủũúụưừửữứự",
+    "UÙỦŨÚỤƯỪỬỮỨỰ",
+    "yỳỷỹýỵ",
+    "YỲỶỸÝỴ",
+  ];
+  for (let i = 0; i < AccentsMap.length; i++) {
+    const re = new RegExp("[" + AccentsMap[i].substr(1) + "]", "g");
+    const char = AccentsMap[i][0];
+    str = str.replace(re, char);
+  }
+  return str;
+};

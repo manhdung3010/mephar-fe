@@ -95,7 +95,7 @@ export function StoreInfo() {
           <InputError error={errors.name?.message} />
         </div>
 
-        <div className="mb-5">
+        {/* <div className="mb-5">
           <Label infoText="" label="Địa chỉ email" required />
           <CustomInput
             className="h-11"
@@ -103,7 +103,7 @@ export function StoreInfo() {
             onChange={(e) => setValue('email', e, { shouldValidate: true })}
           />
           <InputError error={errors.email?.message} />
-        </div>
+        </div> */}
 
         <div className="">
           <Label infoText="" label="Số điện thoại" required />

@@ -76,19 +76,22 @@ const ProductList = () => {
       dataIndex: 'productUnit',
       key: 'productUnit',
       className: 'unit-col',
-      render: (data) => {
-        setValueUnit(data?.find((unit) => unit.isBaseUnit)?.id || data[0]?.id)
-        return <CustomUnitSelect
+      render: (data) => (
+        <CustomUnitSelect
           options={data?.map((item) => ({
             value: item.id,
             label: item.unitName,
           }))}
           value={
-            valueUnit
+            data?.find((unit) => unit.isBaseUnit)?.id ||
+            data[0]?.id
           }
-          onChange={(value) => setValueUnit(value)}
+          onChange={(value) => {
+            // change unit value
+
+          }}
         />
-      },
+      ),
     },
     {
       title: 'Nhóm hàng',

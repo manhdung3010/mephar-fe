@@ -21,6 +21,7 @@ export function CustomSelect({
   onSearch,
   isLoading,
   listHeight = 256,
+  disabled
 }: {
   onChange: (value: any) => void;
   defaultValue?: any;
@@ -35,6 +36,7 @@ export function CustomSelect({
   onSearch?: (value: string) => void;
   isLoading?: boolean;
   listHeight?: number;
+  disabled?: boolean;
 }) {
   const filterOption = (input, option) => {
     return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
@@ -71,6 +73,7 @@ export function CustomSelect({
           'prefix-icon': !!prefixIcon,
         })}
         loading={isLoading}
+        disabled={disabled}
       />
     </ComponentStyled>
   );
