@@ -94,6 +94,10 @@ const Info = ({ record }: { record: IProduct }) => {
 
   console.log("record", record)
 
+  const handlePrintBarcode = () => {
+    setOpenPrintBarcodeModal(true);
+  }
+
   return (
     <>
       <div className="bg-[#F5F5F5] p-4 text-lg font-medium text-[#0070F4]">
@@ -220,8 +224,8 @@ const Info = ({ record }: { record: IProduct }) => {
             <div className="text-gray-main">Trạng thái:</div>
             <div
               className={`${record.status === EProductStatus.active
-                  ? 'text-[#00B63E]'
-                  : 'text-gray-main'
+                ? 'text-[#00B63E]'
+                : 'text-gray-main'
                 }`}
             >
               {
@@ -264,7 +268,7 @@ const Info = ({ record }: { record: IProduct }) => {
           type="primary"
           outline={true}
           prefixIcon={<Image src={BarcodeBlueIcon} alt="" />}
-          onClick={() => setOpenPrintBarcodeModal(true)}
+          onClick={handlePrintBarcode}
         >
           In mã vạch
         </CustomButton>
@@ -297,6 +301,7 @@ const Info = ({ record }: { record: IProduct }) => {
       <PrintBarcodeModal
         isOpen={openPrintBarcodeModal}
         onCancel={() => setOpenPrintBarcodeModal(false)}
+        barCode={record.barCode}
       />
 
       <DeleteProductModal

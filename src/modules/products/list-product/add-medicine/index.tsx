@@ -88,9 +88,11 @@ const AddMedicine = ({
 
       Object.keys(schema.fields).forEach((key: any) => {
         if (![undefined, null].includes(record[key]) && key !== 'type') {
-          setValue(key, record[key], {
-            shouldValidate: true,
-          });
+          if (key !== "code") {
+            setValue(key, record[key], {
+              shouldValidate: true,
+            });
+          }
         }
       });
 
@@ -238,6 +240,7 @@ const AddMedicine = ({
                   setError,
                 }}
                 key="0"
+                selectedMedicineCategory={selectedMedicineCategory && JSON.parse(selectedMedicineCategory)}
                 setSelectedMedicineCategory={setSelectedMedicineCategory}
                 groupProductName={productDetail?.data?.groupProduct?.name}
                 dosageName={productDetail?.data?.productDosage?.name}

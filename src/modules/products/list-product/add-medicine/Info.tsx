@@ -55,7 +55,7 @@ export const defaultUnit = (listUnit) => {
   return unitObject;
 };
 
-const Info = ({ useForm, setSelectedMedicineCategory, groupProductName, dosageName, positionName }: any) => {
+const Info = ({ useForm, setSelectedMedicineCategory, selectedMedicineCategory, groupProductName, dosageName, positionName }: any) => {
   const { getValues, setValue, errors } = useForm;
 
   const [isOpenAddGroupProduct, setIsOpenAddGroupProduct] =
@@ -126,6 +126,14 @@ const Info = ({ useForm, setSelectedMedicineCategory, groupProductName, dosageNa
     }
   }, [getValues('productUnits')]);
 
+  useEffect(() => {
+    if (!getValues('name')) {
+      setSelectedMedicineCategory(null);
+    }
+  }, [getValues('name')])
+
+  console.log("barcode", getValues('barCode'))
+
   return (
     <div className="mt-5">
       <div className="grid grid-cols-2 gap-x-[42px] gap-y-5">
@@ -147,11 +155,9 @@ const Info = ({ useForm, setSelectedMedicineCategory, groupProductName, dosageNa
           <CustomInput
             placeholder="Nhập mã vạch"
             className="h-11"
-            onChange={(e) =>
-              setValue('barCode', e, {
-                shouldValidate: true,
-              })
-            }
+            onChange={(e) => setValue('barCode', e, {
+              shouldValidate: true,
+            })}
             value={getValues('barCode')}
           />
           <InputError error={errors?.barCode?.message} />
@@ -162,7 +168,10 @@ const Info = ({ useForm, setSelectedMedicineCategory, groupProductName, dosageNa
             placeholder="Nhập tên thuốc"
             className="h-11 !rounded"
             onSelect={
-              (value) => setSelectedMedicineCategory(value)
+              (value) => {
+                setSelectedMedicineCategory(value);
+                setValue('barCode', value && JSON.parse(value)?.code, { shouldValidate: true });
+              }
             }
             showSearch={true}
             onSearch={(value) => {
@@ -192,6 +201,24 @@ const Info = ({ useForm, setSelectedMedicineCategory, groupProductName, dosageNa
           />
           <InputError error={errors?.name?.message} />
         </div>
+        {
+          selectedMedicineCategory?.code && (
+            <div>
+              <Label infoText="" label="Mã thuốc" />
+              <CustomInput
+                placeholder="Nhập mã thuốc"
+                className="h-11"
+                onChange={(e) =>
+                  setValue('selectedMedicineCategory', e, {
+                    shouldValidate: true,
+                  })
+                }
+                value={selectedMedicineCategory?.code}
+                disabled
+              />
+            </div>
+          )
+        }
         <div>
           <Label infoText="" label="Tên viết tắt" />
           <CustomInput

@@ -4,14 +4,32 @@ import CloseCircleGrayIcon from '@/assets/closeCircleGrayIcon.svg';
 import { CustomButton } from '@/components/CustomButton';
 import { CustomInput } from '@/components/CustomInput';
 import { CustomModal } from '@/components/CustomModal';
+import { useState } from 'react';
+import JsBarcode from 'jsbarcode';
 
 const PrintBarcode = ({
   isOpen,
   onCancel,
+  barCode
 }: {
   isOpen: boolean;
   onCancel: () => void;
+  barCode: string;
 }) => {
+
+  const [quantity, setQuantity] = useState(1);
+
+  const handlePrint = () => {
+    const printWindow: any = window.open('', '_blank');
+    for (let i = 0; i < quantity; i++) {
+      const img = document.createElement('img');
+      JsBarcode(img, barCode);
+      printWindow.document.body.appendChild(img);
+    }
+    printWindow.document.close();
+    printWindow.print();
+  }
+
   return (
     <CustomModal
       closeIcon={<Image src={CloseCircleGrayIcon} alt="" />}
@@ -31,13 +49,14 @@ const PrintBarcode = ({
           <CustomInput
             className="mt-0 h-[26px]"
             bordered={false}
-            onChange={() => {}}
+            value={quantity > 0 ? quantity : 1}
+            onChange={(e) => setQuantity(e.target.value)}
           />
           <div className="flex h-[28px] border border-[#F2F2F5]">
-            <div className="flex cursor-pointer items-center justify-center rounded-l bg-[#3E7BFA] p-2 text-base leading-5 text-white">
+            <div className="flex cursor-pointer items-center justify-center rounded-l bg-[#3E7BFA] p-2 text-base leading-5 text-white" onClick={() => setQuantity(quantity + 1)}>
               +
             </div>
-            <div className="flex cursor-pointer items-center justify-center rounded-r bg-white p-2 text-base leading-5 text-[#3E7BFA]">
+            <div onClick={() => setQuantity(quantity > 1 ? quantity - 1 : 1)} className="flex cursor-pointer items-center justify-center rounded-r bg-white p-2 text-base leading-5 text-[#3E7BFA]">
               -
             </div>
           </div>
@@ -50,7 +69,7 @@ const PrintBarcode = ({
           >
             Hủy
           </CustomButton>
-          <CustomButton className="!h-11 w-full" onClick={onCancel}>
+          <CustomButton className="!h-11 w-full" onClick={handlePrint}>
             In
           </CustomButton>
         </div>

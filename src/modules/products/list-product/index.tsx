@@ -16,6 +16,7 @@ import ProductDetail from './row-detail';
 import Search from './Search';
 import type { IProduct } from './types';
 import { CustomUnitSelect } from '@/components/CustomUnitSelect';
+import ListUnit from './ListUnit';
 
 const ProductList = () => {
   const branchId = useRecoilValue(branchState);
@@ -26,7 +27,7 @@ const ProductList = () => {
     keyword: '',
   });
 
-  const [valueUnit, setValueUnit] = useState<number | undefined>(undefined);
+  const [valueChange, setValueChange] = useState<number | undefined>(undefined);
 
   const { data: products, isLoading } = useQuery(
     [
@@ -44,6 +45,7 @@ const ProductList = () => {
   >({});
 
   const columns: ColumnsType<IProduct> = [
+
     {
       title: 'Mã hàng',
       dataIndex: 'code',
@@ -76,22 +78,12 @@ const ProductList = () => {
       dataIndex: 'productUnit',
       key: 'productUnit',
       className: 'unit-col',
-      render: (data) => (
-        <CustomUnitSelect
-          options={data?.map((item) => ({
-            value: item.id,
-            label: item.unitName,
-          }))}
-          value={
-            data?.find((unit) => unit.isBaseUnit)?.id ||
-            data[0]?.id
-          }
-          onChange={(value) => {
-            // change unit value
-
-          }}
-        />
-      ),
+      render: (data, record) => {
+        console.log("record", record)
+        return (
+          <ListUnit data={data} onChangeUnit={(value) => handleChangeUnitValue(value)} />
+        )
+      },
     },
     {
       title: 'Nhóm hàng',
@@ -110,7 +102,9 @@ const ProductList = () => {
       title: 'Giá bán',
       dataIndex: 'price',
       key: 'price',
-      render: (value) => formatMoney(value),
+      render: (value, record) => {
+        return record?.productUnit?.find((unit) => unit.id === valueChange)?.price || formatMoney(value)
+      },
     },
     {
       title: 'Giá vốn',
@@ -119,6 +113,10 @@ const ProductList = () => {
       render: (value) => formatMoney(value),
     },
   ];
+
+  const handleChangeUnitValue = (value) => {
+    setValueChange(value)
+  }
 
   return (
     <div>
