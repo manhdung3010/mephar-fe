@@ -92,8 +92,6 @@ const Info = ({ record }: { record: IProduct }) => {
     }
   };
 
-  console.log("record", record)
-
   const handlePrintBarcode = () => {
     setOpenPrintBarcodeModal(true);
   }

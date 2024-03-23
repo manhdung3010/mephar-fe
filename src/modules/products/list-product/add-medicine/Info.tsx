@@ -132,8 +132,6 @@ const Info = ({ useForm, setSelectedMedicineCategory, selectedMedicineCategory, 
     }
   }, [getValues('name')])
 
-  console.log("barcode", getValues('barCode'))
-
   return (
     <div className="mt-5">
       <div className="grid grid-cols-2 gap-x-[42px] gap-y-5">

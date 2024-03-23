@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import type { ColumnsType } from 'antd/es/table';
-import { debounce } from 'lodash';
-import { useState } from 'react';
+import { debounce, set } from 'lodash';
+import { useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 
 import { getProduct } from '@/api/product.service';
@@ -25,9 +25,34 @@ const ProductList = () => {
     page: 1,
     limit: 20,
     keyword: '',
+    // name: '',
+    type: null,
+    status: null,
+    // productCategoryId: '',
+    // groupProductId: '',
+    // statusArray: [],
+    // unitId: '',
+    // manufactureId: '',
+    // notEqualManufactureId: '',
+    // listProductId: [],
+    // notEqualId: '',
+    // order: ['id', 'desc'],
+    // tag: '',
+    // newest: '',
+    // bestseller: '',
+    // az: '',
+    // za: '',
+    // price: '',
+    // include: 'productUnit,groupProduct,manufacture,productCategory',
+    // attributes: '',
+    // raw: false,
+    // branchId: branchId,
+    // storeId: '',
+    // isSale: false
   });
 
   const [valueChange, setValueChange] = useState<number | undefined>(undefined);
+  const [selectedList, setSelectedList] = useState<any>([]);
 
   const { data: products, isLoading } = useQuery(
     [
@@ -36,6 +61,8 @@ const ProductList = () => {
       formFilter.limit,
       formFilter.keyword,
       branchId,
+      formFilter.status,
+      formFilter.type
     ],
     () => getProduct({ ...formFilter, branchId })
   );
@@ -43,6 +70,10 @@ const ProductList = () => {
   const [expandedRowKeys, setExpandedRowKeys] = useState<
     Record<string, boolean>
   >({});
+
+  useEffect(() => {
+    setSelectedList(products?.data?.items)
+  }, [formFilter, products?.data?.items])
 
   const columns: ColumnsType<IProduct> = [
 
@@ -79,9 +110,8 @@ const ProductList = () => {
       key: 'productUnit',
       className: 'unit-col',
       render: (data, record) => {
-        console.log("record", record)
         return (
-          <ListUnit data={data} onChangeUnit={(value) => handleChangeUnitValue(value)} />
+          <ListUnit data={data} onChangeUnit={(value) => handleChangeUnitValue(value, record)} />
         )
       },
     },
@@ -103,7 +133,7 @@ const ProductList = () => {
       dataIndex: 'price',
       key: 'price',
       render: (value, record) => {
-        return record?.productUnit?.find((unit) => unit.id === valueChange)?.price || formatMoney(value)
+        return formatMoney(value)
       },
     },
     {
@@ -114,8 +144,12 @@ const ProductList = () => {
     },
   ];
 
-  const handleChangeUnitValue = (value) => {
-    setValueChange(value)
+  const handleChangeUnitValue = (value, record) => {
+    setValueChange(value);
+    const filter = selectedList.filter((item) => item?.id !== record.id);
+    setSelectedList([...filter, { ...record, price: record?.productUnit?.find((unit) => unit.id === value)?.price, unitId: value }]?.sort(function (a, b) {
+      return b.id - a.id;
+    }));
   }
 
   return (
@@ -123,9 +157,12 @@ const ProductList = () => {
       <Header />
       <Search
         onChange={debounce((value) => {
+          console.log("value", value)
           setFormFilter((preValue) => ({
             ...preValue,
-            keyword: value,
+            keyword: value?.keyword,
+            status: value?.status,
+            type: value?.type,
           }));
         }, 300)}
       />
@@ -133,7 +170,7 @@ const ProductList = () => {
         rowSelection={{
           type: 'checkbox',
         }}
-        dataSource={products?.data?.items?.map((item, index) => ({
+        dataSource={selectedList?.map((item, index) => ({
           ...item,
           key: index,
         }))}
