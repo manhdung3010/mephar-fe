@@ -43,7 +43,7 @@ export function Info({ record }: { record: IRecord }) {
         <div className="mb-4 grid w-2/3 grid-cols-2 gap-5">
           <div className="grid grid-cols-3 gap-5">
             <div className="col-span-1 text-gray-main">Mã bác sĩ:</div>
-            <div className="text-black-main">{record.name}</div>
+            <div className="text-black-main">{record.code}</div>
           </div>
 
           <div className="grid grid-cols-3 gap-5">

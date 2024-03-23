@@ -1,36 +1,37 @@
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { message } from 'antd';
-import { debounce } from 'lodash';
-import Image from 'next/image';
-import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { message } from "antd";
+import { debounce } from "lodash";
+import Image from "next/image";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 
 import {
   createCustomer,
   getCustomerDetail,
   updateCustomer,
-} from '@/api/customer.service';
-import { getGroupCustomer } from '@/api/group-customer';
-import ArrowDownIcon from '@/assets/arrowDownGray.svg';
-import DateIcon from '@/assets/dateIcon.svg';
-import PhotographIcon from '@/assets/photograph.svg';
-import PlusCircleIcon from '@/assets/plus-circle.svg';
-import { CustomButton } from '@/components/CustomButton';
-import { CustomDatePicker } from '@/components/CustomDatePicker';
-import { CustomInput, CustomTextarea } from '@/components/CustomInput';
-import Label from '@/components/CustomLabel';
-import { CustomRadio } from '@/components/CustomRadio';
-import { CustomSelect } from '@/components/CustomSelect';
-import { CustomUpload } from '@/components/CustomUpload';
-import InputError from '@/components/InputError';
-import { ECustomerStatus, ECustomerType, EGender } from '@/enums';
-import { formatDate } from '@/helpers';
-import { useAddress } from '@/hooks/useAddress';
+  updateStatusCustomer,
+} from "@/api/customer.service";
+import { getGroupCustomer } from "@/api/group-customer";
+import ArrowDownIcon from "@/assets/arrowDownGray.svg";
+import DateIcon from "@/assets/dateIcon.svg";
+import PhotographIcon from "@/assets/photograph.svg";
+import PlusCircleIcon from "@/assets/plus-circle.svg";
+import { CustomButton } from "@/components/CustomButton";
+import { CustomDatePicker } from "@/components/CustomDatePicker";
+import { CustomInput, CustomTextarea } from "@/components/CustomInput";
+import Label from "@/components/CustomLabel";
+import { CustomRadio } from "@/components/CustomRadio";
+import { CustomSelect } from "@/components/CustomSelect";
+import { CustomUpload } from "@/components/CustomUpload";
+import InputError from "@/components/InputError";
+import { ECustomerStatus, ECustomerType, EGender } from "@/enums";
+import { formatDate } from "@/helpers";
+import { useAddress } from "@/hooks/useAddress";
 
-import { AddGroupCustomerModal } from '../../group-customer/AddGroupCustomerModal';
-import { schema } from './schema';
+import { AddGroupCustomerModal } from "../../group-customer/AddGroupCustomerModal";
+import { schema } from "./schema";
 
 export function AddCustomer({ customerId }: { customerId?: string }) {
   const queryClient = useQueryClient();
@@ -43,7 +44,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
     formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
-    mode: 'onChange',
+    mode: "onChange",
     defaultValues: {
       status: ECustomerStatus.active,
       gender: EGender.male,
@@ -52,14 +53,16 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
   });
 
   const { data: customerDetail } = useQuery(
-    ['CUSTOMER_DETAIL', customerId],
+    ["CUSTOMER_DETAIL", customerId],
     () => getCustomerDetail(Number(customerId)),
     { enabled: !!customerId }
   );
 
+  console.log("customerDetail: ", customerDetail);
+
   const { provinces, districts, wards } = useAddress(
-    getValues('provinceId'),
-    getValues('districtId')
+    getValues("provinceId"),
+    getValues("districtId")
   );
 
   const [groupCustomerKeyword, setGroupCustomerKeyword] = useState();
@@ -67,22 +70,32 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
     useState(false);
 
   const { data: groupCustomers } = useQuery(
-    ['GROUP_CUSTOMER', groupCustomerKeyword],
+    ["GROUP_CUSTOMER", groupCustomerKeyword],
     () =>
       getGroupCustomer({ page: 1, limit: 20, keyword: groupCustomerKeyword })
   );
 
   const { mutate: mutateCreateCustomer, isLoading: isLoadingCreateCustomer } =
     useMutation(
-      () =>
-        customerDetail
-          ? updateCustomer(customerDetail?.data?.id, getValues())
-          : createCustomer(getValues()),
+      () => {
+        const customerData = getValues();
+        const customerId = customerDetail?.data?.id;
+
+        const customerMutation = customerId
+          ? updateCustomer(customerId, customerData)
+          : createCustomer(customerData);
+
+        const statusMutation = customerId
+          ? updateStatusCustomer(customerId, { status: customerData.status })
+          : Promise.resolve();
+
+        return Promise.all([customerMutation, statusMutation]);
+      },
+
       {
         onSuccess: async () => {
-          await queryClient.invalidateQueries(['CUSTOMER_LIST']);
-
-          router.push('/partners/customer');
+          await queryClient.invalidateQueries(["CUSTOMER_LIST"]);
+          router.push("/partners/customer");
         },
         onError: (err: any) => {
           message.error(err?.message);
@@ -110,13 +123,13 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
     <>
       <div className="my-6 flex items-center justify-between bg-white p-5">
         <div className="text-2xl font-medium uppercase">
-          {customerDetail ? 'Cập nhật khách hàng' : 'Thêm mới KHÁCH HÀNG'}
+          {customerDetail ? "Cập nhật khách hàng" : "Thêm mới KHÁCH HÀNG"}
         </div>
         <div className="flex gap-4">
           <CustomButton
             outline={true}
             type="danger"
-            onClick={() => router.push('/partners/customer')}
+            onClick={() => router.push("/partners/customer")}
           >
             Hủy bỏ
           </CustomButton>
@@ -138,8 +151,8 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
               <CustomInput
                 placeholder="Mã mặc định"
                 className="h-11"
-                onChange={(e) => setValue('code', e, { shouldValidate: true })}
-                value={getValues('code')}
+                onChange={(e) => setValue("code", e, { shouldValidate: true })}
+                value={getValues("code")}
               />
             </div>
 
@@ -148,8 +161,8 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
               <CustomInput
                 placeholder="Nhập số điện thoại"
                 className="h-11"
-                onChange={(e) => setValue('phone', e, { shouldValidate: true })}
-                value={getValues('phone')}
+                onChange={(e) => setValue("phone", e, { shouldValidate: true })}
+                value={getValues("phone")}
               />
               <InputError error={errors.phone?.message} />
             </div>
@@ -160,9 +173,9 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
                 placeholder="Nhập tên khách hàng"
                 className="h-11"
                 onChange={(e) =>
-                  setValue('fullName', e, { shouldValidate: true })
+                  setValue("fullName", e, { shouldValidate: true })
                 }
-                value={getValues('fullName')}
+                value={getValues("fullName")}
               />
               <InputError error={errors.fullName?.message} />
             </div>
@@ -175,9 +188,9 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
                   label: item.name,
                 }))}
                 onChange={(value) =>
-                  setValue('groupCustomerId', value, { shouldValidate: true })
+                  setValue("groupCustomerId", value, { shouldValidate: true })
                 }
-                value={getValues('groupCustomerId')}
+                value={getValues("groupCustomerId")}
                 showSearch={true}
                 onSearch={debounce((value) => {
                   setGroupCustomerKeyword(value);
@@ -203,8 +216,8 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
               <CustomInput
                 placeholder="Email"
                 className="h-11"
-                onChange={(e) => setValue('email', e, { shouldValidate: true })}
-                value={getValues('email')}
+                onChange={(e) => setValue("email", e, { shouldValidate: true })}
+                value={getValues("email")}
               />
               <InputError error={errors.email?.message} />
             </div>
@@ -214,13 +227,13 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
               <div className="h-11 rounded-md border border-[#d9d9d9] px-4 py-[2px]">
                 <CustomRadio
                   options={[
-                    { value: ECustomerType.PERSONAL, label: 'Cá nhân' },
-                    { value: ECustomerType.COMPANY, label: 'Công ty' },
+                    { value: ECustomerType.PERSONAL, label: "Cá nhân" },
+                    { value: ECustomerType.COMPANY, label: "Công ty" },
                   ]}
                   onChange={(value) =>
-                    setValue('type', value, { shouldValidate: true })
+                    setValue("type", value, { shouldValidate: true })
                   }
-                  value={getValues('type')}
+                  value={getValues("type")}
                 />
                 <InputError error={errors.type?.message} />
               </div>
@@ -233,11 +246,11 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
                 suffixIcon={<Image src={DateIcon} alt="" />}
                 className="h-11 w-full"
                 onChange={(value) => {
-                  setValue('birthday', formatDate(value, 'YYYY-MM-DD'), {
+                  setValue("birthday", formatDate(value, "YYYY-MM-DD"), {
                     shouldValidate: true,
                   });
                 }}
-                value={getValues('birthday')}
+                value={getValues("birthday")}
               />
               <InputError error={errors.birthday?.message} />
             </div>
@@ -247,28 +260,28 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
               <div className="h-11 rounded-md border border-[#d9d9d9] px-4 py-[2px]">
                 <CustomRadio
                   options={[
-                    { value: EGender.male, label: 'Nam' },
-                    { value: EGender.female, label: 'Nữ' },
+                    { value: EGender.male, label: "Nam" },
+                    { value: EGender.female, label: "Nữ" },
                   ]}
                   onChange={(value) =>
-                    setValue('gender', value, { shouldValidate: true })
+                    setValue("gender", value, { shouldValidate: true })
                   }
-                  value={getValues('gender')}
+                  value={getValues("gender")}
                 />
                 <InputError error={errors.gender?.message} />
               </div>
             </div>
 
-            {getValues('type') === ECustomerType.COMPANY && (
+            {getValues("type") === ECustomerType.COMPANY && (
               <div>
                 <Label infoText="" label="Mã số thuế" />
                 <CustomInput
                   placeholder="Mã số thuế"
                   className="h-11"
                   onChange={(e) =>
-                    setValue('taxCode', e, { shouldValidate: true })
+                    setValue("taxCode", e, { shouldValidate: true })
                   }
-                  value={getValues('taxCode')}
+                  value={getValues("taxCode")}
                 />
                 <InputError error={errors.taxCode?.message} />
               </div>
@@ -280,9 +293,9 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
                 placeholder="Nhập địa chỉ"
                 className="h-11"
                 onChange={(e) =>
-                  setValue('address', e, { shouldValidate: true })
+                  setValue("address", e, { shouldValidate: true })
                 }
-                value={getValues('address')}
+                value={getValues("address")}
               />
               <InputError error={errors.address?.message} />
             </div>
@@ -291,13 +304,13 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
               <Label infoText="" label="Tỉnh/Thành" />
               <CustomSelect
                 onChange={(value) =>
-                  setValue('provinceId', value, { shouldValidate: true })
+                  setValue("provinceId", value, { shouldValidate: true })
                 }
                 options={provinces?.data?.items?.map((item) => ({
                   value: item.id,
                   label: item.name,
                 }))}
-                value={getValues('provinceId')}
+                value={getValues("provinceId")}
                 className=" h-11 !rounded"
                 placeholder="Chọn tỉnh/thành"
                 showSearch={true}
@@ -309,13 +322,13 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
               <Label infoText="" label="Quận/Huyện" />
               <CustomSelect
                 onChange={(value) =>
-                  setValue('districtId', value, { shouldValidate: true })
+                  setValue("districtId", value, { shouldValidate: true })
                 }
                 options={districts?.data?.items?.map((item) => ({
                   value: item.id,
                   label: item.name,
                 }))}
-                value={getValues('districtId')}
+                value={getValues("districtId")}
                 className=" h-11 !rounded"
                 placeholder="Chọn quận/huyện"
                 showSearch={true}
@@ -327,13 +340,13 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
               <Label infoText="" label="Phường/xã" />
               <CustomSelect
                 onChange={(value) =>
-                  setValue('wardId', value, { shouldValidate: true })
+                  setValue("wardId", value, { shouldValidate: true })
                 }
                 options={wards?.data?.items?.map((item) => ({
                   value: item.id,
                   label: item.name,
                 }))}
-                value={getValues('wardId')}
+                value={getValues("wardId")}
                 className=" h-11 !rounded"
                 placeholder="Chọn phường/xã"
                 showSearch={true}
@@ -346,15 +359,15 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
               <div className="h-11 rounded-md border border-[#d9d9d9] px-4 py-[2px]">
                 <CustomRadio
                   options={[
-                    { value: ECustomerStatus.active, label: 'Hoạt động' },
+                    { value: ECustomerStatus.active, label: "Hoạt động" },
                     {
                       value: ECustomerStatus.inactive,
-                      label: 'Ngưng hoạt động',
+                      label: "Ngưng hoạt động",
                     },
                   ]}
-                  value={getValues('status')}
+                  value={getValues("status")}
                   onChange={(value) =>
-                    setValue('status', value, { shouldValidate: true })
+                    setValue("status", value, { shouldValidate: true })
                   }
                 />
                 <InputError error={errors.status?.message} />
@@ -368,9 +381,9 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
               rows={10}
               placeholder="Nhập ghi chú"
               onChange={(e) =>
-                setValue('note', e.target.value, { shouldValidate: true })
+                setValue("note", e.target.value, { shouldValidate: true })
               }
-              value={getValues('note')}
+              value={getValues("note")}
             />
             <InputError error={errors.note?.message} />
           </div>
@@ -379,7 +392,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
         <div
           className="flex h-fit w-1/3 max-w-[360px] flex-col bg-white p-5"
           style={{
-            boxShadow: '0px 8px 13px -3px rgba(0, 0, 0, 0.07)',
+            boxShadow: "0px 8px 13px -3px rgba(0, 0, 0, 0.07)",
           }}
         >
           <div>
@@ -388,18 +401,18 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
             </div>
             <CustomUpload
               onChangeValue={(value) =>
-                setValue('avatarId', value, { shouldValidate: true })
+                setValue("avatarId", value, { shouldValidate: true })
               }
               values={[customerDetail?.data?.avatar?.path]}
             >
               <div
                 className={
-                  'flex h-[300px] w-full flex-col items-center justify-center gap-[5px] rounded-lg border-2 border-dashed border-[#9CA1AD] p-5'
+                  "flex h-[300px] w-full flex-col items-center justify-center gap-[5px] rounded-lg border-2 border-dashed border-[#9CA1AD] p-5"
                 }
               >
                 <Image src={PhotographIcon} alt="" />
                 <div className="font-semibold">
-                  <span className="text-[#E03]">Tải ảnh lên</span>{' '}
+                  <span className="text-[#E03]">Tải ảnh lên</span>{" "}
                   <span className="text-[#6F727A]">hoặc kéo và thả</span>
                 </div>
                 <div className="font-thin text-[#6F727A]">
@@ -417,7 +430,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
           setOpenAddGroupCustomerModal(false);
         }}
         onSave={({ groupCustomerId, groupCustomerName }) => {
-          setValue('groupCustomerId', groupCustomerId, {
+          setValue("groupCustomerId", groupCustomerId, {
             shouldValidate: true,
           });
           setGroupCustomerKeyword(groupCustomerName);
