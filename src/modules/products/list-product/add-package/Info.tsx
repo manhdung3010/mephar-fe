@@ -26,6 +26,7 @@ import { defaultUnit } from '../add-medicine/Info';
 import { AddGroupProductModal } from '../components/AddGroupProduct';
 import { AddManufactureModal } from '../components/AddManufacture';
 import { AddPositionModal } from '../components/AddPositionModal';
+import { CustomAutocomplete } from '@/components/CustomAutocomplete';
 
 const Info = ({
   useForm,
@@ -142,6 +143,48 @@ const Info = ({
           />
           <InputError error={errors?.name?.message} />
         </div>
+
+         {/* <div>
+          <Label infoText="" label="Tên thuốc" required />
+          <CustomAutocomplete
+            placeholder="Nhập tên thuốc"
+            className="h-11 !rounded"
+            onSelect={
+              (value) => {
+                setSelectedMedicineCategory(value);
+                setValue('barCode', value && JSON.parse(value)?.code, { shouldValidate: true });
+              }
+            }
+            showSearch={true}
+            onSearch={(value) => {
+              setValue('name', value, { shouldValidate: true });
+              getCategoryKeyword(value);
+            }}
+            value={getValues('name')}
+            options={exampleProduct?.data?.items?.map((item) => ({
+              label: <div>
+                <div className='text-#0F1824 mb-1 text-base font-medium'>{item.name}</div>
+
+                <div className=' grid grid-cols-5 gap-x-8 gap-y-1'>
+                  <div className=' col-span-1 whitespace-normal'>Số đăng ký: {item?.registerNumber}</div>
+                  <div className=' col-span-2 whitespace-normal'>Hoạt chất: {item?.content}</div>
+                  <div className=' col-span-2 whitespace-normal'> </div>
+                  <div className=' col-span-1 whitespace-normal'>Hàm lượng: {item?.dosage?.name}</div>
+                  <div className=' col-span-2 whitespace-normal'>Quy cách đóng gói: {item?.packingSpecification}</div>
+                  <div className=' col-span-2 whitespace-normal'>Hãng sản phẩm: {item?.manufacture?.name}</div>
+                </div>
+
+                <div className='mt-3 h-[1px] w-full bg-[#CFCFCF]' />
+              </div>,
+              value: JSON.stringify(item),
+            }))}
+            suffixIcon={isLoadingSearchMedicine && <LoadingIcon />}
+            popupClassName="search-product"
+          />
+          <InputError error={errors?.name?.message} />
+        </div> */}
+
+
         <div>
           <Label infoText="" label="Tên viết tắt" />
           <CustomInput
