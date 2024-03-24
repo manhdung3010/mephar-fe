@@ -1,12 +1,12 @@
-import { Select } from 'antd';
-import cx from 'classnames';
-import Image from 'next/image';
-import type { ReactNode } from 'react';
+import { Select } from "antd";
+import cx from "classnames";
+import Image from "next/image";
+import type { ReactNode } from "react";
 
-import ArrowDownGrayIcon from '@/assets/arrowDownGray.svg';
-import ArrowDownIcon from '@/assets/arrowDownIcon.svg';
+import ArrowDownGrayIcon from "@/assets/arrowDownGray.svg";
+import ArrowDownIcon from "@/assets/arrowDownIcon.svg";
 
-import { ComponentStyled } from './styled';
+import { ComponentStyled } from "./styled";
 
 export function CustomSelect({
   onChange,
@@ -21,7 +21,7 @@ export function CustomSelect({
   onSearch,
   isLoading,
   listHeight = 256,
-  disabled
+  disabled,
 }: {
   onChange: (value: any) => void;
   defaultValue?: any;
@@ -29,7 +29,7 @@ export function CustomSelect({
   options?: { value: any; label: any; disabled?: boolean }[];
   prefixIcon?: ReactNode;
   suffixIcon?: ReactNode;
-  className?: 'border-underline' | 'suffix-icon' | string;
+  className?: "border-underline" | "suffix-icon" | string;
   wrapClassName?: string;
   showSearch?: boolean;
   placeholder?: string;
@@ -37,9 +37,17 @@ export function CustomSelect({
   isLoading?: boolean;
   listHeight?: number;
   disabled?: boolean;
-}) {
+  }) {
+  
+  // const filterOption = (input, option) => {
+  //   return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+  // };
+
   const filterOption = (input, option) => {
-    return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+    if (typeof option.label === "string") {
+      return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+    }
+    return false;
   };
 
   return (
@@ -62,15 +70,15 @@ export function CustomSelect({
         listHeight={listHeight}
         suffixIcon={
           suffixIcon ??
-          (className?.includes('border-underline') ? (
+          (className?.includes("border-underline") ? (
             <Image src={ArrowDownIcon} />
           ) : (
             <Image src={ArrowDownGrayIcon} />
           ))
         }
-        className={cx('normal-select', className, {
-          'suffix-icon': !!suffixIcon,
-          'prefix-icon': !!prefixIcon,
+        className={cx("normal-select", className, {
+          "suffix-icon": !!suffixIcon,
+          "prefix-icon": !!prefixIcon,
         })}
         loading={isLoading}
         disabled={disabled}

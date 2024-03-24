@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { debounce } from 'lodash';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { getCountries } from '@/api/address.service';
 import {
@@ -27,6 +27,8 @@ import { AddGroupProductModal } from '../components/AddGroupProduct';
 import { AddManufactureModal } from '../components/AddManufacture';
 import { AddPositionModal } from '../components/AddPositionModal';
 import { CustomAutocomplete } from '@/components/CustomAutocomplete';
+import { getMedicineCategory } from '@/api/medicine-category.service';
+import { LoadingIcon } from '@/components/LoadingIcon';
 
 const Info = ({
   useForm,
@@ -34,6 +36,9 @@ const Info = ({
   positionName,
   manufactureName,
   countryName,
+  selectedMedicineCategory,
+  setSelectedMedicineCategory
+
 }: any) => {
   const { getValues, setValue, errors } = useForm;
 
@@ -49,6 +54,7 @@ const Info = ({
   const [positionKeyword, setPositionKeyword] = useState();
   const [manufactureKeyword, setManufactureKeyword] = useState();
   const [countryKeyword, setCountryKeyword] = useState();
+    const [medicineCategoryKeyword, setMedicineCategoryKeyword] = useState<string>();
 
   useEffect(() => {
     setGroupProductKeyword(groupProductName);
@@ -80,6 +86,23 @@ const Info = ({
 
   const { data: countries } = useQuery(['COUNTRIES', countryKeyword], () =>
     getCountries({ page: 1, limit: 20, keyword: countryKeyword })
+  );
+
+    const getCategoryKeyword = useCallback(
+    debounce((keyword) => {
+      return setMedicineCategoryKeyword(keyword)
+    }, 300),
+    []
+  );
+
+  const { data: exampleProduct, isLoading: isLoadingSearchMedicine } = useQuery(
+    ['SEARCH_PRODUCT_MEDICINE', medicineCategoryKeyword],
+    () =>
+      getMedicineCategory({
+        name: medicineCategoryKeyword,
+        page: 1,
+        limit: 20,
+      })
   );
 
   const onChangeUnit = (unitKey, objectKey, value) => {
@@ -129,7 +152,7 @@ const Info = ({
           />
           <InputError error={errors?.barCode?.message} />
         </div>
-        <div>
+        {/* <div>
           <Label infoText="" label="Tên hàng hóa" required />
           <CustomInput
             className="!h-11"
@@ -142,10 +165,10 @@ const Info = ({
             value={getValues('name')}
           />
           <InputError error={errors?.name?.message} />
-        </div>
+        </div> */}
 
-         {/* <div>
-          <Label infoText="" label="Tên thuốc" required />
+          <div>
+          <Label infoText="" label="Tên hàng hóa" required />
           <CustomAutocomplete
             placeholder="Nhập tên thuốc"
             className="h-11 !rounded"
@@ -182,7 +205,7 @@ const Info = ({
             popupClassName="search-product"
           />
           <InputError error={errors?.name?.message} />
-        </div> */}
+        </div> 
 
 
         <div>

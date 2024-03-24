@@ -2,7 +2,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { cloneDeep, debounce, set } from 'lodash';
+import { cloneDeep, debounce } from 'lodash';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
@@ -15,30 +15,30 @@ import {
   getProduct,
   getSampleMedicineDetail,
   updateSampleMedicine,
-} from '@/api/product.service';
-import ArrowDownIcon from '@/assets/arrowDownGray.svg';
-import PlusCircleIcon from '@/assets/plus-circle.svg';
-import RemoveIcon from '@/assets/removeIcon.svg';
-import SearchIcon from '@/assets/searchIcon.svg';
-import { CustomAutocomplete } from '@/components/CustomAutocomplete';
-import { CustomButton } from '@/components/CustomButton';
-import { CustomInput, CustomTextarea } from '@/components/CustomInput';
-import Label from '@/components/CustomLabel';
-import { CustomRadio } from '@/components/CustomRadio';
-import { CustomSelect } from '@/components/CustomSelect';
-import CustomTable from '@/components/CustomTable';
-import { CustomUnitSelect } from '@/components/CustomUnitSelect';
-import { CustomUpload } from '@/components/CustomUpload';
-import NormalUpload from '@/components/CustomUpload/NormalUpload';
-import InputError from '@/components/InputError';
-import { LoadingIcon } from '@/components/LoadingIcon';
-import { ECommonStatus } from '@/enums';
-import { formatMoney } from '@/helpers';
-import { branchState } from '@/recoil/state';
+} from "@/api/product.service";
+import ArrowDownIcon from "@/assets/arrowDownGray.svg";
+import PlusCircleIcon from "@/assets/plus-circle.svg";
+import RemoveIcon from "@/assets/removeIcon.svg";
+import SearchIcon from "@/assets/searchIcon.svg";
+import { CustomAutocomplete } from "@/components/CustomAutocomplete";
+import { CustomButton } from "@/components/CustomButton";
+import { CustomInput, CustomTextarea } from "@/components/CustomInput";
+import Label from "@/components/CustomLabel";
+import { CustomRadio } from "@/components/CustomRadio";
+import { CustomSelect } from "@/components/CustomSelect";
+import CustomTable from "@/components/CustomTable";
+import { CustomUnitSelect } from "@/components/CustomUnitSelect";
+import { CustomUpload } from "@/components/CustomUpload";
+import NormalUpload from "@/components/CustomUpload/NormalUpload";
+import InputError from "@/components/InputError";
+import { LoadingIcon } from "@/components/LoadingIcon";
+import { ECommonStatus } from "@/enums";
+import { formatMoney } from "@/helpers";
+import { branchState } from "@/recoil/state";
 
-import Tab from '../../../../components/CustomTab';
-import { AddPositionModal } from '../../list-product/components/AddPositionModal';
-import { schema } from './schema';
+import Tab from "../../../../components/CustomTab";
+import { AddPositionModal } from "../../list-product/components/AddPositionModal";
+import { schema } from "./schema";
 
 const AddSampleMedicine = ({
   sampleMedicineId,
@@ -57,22 +57,22 @@ const AddSampleMedicine = ({
     formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
-    mode: 'onChange',
+    mode: "onChange",
     defaultValues: {
       status: ECommonStatus.active,
       branchId,
     },
   });
 
-  const [positionKeyword, setPositionKeyword] = useState('');
+  const [positionKeyword, setPositionKeyword] = useState("");
   const [isOpenAddPosition, setIsOpenAddPosition] = useState(false);
 
-  const { data: positions } = useQuery(['POSITION', positionKeyword], () =>
+  const { data: positions } = useQuery(["POSITION", positionKeyword], () =>
     getPosition({ page: 1, limit: 20, keyword: positionKeyword })
   );
 
   const { data: sampleMedicineDetail } = useQuery(
-    ['DETAIL_PRODUCT', sampleMedicineId],
+    ["DETAIL_PRODUCT", sampleMedicineId],
     () => getSampleMedicineDetail(Number(sampleMedicineId)),
     { enabled: !!sampleMedicineId }
   );
@@ -80,14 +80,14 @@ const AddSampleMedicine = ({
   const [formFilter, setFormFilter] = useState({
     page: 1,
     limit: 20,
-    keyword: '',
+    keyword: "",
   });
 
   const [productSelected, setProductSelected] = useState<any>([]);
 
   const { data: products, isLoading } = useQuery(
     [
-      'LIST_PRODUCT',
+      "LIST_PRODUCT",
       formFilter.page,
       formFilter.limit,
       formFilter.keyword,
@@ -135,39 +135,40 @@ const AddSampleMedicine = ({
 
     setProductSelected(products);
   };
+
   const columns: ColumnsType<any> = [
     {
-      title: 'STT',
-      dataIndex: 'key',
-      key: 'key',
+      title: "STT",
+      dataIndex: "key",
+      key: "key",
       render: (_, __, index) => index + 1,
     },
     {
-      title: 'Mã hàng',
-      dataIndex: 'code',
-      key: 'code',
+      title: "Mã hàng",
+      dataIndex: "code",
+      key: "code",
     },
     {
-      title: 'Tên hàng',
-      dataIndex: 'name',
-      key: 'name',
+      title: "Tên hàng",
+      dataIndex: "name",
+      key: "name",
     },
     {
-      title: 'liều dùng',
-      dataIndex: 'dosage',
-      key: 'dosage',
+      title: "liều dùng",
+      dataIndex: "dosage",
+      key: "dosage",
       render: (dosage, { id }) => (
         <CustomInput
           value={dosage}
           className="h-11 w-[200px]"
-          onChange={(value) => onChangeValueProduct(id, 'dosage', value)}
+          onChange={(value) => onChangeValueProduct(id, "dosage", value)}
         />
       ),
     },
     {
-      title: 'Đơn vị',
-      dataIndex: 'units',
-      key: 'units',
+      title: "Đơn vị",
+      dataIndex: "units",
+      key: "units",
       render: (_, { productUnit, id, productUnitIdSelected }) => (
         <CustomUnitSelect
           options={(() => {
@@ -200,9 +201,9 @@ const AddSampleMedicine = ({
       ),
     },
     {
-      title: 'Số lượng',
-      dataIndex: 'quantity',
-      key: 'quantity',
+      title: "Số lượng",
+      dataIndex: "quantity",
+      key: "quantity",
       render: (quantity, { id }) => (
         <CustomInput
           wrapClassName="!w-[110px]"
@@ -213,13 +214,13 @@ const AddSampleMedicine = ({
           value={quantity}
           type="number"
           onChange={(value) => {
-            onChangeValueProduct(id, 'quantity', value);
+            onChangeValueProduct(id, "quantity", value);
           }}
           onMinus={(value) => {
-            onChangeValueProduct(id, 'quantity', value);
+            onChangeValueProduct(id, "quantity", value);
           }}
           onPlus={(value) => {
-            onChangeValueProduct(id, 'quantity', value);
+            onChangeValueProduct(id, "quantity", value);
           }}
         />
       ),
@@ -235,15 +236,15 @@ const AddSampleMedicine = ({
       />,
     },
     {
-      title: 'Thành tiền',
-      dataIndex: 'price',
-      key: 'price',
+      title: "Thành tiền",
+      dataIndex: "price",
+      key: "price",
       render: (_value, { price, quantity }) => formatMoney(price * quantity),
     },
     {
-      title: '',
-      dataIndex: 'action',
-      key: 'action',
+      title: "",
+      dataIndex: "action",
+      key: "action",
       render: (_, { id }) => (
         <Image
           src={RemoveIcon}
@@ -269,10 +270,10 @@ const AddSampleMedicine = ({
       },
       {
         onSuccess: async () => {
-          await queryClient.invalidateQueries(['LIST_PRODUCT']);
+          await queryClient.invalidateQueries(["LIST_PRODUCT"]);
           reset();
 
-          router.push('/products/sample-medicine');
+          router.push("/products/sample-medicine");
         },
         onError: (err: any) => {
           message.error(err?.message);
@@ -288,11 +289,12 @@ const AddSampleMedicine = ({
     mutateCreateMedicine();
   };
 
+
   return (
     <>
       <div className="mt-6 flex items-center justify-between bg-white p-5">
         <div className="text-2xl font-medium uppercase">
-          Thêm mới ĐƠN THUỐC MẪU
+          {sampleMedicineDetail ? "Sửa danh sách đơn thuốc mẫu" : "Thêm danh sách đơn thuốc mẫu"}
         </div>
         <div className="flex gap-4">
           <CustomButton outline={true} onClick={() => router.push('/products/sample-medicine')}>Hủy bỏ</CustomButton>
@@ -306,11 +308,11 @@ const AddSampleMedicine = ({
                 price: +product.price,
               }));
 
-              setValue('ingredientProducts', products, {
+              setValue("ingredientProducts", products, {
                 shouldValidate: true,
               });
 
-              handleSubmit(onSubmit)();
+              handleSubmit(onSubmit);
             }}
             disabled={isLoadingCreateMedicine}
           >
@@ -323,11 +325,11 @@ const AddSampleMedicine = ({
         <div
           className="h-fit flex-[2] bg-white p-5"
           style={{
-            boxShadow: '0px 8px 13px -3px rgba(0, 0, 0, 0.07)',
+            boxShadow: "0px 8px 13px -3px rgba(0, 0, 0, 0.07)",
           }}
         >
           <Tab
-            menu={['Thông tin']}
+            menu={["Thông tin"]}
             components={[
               <div className="mt-5" key={0}>
                 <div className="grid grid-cols-2 gap-x-[42px] gap-y-5">
@@ -337,9 +339,9 @@ const AddSampleMedicine = ({
                       className="h-11"
                       placeholder="Mã hàng tự động"
                       onChange={(e) =>
-                        setValue('code', e, { shouldValidate: true })
+                        setValue("code", e, { shouldValidate: true })
                       }
-                      value={getValues('code')}
+                      value={getValues("code")}
                     />
                   </div>
                   <div>
@@ -348,16 +350,16 @@ const AddSampleMedicine = ({
                       <CustomRadio
                         className="-mt-2 flex flex-col"
                         options={[
-                          { value: ECommonStatus.active, label: 'Hoạt động' },
+                          { value: ECommonStatus.active, label: "Hoạt động" },
                           {
                             value: ECommonStatus.inactive,
-                            label: 'Ngưng hoạt động',
+                            label: "Ngưng hoạt động",
                           },
                         ]}
                         onChange={(value) =>
-                          setValue('status', value, { shouldValidate: true })
+                          setValue("status", value, { shouldValidate: true })
                         }
-                        value={getValues('status')}
+                        value={getValues("status")}
                       />
                     </div>
                   </div>
@@ -367,9 +369,9 @@ const AddSampleMedicine = ({
                       className="h-11"
                       placeholder="Nhập tên đơn thuốc mẫu"
                       onChange={(e) =>
-                        setValue('name', e, { shouldValidate: true })
+                        setValue("name", e, { shouldValidate: true })
                       }
-                      value={getValues('name')}
+                      value={getValues("name")}
                     />
                     <InputError error={errors?.name?.message} />
                   </div>
@@ -378,7 +380,7 @@ const AddSampleMedicine = ({
                     <Label infoText="" label="Vị trí" />
                     <CustomSelect
                       onChange={(value) =>
-                        setValue('positionId', value, { shouldValidate: true })
+                        setValue("positionId", value, { shouldValidate: true })
                       }
                       options={positions?.data?.items?.map((item) => ({
                         value: item.id,
@@ -400,7 +402,7 @@ const AddSampleMedicine = ({
                           />
                         </div>
                       }
-                      value={getValues('positionId')}
+                      value={getValues("positionId")}
                     />
                     <InputError error={errors?.positionId?.message} />
                   </div>
@@ -411,11 +413,11 @@ const AddSampleMedicine = ({
                       className="h-11"
                       placeholder="Nhập trọng lượng"
                       onChange={(e) =>
-                        setValue('weight', e, {
+                        setValue("weight", e, {
                           shouldValidate: true,
                         })
                       }
-                      value={getValues('weight')}
+                      value={getValues("weight")}
                     />
                     <InputError error={errors?.weight?.message} />
                   </div>
@@ -425,7 +427,7 @@ const AddSampleMedicine = ({
                     <CustomUpload
                       className="!w-fit"
                       onChangeValue={(value) =>
-                        setValue('imageId', value, { shouldValidate: true })
+                        setValue("imageId", value, { shouldValidate: true })
                       }
                       values={[sampleMedicineDetail?.data?.image?.path]}
                     >
@@ -439,8 +441,8 @@ const AddSampleMedicine = ({
                   <Label infoText="" label="Ghi chú" />
                   <CustomTextarea
                     placeholder="Nhập ghi chú"
-                    onChange={(e) => setValue('description', e.target.value)}
-                    value={getValues('description')}
+                    onChange={(e) => setValue("description", e.target.value, { shouldValidate: true })}
+                    value={getValues("description")}
                     rows={1}
                   />
                 </div>
@@ -492,7 +494,7 @@ const AddSampleMedicine = ({
                                 Hoạt chất: {item?.content}
                               </div>
                               <div className=" col-span-2 whitespace-normal">
-                                {' '}
+                                {" "}
                               </div>
                               <div className=" col-span-1 whitespace-normal">
                                 Hàm lượng: {item?.dosage?.name}

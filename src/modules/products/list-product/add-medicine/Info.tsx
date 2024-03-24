@@ -26,6 +26,7 @@ import Label from '../../../../components/CustomLabel';
 import { AddDosageModal } from '../components/AddDosageModal';
 import { AddGroupProductModal } from '../components/AddGroupProduct';
 import { AddPositionModal } from '../components/AddPositionModal';
+import { log } from 'console';
 
 export enum EExpireDateType {
   STRING = 1,
@@ -57,6 +58,7 @@ export const defaultUnit = (listUnit) => {
 
 const Info = ({ useForm, setSelectedMedicineCategory, selectedMedicineCategory, groupProductName, dosageName, positionName }: any) => {
   const { getValues, setValue, errors } = useForm;
+console.log("selectedMedicineCategory: ", selectedMedicineCategory);
 
   const [isOpenAddGroupProduct, setIsOpenAddGroupProduct] =
     useState(false);
