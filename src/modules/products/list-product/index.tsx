@@ -72,7 +72,9 @@ const ProductList = () => {
   >({});
 
   useEffect(() => {
-    setSelectedList(products?.data?.items)
+    setSelectedList(products?.data?.items?.map((item) => ({ ...item, unitId: item?.productUnit?.find((unit) => unit.isBaseUnit)?.id }))?.sort(function (a, b) {
+      return b.id - a.id;
+    }));
   }, [formFilter, products?.data?.items])
 
   const columns: ColumnsType<IProduct> = [
@@ -111,7 +113,7 @@ const ProductList = () => {
       className: 'unit-col',
       render: (data, record) => {
         return (
-          <ListUnit data={data} onChangeUnit={(value) => handleChangeUnitValue(value, record)} />
+          <ListUnit data={data} onChangeUnit={(value) => handleChangeUnitValue(value, record)} record={record} isDetailOpen={true} />
         )
       },
     },
@@ -147,7 +149,8 @@ const ProductList = () => {
   const handleChangeUnitValue = (value, record) => {
     setValueChange(value);
     const filter = selectedList.filter((item) => item?.id !== record.id);
-    setSelectedList([...filter, { ...record, price: record?.productUnit?.find((unit) => unit.id === value)?.price, unitId: value }]?.sort(function (a, b) {
+    const newRecord = record?.productUnit?.find((unit) => unit.id === value);
+    setSelectedList([...filter, { ...record, price: newRecord?.price, unitId: value }]?.sort(function (a, b) {
       return b.id - a.id;
     }));
   }
@@ -196,7 +199,7 @@ const ProductList = () => {
         expandable={{
           // eslint-disable-next-line @typescript-eslint/no-shadow
           expandedRowRender: (record: IProduct) => (
-            <ProductDetail record={record} />
+            <ProductDetail record={record} onChangeUnit={(value) => handleChangeUnitValue(value, record)} />
           ),
           expandIcon: () => <></>,
           expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key),

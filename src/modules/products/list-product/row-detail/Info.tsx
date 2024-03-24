@@ -26,8 +26,9 @@ import { formatMoney, getImage } from '@/helpers';
 import type { IProduct } from '../types';
 import DeleteProductModal from './DeleteProduct';
 import PrintBarcodeModal from './PrintBarcodeModal';
+import ListUnit from '../ListUnit';
 
-const Info = ({ record }: { record: IProduct }) => {
+const Info = ({ record, onChangeUnit }: { record: IProduct, onChangeUnit: any }) => {
   const queryClient = useQueryClient();
   const router = useRouter();
 
@@ -128,6 +129,10 @@ const Info = ({ record }: { record: IProduct }) => {
             <div className="text-black-main">{record.barCode}</div>
           </div>
           <div className="grid grid-cols-2 gap-5">
+            <div className="text-gray-main">Mã thuốc:</div>
+            <div className="text-black-main">{record.barCode}</div>
+          </div>
+          <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Nhóm hàng: </div>
             <div className="text-black-main">{record.groupProduct?.name}</div>
           </div>
@@ -206,7 +211,7 @@ const Info = ({ record }: { record: IProduct }) => {
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Danh sách đơn vị:</div>
             <div className="text-black-main">
-              <CustomUnitSelect
+              {/* <CustomUnitSelect
                 options={record?.productUnit?.map((item) => ({
                   value: item.id,
                   label: item.unitName,
@@ -215,7 +220,8 @@ const Info = ({ record }: { record: IProduct }) => {
                   record?.productUnit?.find((unit) => unit.isBaseUnit)?.id ||
                   record?.productUnit[0]?.id
                 }
-              />
+              /> */}
+              <ListUnit data={record?.productUnit} onChangeUnit={onChangeUnit} record={record} isDetailOpen={true} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-5">

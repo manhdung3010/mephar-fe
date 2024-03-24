@@ -7,11 +7,21 @@ import { CustomSelect } from '@/components/CustomSelect';
 import CustomTable from '@/components/CustomTable';
 import { CustomUpload } from '@/components/CustomUpload';
 import NormalUpload from '@/components/CustomUpload/NormalUpload';
+import ArrowDownIcon from '@/assets/arrowDownGray.svg';
 
 import Label from '../../../../components/CustomLabel';
 import type { IProduct } from '../types';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { getGroupProduct, getPosition } from '@/api/product.service';
+import { AddPositionModal } from '../components/AddPositionModal';
+import InputError from '@/components/InputError';
+import { AddGroupProductModal } from '../components/AddGroupProduct';
 
-const Info = () => {
+const Info = ({ useForm, setSelectedMedicineCategory, selectedMedicineCategory, groupProductName, dosageName, positionName }: any) => {
+
+  const { getValues, setValue, errors } = useForm;
+
   const record = {
     key: 1,
     code: 'HH230704161432',
@@ -20,9 +30,23 @@ const Info = () => {
     cost: '250,000',
   };
 
+  const [isOpenAddPosition, setIsOpenAddPosition] = useState(false)
+  const [isOpenAddGroupProduct, setIsOpenAddGroupProduct] =
+    useState(false);
+
+  const [positionKeyword, setPositionKeyword] = useState('');
+  const [groupProductKeyword, setGroupProductKeyword] = useState(groupProductName);
+
   const dataSource: any = Array(2)
     .fill(0)
     .map((_, index) => ({ ...record, key: index }));
+
+  const { data: positions } = useQuery(['POSITION', positionKeyword], () =>
+    getPosition({ page: 1, limit: 20, keyword: positionKeyword })
+  );
+  const { data: groupProduct } = useQuery(['GROUP_PRODUCT', groupProductKeyword], () =>
+    getGroupProduct({ page: 1, limit: 20, keyword: groupProductKeyword })
+  );
 
   const columns: ColumnsType<IProduct> = [
     {
@@ -51,60 +75,114 @@ const Info = () => {
     <div className="mt-5">
       <div className="grid grid-cols-2 gap-x-[42px] gap-y-5">
         <div>
-          <Label infoText="" label="Mã hàng" required />
+          <Label infoText="" label="Mã hàng" />
           <CustomInput
             className="h-11"
             placeholder="Mã hàng tự động"
-            onChange={() => {}}
+            onChange={() => { }}
           />
+          <InputError error={errors?.code?.message} />
         </div>
         <div>
           <Label infoText="" label="Mã vạch" required />
           <CustomInput
             className="h-11"
             placeholder="Nhập mã vạch"
-            onChange={() => {}}
+            onChange={() => { }}
           />
+          <InputError error={errors?.barCode?.message} />
         </div>
         <div>
           <Label infoText="" label="Tên hàng hóa" required />
           <CustomInput
             className="h-11"
             placeholder="Nhập tên thuốc"
-            onChange={() => {}}
+            onChange={() => { }}
           />
+          <InputError error={errors?.name?.message} />
         </div>
         <div>
           <Label infoText="" label="Nhóm" required />
-          <CustomInput
-            className="h-11"
+          <CustomSelect
+            onChange={(value) =>
+              setValue('groupProductId', value, { shouldValidate: true })
+            }
+            options={groupProduct?.data?.items?.map((item) => ({
+              value: item.id,
+              label: item.name,
+            }))}
+            showSearch={true}
+            // onSearch={debounce((value) => {
+            //   setGroupProductKeyword(value);
+            // }, 300)}
+            className="suffix-icon h-11 !rounded"
             placeholder="Nhóm sản phẩm"
-            onChange={() => {}}
+            suffixIcon={
+              <div className="flex items-center">
+                <Image src={ArrowDownIcon} alt="" />
+                <Image
+                  src={PlusCircleIcon}
+                  alt=""
+                  onClick={() => setIsOpenAddGroupProduct(true)}
+                />
+              </div>
+            }
+            value={getValues('groupProductId')}
           />
+          <InputError error={errors?.groupProductId?.message} />
         </div>
         <div>
           <Label infoText="" label="Vị trí" required />
-          <CustomInput
-            className="h-11"
-            placeholder="Đường dùng"
-            onChange={() => {}}
+          <CustomSelect
+            onChange={(value) =>
+              // setValue('positionId', value, { shouldValidate: true })
+              console.log(value)
+            }
+            options={
+              positions?.data?.items?.map((item) => ({
+                value: item.id,
+                label: item.name,
+              }))
+            }
+            showSearch={true}
+            //   onSearch={
+            //     debounce((value) => {
+            //     setPositionKeyword(value);
+            //   }, 300)
+            // }
+            className="suffix-icon h-11 !rounded"
+            placeholder="Vị trí sản phẩm"
+            suffixIcon={
+              <div className="flex items-center">
+                <Image src={ArrowDownIcon} alt="" />
+                <Image
+                  src={PlusCircleIcon}
+                  alt=""
+                  onClick={() => setIsOpenAddPosition(true)}
+                />
+              </div>
+            }
+          // value={getValues('positionId')}
           />
+          <InputError error={errors?.barCode?.message} />
         </div>
         <div>
           <Label infoText="" label="Giá bán" required />
           <CustomInput
             className="h-11"
             placeholder="Nhập giá bán"
-            onChange={() => {}}
+            onChange={() => { }}
           />
+          <InputError error={errors?.price?.message} />
         </div>
         <div>
-          <Label infoText="" label="Trọng lượng" required />
+          <Label infoText="" label="Trọng lượng" />
           <CustomInput
             className="h-11"
             placeholder="Nhập trọng lượng"
-            onChange={() => {}}
+            onChange={() => { }}
           />
+          <InputError error={errors?.weight?.message} />
         </div>
         <div />
         <div>
@@ -123,7 +201,7 @@ const Info = () => {
                   Tên thuộc tính
                 </div>
                 <CustomSelect
-                  onChange={() => {}}
+                  onChange={() => { }}
                   placeholder="Chọn thuộc tính"
                   className="border-underline grow !rounded-none"
                 />
@@ -133,7 +211,7 @@ const Info = () => {
                 <CustomInput
                   placeholder="Nhập giá trị"
                   className="w-auto !rounded-none border-0 border-b"
-                  onChange={() => {}}
+                  onChange={() => { }}
                 />
               </div>
             </div>
@@ -155,9 +233,22 @@ const Info = () => {
         <CustomInput
           className="h-11"
           placeholder="Nhập đơn vị cơ bản"
-          onChange={() => {}}
+          onChange={() => { }}
         />
+        <InputError error={errors?.weight?.message} />
       </div>
+      <AddPositionModal
+        isOpen={isOpenAddPosition}
+        onCancel={() => setIsOpenAddPosition(false)}
+        setPositionKeyword={setPositionKeyword}
+        setProductValue={setValue}
+      />
+      <AddGroupProductModal
+        isOpen={isOpenAddGroupProduct}
+        onCancel={() => setIsOpenAddGroupProduct(false)}
+        setGroupProductKeyword={setGroupProductKeyword}
+        setProductValue={setValue}
+      />
     </div>
   );
 };

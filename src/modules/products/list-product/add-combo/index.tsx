@@ -4,6 +4,10 @@ import Tab from '../../../../components/CustomTab';
 import Detail from './Detail';
 import Info from './Info';
 import Ingredient from './Ingredient';
+import { useRouter } from 'next/router';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { schema } from './schema';
 
 const AddCombo = ({
   productId,
@@ -12,6 +16,31 @@ const AddCombo = ({
   productId?: string;
   isCopy?: boolean;
 }) => {
+  const router = useRouter();
+
+  const {
+    getValues,
+    setValue,
+    handleSubmit,
+    reset,
+    setError,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(schema),
+    mode: 'onChange',
+    defaultValues: {
+      // status: EProductStatus.active,
+      // type: EProductType.MEDICINE,
+      // isDirectSale: false,
+      // isBatchExpireControl: true,
+      // expiryPeriod: 180,
+    },
+  });
+
+  const onSubmit = (data) => {
+    console.log("submit combo")
+  }
+
   return (
     <>
       <div className="mt-6 flex items-center justify-between bg-white p-5">
@@ -19,8 +48,8 @@ const AddCombo = ({
           Thêm mới COMBO - đóng gói
         </div>
         <div className="flex gap-4">
-          <CustomButton outline={true}>Hủy bỏ</CustomButton>
-          <CustomButton>Lưu</CustomButton>
+          <CustomButton outline={true} onClick={() => router.push('/products/list')}>Hủy bỏ</CustomButton>
+          <CustomButton onClick={handleSubmit(onSubmit)}>Lưu</CustomButton>
         </div>
       </div>
 
@@ -34,7 +63,12 @@ const AddCombo = ({
           <Tab
             menu={['Thông tin', 'Mô tả chi tiết', 'Thành phần']}
             components={[
-              <Info key="0" />,
+              <Info key="0" useForm={{
+                getValues,
+                setValue,
+                errors,
+                setError,
+              }} />,
               <Detail key="1" />,
               <Ingredient key="2" />,
             ]}

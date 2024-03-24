@@ -1,7 +1,8 @@
 import { CustomUnitSelect } from '@/components/CustomUnitSelect'
 import React, { useEffect, useState } from 'react'
+import { IProduct } from './types'
 
-function ListUnit({ data, onChangeUnit }) {
+function ListUnit({ data, onChangeUnit, record, isDetailOpen }: { data: any, onChangeUnit: any, record: IProduct, isDetailOpen: boolean }) {
 
   const [unitValue, setUnitValue] = useState<number | undefined>(undefined)
 
@@ -21,7 +22,12 @@ function ListUnit({ data, onChangeUnit }) {
         label: item.unitName,
       }))}
       value={
-        data?.filter((unit) => unit.id === unitValue).map((item) => (
+        isDetailOpen ? data?.filter((unit) => unit.id === record?.unitId).map((item) => (
+          {
+            value: item.id,
+            label: item.unitName,
+          }
+        )) : data?.filter((unit) => unit.id === unitValue).map((item) => (
           {
             value: item.id,
             label: item.unitName,

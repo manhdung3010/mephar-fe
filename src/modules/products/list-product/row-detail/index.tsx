@@ -7,7 +7,7 @@ import Inventory from './Inventory';
 import ProductExpire from './ProductExpire';
 import WareHouseCard from './WareHouseCard';
 
-const ProductDetail = ({ record }: { record: IProduct }) => {
+const ProductDetail = ({ record, onChangeUnit }: { record: IProduct, onChangeUnit: any }) => {
   const [select, setSelect] = useState(0);
 
   const menu = ['Thông tin', 'Thẻ kho', 'Tồn kho', 'Lô/hạn sử dụng'];
@@ -36,7 +36,7 @@ const ProductDetail = ({ record }: { record: IProduct }) => {
         </div>
         <div className="h-[1px] w-full bg-[#D64457]" />
       </div>
-      {select === 0 && <Info record={record} />}
+      {select === 0 && <Info record={record} onChangeUnit={onChangeUnit} />}
       {select === 1 && <WareHouseCard />}
       {select === 2 && <Inventory />}
       {select === 3 && <ProductExpire />}

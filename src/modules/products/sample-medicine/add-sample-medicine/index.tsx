@@ -2,7 +2,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { cloneDeep, debounce } from 'lodash';
+import { cloneDeep, debounce, set } from 'lodash';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
@@ -228,7 +228,11 @@ const AddSampleMedicine = ({
       title: 'Giá bán',
       dataIndex: 'price',
       key: 'price',
-      render: (value) => formatMoney(value),
+      render: (value, { id }) => <CustomInput
+        value={value}
+        className="h-11 w-[200px]"
+        onChange={(value) => onChangeValueProduct(id, 'price', value)}
+      />,
     },
     {
       title: 'Thành tiền',
@@ -277,6 +281,10 @@ const AddSampleMedicine = ({
     );
 
   const onSubmit = () => {
+    if (!productSelected.length) {
+      message.error('Vui lòng chọn ít nhất 1 sản phẩm');
+      return;
+    }
     mutateCreateMedicine();
   };
 
@@ -287,7 +295,7 @@ const AddSampleMedicine = ({
           Thêm mới ĐƠN THUỐC MẪU
         </div>
         <div className="flex gap-4">
-          <CustomButton outline={true}>Hủy bỏ</CustomButton>
+          <CustomButton outline={true} onClick={() => router.push('/products/sample-medicine')}>Hủy bỏ</CustomButton>
           <CustomButton
             onClick={() => {
               const products = productSelected.map((product) => ({
@@ -295,6 +303,7 @@ const AddSampleMedicine = ({
                 productUnitId: product.productUnitIdSelected,
                 quantity: product.quantity,
                 dosage: product.dosage,
+                price: +product.price,
               }));
 
               setValue('ingredientProducts', products, {
@@ -438,7 +447,7 @@ const AddSampleMedicine = ({
 
                 <div className="mt-8">
                   <div className="flex items-center justify-between">
-                    <div className="text-base font-semibold">Thành phần</div>
+                    <Label className='text-base font-semibold"' hasInfoIcon={false} label="Thành phần" required />
                     <CustomAutocomplete
                       wrapClassName="!w-60"
                       className="!h-12 !rounded-full px-4 py-2"
@@ -446,16 +455,15 @@ const AddSampleMedicine = ({
                       suffixIcon={isLoading && <LoadingIcon />}
                       placeholder="Tìm kiếm sản phẩm"
                       showSearch={true}
-                      onSearch={debounce((value) => {
+                      onSearch={(value) => {
                         setFormFilter((preValue) => ({
                           ...preValue,
                           keyword: value,
                         }));
-                      }, 300)}
-                      value={null}
+                      }}
+                      value={formFilter.keyword}
                       onSelect={(value) => {
                         const product = JSON.parse(value);
-
                         if (
                           !productSelected.find((p: any) => p.id === product.id)
                         ) {

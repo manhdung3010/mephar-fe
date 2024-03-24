@@ -23,7 +23,7 @@ const Index = ({ id }: { id?: number }) => {
         />
       }
       title={
-        <Link href="/products/list">
+        <Link href="/products/sample-medicine">
           <span className="flex cursor-pointer items-center gap-2 text-base font-medium text-[#969696]">
             <Image src={ArrowLeftIcon} /> Quay về danh sách đơn thuốc mẫu
           </span>

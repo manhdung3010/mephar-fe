@@ -1,4 +1,4 @@
-import type { EProductStatus, EProductType } from '@/enums';
+import type { EProductStatus, EProductType } from "@/enums";
 
 export interface IProduct {
   key: number;
@@ -36,4 +36,5 @@ export interface IProduct {
     quantity: number;
     expiredDate: string;
   };
+  unitId?: number;
 }

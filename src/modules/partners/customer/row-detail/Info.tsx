@@ -131,7 +131,7 @@ export function Info({ record }: { record: ICustomer }) {
 
       <div className="flex justify-end gap-4">
         <CustomButton
-          type={"disable"}
+          type={`disable`}
           outline={true}
           prefixIcon={<Image src={LockIcon} alt="" />}
           onClick={() => handleUpdateStatus(record.id as any, String(record?.status) === "active" ? ECustomerStatus.inactive : ECustomerStatus.active)}
