@@ -116,11 +116,19 @@ const Search = ({ onChange }: { onChange: (value) => void }) => {
           <Select
             bordered={false}
             suffixIcon={<Image src={ArrowDownGray} alt="" />}
-            placeholder="Nhà cung cấp"
+            placeholder="Tích điểm"
             optionFilterProp="children"
             // onChange={onChange}
             // onSearch={onSearch}
             options={[
+              {
+                value: 1,
+                label: "Có tích điểm",
+              },
+              {
+                value: 0,
+                label: "Không tích điểm",
+              }
             ]}
           />
         </div>
@@ -175,8 +183,8 @@ const Search = ({ onChange }: { onChange: (value) => void }) => {
             Tồn kho:
           </span>
           <span>Thuốc</span>
-        </Tag>
-        <Tag
+        </Tag> */}
+        {/* <Tag
           // key={tag}
           closable={true}
           style={{ userSelect: 'none' }}
@@ -184,7 +192,7 @@ const Search = ({ onChange }: { onChange: (value) => void }) => {
           className='py-1 px-4'
         >
           <span>
-            Nhà cung cấp:
+            Tích điểm:
           </span>
           <span>Thuốc</span>
         </Tag> */}
