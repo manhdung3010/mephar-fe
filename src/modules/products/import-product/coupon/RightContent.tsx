@@ -306,7 +306,7 @@ export function RightContent({ useForm }: { useForm: any }) {
           disabled={isLoadingCreateProductImport}
           onClick={() => {
             changePayload(EImportProductStatus.SUCCEED);
-            handleSubmit(onSubmit)();
+            handleSubmit(onSubmit());
           }}
         >
           Hoàn thành

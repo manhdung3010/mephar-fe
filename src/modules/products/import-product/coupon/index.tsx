@@ -82,7 +82,9 @@ export default function ImportCoupon() {
     ],
     () => getInboundProducts({ ...formFilter, branchId })
   );
-
+  console.log("products: " , products);
+  
+  
   const [expandedRowKeys, setExpandedRowKeys] = useState<
     Record<string, boolean>
   >({});
@@ -360,6 +362,7 @@ export default function ImportCoupon() {
                 setImportProducts(cloneImportProducts);
               }}
               onSearch={debounce((value) => {
+                console.log('Search value:', value);
                 setFormFilter((preValue) => ({
                   ...preValue,
                   keyword: value,
@@ -386,7 +389,7 @@ export default function ImportCoupon() {
 
                     <div>
                       <div className="flex gap-x-5">
-                        <div>{item.product.name}</div>
+                        <div>{item.product.code} - {item.product.name}</div>
                         <div className="rounded bg-red-main px-2 py-[2px] text-white">
                           {item.unitName}
                         </div>

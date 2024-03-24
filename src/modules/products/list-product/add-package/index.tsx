@@ -2,7 +2,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { message } from 'antd';
 import { useRouter } from 'next/router';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRecoilValue } from 'recoil';
 
@@ -30,6 +30,8 @@ const AddPackage = ({
   const queryClient = useQueryClient();
   const router = useRouter();
   const branchId = useRecoilValue(branchState);
+   const [selectedMedicineCategory, setSelectedMedicineCategory] =
+    useState<any>();
 
   const { data: product } = useQuery(
     ['DETAIL_PRODUCT', productId],
@@ -55,6 +57,30 @@ const AddPackage = ({
       expiryPeriod: 180,
     },
   });
+
+
+    useEffect(() => {
+    if (selectedMedicineCategory) {
+      const record = JSON.parse(selectedMedicineCategory);
+
+      Object.keys(schema.fields).forEach((key: any) => {
+        if (![undefined, null].includes(record[key]) && key !== 'type') {
+          if (key !== "code") {
+            setValue(key, record[key], {
+              shouldValidate: true,
+            });
+          }
+        }
+      });
+
+      // setManufactureKeyword(record?.manufacture?.name);
+      // setCountryKeyword(record?.country?.name);
+
+      setValue('baseUnit', record?.unit?.name, {
+        shouldValidate: true,
+      });
+    }
+  }, [selectedMedicineCategory]);
 
   useEffect(() => {
     if (product?.data) {
@@ -185,6 +211,9 @@ const AddPackage = ({
                   setValue,
                   errors,
                 }}
+                // key="0"
+                selectedMedicineCategory={selectedMedicineCategory && JSON.parse(selectedMedicineCategory)}
+                setSelectedMedicineCategory={setSelectedMedicineCategory}
                 groupProductName={product?.data?.groupProduct?.name}
                 positionName={product?.data?.productPosition?.name}
                 manufactureName={product?.data?.productManufacture?.name}

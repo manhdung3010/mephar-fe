@@ -8,7 +8,7 @@ export const schema = yup.object().shape({
   weight: yup.string(),
   status: yup.number().required('Đây là trường bắt buộc!'),
   imageId: yup.string(),
-  positionId: yup.number(),
+  positionId: yup.string(),
   ingredientProducts: yup.array(
     yup.object({
       dosage: yup.string(),
