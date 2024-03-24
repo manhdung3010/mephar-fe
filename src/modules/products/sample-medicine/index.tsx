@@ -21,6 +21,7 @@ const SampleMedicine = () => {
     page: 1,
     limit: 20,
     keyword: '',
+    status: undefined,
   });
 
   const { data: products, isLoading } = useQuery(
@@ -29,6 +30,7 @@ const SampleMedicine = () => {
       formFilter.page,
       formFilter.limit,
       formFilter.keyword,
+      formFilter.status,
       branchId,
     ],
     () => getSampleMedicines({ ...formFilter, branchId })
@@ -95,7 +97,8 @@ const SampleMedicine = () => {
         onChange={debounce((value) => {
           setFormFilter((preValue) => ({
             ...preValue,
-            keyword: value,
+            keyword: value?.keyword,
+            status: value?.status,
           }));
         }, 300)}
       />

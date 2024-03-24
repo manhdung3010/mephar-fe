@@ -160,7 +160,6 @@ const ProductList = () => {
       <Header />
       <Search
         onChange={debounce((value) => {
-          console.log("value", value)
           setFormFilter((preValue) => ({
             ...preValue,
             keyword: value?.keyword,

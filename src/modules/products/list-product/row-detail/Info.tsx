@@ -172,12 +172,12 @@ const Info = ({ record, onChangeUnit }: { record: IProduct, onChangeUnit: any })
               {record.productPosition?.name}
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-5">
+          {/* <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Cảnh báo hết hạn:</div>
             <div className="text-black-main">
               {record.warningExpiryDate || record.warningExpiryText}
             </div>
-          </div>
+          </div> */}
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Số đăng ký:</div>
             <div className="text-black-main">{record.registerNumber}</div>

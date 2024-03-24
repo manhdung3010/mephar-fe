@@ -51,13 +51,13 @@ const Info = ({ record }) => {
       title: 'Mã hàng',
       dataIndex: 'code',
       key: 'code',
-      render: (_, { product }) => product.code,
+      render: (_, { product }) => product?.code,
     },
     {
       title: 'Tên hàng',
       dataIndex: 'name',
       key: 'name',
-      render: (_, { product }) => product.name,
+      render: (_, { product }) => product?.name,
     },
     {
       title: 'liều dùng',
