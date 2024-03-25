@@ -25,9 +25,11 @@ import type {
 import { branchState, productImportState, profileState } from '@/recoil/state';
 
 import type { IBatch } from '../interface';
-import { ListBatchModal } from './ListBatchModal';
+// import { ListBatchModal } from './ListBatchModal';
 import { RightContent } from './RightContent';
-import { schema } from './schema';
+import { ListBatchModal } from '../coupon/ListBatchModal';
+import { schema } from '../coupon/schema';
+// import { schema } from '../schema';
 
 export default function ImportCoupon() {
   const profile = useRecoilValue(profileState);
@@ -82,6 +84,8 @@ export default function ImportCoupon() {
     ],
     () => getInboundProducts({ ...formFilter, branchId })
   );
+  console.log("products: " , products);
+  
   
   const [expandedRowKeys, setExpandedRowKeys] = useState<
     Record<string, boolean>

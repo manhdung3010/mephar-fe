@@ -20,8 +20,9 @@ import InputError from '@/components/InputError';
 import { EImportProductStatus } from '@/enums';
 import { formatMoney } from '@/helpers';
 import { productImportState } from '@/recoil/state';
+import { AddProviderModal } from '../coupon/AddProviderModal';
 
-import { AddProviderModal } from './AddProviderModal';
+
 
 export function RightContent({ useForm }: { useForm: any }) {
   const queryClient = useQueryClient();
@@ -39,7 +40,6 @@ export function RightContent({ useForm }: { useForm: any }) {
     ['EMPLOYEE_LIST', searchEmployeeText],
     () => getEmployee({ page: 1, limit: 20, keyword: searchEmployeeText })
   );
-
   const { data: providers } = useQuery(
     ['PROVIDER_LIST', searchProviderText],
     () => getProvider({ page: 1, limit: 20, keyword: searchProviderText })
@@ -204,7 +204,9 @@ export function RightContent({ useForm }: { useForm: any }) {
 
             <div className="mb-5 flex justify-between">
               <div className=" leading-normal text-[#828487]">Trạng thái</div>
-              <div className=" leading-normal text-[#19191C]">Phiếu tạm</div>
+              <div className=" leading-normal text-[#19191C]">
+            { getValues('status')}
+              </div>
             </div>
           </div>
 
@@ -295,7 +297,7 @@ export function RightContent({ useForm }: { useForm: any }) {
           className="!h-12 text-lg font-semibold"
           onClick={() => {
             changePayload(EImportProductStatus.DRAFT);
-            handleSubmit(onSubmit());
+            handleSubmit(onSubmit)();
           }}
           disabled={isLoadingCreateProductImport}
         >

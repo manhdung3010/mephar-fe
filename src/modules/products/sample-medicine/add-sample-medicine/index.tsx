@@ -303,7 +303,7 @@ const AddSampleMedicine = ({
                 shouldValidate: true,
               });
 
-              handleSubmit(onSubmit);
+              handleSubmit(onSubmit)();
             }}
             disabled={isLoadingCreateMedicine}
           >

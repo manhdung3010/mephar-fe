@@ -1,24 +1,28 @@
-import { useQuery } from '@tanstack/react-query';
-import type { ColumnsType } from 'antd/es/table';
-import cx from 'classnames';
-import Image from 'next/image';
-import { useRouter } from 'next/router';
-import { useState } from 'react';
-import { useRecoilValue } from 'recoil';
+import { useQuery } from "@tanstack/react-query";
+import type { ColumnsType } from "antd/es/table";
+import cx from "classnames";
+import Image from "next/image";
+import { useRouter } from "next/router";
+import { useState } from "react";
+import { useRecoilValue } from "recoil";
+import Header from "./Header";
 
-import { getImportProduct } from '@/api/import-product.service';
-import ExportIcon from '@/assets/exportIcon.svg';
-import ImportIcon from '@/assets/importIcon.svg';
-import { CustomButton } from '@/components/CustomButton';
-import CustomPagination from '@/components/CustomPagination';
-import CustomTable from '@/components/CustomTable';
-import { EImportProductStatus, EImportProductStatusLabel } from '@/enums';
-import { formatMoney } from '@/helpers';
-import { branchState } from '@/recoil/state';
+import { getImportProduct } from "@/api/import-product.service";
+import ExportIcon from "@/assets/exportIcon.svg";
+import ImportIcon from "@/assets/importIcon.svg";
+import { CustomButton } from "@/components/CustomButton";
+import CustomPagination from "@/components/CustomPagination";
+import CustomTable from "@/components/CustomTable";
+import { EImportProductStatus, EImportProductStatusLabel } from "@/enums";
+import { formatMoney } from "@/helpers";
+import { branchState } from "@/recoil/state";
+import DocumentDownload from "@/assets/documentDownload.svg";
+import DocumentUpload from "@/assets/documentUpload.svg";
 
-import type { IRecord } from './interface';
-import ProductDetail from './row-detail';
-import Search from './Search';
+import type { IRecord } from "./interface";
+import ProductDetail from "./row-detail";
+import Search from "./Search";
+import { Button } from "antd";
 
 export function ImportProduct() {
   const router = useRouter();
@@ -27,13 +31,13 @@ export function ImportProduct() {
   const [formFilter, setFormFilter] = useState({
     page: 1,
     limit: 20,
-    keyword: '',
+    keyword: "",
     dateRange: { startDate: undefined, endDate: undefined },
     userId: undefined,
   });
 
   const { data: importProducts, isLoading } = useQuery(
-    ['LIST_IMPORT_PRODUCT', JSON.stringify(formFilter), branchId],
+    ["LIST_IMPORT_PRODUCT", JSON.stringify(formFilter), branchId],
     () => getImportProduct({ ...formFilter, branchId })
   );
 
@@ -43,14 +47,14 @@ export function ImportProduct() {
 
   const columns: ColumnsType<IRecord> = [
     {
-      title: 'STT',
-      dataIndex: 'key',
-      key: 'key',
+      title: "STT",
+      dataIndex: "key",
+      key: "key",
     },
     {
-      title: 'Mã nhập hàng',
-      dataIndex: 'code',
-      key: 'code',
+      title: "Mã nhập hàng",
+      dataIndex: "code",
+      key: "code",
       render: (value, _, index) => (
         <span
           className="cursor-pointer text-[#0070F4]"
@@ -70,33 +74,33 @@ export function ImportProduct() {
       ),
     },
     {
-      title: 'Thời gian',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
+      title: "Thời gian",
+      dataIndex: "createdAt",
+      key: "createdAt",
     },
     {
-      title: 'Nhà cung cấp',
-      dataIndex: 'supplier',
-      key: 'supplier',
+      title: "Nhà cung cấp",
+      dataIndex: "supplier",
+      key: "supplier",
       render: (data) => data?.name,
     },
     {
-      title: 'Cần trả nhà cung cấp',
-      dataIndex: 'totalPrice',
-      key: 'totalPrice',
+      title: "Cần trả nhà cung cấp",
+      dataIndex: "totalPrice",
+      key: "totalPrice",
       render: (value) => formatMoney(value),
     },
     {
-      title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
       render: (_, { status }) => (
         <div
           className={cx(
             status === EImportProductStatus.SUCCEED
-              ? 'text-[#00B63E] border border-[#00B63E] bg-[#DEFCEC]'
-              : 'text-[#6D6D6D] border border-[#6D6D6D] bg-[#F0F1F1]',
-            'px-2 py-1 rounded-2xl w-max'
+              ? "text-[#00B63E] border border-[#00B63E] bg-[#DEFCEC]"
+              : "text-[#6D6D6D] border border-[#6D6D6D] bg-[#F0F1F1]",
+            "px-2 py-1 rounded-2xl w-max"
           )}
         >
           {EImportProductStatusLabel[status]}
@@ -108,8 +112,10 @@ export function ImportProduct() {
   return (
     <div>
       <div className="my-3 flex justify-end gap-4">
+        <Header />
+
         <CustomButton
-          onClick={() => router.push('/products/import/coupon')}
+          onClick={() => router.push("/products/import/coupon")}
           type="success"
           prefixIcon={<Image src={ImportIcon} />}
         >
@@ -125,7 +131,7 @@ export function ImportProduct() {
 
       <CustomTable
         rowSelection={{
-          type: 'checkbox',
+          type: "checkbox",
         }}
         dataSource={importProducts?.data?.items?.map((item, index) => ({
           ...item,
@@ -135,15 +141,19 @@ export function ImportProduct() {
         columns={columns}
         onRow={(record, rowIndex) => {
           return {
-            onClick: event => {
+            onClick: (event) => {
               // Toggle expandedRowKeys state here
               if (expandedRowKeys[record.key - 1]) {
-                const { [record.key - 1]: value, ...remainingKeys } = expandedRowKeys;
+                const { [record.key - 1]: value, ...remainingKeys } =
+                  expandedRowKeys;
                 setExpandedRowKeys(remainingKeys);
               } else {
-                setExpandedRowKeys({ ...expandedRowKeys, [record.key - 1]: true });
+                setExpandedRowKeys({
+                  ...expandedRowKeys,
+                  [record.key - 1]: true,
+                });
               }
-            }
+            },
           };
         }}
         expandable={{
