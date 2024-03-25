@@ -56,9 +56,8 @@ export const defaultUnit = (listUnit) => {
   return unitObject;
 };
 
-const Info = ({ useForm, setSelectedMedicineCategory, selectedMedicineCategory, groupProductName, dosageName, positionName }: any) => {
+const Info = ({ useForm, setSelectedMedicineCategory, selectedMedicineCategory, groupProductName, dosageName, positionName, drugCode }: any) => {
   const { getValues, setValue, errors } = useForm;
-console.log("selectedMedicineCategory: ", selectedMedicineCategory);
 
   const [isOpenAddGroupProduct, setIsOpenAddGroupProduct] =
     useState(false);
@@ -153,7 +152,7 @@ console.log("selectedMedicineCategory: ", selectedMedicineCategory);
         <div>
           <Label infoText="" label="Mã vạch" />
           <CustomInput
-            placeholder="Nhập mã vạch"
+            placeholder="Mã vạch tự động"
             className="h-11"
             onChange={(e) => setValue('barCode', e, {
               shouldValidate: true,
@@ -170,7 +169,6 @@ console.log("selectedMedicineCategory: ", selectedMedicineCategory);
             onSelect={
               (value) => {
                 setSelectedMedicineCategory(value);
-                setValue('barCode', value && JSON.parse(value)?.code, { shouldValidate: true });
               }
             }
             showSearch={true}
@@ -202,7 +200,7 @@ console.log("selectedMedicineCategory: ", selectedMedicineCategory);
           <InputError error={errors?.name?.message} />
         </div>
         {
-          selectedMedicineCategory?.code && (
+          selectedMedicineCategory?.code || drugCode && (
             <div>
               <Label infoText="" label="Mã thuốc" />
               <CustomInput
@@ -213,7 +211,7 @@ console.log("selectedMedicineCategory: ", selectedMedicineCategory);
                     shouldValidate: true,
                   })
                 }
-                value={selectedMedicineCategory?.code}
+                value={selectedMedicineCategory?.code ?? drugCode}
                 disabled
               />
             </div>
@@ -464,12 +462,14 @@ console.log("selectedMedicineCategory: ", selectedMedicineCategory);
               />
               <CustomInput
                 onChange={(e) => onChangeUnit(unitKey, 'code', e)}
+                placeholder='Mã hàng tự động'
                 wrapClassName='flex-1'
                 className="mt-0 h-11 flex-1"
                 value={listUnit[unitKey].code}
                 bordered={false}
               />
               <CustomInput
+                placeholder='Mã vạch tự động'
                 onChange={(e) => onChangeUnit(unitKey, 'barCode', e)}
                 wrapClassName='flex-1'
                 className="mt-0 h-11 flex-1"

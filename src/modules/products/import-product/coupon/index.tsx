@@ -66,6 +66,8 @@ export default function ImportCoupon() {
   const [openListBatchModal, setOpenListBatchModal] = useState(false);
   const [productKeyAddBatch, setProductKeyAddBatch] = useState<string>();
 
+  const [productData, setProductData] = useState<IImportProduct[]>([]);
+
   const [formFilter, setFormFilter] = useState({
     page: 1,
     limit: 20,
@@ -82,9 +84,14 @@ export default function ImportCoupon() {
     ],
     () => getInboundProducts({ ...formFilter, branchId })
   );
-  console.log("products: " , products);
-  
-  
+
+  useEffect(() => {
+    if (products?.data?.items) {
+      setProductData(products.data.items);
+    }
+  }, [products?.data?.items]);
+
+
   const [expandedRowKeys, setExpandedRowKeys] = useState<
     Record<string, boolean>
   >({});
@@ -161,16 +168,16 @@ export default function ImportCoupon() {
       render: (_, { product }, index) => (
         <span
           className="cursor-pointer text-[#0070F4]"
-          // onClick={() => {
-          //   const currentState = expandedRowKeys[`${index}`];
-          //   const temp = { ...expandedRowKeys };
-          //   if (currentState) {
-          //     delete temp[`${index}`];
-          //   } else {
-          //     temp[`${index}`] = true;
-          //   }
-          //   setExpandedRowKeys({ ...temp });
-          // }}
+        // onClick={() => {
+        //   const currentState = expandedRowKeys[`${index}`];
+        //   const temp = { ...expandedRowKeys };
+        //   if (currentState) {
+        //     delete temp[`${index}`];
+        //   } else {
+        //     temp[`${index}`] = true;
+        //   }
+        //   setExpandedRowKeys({ ...temp });
+        // }}
         >
           {product.code}
         </span>
@@ -370,9 +377,9 @@ export default function ImportCoupon() {
               }, 300)}
               listHeight={512}
               showSearch={true}
-              value={null}
-              options={products?.data?.items?.map((item) => ({
-                value: JSON.stringify(item),
+              // value={null}
+              options={productData.map((item) => ({
+                value: item.id,
                 label: (
                   <div className="flex items-center gap-x-4 p-2">
                     <div className=" flex h-12 w-[68px] items-center rounded border border-gray-300 p-[2px]">

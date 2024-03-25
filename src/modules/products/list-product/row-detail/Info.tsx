@@ -130,7 +130,7 @@ const Info = ({ record, onChangeUnit }: { record: IProduct, onChangeUnit: any })
           </div>
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Mã thuốc:</div>
-            <div className="text-black-main">{record.barCode}</div>
+            <div className="text-black-main">{record?.drugCode}</div>
           </div>
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Nhóm hàng: </div>

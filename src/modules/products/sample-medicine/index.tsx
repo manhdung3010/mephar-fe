@@ -22,6 +22,8 @@ const SampleMedicine = () => {
     limit: 20,
     keyword: '',
     status: undefined,
+    positionId: undefined,
+    userId: undefined,
   });
 
   const { data: products, isLoading } = useQuery(
@@ -31,6 +33,8 @@ const SampleMedicine = () => {
       formFilter.limit,
       formFilter.keyword,
       formFilter.status,
+      formFilter.positionId,
+      formFilter.userId,
       branchId,
     ],
     () => getSampleMedicines({ ...formFilter, branchId })
@@ -99,6 +103,8 @@ const SampleMedicine = () => {
             ...preValue,
             keyword: value?.keyword,
             status: value?.status,
+            positionId: value?.positionId,
+            userId: value?.userId,
           }));
         }, 300)}
       />

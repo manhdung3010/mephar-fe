@@ -68,8 +68,6 @@ const Search = ({ onChange }: { onChange: (value) => void }) => {
     onChange({ ...formFilter, [key]: value });
   }
 
-  console.log("formFilter", formFilter)
-
   return (
     <div className="bg-white">
       <div className="flex items-center gap-4 p-4">
@@ -113,7 +111,7 @@ const Search = ({ onChange }: { onChange: (value) => void }) => {
             // onSearch={onSearch}
             options={productInventoryData}
           />
-          <Select
+          {/* <Select
             bordered={false}
             suffixIcon={<Image src={ArrowDownGray} alt="" />}
             placeholder="Tích điểm"
@@ -130,7 +128,7 @@ const Search = ({ onChange }: { onChange: (value) => void }) => {
                 label: "Không tích điểm",
               }
             ]}
-          />
+          /> */}
         </div>
 
         {/* <CustomButton

@@ -13,7 +13,7 @@ import { CustomButton } from '@/components/CustomButton';
 import CustomPagination from '@/components/CustomPagination';
 import CustomTable from '@/components/CustomTable';
 import { EImportProductStatus, EImportProductStatusLabel } from '@/enums';
-import { formatMoney } from '@/helpers';
+import { formatDateTime, formatMoney } from '@/helpers';
 import { branchState } from '@/recoil/state';
 
 import type { IRecord } from './interface';
@@ -30,6 +30,8 @@ export function ImportProduct() {
     keyword: '',
     dateRange: { startDate: undefined, endDate: undefined },
     userId: undefined,
+    supplierId: undefined,
+    status: undefined,
   });
 
   const { data: importProducts, isLoading } = useQuery(
@@ -73,6 +75,7 @@ export function ImportProduct() {
       title: 'Thời gian',
       dataIndex: 'createdAt',
       key: 'createdAt',
+      render: (value) => formatDateTime(value),
     },
     {
       title: 'Nhà cung cấp',
@@ -121,7 +124,7 @@ export function ImportProduct() {
         </CustomButton>
       </div>
 
-      <Search setFormFilter={setFormFilter} />
+      <Search setFormFilter={setFormFilter} formFilter={formFilter} />
 
       <CustomTable
         rowSelection={{

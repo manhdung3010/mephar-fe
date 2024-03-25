@@ -12,21 +12,8 @@ import { EProductType, EProductTypeLabel, getEnumKeyByValue } from '@/enums';
 import { useQuery } from '@tanstack/react-query';
 import { getPosition } from '@/api/product.service';
 import { getEmployee } from '@/api/employee.service';
+import { EProductStatus, EProductStatusLabel } from '@/enums/filter';
 
-const productTypeData = [
-  {
-    value: 1,
-    label: 'Thuốc',
-  },
-  {
-    value: 2,
-    label: 'Hàng hóa',
-  },
-  {
-    value: 3,
-    label: 'Combo - đóng gói',
-  },
-]
 
 const productStatusData = [
   {
@@ -64,8 +51,8 @@ const Search = ({ onChange }: { onChange: (value) => void }) => {
     keyword: '',
     status: null,
     type: null,
-    position: null,
-    user: null
+    positionId: null,
+    userId: null
   });
   const [positionKeyword, setPositionKeyword] = useState("");
   const [userKeyword, setUserKeyword] = useState("");
@@ -78,12 +65,14 @@ const Search = ({ onChange }: { onChange: (value) => void }) => {
     () => getEmployee({ page: 1, limit: 20, keyword: userKeyword })
   );
 
+  useEffect(() => {
+    onChange(formFilter);
+  }, [formFilter])
+
   const handleChangeFormFilter = (key, value) => {
     setFormFilter({ ...formFilter, [key]: value });
     onChange({ ...formFilter, [key]: value });
   }
-
-  console.log("formFilter", formFilter)
 
   return (
     <div className="bg-white">
@@ -115,12 +104,12 @@ const Search = ({ onChange }: { onChange: (value) => void }) => {
             suffixIcon={<Image src={ArrowDownGray} alt="" />}
             placeholder="Vị trí"
             optionFilterProp="children"
-            onChange={(value) => handleChangeFormFilter('position', value)}
+            onChange={(value) => handleChangeFormFilter('positionId', value)}
             options={positions?.data?.items?.map((item) => ({
               value: item.id,
               label: item.name,
             }))}
-            value={productStatusData.find((item) => item.value === formFilter?.position) || undefined}
+            value={positions?.data?.items?.find((item) => item?.id === formFilter?.positionId)?.name || undefined}
           />
           <Select
             className='w-[150px] rounded-l-[3px] rounded-r-[3px]'
@@ -128,12 +117,12 @@ const Search = ({ onChange }: { onChange: (value) => void }) => {
             suffixIcon={<Image src={ArrowDownGray} alt="" />}
             placeholder="Người tạo"
             optionFilterProp="children"
-            onChange={(value) => handleChangeFormFilter('user', value)}
+            onChange={(value) => handleChangeFormFilter('userId', value)}
             options={employees?.data?.items?.map((item) => ({
               value: item.id,
               label: item.fullName,
             }))}
-            value={productStatusData.find((item) => item.value === formFilter?.user) || undefined}
+            value={employees?.data?.items?.find((item) => item?.id === formFilter?.userId)?.fullName || undefined}
           />
         </div>
 
@@ -151,7 +140,7 @@ const Search = ({ onChange }: { onChange: (value) => void }) => {
       <div className='flex items-center gap-4 p-4'>
         {
           Object.keys(formFilter).map((key, index) => {
-            if (formFilter[key]) {
+            if (formFilter[key] !== null && formFilter[key] !== "") {
               return (
                 <Tag
                   key={index}
@@ -166,10 +155,37 @@ const Search = ({ onChange }: { onChange: (value) => void }) => {
                   }}
                   className='py-1 px-4'
                 >
-                  <span>
-                    {key === "status" ? "Trạng thái" : key === "position" ? "Vị trí" : key === "user" ? "Người tạo" : key}:
-                  </span>
-                  <span className='ml-1 font-semibold'>{formFilter[key]}</span>
+
+                  {
+                    key === "status" && (
+                      <>
+                        <span>
+                          Trạng thái:
+                        </span>
+                        <span className='ml-1 font-semibold'>{formFilter[key] === EProductStatus.active ? EProductStatusLabel.active : EProductStatusLabel.inactive}</span>
+                      </>
+                    )
+                  }
+                  {
+                    key === "positionid" && (
+                      <>
+                        <span>
+                          Vị trí:
+                        </span>
+                        <span className='ml-1 font-semibold'>{positions?.data?.items?.find((item) => item?.id === formFilter[key])?.name}</span>
+                      </>
+                    )
+                  }
+                  {
+                    key === "userId" && (
+                      <>
+                        <span>
+                          Người tạo:
+                        </span>
+                        <span className='ml-1 font-semibold'>{employees?.data?.items?.find((item) => item?.id === formFilter[key])?.fullName}</span>
+                      </>
+                    )
+                  }
                 </Tag>
               )
             }

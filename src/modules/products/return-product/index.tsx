@@ -16,6 +16,7 @@ import { branchState } from '@/recoil/state';
 import type { IRecord } from './interface';
 import ProductDetail from './row-detail';
 import Search from './Search';
+import { formatDateTime } from '@/helpers';
 
 export function ReturnProduct() {
   const router = useRouter();
@@ -46,7 +47,7 @@ export function ReturnProduct() {
       render: (_, __, index) => index + 1,
     },
     {
-      title: 'Mã nhập hàng',
+      title: 'Mã trả hàng',
       dataIndex: 'code',
       key: 'code',
       render: (value, _, index) => (
@@ -71,11 +72,13 @@ export function ReturnProduct() {
       title: 'Thời gian',
       dataIndex: 'createdAt',
       key: 'createdAt',
+      render: (data) => formatDateTime(data),
     },
     {
       title: 'Thời gian tạo',
       dataIndex: 'createdAt',
       key: 'createdAt',
+      render: (data) => formatDateTime(data),
     },
     {
       title: 'Nhà cung cấp',
@@ -123,7 +126,7 @@ export function ReturnProduct() {
         </CustomButton>
       </div>
 
-      <Search />
+      <Search setFormFilter={setFormFilter} formFilter={formFilter} />
 
       <CustomTable
         rowSelection={{

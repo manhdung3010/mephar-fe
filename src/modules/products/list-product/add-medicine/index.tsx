@@ -139,6 +139,7 @@ const AddMedicine = ({
         const payload = {
           ...getValues(),
           branchId,
+          drugCode: selectedMedicineCategory && JSON.parse(selectedMedicineCategory)?.code,
           productUnits: [
             ...(getValues('productUnits') || []),
             {
@@ -245,6 +246,7 @@ const AddMedicine = ({
                 groupProductName={productDetail?.data?.groupProduct?.name}
                 dosageName={productDetail?.data?.productDosage?.name}
                 positionName={productDetail?.data?.productPosition?.name}
+                drugCode={productDetail?.data?.drugCode}
               />,
               <Detail
                 key="1"

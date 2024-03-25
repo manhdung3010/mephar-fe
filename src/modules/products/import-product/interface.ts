@@ -1,4 +1,4 @@
-import type { EImportProductStatus } from '@/enums';
+import { EImportProductStatus, EImportProductStatusLabel } from "@/enums";
 
 export interface IRecord {
   key: number;
@@ -115,3 +115,14 @@ export interface IBatch {
   expiryDate: string;
   originalInventory: number; // client;
 }
+
+export const importProductStatus = [
+  {
+    value: EImportProductStatus.SUCCEED,
+    label: EImportProductStatusLabel.SUCCEED,
+  },
+  {
+    value: EImportProductStatus.DRAFT,
+    label: EImportProductStatusLabel.DRAFT,
+  },
+];

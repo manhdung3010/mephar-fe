@@ -37,4 +37,5 @@ export interface IProduct {
     expiredDate: string;
   };
   unitId?: number;
+  drugCode?: string;
 }

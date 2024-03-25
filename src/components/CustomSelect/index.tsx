@@ -37,8 +37,8 @@ export function CustomSelect({
   isLoading?: boolean;
   listHeight?: number;
   disabled?: boolean;
-  }) {
-  
+}) {
+
   // const filterOption = (input, option) => {
   //   return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
   // };

@@ -326,7 +326,6 @@ export function RightContent({ useForm }: { useForm: any }) {
                     type="number"
                     hideArrow={true}
                     value={getValues('cashOfCustomer')}
-                    disabled={getValues('paymentType') !== EPaymentMethod.CASH}
                   />
                 </div>
               </div>

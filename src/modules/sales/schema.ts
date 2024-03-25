@@ -70,7 +70,6 @@ export const schema = yup.object().shape({
     .test("isRequire", "Đây là trường bắt buộc!", (value, context) => {
       if (context.parent.paymentType === EPaymentMethod.CASH && !value?.length)
         return false;
-
       return true;
     }),
   paymentType: yup.string().required("Đây là trường bắt buộc!"),
