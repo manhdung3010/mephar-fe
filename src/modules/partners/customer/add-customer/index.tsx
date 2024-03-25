@@ -105,6 +105,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
 
   const onSubmit = () => {
     mutateCreateCustomer();
+    
   };
 
   useEffect(() => {

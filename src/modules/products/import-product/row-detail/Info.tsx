@@ -13,15 +13,25 @@ import { CustomButton } from '@/components/CustomButton';
 import CustomTable from '@/components/CustomTable';
 import { EImportProductStatus, EImportProductStatusLabel } from '@/enums';
 import { formatMoney, formatNumber } from '@/helpers';
+import PrintBarcodeModal from '../../list-product/row-detail/PrintBarcodeModal';
 
 import type { IProduct, IRecord } from '../interface';
+import CancelProductModal from './CancelProduct';
+import { useRouter } from 'next/router';
 
 export function Info({ record }: { record: IRecord }) {
+  const [openPrintBarcodeModal, setOpenPrintBarcodeModal] = useState(false);
+  const [openCancelPrintProduct, setOpenCancelPrintProduct] = useState(false);
+ const router = useRouter();
+
   const { data: importProductDetail, isLoading } = useQuery<{
     data: { inbound: IRecord; products: any };
   }>(['IMPORT_PRODUCT_DETAIL', record.id], () =>
     getImportProductDetail(record.id)
   );
+  
+   const onSubmit = () => {
+  };
 
   const [expandedRowKeys, setExpandedRowKeys] = useState<
     Record<string, boolean>
@@ -258,6 +268,7 @@ export function Info({ record }: { record: IRecord }) {
           outline={true}
           type="primary"
           prefixIcon={<Image src={BarcodeBlueIcon} alt="" />}
+          onClick={() => setOpenPrintBarcodeModal(true)}
         >
           In mã vạch
         </CustomButton>
@@ -265,6 +276,7 @@ export function Info({ record }: { record: IRecord }) {
           outline={true}
           type="primary"
           prefixIcon={<Image src={OpenOrderIcon} alt="" />}
+          //  onClick={() => router.push('/products/import/promissory-note')}
         >
           Mở phiếu
         </CustomButton>
@@ -278,6 +290,7 @@ export function Info({ record }: { record: IRecord }) {
         <CustomButton
           outline={true}
           prefixIcon={<Image src={CloseIcon} alt="" />}
+          onClick={() => setOpenCancelPrintProduct(true)}
         >
           Hủy bỏ
         </CustomButton>
@@ -288,6 +301,19 @@ export function Info({ record }: { record: IRecord }) {
           Trả hàng nhập
         </CustomButton>
       </div>
+
+       <CancelProductModal
+        isOpen={openCancelPrintProduct}
+        onCancel={() => setOpenCancelPrintProduct(false)}
+        onSubmit={onSubmit}
+        // isLoading={isLoadingDeleteProduct}
+      />
+
+      <PrintBarcodeModal
+       isOpen={openPrintBarcodeModal}
+        onCancel={() => setOpenPrintBarcodeModal(false)}
+        barCode={record?.code}
+      />
     </div>
   );
 }
