@@ -117,3 +117,65 @@ export const removeAccents = (str: string) => {
   }
   return str;
 };
+
+export const convertMoneyToString = (amount: number) => {
+  // Mảng các chữ số
+  var units = [
+    "",
+    "một",
+    "hai",
+    "ba",
+    "bốn",
+    "năm",
+    "sáu",
+    "bảy",
+    "tám",
+    "chín",
+  ];
+  // Mảng các đơn vị
+  var places = ["", "nghìn", "triệu", "tỷ"];
+
+  // Hàm đọc ba chữ số
+  function docBaChuSo(num) {
+    var hundred = Math.floor(num / 100);
+    var ten = Math.floor((num % 100) / 10);
+    var unit = num % 10;
+    var result = "";
+    if (hundred > 0) {
+      result += units[hundred] + " trăm ";
+    }
+    if (ten === 0 && unit === 0 && hundred > 0) {
+      result += "linh ";
+    } else if (ten === 0 && unit > 0) {
+      result += "lẻ ";
+    } else if (ten === 1) {
+      result += "mười ";
+    } else if (ten > 1) {
+      result += units[ten] + " mươi ";
+    }
+    if (unit === 1 && ten !== 0 && ten !== 1) {
+      result += "mốt ";
+    } else if (unit === 5 && (ten !== 0 || hundred !== 0)) {
+      result += "lăm ";
+    } else if (unit > 0) {
+      result += units[unit] + " ";
+    }
+    return result;
+  }
+
+  var readAmount = "";
+  var money = Math.abs(amount);
+  var placeIndex = 0;
+  while (money > 0) {
+    var chunk = money % 1000;
+    if (chunk > 0) {
+      readAmount = docBaChuSo(chunk) + places[placeIndex] + " " + readAmount;
+    }
+    money = Math.floor(money / 1000);
+    placeIndex++;
+  }
+  if (amount < 0) {
+    readAmount = "Âm " + readAmount;
+  }
+  return readAmount.trim();
+};

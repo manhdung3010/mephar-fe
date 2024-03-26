@@ -233,6 +233,7 @@ const AddSampleMedicine = ({
         value={value}
         className="h-11 w-[200px]"
         onChange={(value) => onChangeValueProduct(id, 'price', value)}
+        type="number"
       />,
     },
     {

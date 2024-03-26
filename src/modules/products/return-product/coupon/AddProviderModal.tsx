@@ -14,8 +14,11 @@ import { CustomModal } from '@/components/CustomModal';
 import { CustomSelect } from '@/components/CustomSelect';
 import InputError from '@/components/InputError';
 import { useAddress } from '@/hooks/useAddress';
+import PlusIcon from '@/assets/plusIcon.svg';
 
 import { schema } from '../../../partners/provider/add-provider/schema';
+import Image from 'next/image';
+import { AddGroupProviderModal } from '@/modules/partners/group-provider/AddGroupProviderModal';
 
 export function AddProviderModal({
   isOpen,
@@ -40,6 +43,7 @@ export function AddProviderModal({
   });
 
   const [groupProviderKeyword, setGroupProviderKeyword] = useState();
+  const [isOpennAddGroupProvider, setIsOpenAddGroupProvider] = useState(false);
 
   const { data: branches } = useQuery(['SETTING_BRANCH'], () => getBranch());
   const { data: groupProviders } = useQuery(
@@ -183,6 +187,16 @@ export function AddProviderModal({
             onSearch={debounce((value) => {
               setGroupProviderKeyword(value);
             }, 300)}
+            suffixIcon={
+              <div className="flex items-center">
+                {/* <Image src={ArrowDownIcon} alt="" /> */}
+                <Image
+                  src={PlusIcon}
+                  alt=""
+                  onClick={() => setIsOpenAddGroupProvider(true)}
+                />
+              </div>
+            }
           />
         </div>
 
@@ -262,6 +276,19 @@ export function AddProviderModal({
           value={getValues('note')}
         />
       </div>
+
+      <AddGroupProviderModal
+        isOpen={isOpennAddGroupProvider}
+        onCancel={() => {
+          setIsOpenAddGroupProvider(false);
+        }}
+        onSuccess={({ groupProviderId, groupProviderName }) => {
+          setGroupProviderKeyword(groupProviderName);
+          setValue('groupSupplierId', groupProviderId, {
+            shouldValidate: true,
+          });
+        }}
+      />
     </CustomModal>
   );
 }

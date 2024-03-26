@@ -24,14 +24,20 @@ import type {
 } from '@/modules/products/import-product/coupon/interface';
 import { branchState, productReturnState, profileState } from '@/recoil/state';
 
-import type { IBatch } from '../interface';
+import type { IBatch, IRecord } from '../interface';
 import { ListBatchModal } from './ListBatchModal';
 import { RightContent } from './RightContent';
 import { schema } from './schema';
+import { CustomAutocomplete } from '@/components/CustomAutocomplete';
+import { useRouter } from 'next/router';
+import { getReturnProductDetail } from '@/api/return-product.service';
 
 export default function ReturnCoupon() {
   const profile = useRecoilValue(profileState);
   const branchId = useRecoilValue(branchState);
+
+  const router = useRouter();
+  const { returnId } = router.query;
 
   const [returnProducts, setReturnProducts] =
     useRecoilState(productReturnState);
@@ -50,6 +56,93 @@ export default function ReturnCoupon() {
       branchId,
     },
   });
+
+  const { data: returnProductDetail, isLoading } = useQuery<{
+    data: { purchaseReturn: IRecord; products: any };
+  }>(['RETURN_PRODUCT_DETAIL', returnId], () =>
+    getReturnProductDetail(Number(returnId))
+  );
+
+  useEffect(() => {
+    if (returnProductDetail) {
+      console.log("returnProductDetail", returnProductDetail)
+      // setReturnProducts(returnProductDetail?.data?.products);
+      // const product: IImportProduct = JSON.parse(value);
+      // console.log("product", product)
+
+      // const localProduct: IImportProductLocal = {
+      //   ...product,
+      //   productKey: `${product.product.id}-${product.id}`,
+      //   inventory: product.quantity,
+      //   quantity: 1,
+      //   discountValue: 0,
+      //   batches: [],
+      // };
+
+      returnProductDetail?.data?.products?.forEach((product) => {
+        const newProduct = {
+          ...product,
+          productUnit: [product.productBatchHistories[0].productUnit],
+        }
+        const localProduct: IImportProductLocal = {
+          ...newProduct,
+          productKey: `${product.product.id}-${product.id}`,
+          inventory: product.quantity,
+          quantity: 1,
+          discountValue: 0,
+          batches: [],
+        };
+
+        let cloneImportProducts = cloneDeep(returnProducts);
+
+        if (
+          returnProducts.find(
+            (p) => p.productKey === localProduct.productKey
+          )
+        ) {
+          cloneImportProducts = cloneImportProducts.map((product) => {
+            if (product.productKey === localProduct.productKey) {
+              return {
+                ...product,
+                quantity: product.quantity + 1,
+              };
+            }
+
+            return product;
+          });
+        } else {
+          cloneImportProducts.push(localProduct);
+        }
+
+        console.log("cloneImportProducts", cloneImportProducts)
+
+        setReturnProducts(cloneImportProducts);
+      });
+
+      // let cloneImportProducts = cloneDeep(returnProducts);
+
+      // if (
+      //   returnProducts.find(
+      //     (p) => p.productKey === localProduct.productKey
+      //   )
+      // ) {
+      //   cloneImportProducts = cloneImportProducts.map((product) => {
+      //     if (product.productKey === localProduct.productKey) {
+      //       return {
+      //         ...product,
+      //         quantity: product.quantity + 1,
+      //       };
+      //     }
+
+      //     return product;
+      //   });
+      // } else {
+      //   cloneImportProducts.push(localProduct);
+      // }
+
+      // setReturnProducts(cloneImportProducts);
+    }
+  }, [returnProductDetail])
 
   useEffect(() => {
     if (profile) {
@@ -159,16 +252,16 @@ export default function ReturnCoupon() {
       render: (_, { product }, index) => (
         <span
           className="cursor-pointer text-[#0070F4]"
-          // onClick={() => {
-          //   const currentState = expandedRowKeys[`${index}`];
-          //   const temp = { ...expandedRowKeys };
-          //   if (currentState) {
-          //     delete temp[`${index}`];
-          //   } else {
-          //     temp[`${index}`] = true;
-          //   }
-          //   setExpandedRowKeys({ ...temp });
-          // }}
+        // onClick={() => {
+        //   const currentState = expandedRowKeys[`${index}`];
+        //   const temp = { ...expandedRowKeys };
+        //   if (currentState) {
+        //     delete temp[`${index}`];
+        //   } else {
+        //     temp[`${index}`] = true;
+        //   }
+        //   setExpandedRowKeys({ ...temp });
+        // }}
         >
           {product.code}
         </span>
@@ -191,7 +284,7 @@ export default function ReturnCoupon() {
               Number(product.productKey.split('-')[1])
             );
 
-            return product.productUnit.map((unit) => ({
+            return product.productUnit?.map((unit) => ({
               value: unit.id,
               label: unit.unitName,
               disabled: productUnitKeysSelected.includes(unit.id),
@@ -319,13 +412,16 @@ export default function ReturnCoupon() {
       <div className="grow overflow-x-auto">
         <div className="hidden-scrollbar overflow-x-auto overflow-y-hidden">
           <div className="flex h-[72px] w-full  min-w-[800px] items-center bg-red-main px-6 py-3">
-            <CustomSelect
+
+            <CustomAutocomplete
               className="!h-[48px] w-full !rounded text-base"
               prefixIcon={<Image src={SearchIcon} alt="" />}
               placeholder="Tìm kiếm theo mã nhập hàng"
               wrapClassName="w-full !rounded bg-white"
-              onChange={(value) => {
+              listHeight={512}
+              onSelect={(value) => {
                 const product: IImportProduct = JSON.parse(value);
+                console.log("product", product)
 
                 const localProduct: IImportProductLocal = {
                   ...product,
@@ -359,15 +455,14 @@ export default function ReturnCoupon() {
 
                 setReturnProducts(cloneImportProducts);
               }}
+              showSearch={true}
               onSearch={debounce((value) => {
                 setFormFilter((preValue) => ({
                   ...preValue,
                   keyword: value,
                 }));
-              }, 300)}
-              listHeight={512}
-              showSearch={true}
-              value={null}
+              })}
+              value={formFilter.keyword}
               options={products?.data?.items?.map((item) => ({
                 value: JSON.stringify(item),
                 label: (

@@ -245,18 +245,23 @@ export function CreatePrescriptionModal({
         </div>
 
         <div className="w-1/2 pl-5">
-          <div className=" mb-5 flex items-end">
-            <label className="mr-2 w-[120px] min-w-[120px] font-medium text-[#28293D]">
-              CMTND/Căn cước
-            </label>
-            <CustomInput
-              bordered={false}
-              wrapClassName="grow"
-              className="border-[#E4E4EB]"
-              onChange={(value) =>
-                setValue('identificationCard', value, { shouldValidate: true })
-              }
-            />
+          <div className=" mb-5 flex items-end flex-col">
+            <div className='flex w-full items-center'>
+              <label className="mr-2 w-[120px] min-w-[120px] font-medium text-[#28293D]">
+                CMTND/Căn cước
+              </label>
+              <CustomInput
+                bordered={false}
+                wrapClassName="grow"
+                className="border-[#E4E4EB]"
+                onChange={(value) =>
+                  setValue('identificationCard', value, { shouldValidate: true })
+                }
+              />
+            </div>
+            <div>
+              <InputError error={errors.identificationCard?.message} />
+            </div>
           </div>
 
           <div className=" mb-5 flex items-end">
@@ -301,18 +306,23 @@ export function CreatePrescriptionModal({
             />
           </div>
 
-          <div className=" mb-5 flex items-end">
-            <label className="mr-2 w-[120px] min-w-[120px] font-medium text-[#28293D]">
-              Điện thoại liên hệ
-            </label>
-            <CustomInput
-              bordered={false}
-              wrapClassName="grow"
-              className="border-[#E4E4EB]"
-              onChange={(value) =>
-                setValue('phone', value, { shouldValidate: true })
-              }
-            />
+          <div className=" mb-5 flex items-end flex-col">
+            <div className='flex items-end w-full'>
+              <label className="mr-2 w-[120px] min-w-[120px] font-medium text-[#28293D]">
+                Điện thoại liên hệ
+              </label>
+              <CustomInput
+                bordered={false}
+                wrapClassName="grow"
+                className="border-[#E4E4EB]"
+                onChange={(value) =>
+                  setValue('phone', value, { shouldValidate: true })
+                }
+              />
+            </div>
+            <div>
+              <InputError error={errors.phone?.message} />
+            </div>
           </div>
 
           <div className=" mb-5 flex items-end">

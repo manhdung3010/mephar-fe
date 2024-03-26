@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { message } from 'antd';
 import cx from 'classnames';
-import { cloneDeep, debounce } from 'lodash';
+import { cloneDeep, debounce, set } from 'lodash';
 import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -64,6 +64,7 @@ export function RightContent({ useForm }: { useForm: any }) {
 
   const [searchEmployeeText, setSearchEmployeeText] = useState('');
   const [searchCustomerText, setSearchCustomerText] = useState('');
+  const [saleInvoice, setSaleInvoice] = useState();
 
   const { data: employees } = useQuery(
     ['EMPLOYEE_LIST', searchEmployeeText],
@@ -164,8 +165,11 @@ export function RightContent({ useForm }: { useForm: any }) {
         });
       },
       {
-        onSuccess: async () => {
+        onSuccess: async (res) => {
           await queryClient.invalidateQueries(['LIST_SALE_PRODUCT']);
+          if (res.data) {
+            setSaleInvoice(res.data);
+          }
 
           const orderClone = cloneDeep(orderObject);
 
@@ -218,7 +222,7 @@ export function RightContent({ useForm }: { useForm: any }) {
         <CustomSelect
           options={customers?.data?.items?.map((item) => ({
             value: item.id,
-            label: item.fullName,
+            label: item.fullName + " - " + item.phone,
           }))}
           value={getValues('customerId')}
           onSearch={debounce((value) => {
@@ -496,6 +500,7 @@ export function RightContent({ useForm }: { useForm: any }) {
         onCancel={() => {
           setIsOpenOrderSuccessModal(false);
         }}
+        saleInvoice={saleInvoice}
       />
     </RightContentStyled>
   );

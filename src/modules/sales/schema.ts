@@ -88,12 +88,22 @@ export const prescriptionSchema = yup.object().shape({
   gender: yup.string(),
   age: yup.string(),
   weight: yup.string(),
-  identificationCard: yup.string(),
+  identificationCard: yup
+    .mixed()
+    .test("is-number", "CMTND/CCCD phải là số", function (value: any) {
+      // Nếu giá trị là null hoặc undefined, trả về luôn là true (không có lỗi)
+      if (value === null || value === undefined) {
+        return true;
+      }
+      // Kiểm tra xem giá trị có phải là một số không
+      return !isNaN(value);
+    }),
   healthInsuranceCard: yup.string(),
   address: yup.string(),
   supervisor: yup.string(),
   phone: yup
     .string()
+    .nullable()
     .matches(regexPhoneNumber, "Vui lòng nhập đúng định dạng số điện thoại"),
   diagnostic: yup.string(),
   healthFacilityId: yup.number(),

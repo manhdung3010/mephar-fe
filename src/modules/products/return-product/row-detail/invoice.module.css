@@ -1,0 +1,12 @@
+.invoicePrint {
+  position: absolute;
+  width: 100%;
+  z-index: -1;
+}
+
+@media print {
+  .invoicePrint {
+    padding: 50px;
+    font-size: 16px;
+  }
+}

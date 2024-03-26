@@ -283,8 +283,8 @@ export function CreateCustomerModal({
               <CustomRadio
                 className="-mr-4 flex"
                 options={[
-                  { value: 0, label: 'Cá nhân' },
-                  { value: 1, label: 'Công ty' },
+                  { value: 1, label: 'Cá nhân' },
+                  { value: 2, label: 'Công ty' },
                 ]}
                 onChange={(value) =>
                   setValue('type', value, { shouldValidate: true })

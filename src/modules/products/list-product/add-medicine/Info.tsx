@@ -200,7 +200,7 @@ const Info = ({ useForm, setSelectedMedicineCategory, selectedMedicineCategory, 
           <InputError error={errors?.name?.message} />
         </div>
         {
-          selectedMedicineCategory?.code || drugCode && (
+          selectedMedicineCategory?.code && (
             <div>
               <Label infoText="" label="Mã thuốc" />
               <CustomInput
@@ -211,7 +211,25 @@ const Info = ({ useForm, setSelectedMedicineCategory, selectedMedicineCategory, 
                     shouldValidate: true,
                   })
                 }
-                value={selectedMedicineCategory?.code ?? drugCode}
+                value={selectedMedicineCategory?.code || drugCode}
+                disabled
+              />
+            </div>
+          )
+        }
+        {
+          drugCode && (
+            <div>
+              <Label infoText="" label="Mã thuốc" />
+              <CustomInput
+                placeholder="Nhập mã thuốc"
+                className="h-11"
+                onChange={(e) =>
+                  setValue('selectedMedicineCategory', e, {
+                    shouldValidate: true,
+                  })
+                }
+                value={drugCode}
                 disabled
               />
             </div>

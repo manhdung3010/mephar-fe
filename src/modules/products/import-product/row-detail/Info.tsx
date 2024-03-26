@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import type { ColumnsType } from 'antd/es/table';
 import Image from 'next/image';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { getImportProductDetail } from '@/api/import-product.service';
 import BarcodeBlueIcon from '@/assets/barcodeBlue.svg';
@@ -18,20 +18,24 @@ import PrintBarcodeModal from '../../list-product/row-detail/PrintBarcodeModal';
 import type { IProduct, IRecord } from '../interface';
 import CancelProductModal from './CancelProduct';
 import { useRouter } from 'next/router';
+import InvoicePrint from './InvoicePrint';
+import { useReactToPrint } from 'react-to-print';
+import styles from "./invoice.module.css"
 
 export function Info({ record }: { record: IRecord }) {
   const [openPrintBarcodeModal, setOpenPrintBarcodeModal] = useState(false);
   const [openCancelPrintProduct, setOpenCancelPrintProduct] = useState(false);
- const router = useRouter();
+  const router = useRouter();
 
   const { data: importProductDetail, isLoading } = useQuery<{
     data: { inbound: IRecord; products: any };
   }>(['IMPORT_PRODUCT_DETAIL', record.id], () =>
     getImportProductDetail(record.id)
   );
-  
-   const onSubmit = () => {
+
+  const onSubmit = () => {
   };
+  const invoiceComponentRef = useRef(null);
 
   const [expandedRowKeys, setExpandedRowKeys] = useState<
     Record<string, boolean>
@@ -114,8 +118,17 @@ export function Info({ record }: { record: IRecord }) {
     return total;
   }, [importProductDetail]);
 
+
+
+  const handlePrintInvoice = useReactToPrint({
+    content: () => invoiceComponentRef.current,
+  });
+
   return (
     <div className="gap-12 ">
+      <div ref={invoiceComponentRef} className={`${styles.invoicePrint} invoice-print`}>
+        <InvoicePrint data={importProductDetail?.data} columns={columns} />
+      </div>
       <div className="mb-4 grid flex-1 grid-cols-2 gap-4">
         <div className="grid grid-cols-2 gap-5">
           <div className="text-gray-main">Mã nhập hàng:</div>
@@ -127,16 +140,15 @@ export function Info({ record }: { record: IRecord }) {
         <div className="grid grid-cols-2 gap-5">
           <div className="text-gray-main">Trạng thái:</div>
           <div
-            className={`${
-              importProductDetail?.data?.inbound?.status ===
+            className={`${importProductDetail?.data?.inbound?.status ===
               EImportProductStatus.SUCCEED
-                ? 'text-[#00B63E]'
-                : 'text-gray-main'
-            }`}
+              ? 'text-[#00B63E]'
+              : 'text-gray-main'
+              }`}
           >
             {
               EImportProductStatusLabel[
-                importProductDetail?.data?.inbound?.status as string
+              importProductDetail?.data?.inbound?.status as string
               ]
             }
           </div>
@@ -276,17 +288,20 @@ export function Info({ record }: { record: IRecord }) {
           outline={true}
           type="primary"
           prefixIcon={<Image src={OpenOrderIcon} alt="" />}
-          //  onClick={() => router.push('/products/import/promissory-note')}
+        //  onClick={() => router.push('/products/import/promissory-note')}
         >
           Mở phiếu
         </CustomButton>
+
         <CustomButton
           outline={true}
           type="primary"
           prefixIcon={<Image src={PrintOrderIcon} alt="" />}
+          onClick={handlePrintInvoice}
         >
           In phiếu
         </CustomButton>
+
         <CustomButton
           outline={true}
           prefixIcon={<Image src={CloseIcon} alt="" />}
@@ -302,15 +317,15 @@ export function Info({ record }: { record: IRecord }) {
         </CustomButton>
       </div>
 
-       <CancelProductModal
+      <CancelProductModal
         isOpen={openCancelPrintProduct}
         onCancel={() => setOpenCancelPrintProduct(false)}
         onSubmit={onSubmit}
-        // isLoading={isLoadingDeleteProduct}
+      // isLoading={isLoadingDeleteProduct}
       />
 
       <PrintBarcodeModal
-       isOpen={openPrintBarcodeModal}
+        isOpen={openPrintBarcodeModal}
         onCancel={() => setOpenPrintBarcodeModal(false)}
         barCode={record?.code}
       />

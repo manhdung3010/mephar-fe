@@ -2,12 +2,11 @@ import { useQuery } from '@tanstack/react-query';
 import type { ColumnsType } from 'antd/es/table';
 import cx from 'classnames';
 import Image from 'next/image';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { getReturnProductDetail } from '@/api/return-product.service';
 import CloseIcon from '@/assets/closeIcon.svg';
 import OpenOrderIcon from '@/assets/openOrder.svg';
-import PlusIcon from '@/assets/PlusIconWhite.svg';
 import PrintOrderIcon from '@/assets/printOrder.svg';
 import { CustomButton } from '@/components/CustomButton';
 import CustomTable from '@/components/CustomTable';
@@ -15,8 +14,14 @@ import { EReturnProductStatus, EReturnProductStatusLabel } from '@/enums';
 import { formatMoney, formatNumber } from '@/helpers';
 
 import type { IProduct, IRecord } from '../interface';
+import InvoicePrint from './InvoicePrint';
+import styles from "./invoice.module.css";
+import { useReactToPrint } from 'react-to-print';
 
 export function Info({ record }: { record: IRecord }) {
+
+  const invoiceComponentRef = useRef<HTMLDivElement>(null);
+
   const { data: returnProductDetail, isLoading } = useQuery<{
     data: { purchaseReturn: IRecord; products: any };
   }>(['RETURN_PRODUCT_DETAIL', record.id], () =>
@@ -104,6 +109,10 @@ export function Info({ record }: { record: IRecord }) {
     return total;
   }, [returnProductDetail]);
 
+  const handlePrintInvoice = useReactToPrint({
+    content: () => invoiceComponentRef.current,
+  });
+
   return (
     <div className="gap-12 ">
       <div className="mb-4 grid flex-1 grid-cols-2 gap-4">
@@ -131,7 +140,7 @@ export function Info({ record }: { record: IRecord }) {
           >
             {
               EReturnProductStatusLabel[
-                returnProductDetail?.data?.purchaseReturn?.status as string
+              returnProductDetail?.data?.purchaseReturn?.status as string
               ]
             }
           </div>
@@ -270,6 +279,7 @@ export function Info({ record }: { record: IRecord }) {
           outline={true}
           type="primary"
           prefixIcon={<Image src={PrintOrderIcon} alt="" />}
+          onClick={handlePrintInvoice}
         >
           In phiếu
         </CustomButton>
@@ -279,12 +289,10 @@ export function Info({ record }: { record: IRecord }) {
         >
           Hủy bỏ
         </CustomButton>
-        <CustomButton
-          type="success"
-          prefixIcon={<Image src={PlusIcon} alt="" />}
-        >
-          Trả hàng nhập
-        </CustomButton>
+      </div>
+
+      <div ref={invoiceComponentRef} className={`${styles.invoicePrint} invoice-print`}>
+        <InvoicePrint data={returnProductDetail?.data} columns={columns} totalQuantity={totalQuantity} />
       </div>
     </div>
   );
