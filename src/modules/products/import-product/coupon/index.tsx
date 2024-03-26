@@ -1,33 +1,35 @@
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useQuery } from '@tanstack/react-query';
-import type { ColumnsType } from 'antd/es/table';
-import { cloneDeep, debounce } from 'lodash';
-import Image from 'next/image';
-import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useQuery } from "@tanstack/react-query";
+import type { ColumnsType } from "antd/es/table";
+import { cloneDeep, debounce } from "lodash";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useRecoilState, useRecoilValue } from "recoil";
 
-import { getInboundProducts } from '@/api/product.service';
-import CloseIcon from '@/assets/closeWhiteIcon.svg';
-import RemoveIcon from '@/assets/removeIcon.svg';
-import SearchIcon from '@/assets/searchIcon.svg';
-import { CustomInput } from '@/components/CustomInput';
-import { CustomSelect } from '@/components/CustomSelect';
-import CustomTable from '@/components/CustomTable';
-import { CustomUnitSelect } from '@/components/CustomUnitSelect';
-import InputError from '@/components/InputError';
-import { EProductType } from '@/enums';
-import { formatMoney, getImage } from '@/helpers';
+import { getInboundProducts } from "@/api/product.service";
+import CloseIcon from "@/assets/closeWhiteIcon.svg";
+import RemoveIcon from "@/assets/removeIcon.svg";
+import SearchIcon from "@/assets/searchIcon.svg";
+import { CustomInput } from "@/components/CustomInput";
+import { CustomSelect } from "@/components/CustomSelect";
+import CustomTable from "@/components/CustomTable";
+import { CustomUnitSelect } from "@/components/CustomUnitSelect";
+import InputError from "@/components/InputError";
+import { EProductType } from "@/enums";
+import { formatMoney, getImage } from "@/helpers";
 import type {
   IImportProduct,
   IImportProductLocal,
-} from '@/modules/products/import-product/coupon/interface';
-import { branchState, productImportState, profileState } from '@/recoil/state';
+} from "@/modules/products/import-product/coupon/interface";
+import { branchState, productImportState, profileState } from "@/recoil/state";
 
-import type { IBatch } from '../interface';
-import { ListBatchModal } from './ListBatchModal';
-import { RightContent } from './RightContent';
-import { schema } from './schema';
+import type { IBatch, IRecord } from "../interface";
+import { ListBatchModal } from "./ListBatchModal";
+import { RightContent } from "./RightContent";
+import { schema } from "./schema";
+import { useRouter } from "next/router";
+import { getImportProductDetail } from "@/api/import-product.service";
 
 export default function ImportCoupon() {
   const profile = useRecoilValue(profileState);
@@ -35,6 +37,16 @@ export default function ImportCoupon() {
 
   const [importProducts, setImportProducts] =
     useRecoilState(productImportState);
+
+  const router = useRouter();
+  const { id } = router.query;
+
+  const { data: importProductDetail, isLoading } = useQuery(
+    ["IMPORT_PRODUCT_DETAIL", id],
+    () => getImportProductDetail(Number(id))
+  );
+
+  console.log("importProductDetail-coupon:", importProductDetail);
 
   const {
     getValues,
@@ -45,7 +57,7 @@ export default function ImportCoupon() {
     formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
-    mode: 'onChange',
+    mode: "onChange",
     defaultValues: {
       branchId,
     },
@@ -53,13 +65,13 @@ export default function ImportCoupon() {
 
   useEffect(() => {
     if (profile) {
-      setValue('userId', profile.id);
+      setValue("userId", profile.id);
     }
   }, [profile]);
 
   useEffect(() => {
     if (branchId) {
-      setValue('branchId', branchId);
+      setValue("branchId", branchId);
     }
   }, [branchId]);
 
@@ -71,12 +83,12 @@ export default function ImportCoupon() {
   const [formFilter, setFormFilter] = useState({
     page: 1,
     limit: 20,
-    keyword: '',
+    keyword: "",
   });
 
   const { data: products } = useQuery<{ data: { items: IImportProduct[] } }>(
     [
-      'LIST_IMPORT_PRODUCT',
+      "LIST_IMPORT_PRODUCT",
       formFilter.page,
       formFilter.limit,
       formFilter.keyword,
@@ -90,7 +102,6 @@ export default function ImportCoupon() {
       setProductData(products.data.items);
     }
   }, [products?.data?.items]);
-
 
   const [expandedRowKeys, setExpandedRowKeys] = useState<
     Record<string, boolean>
@@ -112,7 +123,7 @@ export default function ImportCoupon() {
 
     productImportClone = productImportClone.map((product) => {
       if (product.productKey === productKey) {
-        if (field === 'quantity' && product.batches?.length === 1) {
+        if (field === "quantity" && product.batches?.length === 1) {
           return {
             ...product,
             quantity: newValue,
@@ -137,9 +148,9 @@ export default function ImportCoupon() {
 
   const columns: ColumnsType<IImportProductLocal> = [
     {
-      title: '',
-      dataIndex: 'action',
-      key: 'action',
+      title: "",
+      dataIndex: "action",
+      key: "action",
       render: (_, { id }) => (
         <Image
           src={RemoveIcon}
@@ -157,47 +168,47 @@ export default function ImportCoupon() {
       ),
     },
     {
-      title: 'STT',
-      dataIndex: 'key',
-      key: 'key',
+      title: "STT",
+      dataIndex: "key",
+      key: "key",
     },
     {
-      title: 'Mã hàng',
-      dataIndex: 'code',
-      key: 'code',
+      title: "Mã hàng",
+      dataIndex: "code",
+      key: "code",
       render: (_, { product }, index) => (
         <span
           className="cursor-pointer text-[#0070F4]"
-        // onClick={() => {
-        //   const currentState = expandedRowKeys[`${index}`];
-        //   const temp = { ...expandedRowKeys };
-        //   if (currentState) {
-        //     delete temp[`${index}`];
-        //   } else {
-        //     temp[`${index}`] = true;
-        //   }
-        //   setExpandedRowKeys({ ...temp });
-        // }}
+          // onClick={() => {
+          //   const currentState = expandedRowKeys[`${index}`];
+          //   const temp = { ...expandedRowKeys };
+          //   if (currentState) {
+          //     delete temp[`${index}`];
+          //   } else {
+          //     temp[`${index}`] = true;
+          //   }
+          //   setExpandedRowKeys({ ...temp });
+          // }}
         >
           {product.code}
         </span>
       ),
     },
     {
-      title: 'Tên hàng',
-      dataIndex: 'name',
-      key: 'name',
+      title: "Tên hàng",
+      dataIndex: "name",
+      key: "name",
       render: (_, { product }) => product.name,
     },
     {
-      title: 'ĐVT',
-      dataIndex: 'units',
-      key: 'units',
+      title: "ĐVT",
+      dataIndex: "units",
+      key: "units",
       render: (_, { productKey, product, id }) => (
         <CustomUnitSelect
           options={(() => {
             const productUnitKeysSelected = importProducts.map((product) =>
-              Number(product.productKey.split('-')[1])
+              Number(product.productKey.split("-")[1])
             );
 
             return product.productUnit.map((unit) => ({
@@ -237,9 +248,9 @@ export default function ImportCoupon() {
       ),
     },
     {
-      title: 'Số lượng',
-      dataIndex: 'quantity',
-      key: 'quantity',
+      title: "Số lượng",
+      dataIndex: "quantity",
+      key: "quantity",
       render: (quantity, { productKey }) => (
         <CustomInput
           wrapClassName="!w-[110px]"
@@ -250,41 +261,41 @@ export default function ImportCoupon() {
           value={quantity}
           type="number"
           onChange={(value) =>
-            onChangeValueProduct(productKey, 'quantity', value)
+            onChangeValueProduct(productKey, "quantity", value)
           }
           onMinus={(value) =>
-            onChangeValueProduct(productKey, 'quantity', value)
+            onChangeValueProduct(productKey, "quantity", value)
           }
           onPlus={(value) =>
-            onChangeValueProduct(productKey, 'quantity', value)
+            onChangeValueProduct(productKey, "quantity", value)
           }
         />
       ),
     },
     {
-      title: 'Đơn giá',
-      dataIndex: 'primePrice',
-      key: 'primePrice',
+      title: "Đơn giá",
+      dataIndex: "primePrice",
+      key: "primePrice",
       render: (_, { productKey, price }) => (
         <CustomInput
           type="number"
           bordered={false}
-          onChange={(value) => onChangeValueProduct(productKey, 'price', value)}
+          onChange={(value) => onChangeValueProduct(productKey, "price", value)}
           wrapClassName="w-[100px]"
           defaultValue={price}
         />
       ),
     },
     {
-      title: 'Giảm giá',
-      dataIndex: 'discountValue',
-      key: 'discountValue',
+      title: "Giảm giá",
+      dataIndex: "discountValue",
+      key: "discountValue",
       render: (value, { productKey }) => (
         <CustomInput
           type="number"
           bordered={false}
           onChange={(value) =>
-            onChangeValueProduct(productKey, 'discountValue', value)
+            onChangeValueProduct(productKey, "discountValue", value)
           }
           wrapClassName="w-[100px]"
           defaultValue={value}
@@ -292,9 +303,9 @@ export default function ImportCoupon() {
       ),
     },
     {
-      title: 'Thành tiền',
-      dataIndex: 'totalPrice',
-      key: 'totalPrice',
+      title: "Thành tiền",
+      dataIndex: "totalPrice",
+      key: "totalPrice",
       render: (_, { quantity, discountValue, price }) =>
         formatMoney(quantity * price - discountValue),
     },
@@ -369,7 +380,7 @@ export default function ImportCoupon() {
                 setImportProducts(cloneImportProducts);
               }}
               onSearch={debounce((value) => {
-                console.log('Search value:', value);
+                console.log("Search value:", value);
                 setFormFilter((preValue) => ({
                   ...preValue,
                   keyword: value,
@@ -377,9 +388,9 @@ export default function ImportCoupon() {
               }, 300)}
               listHeight={512}
               showSearch={true}
-              // value={null}
-              options={productData.map((item) => ({
-                value: item.id,
+              value={null}
+              options={products?.data?.items?.map((item) => ({
+                value: JSON.stringify(item),
                 label: (
                   <div className="flex items-center gap-x-4 p-2">
                     <div className=" flex h-12 w-[68px] items-center rounded border border-gray-300 p-[2px]">
@@ -396,7 +407,9 @@ export default function ImportCoupon() {
 
                     <div>
                       <div className="flex gap-x-5">
-                        <div>{item.product.code} - {item.product.name}</div>
+                        <div>
+                          {item.product.code} - {item.product.name}
+                        </div>
                         <div className="rounded bg-red-main px-2 py-[2px] text-white">
                           {item.unitName}
                         </div>
@@ -442,9 +455,9 @@ export default function ImportCoupon() {
                               className="flex items-center rounded bg-red-main py-1 px-2 text-white"
                             >
                               <span className="mr-2">
-                                {batch.name} - {batch.expiryDate} - SL:{' '}
+                                {batch.name} - {batch.expiryDate} - SL:{" "}
                                 {batch.quantity}
-                              </span>{' '}
+                              </span>{" "}
                               <Image
                                 className=" cursor-pointer"
                                 src={CloseIcon}
@@ -501,7 +514,7 @@ export default function ImportCoupon() {
                 });
 
                 setImportProducts(importProductsClone);
-                setError('products', { message: undefined });
+                setError("products", { message: undefined });
               }}
             />
           </div>

@@ -1,12 +1,9 @@
 import type { MenuProps } from "antd";
-import { Button, Dropdown } from "antd";
+import { Dropdown } from "antd";
 import Image from "next/image";
 import { useRouter } from "next/router";
 
 import ArrowDown from "@/assets/arrowDown.svg";
-import DocumentDownload from "@/assets/documentDownload.svg";
-import DocumentUpload from "@/assets/documentUpload.svg";
-import PlusIconWhite from "@/assets/PlusIconWhite.svg";
 import { CustomButton } from "@/components/CustomButton";
 
 const AddNew = () => {
@@ -24,12 +21,10 @@ const AddNew = () => {
     {
       label: "In",
       key: "1",
-      //   onClick: () => router.push('/products/list/add-medicine'),
     },
     {
       label: "Xuất file",
       key: "2",
-      //   onClick: () => router.push('/products/list/add-package'),
     },
   ];
 
@@ -42,7 +37,6 @@ const AddNew = () => {
     <Dropdown menu={menuProps} trigger={["click"]}>
       <CustomButton onClick={handleButtonClick} type="danger" className="p-0">
         <div className="flex items-center justify-center border-r border-[#EE6274] py-[8px] px-4">
-          <Image src={PlusIconWhite} alt="" />
           <span className="pl-[6px]">Thao tác</span>
         </div>
         <div className="flex items-center px-[10px] py-2">

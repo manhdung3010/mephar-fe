@@ -204,7 +204,7 @@ export function RightContent({ useForm }: { useForm: any }) {
 
             <div className="mb-5 flex justify-between">
               <div className=" leading-normal text-[#828487]">Trạng thái</div>
-              <div className=" leading-normal text-[#19191C]">Phiếu tạm</div>
+              <div className=" leading-normal text-[#19191C]">Phiếu tạm </div>
             </div>
           </div>
 
