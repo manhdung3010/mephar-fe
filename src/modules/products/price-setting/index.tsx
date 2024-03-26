@@ -1,18 +1,18 @@
-import { useQuery } from '@tanstack/react-query';
-import type { ColumnsType } from 'antd/es/table';
-import { debounce } from 'lodash';
-import Image from 'next/image';
-import { useState } from 'react';
+import { useQuery } from "@tanstack/react-query";
+import type { ColumnsType } from "antd/es/table";
+import { debounce } from "lodash";
+import Image from "next/image";
+import { useState } from "react";
 
-import { getPriceSetting } from '@/api/price-setting.service';
-import EditIcon from '@/assets/editIcon.svg';
-import SearchIcon from '@/assets/searchIcon.svg';
-import { CustomInput } from '@/components/CustomInput';
-import CustomPagination from '@/components/CustomPagination';
-import CustomTable from '@/components/CustomTable';
-import { formatMoney } from '@/helpers';
+import { getPriceSetting } from "@/api/price-setting.service";
+import EditIcon from "@/assets/editIcon.svg";
+import SearchIcon from "@/assets/searchIcon.svg";
+import { CustomInput } from "@/components/CustomInput";
+import CustomPagination from "@/components/CustomPagination";
+import CustomTable from "@/components/CustomTable";
+import { formatMoney } from "@/helpers";
 
-import { EditPriceModal } from './EditPriceModal';
+import { EditPriceModal } from "./EditPriceModal";
 
 interface IRecord {
   key: number;
@@ -37,13 +37,14 @@ export function PriceSetting() {
   const [formFilter, setFormFilter] = useState({
     page: 1,
     limit: 20,
-    keyword: '',
+    keyword: "",
   });
   const [selectedBatchId, setSelectedBatchId] = useState<number>();
+  const [filteredData, setFilteredData] = useState<IRecord[]>([]);
 
   const { data: priceSettings } = useQuery(
     [
-      'LIST_PRICE_SETTING',
+      "LIST_PRICE_SETTING",
       formFilter.page,
       formFilter.limit,
       formFilter.keyword,
@@ -51,48 +52,78 @@ export function PriceSetting() {
     () => getPriceSetting({ ...formFilter })
   );
 
+  const filterData = (keyword: string) => {
+    if (!keyword) {
+      setFilteredData([]);
+      return;
+    }
+
+    const filtered = priceSettings?.data?.items?.filter((item: IRecord) => {
+      const productName = item.product.name.toLowerCase();
+      const productCode = item.product.code.toLowerCase();
+      const searchKeyword = keyword.toLowerCase().trim();
+
+      return (
+        productName.includes(searchKeyword) ||
+        productCode.includes(searchKeyword)
+      );
+    });
+
+    setFilteredData(filtered || []);
+  };
+
+  const handleSearch = debounce((value: string) => {
+    setFormFilter((prevValue) => ({
+      ...prevValue,
+      keyword: value,
+    }));
+    filterData(value);
+
+    console.log("value: ", value);
+  }, 300);
+
   const columns: ColumnsType<IRecord> = [
     {
-      title: 'STT',
-      dataIndex: 'key',
-      key: 'key',
+      title: "STT",
+      dataIndex: "key",
+      key: "key",
     },
     {
-      title: 'Mã nhập hàng',
-      dataIndex: 'product',
-      key: 'product',
+      title: "Mã nhập hàng",
+      dataIndex: "product",
+      key: "product",
       render: (product) => product.code,
     },
     {
-      title: 'Tên hàng',
-      dataIndex: 'product',
-      key: 'product',
+      title: "Tên hàng",
+      dataIndex: "product",
+      key: "product",
       render: (value) => (
         <span className="cursor-pointer text-[#0070F4]">{value.name}</span>
       ),
     },
     {
-      title: 'Đơn vị',
-      dataIndex: 'unitName',
-      key: 'unitName',
+      title: "Đơn vị",
+      dataIndex: "unitName",
+      key: "unitName",
     },
     {
-      title: 'Giá vốn',
-      dataIndex: 'product',
-      key: 'product',
+      title: "Giá vốn",
+      dataIndex: "product",
+      key: "product",
       render: (product, { exchangeValue }) =>
         formatMoney(product.primePrice * exchangeValue),
     },
     {
-      title: 'Giá nhập cuối',
-      dataIndex: 'price',
-      key: 'price',
+      title: "Giá nhập cuối",
+      dataIndex: "price",
+      key: "price",
       render: (value) => formatMoney(value),
     },
     {
-      title: 'Giá bán trên chợ',
-      dataIndex: 'marketPrice',
-      key: 'marketPrice',
+      title: "Giá bán trên chợ",
+      dataIndex: "marketPrice",
+      key: "marketPrice",
       render: (value) => (
         <CustomInput
           bordered={false}
@@ -104,9 +135,9 @@ export function PriceSetting() {
       ),
     },
     {
-      title: 'Giá bán POS',
-      dataIndex: 'price',
-      key: 'price',
+      title: "Giá bán POS",
+      dataIndex: "price",
+      key: "price",
       render: (value, { id }) => (
         <CustomInput
           bordered={false}
@@ -124,21 +155,18 @@ export function PriceSetting() {
   return (
     <div className="my-6 bg-white">
       <div className="p-4">
-        <CustomInput
-          placeholder="Tìm kiếm theo tên"
-          prefixIcon={<Image src={SearchIcon} alt="" />}
-          className=""
-          onChange={debounce((value) => {
-            setFormFilter((preValue) => ({
-              ...preValue,
-              keyword: value,
-            }));
-          }, 300)}
+        <input
+          className="w-full px-2 py-2 outline-none"
+          placeholder="Tìm kiếm theo tên, mã"
+          onChange={(e) => handleSearch(e.target.value)}
         />
       </div>
 
       <CustomTable
-        dataSource={priceSettings?.data?.items?.map((item, index) => ({
+        dataSource={(filteredData.length > 0
+          ? filteredData
+          : priceSettings?.data?.items
+        )?.map((item, index) => ({
           ...item,
           key: index + 1,
         }))}

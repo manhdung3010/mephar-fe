@@ -7,23 +7,18 @@ import { useState } from "react";
 import { useRecoilValue } from "recoil";
 import Header from "./Header";
 
-import { getImportProduct } from '@/api/import-product.service';
-import ExportIcon from '@/assets/exportIcon.svg';
-import ImportIcon from '@/assets/importIcon.svg';
-import { CustomButton } from '@/components/CustomButton';
-import CustomPagination from '@/components/CustomPagination';
-import CustomTable from '@/components/CustomTable';
-import { EImportProductStatus, EImportProductStatusLabel } from '@/enums';
-import { formatDateTime, formatMoney } from '@/helpers';
-import { branchState } from '@/recoil/state';
-
-import DocumentDownload from "@/assets/documentDownload.svg";
-import DocumentUpload from "@/assets/documentUpload.svg";
-
+import { getImportProduct } from "@/api/import-product.service";
+import ExportIcon from "@/assets/exportIcon.svg";
+import ImportIcon from "@/assets/importIcon.svg";
+import { CustomButton } from "@/components/CustomButton";
+import CustomPagination from "@/components/CustomPagination";
+import CustomTable from "@/components/CustomTable";
+import { EImportProductStatus, EImportProductStatusLabel } from "@/enums";
+import { formatDateTime, formatMoney } from "@/helpers";
+import { branchState } from "@/recoil/state";
 import type { IRecord } from "./interface";
 import ProductDetail from "./row-detail";
 import Search from "./Search";
-import { Button } from "antd";
 
 export function ImportProduct() {
   const router = useRouter();
@@ -47,6 +42,16 @@ export function ImportProduct() {
   const [expandedRowKeys, setExpandedRowKeys] = useState<
     Record<string, boolean>
   >({});
+
+  const [isHeaderVisible, setIsHeaderVisible] = useState(false);
+
+  const handleCheckboxChange = (selectedRowKeys, selectedRows) => {
+    if (selectedRows.length === 0) {
+      setIsHeaderVisible(false);
+    } else {
+      setIsHeaderVisible(true);
+    }
+  };
 
   const columns: ColumnsType<IRecord> = [
     {
@@ -77,9 +82,9 @@ export function ImportProduct() {
       ),
     },
     {
-      title: 'Thời gian',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
+      title: "Thời gian",
+      dataIndex: "createdAt",
+      key: "createdAt",
       render: (value) => formatDateTime(value),
     },
     {
@@ -116,7 +121,7 @@ export function ImportProduct() {
   return (
     <div>
       <div className="my-3 flex justify-end gap-4">
-        <Header />
+        {isHeaderVisible && <Header />}
 
         <CustomButton
           onClick={() => router.push("/products/import/coupon")}
@@ -136,6 +141,7 @@ export function ImportProduct() {
       <CustomTable
         rowSelection={{
           type: "checkbox",
+          onChange: handleCheckboxChange,
         }}
         dataSource={importProducts?.data?.items?.map((item, index) => ({
           ...item,

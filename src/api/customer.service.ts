@@ -17,7 +17,7 @@ export function updateStatusCustomer(id: number, payload) {
 }
 
 export function updateCustomer(id: number, payload) {
-  return axiosClient.patch(`customer/${id}/status`, payload);
+  return axiosClient.put(`customer/${id}`, payload);
 }
 
 export function createCustomer(payload) {

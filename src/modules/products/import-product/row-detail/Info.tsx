@@ -1,19 +1,20 @@
-import { useQuery } from '@tanstack/react-query';
 import type { ColumnsType } from 'antd/es/table';
 import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { getImportProductDetail } from '@/api/import-product.service';
-import BarcodeBlueIcon from '@/assets/barcodeBlue.svg';
-import CloseIcon from '@/assets/closeIcon.svg';
-import OpenOrderIcon from '@/assets/openOrder.svg';
-import PlusIcon from '@/assets/PlusIconWhite.svg';
-import PrintOrderIcon from '@/assets/printOrder.svg';
-import { CustomButton } from '@/components/CustomButton';
-import CustomTable from '@/components/CustomTable';
-import { EImportProductStatus, EImportProductStatusLabel } from '@/enums';
-import { formatMoney, formatNumber } from '@/helpers';
-import PrintBarcodeModal from '../../list-product/row-detail/PrintBarcodeModal';
+import { message } from 'antd';
+import { deleteImportProduct, getImportProductDetail } from "@/api/import-product.service";
+import BarcodeBlueIcon from "@/assets/barcodeBlue.svg";
+import CloseIcon from "@/assets/closeIcon.svg";
+import OpenOrderIcon from "@/assets/openOrder.svg";
+import PlusIcon from "@/assets/PlusIconWhite.svg";
+import PrintOrderIcon from "@/assets/printOrder.svg";
+import { CustomButton } from "@/components/CustomButton";
+import CustomTable from "@/components/CustomTable";
+import { EImportProductStatus, EImportProductStatusLabel } from "@/enums";
+import { formatMoney, formatNumber } from "@/helpers";
+import PrintBarcodeModal from "../../list-product/row-detail/PrintBarcodeModal";
 
 import type { IProduct, IRecord } from '../interface';
 import CancelProductModal from './CancelProduct';
@@ -26,16 +27,31 @@ export function Info({ record }: { record: IRecord }) {
   const [openPrintBarcodeModal, setOpenPrintBarcodeModal] = useState(false);
   const [openCancelPrintProduct, setOpenCancelPrintProduct] = useState(false);
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const { data: importProductDetail, isLoading } = useQuery<{
     data: { inbound: IRecord; products: any };
-  }>(['IMPORT_PRODUCT_DETAIL', record.id], () =>
+  }>(["IMPORT_PRODUCT_DETAIL", record.id], () =>
     getImportProductDetail(record.id)
   );
 
-  const onSubmit = () => {
+  const handleOpenOrderClick = () => {
+    router.push(`/products/import/coupon/?id=${record.id}`);
   };
   const invoiceComponentRef = useRef(null);
+
+  const { mutate: mutateCancelImportProduct, isLoading: isLoadingDeleteProduct } =
+    useMutation(() => deleteImportProduct(Number(record.id)), {
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(['LIST_PRODUCT']);
+        setOpenCancelPrintProduct(false);
+      },
+      onError: (err: any) => {
+        message.error(err?.message);
+      },
+    });
+
+  const onSubmit = () => { mutateCancelImportProduct() };
 
   const [expandedRowKeys, setExpandedRowKeys] = useState<
     Record<string, boolean>
@@ -43,23 +59,23 @@ export function Info({ record }: { record: IRecord }) {
 
   const columns: ColumnsType<IProduct> = [
     {
-      title: 'Mã hàng',
-      dataIndex: 'id',
-      key: 'id',
+      title: "Mã hàng",
+      dataIndex: "id",
+      key: "id",
       render: (_, { product }) => (
         <span className="cursor-pointer text-[#0070F4]">{product.code}</span>
       ),
     },
     {
-      title: 'Tên hàng',
-      dataIndex: 'name',
-      key: 'name',
+      title: "Tên hàng",
+      dataIndex: "name",
+      key: "name",
       render: (_, { product }) => product.name,
     },
     {
-      title: 'Số lượng',
-      dataIndex: 'totalQuantity',
-      key: 'totalQuantity',
+      title: "Số lượng",
+      dataIndex: "totalQuantity",
+      key: "totalQuantity",
       render: (_, { productBatchHistories }) =>
         formatNumber(
           productBatchHistories.reduce((acc, obj) => acc + obj.quantity, 0)
@@ -71,23 +87,23 @@ export function Info({ record }: { record: IRecord }) {
     //   key: 'importPrice',
     // },
     {
-      title: 'Giảm giá',
-      dataIndex: 'discount',
-      key: 'discount',
+      title: "Giảm giá",
+      dataIndex: "discount",
+      key: "discount",
       render: (_, { productBatchHistories }) =>
         formatMoney(productBatchHistories[0]?.discount),
     },
     {
-      title: 'Giá nhập',
-      dataIndex: 'importPrice',
-      key: 'importPrice',
+      title: "Giá nhập",
+      dataIndex: "importPrice",
+      key: "importPrice",
       render: (_, { productBatchHistories }) =>
         formatMoney(productBatchHistories[0]?.importPrice),
     },
     {
-      title: 'Thành tiền',
-      dataIndex: 'totalPrice',
-      key: 'totalPrice',
+      title: "Thành tiền",
+      dataIndex: "totalPrice",
+      key: "totalPrice",
       render: (_, { productBatchHistories }) =>
         formatMoney(productBatchHistories[0]?.totalPrice),
     },
@@ -215,9 +231,9 @@ export function Info({ record }: { record: IRecord }) {
                               className="flex items-center rounded bg-red-main py-1 px-2 text-white"
                             >
                               <span className="mr-2">
-                                {batch.name} - {batch.expiryDate} - SL:{' '}
+                                {batch.name} - {batch.expiryDate} - SL:{" "}
                                 {quantity}
-                              </span>{' '}
+                              </span>{" "}
                             </div>
                           )}
                         </>
@@ -288,7 +304,6 @@ export function Info({ record }: { record: IRecord }) {
           outline={true}
           type="primary"
           prefixIcon={<Image src={OpenOrderIcon} alt="" />}
-        //  onClick={() => router.push('/products/import/promissory-note')}
         >
           Mở phiếu
         </CustomButton>
@@ -321,7 +336,7 @@ export function Info({ record }: { record: IRecord }) {
         isOpen={openCancelPrintProduct}
         onCancel={() => setOpenCancelPrintProduct(false)}
         onSubmit={onSubmit}
-      // isLoading={isLoadingDeleteProduct}
+        isLoading={isLoadingDeleteProduct}
       />
 
       <PrintBarcodeModal
