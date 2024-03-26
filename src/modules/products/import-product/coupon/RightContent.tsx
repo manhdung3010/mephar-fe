@@ -22,9 +22,11 @@ import { formatMoney } from '@/helpers';
 import { productImportState } from '@/recoil/state';
 
 import { AddProviderModal } from './AddProviderModal';
+import { useRouter } from 'next/router';
 
 export function RightContent({ useForm }: { useForm: any }) {
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const { getValues, setValue, handleSubmit, reset, errors } = useForm;
   const [productsImport, setProductsImport] =
@@ -93,6 +95,7 @@ export function RightContent({ useForm }: { useForm: any }) {
         setValue('userId', userId, { shouldValidate: true });
         setProductsImport([]);
         await queryClient.invalidateQueries(['LIST_IMPORT_PRODUCT']);
+        router.push('/products/import');
       },
       onError: (err: any) => {
         message.error(err?.message);

@@ -377,9 +377,9 @@ export default function ImportCoupon() {
               }, 300)}
               listHeight={512}
               showSearch={true}
-              // value={null}
-              options={productData.map((item) => ({
-                value: item.id,
+              value={null}
+              options={products?.data?.items.map((item) => ({
+                value: JSON.stringify(item),
                 label: (
                   <div className="flex items-center gap-x-4 p-2">
                     <div className=" flex h-12 w-[68px] items-center rounded border border-gray-300 p-[2px]">
