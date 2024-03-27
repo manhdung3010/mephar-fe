@@ -46,6 +46,8 @@ const Info = ({
     defaultUnit(getValues('productUnits'))
   );
 
+  console.log("errors", errors)
+
   const [isOpenAddGroupProduct, setIsOpenAddGroupProduct] = useState(false);
   const [isOpenAddPosition, setIsOpenAddPosition] = useState(false);
   const [isOpenManufactureModal, setIsOpenManufactureModal] = useState(false);
@@ -54,7 +56,7 @@ const Info = ({
   const [positionKeyword, setPositionKeyword] = useState();
   const [manufactureKeyword, setManufactureKeyword] = useState();
   const [countryKeyword, setCountryKeyword] = useState();
-    const [medicineCategoryKeyword, setMedicineCategoryKeyword] = useState<string>();
+  const [medicineCategoryKeyword, setMedicineCategoryKeyword] = useState<string>();
 
   useEffect(() => {
     setGroupProductKeyword(groupProductName);
@@ -88,7 +90,7 @@ const Info = ({
     getCountries({ page: 1, limit: 20, keyword: countryKeyword })
   );
 
-    const getCategoryKeyword = useCallback(
+  const getCategoryKeyword = useCallback(
     debounce((keyword) => {
       return setMedicineCategoryKeyword(keyword)
     }, 300),
@@ -167,45 +169,20 @@ const Info = ({
           <InputError error={errors?.name?.message} />
         </div> */}
 
-          <div>
+        <div>
           <Label infoText="" label="Tên hàng hóa" required />
-          <CustomAutocomplete
-            placeholder="Nhập tên thuốc"
-            className="h-11 !rounded"
-            onSelect={
-              (value) => {
-                setSelectedMedicineCategory(value);
-                setValue('barCode', value && JSON.parse(value)?.code, { shouldValidate: true });
-              }
+          <CustomInput
+            placeholder="Nhập tên hàng hóa"
+            className="h-11"
+            onChange={(e) =>
+              setValue('name', e, {
+                shouldValidate: true,
+              })
             }
-            showSearch={true}
-            onSearch={(value) => {
-              setValue('name', value, { shouldValidate: true });
-              getCategoryKeyword(value);
-            }}
             value={getValues('name')}
-            options={exampleProduct?.data?.items?.map((item) => ({
-              label: <div>
-                <div className='text-#0F1824 mb-1 text-base font-medium'>{item.name}</div>
-
-                <div className=' grid grid-cols-5 gap-x-8 gap-y-1'>
-                  <div className=' col-span-1 whitespace-normal'>Số đăng ký: {item?.registerNumber}</div>
-                  <div className=' col-span-2 whitespace-normal'>Hoạt chất: {item?.content}</div>
-                  <div className=' col-span-2 whitespace-normal'> </div>
-                  <div className=' col-span-1 whitespace-normal'>Hàm lượng: {item?.dosage?.name}</div>
-                  <div className=' col-span-2 whitespace-normal'>Quy cách đóng gói: {item?.packingSpecification}</div>
-                  <div className=' col-span-2 whitespace-normal'>Hãng sản phẩm: {item?.manufacture?.name}</div>
-                </div>
-
-                <div className='mt-3 h-[1px] w-full bg-[#CFCFCF]' />
-              </div>,
-              value: JSON.stringify(item),
-            }))}
-            suffixIcon={isLoadingSearchMedicine && <LoadingIcon />}
-            popupClassName="search-product"
           />
           <InputError error={errors?.name?.message} />
-        </div> 
+        </div>
 
 
         <div>
@@ -550,7 +527,7 @@ const Info = ({
                   listUnit[unitKey].price !== undefined
                     ? listUnit[unitKey].price
                     : Number(getValues('price') || 0) *
-                      Number(listUnit[unitKey].exchangeValue || 0)
+                    Number(listUnit[unitKey].exchangeValue || 0)
                 }
                 type="number"
                 bordered={false}

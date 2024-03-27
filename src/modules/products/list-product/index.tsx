@@ -150,7 +150,7 @@ const ProductList = () => {
     setValueChange(value);
     const filter = selectedList.filter((item) => item?.id !== record.id);
     const newRecord = record?.productUnit?.find((unit) => unit.id === value);
-    setSelectedList([...filter, { ...record, ...newRecord, unitId: value }]?.sort(function (a, b) {
+    setSelectedList([...filter, { ...record, price: newRecord?.price, code: newRecord?.code, unitId: value }]?.sort(function (a, b) {
       return b.id - a.id;
     }));
   }
