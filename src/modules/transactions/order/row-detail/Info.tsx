@@ -12,8 +12,9 @@ import { CustomButton } from '@/components/CustomButton';
 import { EOrderStatus, EOrderStatusLabel } from '@/enums';
 import { formatMoney, formatNumber } from '@/helpers';
 
-import type { IOrder } from '..';
+
 import { OrderHistoryModal } from './HistoryModal';
+import { IOrder } from '../type';
 
 export function Info({ record }: { record: IOrder }) {
   const router = useRouter();
@@ -107,11 +108,11 @@ export function Info({ record }: { record: IOrder }) {
           </div>
           <div className="mb-4 grid grid-cols-3 gap-5">
             <div className="text-gray-main ">Số điện thoại:</div>
-            <div className="col-span-2 text-black-main">---</div>
+            <div className="col-span-2 text-black-main">----</div>
           </div>
           <div className="mb-4 grid grid-cols-3 gap-5">
             <div className="text-gray-main ">Địa chỉ:</div>
-            <div className="col-span-2 text-black-main">---</div>
+            <div className="col-span-2 text-black-main">-----</div>
           </div>
         </div>
 
@@ -149,7 +150,7 @@ export function Info({ record }: { record: IOrder }) {
                 <Image
                   width={60}
                   height={60}
-                  src={product.product.image?.path}
+                  src={product.product.image.path}
                   alt=""
                   objectFit="cover"
                 />

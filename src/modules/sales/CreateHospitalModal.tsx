@@ -13,9 +13,11 @@ import InputError from '@/components/InputError';
 export function AddHospitalModal({
   isOpen,
   onCancel,
+  onSave
 }: {
   isOpen: boolean;
-  onCancel: () => void;
+    onCancel: () => void;
+  onSave: ({ healthFacilityId, healthFacilityName}) => void;
 }) {
   const queryClient = useQueryClient();
 
@@ -36,8 +38,14 @@ export function AddHospitalModal({
 
   const { mutate: mutateCreateHospital, isLoading: isLoadingCreateHospital } =
     useMutation(() => createHospital(getValues()), {
-      onSuccess: async () => {
+      onSuccess: async (res) => {
         await queryClient.invalidateQueries(['HOSPITAL']);
+        if (onSave) {
+          onSave({
+            healthFacilityId: res.data.id,
+            healthFacilityName: getValues('name'),
+          })
+        }
         reset();
 
         onCancel();

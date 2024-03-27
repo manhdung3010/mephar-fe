@@ -15,11 +15,13 @@ export function AddMajorModal({
   onCancel,
   setMajorKeyword,
   setDoctorValue,
+  onSave
 }: {
   isOpen: boolean;
   onCancel: () => void;
   setMajorKeyword: (value) => void;
-  setDoctorValue: any;
+    setDoctorValue: any;
+  onSave: ({specialistId, specialistName}) => void;
 }) {
   const queryClient = useQueryClient();
 
@@ -44,6 +46,12 @@ export function AddMajorModal({
         setMajorKeyword(getValues('name'));
         setDoctorValue('specialistId', res.data.id);
         await queryClient.invalidateQueries(['MAJOR']);
+        if (onSave) {
+          onSave({
+            specialistId: res.data.id,
+            specialistName: getValues('name'),
+          });
+        }
         reset();
 
         onCancel();

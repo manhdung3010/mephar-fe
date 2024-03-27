@@ -32,9 +32,11 @@ import { schema } from '../partners/doctor/add-doctor/schema';
 export function CreateDoctorModal({
   isOpen,
   onCancel,
+  onSave
 }: {
   isOpen: boolean;
-  onCancel: () => void;
+    onCancel: () => void;
+  onSave: ({doctorId, doctorName}) => void;
 }) {
   const queryClient = useQueryClient();
 
@@ -79,8 +81,14 @@ export function CreateDoctorModal({
 
   const { mutate: mutateCreateDoctor, isLoading: isLoadingCreateDoctor } =
     useMutation(() => createDoctor(getValues()), {
-      onSuccess: async () => {
+      onSuccess: async (res) => {
         await queryClient.invalidateQueries(['DOCTOR_LIST']);
+        if (onSave) {
+          onSave({
+            doctorId: res.data.id,
+            doctorName: getValues('name'),
+          });
+        }
         onCancel();
       },
       onError: (err: any) => {
@@ -178,6 +186,7 @@ export function CreateDoctorModal({
                   value: item.id,
                   label: item.name,
                 }))}
+                value={getValues('specialistId')}
                 showSearch={true}
                 onSearch={debounce((value) => {
                   setMajorKeyword(value);
@@ -215,6 +224,7 @@ export function CreateDoctorModal({
                   value: item.id,
                   label: item.name,
                 }))}
+                value={getValues('levelId')}
                 showSearch={true}
                 onSearch={debounce((value) => {
                   setLevelKeyword(value);
@@ -248,6 +258,7 @@ export function CreateDoctorModal({
                   value: item.id,
                   label: item.name,
                 }))}
+                 value={getValues('workPlaceId')}
                 showSearch={true}
                 onSearch={debounce((value) => {
                   setWorkPlaceKeyword(value);
@@ -397,6 +408,12 @@ export function CreateDoctorModal({
         onCancel={() => setOpenMajorModal(false)}
         setMajorKeyword={setMajorKeyword}
         setDoctorValue={setValue}
+        onSave={({ specialistId, specialistName }) => {
+          setValue("specialistId", specialistId, {
+            shouldValidate: true,
+          });
+          setMajorKeyword(specialistName);
+        }}
       />
 
       <AddLevelModal
@@ -404,6 +421,10 @@ export function CreateDoctorModal({
         onCancel={() => setOpenLevelModal(false)}
         setLevelKeyword={setLevelKeyword}
         setDoctorValue={setValue}
+        onSave={({ levelId, levelName }) => {
+          setValue("levelId", levelId, { shouldValidate: true });
+          setLevelKeyword(levelName);
+        }}
       />
 
       <AddWorkPlaceModal
@@ -411,6 +432,12 @@ export function CreateDoctorModal({
         onCancel={() => setOpenWorkPlaceModal(false)}
         setWordPlaceKeyword={setWorkPlaceKeyword}
         setDoctorValue={setValue}
+        onSave={({ workPlaceId, workPlaceName }) => {
+          setValue("workPlaceId", workPlaceId, {
+            shouldValidate: true,
+          });
+          setWorkPlaceKeyword(workPlaceName);
+        }}
       />
     </CustomModal>
   );

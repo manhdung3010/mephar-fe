@@ -124,6 +124,7 @@ export function CreatePrescriptionModal({
                   value: item.id,
                   label: item.name,
                 }))}
+                 value={getValues('doctorId')}
                 onChange={(e) =>
                   setValue('doctorId', e, { shouldValidate: true })
                 }
@@ -164,6 +165,7 @@ export function CreatePrescriptionModal({
                   value: item.id,
                   label: item.name,
                 }))}
+                value={getValues('healthFacilityId')}
                 onChange={(value) =>
                   setValue('healthFacilityId', value, { shouldValidate: true })
                 }
@@ -344,11 +346,23 @@ export function CreatePrescriptionModal({
       <CreateDoctorModal
         isOpen={isOpenCreateDoctorModal}
         onCancel={() => setIsOpenCreateDoctorModal(false)}
+         onSave={({ doctorId, doctorName }) => {
+          setValue("doctorId", doctorId, {
+            shouldValidate: true,
+          });
+          setDoctorKeyword(doctorName);
+        }}
       />
 
       <AddHospitalModal
         isOpen={isOpenHospitalModal}
         onCancel={() => setIsOpenCreateHospitalModal(false)}
+        onSave={({ healthFacilityId, healthFacilityName }) => {
+          setValue("healthFacilityId", healthFacilityName, {
+            shouldValidate: true,
+          });
+          setHospitalKeyword(healthFacilityName);
+        }}
       />
     </CustomModal>
   );

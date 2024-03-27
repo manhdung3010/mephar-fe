@@ -3,6 +3,7 @@ import type { ColumnsType } from 'antd/es/table';
 import Image from 'next/image';
 import { useRef, useState } from 'react';
 
+import { message } from 'antd';
 import CloseIcon from '@/assets/closeIcon.svg';
 import PrintOrderIcon from '@/assets/printOrder.svg';
 import SaveIcon from '@/assets/saveIcon.svg';
@@ -11,10 +12,13 @@ import CustomTable from '@/components/CustomTable';
 import { EGenderLabel, EOrderStatusLabel } from '@/enums';
 import { formatMoney } from '@/helpers';
 
-import type { IOrder } from '../../order';
 import { useReactToPrint } from 'react-to-print';
 import SaleInvoicePrint from '@/modules/sales/SaleInvoicePrint';
 import styles from "./invoicePrint.module.css";
+import CancelBillModal from './CancelBillModal';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { deleteOrder } from '@/api/order.service';
+import { IOrder } from '../../order/type';
 
 const { TextArea } = Input;
 
@@ -26,12 +30,29 @@ interface IRecord {
   discount: number;
   price: number;
   totalPrice: number;
+  refund: number;
 }
 
 export function Info({ record }: { record: IOrder }) {
   const [expandedRowKeys, setExpandedRowKeys] = useState<
     Record<string, boolean>
   >({});
+  const [openCancelBill, setOpenCancelBill] = useState(false)
+
+  const queryClient = useQueryClient();
+
+  const { mutate: mutateCancelImportProduct, isLoading: isLoadingDeleteProduct } =
+    useMutation(() => deleteOrder(Number(record.id)), {
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(['ORDERS_PRODUCT']);
+        setOpenCancelBill(false);
+      },
+      onError: (err: any) => {
+        message.error(err?.message);
+      },
+    });
+
+  const onSubmit = () => { mutateCancelImportProduct() };
 
   const invoiceComponentRef = useRef(null);
 
@@ -307,6 +328,7 @@ export function Info({ record }: { record: IOrder }) {
         <CustomButton
           outline={true}
           prefixIcon={<Image src={CloseIcon} alt="" />}
+          onClick={() => setOpenCancelBill(true)}
         >
           Hủy bỏ
         </CustomButton>
@@ -321,6 +343,12 @@ export function Info({ record }: { record: IOrder }) {
       <div ref={invoiceComponentRef} className={styles.invoicePrint}>
         <SaleInvoicePrint saleInvoice={record} />
       </div>
+      <CancelBillModal
+        isOpen={openCancelBill}
+        onCancel={() => setOpenCancelBill(false)}
+        onSubmit={onSubmit}
+        isLoading={isLoadingDeleteProduct}
+      />
     </div>
   );
 }

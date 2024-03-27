@@ -15,11 +15,13 @@ export function AddWorkPlaceModal({
   onCancel,
   setWordPlaceKeyword,
   setDoctorValue,
+  onSave
 }: {
   isOpen: boolean;
   onCancel: () => void;
   setWordPlaceKeyword: (value) => void;
-  setDoctorValue: any;
+    setDoctorValue: any;
+  onSave: ({workPlaceId, workPlaceName}) => void;
 }) {
   const queryClient = useQueryClient();
 
@@ -44,6 +46,12 @@ export function AddWorkPlaceModal({
         setWordPlaceKeyword(getValues('name'));
         setDoctorValue('workPlaceId', res.data.id);
         await queryClient.invalidateQueries(['WORK_PLACE']);
+        if(onSave){
+          onSave({
+            workPlaceId: res.data.id,
+            workPlaceName: getValues('name'),
+          });
+        }
         reset();
 
         onCancel();

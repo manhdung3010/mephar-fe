@@ -1,9 +1,9 @@
 import classNames from 'classnames';
 import { useState } from 'react';
 
-import type { IOrder } from '../../order';
 import History from './history';
 import { Info } from './Info';
+import { IOrder } from '../../order/type';
 
 const BillDetail = ({ record }: { record: IOrder }) => {
   const [select, setSelect] = useState(0);
