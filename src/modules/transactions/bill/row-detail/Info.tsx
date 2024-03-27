@@ -1,7 +1,7 @@
 import { Input } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import CloseIcon from '@/assets/closeIcon.svg';
 import PrintOrderIcon from '@/assets/printOrder.svg';
@@ -12,6 +12,9 @@ import { EGenderLabel, EOrderStatusLabel } from '@/enums';
 import { formatMoney } from '@/helpers';
 
 import type { IOrder } from '../../order';
+import { useReactToPrint } from 'react-to-print';
+import SaleInvoicePrint from '@/modules/sales/SaleInvoicePrint';
+import styles from "./invoicePrint.module.css";
 
 const { TextArea } = Input;
 
@@ -29,6 +32,8 @@ export function Info({ record }: { record: IOrder }) {
   const [expandedRowKeys, setExpandedRowKeys] = useState<
     Record<string, boolean>
   >({});
+
+  const invoiceComponentRef = useRef(null);
 
   const columns: ColumnsType<IRecord> = [
     {
@@ -81,6 +86,10 @@ export function Info({ record }: { record: IOrder }) {
       render: (_, { quantity, price }) => formatMoney(quantity * price),
     },
   ];
+
+  const handlePrintInvoice = useReactToPrint({
+    content: () => invoiceComponentRef.current,
+  });
 
   return (
     <div className="gap-12 ">
@@ -291,6 +300,7 @@ export function Info({ record }: { record: IOrder }) {
           outline={true}
           type="primary"
           prefixIcon={<Image src={PrintOrderIcon} alt="" />}
+          onClick={handlePrintInvoice}
         >
           In phiếu
         </CustomButton>
@@ -306,6 +316,10 @@ export function Info({ record }: { record: IOrder }) {
         >
           Lưu
         </CustomButton>
+      </div>
+
+      <div ref={invoiceComponentRef} className={styles.invoicePrint}>
+        <SaleInvoicePrint saleInvoice={record} />
       </div>
     </div>
   );

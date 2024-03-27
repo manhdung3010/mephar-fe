@@ -1,8 +1,8 @@
 import CustomTable from '@/components/CustomTable'
-import { formatDateTime, formatMoney } from '@/helpers'
+import { formatDateTime, formatMoney, formatNumber } from '@/helpers'
 import React from 'react'
 
-function InvoicePrint({ data, columns }: any) {
+function InvoicePrint({ data, columns, totalQuantity }: any) {
   return (
     <div >
       <div className='flex items-center flex-col'>
@@ -31,10 +31,13 @@ function InvoicePrint({ data, columns }: any) {
       </div>
 
       <div className='flex flex-col w-80 ml-auto'>
-        <p className='flex justify-between'>Tổng số lượng mặt hàng: <span className='ml-1'>{data?.products?.length + 1}</span></p>
+        <p className='flex justify-between'>Tổng số lượng: <span className='ml-1'>{formatNumber(totalQuantity)}</span></p>
+        <p className='flex justify-between'>Tổng số lượng mặt hàng: <span className='ml-1'>{data?.products?.length}</span></p>
         <p className='flex justify-between'>Tổng tiền: <span className='ml-1'>{formatMoney(data?.inbound?.totalPrice)}</span></p>
         <p className='flex justify-between'>Giảm giá: <span className='ml-1'>{formatMoney(data?.inbound?.discount)}</span></p>
-        <p className='flex justify-between'>Thành tiền: <span className='ml-1'>{formatMoney(data?.inbound?.totalPrice - data?.inbound?.discount)}</span></p>
+        <p className='flex justify-between'>Tiền đã trả NCC: <span className='ml-1'>{formatMoney(data?.inbound?.paid)}</span></p>
+        <p className='flex justify-between'>Nợ: <span className='ml-1'>{formatMoney(data?.inbound?.debt)}</span></p>
+
       </div>
       <p>
         <span className='font-bold'>Ghi chú:</span> {data?.inbound?.description}

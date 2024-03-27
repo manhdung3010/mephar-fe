@@ -143,7 +143,7 @@ export function Info({ record }: { record: IRecord }) {
   return (
     <div className="gap-12 ">
       <div ref={invoiceComponentRef} className={`${styles.invoicePrint} invoice-print`}>
-        <InvoicePrint data={importProductDetail?.data} columns={columns} />
+        <InvoicePrint data={importProductDetail?.data} columns={columns} totalQuantity={totalQuantity} />
       </div>
       <div className="mb-4 grid flex-1 grid-cols-2 gap-4">
         <div className="grid grid-cols-2 gap-5">

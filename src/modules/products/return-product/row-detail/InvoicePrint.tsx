@@ -6,12 +6,12 @@ function InvoicePrint({ data, columns, totalQuantity }: any) {
   return (
     <div >
       <div className='flex items-center flex-col'>
-        <h4 className='text-lg font-bold'>PHIẾU NHẬP HÀNG</h4>
+        <h4 className='text-lg font-bold'>TRẢ HÀNG NHẬP</h4>
         <p className='font-bold'>Mã phiếu: <span>{data?.purchaseReturn?.code}</span></p>
         <p>Ngày tạo: <span>{formatDateTime(data?.purchaseReturn?.createdAt)}</span></p>
       </div>
       <div className='mt-5'>
-        <p>Chi nhánh nhập: <span className='ml-1'>{data?.purchaseReturn?.branch?.name}</span></p>
+        <p>Địa chỉ chi nhánh: <span className='ml-1'>{data?.purchaseReturn?.branch?.name}</span></p>
         <p>Người tạo: <span className='ml-1'>{data?.purchaseReturn?.creator?.fullName}</span></p>
         <p>Nhà cung cấp: <span className='ml-1'>{data?.purchaseReturn?.supplier?.name}</span></p>
         <p>Địa chỉ: <span className='ml-1'>{data?.purchaseReturn?.supplier?.address}</span></p>
@@ -44,7 +44,7 @@ function InvoicePrint({ data, columns, totalQuantity }: any) {
         </div>
 
         <div className="grid grid-cols-2">
-          <div className="">Tổng cộng:</div>
+          <div className="">Tổng tiền hàng trả:</div>
           <div className="text-black-main">
             {formatMoney(data?.purchaseReturn?.totalPrice)}
           </div>
@@ -58,16 +58,9 @@ function InvoicePrint({ data, columns, totalQuantity }: any) {
         </div>
 
         <div className="grid grid-cols-2">
-          <div className="">Tiền đã trả NCC:</div>
+          <div className="">Tiền NCC trả:</div>
           <div className="text-black-main">
             {formatMoney(data?.purchaseReturn?.paid)}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2">
-          <div className="">Nợ:</div>
-          <div className="text-black-main">
-            {formatMoney(data?.purchaseReturn?.debt)}
           </div>
         </div>
       </div>
