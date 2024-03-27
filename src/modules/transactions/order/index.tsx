@@ -97,10 +97,12 @@ export function OrderTransaction() {
     page: 1,
     limit: 20,
     keyword: '',
+    dateRange: { startDate: undefined, endDate: undefined },
+    status: undefined,
   });
 
   const { data: orders, isLoading } = useQuery(
-    ['ORDER_LIST', formFilter.keyword, branchId],
+    ['ORDER_LIST', formFilter, branchId],
     () => getOrder({ ...formFilter, branchId })
   );
 
@@ -300,7 +302,7 @@ export function OrderTransaction() {
         </div>
       </div>
 
-      <Search />
+      <Search setFormFilter={setFormFilter} formFilter={formFilter} />
 
       <CustomTable
         rowSelection={{

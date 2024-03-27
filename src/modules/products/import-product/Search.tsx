@@ -33,13 +33,6 @@ const Search = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void,
     () => getProvider({ page: 1, limit: 20, keyword: searchProviderText })
   );
 
-  const onChange = (value: string) => {
-    setFormFilter((preValue) => ({
-      ...preValue,
-      userId: value,
-    }));
-  };
-
   return (
     <div className="bg-white">
       <div className="flex items-center gap-4 p-4">

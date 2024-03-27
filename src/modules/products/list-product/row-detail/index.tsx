@@ -10,7 +10,7 @@ import WareHouseCard from './WareHouseCard';
 const ProductDetail = ({ record, onChangeUnit }: { record: IProduct, onChangeUnit: any }) => {
   const [select, setSelect] = useState(0);
 
-  const menu = ['Thông tin', 'Thẻ kho', 'Tồn kho', 'Lô/hạn sử dụng'];
+  const menu = ['Thông tin', 'Thẻ kho', 'Lô/hạn sử dụng'];
 
   return (
     <div
@@ -38,8 +38,8 @@ const ProductDetail = ({ record, onChangeUnit }: { record: IProduct, onChangeUni
       </div>
       {select === 0 && <Info record={record} onChangeUnit={onChangeUnit} />}
       {select === 1 && <WareHouseCard />}
-      {select === 2 && <Inventory />}
-      {select === 3 && <ProductExpire />}
+      {/* {select === 2 && <Inventory />} */}
+      {select === 2 && <ProductExpire />}
     </div>
   );
 };

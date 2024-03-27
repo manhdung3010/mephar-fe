@@ -8,6 +8,7 @@ import DocumentDownload from '@/assets/documentDownload.svg';
 import DocumentUpload from '@/assets/documentUpload.svg';
 import PlusIconWhite from '@/assets/PlusIconWhite.svg';
 import { CustomButton } from '@/components/CustomButton';
+import useExportToExcel from '@/hooks/useExportExcel';
 
 const AddNew = () => {
   const router = useRouter();
@@ -58,12 +59,37 @@ const AddNew = () => {
   );
 };
 
-const Header = () => {
+const Header = ({ data }: any) => {
+  const columnMapping = {
+    code: 'Mã hàng',
+    name: 'Tên sản phẩm',
+    shortName: "Tên viết tắt",
+    baseUnit: "Đơn vị",
+    groupProduct: "Nhóm hàng",
+    type: "Loại hàng",
+    price: "Giá bán",
+    packingSpecification: "Quy cách đóng gói",
+    weight: "Trọng lượng",
+    productDosage: "Đường dùng",
+    productPosition: "Vị trí",
+    registerNumber: "Số đăng ký",
+    activeElement: "Hoạt chất",
+    productManufacture: "Nhà sản xuất",
+    country: "Nước sản xuất",
+    description: "Mô tả",
+    status: "Trạng thái",
+  };
+  const { exported, exportToExcel } = useExportToExcel(
+    data,
+    columnMapping,
+    `DANHSACHSANPHAM_${Date.now()}.xlsx`,
+  );
   return (
     <div className="flex w-full items-center justify-end py-3">
       <Button
         type="text"
         className="flex h-auto items-center justify-center py-[6px] px-[5px] text-black-main"
+        onClick={exportToExcel}
       >
         <Image src={DocumentUpload} alt="" />
         <span className="pl-[6px]">Xuất file</span>

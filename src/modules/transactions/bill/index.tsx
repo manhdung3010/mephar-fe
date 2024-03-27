@@ -30,13 +30,14 @@ export function BillTransaction() {
     page: 1,
     limit: 20,
     keyword: '',
-    status: EOrderStatus.SUCCEED,
+    dateRange: { startDate: undefined, endDate: undefined },
+    status: undefined,
     branchId,
   });
 
   const { data: orders, isLoading } = useQuery(
-    ['ORDER_LIST', formFilter.page, formFilter.limit, formFilter.keyword],
-    () => getOrder(formFilter)
+    ['ORDER_LIST', JSON.stringify(formFilter), branchId],
+    () => getOrder({ ...formFilter, branchId })
   );
 
   const [expandedRowKeys, setExpandedRowKeys] = useState<
@@ -141,14 +142,7 @@ export function BillTransaction() {
         </CustomButton>
       </div>
 
-      <Search
-        onChange={debounce((value) => {
-          setFormFilter((preValue) => ({
-            ...preValue,
-            keyword: value,
-          }));
-        }, 300)}
-      />
+      <Search setFormFilter={setFormFilter} formFilter={formFilter} />
 
       <CustomTable
         rowSelection={{

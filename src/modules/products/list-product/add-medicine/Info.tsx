@@ -26,7 +26,6 @@ import Label from '../../../../components/CustomLabel';
 import { AddDosageModal } from '../components/AddDosageModal';
 import { AddGroupProductModal } from '../components/AddGroupProduct';
 import { AddPositionModal } from '../components/AddPositionModal';
-import { log } from 'console';
 
 export enum EExpireDateType {
   STRING = 1,
@@ -56,7 +55,7 @@ export const defaultUnit = (listUnit) => {
   return unitObject;
 };
 
-const Info = ({ useForm, setSelectedMedicineCategory, selectedMedicineCategory, groupProductName, dosageName, positionName, drugCode }: any) => {
+const Info = ({ useForm, setSelectedMedicineCategory, selectedMedicineCategory, groupProductName, dosageName, positionName, drugCode, id }: any) => {
   const { getValues, setValue, errors } = useForm;
 
   const [isOpenAddGroupProduct, setIsOpenAddGroupProduct] =
@@ -132,6 +131,13 @@ const Info = ({ useForm, setSelectedMedicineCategory, selectedMedicineCategory, 
       setSelectedMedicineCategory(null);
     }
   }, [getValues('name')])
+
+  // useEffect(() => {
+  //   if (getValues('price')) {
+  //     setMainPrice(getValues('price'));
+  //   }
+  // }, [getValues('price')])
+
 
   return (
     <div className="mt-5">
@@ -470,9 +476,9 @@ const Info = ({ useForm, setSelectedMedicineCategory, selectedMedicineCategory, 
                 wrapClassName='flex-1'
                 className="mt-0 h-11 flex-1"
                 value={
-                  listUnit[unitKey].price !== undefined
+                  id ? Number(getValues("price") || 0) * Number(listUnit[unitKey].exchangeValue || 0) : listUnit[unitKey].price !== undefined
                     ? listUnit[unitKey].price
-                    : Number(getValues('price') || 0) *
+                    : Number(getValues("price") || 0) *
                     Number(listUnit[unitKey].exchangeValue || 0)
                 }
                 type="number"

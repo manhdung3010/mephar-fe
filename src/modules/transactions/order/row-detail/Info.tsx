@@ -58,7 +58,7 @@ export function Info({ record }: { record: IOrder }) {
           </div>
           <div className="mb-4 grid grid-cols-3 gap-5">
             <div className="text-gray-main ">Ghi chú:</div>
-            <div className="col-span-2 text-black-main">---</div>
+            <div className="col-span-2 text-black-main">{record?.description}</div>
           </div>
           <div className="mb-4 grid grid-cols-3 gap-5">
             <div className="text-gray-main ">Lý do huỷ:</div>
@@ -66,7 +66,7 @@ export function Info({ record }: { record: IOrder }) {
           </div>
         </div>
 
-        <div>
+        {/* <div>
           <div className="mb-4 font-semibold text-black-main">
             Thông tin vận chuyển
           </div>
@@ -93,7 +93,7 @@ export function Info({ record }: { record: IOrder }) {
           >
             Lịch sử đơn hàng
           </button>
-        </div>
+        </div> */}
       </div>
 
       <div className="mb-4 grid grid-cols-2 border-b border-[#E8EAEB]">
@@ -126,18 +126,10 @@ export function Info({ record }: { record: IOrder }) {
             </div>
           </div>
           <div className="mb-4 grid grid-cols-3 gap-5">
-            <div className="text-gray-main ">Phí vận chuyển:</div>
-            <div className="col-span-2 text-black-main">---</div>
-          </div>
-          <div className="mb-4 grid grid-cols-3 gap-5">
             <div className="text-gray-main ">Tổng tiền thanh toán:</div>
             <div className="col-span-2 text-black-main">
               {formatMoney(record.cashOfCustomer)}
             </div>
-          </div>
-          <div className="mb-4 grid grid-cols-3 gap-5">
-            <div className="text-gray-main ">Doanh thu:</div>
-            <div className="col-span-2 text-[#00B63E]">---</div>
           </div>
         </div>
       </div>
@@ -183,7 +175,7 @@ export function Info({ record }: { record: IOrder }) {
       </div>
 
       <div className="flex justify-end gap-4">
-        <CustomButton
+        {/* <CustomButton
           type="primary"
           outline={true}
           onClick={() => {
@@ -216,7 +208,7 @@ export function Info({ record }: { record: IOrder }) {
           prefixIcon={<Image src={DolarIcon} alt="" />}
         >
           Đã thanh toán
-        </CustomButton>
+        </CustomButton> */}
 
         <CustomButton
           outline={true}

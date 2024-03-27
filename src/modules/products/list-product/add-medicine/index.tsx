@@ -40,6 +40,7 @@ const AddMedicine = ({
 }) => {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const { id } = router.query;
   const branchId = useRecoilValue(branchState);
 
   const {
@@ -247,6 +248,7 @@ const AddMedicine = ({
                 dosageName={productDetail?.data?.productDosage?.name}
                 positionName={productDetail?.data?.productPosition?.name}
                 drugCode={productDetail?.data?.drugCode}
+                id={id as string}
               />,
               <Detail
                 key="1"

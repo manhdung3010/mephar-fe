@@ -7,7 +7,7 @@ import { useRecoilValue } from 'recoil';
 import { getProduct } from '@/api/product.service';
 import CustomPagination from '@/components/CustomPagination';
 import { EProductType, EProductTypeLabel, getEnumKeyByValue } from '@/enums';
-import { formatMoney } from '@/helpers';
+import { formatMoney, formatNumber } from '@/helpers';
 import { branchState } from '@/recoil/state';
 
 import CustomTable from '../../../components/CustomTable';
@@ -124,6 +124,12 @@ const ProductList = () => {
       render: (data) => data?.name,
     },
     {
+      title: 'Tồn kho',
+      dataIndex: 'inventory',
+      key: 'inventory',
+      render: (data) => formatNumber(data),
+    },
+    {
       title: 'Loại hàng',
       dataIndex: 'type',
       key: 'type',
@@ -157,7 +163,7 @@ const ProductList = () => {
 
   return (
     <div>
-      <Header />
+      <Header data={selectedList} />
       <Search
         onChange={debounce((value) => {
           setFormFilter((preValue) => ({
