@@ -1,90 +1,26 @@
-import { useQuery } from '@tanstack/react-query';
-import { Select } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
-import cx from 'classnames';
-import Image from 'next/image';
-import { useState } from 'react';
-import { useRecoilValue } from 'recoil';
+import { useQuery } from "@tanstack/react-query";
+import { Select } from "antd";
+import type { ColumnsType } from "antd/es/table";
+import cx from "classnames";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { useRecoilValue } from "recoil";
+import { debounce } from "lodash";
 
-import { getOrder } from '@/api/order.service';
-import ArrowDownIcon from '@/assets/arrowDownGray.svg';
-import ExportIcon from '@/assets/exportFileIcon.svg';
-import ImportIcon from '@/assets/importFileIcon.svg';
-import PlusIcon from '@/assets/plusWhiteIcon.svg';
-import { CustomButton } from '@/components/CustomButton';
-import CustomPagination from '@/components/CustomPagination';
-import CustomTable from '@/components/CustomTable';
-import type { EDiscountType, EGender } from '@/enums';
-import { EOrderStatus, EOrderStatusLabel } from '@/enums';
-import { formatMoney } from '@/helpers';
-import { branchState } from '@/recoil/state';
+import { getOrder } from "@/api/order.service";
+import ArrowDownIcon from "@/assets/arrowDownGray.svg";
+import ExportIcon from "@/assets/exportFileIcon.svg";
+import ImportIcon from "@/assets/importFileIcon.svg";
+import PlusIcon from "@/assets/plusWhiteIcon.svg";
+import { CustomButton } from "@/components/CustomButton";
+import CustomPagination from "@/components/CustomPagination";
+import CustomTable from "@/components/CustomTable";
+import { EOrderStatus, EOrderStatusLabel } from "@/enums";
+import { formatMoney } from "@/helpers";
+import { branchState } from "@/recoil/state";
 
-import OrderDetail from './row-detail';
-import Search from './Search';
-
-export interface IOrder {
-  key: number;
-  number: string;
-  code: string;
-  quantity: number;
-  cashOfCustomer: number;
-  earnMoney: number;
-  customer?: { fullName: string };
-  delivery: string;
-  status: EOrderStatus;
-  createdAt: string;
-  note: string;
-  products: {
-    productId: number;
-    price: number;
-    quantity: number;
-    name: string;
-    discount: number;
-    product: {
-      code: string;
-      shortName: string;
-      name: string;
-      image?: { path: string };
-    };
-    productUnit: {
-      unitName: string;
-      price: number;
-    };
-  }[];
-  discount: number;
-  discountType?: EDiscountType;
-  branch?: {
-    name: string;
-  };
-  user?: {
-    fullName: string;
-  };
-  prescription?: {
-    code: string;
-    name: string;
-    gender: EGender;
-    age: string;
-    weight: string;
-    identificationCard: string;
-    healthInsuranceCard: string;
-    address: string;
-    supervisor: string;
-    phone: string;
-    diagnostic: string;
-    createdBy: 50;
-    doctor: {
-      name: string;
-      phone: string;
-      code: string;
-      email: string;
-      gender: EGender;
-    };
-    healthFacility: {
-      name: string;
-    };
-  };
-  description: string;
-}
+import OrderDetail from "./row-detail";
+import { IOrder } from "./type";
 
 export function OrderTransaction() {
   const branchId = useRecoilValue(branchState);
@@ -93,27 +29,67 @@ export function OrderTransaction() {
     Record<string, boolean>
   >({});
 
+  const [filteredData, setFilteredData] = useState<IOrder[]>([]);
+
   const [formFilter, setFormFilter] = useState({
     page: 1,
     limit: 20,
-    keyword: '',
+    keyword: "",
   });
 
   const { data: orders, isLoading } = useQuery(
-    ['ORDER_LIST', formFilter.keyword, branchId],
+    ["ORDER_LIST", formFilter.keyword, branchId],
     () => getOrder({ ...formFilter, branchId })
   );
 
+  const filterData = (keyword: string) => {
+    if (!keyword) {
+      setFilteredData([]);
+      return;
+    }
+    const searchKeyword = keyword.toLowerCase().trim();
+
+    const filtered = orders?.data?.items?.filter((item: IOrder) => {
+      const productCode = item.code.toLowerCase();
+      const productUserFullName = item.customer.fullName.toLowerCase();
+      const productName = item.products
+        ?.map((product) => product.product.name.toLowerCase())
+        .join(", ");
+
+      return (
+        productName.includes(searchKeyword) ||
+        productCode.includes(searchKeyword) ||
+        productUserFullName.includes(searchKeyword)
+      );
+    });
+
+    setFilteredData(filtered || []);
+  };
+
+  const handleSearch = debounce((value: string) => {
+    setFormFilter((prevValue) => ({
+      ...prevValue,
+      keyword: value,
+    }));
+    filterData(value);
+  }, 300);
+
+  useEffect(() => {
+    if (!formFilter.keyword.trim()) {
+      setFilteredData([]);
+    }
+  }, [formFilter.keyword]);
+
   const columns: ColumnsType<IOrder> = [
     {
-      title: 'STT',
-      dataIndex: 'key',
-      key: 'key',
+      title: "STT",
+      dataIndex: "key",
+      key: "key",
     },
     {
-      title: 'Mã đơn hàng',
-      dataIndex: 'code',
-      key: 'code',
+      title: "Mã đơn hàng",
+      dataIndex: "code",
+      key: "code",
       render: (value, _, index) => (
         <span
           className="cursor-pointer text-[#0070F4]"
@@ -133,50 +109,50 @@ export function OrderTransaction() {
       ),
     },
     {
-      title: 'Tổng số SP',
-      dataIndex: 'totalProducts',
-      key: 'totalProducts',
+      title: "Tổng số SP",
+      dataIndex: "totalProducts",
+      key: "totalProducts",
     },
     {
-      title: 'Tổng tiền thanh toán',
-      dataIndex: 'cashOfCustomer',
-      key: 'cashOfCustomer',
+      title: "Tổng tiền thanh toán",
+      dataIndex: "cashOfCustomer",
+      key: "cashOfCustomer",
       render: (value) => formatMoney(value),
     },
     {
-      title: 'Doanh thu',
-      dataIndex: 'earnMoney',
-      key: 'earnMoney',
+      title: "Doanh thu",
+      dataIndex: "earnMoney",
+      key: "earnMoney",
     },
     {
-      title: 'Người mua',
-      dataIndex: 'customer',
-      key: 'customer',
+      title: "Người mua",
+      dataIndex: "customer",
+      key: "customer",
       render: (data) => data?.fullName,
     },
     {
-      title: 'ĐVVC',
-      dataIndex: 'delivery',
-      key: 'delivery',
+      title: "ĐVVC",
+      dataIndex: "delivery",
+      key: "delivery",
     },
     {
-      title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
       render: (_, { status }) => (
         <div
           className={cx(
             {
-              'text-[#FF8800] border border-[#FF8800] bg-[#fff]':
+              "text-[#FF8800] border border-[#FF8800] bg-[#fff]":
                 status === EOrderStatus.PENDING,
-              'text-[#00B63E] border border-[#00B63E] bg-[#DEFCEC]':
+              "text-[#00B63E] border border-[#00B63E] bg-[#DEFCEC]":
                 status === EOrderStatus.SUCCEED,
-              'text-[#0070F4] border border-[#0070F4] bg-[#E4F0FE]':
+              "text-[#0070F4] border border-[#0070F4] bg-[#E4F0FE]":
                 status === EOrderStatus.DELIVERING,
-              'text-[#EA2020] border border-[#EA2020] bg-[#FFE7E9]':
+              "text-[#EA2020] border border-[#EA2020] bg-[#FFE7E9]":
                 status === EOrderStatus.CANCELLED,
             },
-            'px-2 py-1 rounded-2xl w-max'
+            "px-2 py-1 rounded-2xl w-max"
           )}
         >
           {EOrderStatusLabel[status]}
@@ -184,15 +160,15 @@ export function OrderTransaction() {
       ),
     },
     {
-      title: 'Thời gian',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
+      title: "Thời gian",
+      dataIndex: "createdAt",
+      key: "createdAt",
       render: (value) => <span>Tạo: {value}</span>,
     },
     {
-      title: 'Lý do hủy',
-      dataIndex: 'note',
-      key: 'note',
+      title: "Lý do hủy",
+      dataIndex: "note",
+      key: "note",
     },
   ];
   return (
@@ -220,9 +196,9 @@ export function OrderTransaction() {
           </span>
           <Select
             bordered={false}
-            defaultValue={'1'}
+            defaultValue={"1"}
             className="min-w-[150px] text-red-main"
-            options={[{ label: '90 ngày gần nhất', value: '1' }]}
+            options={[{ label: "90 ngày gần nhất", value: "1" }]}
             suffixIcon={<Image src={ArrowDownIcon} />}
           />
         </div>
@@ -300,13 +276,22 @@ export function OrderTransaction() {
         </div>
       </div>
 
-      <Search />
+      <div className="p-4 bg-white">
+        <input
+          className="w-full px-2 py-1 outline-none border rounded"
+          placeholder="Tìm kiếm theo mã đơn hàng, người mua"
+          onChange={(e) => handleSearch(e.target.value)}
+        />
+      </div>
 
       <CustomTable
         rowSelection={{
-          type: 'checkbox',
+          type: "checkbox",
         }}
-        dataSource={orders?.data?.items?.map((item, index) => ({
+        dataSource={(filteredData.length > 0
+          ? filteredData
+          : orders?.data?.items
+        )?.map((item, index) => ({
           ...item,
           key: index + 1,
         }))}
@@ -314,15 +299,19 @@ export function OrderTransaction() {
         loading={isLoading}
         onRow={(record, rowIndex) => {
           return {
-            onClick: event => {
+            onClick: (event) => {
               // Toggle expandedRowKeys state here
               if (expandedRowKeys[record.key - 1]) {
-                const { [record.key - 1]: value, ...remainingKeys } = expandedRowKeys;
+                const { [record.key - 1]: value, ...remainingKeys } =
+                  expandedRowKeys;
                 setExpandedRowKeys(remainingKeys);
               } else {
-                setExpandedRowKeys({ ...expandedRowKeys, [record.key - 1]: true });
+                setExpandedRowKeys({
+                  ...expandedRowKeys,
+                  [record.key - 1]: true,
+                });
               }
-            }
+            },
           };
         }}
         expandable={{

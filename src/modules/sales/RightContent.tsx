@@ -478,6 +478,12 @@ export function RightContent({ useForm }: { useForm: any }) {
       <CreateCustomerModal
         isOpen={isOpenAddCustomerModal}
         onCancel={() => setIsOpenAddCustomerModal(false)}
+       onSave={({ customerId, CustomerName }) => {
+          setValue("customerId", customerId, {
+            shouldValidate: true,
+          });
+          setSearchCustomerText(CustomerName);
+        }}
       />
 
       <CreateDiscountModal

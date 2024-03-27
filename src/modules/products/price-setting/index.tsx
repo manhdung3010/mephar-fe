@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { ColumnsType } from "antd/es/table";
 import { debounce } from "lodash";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { getPriceSetting } from "@/api/price-setting.service";
 import EditIcon from "@/assets/editIcon.svg";
@@ -19,6 +19,7 @@ interface IRecord {
   id: number;
   exchangeValue: number;
   price: number;
+  code: number;
   product: {
     id: number;
     code: string;
@@ -42,7 +43,7 @@ export function PriceSetting() {
   const [selectedBatchId, setSelectedBatchId] = useState<number>();
   const [filteredData, setFilteredData] = useState<IRecord[]>([]);
 
-  const { data: priceSettings } = useQuery(
+  const { data: priceSettings , isLoading} = useQuery(
     [
       "LIST_PRICE_SETTING",
       formFilter.page,
@@ -57,11 +58,11 @@ export function PriceSetting() {
       setFilteredData([]);
       return;
     }
+    const searchKeyword = keyword.toLowerCase().trim();
 
     const filtered = priceSettings?.data?.items?.filter((item: IRecord) => {
       const productName = item.product.name.toLowerCase();
       const productCode = item.product.code.toLowerCase();
-      const searchKeyword = keyword.toLowerCase().trim();
 
       return (
         productName.includes(searchKeyword) ||
@@ -78,9 +79,13 @@ export function PriceSetting() {
       keyword: value,
     }));
     filterData(value);
-
-    console.log("value: ", value);
   }, 300);
+
+ useEffect(() => {
+    if (!formFilter.keyword.trim()) {
+      setFilteredData([]); 
+    }
+  }, [formFilter.keyword]);
 
   const columns: ColumnsType<IRecord> = [
     {
@@ -90,9 +95,9 @@ export function PriceSetting() {
     },
     {
       title: "Mã nhập hàng",
-      dataIndex: "product",
-      key: "product",
-      render: (product) => product.code,
+      dataIndex: "code",
+      key: "code",
+     
     },
     {
       title: "Tên hàng",
@@ -141,12 +146,12 @@ export function PriceSetting() {
       render: (value, { id }) => (
         <CustomInput
           bordered={false}
-          suffixIcon={<Image src={EditIcon} />}
+          suffixIcon={<Image src={EditIcon} className="cursor-pointer" onClick={() => setSelectedBatchId(id)}/>}
           className="w-[120px]"
           onChange={() => {}}
           type="number"
           defaultValue={value}
-          onClick={() => setSelectedBatchId(id)}
+         
         />
       ),
     },
@@ -156,7 +161,7 @@ export function PriceSetting() {
     <div className="my-6 bg-white">
       <div className="p-4">
         <input
-          className="w-full px-2 py-2 outline-none"
+          className="w-full px-2 py-1 outline-none border rounded"
           placeholder="Tìm kiếm theo tên, mã"
           onChange={(e) => handleSearch(e.target.value)}
         />
@@ -171,6 +176,7 @@ export function PriceSetting() {
           key: index + 1,
         }))}
         columns={columns}
+          loading={isLoading}
       />
 
       <CustomPagination

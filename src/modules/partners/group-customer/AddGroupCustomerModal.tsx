@@ -1,20 +1,20 @@
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { message } from 'antd';
-import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { message } from "antd";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
 
 import {
   createGroupCustomer,
   getGroupCustomerDetail,
   updateGroupCustomer,
-} from '@/api/group-customer';
-import { CustomInput, CustomTextarea } from '@/components/CustomInput';
-import Label from '@/components/CustomLabel';
-import { CustomModal } from '@/components/CustomModal';
-import InputError from '@/components/InputError';
+} from "@/api/group-customer";
+import { CustomInput, CustomTextarea } from "@/components/CustomInput";
+import Label from "@/components/CustomLabel";
+import { CustomModal } from "@/components/CustomModal";
+import InputError from "@/components/InputError";
 
-import { schema } from './schema';
+import { schema } from "./schema";
 
 export function AddGroupCustomerModal({
   groupCustomerId,
@@ -30,7 +30,7 @@ export function AddGroupCustomerModal({
   const queryClient = useQueryClient();
 
   const { data: groupCustomerDetail } = useQuery(
-    ['GROUP_CUSTOMER_DETAIL', groupCustomerId],
+    ["GROUP_CUSTOMER_DETAIL", groupCustomerId],
     () => getGroupCustomerDetail(Number(groupCustomerId)),
     { enabled: !!groupCustomerId }
   );
@@ -42,7 +42,7 @@ export function AddGroupCustomerModal({
     formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
-    mode: 'onChange',
+    mode: "onChange",
   });
 
   const {
@@ -55,12 +55,12 @@ export function AddGroupCustomerModal({
         : createGroupCustomer(getValues()),
     {
       onSuccess: async (res) => {
-        await queryClient.invalidateQueries(['GROUP_CUSTOMER']);
+        await queryClient.invalidateQueries(["GROUP_CUSTOMER"]);
 
         if (onSave) {
           onSave({
             groupCustomerId: res.data.id,
-            groupCustomerName: getValues('name'),
+            groupCustomerName: getValues("name"),
           });
         }
 
@@ -98,8 +98,8 @@ export function AddGroupCustomerModal({
       }}
       title={
         groupCustomerDetail
-          ? 'Cập nhật nhóm khách hàng'
-          : 'Thêm mới nhóm khách hàng'
+          ? "Cập nhật nhóm khách hàng"
+          : "Thêm mới nhóm khách hàng"
       }
       width={650}
       onSubmit={handleSubmit(onSubmit)}
@@ -113,8 +113,8 @@ export function AddGroupCustomerModal({
           <CustomInput
             placeholder="Nhập tên nhóm"
             className="h-11"
-            onChange={(e) => setValue('name', e, { shouldValidate: true })}
-            value={getValues('name')}
+            onChange={(e) => setValue("name", e, { shouldValidate: true })}
+            value={getValues("name")}
           />
           <InputError error={errors.name?.message} />
         </div>
@@ -124,9 +124,9 @@ export function AddGroupCustomerModal({
           <CustomInput
             placeholder="0.0"
             className="h-11"
-            onChange={(e) => setValue('discount', +e, { shouldValidate: true })}
+            onChange={(e) => setValue("discount", +e, { shouldValidate: true })}
             type="number"
-            value={getValues('discount')}
+            value={getValues("discount")}
           />
         </div>
       </div>
@@ -137,9 +137,9 @@ export function AddGroupCustomerModal({
           rows={10}
           placeholder="Nhập Mô tả"
           onChange={(e) =>
-            setValue('description', e.target.value, { shouldValidate: true })
+            setValue("description", e.target.value, { shouldValidate: true })
           }
-          value={getValues('description')}
+          value={getValues("description")}
         />
       </div>
     </CustomModal>

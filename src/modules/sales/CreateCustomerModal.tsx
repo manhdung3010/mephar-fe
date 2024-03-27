@@ -36,9 +36,11 @@ import { getBranch } from '@/api/branch.service';
 export function CreateCustomerModal({
   isOpen,
   onCancel,
+  onSave
 }: {
   isOpen: boolean;
-  onCancel: () => void;
+    onCancel: () => void;
+  onSave: ({customerId,CustomerName}) => void;
 }) {
   const queryClient = useQueryClient();
 
@@ -77,8 +79,15 @@ export function CreateCustomerModal({
 
   const { mutate: mutateCreateCustomer, isLoading: isLoadingCreateCustomer } =
     useMutation(() => createCustomer(getValues()), {
-      onSuccess: async () => {
+      onSuccess: async (res) => {
         await queryClient.invalidateQueries(['CUSTOMER_LIST']);
+        if (onSave) {
+          onSave({
+            customerId: res.data.id,
+            CustomerName: getValues('fullName'),
+          });
+          
+        }
         onCancel();
       },
       onError: (err: any) => {
@@ -422,6 +431,12 @@ export function CreateCustomerModal({
         isOpen={groupCustomer}
         onCancel={() => {
           setGroupCustomer(false);
+        }}
+         onSave={({ groupCustomerId, groupCustomerName }) => {
+          setValue("groupCustomerId", groupCustomerId, {
+            shouldValidate: true,
+          });
+          setGroupCustomerKeyword(groupCustomerName);
         }}
       />
     </CustomModal>

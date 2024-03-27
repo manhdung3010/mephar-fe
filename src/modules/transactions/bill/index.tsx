@@ -1,25 +1,26 @@
-import { useQuery } from '@tanstack/react-query';
-import type { ColumnsType } from 'antd/es/table';
-import cx from 'classnames';
-import { debounce } from 'lodash';
-import Image from 'next/image';
-import { useRouter } from 'next/router';
-import { useState } from 'react';
-import { useRecoilValue } from 'recoil';
+import { useQuery } from "@tanstack/react-query";
+import type { ColumnsType } from "antd/es/table";
+import cx from "classnames";
+import { debounce } from "lodash";
+import Image from "next/image";
+import { useRouter } from "next/router";
+import { useState } from "react";
+import { useRecoilValue } from "recoil";
+import PlusIconWhite from '@/assets/PlusIconWhite.svg';
 
-import { getOrder } from '@/api/order.service';
-import ExportIcon from '@/assets/exportIcon.svg';
-import ImportIcon from '@/assets/importIcon.svg';
-import { CustomButton } from '@/components/CustomButton';
-import CustomPagination from '@/components/CustomPagination';
-import CustomTable from '@/components/CustomTable';
-import { EOrderStatus, EOrderStatusLabel } from '@/enums';
-import { formatMoney, formatNumber } from '@/helpers';
-import { branchState } from '@/recoil/state';
+import { getOrder } from "@/api/order.service";
+import ExportIcon from "@/assets/exportIcon.svg";
+import { CustomButton } from "@/components/CustomButton";
+import CustomPagination from "@/components/CustomPagination";
+import CustomTable from "@/components/CustomTable";
+import { EOrderStatus, EOrderStatusLabel } from "@/enums";
+import { formatMoney, formatNumber } from "@/helpers";
+import { branchState } from "@/recoil/state";
 
-import type { IOrder } from '../order';
-import BillDetail from './row-detail';
-import Search from './Search';
+
+import BillDetail from "./row-detail";
+import Search from "./Search";
+import { IOrder } from "../order/type";
 
 export function BillTransaction() {
   const branchId = useRecoilValue(branchState);
@@ -29,13 +30,13 @@ export function BillTransaction() {
   const [formFilter, setFormFilter] = useState({
     page: 1,
     limit: 20,
-    keyword: '',
+    keyword: "",
     status: EOrderStatus.SUCCEED,
     branchId,
   });
 
   const { data: orders, isLoading } = useQuery(
-    ['ORDER_LIST', formFilter.page, formFilter.limit, formFilter.keyword],
+    ["ORDER_LIST", formFilter.page, formFilter.limit, formFilter.keyword],
     () => getOrder(formFilter)
   );
 
@@ -45,14 +46,14 @@ export function BillTransaction() {
 
   const columns: ColumnsType<IOrder> = [
     {
-      title: 'STT',
-      dataIndex: 'key',
-      key: 'key',
+      title: "STT",
+      dataIndex: "key",
+      key: "key",
     },
     {
-      title: 'Mã hóa đơn',
-      dataIndex: 'code',
-      key: 'code',
+      title: "Mã hóa đơn",
+      dataIndex: "code",
+      key: "code",
       render: (value, _, index) => (
         <span
           className="cursor-pointer text-[#0070F4]"
@@ -72,51 +73,51 @@ export function BillTransaction() {
       ),
     },
     {
-      title: 'Thời gian',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
+      title: "Thời gian",
+      dataIndex: "createdAt",
+      key: "createdAt",
     },
     {
-      title: 'Mã trả hàng',
-      dataIndex: 'returnId',
-      key: 'returnId',
+      title: "Mã trả hàng",
+      dataIndex: "returnId",
+      key: "returnId",
     },
     {
-      title: 'Khách hàng',
-      dataIndex: 'customer',
-      key: 'customer',
+      title: "Khách hàng",
+      dataIndex: "customer",
+      key: "customer",
       render: (data) => data?.fullName,
     },
     {
-      title: 'Tổng tiền hàng',
-      dataIndex: 'totalPrice',
-      key: 'totalPrice',
+      title: "Tổng tiền hàng",
+      dataIndex: "totalPrice",
+      key: "totalPrice",
       render: (value) => formatMoney(value),
     },
     {
-      title: 'Giảm giá',
-      dataIndex: 'discount',
-      key: 'discount',
+      title: "Giảm giá",
+      dataIndex: "discount",
+      key: "discount",
       render: (_, { discount, discountType }) =>
         discount ? `${formatNumber(discount)}${discountType}` : 0,
     },
     {
-      title: 'Khách đã trả',
-      dataIndex: 'cashOfCustomer',
-      key: 'cashOfCustomer',
+      title: "Khách đã trả",
+      dataIndex: "cashOfCustomer",
+      key: "cashOfCustomer",
       render: (value) => formatMoney(value),
     },
     {
-      title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
       render: (_, { status }) => (
         <div
           className={cx(
             status === EOrderStatus.SUCCEED
-              ? 'text-[#00B63E] border border-[#00B63E] bg-[#DEFCEC]'
-              : 'text-[#6D6D6D] border border-[#6D6D6D] bg-[#F0F1F1]',
-            'px-2 py-1 rounded-2xl w-max'
+              ? "text-[#00B63E] border border-[#00B63E] bg-[#DEFCEC]"
+              : "text-[#6D6D6D] border border-[#6D6D6D] bg-[#F0F1F1]",
+            "px-2 py-1 rounded-2xl w-max"
           )}
         >
           {EOrderStatusLabel[status]}
@@ -129,11 +130,11 @@ export function BillTransaction() {
     <div>
       <div className="my-3 flex justify-end gap-4">
         <CustomButton
-          onClick={() => router.push('/products/import/coupon')}
+          onClick={() => router.push("/sales/")}
           type="success"
-          prefixIcon={<Image src={ImportIcon} />}
+          prefixIcon={<Image src={PlusIconWhite} />}
         >
-          Nhập hàng
+          Thêm hóa đơn
         </CustomButton>
 
         <CustomButton prefixIcon={<Image src={ExportIcon} />}>
@@ -152,7 +153,7 @@ export function BillTransaction() {
 
       <CustomTable
         rowSelection={{
-          type: 'checkbox',
+          type: "checkbox",
         }}
         dataSource={orders?.data?.items?.map((item, index) => ({
           ...item,
@@ -162,15 +163,19 @@ export function BillTransaction() {
         loading={isLoading}
         onRow={(record, rowIndex) => {
           return {
-            onClick: event => {
+            onClick: (event) => {
               // Toggle expandedRowKeys state here
               if (expandedRowKeys[record.key - 1]) {
-                const { [record.key - 1]: value, ...remainingKeys } = expandedRowKeys;
+                const { [record.key - 1]: value, ...remainingKeys } =
+                  expandedRowKeys;
                 setExpandedRowKeys(remainingKeys);
               } else {
-                setExpandedRowKeys({ ...expandedRowKeys, [record.key - 1]: true });
+                setExpandedRowKeys({
+                  ...expandedRowKeys,
+                  [record.key - 1]: true,
+                });
               }
-            }
+            },
           };
         }}
         expandable={{

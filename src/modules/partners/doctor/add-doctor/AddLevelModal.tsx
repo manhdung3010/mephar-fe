@@ -15,11 +15,13 @@ export function AddLevelModal({
   onCancel,
   setLevelKeyword,
   setDoctorValue,
+  onSave
 }: {
   isOpen: boolean;
   onCancel: () => void;
   setLevelKeyword: (value) => void;
-  setDoctorValue: any;
+    setDoctorValue: any;
+  onSave: ({levelId, levelName}) => void;
 }) {
   const queryClient = useQueryClient();
 
@@ -44,6 +46,12 @@ export function AddLevelModal({
         setLevelKeyword(getValues('name'));
         setDoctorValue('levelId', res.data.id);
         await queryClient.invalidateQueries(['LEVEL']);
+        if (onSave) {
+          onSave({
+            levelId: res.data.id,
+            levelName: getValues('name'),
+          });
+        }
         reset();
 
         onCancel();
