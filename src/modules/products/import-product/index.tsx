@@ -19,6 +19,7 @@ import { branchState } from "@/recoil/state";
 import type { IRecord } from "./interface";
 import ProductDetail from "./row-detail";
 import Search from "./Search";
+import useExportToExcel from "@/hooks/useExportExcel";
 
 export function ImportProduct() {
   const router = useRouter();
@@ -118,6 +119,30 @@ export function ImportProduct() {
     },
   ];
 
+  const columnMapping = {
+    code: "Mã hàng",
+    totalPrice: "Tổng giá",
+    discount: "Giảm giá",
+    status: "Trạng thái",
+    "user.fullName": "Người dùng",
+    "store.name": "Tên cửa hàng",
+    "store.phone": "Số điện thoại cửa hàng",
+    "store.address": "Địa chỉ cửa hàng",
+    "branch.name": "Tên chi nhánh",
+    "branch.phone": "Số điện thoại chi nhánh",
+    "branch.code": "Mã chi nhánh",
+    "supplier.name": "Tên nhà cung cấp",
+    "supplier.phone": "Số điện thoại nhà cung cấp",
+    "supplier.email": "Email nhà cung cấp",
+    "supplier.code": "Mã nhà cung cấp",
+  };
+
+  const { exported, exportToExcel } = useExportToExcel(
+    importProducts?.data.items,
+    columnMapping,
+    `DANHSACHNHAPSANPHAM_${Date.now()}.xlsx`
+  );
+
   return (
     <div>
       <div className="my-3 flex justify-end gap-4">
@@ -131,7 +156,10 @@ export function ImportProduct() {
           Nhập hàng
         </CustomButton>
 
-        <CustomButton prefixIcon={<Image src={ExportIcon} />}>
+        <CustomButton
+          prefixIcon={<Image src={ExportIcon} />}
+          onClick={exportToExcel}
+        >
           Xuất file
         </CustomButton>
       </div>
