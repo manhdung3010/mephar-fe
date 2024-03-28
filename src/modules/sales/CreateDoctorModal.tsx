@@ -28,6 +28,7 @@ import { AddLevelModal } from '../partners/doctor/add-doctor/AddLevelModal';
 import { AddMajorModal } from '../partners/doctor/add-doctor/AddMajorModal';
 import { AddWorkPlaceModal } from '../partners/doctor/add-doctor/AddWorkPlaceModal';
 import { schema } from '../partners/doctor/add-doctor/schema';
+import Label from '@/components/CustomLabel';
 
 export function CreateDoctorModal({
   isOpen,
@@ -35,8 +36,8 @@ export function CreateDoctorModal({
   onSave
 }: {
   isOpen: boolean;
-    onCancel: () => void;
-  onSave: ({doctorId, doctorName}) => void;
+  onCancel: () => void;
+  onSave: ({ doctorId, doctorName }) => void;
 }) {
   const queryClient = useQueryClient();
 
@@ -258,7 +259,7 @@ export function CreateDoctorModal({
                   value: item.id,
                   label: item.name,
                 }))}
-                 value={getValues('workPlaceId')}
+                value={getValues('workPlaceId')}
                 showSearch={true}
                 onSearch={debounce((value) => {
                   setWorkPlaceKeyword(value);
@@ -292,7 +293,7 @@ export function CreateDoctorModal({
           </div>
         </div>
         <div className="w-[calc(calc(100%-98px)/2)] max-w-[362px]">
-          <div className=" mb-5 flex items-end">
+          <div className=" mb-5 flex items-center">
             <label className="mr-2 w-[120px] min-w-[120px] font-medium text-[#28293D]">
               Trạng thái
             </label>
@@ -310,30 +311,34 @@ export function CreateDoctorModal({
             />
           </div>
 
-          <div className=" mb-5 flex items-end">
-            <label className="mr-2 w-[120px] min-w-[120px] font-medium text-[#28293D]">
-              Số điện thoại
-            </label>
-            <CustomInput
-              bordered={false}
-              wrapClassName="grow"
-              className="border-[#E4E4EB]"
-              onChange={(e) => setValue('phone', e, { shouldValidate: true })}
-            />
+          <div className=" mb-5 flex items-end flex-col">
+            <div className='flex items-end w-full'>
+              <Label className="mr-2 w-[120px] min-w-[120px] font-medium text-[#28293D]" label="Số điện thoại" hasInfoIcon={false} required />
+              <CustomInput
+                bordered={false}
+                wrapClassName="grow"
+                className="border-[#E4E4EB]"
+                onChange={(e) => setValue('phone', e, { shouldValidate: true })}
+              />
+            </div>
+            <div>
+              <InputError error={errors.phone?.message} />
+            </div>
           </div>
-
-          <div className=" mb-5 flex items-end">
-            <label className="mr-2 w-[120px] min-w-[120px] font-medium text-[#28293D]">
-              Email
-            </label>
-            <CustomInput
-              bordered={false}
-              wrapClassName="grow"
-              className="border-[#E4E4EB]"
-              onChange={(e) => setValue('email', e, { shouldValidate: true })}
-            />
+          <div className=" mb-5 flex items-end flex-col">
+            <div className='flex items-end w-full'>
+              <Label className="mr-2 w-[120px] min-w-[120px] font-medium text-[#28293D]" label="Email" hasInfoIcon={false} />
+              <CustomInput
+                bordered={false}
+                wrapClassName="grow"
+                className="border-[#E4E4EB]"
+                onChange={(e) => setValue('email', e, { shouldValidate: true })}
+              />
+            </div>
+            <div>
+              <InputError error={errors.email?.message} />
+            </div>
           </div>
-
           <div className=" mb-5 flex items-end">
             <label className="mr-2 w-[120px] min-w-[120px] font-medium text-[#28293D]">
               Địa chỉ

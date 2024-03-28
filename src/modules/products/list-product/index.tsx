@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import type { ColumnsType } from 'antd/es/table';
-import { debounce, set } from 'lodash';
+import { debounce } from 'lodash';
 import { useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 
@@ -12,11 +12,10 @@ import { branchState } from '@/recoil/state';
 
 import CustomTable from '../../../components/CustomTable';
 import Header from './Header';
-import ProductDetail from './row-detail';
-import Search from './Search';
-import type { IProduct } from './types';
-import { CustomUnitSelect } from '@/components/CustomUnitSelect';
 import ListUnit from './ListUnit';
+import Search from './Search';
+import ProductDetail from './row-detail';
+import type { IProduct } from './types';
 
 const ProductList = () => {
   const branchId = useRecoilValue(branchState);
@@ -25,34 +24,12 @@ const ProductList = () => {
     page: 1,
     limit: 20,
     keyword: '',
-    // name: '',
     type: null,
     status: null,
-    // productCategoryId: '',
-    // groupProductId: '',
-    // statusArray: [],
-    // unitId: '',
-    // manufactureId: '',
-    // notEqualManufactureId: '',
-    // listProductId: [],
-    // notEqualId: '',
-    // order: ['id', 'desc'],
-    // tag: '',
-    // newest: '',
-    // bestseller: '',
-    // az: '',
-    // za: '',
-    // price: '',
-    // include: 'productUnit,groupProduct,manufacture,productCategory',
-    // attributes: '',
-    // raw: false,
-    // branchId: branchId,
-    // storeId: '',
-    // isSale: false
   });
 
   const [valueChange, setValueChange] = useState<number | undefined>(undefined);
-  const [selectedList, setSelectedList] = useState<any>([]);
+  const [selectedList, setSelectedList] = useState<IProduct[]>([]);
 
   const { data: products, isLoading } = useQuery(
     [
@@ -72,7 +49,7 @@ const ProductList = () => {
   >({});
 
   useEffect(() => {
-    setSelectedList(products?.data?.items?.map((item) => ({ ...item, unitId: item?.productUnit?.find((unit) => unit.isBaseUnit)?.id }))?.sort(function (a, b) {
+    setSelectedList(products?.data?.items?.map((item) => ({ ...item, unitId: item?.productUnit?.find((unit) => unit.isBaseUnit)?.id, unitQuantity: item?.inventory / item?.productUnit?.find((unit) => unit.isBaseUnit)?.exchangeValue }))?.sort(function (a, b) {
       return b.id - a.id;
     }));
   }, [formFilter, products?.data?.items])
@@ -125,8 +102,8 @@ const ProductList = () => {
     },
     {
       title: 'Tồn kho',
-      dataIndex: 'inventory',
-      key: 'inventory',
+      dataIndex: 'unitQuantity',
+      key: 'unitQuantity',
       render: (data) => formatNumber(data),
     },
     {
@@ -156,7 +133,7 @@ const ProductList = () => {
     setValueChange(value);
     const filter = selectedList.filter((item) => item?.id !== record.id);
     const newRecord = record?.productUnit?.find((unit) => unit.id === value);
-    setSelectedList([...filter, { ...record, price: newRecord?.price, code: newRecord?.code, unitId: value }]?.sort(function (a, b) {
+    setSelectedList([...filter, { ...record, price: newRecord?.price, code: newRecord?.code, barCode: newRecord.barCode, unitId: value, unitQuantity: Number(record?.inventory) / newRecord?.exchangeValue }]?.sort(function (a, b) {
       return b.id - a.id;
     }));
   }
@@ -204,7 +181,7 @@ const ProductList = () => {
         expandable={{
           // eslint-disable-next-line @typescript-eslint/no-shadow
           expandedRowRender: (record: IProduct) => (
-            <ProductDetail record={record} onChangeUnit={(value) => handleChangeUnitValue(value, record)} />
+            <ProductDetail record={record} onChangeUnit={(value) => handleChangeUnitValue(value, record)} branchId={branchId} />
           ),
           expandIcon: () => <></>,
           expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key),

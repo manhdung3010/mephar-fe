@@ -15,11 +15,11 @@ const RowDetail = ({ record }: { record: ICustomer }) => {
 
   const menu = [
     'Thông tin',
-    'Địa chỉ nhận hàng',
+    // 'Địa chỉ nhận hàng',
     'Nợ cần thu từ khách',
     'Lịch sử  mua hàng',
-    'Lịch sử trả hàng',
-    'Lịch sử tích điểm',
+    // 'Lịch sử trả hàng',
+    // 'Lịch sử tích điểm',
     'Ghi chú',
   ];
 
@@ -48,12 +48,12 @@ const RowDetail = ({ record }: { record: ICustomer }) => {
         <div className="h-[1px] w-full bg-[#D64457]" />
       </div>
       {select === 0 && <Info record={record} />}
-      {select === 1 && <ReceiveAddress record={record} />}
-      {select === 2 && <Debt record={record} />}
-      {select === 3 && <BuyHistory record={record} />}
-      {select === 4 && <ReturnHistory record={record} />}
-      {select === 5 && <CollectPointHistory record={record} />}
-      {select === 6 && <Note record={record} />}
+      {/* {select === 1 && <ReceiveAddress record={record} />} */}
+      {select === 1 && <Debt record={record} />}
+      {select === 2 && <BuyHistory record={record} />}
+      {/* {select === 4 && <ReturnHistory record={record} />} */}
+      {/* {select === 5 && <CollectPointHistory record={record} />} */}
+      {select === 3 && <Note record={record} />}
     </div>
   );
 };

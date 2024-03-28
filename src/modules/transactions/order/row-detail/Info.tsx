@@ -61,10 +61,10 @@ export function Info({ record }: { record: IOrder }) {
             <div className="text-gray-main ">Ghi chú:</div>
             <div className="col-span-2 text-black-main">{record?.description}</div>
           </div>
-          <div className="mb-4 grid grid-cols-3 gap-5">
+          {/* <div className="mb-4 grid grid-cols-3 gap-5">
             <div className="text-gray-main ">Lý do huỷ:</div>
             <div className="col-span-2 text-black-main">---</div>
-          </div>
+          </div> */}
         </div>
 
         {/* <div>
@@ -98,7 +98,7 @@ export function Info({ record }: { record: IOrder }) {
       </div>
 
       <div className="mb-4 grid grid-cols-2 border-b border-[#E8EAEB]">
-        <div>
+        {/* <div>
           <div className="mb-4 font-semibold text-black-main">
             Thông tin NHẬN HÀNG
           </div>
@@ -114,7 +114,7 @@ export function Info({ record }: { record: IOrder }) {
             <div className="text-gray-main ">Địa chỉ:</div>
             <div className="col-span-2 text-black-main">-----</div>
           </div>
-        </div>
+        </div> */}
 
         <div>
           <div className="mb-4 font-semibold text-black-main">

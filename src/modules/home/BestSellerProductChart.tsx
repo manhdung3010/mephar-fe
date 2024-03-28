@@ -73,7 +73,7 @@ export const getDateRange = (dateRange) => {
   return undefined;
 };
 
-export function BestSellerProductChart() {
+export function BestSellerProductChart({ branchId }: { branchId: number }) {
   const [productFilter, setProductFilter] = useState({
     dateRange: FilterDateType.CURRENT_MONTH,
     viewType: ViewType.Revenue,
@@ -84,11 +84,13 @@ export function BestSellerProductChart() {
       'BEST_SELLER_PRODUCT_CHART',
       productFilter.viewType,
       productFilter.dateRange,
+      branchId,
     ],
     () =>
       getBestSellerProduct({
         type: productFilter.viewType,
         dateRange: getDateRange(productFilter.dateRange),
+        branchId,
       })
   );
 

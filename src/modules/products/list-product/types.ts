@@ -36,6 +36,7 @@ export interface IProduct {
     quantity: number;
     expiredDate: string;
   };
-  unitId?: number;
-  drugCode?: string;
+  unitId?: number; // Đơn vị tính
+  drugCode?: string; // Mã thuốc
+  unitQuantity?: number; // Tồn kho theo đơn vị
 }

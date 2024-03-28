@@ -13,6 +13,8 @@ import CustomTable from "@/components/CustomTable";
 import { formatMoney } from "@/helpers";
 
 import { EditPriceModal } from "./EditPriceModal";
+import { useRecoilValue } from "recoil";
+import { branchState } from "@/recoil/state";
 
 interface IRecord {
   key: number;
@@ -40,17 +42,21 @@ export function PriceSetting() {
     limit: 20,
     keyword: "",
   });
+
+  const branchId = useRecoilValue(branchState);
+
   const [selectedBatchId, setSelectedBatchId] = useState<number>();
   const [filteredData, setFilteredData] = useState<IRecord[]>([]);
 
-  const { data: priceSettings , isLoading} = useQuery(
+  const { data: priceSettings, isLoading } = useQuery(
     [
       "LIST_PRICE_SETTING",
       formFilter.page,
       formFilter.limit,
       formFilter.keyword,
+      branchId
     ],
-    () => getPriceSetting({ ...formFilter })
+    () => getPriceSetting({ ...formFilter, branchId })
   );
 
   const filterData = (keyword: string) => {
@@ -81,9 +87,9 @@ export function PriceSetting() {
     filterData(value);
   }, 300);
 
- useEffect(() => {
+  useEffect(() => {
     if (!formFilter.keyword.trim()) {
-      setFilteredData([]); 
+      setFilteredData([]);
     }
   }, [formFilter.keyword]);
 
@@ -94,10 +100,10 @@ export function PriceSetting() {
       key: "key",
     },
     {
-      title: "Mã nhập hàng",
+      title: "Mã hàng",
       dataIndex: "code",
       key: "code",
-     
+
     },
     {
       title: "Tên hàng",
@@ -125,20 +131,20 @@ export function PriceSetting() {
       key: "price",
       render: (value) => formatMoney(value),
     },
-    {
-      title: "Giá bán trên chợ",
-      dataIndex: "marketPrice",
-      key: "marketPrice",
-      render: (value) => (
-        <CustomInput
-          bordered={false}
-          suffixIcon={<Image src={EditIcon} />}
-          className="w-[120px]"
-          onChange={() => {}}
-          type="number"
-        />
-      ),
-    },
+    // {
+    //   title: "Giá bán trên chợ",
+    //   dataIndex: "marketPrice",
+    //   key: "marketPrice",
+    //   render: (value) => (
+    //     <CustomInput
+    //       bordered={false}
+    //       suffixIcon={<Image src={EditIcon} />}
+    //       className="w-[120px]"
+    //       onChange={() => { }}
+    //       type="number"
+    //     />
+    //   ),
+    // },
     {
       title: "Giá bán POS",
       dataIndex: "price",
@@ -146,12 +152,12 @@ export function PriceSetting() {
       render: (value, { id }) => (
         <CustomInput
           bordered={false}
-          suffixIcon={<Image src={EditIcon} className="cursor-pointer" onClick={() => setSelectedBatchId(id)}/>}
+          suffixIcon={<Image src={EditIcon} className="cursor-pointer" onClick={() => setSelectedBatchId(id)} />}
           className="w-[120px]"
-          onChange={() => {}}
+          onChange={() => { }}
           type="number"
           defaultValue={value}
-         
+
         />
       ),
     },
@@ -176,7 +182,7 @@ export function PriceSetting() {
           key: index + 1,
         }))}
         columns={columns}
-          loading={isLoading}
+        loading={isLoading}
       />
 
       <CustomPagination

@@ -1,4 +1,4 @@
-import axiosClient from './index';
+import axiosClient from "./index";
 
 export function getProduct(params: {
   page: number;
@@ -6,7 +6,7 @@ export function getProduct(params: {
   keyword?: string;
   branchId?: number;
 }) {
-  return axiosClient.get('product', { params });
+  return axiosClient.get("product", { params });
 }
 
 export function updateProduct(id: number, payload) {
@@ -34,7 +34,7 @@ export function getDosage(params: {
   limit: number;
   keyword?: string;
 }) {
-  return axiosClient.get('dosage', { params });
+  return axiosClient.get("dosage", { params });
 }
 
 export function updateDosage(id: number, payload) {
@@ -54,7 +54,7 @@ export function getProductCategory(params: {
   limit: number;
   keyword?: string;
 }) {
-  return axiosClient.get('product-category/list', { params });
+  return axiosClient.get("product-category/list", { params });
 }
 
 export function updateProductCategory(id: number, payload) {
@@ -74,7 +74,7 @@ export function getPosition(params: {
   limit: number;
   keyword?: string;
 }) {
-  return axiosClient.get('position', { params });
+  return axiosClient.get("position", { params });
 }
 
 export function updatePosition(id: number, payload) {
@@ -94,7 +94,7 @@ export function getManufacture(params: {
   limit: number;
   keyword?: string;
 }) {
-  return axiosClient.get('manufacture', { params });
+  return axiosClient.get("manufacture", { params });
 }
 
 export function updateManufacture(id: number, payload) {
@@ -114,7 +114,7 @@ export function getGroupProduct(params: {
   limit: number;
   keyword?: string;
 }) {
-  return axiosClient.get('group-product', { params });
+  return axiosClient.get("group-product", { params });
 }
 
 export function updateGroupProduct(id: number, payload) {
@@ -135,7 +135,7 @@ export function getInboundProducts(params: {
   keyword?: string;
   branchId?: number;
 }) {
-  return axiosClient.get('product/inbound/master', { params });
+  return axiosClient.get("product/inbound/master", { params });
 }
 
 export function getSaleProducts(params: {
@@ -144,7 +144,7 @@ export function getSaleProducts(params: {
   keyword?: string;
   branchId?: number;
 }) {
-  return axiosClient.get('product/sale/master', { params });
+  return axiosClient.get("product/sale/master", { params });
 }
 
 export function getSampleMedicines(params: {
@@ -155,7 +155,7 @@ export function getSampleMedicines(params: {
   isSale?: boolean;
   status?: number;
 }) {
-  return axiosClient.get('sample-prescription', { params });
+  return axiosClient.get("sample-prescription", { params });
 }
 
 export function getSampleMedicineDetail(id: number) {
@@ -176,4 +176,14 @@ export function deleteSampleMedicine(id: number) {
 
 export function updateSampleMedicineStatus(id: number, payload) {
   return axiosClient.patch(`sample-prescription/${id}/status`, payload);
+}
+
+// warehouse card
+export function getWareHouseCard(params: {
+  productUnitId: number;
+  page: number;
+  limit: number;
+  branchId?: number;
+}) {
+  return axiosClient.get("warehouse/card", { params });
 }

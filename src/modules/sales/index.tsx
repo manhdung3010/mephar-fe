@@ -268,8 +268,8 @@ const Index = () => {
                       >
                         <div
                           className={`flex cursor-pointer items-center ${isSearchSampleMedicine
-                              ? 'rounded border border-blue-500'
-                              : ''
+                            ? 'rounded border border-blue-500'
+                            : ''
                             }`}
                         >
                           <Image
@@ -304,7 +304,10 @@ const Index = () => {
 
                               <div>
                                 <div className="mb-2 flex gap-x-5">
-                                  <div>{item.product.name}</div>
+                                  <div>
+                                    <span>{item.product.code}</span> {" - "}
+                                    <span>{item.product.name}</span>
+                                  </div>
                                   <div className="rounded bg-red-main px-2 py-[2px] text-white">
                                     {item.productUnit.unitName}
                                   </div>

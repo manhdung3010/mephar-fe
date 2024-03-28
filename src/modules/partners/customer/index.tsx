@@ -107,21 +107,21 @@ export function Customer() {
       dataIndex: 'totalSell',
       key: 'totalSell',
     },
-    {
-      title: 'Điểm hiện tại',
-      dataIndex: 'point',
-      key: 'point',
-    },
-    {
-      title: 'Tổng điểm',
-      dataIndex: 'totalPoint',
-      key: 'totalPoint',
-    },
-    {
-      title: 'Tổng bán trừ trả hàng',
-      dataIndex: 'totalSellExceptReturn',
-      key: 'totalSellExceptReturn',
-    },
+    // {
+    //   title: 'Điểm hiện tại',
+    //   dataIndex: 'point',
+    //   key: 'point',
+    // },
+    // {
+    //   title: 'Tổng điểm',
+    //   dataIndex: 'totalPoint',
+    //   key: 'totalPoint',
+    // },
+    // {
+    //   title: 'Tổng bán trừ trả hàng',
+    //   dataIndex: 'totalSellExceptReturn',
+    //   key: 'totalSellExceptReturn',
+    // },
     {
       title: 'Trạng thái',
       dataIndex: 'status',

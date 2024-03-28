@@ -58,18 +58,19 @@ export const options = {
   },
 };
 
-export function RevenueChart() {
+export function RevenueChart({ branchId }: { branchId: number }) {
   const [revenueFilter, setRevenueFilter] = useState({
     dateRange: FilterDateType.CURRENT_MONTH,
     viewType: ViewType.Date,
   });
 
   const { data } = useQuery(
-    ['REVENUE_CHART', revenueFilter.viewType, revenueFilter.dateRange],
+    ['REVENUE_CHART', revenueFilter.viewType, revenueFilter.dateRange, branchId],
     () =>
       getRevenueReport({
         type: revenueFilter.viewType,
         dateRange: getDateRange(revenueFilter.dateRange),
+        branchId
       })
   );
 

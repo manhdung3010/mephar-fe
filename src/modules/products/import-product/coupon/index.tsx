@@ -44,10 +44,11 @@ export default function ImportCoupon() {
 
   const { data: importProductDetail, isLoading } = useQuery(
     ["IMPORT_PRODUCT_DETAIL", id],
-    () => getImportProductDetail(Number(id))
+    () => id ? getImportProductDetail(Number(id)) : Promise.resolve(null),
+    {
+      enabled: !!id, // Only run the query if `id` is truthy
+    }
   );
-
-  console.log("importProductDetail-coupon:", importProductDetail);
 
   const {
     getValues,

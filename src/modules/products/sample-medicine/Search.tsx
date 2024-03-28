@@ -140,7 +140,7 @@ const Search = ({ onChange }: { onChange: (value) => void }) => {
       <div className='flex items-center gap-4 p-4'>
         {
           Object.keys(formFilter).map((key, index) => {
-            if (formFilter[key] !== null && formFilter[key] !== "") {
+            if (formFilter[key] !== null && formFilter[key] !== "" && key !== "keyword") {
               return (
                 <Tag
                   key={index}
@@ -167,7 +167,7 @@ const Search = ({ onChange }: { onChange: (value) => void }) => {
                     )
                   }
                   {
-                    key === "positionid" && (
+                    key === "positionId" && (
                       <>
                         <span>
                           Vị trí:

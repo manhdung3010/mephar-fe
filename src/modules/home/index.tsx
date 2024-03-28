@@ -7,6 +7,8 @@ import DoubleBackIcon from '@/assets/doubleBackIcon.svg';
 
 import { BestSellerProductChart } from './BestSellerProductChart';
 import { RevenueChart } from './RevenueChart';
+import { useRecoilValue } from 'recoil';
+import { branchState } from '@/recoil/state';
 
 export enum FilterDateType {
   CURRENT_MONTH = 1,
@@ -19,6 +21,9 @@ export enum ProductViewType {
 }
 
 export function Home() {
+
+  const branchId = useRecoilValue(branchState);
+
   return (
     <div className="grid grid-cols-4 gap-x-6 py-6">
       <div className="col-span-3 ">
@@ -68,11 +73,11 @@ export function Home() {
         </div>
 
         <div className="mb-6 bg-white p-5">
-          <RevenueChart />
+          <RevenueChart branchId={branchId} />
         </div>
 
         <div className="mb-6 bg-white p-5">
-          <BestSellerProductChart />
+          <BestSellerProductChart branchId={branchId} />
         </div>
       </div>
 

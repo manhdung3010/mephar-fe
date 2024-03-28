@@ -133,11 +133,11 @@ export function OrderTransaction() {
       key: "customer",
       render: (data) => data?.fullName,
     },
-    {
-      title: "ĐVVC",
-      dataIndex: "delivery",
-      key: "delivery",
-    },
+    // {
+    //   title: "ĐVVC",
+    //   dataIndex: "delivery",
+    //   key: "delivery",
+    // },
     {
       title: "Trạng thái",
       dataIndex: "status",
@@ -187,12 +187,12 @@ export function OrderTransaction() {
           <Image src={ImportIcon} /> Nhập hàng
         </div>
 
-        <CustomButton type="success" prefixIcon={<Image src={PlusIcon} />}>
+        {/* <CustomButton type="success" prefixIcon={<Image src={PlusIcon} />}>
           Tạo đơn hàng
-        </CustomButton>
+        </CustomButton> */}
       </div>
 
-      <div className="mb-2 bg-white">
+      {/* <div className="mb-2 bg-white">
         <div className="flex items-center border-b border-[#C7C9D9] p-5">
           <span className="mr-6 font-bold text-[#15171A]">
             ĐƠN HÀNG CẦN XỬ LÝ
@@ -277,7 +277,7 @@ export function OrderTransaction() {
             <div className="text-xl font-medium text-[#182537]">0</div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       <Search setFormFilter={setFormFilter} formFilter={formFilter} />
 

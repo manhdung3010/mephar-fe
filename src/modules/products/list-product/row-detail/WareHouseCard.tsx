@@ -1,6 +1,9 @@
 import type { ColumnsType } from 'antd/es/table';
 
 import CustomTable from '../../../../components/CustomTable';
+import { useQuery } from '@tanstack/react-query';
+import { getWareHouseCard } from '@/api/product.service';
+import { formatDateTime, formatNumber } from '@/helpers';
 
 interface IRecord {
   key: number;
@@ -11,23 +14,32 @@ interface IRecord {
   cost: string;
   quantity: string;
   inStock: string;
+  type?: number;
 }
 
-const WareHouseCard = () => {
-  const record = {
-    key: 1,
-    code: 'HH230704161432',
-    method: 'Nhập hàng',
-    time: '2023-07-28 17:14:05',
-    partner: 'Thực phẩm chức năng',
-    cost: '100,000',
-    quantity: '300',
-    inStock: '25',
-  };
+export const warehouseStatus = {
+  INBOUND: 1,
+  ORDER: 2,
+};
 
-  const dataSource: IRecord[] = Array(8)
-    .fill(0)
-    .map((_, index) => ({ ...record, key: index }));
+const warehouseStatusLable = {
+  [warehouseStatus.INBOUND]: 'Nhập hàng',
+  [warehouseStatus.ORDER]: 'Đặt hàng',
+}
+
+const WareHouseCard = ({ productUnitId, branchId }) => {
+
+
+  const { data: warehouseCard, isLoading } = useQuery(
+    [
+      'WAREHOUSE_CARD',
+      productUnitId,
+      1,
+      50,
+      branchId
+    ],
+    () => getWareHouseCard({ productUnitId, page: 1, limit: 50, branchId })
+  );
 
   const columns: ColumnsType<IRecord> = [
     {
@@ -37,13 +49,15 @@ const WareHouseCard = () => {
     },
     {
       title: 'Phương thức',
-      dataIndex: 'method',
-      key: 'method',
+      dataIndex: 'type',
+      key: 'type',
+      render: (type) => warehouseStatusLable[type],
     },
     {
       title: 'Thời gian',
-      dataIndex: 'time',
-      key: 'time',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      render: (date) => formatDateTime(date),
     },
     {
       title: 'Đối tác',
@@ -51,23 +65,19 @@ const WareHouseCard = () => {
       key: 'partner',
     },
     {
-      title: 'Giá vốn',
-      dataIndex: 'cost',
-      key: 'cost',
-    },
-    {
       title: 'Số lượng',
-      dataIndex: 'quantity',
-      key: 'quantity',
+      dataIndex: 'changeQty',
+      key: 'changeQty',
+      render: (changeQty, record) => record?.type === warehouseStatus.INBOUND ? formatNumber(changeQty) : `-${formatNumber(changeQty)}`,
     },
     {
       title: 'Tồn cuối',
-      dataIndex: 'inStock',
-      key: 'inStock',
+      dataIndex: 'remainQty',
+      key: 'remainQty',
     },
   ];
 
-  return <CustomTable dataSource={dataSource} columns={columns} />;
+  return <CustomTable dataSource={warehouseCard?.data?.items} columns={columns} loading={isLoading} />;
 };
 
 export default WareHouseCard;

@@ -4,7 +4,7 @@ import { regexPhoneNumber } from "@/constants";
 
 export const schema = yup.object().shape({
   name: yup.string().required("Đây là trường bắt buộc!"),
-  email: yup.string(),
+  email: yup.string().email("Vui lòng nhập đúng định dạng email"),
   phone: yup
     .string()
     .required("Đây là trường bắt buộc!")

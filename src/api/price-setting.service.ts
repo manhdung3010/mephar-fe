@@ -4,6 +4,7 @@ export function getPriceSetting(params: {
   page: number;
   limit: number;
   keyword?: string;
+  branchId: number;
 }) {
   return axiosClient.get('product/price/setting', { params });
 }
