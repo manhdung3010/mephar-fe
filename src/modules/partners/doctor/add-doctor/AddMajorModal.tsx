@@ -20,8 +20,8 @@ export function AddMajorModal({
   isOpen: boolean;
   onCancel: () => void;
   setMajorKeyword: (value) => void;
-    setDoctorValue: any;
-  onSave: ({specialistId, specialistName}) => void;
+  setDoctorValue: any;
+  onSave?: ({ specialistId, specialistName }) => void;
 }) {
   const queryClient = useQueryClient();
 

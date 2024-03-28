@@ -20,8 +20,8 @@ export function AddLevelModal({
   isOpen: boolean;
   onCancel: () => void;
   setLevelKeyword: (value) => void;
-    setDoctorValue: any;
-  onSave: ({levelId, levelName}) => void;
+  setDoctorValue: any;
+  onSave?: ({ levelId, levelName }) => void;
 }) {
   const queryClient = useQueryClient();
 
