@@ -1,11 +1,11 @@
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { message } from 'antd';
-import { debounce } from 'lodash';
-import Image from 'next/image';
-import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { message } from "antd";
+import { debounce } from "lodash";
+import Image from "next/image";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 
 import {
   createDoctor,
@@ -14,25 +14,25 @@ import {
   getMajor,
   getWorkPlace,
   updateDoctor,
-} from '@/api/doctor.service';
-import ArrowDownIcon from '@/assets/arrowDownGray.svg';
-import PhotographIcon from '@/assets/photograph.svg';
-import PlusIcon from '@/assets/plus-circle.svg';
-import { CustomButton } from '@/components/CustomButton';
-import { CustomInput, CustomTextarea } from '@/components/CustomInput';
-import Label from '@/components/CustomLabel';
-import { CustomRadio } from '@/components/CustomRadio';
-import { CustomSelect } from '@/components/CustomSelect';
-import { CustomUpload } from '@/components/CustomUpload';
-import InputError from '@/components/InputError';
-import { EDoctorStatus, EGender } from '@/enums';
-import { getImage } from '@/helpers';
-import { useAddress } from '@/hooks/useAddress';
+} from "@/api/doctor.service";
+import ArrowDownIcon from "@/assets/arrowDownGray.svg";
+import PhotographIcon from "@/assets/photograph.svg";
+import PlusIcon from "@/assets/plus-circle.svg";
+import { CustomButton } from "@/components/CustomButton";
+import { CustomInput, CustomTextarea } from "@/components/CustomInput";
+import Label from "@/components/CustomLabel";
+import { CustomRadio } from "@/components/CustomRadio";
+import { CustomSelect } from "@/components/CustomSelect";
+import { CustomUpload } from "@/components/CustomUpload";
+import InputError from "@/components/InputError";
+import { EDoctorStatus, EGender } from "@/enums";
+import { getImage } from "@/helpers";
+import { useAddress } from "@/hooks/useAddress";
 
-import { AddLevelModal } from './AddLevelModal';
-import { AddMajorModal } from './AddMajorModal';
-import { AddWorkPlaceModal } from './AddWorkPlaceModal';
-import { schema } from './schema';
+import { AddLevelModal } from "./AddLevelModal";
+import { AddMajorModal } from "./AddMajorModal";
+import { AddWorkPlaceModal } from "./AddWorkPlaceModal";
+import { schema } from "./schema";
 
 export function AddDoctor({ doctorId }: { doctorId?: string }) {
   const queryClient = useQueryClient();
@@ -49,7 +49,7 @@ export function AddDoctor({ doctorId }: { doctorId?: string }) {
     formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
-    mode: 'onChange',
+    mode: "onChange",
     defaultValues: {
       gender: EGender.male,
       status: EDoctorStatus.active,
@@ -57,28 +57,28 @@ export function AddDoctor({ doctorId }: { doctorId?: string }) {
   });
 
   const { provinces, districts, wards } = useAddress(
-    getValues('provinceId'),
-    getValues('districtId')
+    getValues("provinceId"),
+    getValues("districtId")
   );
 
   const [majorKeyword, setMajorKeyword] = useState();
   const [levelKeyword, setLevelKeyword] = useState();
   const [workPlaceKeyword, setWorkPlaceKeyword] = useState();
 
-  const { data: majors } = useQuery(['MAJOR', majorKeyword], () =>
+  const { data: majors } = useQuery(["MAJOR", majorKeyword], () =>
     getMajor({ page: 1, limit: 20, keyword: majorKeyword })
   );
 
-  const { data: levels } = useQuery(['LEVEL', levelKeyword], () =>
+  const { data: levels } = useQuery(["LEVEL", levelKeyword], () =>
     getLevel({ page: 1, limit: 20, keyword: levelKeyword })
   );
 
-  const { data: workPlaces } = useQuery(['WORK_PLACE', workPlaceKeyword], () =>
+  const { data: workPlaces } = useQuery(["WORK_PLACE", workPlaceKeyword], () =>
     getWorkPlace({ page: 1, limit: 20, keyword: workPlaceKeyword })
   );
 
   const { data: doctorDetail } = useQuery(
-    ['DOCTOR_DETAIL', doctorId],
+    ["DOCTOR_DETAIL", doctorId],
     () => getDoctorDetail(Number(doctorId)),
     { enabled: !!doctorId }
   );
@@ -91,9 +91,9 @@ export function AddDoctor({ doctorId }: { doctorId?: string }) {
           : createDoctor(getValues()),
       {
         onSuccess: async () => {
-          await queryClient.invalidateQueries(['DOCTOR_LIST']);
+          await queryClient.invalidateQueries(["DOCTOR_LIST"]);
 
-          router.push('/partners/doctor');
+          router.push("/partners/doctor");
         },
         onError: (err: any) => {
           message.error(err?.message);
@@ -123,13 +123,13 @@ export function AddDoctor({ doctorId }: { doctorId?: string }) {
     <>
       <div className="my-6 flex items-center justify-between bg-white p-5">
         <div className="text-2xl font-medium uppercase">
-          {doctorDetail ? 'Cập nhật bác sĩ' : 'Thêm mới Bác sĩ'}
+          {doctorDetail ? "Cập nhật bác sĩ" : "Thêm mới Bác sĩ"}
         </div>
         <div className="flex gap-4">
           <CustomButton
             outline={true}
             type="danger"
-            onClick={() => router.push('/partners/doctor')}
+            onClick={() => router.push("/partners/doctor")}
           >
             Hủy bỏ
           </CustomButton>
@@ -151,8 +151,8 @@ export function AddDoctor({ doctorId }: { doctorId?: string }) {
               <CustomInput
                 placeholder="Mã mặc định"
                 className="h-11"
-                onChange={(e) => setValue('code', e, { shouldValidate: true })}
-                value={getValues('code')}
+                onChange={(e) => setValue("code", e, { shouldValidate: true })}
+                value={getValues("code")}
                 disabled={doctorDetail ? true : false}
               />
             </div>
@@ -162,8 +162,8 @@ export function AddDoctor({ doctorId }: { doctorId?: string }) {
               <CustomInput
                 placeholder="Nhập số điện thoại"
                 className="h-11"
-                onChange={(e) => setValue('phone', e, { shouldValidate: true })}
-                value={getValues('phone')}
+                onChange={(e) => setValue("phone", e, { shouldValidate: true })}
+                value={getValues("phone")}
               />
               <InputError error={errors.phone?.message} />
             </div>
@@ -173,8 +173,8 @@ export function AddDoctor({ doctorId }: { doctorId?: string }) {
               <CustomInput
                 placeholder="Nhập tên bác sĩ"
                 className="h-11"
-                onChange={(e) => setValue('name', e, { shouldValidate: true })}
-                value={getValues('name')}
+                onChange={(e) => setValue("name", e, { shouldValidate: true })}
+                value={getValues("name")}
               />
               <InputError error={errors.name?.message} />
             </div>
@@ -184,8 +184,8 @@ export function AddDoctor({ doctorId }: { doctorId?: string }) {
               <CustomInput
                 placeholder="Email"
                 className="h-11"
-                onChange={(e) => setValue('email', e, { shouldValidate: true })}
-                value={getValues('email')}
+                onChange={(e) => setValue("email", e, { shouldValidate: true })}
+                value={getValues("email")}
               />
             </div>
 
@@ -194,13 +194,13 @@ export function AddDoctor({ doctorId }: { doctorId?: string }) {
               <div className="h-11 rounded-md border border-[#d9d9d9] px-4 py-[2px]">
                 <CustomRadio
                   options={[
-                    { value: EGender.male, label: 'Nam' },
-                    { value: EGender.female, label: 'Nữ' },
+                    { value: EGender.male, label: "Nam" },
+                    { value: EGender.female, label: "Nữ" },
                   ]}
                   onChange={(value) =>
-                    setValue('gender', value, { shouldValidate: true })
+                    setValue("gender", value, { shouldValidate: true })
                   }
-                  value={getValues('gender')}
+                  value={getValues("gender")}
                 />
               </div>
             </div>
@@ -209,13 +209,13 @@ export function AddDoctor({ doctorId }: { doctorId?: string }) {
               <Label infoText="" label="Chuyên khoa" />
               <CustomSelect
                 onChange={(value) =>
-                  setValue('specialistId', value, { shouldValidate: true })
+                  setValue("specialistId", value, { shouldValidate: true })
                 }
                 options={majors?.data?.items?.map((item) => ({
                   value: item.id,
                   label: item.name,
                 }))}
-                value={getValues('specialistId')}
+                value={getValues("specialistId")}
                 showSearch={true}
                 onSearch={debounce((value) => {
                   setMajorKeyword(value);
@@ -238,13 +238,13 @@ export function AddDoctor({ doctorId }: { doctorId?: string }) {
               <Label infoText="" label="Trình độ" />
               <CustomSelect
                 onChange={(value) =>
-                  setValue('levelId', value, { shouldValidate: true })
+                  setValue("levelId", value, { shouldValidate: true })
                 }
                 options={levels?.data?.items?.map((item) => ({
                   value: item.id,
                   label: item.name,
                 }))}
-                value={getValues('levelId')}
+                value={getValues("levelId")}
                 showSearch={true}
                 onSearch={debounce((value) => {
                   setLevelKeyword(value);
@@ -267,13 +267,13 @@ export function AddDoctor({ doctorId }: { doctorId?: string }) {
               <Label infoText="" label="Nơi công tác" />
               <CustomSelect
                 onChange={(value) =>
-                  setValue('workPlaceId', value, { shouldValidate: true })
+                  setValue("workPlaceId", value, { shouldValidate: true })
                 }
                 options={workPlaces?.data?.items?.map((item) => ({
                   value: item.id,
                   label: item.name,
                 }))}
-                value={getValues('workPlaceId')}
+                value={getValues("workPlaceId")}
                 showSearch={true}
                 onSearch={debounce((value) => {
                   setWorkPlaceKeyword(value);
@@ -298,9 +298,9 @@ export function AddDoctor({ doctorId }: { doctorId?: string }) {
                 placeholder="Nhập địa chỉ"
                 className="h-11"
                 onChange={(e) =>
-                  setValue('address', e, { shouldValidate: true })
+                  setValue("address", e, { shouldValidate: true })
                 }
-                value={getValues('address')}
+                value={getValues("address")}
               />
             </div>
 
@@ -308,13 +308,13 @@ export function AddDoctor({ doctorId }: { doctorId?: string }) {
               <Label infoText="" label="Tỉnh/Thành" />
               <CustomSelect
                 onChange={(value) =>
-                  setValue('provinceId', value, { shouldValidate: true })
+                  setValue("provinceId", value, { shouldValidate: true })
                 }
                 options={provinces?.data?.items?.map((item) => ({
                   value: item.id,
                   label: item.name,
                 }))}
-                value={getValues('provinceId')}
+                value={getValues("provinceId")}
                 className=" h-11 !rounded"
                 placeholder="Chọn tỉnh/thành"
                 showSearch={true}
@@ -326,13 +326,13 @@ export function AddDoctor({ doctorId }: { doctorId?: string }) {
               <Label infoText="" label="Quận/Huyện" />
               <CustomSelect
                 onChange={(value) =>
-                  setValue('districtId', value, { shouldValidate: true })
+                  setValue("districtId", value, { shouldValidate: true })
                 }
                 options={districts?.data?.items?.map((item) => ({
                   value: item.id,
                   label: item.name,
                 }))}
-                value={getValues('districtId')}
+                value={getValues("districtId")}
                 className=" h-11 !rounded"
                 placeholder="Chọn quận/huyện"
                 showSearch={true}
@@ -344,13 +344,13 @@ export function AddDoctor({ doctorId }: { doctorId?: string }) {
               <Label infoText="" label="Phường/xã" />
               <CustomSelect
                 onChange={(value) =>
-                  setValue('wardId', value, { shouldValidate: true })
+                  setValue("wardId", value, { shouldValidate: true })
                 }
                 options={wards?.data?.items?.map((item) => ({
                   value: item.id,
                   label: item.name,
                 }))}
-                value={getValues('wardId')}
+                value={getValues("wardId")}
                 showSearch={true}
                 className=" h-11 !rounded"
                 placeholder="Chọn phường/xã"
@@ -363,13 +363,13 @@ export function AddDoctor({ doctorId }: { doctorId?: string }) {
               <div className="h-11 rounded-md border border-[#d9d9d9] px-4 py-[2px]">
                 <CustomRadio
                   onChange={(value) =>
-                    setValue('status', value, { shouldValidate: true })
+                    setValue("status", value, { shouldValidate: true })
                   }
                   options={[
-                    { value: EDoctorStatus.active, label: 'Hoạt động' },
-                    { value: EDoctorStatus.inactive, label: 'Ngưng hoạt động' },
+                    { value: EDoctorStatus.active, label: "Hoạt động" },
+                    { value: EDoctorStatus.inactive, label: "Ngưng hoạt động" },
                   ]}
-                  value={getValues('status')}
+                  value={getValues("status")}
                 />
               </div>
             </div>
@@ -381,9 +381,9 @@ export function AddDoctor({ doctorId }: { doctorId?: string }) {
               rows={10}
               placeholder="Nhập ghi chú"
               onChange={(e) =>
-                setValue('note', e.target.value, { shouldValidate: true })
+                setValue("note", e.target.value, { shouldValidate: true })
               }
-              value={getValues('note')}
+              value={getValues("note")}
             />
           </div>
         </div>
@@ -391,26 +391,26 @@ export function AddDoctor({ doctorId }: { doctorId?: string }) {
         <div
           className="flex h-fit w-1/3 max-w-[360px] flex-col bg-white p-5"
           style={{
-            boxShadow: '0px 8px 13px -3px rgba(0, 0, 0, 0.07)',
+            boxShadow: "0px 8px 13px -3px rgba(0, 0, 0, 0.07)",
           }}
         >
           <div>
             <div className="mb-2 font-medium text-[#15171A]">Ảnh bác sĩ</div>
             <CustomUpload
               onChangeValue={(value) =>
-                setValue('avatarId', value, { shouldValidate: true })
+                setValue("avatarId", value, { shouldValidate: true })
               }
               values={[getImage(doctorDetail?.data?.avatar?.path)]}
               className="mb-5"
             >
               <div
                 className={
-                  'flex h-[300px] w-full flex-col items-center justify-center gap-[5px] rounded-lg border-2 border-dashed border-[#9CA1AD] p-5'
+                  "flex h-[300px] w-full flex-col items-center justify-center gap-[5px] rounded-lg border-2 border-dashed border-[#9CA1AD] p-5"
                 }
               >
                 <Image src={PhotographIcon} alt="" />
                 <div className="font-semibold">
-                  <span className="text-[#E03]">Tải ảnh lên</span>{' '}
+                  <span className="text-[#E03]">Tải ảnh lên</span>{" "}
                   <span className="text-[#6F727A]">hoặc kéo và thả</span>
                 </div>
                 <div className="font-thin text-[#6F727A]">
@@ -427,6 +427,12 @@ export function AddDoctor({ doctorId }: { doctorId?: string }) {
         onCancel={() => setOpenMajorModal(false)}
         setMajorKeyword={setMajorKeyword}
         setDoctorValue={setValue}
+        onSave={({ specialistId, specialistName }) => {
+          setMajorKeyword(specialistName);
+          setValue("specialistId", specialistId, {
+            shouldValidate: true,
+          });
+        }}
       />
 
       <AddLevelModal
@@ -434,6 +440,12 @@ export function AddDoctor({ doctorId }: { doctorId?: string }) {
         onCancel={() => setOpenLevelModal(false)}
         setLevelKeyword={setLevelKeyword}
         setDoctorValue={setValue}
+        onSave={({ levelId, levelName }) => {
+          setMajorKeyword(levelName);
+          setValue("levelId", levelId, {
+            shouldValidate: true,
+          });
+        }}
       />
 
       <AddWorkPlaceModal
@@ -441,6 +453,12 @@ export function AddDoctor({ doctorId }: { doctorId?: string }) {
         onCancel={() => setOpenWorkPlaceModal(false)}
         setWordPlaceKeyword={setWorkPlaceKeyword}
         setDoctorValue={setValue}
+        onSave={({ workPlaceId, workPlaceName }) => {
+          setMajorKeyword(workPlaceName);
+          setValue("workPlaceId", workPlaceId, {
+            shouldValidate: true,
+          });
+        }}
       />
     </>
   );

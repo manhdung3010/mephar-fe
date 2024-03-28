@@ -11,7 +11,14 @@ const useExportToExcel = (data, columnMapping, fileName) => {
     const worksheetData = data.map((row) => {
       const rowData = {};
       displayedColumns.forEach((column) => {
-        rowData[columnMapping[column] || column] = row[column];
+       if (columnMapping[column]) {
+          const nestedFields = column.split('.');
+          let value = row;
+          nestedFields.forEach(field => {
+            value = value ? value[field] : null;
+          });
+          rowData[columnMapping[column]] = value;
+        }
       });
       return rowData;
     });
