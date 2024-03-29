@@ -39,7 +39,7 @@ const ProductDetail = ({ record, onChangeUnit, branchId }: { record: IProduct, o
       {select === 0 && <Info record={record} onChangeUnit={onChangeUnit} />}
       {select === 1 && <WareHouseCard productId={record?.id} branchId={branchId} />}
       {/* {select === 2 && <Inventory />} */}
-      {select === 2 && <ProductExpire productId={record?.id} branchId={branchId} />}
+      {select === 2 && <ProductExpire productId={record?.id} branchId={branchId} productUnit={record?.productUnit} />}
     </div>
   );
 };

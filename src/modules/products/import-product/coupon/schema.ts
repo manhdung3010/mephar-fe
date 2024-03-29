@@ -61,5 +61,5 @@ export const schema = yup.object().shape({
   userId: yup.number().required("Đây là trường bắt buộc!"),
   supplierId: yup.string().required("Đây là trường bắt buộc!"),
   branchId: yup.number().required("Đây là trường bắt buộc!"),
-  groupSupplierId: yup.string().required("Đây là trường bắt buộc!"),
+  // groupSupplierId: yup.string().required("Đây là trường bắt buộc!"),
 });

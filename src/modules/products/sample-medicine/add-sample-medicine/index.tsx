@@ -484,7 +484,8 @@ const AddSampleMedicine = ({
                         label: (
                           <div>
                             <div className="text-#0F1824 mb-1 text-base font-medium">
-                              {item.name}
+                              <span>{item?.code}</span>{" - "}
+                              <span>{item.name}</span>
                             </div>
 
                             <div className=" grid grid-cols-5 gap-x-8 gap-y-1">

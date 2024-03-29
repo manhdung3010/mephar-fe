@@ -1,9 +1,11 @@
 import type { ColumnsType } from 'antd/es/table';
 
-import CustomTable from '../../../../components/CustomTable';
-import { useQuery } from '@tanstack/react-query';
 import { getProductExpired } from '@/api/product.service';
+import { CustomUnitSelect } from '@/components/CustomUnitSelect';
 import { formatDate, formatNumber } from '@/helpers';
+import { useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
+import CustomTable from '../../../../components/CustomTable';
 
 interface IRecord {
   key: number;
@@ -13,19 +15,7 @@ interface IRecord {
   lastInputPrice: number;
 }
 
-const ProductExpire = ({ productId, branchId }: { productId: number, branchId: number }) => {
-  const record = {
-    key: 1,
-    product: 'Sản phẩm A',
-    expireDate: '2023-11-08',
-    quantity: 10,
-    lastInputPrice: 10000,
-  };
-
-  const dataSource: IRecord[] = Array(8)
-    .fill(0)
-    .map((_, index) => ({ ...record, key: index }));
-
+const ProductExpire = ({ productId, branchId, productUnit }: { productId: number, branchId: number, productUnit: any[] }) => {
   const { data: productExpired, isLoading } = useQuery(
     [
       'PRODUCT_EXPIRED',
@@ -36,6 +26,40 @@ const ProductExpire = ({ productId, branchId }: { productId: number, branchId: n
     ],
     () => getProductExpired({ productId: productId, page: 1, limit: 50, branchId })
   );
+
+  const [data, setData] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (productExpired?.data?.items) {
+      const newData = productExpired.data.items.map((item, index) => {
+        return {
+          ...item,
+          unitId: productUnit.find((item) => item.isBaseUnit)?.id,
+          quantity: item.inventory / productUnit.find((item) => item.isBaseUnit)?.exchangeValue,
+          productUnit,
+        };
+      });
+      setData(newData);
+    }
+  }, [productExpired?.data?.items])
+
+
+  const handleOnChange = (value, recordId) => {
+    const newData = data.map((item) => {
+      // change quantity to new unit
+      if (item.productUnit.find((unit) => unit.id === value) && item.id === recordId) {
+        const newQuantity = item.inventory / item.productUnit.find((unit) => unit.id === value).exchangeValue;
+        return {
+          ...item,
+          unitId: value,
+          quantity: Math.floor(newQuantity),
+        }
+      }
+      return item;
+    })
+    // console.log("newData", newData)
+    setData(newData)
+  }
 
   const columns: ColumnsType<IRecord> = [
     {
@@ -55,6 +79,17 @@ const ProductExpire = ({ productId, branchId }: { productId: number, branchId: n
       key: 'quantity',
       render: (quantity) => formatNumber(quantity),
     },
+    {
+      title: 'Đơn vị',
+      dataIndex: 'productUnit',
+      key: 'productUnit',
+      render: (productUnit, record: any) => <CustomUnitSelect value={record?.unitId} onChange={(value) => handleOnChange(value, record?.id)} options={productUnit.map((unit) => {
+        return {
+          label: unit.unitName,
+          value: unit.id,
+        }
+      })} />,
+    },
     // {
     //   title: 'Giá nhập gần nhất',
     //   dataIndex: 'lastInputPrice',
@@ -62,7 +97,7 @@ const ProductExpire = ({ productId, branchId }: { productId: number, branchId: n
     // },
   ];
 
-  return <CustomTable dataSource={productExpired?.data?.items} columns={columns} loading={isLoading} />;
+  return <CustomTable dataSource={data} columns={columns} loading={isLoading} />;
 };
 
 export default ProductExpire;

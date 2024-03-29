@@ -170,7 +170,7 @@ export default function ImportCoupon() {
       title: "Mã hàng",
       dataIndex: "code",
       key: "code",
-      render: (_, { product }, index) => (
+      render: (code, { product }, index) => (
         <span
           className="cursor-pointer text-[#0070F4]"
         // onClick={() => {
@@ -184,7 +184,7 @@ export default function ImportCoupon() {
         //   setExpandedRowKeys({ ...temp });
         // }}
         >
-          {product.code}
+          {code}
         </span>
       ),
     },
@@ -223,6 +223,7 @@ export default function ImportCoupon() {
 
                 return {
                   ...product,
+                  code: productUnit?.code || '', // Assign an empty string if productUnit.code is undefined
                   productKey: `${product.product.id}-${value}`,
                   ...productUnit,
                   batches: product.batches?.map((batch) => ({
@@ -333,88 +334,8 @@ export default function ImportCoupon() {
       <div className="grow overflow-x-auto">
         <div className="hidden-scrollbar overflow-x-auto overflow-y-hidden">
           <div className="flex h-[72px] w-full  min-w-[800px] items-center bg-red-main px-6 py-3">
-            {/* <CustomSelect
-              className="!h-[48px] w-full !rounded text-base"
-              prefixIcon={<Image src={SearchIcon} alt="" />}
-              placeholder="Tìm kiếm theo mã nhập hàng"
-              wrapClassName="w-full !rounded bg-white"
-              onChange={(value) => {
-                const product: IImportProduct = JSON.parse(value);
-
-                const localProduct: IImportProductLocal = {
-                  ...product,
-                  productKey: `${product.product.id}-${product.id}`,
-                  inventory: product.quantity,
-                  quantity: 1,
-                  discountValue: 0,
-                  batches: [],
-                };
-
-                let cloneImportProducts = cloneDeep(importProducts);
-
-                if (
-                  importProducts.find(
-                    (p) => p.productKey === localProduct.productKey
-                  )
-                ) {
-                  cloneImportProducts = cloneImportProducts.map((product) => {
-                    if (product.productKey === localProduct.productKey) {
-                      return {
-                        ...product,
-                        quantity: product.quantity + 1,
-                      };
-                    }
-
-                    return product;
-                  });
-                } else {
-                  cloneImportProducts.push(localProduct);
-                }
-
-                setImportProducts(cloneImportProducts);
-              }}
-              onSearch={debounce((value) => {
-                console.log("Search value:", value);
-                setFormFilter((preValue) => ({
-                  ...preValue,
-                  keyword: value,
-                }));
-              }, 300)}
-              listHeight={512}
-              showSearch={true}
-              value={null}
-              options={products?.data?.items.map((item) => ({
-                value: JSON.stringify(item),
-                label: (
-                  <div className="flex items-center gap-x-4 p-2">
-                    <div className=" flex h-12 w-[68px] items-center rounded border border-gray-300 p-[2px]">
-                      {item.product.image?.path && (
-                        <Image
-                          src={getImage(item.product.image?.path)}
-                          height={40}
-                          width={68}
-                          alt=""
-                          objectFit="cover"
-                        />
-                      )}
-                    </div>
-
-                    <div>
-                      <div className="flex gap-x-5">
-                        <div>{item.product.code} - {item.product.name}</div>
-                        <div className="rounded bg-red-main px-2 py-[2px] text-white">
-                          {item.unitName}
-                        </div>
-                      </div>
-                      <div>Số lượng - {item.quantity}</div>
-                    </div>
-                  </div>
-                ),
-              }))}
-            /> */}
             <CustomAutocomplete
               className="!h-[48px] w-full !rounded text-base"
-              // popupClassName="h-[512px]"
               prefixIcon={<Image src={SearchIcon} alt="" />}
               placeholder="Tìm kiếm theo mã nhập hàng"
               wrapClassName="w-full !rounded bg-white"
@@ -481,7 +402,7 @@ export default function ImportCoupon() {
                     <div>
                       <div className="flex gap-x-5">
                         <div>
-                          {item.product.code} - {item.product.name}
+                          {item.code} - {item.product.name}
                         </div>
                         <div className="rounded bg-red-main px-2 py-[2px] text-white">
                           {item.unitName}

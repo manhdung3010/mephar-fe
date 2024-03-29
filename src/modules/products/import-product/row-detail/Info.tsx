@@ -73,6 +73,12 @@ export function Info({ record }: { record: IRecord }) {
       render: (_, { product }) => product.name,
     },
     {
+      title: "Đơn vị",
+      dataIndex: "productBatchHistories",
+      key: "productBatchHistories",
+      render: (productBatchs) => productBatchs[0]?.productUnit?.unitName,
+    },
+    {
       title: "Số lượng",
       dataIndex: "totalQuantity",
       key: "totalQuantity",
