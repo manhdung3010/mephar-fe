@@ -1,6 +1,9 @@
 import type { ColumnsType } from 'antd/es/table';
 
 import CustomTable from '../../../../components/CustomTable';
+import { useQuery } from '@tanstack/react-query';
+import { getProductExpired } from '@/api/product.service';
+import { formatDate, formatNumber } from '@/helpers';
 
 interface IRecord {
   key: number;
@@ -10,7 +13,7 @@ interface IRecord {
   lastInputPrice: number;
 }
 
-const ProductExpire = () => {
+const ProductExpire = ({ productId, branchId }: { productId: number, branchId: number }) => {
   const record = {
     key: 1,
     product: 'Sản phẩm A',
@@ -23,30 +26,43 @@ const ProductExpire = () => {
     .fill(0)
     .map((_, index) => ({ ...record, key: index }));
 
+  const { data: productExpired, isLoading } = useQuery(
+    [
+      'PRODUCT_EXPIRED',
+      productId,
+      1,
+      50,
+      branchId
+    ],
+    () => getProductExpired({ productId: productId, page: 1, limit: 50, branchId })
+  );
+
   const columns: ColumnsType<IRecord> = [
     {
       title: 'Lô/hạn sử dụng',
-      dataIndex: 'product',
-      key: 'product',
+      dataIndex: 'name',
+      key: 'name',
     },
     {
       title: 'Ngày hết hạn',
-      dataIndex: 'expireDate',
-      key: 'expireDate',
+      dataIndex: 'expiryDate',
+      key: 'expiryDate',
+      render: (expiryDate) => formatDate(expiryDate),
     },
     {
       title: 'Số lượng',
       dataIndex: 'quantity',
       key: 'quantity',
+      render: (quantity) => formatNumber(quantity),
     },
-    {
-      title: 'Giá nhập gần nhất',
-      dataIndex: 'lastInputPrice',
-      key: 'lastInputPrice',
-    },
+    // {
+    //   title: 'Giá nhập gần nhất',
+    //   dataIndex: 'lastInputPrice',
+    //   key: 'lastInputPrice',
+    // },
   ];
 
-  return <CustomTable dataSource={dataSource} columns={columns} />;
+  return <CustomTable dataSource={productExpired?.data?.items} columns={columns} loading={isLoading} />;
 };
 
 export default ProductExpire;

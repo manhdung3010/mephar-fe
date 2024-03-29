@@ -37,9 +37,9 @@ const ProductDetail = ({ record, onChangeUnit, branchId }: { record: IProduct, o
         <div className="h-[1px] w-full bg-[#D64457]" />
       </div>
       {select === 0 && <Info record={record} onChangeUnit={onChangeUnit} />}
-      {select === 1 && <WareHouseCard productUnitId={record?.unitId} branchId={branchId} />}
+      {select === 1 && <WareHouseCard productId={record?.id} branchId={branchId} />}
       {/* {select === 2 && <Inventory />} */}
-      {select === 2 && <ProductExpire />}
+      {select === 2 && <ProductExpire productId={record?.id} branchId={branchId} />}
     </div>
   );
 };

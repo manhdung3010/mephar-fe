@@ -300,13 +300,13 @@ export function Info({ record }: { record: IRecord }) {
         >
           In mã vạch
         </CustomButton>
-        <CustomButton
+        {/* <CustomButton
           outline={true}
           type="primary"
           prefixIcon={<Image src={OpenOrderIcon} alt="" />}
         >
           Mở phiếu
-        </CustomButton>
+        </CustomButton> */}
 
         <CustomButton
           outline={true}

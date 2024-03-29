@@ -20,7 +20,7 @@ const RowDetail = ({ record }: { record: ICustomer }) => {
     'Lịch sử  mua hàng',
     // 'Lịch sử trả hàng',
     // 'Lịch sử tích điểm',
-    'Ghi chú',
+    // 'Ghi chú',
   ];
 
   return (
@@ -53,7 +53,7 @@ const RowDetail = ({ record }: { record: ICustomer }) => {
       {select === 2 && <BuyHistory record={record} />}
       {/* {select === 4 && <ReturnHistory record={record} />} */}
       {/* {select === 5 && <CollectPointHistory record={record} />} */}
-      {select === 3 && <Note record={record} />}
+      {/* {select === 3 && <Note record={record} />} */}
     </div>
   );
 };

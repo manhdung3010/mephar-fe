@@ -325,7 +325,7 @@ export function Info({ record }: { record: IOrder }) {
         >
           In phiếu
         </CustomButton>
-        <CustomButton
+        {/* <CustomButton
           outline={true}
           prefixIcon={<Image src={CloseIcon} alt="" />}
           onClick={() => setOpenCancelBill(true)}
@@ -337,7 +337,7 @@ export function Info({ record }: { record: IOrder }) {
           prefixIcon={<Image src={SaveIcon} alt="" />}
         >
           Lưu
-        </CustomButton>
+        </CustomButton> */}
       </div>
 
       <div ref={invoiceComponentRef} className={styles.invoicePrint}>

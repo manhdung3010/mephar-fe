@@ -294,8 +294,8 @@ export function RightContent({ useForm }: { useForm: any }) {
 
       <div className="my-4 h-[1px] w-full bg-[#E4E4E4]"></div>
 
-      <div className="grid grid-cols-2 gap-3 px-6 pb-4">
-        <CustomButton
+      <div className="grid grid-cols-1 gap-3 px-6 pb-4">
+        {/* <CustomButton
           className="!h-12 text-lg font-semibold"
           onClick={() => {
             changePayload(EImportProductStatus.DRAFT);
@@ -304,9 +304,9 @@ export function RightContent({ useForm }: { useForm: any }) {
           disabled={isLoadingCreateProductImport}
         >
           Lưu tạm
-        </CustomButton>
+        </CustomButton> */}
         <CustomButton
-          className="!h-12 text-lg font-semibold"
+          className="!h-12 text-lg font-semibold w-full"
           type="success"
           disabled={isLoadingCreateProductImport}
           onClick={() => {

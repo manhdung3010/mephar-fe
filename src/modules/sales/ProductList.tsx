@@ -176,9 +176,9 @@ export function ProductList({ useForm }: { useForm: any }) {
       render: (_, { product, batches }) => (
         <div>
           <div className=" font-medium">{product.name}</div>
-          <div className="cursor-pointer font-medium text-[#0070F4]">
+          {/* <div className="cursor-pointer font-medium text-[#0070F4]">
             {batches?.length ? 'Lô sản xuất' : ''}
-          </div>
+          </div> */}
           {/* <div>
             test2 - {' '}
             <span className="font-medium italic text-[#828487]">
@@ -371,9 +371,9 @@ export function ProductList({ useForm }: { useForm: any }) {
                       error={
                         errors?.products
                           ? errors?.products[Number(record.key) - 1]?.batches
-                              ?.message ||
-                            errors?.products[Number(record.key) - 1]?.batches[0]
-                              ?.quantity?.message
+                            ?.message ||
+                          errors?.products[Number(record.key) - 1]?.batches[0]
+                            ?.quantity?.message
                           : undefined
                       }
                     />

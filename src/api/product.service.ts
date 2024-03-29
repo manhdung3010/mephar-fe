@@ -180,10 +180,19 @@ export function updateSampleMedicineStatus(id: number, payload) {
 
 // warehouse card
 export function getWareHouseCard(params: {
-  productUnitId: number;
+  productId: number;
   page: number;
   limit: number;
   branchId?: number;
 }) {
   return axiosClient.get("warehouse/card", { params });
+}
+// product expire
+export function getProductExpired(params: {
+  productId: number;
+  page: number;
+  limit: number;
+  branchId?: number;
+}) {
+  return axiosClient.get("batch", { params });
 }

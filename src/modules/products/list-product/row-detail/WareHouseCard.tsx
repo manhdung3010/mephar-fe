@@ -27,18 +27,16 @@ const warehouseStatusLable = {
   [warehouseStatus.ORDER]: 'Đặt hàng',
 }
 
-const WareHouseCard = ({ productUnitId, branchId }) => {
-
-
+const WareHouseCard = ({ productId, branchId }) => {
   const { data: warehouseCard, isLoading } = useQuery(
     [
       'WAREHOUSE_CARD',
-      productUnitId,
+      productId,
       1,
       50,
       branchId
     ],
-    () => getWareHouseCard({ productUnitId, page: 1, limit: 50, branchId })
+    () => getWareHouseCard({ productId: productId, page: 1, limit: 50, branchId })
   );
 
   const columns: ColumnsType<IRecord> = [

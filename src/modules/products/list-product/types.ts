@@ -39,4 +39,5 @@ export interface IProduct {
   unitId?: number; // Đơn vị tính
   drugCode?: string; // Mã thuốc
   unitQuantity?: number; // Tồn kho theo đơn vị
+  productId?: number;
 }

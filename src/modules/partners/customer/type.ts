@@ -32,4 +32,5 @@ export interface ICustomer {
   ward?: {
     name: string;
   };
+  note?: string;
 }

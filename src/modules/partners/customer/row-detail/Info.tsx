@@ -125,7 +125,7 @@ export function Info({ record }: { record: ICustomer }) {
         </div>
 
         <div className="grow">
-          <TextArea rows={8} placeholder="Ghi chú:" />
+          <TextArea rows={8} placeholder="Ghi chú:" value={record?.note} disabled />
         </div>
       </div>
 

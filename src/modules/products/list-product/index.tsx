@@ -104,7 +104,7 @@ const ProductList = () => {
       title: 'Tồn kho',
       dataIndex: 'unitQuantity',
       key: 'unitQuantity',
-      render: (data) => formatNumber(data),
+      render: (data) => formatNumber(Math.floor(data)),
     },
     {
       title: 'Loại hàng',
