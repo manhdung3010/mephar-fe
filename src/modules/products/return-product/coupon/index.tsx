@@ -31,13 +31,14 @@ import { schema } from './schema';
 import { CustomAutocomplete } from '@/components/CustomAutocomplete';
 import { useRouter } from 'next/router';
 import { getReturnProductDetail } from '@/api/return-product.service';
+import { getImportProductDetail } from '@/api/import-product.service';
 
 export default function ReturnCoupon() {
   const profile = useRecoilValue(profileState);
   const branchId = useRecoilValue(branchState);
 
   const router = useRouter();
-  const { returnId } = router.query;
+  const { id } = router.query;
 
   const [returnProducts, setReturnProducts] =
     useRecoilState(productReturnState);
@@ -57,38 +58,30 @@ export default function ReturnCoupon() {
     },
   });
 
-  const { data: returnProductDetail, isLoading } = useQuery<{
-    data: { purchaseReturn: IRecord; products: any };
-  }>(['RETURN_PRODUCT_DETAIL', returnId], () =>
-    getReturnProductDetail(Number(returnId))
+  const { data: importProductDetail, isLoading } = useQuery(
+    ["IMPORT_PRODUCT_DETAIL", id],
+    () => id ? getImportProductDetail(Number(id)) : Promise.resolve(null),
+    {
+      enabled: !!id, // Only run the query if `id` is truthy
+    }
   );
 
+
   useEffect(() => {
-    if (returnProductDetail) {
-      console.log("returnProductDetail", returnProductDetail)
-      // setReturnProducts(returnProductDetail?.data?.products);
-      // const product: IImportProduct = JSON.parse(value);
-      // console.log("product", product)
-
-      // const localProduct: IImportProductLocal = {
-      //   ...product,
-      //   productKey: `${product.product.id}-${product.id}`,
-      //   inventory: product.quantity,
-      //   quantity: 1,
-      //   discountValue: 0,
-      //   batches: [],
-      // };
-
-      returnProductDetail?.data?.products?.forEach((product) => {
+    if (importProductDetail) {
+      importProductDetail?.data?.products?.forEach((product) => {
         const newProduct = {
           ...product,
+          // productId: product.productId,
           productUnit: [product.productBatchHistories[0].productUnit],
         }
         const localProduct: IImportProductLocal = {
           ...newProduct,
           productKey: `${product.product.id}-${product.id}`,
           inventory: product.quantity,
+          productId: product.productId,
           quantity: 1,
+          price: product.productBatchHistories[0].importPrice,
           discountValue: 0,
           batches: [],
         };
@@ -114,35 +107,11 @@ export default function ReturnCoupon() {
           cloneImportProducts.push(localProduct);
         }
 
-        console.log("cloneImportProducts", cloneImportProducts)
-
         setReturnProducts(cloneImportProducts);
       });
-
-      // let cloneImportProducts = cloneDeep(returnProducts);
-
-      // if (
-      //   returnProducts.find(
-      //     (p) => p.productKey === localProduct.productKey
-      //   )
-      // ) {
-      //   cloneImportProducts = cloneImportProducts.map((product) => {
-      //     if (product.productKey === localProduct.productKey) {
-      //       return {
-      //         ...product,
-      //         quantity: product.quantity + 1,
-      //       };
-      //     }
-
-      //     return product;
-      //   });
-      // } else {
-      //   cloneImportProducts.push(localProduct);
-      // }
-
-      // setReturnProducts(cloneImportProducts);
+      setValue('supplierId', importProductDetail?.data?.inbound.supplierId, { shouldValidate: true });
     }
-  }, [returnProductDetail])
+  }, [importProductDetail])
 
   useEffect(() => {
     if (profile) {
@@ -194,7 +163,7 @@ export default function ReturnCoupon() {
   const onChangeValueProduct = (productKey, field, newValue) => {
     let productImportClone = cloneDeep(returnProducts);
 
-    productImportClone = productImportClone.map((product) => {
+    productImportClone = productImportClone.map((product: any) => {
       if (product.productKey === productKey) {
         if (field === 'quantity' && product.batches?.length === 1) {
           return {
@@ -205,6 +174,11 @@ export default function ReturnCoupon() {
               quantity: newValue,
             })),
           };
+        }
+        else if (field === 'quantity') {
+          if (id && newValue > product.productBatchHistories[0].quantity || newValue < 1) {
+            return product;
+          }
         }
 
         return {
@@ -277,25 +251,28 @@ export default function ReturnCoupon() {
       title: 'ĐVT',
       dataIndex: 'units',
       key: 'units',
-      render: (_, { productKey, product, id }) => (
-        <CustomUnitSelect
+      render: (_, record: any) => {
+        if (id) {
+          return record.productUnit[0]?.unitName
+        }
+        return <CustomUnitSelect
           options={(() => {
             const productUnitKeysSelected = returnProducts.map((product) =>
               Number(product.productKey.split('-')[1])
             );
 
-            return product.productUnit?.map((unit) => ({
+            return record?.product.productUnit?.map((unit) => ({
               value: unit.id,
               label: unit.unitName,
               disabled: productUnitKeysSelected.includes(unit.id),
             }));
           })()}
-          value={id}
+          value={record?.id}
           onChange={(value) => {
             let returnProductsClone = cloneDeep(returnProducts);
 
             returnProductsClone = returnProductsClone.map((product) => {
-              if (product.productKey === productKey) {
+              if (product.productKey === record?.productKey) {
                 const productUnit = product.product.productUnit.find(
                   (unit) => unit.id === value
                 );
@@ -318,48 +295,60 @@ export default function ReturnCoupon() {
             setReturnProducts(returnProductsClone);
           }}
         />
-      ),
+      },
     },
     {
       title: 'Số lượng',
       dataIndex: 'quantity',
       key: 'quantity',
-      render: (quantity, { productKey }) => (
-        <CustomInput
-          wrapClassName="!w-[110px]"
-          className="!h-6 !w-[80px] text-center"
-          hasMinus={true}
-          hasPlus={true}
-          defaultValue={quantity}
-          value={quantity}
-          type="number"
-          onChange={(value) =>
-            onChangeValueProduct(productKey, 'quantity', value)
-          }
-          onMinus={(value) =>
-            onChangeValueProduct(productKey, 'quantity', value)
-          }
-          onPlus={(value) =>
-            onChangeValueProduct(productKey, 'quantity', value)
-          }
-        />
+      render: (quantity, record: any) => (
+        <div className='flex items-center gap-2'>
+          <CustomInput
+            wrapClassName="!w-[110px]"
+            className="!h-6 !w-[80px] text-center"
+            hasMinus={true}
+            hasPlus={true}
+            defaultValue={quantity}
+            value={quantity}
+            type="number"
+            onChange={(value) =>
+              onChangeValueProduct(record?.productKey, 'quantity', value)
+            }
+            onMinus={(value) =>
+              onChangeValueProduct(record?.productKey, 'quantity', value)
+            }
+            onPlus={(value) =>
+              onChangeValueProduct(record?.productKey, 'quantity', value)
+            }
+          />
+          <div>
+            / {record?.productBatchHistories[0]?.quantity}
+          </div>
+        </div>
       ),
     },
     {
-      title: 'Đơn giá',
+      title: id ? "Giá nhập" : 'Đơn giá',
       dataIndex: 'primePrice',
       key: 'primePrice',
-      render: (_, { productKey, price }) => (
+      render: (_, record: any) => id ? <CustomInput
+        type="number"
+        bordered={false}
+        onChange={(value) => onChangeValueProduct(record?.productKey, 'price', value)}
+        wrapClassName="w-[100px]"
+        defaultValue={record?.productBatchHistories[0]?.importPrice}
+        disabled
+      /> : (
         <CustomInput
           type="number"
           bordered={false}
-          onChange={(value) => onChangeValueProduct(productKey, 'price', value)}
+          onChange={(value) => onChangeValueProduct(record?.productKey, 'price', value)}
           wrapClassName="w-[100px]"
-          defaultValue={price}
+          defaultValue={record?.price}
         />
       ),
     },
-    {
+    (id ? {} : {
       title: 'Giảm giá',
       dataIndex: 'discountValue',
       key: 'discountValue',
@@ -374,13 +363,29 @@ export default function ReturnCoupon() {
           defaultValue={value}
         />
       ),
-    },
+    }),
+    (id ? {
+      title: "Giá trả lại",
+      dataIndex: 'price',
+      key: 'price',
+      render: (price, record: any) => <CustomInput
+        type="number"
+        bordered={false}
+        onChange={(value) => onChangeValueProduct(record?.productKey, 'price', value)}
+        wrapClassName="w-[100px]"
+        defaultValue={price}
+      />
+    } : {}),
     {
       title: 'Thành tiền',
       dataIndex: 'totalPrice',
       key: 'totalPrice',
-      render: (_, { quantity, discountValue, price }) =>
-        formatMoney(quantity * price - discountValue),
+      render: (_, { quantity, discountValue, price }) => {
+        if (id) {
+          return formatMoney(quantity * price)
+        }
+        return formatMoney(quantity * price - discountValue)
+      },
     },
   ];
 
@@ -421,7 +426,6 @@ export default function ReturnCoupon() {
               listHeight={512}
               onSelect={(value) => {
                 const product: IImportProduct = JSON.parse(value);
-                console.log("product", product)
 
                 const localProduct: IImportProductLocal = {
                   ...product,
@@ -430,6 +434,7 @@ export default function ReturnCoupon() {
                   quantity: 1,
                   discountValue: 0,
                   batches: [],
+                  productBatchHistories: product?.productBatchHistories,
                 };
 
                 let cloneImportProducts = cloneDeep(returnProducts);
@@ -508,7 +513,7 @@ export default function ReturnCoupon() {
                 defaultExpandAllRows: true,
                 expandedRowRender: (record: IImportProductLocal) => (
                   <>
-                    {checkDisplayListBatch(record) && (
+                    {checkDisplayListBatch(record) ? (
                       <div className="bg-[#FFF3E6] px-6 py-2 ">
                         <div className="flex items-center gap-x-3">
                           <div
@@ -551,6 +556,37 @@ export default function ReturnCoupon() {
                               ?.message
                           }
                         />
+                      </div>
+                    ) : (
+                      <div className="bg-[#FFF3E6] px-6 py-2 ">
+                        <div className="flex items-center gap-x-3">
+                          <div
+                            className="flex items-center rounded bg-red-main py-1 px-2 text-white"
+                          >
+                            <span className="mr-2">
+                              {record?.productBatchHistories[0]?.batch?.name} - {record?.productBatchHistories[0]?.batch?.expiryDate} - SL:{' '}
+                              {record?.productBatchHistories[0]?.batch?.quantity}
+                            </span>{' '}
+                            <Image
+                              className=" cursor-pointer"
+                              src={CloseIcon}
+                              onClick={() => {
+                                handleRemoveBatch(
+                                  record.productKey,
+                                  record?.productBatchHistories[0]?.batch?.id
+                                );
+                              }}
+                              alt=""
+                            />
+                          </div>
+                        </div>
+                        {/* <InputError
+                          error={
+                            errors?.products &&
+                            errors?.products[Number(record.key) - 1]?.batches
+                              ?.message
+                          }
+                        /> */}
                       </div>
                     )}
                   </>
@@ -601,6 +637,7 @@ export default function ReturnCoupon() {
           reset,
           errors,
         }}
+        importId={id as string}
       />
     </div>
   );

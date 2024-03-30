@@ -1,4 +1,4 @@
-import type { EProductStatus, EProductType } from '@/enums';
+import type { EProductStatus, EProductType } from "@/enums";
 
 export interface IImportProduct {
   id: number;
@@ -112,6 +112,7 @@ export interface IImportProduct {
     isDefaultBranch: boolean;
     createdAt: string;
   };
+  productBatchHistories: any[];
 }
 
 export interface IImportProductLocal extends IImportProduct {
@@ -119,6 +120,7 @@ export interface IImportProductLocal extends IImportProduct {
   productKey: string; // client
   discountValue: number; // client
   inventory: number; // client
+  productBatchHistories: any[]; // client
   batches: {
     id: number;
     name: string;

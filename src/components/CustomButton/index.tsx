@@ -15,7 +15,8 @@ export function CustomButton({
   wrapClassName,
   disabled = false,
   onEnter,
-  htmlType
+  htmlType,
+  loading
 }: {
   children: any;
   prefixIcon?: ReactNode;
@@ -28,6 +29,7 @@ export function CustomButton({
   disabled?: boolean;
   onEnter?: () => void;
   htmlType?: 'submit' | 'button' | 'reset';
+  loading?: boolean;
 }) {
   return (
     <ButtonStyled className={wrapClassName}>
@@ -47,6 +49,7 @@ export function CustomButton({
           }
         }}
         htmlType={htmlType}
+        loading={loading}
       >
         {prefixIcon ? <div className="mr-2 mt-[5px]">{prefixIcon}</div> : <></>}
         {children}

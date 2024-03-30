@@ -316,7 +316,7 @@ export function RightContent({ useForm }: { useForm: any }) {
             <div className="mb-3 ">
               <div className="flex justify-between">
                 <div className="text-lg leading-normal text-[#828487]">
-                  Tiền khách đưa
+                  Tiền khách đưa <span className='text-red-500'>*</span>
                 </div>
                 <div className="w-[120px]">
                   <CustomInput
@@ -464,6 +464,7 @@ export function RightContent({ useForm }: { useForm: any }) {
           className="!h-11"
           disabled={isLoadingCreateOrder || !orderObject[orderActive]?.length}
           type={!orderObject[orderActive]?.length ? 'disable' : 'danger'}
+          loading={isLoadingCreateOrder}
         >
           <Image src={DolarIcon} alt="" /> Thanh toán
         </CustomButton>
@@ -478,7 +479,7 @@ export function RightContent({ useForm }: { useForm: any }) {
       <CreateCustomerModal
         isOpen={isOpenAddCustomerModal}
         onCancel={() => setIsOpenAddCustomerModal(false)}
-       onSave={({ customerId, CustomerName }) => {
+        onSave={({ customerId, CustomerName }) => {
           setValue("customerId", customerId, {
             shouldValidate: true,
           });

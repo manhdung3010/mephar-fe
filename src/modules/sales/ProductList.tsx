@@ -11,7 +11,7 @@ import CustomTable from '@/components/CustomTable';
 import { CustomUnitSelect } from '@/components/CustomUnitSelect';
 import InputError from '@/components/InputError';
 import { EProductType } from '@/enums';
-import { formatMoney, roundNumber } from '@/helpers';
+import { formatMoney, formatNumber, roundNumber } from '@/helpers';
 import { orderActiveState, orderState } from '@/recoil/state';
 
 import type { IBatch, IProductUnit, ISaleProductLocal } from './interface';
@@ -77,6 +77,7 @@ export function ProductList({ useForm }: { useForm: any }) {
     setOrderObject(orderObjectClone);
   };
 
+  console.log("orderObject[orderActive]", orderObject[orderActive])
   const onExpandMoreBatches = async (productKey, quantity: number) => {
     const orderObjectClone = cloneDeep(orderObject);
 
@@ -243,6 +244,12 @@ export function ProductList({ useForm }: { useForm: any }) {
           }}
         />
       ),
+    },
+    {
+      title: 'Tồn kho',
+      dataIndex: 'price',
+      key: 'price',
+      render: (_, record) => formatNumber(Math.floor(+record.product.inventory / +record.productUnit.exchangeValue)),
     },
     {
       title: 'SỐ LƯỢNG',

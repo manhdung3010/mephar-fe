@@ -333,6 +333,7 @@ export function Info({ record }: { record: IRecord }) {
         <CustomButton
           type="success"
           prefixIcon={<Image src={PlusIcon} alt="" />}
+          onClick={() => router.push(`/products/return/coupon/?id=${record.id}`)}
         >
           Trả hàng nhập
         </CustomButton>

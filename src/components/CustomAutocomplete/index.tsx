@@ -18,6 +18,7 @@ export function CustomAutocomplete({
   listHeight = 256,
   onSelect,
   popupClassName,
+  isLoading,
 }: {
   onChange?: (value: any) => void;
   defaultValue?: any;

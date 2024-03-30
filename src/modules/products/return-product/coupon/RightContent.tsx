@@ -23,7 +23,7 @@ import { productReturnState } from '@/recoil/state';
 
 import { AddProviderModal } from './AddProviderModal';
 
-export function RightContent({ useForm }: { useForm: any }) {
+export function RightContent({ useForm, importId }: { useForm: any, importId: string }) {
   const queryClient = useQueryClient();
 
   const { getValues, setValue, handleSubmit, reset, errors } = useForm;
@@ -57,6 +57,8 @@ export function RightContent({ useForm }: { useForm: any }) {
 
     return price;
   }, [productsReturn]);
+
+  console.log("errors", errors)
 
   const totalPriceAfterDiscount = useMemo(() => {
     const price = Number(totalPrice) - Number(getValues('discount') ?? 0);
@@ -101,13 +103,13 @@ export function RightContent({ useForm }: { useForm: any }) {
 
   const changePayload = (status: EImportProductStatus) => {
     const products = cloneDeep(productsReturn).map(
-      ({ id, price, product, quantity, discountValue, batches }) => ({
-        productId: product.id,
+      ({ id, price, product, quantity, discountValue, batches, productBatchHistories }) => ({
+        productId: product.id || productBatchHistories[0].productId,
         importPrice: price,
         totalQuantity: quantity,
         totalPrice: price * quantity - discountValue,
         discount: discountValue,
-        productUnitId: id,
+        productUnitId: importId ? productBatchHistories[0].productUnitId : id,
         isBatchExpireControl: product.isBatchExpireControl,
         batches: batches?.map(({ id, quantity, expiryDate }) => ({
           id,
@@ -217,20 +219,22 @@ export function RightContent({ useForm }: { useForm: any }) {
               </div>
             </div>
 
-            <div className="mb-5 flex justify-between">
-              <div className=" leading-normal text-[#828487]">Giảm giá</div>
-              <div className="w-[90px]">
-                <CustomInput
-                  bordered={false}
-                  className="h-6 pr-0 text-end "
-                  onChange={(value) =>
-                    setValue('discount', value, { shouldValidate: true })
-                  }
-                  type="number"
-                  value={getValues('discount')}
-                />
+            {
+              !importId && <div className="mb-5 flex justify-between">
+                <div className=" leading-normal text-[#828487]">Giảm giá</div>
+                <div className="w-[90px]">
+                  <CustomInput
+                    bordered={false}
+                    className="h-6 pr-0 text-end "
+                    onChange={(value) =>
+                      setValue('discount', value, { shouldValidate: true })
+                    }
+                    type="number"
+                    value={getValues('discount')}
+                  />
+                </div>
               </div>
-            </div>
+            }
 
             <div className="mb-5 flex justify-between">
               <div className="text-lg leading-normal text-[#000000]">

@@ -1,4 +1,4 @@
-import * as yup from 'yup';
+import * as yup from "yup";
 
 export const schema = yup.object().shape({
   products: yup.array(
@@ -13,20 +13,20 @@ export const schema = yup.object().shape({
       batches: yup
         .array(
           yup.object({
-            id: yup.number().required('Đây là trường bắt buộc!'),
-            quantity: yup.number().required('Đây là trường bắt buộc!'),
-            expiryDate: yup.string().required('Đây là trường bắt buộc!'),
+            id: yup.number().required("Đây là trường bắt buộc!"),
+            quantity: yup.number().required("Đây là trường bắt buộc!"),
+            expiryDate: yup.string().required("Đây là trường bắt buộc!"),
           })
         )
-        .test('is-required', 'Vui lòng chọn lô sản phẩm', (value, context) => {
+        .test("is-required", "Vui lòng chọn lô sản phẩm", (value, context) => {
           if (context.parent.isBatchExpireControl && !value?.length)
             return false;
 
           return true;
         })
         .test(
-          'sum-quantity',
-          'Số lượng sản phẩm khác với số lượng sản phẩm trong từng lô',
+          "sum-quantity",
+          "Số lượng sản phẩm khác với số lượng sản phẩm trong từng lô",
           (batches, context) => {
             if (!context.parent.isBatchExpireControl) return true;
 
@@ -46,8 +46,8 @@ export const schema = yup.object().shape({
   paid: yup
     .string()
     .test(
-      'is-less-than',
-      'Vui lòng nhập nhỏ hơn hoặc bằng tiền tổng hóa đơn',
+      "is-less-than",
+      "Vui lòng nhập nhỏ hơn hoặc bằng tiền tổng hóa đơn",
       (value, context) => {
         if (value && value > context.parent.totalPrice) return false;
         return true;
@@ -58,7 +58,7 @@ export const schema = yup.object().shape({
   totalPrice: yup.number(),
   discount: yup.number(),
   description: yup.string(),
-  userId: yup.number().required('Đây là trường bắt buộc!'),
-  supplierId: yup.number().required('Đây là trường bắt buộc!'),
-  branchId: yup.number().required('Đây là trường bắt buộc!'),
+  userId: yup.number().required("Đây là trường bắt buộc!"),
+  supplierId: yup.number().required("Đây là trường bắt buộc!"),
+  branchId: yup.number().required("Đây là trường bắt buộc!"),
 });

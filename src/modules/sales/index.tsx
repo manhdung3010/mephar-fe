@@ -55,7 +55,7 @@ const Index = () => {
     },
   });
 
-  const { data: products, isLoading } = useQuery<{
+  const { data: products, isLoading: isLoadingProduct } = useQuery<{
     data?: { items: ISaleProduct[] };
   }>(
     [
@@ -250,10 +250,10 @@ const Index = () => {
                       setFormFilter((pre) => ({ ...pre, keyword: '' }));
                       setSearchKeyword('');
                     }}
-                    onSearch={(value) => {
-                      onSearch(value);
+                    onSearch={debounce((value) => {
                       setSearchKeyword(value);
-                    }}
+                      onSearch(value);
+                    }, 300)}
                     showSearch={true}
                     className="h-[48px]  rounded-[30px] bg-white text-base"
                     wrapClassName="!w-[466px]"
@@ -350,7 +350,7 @@ const Index = () => {
                         }))
                     }
                     value={searchKeyword}
-                    isLoading={isLoading || isLoadingSampleMedicines}
+                    isLoading={isLoadingProduct || isLoadingSampleMedicines}
                     listHeight={512}
                     popupClassName="search-product"
                   />
