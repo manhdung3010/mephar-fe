@@ -440,6 +440,8 @@ export function RightContent({ useForm }: { useForm: any }) {
           onClick={() => {
             const products: ISaleProductLocal[] = orderObject[orderActive];
 
+            console.log("products: ", products)
+
             const formatProducts = products.map((product) => ({
               productId: product.productId,
               productUnitId: product.productUnitId,
@@ -449,8 +451,8 @@ export function RightContent({ useForm }: { useForm: any }) {
               isBatchExpireControl: product.product.isBatchExpireControl,
               batches: product.batches
                 .filter((batch) => batch.isSelected)
-                .map((batch) => ({
-                  id: batch.batchId,
+                .map((batch: any) => ({
+                  id: batch.id,
                   quantity: batch.quantity,
                   inventory: batch.inventory,
                 })),

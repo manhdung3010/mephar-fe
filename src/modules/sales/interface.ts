@@ -1,4 +1,4 @@
-import type { EProductStatus, EProductType } from '@/enums';
+import type { EProductStatus, EProductType } from "@/enums";
 
 export interface IBatch {
   productId: number;
@@ -153,7 +153,7 @@ export interface ISaleProduct {
   }[];
 }
 
-export interface ISaleProductLocal extends Omit<ISaleProduct, 'batches'> {
+export interface ISaleProductLocal extends Omit<ISaleProduct, "batches"> {
   productKey: string;
   key?: number;
   originProductUnitId: number;
@@ -165,7 +165,7 @@ export interface ISaleProductLocal extends Omit<ISaleProduct, 'batches'> {
     originalInventory: number;
     isSelected: boolean;
     expiryDate: string;
-    batch: { id: number; name: string };
+    name: string;
     productUnit: {
       id: number;
       unitName: string;

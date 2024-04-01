@@ -30,7 +30,7 @@ export function ListBatchModal({
   const [listBatch, setListBatch] = useState<IBatch[]>([]);
 
   useEffect(() => {
-    orderObject[orderActive]?.forEach((product: ISaleProductLocal) => {
+    orderObject[orderActive]?.forEach((product: any) => {
       if (product.productKey === productKeyAddBatch) {
         setListBatch(
           product.batches?.map((batch) => ({
@@ -43,12 +43,14 @@ export function ListBatchModal({
     });
   }, [productKeyAddBatch]);
 
+  console.log('listBatch', listBatch)
+
   const columns: ColumnsType<IBatch> = [
     {
       title: 'Tên',
       dataIndex: 'name',
       key: 'name',
-      render: (_, { batch }) => batch.name,
+      // render: (_, { batch }) => batch.name,
     },
     {
       title: 'Hạn sử dụng',

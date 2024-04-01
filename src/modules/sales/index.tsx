@@ -115,7 +115,9 @@ const Index = () => {
     } else {
       let isSelectedUnit = true;
 
-      const productLocal: ISaleProductLocal = {
+      console.log("product", product)
+
+      const productLocal: any = {
         ...product,
         productKey,
         quantity: 1,
@@ -123,8 +125,7 @@ const Index = () => {
         originProductUnitId: product.id,
         batches: product.batches?.map((batch) => {
           const inventory =
-            (batch.quantity / product.productUnit.exchangeValue) *
-            batch.productUnit.exchangeValue;
+            (batch.quantity / product.productUnit.exchangeValue)
 
           const newBatch = {
             ...batch,
@@ -176,7 +177,7 @@ const Index = () => {
       } else {
         let isSelectedUnit = true;
 
-        const productLocal: ISaleProductLocal = {
+        const productLocal: any = {
           ...product,
           ...product.productUnit,
           productKey,
@@ -185,9 +186,7 @@ const Index = () => {
           originProductUnitId: product.productUnitId,
           batches: product.batches?.map((batch) => {
             const inventory =
-              (batch.quantity / product.productUnit.exchangeValue) *
-              batch.productUnit.exchangeValue;
-
+              (batch.quantity / product.productUnit.exchangeValue)
             const newBatch = {
               ...batch,
               inventory,

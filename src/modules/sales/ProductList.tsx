@@ -229,9 +229,7 @@ export function ProductList({ useForm }: { useForm: any }) {
                       batches: product.batches?.map((batch) => ({
                         ...batch,
                         inventory:
-                          (batch.originalInventory *
-                            batch.productUnit.exchangeValue) /
-                          unit.exchangeValue,
+                          (Math.floor(batch.quantity / product.productUnit.exchangeValue))
                       })),
                     };
                   }
@@ -356,7 +354,7 @@ export function ProductList({ useForm }: { useForm: any }) {
                               className="flex min-w-fit items-center rounded bg-red-main py-1 px-2 text-white"
                             >
                               <span className="mr-2">
-                                {batch.batch.name} - {batch.expiryDate} - SL:{' '}
+                                {batch.name} - {batch.expiryDate} - SL:{' '}
                                 {batch.quantity}
                               </span>{' '}
                               <Image
