@@ -1,7 +1,7 @@
 import cx from 'classnames';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import CloseIcon from '@/assets/closeIcon.svg';
 import DeliveryIcon from '@/assets/deliveryIcon.svg';
@@ -18,6 +18,14 @@ import { IOrder } from '../type';
 
 export function Info({ record }: { record: IOrder }) {
   const router = useRouter();
+  const [totalPrice, setTotalPrice] = useState(0);
+
+  useEffect(() => {
+    const total = record.products.reduce((acc, product) => {
+      return acc + product.price;
+    }, 0);
+    setTotalPrice(total);
+  }, [record.products])
 
   const [openHistoryModal, setOpenHistoryModal] = useState(false);
   return (
@@ -123,7 +131,7 @@ export function Info({ record }: { record: IOrder }) {
           <div className="mb-4 grid grid-cols-3 gap-5">
             <div className="text-gray-main ">Tổng tiền sản phẩm:</div>
             <div className="col-span-2 text-black-main">
-              {formatMoney(record.cashOfCustomer)}
+              {formatMoney(totalPrice)}
             </div>
           </div>
           <div className="mb-4 grid grid-cols-3 gap-5">

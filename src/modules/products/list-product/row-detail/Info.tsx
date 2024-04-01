@@ -138,7 +138,7 @@ const Info = ({ record, onChangeUnit }: { record: IProduct, onChangeUnit: any })
           </div>
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Loại hàng:</div>
-            <div className="text-black-main">Dụng cụ y tế</div>
+            <div className="text-black-main">{record?.type === 1 ? "Thuốc" : record?.type === 2 ? "Hàng hóa" : "Combo - đóng gói"}</div>
           </div>
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Tên hàng:</div>

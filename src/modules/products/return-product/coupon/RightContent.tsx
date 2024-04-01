@@ -58,8 +58,6 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
     return price;
   }, [productsReturn]);
 
-  console.log("errors", errors)
-
   const totalPriceAfterDiscount = useMemo(() => {
     const price = Number(totalPrice) - Number(getValues('discount') ?? 0);
 
@@ -111,7 +109,7 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
         discount: discountValue,
         productUnitId: importId ? productBatchHistories[0].productUnitId : id,
         isBatchExpireControl: product.isBatchExpireControl,
-        batches: batches?.map(({ id, quantity, expiryDate }) => ({
+        batches: id ? [productBatchHistories[0]?.batch] : batches?.map(({ id, quantity, expiryDate }) => ({
           id,
           quantity,
           expiryDate,

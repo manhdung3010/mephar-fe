@@ -405,11 +405,12 @@ export default function ReturnCoupon() {
   };
 
   const checkDisplayListBatch = (product: IImportProductLocal) => {
-    return (
-      product.product.type === EProductType.MEDICINE ||
-      (product.product.type === EProductType.PACKAGE &&
-        product.product.isBatchExpireControl)
-    );
+    // return (
+    //   product.product.type === EProductType.MEDICINE ||
+    //   (product.product.type === EProductType.PACKAGE &&
+    //     product.product.isBatchExpireControl)
+    // );
+    return product.product.isBatchExpireControl;
   };
 
   return (
@@ -513,7 +514,7 @@ export default function ReturnCoupon() {
                 defaultExpandAllRows: true,
                 expandedRowRender: (record: IImportProductLocal) => (
                   <>
-                    {checkDisplayListBatch(record) ? (
+                    {checkDisplayListBatch(record) && (
                       <div className="bg-[#FFF3E6] px-6 py-2 ">
                         <div className="flex items-center gap-x-3">
                           <div
@@ -526,7 +527,25 @@ export default function ReturnCoupon() {
                             Chọn lô
                           </div>
 
-                          {record.batches?.map((batch) => (
+                          {id ? <div
+                            className="flex items-center rounded bg-red-main py-1 px-2 text-white"
+                          >
+                            <span className="mr-2">
+                              {record.productBatchHistories[0]?.batch.name} - {record.productBatchHistories[0]?.batch.expiryDate} - SL:{' '}
+                              {record.productBatchHistories[0]?.batch.quantity}
+                            </span>{' '}
+                            <Image
+                              className=" cursor-pointer"
+                              src={CloseIcon}
+                              onClick={() => {
+                                handleRemoveBatch(
+                                  record.productKey,
+                                  record.productBatchHistories[0]?.batch.id
+                                );
+                              }}
+                              alt=""
+                            />
+                          </div> : record.batches?.map((batch) => (
                             <div
                               key={batch.id}
                               className="flex items-center rounded bg-red-main py-1 px-2 text-white"
@@ -556,37 +575,6 @@ export default function ReturnCoupon() {
                               ?.message
                           }
                         />
-                      </div>
-                    ) : (
-                      <div className="bg-[#FFF3E6] px-6 py-2 ">
-                        <div className="flex items-center gap-x-3">
-                          <div
-                            className="flex items-center rounded bg-red-main py-1 px-2 text-white"
-                          >
-                            <span className="mr-2">
-                              {record?.productBatchHistories[0]?.batch?.name} - {record?.productBatchHistories[0]?.batch?.expiryDate} - SL:{' '}
-                              {record?.productBatchHistories[0]?.batch?.quantity}
-                            </span>{' '}
-                            <Image
-                              className=" cursor-pointer"
-                              src={CloseIcon}
-                              onClick={() => {
-                                handleRemoveBatch(
-                                  record.productKey,
-                                  record?.productBatchHistories[0]?.batch?.id
-                                );
-                              }}
-                              alt=""
-                            />
-                          </div>
-                        </div>
-                        {/* <InputError
-                          error={
-                            errors?.products &&
-                            errors?.products[Number(record.key) - 1]?.batches
-                              ?.message
-                          }
-                        /> */}
                       </div>
                     )}
                   </>

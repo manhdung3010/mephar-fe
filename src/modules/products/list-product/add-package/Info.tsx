@@ -143,7 +143,7 @@ const Info = ({
         <div>
           <Label infoText="" label="Mã vạch" />
           <CustomInput
-            placeholder="Nhập mã vạch"
+            placeholder="Mã vạch tự động"
             className="h-11"
             onChange={(e) =>
               setValue('barCode', e, {
