@@ -10,7 +10,7 @@ import { Note } from './Note';
 import { ReceiveAddress } from './ReceiveAddress';
 import { ReturnHistory } from './ReturnHistory';
 
-const RowDetail = ({ record }: { record: ICustomer }) => {
+const RowDetail = ({ record, branchId }: { record: ICustomer, branchId: number }) => {
   const [select, setSelect] = useState(0);
 
   const menu = [
@@ -50,7 +50,7 @@ const RowDetail = ({ record }: { record: ICustomer }) => {
       {select === 0 && <Info record={record} />}
       {/* {select === 1 && <ReceiveAddress record={record} />} */}
       {select === 1 && <Debt record={record} />}
-      {select === 2 && <BuyHistory record={record} />}
+      {select === 2 && <BuyHistory record={record} branchId={branchId} />}
       {/* {select === 4 && <ReturnHistory record={record} />} */}
       {/* {select === 5 && <CollectPointHistory record={record} />} */}
       {/* {select === 3 && <Note record={record} />} */}

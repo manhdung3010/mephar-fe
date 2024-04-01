@@ -3,10 +3,14 @@ import type { ColumnsType } from 'antd/es/table';
 import cx from 'classnames';
 import Image from 'next/image';
 
+import { getOrder } from '@/api/order.service';
 import DollarIcon from '@/assets/dolarIcon.svg';
 import { CustomButton } from '@/components/CustomButton';
 import CustomTable from '@/components/CustomTable';
-import { EBillStatus, EBillStatusLabel } from '@/enums';
+import { EOrderStatus, EOrderStatusLabel } from '@/enums';
+import { formatDateTime, formatMoney } from '@/helpers';
+import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 
 const { TextArea } = Input;
 
@@ -15,68 +19,79 @@ interface IRecord {
   id: string;
   totalPrice: number;
   receivePrice: number;
+  cashOfCustomer: number;
   returnPrice: number;
   createdAt: string;
-  status: EBillStatus;
+  status: EOrderStatus;
 }
 
-export function BuyHistory({ record }: { record: any }) {
+export function BuyHistory({ record, branchId }: { record: any, branchId: number }) {
   const data = {
     key: 1,
     id: '002014',
     totalPrice: 120000,
     receivePrice: 50000,
     returnPrice: 0,
-    status: EBillStatus.comleted,
+    status: EOrderStatus.SUCCEED,
     createdAt: '12/10/2023 11:34',
   };
+  const [formFilter, setFormFilter] = useState({
+    page: 1,
+    limit: 20,
+    customerId: record.id,
+    branchId,
+  });
 
-  const dataSource: IRecord[] = Array(1)
-    .fill(0)
-    .map((_, index) => ({ ...data, key: index }));
+  const { data: orders, isLoading } = useQuery(
+    ['ORDER_LIST', JSON.stringify(formFilter), branchId],
+    () => getOrder({ ...formFilter, branchId })
+  );
 
   const columns: ColumnsType<IRecord> = [
     {
       title: 'Mã phiếu',
-      dataIndex: 'id',
-      key: 'id',
+      dataIndex: 'code',
+      key: 'code',
       render: (value) => <span className="text-[#0070F4]">{value}</span>,
     },
     {
       title: 'Thời gian',
       dataIndex: 'createdAt',
       key: 'createdAt',
+      render: (value) => formatDateTime(value),
     },
     {
       title: 'Tổng tiền',
       dataIndex: 'totalPrice',
       key: 'totalPrice',
+      render: (value) => formatMoney(value),
     },
     {
       title: 'Khách trả',
-      dataIndex: 'receivePrice',
-      key: 'receivePrice',
+      dataIndex: 'cashOfCustomer',
+      key: 'cashOfCustomer',
+      render: (value) => formatMoney(value),
     },
     {
       title: 'Trả lại',
       dataIndex: 'returnPrice',
       key: 'returnPrice',
+      render: (value, record) => formatMoney(+record?.cashOfCustomer - +record?.totalPrice),
     },
     {
-      title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
       render: (_, { status }) => (
         <div
           className={cx(
-            {
-              'text-[#00B63E] border border-[#00B63E] bg-[#DEFCEC]':
-                status === EBillStatus.comleted,
-            },
-            'px-2 py-1 rounded-2xl w-max'
+            status === EOrderStatus.SUCCEED
+              ? "text-[#00B63E] border border-[#00B63E] bg-[#DEFCEC]"
+              : "text-[#6D6D6D] border border-[#6D6D6D] bg-[#F0F1F1]",
+            "px-2 py-1 rounded-2xl w-max"
           )}
         >
-          {EBillStatusLabel[status]}
+          {EOrderStatusLabel[status]}
         </div>
       ),
     },
@@ -85,7 +100,7 @@ export function BuyHistory({ record }: { record: any }) {
   return (
     <div className="gap-12 ">
       <CustomTable
-        dataSource={dataSource}
+        dataSource={orders?.data?.items}
         columns={columns}
         pagination={false}
         className="mb-4"

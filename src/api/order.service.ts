@@ -1,14 +1,15 @@
-import type { EOrderStatus } from '@/enums';
+import type { EOrderStatus } from "@/enums";
 
-import axiosClient from './index';
+import axiosClient from "./index";
 
 export function getOrder(params: {
   page: number;
   limit: number;
   branchId: number;
   status?: EOrderStatus;
+  customerId?: number;
 }) {
-  return axiosClient.get('order', { params });
+  return axiosClient.get("order", { params });
 }
 
 export function updateOrder(id: number, payload) {

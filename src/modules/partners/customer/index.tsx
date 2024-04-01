@@ -23,6 +23,8 @@ import { formatMoney } from '@/helpers';
 import RowDetail from './row-detail';
 import Search from './Search';
 import type { ICustomer } from './type';
+import { useRecoilValue } from 'recoil';
+import { branchState } from '@/recoil/state';
 
 interface IRecord {
   key: number;
@@ -41,6 +43,7 @@ interface IRecord {
 export function Customer() {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const branchId = useRecoilValue(branchState);
 
   const [deletedId, setDeletedId] = useState<number>();
   const [formFilter, setFormFilter] = useState({
@@ -240,7 +243,7 @@ export function Customer() {
         expandable={{
           // eslint-disable-next-line @typescript-eslint/no-shadow
           expandedRowRender: (record: ICustomer) => (
-            <RowDetail record={record} />
+            <RowDetail record={record} branchId={branchId} />
           ),
           expandIcon: () => <></>,
           expandedRowKeys: Object.keys(expandedRowKeys).map(
