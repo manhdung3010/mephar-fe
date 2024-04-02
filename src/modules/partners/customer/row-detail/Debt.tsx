@@ -5,6 +5,8 @@ import Image from 'next/image';
 import DollarIcon from '@/assets/dolarIcon.svg';
 import { CustomButton } from '@/components/CustomButton';
 import CustomTable from '@/components/CustomTable';
+import PaymentModal from './PaymentModal';
+import { useState } from 'react';
 
 const { TextArea } = Input;
 
@@ -18,6 +20,7 @@ interface IRecord {
 }
 
 export function Debt({ record }: { record: any }) {
+  const [isOpen, setIsOpen] = useState(false);
   const data = {
     key: 1,
     id: '002014',
@@ -59,6 +62,10 @@ export function Debt({ record }: { record: any }) {
     },
   ];
 
+  const onSubmit = (values: any) => {
+    console.log(values);
+  };
+
   return (
     <div className="gap-12 ">
       <CustomTable
@@ -72,10 +79,13 @@ export function Debt({ record }: { record: any }) {
         <CustomButton
           type="success"
           prefixIcon={<Image src={DollarIcon} alt="" />}
+          onClick={() => setIsOpen(true)}
         >
           Thanh toán
         </CustomButton>
       </div>
+
+      <PaymentModal isOpen={isOpen} onCancel={() => setIsOpen(!isOpen)} onSubmit={onSubmit} />
     </div>
   );
 }

@@ -49,38 +49,27 @@ export function Info({ record }: { record: IRecord }) {
     },
     {
       title: 'Số lượng',
-      dataIndex: 'totalQuantity',
-      key: 'totalQuantity',
-      render: (_, { productBatchHistories }) =>
-        formatNumber(
-          productBatchHistories.reduce((acc, obj) => acc + obj.quantity, 0)
-        ),
+      dataIndex: 'quantity',
+      key: 'quantity',
+      render: (quantity) => formatNumber(quantity),
     },
-    // {
-    //   title: 'Đơn giá',
-    //   dataIndex: 'importPrice',
-    //   key: 'importPrice',
-    // },
     {
       title: 'Giảm giá',
       dataIndex: 'discount',
       key: 'discount',
-      render: (_, { productBatchHistories }) =>
-        formatMoney(productBatchHistories[0]?.discount),
+      render: (money) => formatMoney(money),
     },
     {
       title: 'Giá nhập',
       dataIndex: 'importPrice',
       key: 'importPrice',
-      render: (_, { productBatchHistories }) =>
-        formatMoney(productBatchHistories[0]?.importPrice),
+      render: (money) => formatMoney(+money),
     },
     {
       title: 'Thành tiền',
       dataIndex: 'totalPrice',
       key: 'totalPrice',
-      render: (_, { productBatchHistories }) =>
-        formatMoney(productBatchHistories[0]?.totalPrice),
+      render: (money) => formatMoney(money),
     },
   ];
 
@@ -100,9 +89,7 @@ export function Info({ record }: { record: IRecord }) {
 
     if (returnProductDetail) {
       returnProductDetail.data.products.forEach((product) => {
-        product.productBatchHistories.forEach((batch) => {
-          total += batch.quantity;
-        });
+        total += product.quantity;
       });
     }
 

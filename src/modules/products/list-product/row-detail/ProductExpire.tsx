@@ -35,7 +35,7 @@ const ProductExpire = ({ productId, branchId, productUnit }: { productId: number
         return {
           ...item,
           unitId: productUnit.find((item) => item.isBaseUnit)?.id,
-          quantity: item.inventory / productUnit.find((item) => item.isBaseUnit)?.exchangeValue,
+          quantity: item.quantity,
           productUnit,
         };
       });
