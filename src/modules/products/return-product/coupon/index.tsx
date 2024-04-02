@@ -527,7 +527,7 @@ export default function ReturnCoupon() {
                             Chọn lô
                           </div>
 
-                          {id ? <div
+                          {id && record?.product?.isBatchExpireControl ? <div
                             className="flex items-center rounded bg-red-main py-1 px-2 text-white"
                           >
                             <span className="mr-2">

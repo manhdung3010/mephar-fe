@@ -82,7 +82,6 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
       const products = getValues('products').map(
         ({ isBatchExpireControl, ...product }) => product
       );
-
       console.log("products", products)
 
       return createReturnProduct({ ...getValues(), products });
@@ -102,6 +101,7 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
   );
 
   const changePayload = (status: EImportProductStatus) => {
+    console.log("productsReturn", productsReturn)
     const products = cloneDeep(productsReturn).map(
       ({ id, price, product, quantity, discountValue, batches, productBatchHistories }) => ({
         productId: product.id || productBatchHistories[0].productId,
@@ -111,11 +111,13 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
         discount: discountValue,
         productUnitId: importId ? productBatchHistories[0].productUnitId : id,
         isBatchExpireControl: product.isBatchExpireControl,
-        batches: id ? [{ ...productBatchHistories[0]?.batch, quantity }] : batches?.map(({ id, quantity, expiryDate }) => ({
-          id,
-          quantity,
-          expiryDate,
-        })),
+        ...(!product.isBatchExpireControl ? null : {
+          batches: id ? [{ ...productBatchHistories[0]?.batch, quantity }] : batches?.map(({ id, quantity, expiryDate }) => ({
+            id,
+            quantity,
+            expiryDate,
+          }))
+        }),
       })
     );
     setValue('products', products);
@@ -127,6 +129,8 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
   const onSubmit = () => {
     mutateCreateProductReturn();
   };
+
+  console.log("errors", errors)
 
   return (
     <div className="flex h-[calc(100vh-52px)] w-[360px] min-w-[360px] flex-col border-l border-[#E4E4E4] bg-white">
