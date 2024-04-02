@@ -1,9 +1,8 @@
 import { CustomDatePicker } from '@/components/CustomDatePicker';
-import { CustomInput } from '@/components/CustomInput';
+import { CustomInput, CustomTextarea } from '@/components/CustomInput';
 import Label from '@/components/CustomLabel';
 import { CustomModal } from '@/components/CustomModal'
 import { yupResolver } from '@hookform/resolvers/yup';
-import TextArea from 'antd/es/input/TextArea';
 import Image from 'next/image';
 import DateIcon from "@/assets/dateIcon.svg";
 import React from 'react'
@@ -95,7 +94,7 @@ function PaymentModal({ isOpen, onCancel, onSubmit, branches, branchId, isLoadin
           </div>
           <div>
             <Label infoText="" label="Ghi chú" />
-            <TextArea rows={8} placeholder="Ghi chú:" onChange={(e: any) => setValue("code", e, { shouldValidate: true })}
+            <CustomTextarea rows={8} placeholder="Ghi chú:" onChange={(e: any) => setValue("code", e, { shouldValidate: true })}
               value={getValues("code")} />
           </div>
         </div>
