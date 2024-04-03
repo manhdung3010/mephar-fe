@@ -82,7 +82,6 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
       const products = getValues('products').map(
         ({ isBatchExpireControl, ...product }) => product
       );
-      console.log("products", products)
 
       return createReturnProduct({ ...getValues(), products });
     },
@@ -95,13 +94,12 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
         await queryClient.invalidateQueries(['LIST_IMPORT_PRODUCT']);
       },
       onError: (err: any) => {
-        message.error(err?.message);
+        message.error("Tạo phiếu trả hàng thất bại!");
       },
     }
   );
 
   const changePayload = (status: EImportProductStatus) => {
-    console.log("productsReturn", productsReturn)
     const products = cloneDeep(productsReturn).map(
       ({ id, price, product, quantity, discountValue, batches, productBatchHistories }) => ({
         productId: product.id || productBatchHistories[0].productId,
@@ -112,7 +110,7 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
         productUnitId: importId ? productBatchHistories[0].productUnitId : id,
         isBatchExpireControl: product.isBatchExpireControl,
         ...(!product.isBatchExpireControl ? null : {
-          batches: id ? [{ ...productBatchHistories[0]?.batch, quantity }] : batches?.map(({ id, quantity, expiryDate }) => ({
+          batches: importId ? [{ ...productBatchHistories[0]?.batch, quantity }] : batches?.map(({ id, quantity, expiryDate }) => ({
             id,
             quantity,
             expiryDate,
@@ -174,8 +172,9 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
             className="h-[44px]"
             placeholder="Tìm nhà cung cấp"
             prefixIcon={<Image src={ProviderIcon} alt="" />}
+            disabled={importId ? true : false}
             suffixIcon={
-              <Image
+              importId ? null : <Image
                 src={PlusIcon}
                 onClick={(e) => {
                   setIsOpenAddProviderModal(true);

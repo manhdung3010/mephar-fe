@@ -19,6 +19,7 @@ export function CustomAutocomplete({
   onSelect,
   popupClassName,
   isLoading,
+  disabled
 }: {
   onChange?: (value: any) => void;
   defaultValue?: any;
@@ -35,6 +36,7 @@ export function CustomAutocomplete({
   listHeight?: number;
   onSelect?: (value: any) => void;
   popupClassName?: string;
+  disabled?: boolean;
 }) {
   const filterOption = () => true;
 
@@ -63,6 +65,7 @@ export function CustomAutocomplete({
           'prefix-icon': !!prefixIcon,
         })}
         popupClassName={popupClassName}
+        disabled={disabled}
       />
     </ComponentStyled>
   );

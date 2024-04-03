@@ -77,7 +77,7 @@ export default function ReturnCoupon() {
         }
         const localProduct: IImportProductLocal = {
           ...newProduct,
-          productKey: `${product.product.id}-${product.id}`,
+          productKey: `${product.product.id || product.productId}-${product.id}`,
           inventory: product.quantity,
           productId: product.productId,
           quantity: 1,
@@ -321,9 +321,11 @@ export default function ReturnCoupon() {
               onChangeValueProduct(record?.productKey, 'quantity', value)
             }
           />
-          <div>
-            / {record?.productBatchHistories[0]?.quantity}
-          </div>
+          {/* {
+            id && <div>
+              / {record?.productBatchHistories[0]?.quantity}
+            </div>
+          } */}
         </div>
       ),
     },
@@ -425,6 +427,7 @@ export default function ReturnCoupon() {
               placeholder="Tìm kiếm theo mã nhập hàng"
               wrapClassName="w-full !rounded bg-white"
               listHeight={512}
+              disabled={id ? true : false}
               onSelect={(value) => {
                 const product: IImportProduct = JSON.parse(value);
 

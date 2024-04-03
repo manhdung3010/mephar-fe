@@ -176,7 +176,7 @@ export function ListBatchModal({
                   {
                     ...record,
                     originalInventory: record.inventory,
-                    inventory: record.inventory / exchangeValue,
+                    inventory: record?.quantity,
                     quantity,
                   },
                 ]);

@@ -42,7 +42,11 @@ export function ListBatchModal({
       );
 
       if (product?.batches) {
-        setListBatchSelected(product.batches);
+        const newBatches = product.batches.map((batch) => ({
+          ...batch,
+          inventory: batch.quantity,
+        }));
+        setListBatchSelected(newBatches);
       }
     }
   }, [productKeyAddBatch]);
@@ -67,6 +71,8 @@ export function ListBatchModal({
       exchangeValue,
     };
   }, [productKeyAddBatch]);
+
+  console.log("productId", productId)
 
   const { data: batches, isLoading } = useQuery(
     ['LIST_BATCH', formFilter.page, formFilter.limit, formFilter.keyword],
