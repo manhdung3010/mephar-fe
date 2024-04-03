@@ -80,7 +80,7 @@ export default function ReturnCoupon() {
           productKey: `${product.product.id || product.productId}-${product.id}`,
           inventory: product.quantity,
           productId: product.productId,
-          quantity: id ? product.productBatchHistories[0].quantity : 1,
+          quantity: 1,
           price: product.productBatchHistories[0].importPrice,
           discountValue: 0,
           batches: id ? product.productBatchHistories : [],
@@ -93,6 +93,7 @@ export default function ReturnCoupon() {
             (p) => p.productKey === localProduct.productKey
           )
         ) {
+          console.log("importProductDetail?.data?.products", importProductDetail?.data?.products)
           cloneImportProducts = cloneImportProducts.map((product) => {
             if (product.productKey === localProduct.productKey) {
               return {
@@ -158,7 +159,7 @@ export default function ReturnCoupon() {
 
       setExpandedRowKeys(expandedRowKeysClone);
     }
-  }, [returnProducts.length]);
+  }, [returnProducts?.length]);
 
   const onChangeValueProduct = (productKey, field, newValue) => {
     let productImportClone = cloneDeep(returnProducts);
@@ -174,11 +175,6 @@ export default function ReturnCoupon() {
               quantity: newValue,
             })),
           };
-        }
-        else if (field === 'quantity') {
-          if (id && newValue > product.productBatchHistories[0].quantity || newValue < 1) {
-            return product;
-          }
         }
 
         return {

@@ -36,6 +36,7 @@ const ProductExpire = ({ productId, branchId, productUnit }: { productId: number
           ...item,
           unitId: productUnit.find((item) => item.isBaseUnit)?.id,
           quantity: item.quantity,
+          inventory: item.quantity,
           productUnit,
         };
       });
@@ -48,11 +49,11 @@ const ProductExpire = ({ productId, branchId, productUnit }: { productId: number
     const newData = data.map((item) => {
       // change quantity to new unit
       if (item.productUnit.find((unit) => unit.id === value) && item.id === recordId) {
-        const newQuantity = item.inventory / item.productUnit.find((unit) => unit.id === value).exchangeValue;
+        const newQuantity = item.quantity / item.productUnit.find((unit) => unit.id === value).exchangeValue;
         return {
           ...item,
           unitId: value,
-          quantity: Math.floor(newQuantity),
+          inventory: Math.floor(newQuantity),
         }
       }
       return item;
@@ -75,8 +76,8 @@ const ProductExpire = ({ productId, branchId, productUnit }: { productId: number
     },
     {
       title: 'Số lượng',
-      dataIndex: 'quantity',
-      key: 'quantity',
+      dataIndex: 'inventory',
+      key: 'inventory',
       render: (quantity) => formatNumber(quantity),
     },
     {

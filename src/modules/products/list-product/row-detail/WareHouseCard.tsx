@@ -20,11 +20,17 @@ interface IRecord {
 export const warehouseStatus = {
   INBOUND: 1,
   ORDER: 2,
+  INBOUND_RETURN: 3,
+  MOVE: 4,
+  ADJUSTMENT: 5,
 };
 
 const warehouseStatusLable = {
   [warehouseStatus.INBOUND]: 'Nhập hàng',
   [warehouseStatus.ORDER]: 'Đặt hàng',
+  [warehouseStatus.INBOUND_RETURN]: 'Trả hàng',
+  [warehouseStatus.MOVE]: 'Chuyển hàng',
+  [warehouseStatus.ADJUSTMENT]: 'Kiểm kho',
 }
 
 const WareHouseCard = ({ productId, branchId }) => {
@@ -66,7 +72,7 @@ const WareHouseCard = ({ productId, branchId }) => {
       title: 'Số lượng',
       dataIndex: 'changeQty',
       key: 'changeQty',
-      render: (changeQty, record) => record?.type === warehouseStatus.INBOUND ? formatNumber(changeQty) : `-${formatNumber(changeQty)}`,
+      render: (changeQty, record) => formatNumber(changeQty),
     },
     {
       title: 'Tồn cuối',

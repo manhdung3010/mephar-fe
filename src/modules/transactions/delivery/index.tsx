@@ -15,6 +15,9 @@ import {
 
 import ReturnDetail from './row-detail';
 import Search from './Search';
+import CustomPagination from '@/components/CustomPagination';
+import { useRecoilValue } from 'recoil';
+import { branchState } from '@/recoil/state';
 
 interface IRecord {
   key: number;
@@ -28,10 +31,20 @@ interface IRecord {
 
 export function DeliveryTransaction() {
   const router = useRouter();
+  const branchId = useRecoilValue(branchState);
 
   const [expandedRowKeys, setExpandedRowKeys] = useState<
     Record<string, boolean>
   >({});
+
+  const [formFilter, setFormFilter] = useState({
+    page: 1,
+    limit: 20,
+    keyword: '',
+    dateRange: { startDate: undefined, endDate: undefined },
+    status: undefined,
+    branchId,
+  });
 
   const record = {
     key: 1,
@@ -166,6 +179,13 @@ export function DeliveryTransaction() {
           expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key),
         }}
       />
+      {/* <CustomPagination
+        page={formFilter.page}
+        pageSize={formFilter.limit}
+        setPage={(value) => setFormFilter({ ...formFilter, page: value })}
+        setPerPage={(value) => setFormFilter({ ...formFilter, limit: value })}
+        total={orders?.data?.totalItem}
+      /> */}
     </div>
   );
 }

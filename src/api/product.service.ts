@@ -196,3 +196,15 @@ export function getProductExpired(params: {
 }) {
   return axiosClient.get("batch", { params });
 }
+// product expire
+export function getProductInventory(
+  productId,
+  params: {
+    productId: number;
+    page: number;
+    limit: number;
+    branchId?: number;
+  }
+) {
+  return axiosClient.get(`product/${productId}/inventory`, { params });
+}

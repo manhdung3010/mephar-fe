@@ -47,6 +47,9 @@ export function ListBatchModal({
     }
   }, [productKeyAddBatch]);
 
+  console.log("listBatchSelected", listBatchSelected)
+
+
   const [formFilter, setFormFilter] = useState({
     page: 1,
     limit: 99,
@@ -79,6 +82,17 @@ export function ListBatchModal({
     { enabled: isOpen }
   );
 
+  useEffect(() => {
+    if (batches?.data?.items) {
+      const records = batches?.data?.items.map((item) => ({
+        ...item,
+        inventory: item.quantity,
+      }));
+
+      setListBatchSelected(records);
+    }
+  }, [batches?.data?.items])
+
   const columns = [
     {
       title: 'STT',
@@ -89,6 +103,7 @@ export function ListBatchModal({
       title: 'Tên',
       dataIndex: 'name',
       key: 'name',
+      render: (name, { batch }) => name || batch?.name,
     },
     {
       title: 'Hạn sử dụng',
@@ -117,6 +132,7 @@ export function ListBatchModal({
           wrapClassName="w-[100px]"
           type="number"
           defaultValue={quantity}
+          value={quantity}
         />
       ),
     },

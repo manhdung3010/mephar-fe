@@ -91,10 +91,10 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
       onSuccess: async () => {
         const userId = getValues('userId');
         reset();
-        router.push('/products/return/coupon');
         setValue('userId', userId, { shouldValidate: true });
         setProductsReturn([]);
         await queryClient.invalidateQueries(['LIST_IMPORT_PRODUCT']);
+        router.push('/products/return/coupon');
       },
       onError: (err: any) => {
         message.error("Tạo phiếu trả hàng thất bại!");

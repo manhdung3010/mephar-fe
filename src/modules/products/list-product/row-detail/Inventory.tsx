@@ -4,50 +4,59 @@ import cx from 'classnames';
 import { EProductStatus, EProductStatusLabel } from '@/enums';
 
 import CustomTable from '../../../../components/CustomTable';
+import { useQuery } from '@tanstack/react-query';
+import { getProductInventory } from '@/api/product.service';
+import { formatNumber } from '@/helpers';
 
 interface IRecord {
   key: number;
-  branch: string;
+  branch: {
+    id: number;
+    name: string;
+  };
   inventory: number;
   order: number;
   planSoldOff: string;
   status: EProductStatus;
 }
 
-const Inventory = () => {
-  const record = {
-    key: 1,
-    branch: 'Chi nhánh mặc định',
-    inventory: 80,
-    order: 10,
-    planSoldOff: 'content',
-    status: EProductStatus.active,
-  };
+const Inventory = ({ productId, branchId }: { productId: number, branchId: number }) => {
 
-  const dataSource: IRecord[] = Array(8)
-    .fill(0)
-    .map((_, index) => ({ ...record, key: index }));
+  const { data: productInventory, isLoading } = useQuery(
+    [
+      'PRODUCT_INVENTORY',
+      productId,
+      1,
+      50,
+      branchId
+    ],
+    () => getProductInventory(productId, { productId: productId, page: 1, limit: 50, branchId })
+  );
 
   const columns: ColumnsType<IRecord> = [
     {
       title: 'Chi nhánh',
       dataIndex: 'branch',
       key: 'branch',
+      render: (_, { branch }) => branch?.name,
     },
     {
       title: 'Tồn kho',
-      dataIndex: 'inventory',
-      key: 'inventory',
+      dataIndex: 'quantity',
+      key: 'quantity',
+      render: (quantity) => formatNumber(quantity),
     },
     {
       title: 'Khách đặt hàng',
       dataIndex: 'order',
       key: 'order',
+      render: (order) => formatNumber(order),
     },
     {
       title: 'Dự kiến hết hàng',
       dataIndex: 'planSoldOff',
       key: 'planSoldOff',
+      render: (order) => formatNumber(order),
     },
     {
       title: 'Trạng thái',
@@ -68,7 +77,7 @@ const Inventory = () => {
     },
   ];
 
-  return <CustomTable dataSource={dataSource} columns={columns} />;
+  return <CustomTable dataSource={productInventory?.data} columns={columns} loading={isLoading} />;
 };
 
 export default Inventory;

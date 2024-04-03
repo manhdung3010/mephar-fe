@@ -304,7 +304,7 @@ const Index = () => {
                               <div>
                                 <div className="mb-2 flex gap-x-5">
                                   <div>
-                                    <span>{item.product.code}</span> {" - "}
+                                    <span>{item.code}</span> {" - "}
                                     <span>{item.product.name}</span>
                                   </div>
                                   <div className="rounded bg-red-main px-2 py-[2px] text-white">

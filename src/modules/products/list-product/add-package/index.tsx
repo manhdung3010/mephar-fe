@@ -30,7 +30,7 @@ const AddPackage = ({
   const queryClient = useQueryClient();
   const router = useRouter();
   const branchId = useRecoilValue(branchState);
-   const [selectedMedicineCategory, setSelectedMedicineCategory] =
+  const [selectedMedicineCategory, setSelectedMedicineCategory] =
     useState<any>();
 
   const { data: product } = useQuery(
@@ -59,7 +59,7 @@ const AddPackage = ({
   });
 
 
-    useEffect(() => {
+  useEffect(() => {
     if (selectedMedicineCategory) {
       const record = JSON.parse(selectedMedicineCategory);
 
@@ -208,7 +208,7 @@ const AddPackage = ({
                 key="0"
                 useForm={{
                   getValues,
-                  setValue, 
+                  setValue,
                   errors,
                 }}
                 // key="0"
@@ -218,6 +218,7 @@ const AddPackage = ({
                 positionName={product?.data?.productPosition?.name}
                 manufactureName={product?.data?.productManufacture?.name}
                 countryName={product?.data?.country?.name}
+                isCopy={isCopy}
               />,
               <Detail
                 useForm={{

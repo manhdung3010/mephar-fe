@@ -37,7 +37,8 @@ const Info = ({
   manufactureName,
   countryName,
   selectedMedicineCategory,
-  setSelectedMedicineCategory
+  setSelectedMedicineCategory,
+  isCopy,
 
 }: any) => {
   const { getValues, setValue, errors } = useForm;
@@ -536,14 +537,16 @@ const Info = ({
                 onChange={(e) => onChangeUnit(unitKey, 'code', e)}
                 wrapClassName="flex-1"
                 className="mt-0 h-11 flex-1"
-                value={listUnit[unitKey].code}
+                value={isCopy ? null : listUnit[unitKey].code}
+                placeholder='Mã hàng tự động'
                 bordered={false}
               />
               <CustomInput
                 onChange={(e) => onChangeUnit(unitKey, 'barCode', e)}
                 wrapClassName="flex-1"
                 className="mt-0 h-11 flex-1"
-                value={listUnit[unitKey].barCode}
+                value={isCopy ? null : listUnit[unitKey].barCode}
+                placeholder='Mã vạch tự động'
                 bordered={false}
               />
               <CustomInput
