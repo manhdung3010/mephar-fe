@@ -1,7 +1,7 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useQuery } from '@tanstack/react-query';
 import type { ColumnsType } from 'antd/es/table';
-import { cloneDeep, debounce } from 'lodash';
+import { cloneDeep, debounce, set } from 'lodash';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -80,10 +80,10 @@ export default function ReturnCoupon() {
           productKey: `${product.product.id || product.productId}-${product.id}`,
           inventory: product.quantity,
           productId: product.productId,
-          quantity: 1,
+          quantity: id ? product.productBatchHistories[0].quantity : 1,
           price: product.productBatchHistories[0].importPrice,
           discountValue: 0,
-          batches: [],
+          batches: id ? product.productBatchHistories : [],
         };
 
         let cloneImportProducts = cloneDeep(returnProducts);
@@ -415,6 +415,8 @@ export default function ReturnCoupon() {
     return product.product.isBatchExpireControl;
   };
 
+  console.log("returnProducts", returnProducts)
+
   return (
     <div className="-mx-8 flex">
       <div className="grow overflow-x-auto">
@@ -530,31 +532,13 @@ export default function ReturnCoupon() {
                             Chọn lô
                           </div>
 
-                          {id && record?.product?.isBatchExpireControl ? <div
-                            className="flex items-center rounded bg-red-main py-1 px-2 text-white"
-                          >
-                            <span className="mr-2">
-                              {record.productBatchHistories[0]?.batch.name} - {record.productBatchHistories[0]?.batch.expiryDate} - SL:{' '}
-                              {record.productBatchHistories[0]?.batch.quantity}
-                            </span>{' '}
-                            <Image
-                              className=" cursor-pointer"
-                              src={CloseIcon}
-                              onClick={() => {
-                                handleRemoveBatch(
-                                  record.productKey,
-                                  record.productBatchHistories[0]?.batch.id
-                                );
-                              }}
-                              alt=""
-                            />
-                          </div> : record.batches?.map((batch) => (
+                          {record.batches?.map((batch: any) => (
                             <div
                               key={batch.id}
                               className="flex items-center rounded bg-red-main py-1 px-2 text-white"
                             >
                               <span className="mr-2">
-                                {batch.name} - {batch.expiryDate} - SL:{' '}
+                                {batch.name || batch.batch.name} - {batch.expiryDate} - SL:{' '}
                                 {batch.quantity}
                               </span>{' '}
                               <Image

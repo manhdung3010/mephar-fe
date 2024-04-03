@@ -204,7 +204,6 @@ export function ListBatchModal({
           }, 300)}
           className="h-11 !rounded"
           placeholder="Chọn lô"
-          value={null}
         />
       </div>
       <CustomTable

@@ -22,9 +22,11 @@ import { formatMoney } from '@/helpers';
 import { productReturnState } from '@/recoil/state';
 
 import { AddProviderModal } from './AddProviderModal';
+import { useRouter } from 'next/router';
 
 export function RightContent({ useForm, importId }: { useForm: any, importId: string }) {
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const { getValues, setValue, handleSubmit, reset, errors } = useForm;
   const [productsReturn, setProductsReturn] =
@@ -89,6 +91,7 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
       onSuccess: async () => {
         const userId = getValues('userId');
         reset();
+        router.push('/products/return/coupon');
         setValue('userId', userId, { shouldValidate: true });
         setProductsReturn([]);
         await queryClient.invalidateQueries(['LIST_IMPORT_PRODUCT']);
