@@ -253,7 +253,7 @@ export default function ReturnCoupon() {
       key: 'units',
       render: (_, record: any) => {
         if (id) {
-          return record.productUnit[0]?.unitName
+          return record.productUnit.find((item, index) => index === 0)?.unitName
         }
         return <CustomUnitSelect
           options={(() => {
@@ -338,7 +338,7 @@ export default function ReturnCoupon() {
         bordered={false}
         onChange={(value) => onChangeValueProduct(record?.productKey, 'price', value)}
         wrapClassName="w-[100px]"
-        defaultValue={record?.productBatchHistories[0]?.importPrice}
+        defaultValue={record?.productBatchHistories.find((item, index) => index === 0)?.importPrice}
         disabled
       /> : (
         <CustomInput
