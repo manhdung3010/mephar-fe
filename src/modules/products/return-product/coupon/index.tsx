@@ -93,7 +93,6 @@ export default function ReturnCoupon() {
             (p) => p.productKey === localProduct.productKey
           )
         ) {
-          console.log("importProductDetail?.data?.products", importProductDetail?.data?.products)
           cloneImportProducts = cloneImportProducts.map((product) => {
             if (product.productKey === localProduct.productKey) {
               return {
@@ -411,8 +410,6 @@ export default function ReturnCoupon() {
     return product.product.isBatchExpireControl;
   };
 
-  console.log("returnProducts", returnProducts)
-
   return (
     <div className="-mx-8 flex">
       <div className="grow overflow-x-auto">
@@ -488,7 +485,10 @@ export default function ReturnCoupon() {
 
                     <div>
                       <div className="flex gap-x-5">
-                        <div>{item.product.name}</div>
+                        <div className='flex gap-x-1'>
+                          <div>{item.code}</div> {" - "}
+                          <div>{item.product.name}</div>
+                        </div>
                         <div className="rounded bg-red-main px-2 py-[2px] text-white">
                           {item.unitName}
                         </div>

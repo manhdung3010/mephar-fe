@@ -10,11 +10,29 @@ import CustomTable from '@/components/CustomTable';
 import { CustomUnitSelect } from '@/components/CustomUnitSelect';
 
 import { RightContent } from './RightContent';
+import { useQuery } from '@tanstack/react-query';
+import { ISaleProduct } from '@/modules/sales/interface';
+import { useRecoilValue } from 'recoil';
+import { branchState } from '@/recoil/state';
+import { getInboundProducts, getSaleProducts } from '@/api/product.service';
+import { CustomAutocomplete } from '@/components/CustomAutocomplete';
+import { IImportProduct, IImportProductLocal } from '@/modules/products/import-product/coupon/interface';
+import { cloneDeep, debounce } from 'lodash';
+import { formatNumber, getImage } from '@/helpers';
+import { EProductType } from '@/enums';
+import InputError from '@/components/InputError';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { schema } from './schema';
 
 interface IRecord {
   key: number;
   id: string;
   name: string;
+  product: {
+    id: string;
+    name: string;
+  };
   units: { name: string }[];
   inventoryQuantity: number;
   deliveryQuantity: number;
@@ -25,26 +43,75 @@ export function DeliveryCoupon() {
     Record<string, boolean>
   >({});
 
-  const dataSource: IRecord[] = [
-    {
-      key: 0,
-      id: 'TH230719085724',
-      name: 'Mike',
-      units: [{ name: 'test 1' }, { name: 'test2' }],
-      inventoryQuantity: 100,
-      deliveryQuantity: 10,
-    },
-    {
-      key: 1,
-      id: 'TH230719085724',
-      name: 'Mike',
-      units: [{ name: 'test 1' }, { name: 'test2' }],
-      inventoryQuantity: 100,
-      deliveryQuantity: 100000,
-    },
-  ];
+  const [importProducts, setImportProducts] = useState<IImportProductLocal[]>([]);
 
-  const columns: ColumnsType<IRecord> = [
+  const [formFilter, setFormFilter] = useState({
+    page: 1,
+    limit: 20,
+    isSale: true,
+    keyword: '',
+  });
+  const branchId = useRecoilValue(branchState);
+  const [productKeyAddBatch, setProductKeyAddBatch] = useState<string>();
+  const [openListBatchModal, setOpenListBatchModal] = useState<boolean>(false);
+
+  const {
+    getValues,
+    setValue,
+    handleSubmit,
+    reset,
+    setError,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(schema),
+    mode: "onChange",
+    defaultValues: {
+      branchId,
+    },
+  });
+
+  const { data: products } = useQuery<{ data: { items: IImportProduct[] } }>(
+    [
+      "LIST_IMPORT_PRODUCT",
+      formFilter.page,
+      formFilter.limit,
+      formFilter.keyword,
+      branchId,
+    ],
+    () => getInboundProducts({ ...formFilter, branchId })
+  );
+
+  console.log("importProducts", importProducts)
+
+  const onChangeValueProduct = (productKey, field, newValue) => {
+    let productImportClone = cloneDeep(importProducts);
+
+    productImportClone = productImportClone.map((product) => {
+      if (product.productKey === productKey) {
+        if (field === "quantity" && product.batches?.length === 1) {
+          return {
+            ...product,
+            quantity: newValue,
+            batches: product.batches?.map((batch) => ({
+              ...batch,
+              quantity: newValue,
+            })),
+          };
+        }
+
+        return {
+          ...product,
+          [field]: newValue,
+        };
+      }
+
+      return product;
+    });
+
+    setImportProducts(productImportClone);
+  };
+
+  const columns: any = [
     {
       title: '',
       dataIndex: 'action',
@@ -53,7 +120,15 @@ export function DeliveryCoupon() {
         <Image
           src={RemoveIcon}
           className=" cursor-pointer"
-          onClick={() => console.log(id)}
+          onClick={() => {
+            const productImportClone = cloneDeep(importProducts);
+            const index = productImportClone.findIndex(
+              (product) => product.id === id
+            );
+            productImportClone.splice(index, 1);
+            setImportProducts(productImportClone);
+          }}
+          alt=""
         />
       ),
     },
@@ -64,8 +139,8 @@ export function DeliveryCoupon() {
     },
     {
       title: 'Mã hàng',
-      dataIndex: 'id',
-      key: 'id',
+      dataIndex: 'code',
+      key: 'code',
       render: (value, _, index) => (
         <span
           className="cursor-pointer text-[#0070F4]"
@@ -88,37 +163,196 @@ export function DeliveryCoupon() {
       title: 'Tên hàng',
       dataIndex: 'name',
       key: 'name',
+      render: (_, { product }) => <span className="font-medium">{product.name}</span>,
     },
     {
       title: 'ĐVT',
       dataIndex: 'units',
       key: 'units',
-      render: (_, { units }) => <CustomUnitSelect />,
+      render: (_, { productKey, product, id }) => (
+        <CustomUnitSelect
+          options={(() => {
+            const productUnitKeysSelected = importProducts.map((product) =>
+              Number(product.productKey.split("-")[1])
+            );
+
+            return product.productUnit.map((unit) => ({
+              value: unit.id,
+              label: unit.unitName,
+              disabled: productUnitKeysSelected.includes(unit.id),
+            }));
+          })()}
+          value={id}
+          onChange={(value) => {
+            let importProductsClone = cloneDeep(importProducts);
+            importProductsClone = importProductsClone.map((product) => {
+              if (product.productKey === productKey) {
+                const productUnit = product.product.productUnit.find(
+                  (unit) => unit.id === value
+                );
+
+                return {
+                  ...product,
+                  code: productUnit?.code || '', // Assign an empty string if productUnit.code is undefined
+                  productKey: `${product.product.id}-${value}`,
+                  ...productUnit,
+                  batches: product.batches?.map((batch) => ({
+                    ...batch,
+                    inventory:
+                      batch.originalInventory / productUnit!.exchangeValue,
+                  })),
+                };
+              }
+
+              return product;
+            });
+
+            setImportProducts(importProductsClone);
+          }}
+        />
+      ),
     },
     {
       title: 'Tồn kho',
-      dataIndex: 'inventoryQuantity',
-      key: 'inventoryQuantity',
+      dataIndex: 'inventory',
+      key: 'inventory',
+      render: (value) => formatNumber(value),
     },
 
     {
-      title: 'SL chuyển',
-      dataIndex: 'deliveryQuantity',
-      key: 'deliveryQuantity',
+      title: "SL chuyển",
+      dataIndex: "quantity",
+      key: "quantity",
+      render: (quantity, { productKey }) => (
+        <CustomInput
+          wrapClassName="!w-[110px]"
+          className="!h-6 !w-[80px] text-center"
+          hasMinus={true}
+          hasPlus={true}
+          defaultValue={quantity}
+          value={quantity}
+          type="number"
+          onChange={(value) =>
+            onChangeValueProduct(productKey, "quantity", value)
+          }
+          onMinus={(value) =>
+            onChangeValueProduct(productKey, "quantity", value)
+          }
+          onPlus={(value) =>
+            onChangeValueProduct(productKey, "quantity", value)
+          }
+        />
+      ),
     },
   ];
+
+  const checkDisplayListBatch = (product: IImportProductLocal) => {
+    return (
+      product.product.type === EProductType.MEDICINE ||
+      (product.product.type === EProductType.PACKAGE &&
+        product.product.isBatchExpireControl)
+    );
+  };
+
+  const handleRemoveBatch = (productKey: string, batchId: number) => {
+    let products = cloneDeep(importProducts);
+
+    products = products.map((product) => {
+      if (product.productKey === productKey) {
+        return {
+          ...product,
+          batches: product.batches?.filter((batch) => batch.id !== batchId),
+        };
+      }
+      return product;
+    });
+    setImportProducts(products);
+  };
 
   return (
     <div className="-mx-8 flex">
       <div className="grow overflow-x-auto">
         <div className="hidden-scrollbar overflow-x-auto overflow-y-hidden">
           <div className="flex h-[72px] w-full  min-w-[800px] items-center bg-red-main px-6 py-3">
-            <CustomInput
-              className="h-[40px] w-full rounded text-base"
-              prefixIcon={<Image src={SearchIcon} />}
+            <CustomAutocomplete
+              className="!h-[48px] w-full !rounded text-base"
+              prefixIcon={<Image src={SearchIcon} alt="" />}
               placeholder="Tìm kiếm hàng hóa theo mã hoặc tên"
-              wrapClassName="w-full"
-              onChange={() => {}}
+              wrapClassName="w-full !rounded bg-white"
+              onSelect={(value) => {
+                const product: IImportProduct = JSON.parse(value);
+
+                const localProduct: IImportProductLocal = {
+                  ...product,
+                  productKey: `${product.product.id}-${product.id}`,
+                  inventory: product.quantity,
+                  quantity: 1,
+                  discountValue: 0,
+                  batches: [],
+                };
+
+                let cloneImportProducts = cloneDeep(importProducts);
+
+                if (
+                  importProducts.find(
+                    (p) => p.productKey === localProduct.productKey
+                  )
+                ) {
+                  cloneImportProducts = cloneImportProducts.map((product) => {
+                    if (product.productKey === localProduct.productKey) {
+                      return {
+                        ...product,
+                        quantity: product.quantity + 1,
+                      };
+                    }
+
+                    return product;
+                  });
+                } else {
+                  cloneImportProducts.push(localProduct);
+                }
+
+                setImportProducts(cloneImportProducts);
+              }}
+              showSearch={true}
+              listHeight={512}
+              onSearch={debounce((value) => {
+                setFormFilter((preValue) => ({
+                  ...preValue,
+                  keyword: value,
+                }));
+              })}
+              value={formFilter.keyword}
+              options={products?.data?.items.map((item: any) => ({
+                value: JSON.stringify(item),
+                label: (
+                  <div className="flex items-center gap-x-4 p-2">
+                    <div className=" flex h-12 w-[68px] items-center rounded border border-gray-300 p-[2px]">
+                      {item.product.image?.path && (
+                        <Image
+                          src={getImage(item.product.image?.path)}
+                          height={40}
+                          width={68}
+                          alt=""
+                          objectFit="cover"
+                        />
+                      )}
+                    </div>
+
+                    <div>
+                      <div className="flex gap-x-5">
+                        <div>
+                          {item.code} - {item.product.name}
+                        </div>
+                        <div className="rounded bg-red-main px-2 py-[2px] text-white">
+                          {item.unitName}
+                        </div>
+                      </div>
+                      <div>Số lượng - {item.quantity}</div>
+                    </div>
+                  </div>
+                ),
+              }))}
             />
           </div>
         </div>
@@ -126,26 +360,66 @@ export function DeliveryCoupon() {
         <div className=" overflow-x-auto">
           <div className="min-w-[1000px]">
             <CustomTable
-              dataSource={dataSource}
+              dataSource={importProducts?.map((item, index) => ({
+                ...item,
+                key: index + 1,
+              }))}
               columns={columns}
               pagination={false}
               expandable={{
                 defaultExpandAllRows: true,
-                // eslint-disable-next-line @typescript-eslint/no-shadow
-                expandedRowRender: (record: IRecord) => (
-                  <div className="flex items-center bg-[#FFF3E6] px-6 py-2">
-                    <div className="mr-3 cursor-pointer font-medium text-[#0070F4]">
-                      Chọn lô
-                    </div>
-                    <div className="flex items-center rounded bg-red-main py-1 px-2 text-white">
-                      <span className="mr-2">Pherelive SL1 - 26/07/2023</span>{' '}
-                      <Image className=" cursor-pointer" src={CloseIcon} />
-                    </div>
-                  </div>
+                expandedRowRender: (record: IImportProductLocal) => (
+                  <>
+                    {checkDisplayListBatch(record) && (
+                      <div className="bg-[#FFF3E6] px-6 py-2 ">
+                        <div className="flex items-center gap-x-3">
+                          <div
+                            className="ml-1 cursor-pointer font-medium text-[#0070F4]"
+                            onClick={() => {
+                              setProductKeyAddBatch(record.productKey);
+                              setOpenListBatchModal(true);
+                            }}
+                          >
+                            Chọn lô
+                          </div>
+
+                          {record.batches?.map((batch) => (
+                            <div
+                              key={batch.id}
+                              className="flex items-center rounded bg-red-main py-1 px-2 text-white"
+                            >
+                              <span className="mr-2">
+                                {batch.name} - {batch.expiryDate} - SL:{" "}
+                                {batch.quantity}
+                              </span>{" "}
+                              <Image
+                                className=" cursor-pointer"
+                                src={CloseIcon}
+                                onClick={() => {
+                                  handleRemoveBatch(
+                                    record.productKey,
+                                    batch.id
+                                  );
+                                }}
+                                alt=""
+                              />
+                            </div>
+                          ))}
+                        </div>
+                        <InputError
+                          error={
+                            errors?.products &&
+                            errors?.products[Number(record.key) - 1]?.batches
+                              ?.message
+                          }
+                        />
+                      </div>
+                    )}
+                  </>
                 ),
                 expandIcon: () => <></>,
                 expandedRowKeys: Object.keys(expandedRowKeys).map(
-                  (key) => +key
+                  (key) => +key + 1
                 ),
               }}
             />

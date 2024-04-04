@@ -115,10 +115,9 @@ const Index = () => {
     } else {
       let isSelectedUnit = true;
 
-      console.log("product", product)
-
       const productLocal: any = {
         ...product,
+        inventory: product.quantity,
         productKey,
         quantity: 1,
         productUnitId: product.id,

@@ -158,6 +158,7 @@ export interface ISaleProductLocal extends Omit<ISaleProduct, "batches"> {
   productKey: string;
   key?: number;
   originProductUnitId: number;
+  inventory?: number;
   batches: {
     batchId: number;
     productUnitId: number;

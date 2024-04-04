@@ -24,13 +24,9 @@ const Inventory = ({ productId, branchId }: { productId: number, branchId: numbe
 
   const { data: productInventory, isLoading } = useQuery(
     [
-      'PRODUCT_INVENTORY',
-      productId,
-      1,
-      50,
-      branchId
+      'PRODUCT_INVENTORY'
     ],
-    () => getProductInventory(productId, { productId: productId, page: 1, limit: 50, branchId })
+    () => getProductInventory(productId)
   );
 
   const columns: ColumnsType<IRecord> = [

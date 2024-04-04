@@ -43,7 +43,6 @@ export function ProductList({ useForm }: { useForm: any }) {
       const expandedRowKeysClone = { ...expandedRowKeys };
 
       const orderObjectClone = cloneDeep(orderObject);
-
       orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map(
         (product: ISaleProductLocal, index) => {
           if (checkDisplayListBatch(product)) {
@@ -247,7 +246,7 @@ export function ProductList({ useForm }: { useForm: any }) {
       title: 'Tồn kho',
       dataIndex: 'price',
       key: 'price',
-      render: (_, record) => formatNumber(Math.floor(+record.product.inventory / +record.productUnit.exchangeValue)),
+      render: (_, record) => formatNumber(record.inventory),
     },
     {
       title: 'SỐ LƯỢNG',
