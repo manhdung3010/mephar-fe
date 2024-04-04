@@ -24,6 +24,9 @@ import InputError from '@/components/InputError';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { schema } from './schema';
+// import { ListBatchModal } from '@/modules/sales/ListBatchModal';
+import { IBatch } from '@/modules/products/import-product/interface';
+import { ListBatchModal } from '@/modules/products/import-product/coupon/ListBatchModal';
 
 interface IRecord {
   key: number;
@@ -247,6 +250,7 @@ export function DeliveryCoupon() {
   ];
 
   const checkDisplayListBatch = (product: IImportProductLocal) => {
+    console.log("product", product)
     return (
       product.product.type === EProductType.MEDICINE ||
       (product.product.type === EProductType.PACKAGE &&
@@ -423,11 +427,39 @@ export function DeliveryCoupon() {
                 ),
               }}
             />
+
+            <ListBatchModal
+              key={openListBatchModal ? 1 : 0}
+              isOpen={!!openListBatchModal}
+              onCancel={() => setOpenListBatchModal(false)}
+              productKeyAddBatch={productKeyAddBatch}
+              onSave={(listBatch: IBatch[]) => {
+                let importProductsClone = cloneDeep(importProducts);
+
+                importProductsClone = importProductsClone.map((product) => {
+                  if (product.productKey === productKeyAddBatch) {
+                    return {
+                      ...product,
+                      quantity: listBatch.reduce(
+                        (acc, obj) => acc + obj.quantity,
+                        0
+                      ),
+                      batches: listBatch,
+                    };
+                  }
+
+                  return product;
+                });
+
+                setImportProducts(importProductsClone);
+                setError("products", { message: undefined });
+              }}
+            />
           </div>
         </div>
       </div>
 
-      <RightContent />
+      <RightContent useForm={{ getValues, setValue, handleSubmit, errors, reset }} />
     </div>
   );
 }

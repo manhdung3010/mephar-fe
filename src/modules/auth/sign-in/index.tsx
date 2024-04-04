@@ -172,6 +172,7 @@ export function SignIn() {
               type="primary"
               htmlType="submit"
               disabled={isLoading}
+              loading={isLoading}
             >
               Đăng nhập
             </CustomButton>

@@ -53,13 +53,9 @@ export const schema = yup.object().shape({
         return true;
       }
     ),
-  debt: yup.number(),
-  status: yup.string(),
   totalPrice: yup.number(),
-  discount: yup.number(),
   description: yup.string(),
   userId: yup.number().required("Đây là trường bắt buộc!"),
-  supplierId: yup.string().required("Đây là trường bắt buộc!"),
   branchId: yup.number().required("Đây là trường bắt buộc!"),
   // groupSupplierId: yup.string().required("Đây là trường bắt buộc!"),
 });
