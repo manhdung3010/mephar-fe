@@ -156,7 +156,7 @@ export function Info({ record }: { record: IOrder }) {
 
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Người tạo:</div>
-            <div className="text-black-main">---</div>
+            <div className="text-black-main">{record?.user?.fullName}</div>
           </div>
 
           <div className="grid grid-cols-2 gap-5">
@@ -297,23 +297,23 @@ export function Info({ record }: { record: IOrder }) {
 
       <div className="ml-auto mb-5 w-[300px]">
         <div className=" mb-3 grid grid-cols-2">
-          <div className="text-gray-main">Tổng thực tế:</div>
-          <div className="text-black-main">---</div>
+          <div className="text-gray-main">Tổng tiền hàng:</div>
+          <div className="text-black-main">{formatMoney(record?.totalPrice + record?.discount)}</div>
         </div>
 
         <div className=" mb-3 grid grid-cols-2">
-          <div className="text-gray-main">Số lượng tăng:</div>
-          <div className="text-black-main">---</div>
+          <div className="text-gray-main">Giảm giá hóa đơn:</div>
+          <div className="text-black-main">{formatMoney(record?.discount)}</div>
         </div>
 
         <div className=" mb-3 grid grid-cols-2">
-          <div className="text-gray-main">Số lượng giảm:</div>
-          <div className="text-black-main">---</div>
+          <div className="text-gray-main">Khách cần trả:</div>
+          <div className="text-black-main">{formatMoney(record?.totalPrice)}</div>
         </div>
 
         <div className=" mb-3 grid grid-cols-2">
-          <div className="text-gray-main">Tổng chênh lệch:</div>
-          <div className="text-black-main">---</div>
+          <div className="text-gray-main">Khách đã trả:</div>
+          <div className="text-black-main">{formatMoney(record?.cashOfCustomer)}</div>
         </div>
       </div>
 

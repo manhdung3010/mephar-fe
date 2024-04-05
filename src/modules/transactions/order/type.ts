@@ -1,7 +1,7 @@
 import { EDiscountType, EGender, EOrderStatus } from "@/enums";
 
 export interface IOrder {
-  id:number
+  id: number;
   key: number;
   number: string;
   code: string;
@@ -13,6 +13,7 @@ export interface IOrder {
   status: EOrderStatus;
   createdAt: string;
   note: string;
+  totalPrice: number;
   products: {
     productId: number;
     price: number;
@@ -64,4 +65,3 @@ export interface IOrder {
   };
   description: string;
 }
-
