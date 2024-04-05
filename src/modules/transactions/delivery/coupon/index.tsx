@@ -1,4 +1,3 @@
-import type { ColumnsType } from 'antd/es/table';
 import Image from 'next/image';
 import { useState } from 'react';
 
@@ -9,24 +8,23 @@ import { CustomInput } from '@/components/CustomInput';
 import CustomTable from '@/components/CustomTable';
 import { CustomUnitSelect } from '@/components/CustomUnitSelect';
 
-import { RightContent } from './RightContent';
-import { useQuery } from '@tanstack/react-query';
-import { ISaleProduct } from '@/modules/sales/interface';
-import { useRecoilValue } from 'recoil';
-import { branchState } from '@/recoil/state';
-import { getInboundProducts, getSaleProducts } from '@/api/product.service';
+import { getInboundProducts } from '@/api/product.service';
 import { CustomAutocomplete } from '@/components/CustomAutocomplete';
-import { IImportProduct, IImportProductLocal } from '@/modules/products/import-product/coupon/interface';
-import { cloneDeep, debounce } from 'lodash';
-import { formatNumber, getImage } from '@/helpers';
-import { EProductType } from '@/enums';
 import InputError from '@/components/InputError';
-import { useForm } from 'react-hook-form';
+import { EProductType } from '@/enums';
+import { formatNumber, getImage } from '@/helpers';
+import { IImportProduct, IImportProductLocal } from '@/modules/products/import-product/coupon/interface';
+import { branchState, productMoveState } from '@/recoil/state';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { useQuery } from '@tanstack/react-query';
+import { cloneDeep, debounce } from 'lodash';
+import { useForm } from 'react-hook-form';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { RightContent } from './RightContent';
 import { schema } from './schema';
 // import { ListBatchModal } from '@/modules/sales/ListBatchModal';
-import { IBatch } from '@/modules/products/import-product/interface';
 import { ListBatchModal } from '@/modules/products/import-product/coupon/ListBatchModal';
+import { IBatch } from '@/modules/products/import-product/interface';
 
 interface IRecord {
   key: number;
@@ -46,18 +44,18 @@ export function DeliveryCoupon() {
     Record<string, boolean>
   >({});
 
-  const [importProducts, setImportProducts] = useState<IImportProductLocal[]>([]);
+  const [importProducts, setImportProducts] =
+    useRecoilState(productMoveState);
 
   const [formFilter, setFormFilter] = useState({
     page: 1,
     limit: 20,
-    isSale: true,
     keyword: '',
   });
   const branchId = useRecoilValue(branchState);
+
   const [productKeyAddBatch, setProductKeyAddBatch] = useState<string>();
   const [openListBatchModal, setOpenListBatchModal] = useState<boolean>(false);
-
   const {
     getValues,
     setValue,
@@ -69,7 +67,7 @@ export function DeliveryCoupon() {
     resolver: yupResolver(schema),
     mode: "onChange",
     defaultValues: {
-      branchId,
+      fromBranchId: branchId,
     },
   });
 
@@ -83,8 +81,6 @@ export function DeliveryCoupon() {
     ],
     () => getInboundProducts({ ...formFilter, branchId })
   );
-
-  console.log("importProducts", importProducts)
 
   const onChangeValueProduct = (productKey, field, newValue) => {
     let productImportClone = cloneDeep(importProducts);
@@ -147,16 +143,16 @@ export function DeliveryCoupon() {
       render: (value, _, index) => (
         <span
           className="cursor-pointer text-[#0070F4]"
-          onClick={() => {
-            const currentState = expandedRowKeys[`${index}`];
-            const temp = { ...expandedRowKeys };
-            if (currentState) {
-              delete temp[`${index}`];
-            } else {
-              temp[`${index}`] = true;
-            }
-            setExpandedRowKeys({ ...temp });
-          }}
+        // onClick={() => {
+        //   const currentState = expandedRowKeys[`${index}`];
+        //   const temp = { ...expandedRowKeys };
+        //   if (currentState) {
+        //     delete temp[`${index}`];
+        //   } else {
+        //     temp[`${index}`] = true;
+        //   }
+        //   setExpandedRowKeys({ ...temp });
+        // }}
         >
           {value}
         </span>
@@ -250,7 +246,6 @@ export function DeliveryCoupon() {
   ];
 
   const checkDisplayListBatch = (product: IImportProductLocal) => {
-    console.log("product", product)
     return (
       product.product.type === EProductType.MEDICINE ||
       (product.product.type === EProductType.PACKAGE &&
@@ -459,7 +454,7 @@ export function DeliveryCoupon() {
         </div>
       </div>
 
-      <RightContent useForm={{ getValues, setValue, handleSubmit, errors, reset }} />
+      <RightContent useForm={{ getValues, setValue, handleSubmit, errors, reset }} branchId={branchId} />
     </div>
   );
 }

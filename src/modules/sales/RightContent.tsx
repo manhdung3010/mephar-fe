@@ -177,11 +177,11 @@ export function RightContent({ useForm }: { useForm: any }) {
 
           setOrderObject(orderClone);
 
-          if (getValues('paymentType') === EPaymentMethod.BANKING) {
-            setIsOpenScanQrModal(true);
-          } else {
-            setIsOpenOrderSuccessModal(true);
-          }
+          // if (getValues('paymentType') === EPaymentMethod.BANKING) {
+          //   setIsOpenScanQrModal(true);
+          // } else {
+          // }
+          setIsOpenOrderSuccessModal(true);
 
           reset();
           setValue('userId', profile.id, { shouldValidate: true });

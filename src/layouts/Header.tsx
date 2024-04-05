@@ -10,13 +10,14 @@ import { getBranch } from '@/api/branch.service';
 import DropdownIcon from '@/assets/dropdownIcon.svg';
 import LocationIcon from '@/assets/locationIcon.svg';
 import { getImage, randomString } from '@/helpers';
-import { setToken } from '@/helpers/storage';
+import { setItem, setToken } from '@/helpers/storage';
 import {
   branchState,
   orderActiveState,
   orderState,
   profileState,
 } from '@/recoil/state';
+import { EStorageKey } from '@/enums';
 
 export const Header = ({ title }: { title?: string | ReactNode }) => {
   const router = useRouter();
@@ -46,6 +47,7 @@ export const Header = ({ title }: { title?: string | ReactNode }) => {
 
   const logout = () => {
     setToken('');
+    setItem(EStorageKey.PRODUCT_RETURN_STATE, '');
     router.push('/auth/sign-in');
   };
 

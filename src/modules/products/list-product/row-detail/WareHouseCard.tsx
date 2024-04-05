@@ -72,7 +72,7 @@ const WareHouseCard = ({ productId, branchId }) => {
       title: 'Số lượng',
       dataIndex: 'changeQty',
       key: 'changeQty',
-      render: (changeQty, record) => formatNumber(changeQty),
+      render: (changeQty, { type }) => <span>{type === warehouseStatus.ORDER ? "-" : null + formatNumber(changeQty)}</span>,
     },
     {
       title: 'Tồn cuối',

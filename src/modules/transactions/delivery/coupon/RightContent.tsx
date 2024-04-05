@@ -1,23 +1,30 @@
 import Image from 'next/image';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
+import { getBranch } from '@/api/branch.service';
+import { getEmployee } from '@/api/employee.service';
+import { createMoveProduct } from '@/api/move';
 import EditIcon from '@/assets/editIcon.svg';
+import EmployeeIcon from '@/assets/employeeIcon.svg';
 import { CustomButton } from '@/components/CustomButton';
 import { CustomInput } from '@/components/CustomInput';
 import { CustomSelect } from '@/components/CustomSelect';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { getEmployee } from '@/api/employee.service';
-import EmployeeIcon from '@/assets/employeeIcon.svg';
-import { debounce, get } from 'lodash';
 import InputError from '@/components/InputError';
-import { getBranch } from '@/api/branch.service';
-import { createImportProduct } from '@/api/import-product.service';
+import { formatNumber } from '@/helpers';
+import { productMoveState, profileState } from '@/recoil/state';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { message } from 'antd';
+import { cloneDeep, debounce } from 'lodash';
+import { useRecoilState, useRecoilValue } from 'recoil';
 
-export function RightContent({ useForm }: { useForm: any }) {
-  const [isOpenAddCustomerModal, setIsOpenAddCustomerModal] = useState(false);
+export function RightContent({ useForm, branchId }: { useForm: any, branchId: number }) {
   const [searchEmployeeText, setSearchEmployeeText] = useState('');
 
   const { getValues, setValue, handleSubmit, errors, reset } = useForm;
+
+  const [productsImport, setProductsImport] =
+    useRecoilState(productMoveState);
+  const profile = useRecoilValue(profileState);
 
   const { data: employees } = useQuery(
     ['EMPLOYEE_LIST', searchEmployeeText],
@@ -35,30 +42,81 @@ export function RightContent({ useForm }: { useForm: any }) {
         ({ isBatchExpireControl, ...product }) => product
       );
 
-      console.log("products", products)
-
-      return createImportProduct({ ...getValues(), products });
+      return createMoveProduct({ ...getValues(), products, totalItem });
     },
     {
       onSuccess: async () => {
         // const userId = getValues('userId');
-        // reset();
+        reset();
         // setValue('userId', userId, { shouldValidate: true });
-        // setProductsImport([]);
+        setProductsImport([]);
         // await queryClient.invalidateQueries(['LIST_IMPORT_PRODUCT']);
         // router.push('/products/import');
+        message.success('Tạo phiếu chuyển hàng thành công');
       },
       onError: (err: any) => {
-        // message.error(err?.message);
+        message.error(err?.message);
       },
     }
   );
+
+  useEffect(() => {
+    if (profile) {
+      setValue('movedBy', profile.id);
+    }
+  }, [profile])
+
+  const totalPrice = useMemo(() => {
+    let price = 0;
+
+    if (productsImport?.length) {
+      productsImport.forEach(
+        ({ price: unitPrice, quantity, discountValue }) => {
+          price += unitPrice * quantity - discountValue;
+        }
+      );
+    }
+
+    return price;
+  }, [productsImport]);
+  const totalItem = useMemo(() => {
+    let quantity = 0;
+
+    if (productsImport?.length) {
+      productsImport.forEach(
+        ({ quantity: itemQuantity }) => {
+          quantity += itemQuantity
+        }
+      );
+    }
+
+    return quantity;
+  }, [productsImport]);
+
+  const changePayload = () => {
+    const products = cloneDeep(productsImport).map(
+      ({ id, price, product, quantity, discountValue, batches }) => ({
+        productId: product.id,
+        importPrice: price,
+        quantity: quantity,
+        discount: discountValue,
+        productUnitId: id,
+        isBatchExpireControl: product.isBatchExpireControl,
+        batches: batches?.map(({ id, quantity, expiryDate }) => ({
+          id,
+          quantity,
+          expiryDate,
+        })),
+      })
+    );
+    setValue('products', products);
+  };
 
   const onSubmit = () => {
     console.log(getValues());
     // console.log("products", getValues('products'))
     // console.log("userId", getValues('userId'))
-    // mutateCreateProductImport();
+    mutateCreateProductImport();
   }
 
   console.log("errors", errors)
@@ -72,12 +130,12 @@ export function RightContent({ useForm }: { useForm: any }) {
             label: item.fullName,
           }))}
           showSearch={true}
-          value={getValues('userId')}
+          value={getValues('movedBy')}
           onSearch={debounce((value) => {
             setSearchEmployeeText(value);
           }, 300)}
           onChange={(value) => {
-            setValue('userId', value, { shouldValidate: true });
+            setValue('movedBy', value, { shouldValidate: true });
           }}
           wrapClassName=""
           className="h-[44px]"
@@ -100,7 +158,10 @@ export function RightContent({ useForm }: { useForm: any }) {
                 bordered={false}
                 placeholder="Mã phiếu tự động"
                 className="h-6 pr-0 text-end"
-                onChange={() => { }}
+                value={getValues('code')}
+                onChange={(value) => {
+                  setValue('code', value, { shouldValidate: true });
+                }}
               />
             </div>
 
@@ -115,7 +176,7 @@ export function RightContent({ useForm }: { useForm: any }) {
               <div className=" leading-normal text-[#828487]">
                 Tổng số lượng
               </div>
-              <div className=" leading-normal text-[#19191C]">10</div>
+              <div className=" leading-normal text-[#19191C]">{formatNumber(totalItem)}</div>
             </div>
 
             <div className="mb-5 flex items-center justify-between">
@@ -123,17 +184,17 @@ export function RightContent({ useForm }: { useForm: any }) {
                 Tới chi nhánh
               </div>
               <CustomSelect
-                options={branches?.data?.items?.map((item) => ({
+                options={branches?.data?.items?.filter((br) => br.id !== branchId).map((item) => ({
                   value: item.id,
                   label: item.name,
                 }))}
                 showSearch={true}
-                value={getValues('branchId')}
+                value={getValues('toBranchId')}
                 onSearch={debounce((value) => {
                   setSearchEmployeeText(value);
                 }, 300)}
                 onChange={(value) => {
-                  setValue('branchId', value, { shouldValidate: true });
+                  setValue('toBranchId', value, { shouldValidate: true });
                 }}
                 wrapClassName=""
                 className="border-underline"
@@ -165,6 +226,7 @@ export function RightContent({ useForm }: { useForm: any }) {
           Lưu tạm
         </CustomButton>
         <CustomButton className="!h-12 text-lg font-semibold" type="success" onClick={() => {
+          changePayload();
           handleSubmit(onSubmit)();
         }}>
           Hoàn thành

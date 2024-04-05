@@ -57,7 +57,9 @@ function SaleInvoicePrint({ saleInvoice }: any) {
         <div className="grid grid-cols-2">
           <div className="">Tổng cộng:</div>
           <div className="text-black-main text-right">
-            {formatMoney(saleInvoice?.order?.totalPrice ?? saleInvoice?.totalPrice)}
+            {
+              saleInvoice?.order ? formatMoney(saleInvoice?.order?.totalPrice + saleInvoice?.order?.discount) : formatMoney(saleInvoice?.totalPrice + saleInvoice?.discount)
+            }
           </div>
         </div>
 
@@ -72,9 +74,9 @@ function SaleInvoicePrint({ saleInvoice }: any) {
           <div className="">Tổng thanh toán:</div>
           {
             saleInvoice?.order ? <div className="text-black-main text-right">
-              {formatMoney(+saleInvoice?.order?.totalPrice - +saleInvoice?.order?.discount)}
+              {formatMoney(+saleInvoice?.order?.totalPrice)}
             </div> : <div className="text-black-main text-right">
-              {formatMoney(+saleInvoice?.totalPrice - +saleInvoice?.discount)}
+              {formatMoney(+saleInvoice?.totalPrice)}
             </div>
           }
         </div>

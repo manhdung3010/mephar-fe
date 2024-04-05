@@ -71,7 +71,7 @@ export function ListBatchModal({
     };
   }, [productKeyAddBatch]);
 
-  const { data: batches, isLoading } = useQuery(
+  let { data: batches, isLoading } = useQuery(
     ['LIST_BATCH', formFilter.page, formFilter.limit, formFilter.keyword],
     () =>
       getBatch({
@@ -89,7 +89,7 @@ export function ListBatchModal({
         inventory: item.quantity,
       }));
 
-      setListBatchSelected(records);
+      batches.data.items = records;
     }
   }, [batches?.data?.items])
 
@@ -121,7 +121,7 @@ export function ListBatchModal({
             let batchesClone = cloneDeep(listBatchSelected);
             batchesClone = batchesClone.map((batch) => {
               if (batch.id === id) {
-                return { ...batch, quantity: value };
+                return { ...batch, quantity: value, };
               }
 
               return batch;

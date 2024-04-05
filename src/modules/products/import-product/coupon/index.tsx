@@ -22,7 +22,7 @@ import type {
   IImportProduct,
   IImportProductLocal,
 } from "@/modules/products/import-product/coupon/interface";
-import { branchState, productImportState, profileState } from "@/recoil/state";
+import { branchState, productImportState, productMoveState, profileState } from "@/recoil/state";
 
 import type { IBatch } from '../interface';
 import { ListBatchModal } from './ListBatchModal';
@@ -37,7 +37,7 @@ export default function ImportCoupon() {
   const branchId = useRecoilValue(branchState);
 
   const [importProducts, setImportProducts] =
-    useRecoilState(productImportState);
+    useRecoilState(productMoveState);
 
   const router = useRouter();
   const { id } = router.query;
@@ -127,7 +127,6 @@ export default function ImportCoupon() {
             })),
           };
         }
-
         return {
           ...product,
           [field]: newValue,

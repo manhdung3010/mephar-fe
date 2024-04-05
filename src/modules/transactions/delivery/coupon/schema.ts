@@ -23,39 +23,29 @@ export const schema = yup.object().shape({
             return false;
 
           return true;
-        })
-        .test(
-          "sum-quantity",
-          "Số lượng sản phẩm khác với số lượng sản phẩm trong từng lô",
-          (batches, context) => {
-            if (!context.parent.isBatchExpireControl) return true;
+        }),
+      // .test(
+      //   "sum-quantity",
+      //   "Số lượng sản phẩm khác với số lượng sản phẩm trong từng lô",
+      //   (batches, context) => {
+      //     if (!context.parent.isBatchExpireControl) return true;
 
-            const totalQuantity = batches?.reduce?.(
-              (acc, obj) => acc + obj.quantity,
-              0
-            );
+      //     const totalQuantity = batches?.reduce?.(
+      //       (acc, obj) => acc + obj.quantity,
+      //       0
+      //     );
 
-            if (totalQuantity !== context.parent.totalQuantity) return false;
+      //     if (totalQuantity !== context.parent.totalQuantity) return false;
 
-            return true;
-          }
-        ),
+      //     return true;
+      //   }
+      // ),
     })
   ),
   code: yup.string(),
-  paid: yup
-    .string()
-    .test(
-      "is-less-than",
-      "Vui lòng nhập nhỏ hơn hoặc bằng tiền tổng hóa đơn",
-      (value, context) => {
-        if (value && value > context.parent.totalPrice) return false;
-        return true;
-      }
-    ),
-  totalPrice: yup.number(),
   description: yup.string(),
-  userId: yup.number().required("Đây là trường bắt buộc!"),
-  branchId: yup.number().required("Đây là trường bắt buộc!"),
+  movedBy: yup.number().required("Đây là trường bắt buộc!"),
+  toBranchId: yup.number().required("Đây là trường bắt buộc!"),
+  fromBranchId: yup.number(),
   // groupSupplierId: yup.string().required("Đây là trường bắt buộc!"),
 });

@@ -19,6 +19,7 @@ import CancelBillModal from './CancelBillModal';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteOrder } from '@/api/order.service';
 import { IOrder } from '../../order/type';
+import PlusIconWhite from '@/assets/PlusIconWhite.svg';
 
 const { TextArea } = Input;
 
@@ -93,7 +94,7 @@ export function Info({ record }: { record: IOrder }) {
       title: 'Đơn giá',
       dataIndex: 'price',
       key: 'price',
-      render: (value) => formatMoney(value),
+      render: (value, { discount }) => formatMoney(+value - +discount),
     },
     {
       title: 'Giảm giá',
@@ -325,7 +326,7 @@ export function Info({ record }: { record: IOrder }) {
         >
           In phiếu
         </CustomButton>
-        {/* <CustomButton
+        <CustomButton
           outline={true}
           prefixIcon={<Image src={CloseIcon} alt="" />}
           onClick={() => setOpenCancelBill(true)}
@@ -334,10 +335,10 @@ export function Info({ record }: { record: IOrder }) {
         </CustomButton>
         <CustomButton
           type="success"
-          prefixIcon={<Image src={SaveIcon} alt="" />}
+          prefixIcon={<Image src={PlusIconWhite} alt="" />}
         >
-          Lưu
-        </CustomButton> */}
+          Trả hàng
+        </CustomButton>
       </div>
 
       <div ref={invoiceComponentRef} className={styles.invoicePrint}>

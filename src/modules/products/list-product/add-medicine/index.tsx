@@ -249,6 +249,7 @@ const AddMedicine = ({
                 positionName={productDetail?.data?.productPosition?.name}
                 drugCode={productDetail?.data?.drugCode}
                 id={id as string}
+                isCopy={isCopy}
               />,
               <Detail
                 key="1"

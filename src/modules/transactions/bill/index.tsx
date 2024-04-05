@@ -100,7 +100,7 @@ export function BillTransaction() {
       dataIndex: "discount",
       key: "discount",
       render: (_, { discount, discountType }) =>
-        discount ? `${formatNumber(discount)}${discountType}` : 0,
+        formatMoney(+discount),
     },
     {
       title: "Khách đã trả",

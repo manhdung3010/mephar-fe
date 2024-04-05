@@ -55,7 +55,7 @@ export const defaultUnit = (listUnit) => {
   return unitObject;
 };
 
-const Info = ({ useForm, setSelectedMedicineCategory, selectedMedicineCategory, groupProductName, dosageName, positionName, drugCode, id }: any) => {
+const Info = ({ useForm, setSelectedMedicineCategory, selectedMedicineCategory, groupProductName, dosageName, positionName, drugCode, id, isCopy }: any) => {
   const { getValues, setValue, errors } = useForm;
 
   const [isOpenAddGroupProduct, setIsOpenAddGroupProduct] =
@@ -66,6 +66,8 @@ const Info = ({ useForm, setSelectedMedicineCategory, selectedMedicineCategory, 
   const [groupProductKeyword, setGroupProductKeyword] = useState(groupProductName);
   const [dosageKeyword, setDosageKeyword] = useState(dosageName);
   const [positionKeyword, setPositionKeyword] = useState(positionName);
+
+  console.log("isCopy", isCopy);
 
   useEffect(() => {
     setGroupProductKeyword(groupProductName);
@@ -152,7 +154,7 @@ const Info = ({ useForm, setSelectedMedicineCategory, selectedMedicineCategory, 
                 shouldValidate: true,
               })
             }
-            value={getValues('code')}
+            value={isCopy ? null : getValues('code')}
           />
         </div>
         <div>
@@ -163,7 +165,7 @@ const Info = ({ useForm, setSelectedMedicineCategory, selectedMedicineCategory, 
             onChange={(e) => setValue('barCode', e, {
               shouldValidate: true,
             })}
-            value={getValues('barCode')}
+            value={isCopy ? null : getValues('barCode')}
           />
           <InputError error={errors?.barCode?.message} />
         </div>
@@ -489,7 +491,7 @@ const Info = ({ useForm, setSelectedMedicineCategory, selectedMedicineCategory, 
                 placeholder='Mã hàng tự động'
                 wrapClassName='flex-1'
                 className="mt-0 h-11 flex-1"
-                value={listUnit[unitKey].code}
+                value={isCopy ? null : listUnit[unitKey].code}
                 bordered={false}
               />
               <CustomInput
@@ -497,7 +499,7 @@ const Info = ({ useForm, setSelectedMedicineCategory, selectedMedicineCategory, 
                 onChange={(e) => onChangeUnit(unitKey, 'barCode', e)}
                 wrapClassName='flex-1'
                 className="mt-0 h-11 flex-1"
-                value={listUnit[unitKey].barCode}
+                value={isCopy ? null : listUnit[unitKey].barCode}
                 bordered={false}
               />
               <CustomInput
