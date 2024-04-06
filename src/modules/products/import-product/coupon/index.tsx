@@ -37,7 +37,7 @@ export default function ImportCoupon() {
   const branchId = useRecoilValue(branchState);
 
   const [importProducts, setImportProducts] =
-    useRecoilState(productMoveState);
+    useRecoilState(productImportState);
 
   const router = useRouter();
   const { id } = router.query;

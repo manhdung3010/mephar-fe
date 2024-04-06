@@ -484,7 +484,7 @@ export default function ReturnCoupon() {
                     </div>
 
                     <div>
-                      <div className="flex gap-x-5">
+                      <div className="flex gap-x-3">
                         <div className='flex gap-x-1'>
                           <div>{item.code}</div> {" - "}
                           <div>{item.product.name}</div>
@@ -492,6 +492,13 @@ export default function ReturnCoupon() {
                         <div className="rounded bg-red-main px-2 py-[2px] text-white">
                           {item.unitName}
                         </div>
+                        {
+                          item.quantity <= 0 && (
+                            <div className="rounded text-red-main  py-[2px] italic">
+                              Hết hàng
+                            </div>
+                          )
+                        }
                       </div>
                       <div>Số lượng - {item.quantity}</div>
                     </div>

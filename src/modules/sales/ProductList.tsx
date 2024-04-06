@@ -147,27 +147,29 @@ export function ProductList({ useForm }: { useForm: any }) {
       dataIndex: 'action',
       key: 'action',
       render: (_, { id }) => (
-        <Image
-          src={RemoveIcon}
-          className=" cursor-pointer"
-          onClick={() => {
-            const orderObjectClone = cloneDeep(orderObject);
-            const productsClone = orderObjectClone[orderActive] || [];
-            orderObjectClone[orderActive] = productsClone.filter(
-              (product) => product.id !== id
-            );
+        <div className='w-10 flex-shrink-0'>
+          <Image
+            src={RemoveIcon}
+            className=" cursor-pointer"
+            onClick={() => {
+              const orderObjectClone = cloneDeep(orderObject);
+              const productsClone = orderObjectClone[orderActive] || [];
+              orderObjectClone[orderActive] = productsClone.filter(
+                (product) => product.id !== id
+              );
 
-            setOrderObject(orderObjectClone);
-          }}
-          alt=""
-        />
+              setOrderObject(orderObjectClone);
+            }}
+            alt=""
+          />
+        </div>
       ),
     },
     {
       title: 'MÃ SKU',
       dataIndex: 'code',
       key: 'code',
-      render: (_, { product }) => product.code,
+      render: (_, { productUnit }) => productUnit.code,
     },
     {
       title: 'TÊN SẢN PHẨM',
@@ -246,7 +248,10 @@ export function ProductList({ useForm }: { useForm: any }) {
       title: 'Tồn kho',
       dataIndex: 'price',
       key: 'price',
-      render: (_, record) => formatNumber(record.inventory),
+      render: (_, record) => <div>
+        {formatNumber(record.inventory)}
+
+      </div>
     },
     {
       title: 'SỐ LƯỢNG',

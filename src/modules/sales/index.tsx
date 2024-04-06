@@ -301,7 +301,7 @@ const Index = () => {
                               </div>
 
                               <div>
-                                <div className="mb-2 flex gap-x-5">
+                                <div className="mb-2 flex gap-x-3">
                                   <div>
                                     <span>{item.code}</span> {" - "}
                                     <span>{item.product.name}</span>
@@ -309,6 +309,13 @@ const Index = () => {
                                   <div className="rounded bg-red-main px-2 py-[2px] text-white">
                                     {item.productUnit.unitName}
                                   </div>
+                                  {
+                                    item.quantity <= 0 && (
+                                      <div className="rounded text-red-main py-[2px] italic">
+                                        Hết hàng
+                                      </div>
+                                    )
+                                  }
                                 </div>
 
                                 <div className="flex gap-x-3">
