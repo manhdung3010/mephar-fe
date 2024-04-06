@@ -143,16 +143,16 @@ export function DeliveryCoupon() {
       render: (value, _, index) => (
         <span
           className="cursor-pointer text-[#0070F4]"
-        // onClick={() => {
-        //   const currentState = expandedRowKeys[`${index}`];
-        //   const temp = { ...expandedRowKeys };
-        //   if (currentState) {
-        //     delete temp[`${index}`];
-        //   } else {
-        //     temp[`${index}`] = true;
-        //   }
-        //   setExpandedRowKeys({ ...temp });
-        // }}
+          onClick={() => {
+            const currentState = expandedRowKeys[`${index}`];
+            const temp = { ...expandedRowKeys };
+            if (currentState) {
+              delete temp[`${index}`];
+            } else {
+              temp[`${index}`] = true;
+            }
+            setExpandedRowKeys({ ...temp });
+          }}
         >
           {value}
         </span>
