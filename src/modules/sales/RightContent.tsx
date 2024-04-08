@@ -93,7 +93,7 @@ export function RightContent({ useForm }: { useForm: any }) {
     let price = 0;
 
     orderObject[orderActive]?.forEach((product: ISaleProductLocal) => {
-      const unit = product.product.productUnit.find(
+      const unit = product.product.productUnit?.find(
         (unit) => unit.id === product.productUnitId
       );
 

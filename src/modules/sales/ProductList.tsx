@@ -75,8 +75,6 @@ export function ProductList({ useForm }: { useForm: any }) {
 
     setOrderObject(orderObjectClone);
   };
-
-  console.log("orderObject[orderActive]", orderObject[orderActive])
   const onExpandMoreBatches = async (productKey, quantity: number) => {
     const orderObjectClone = cloneDeep(orderObject);
 
@@ -196,7 +194,7 @@ export function ProductList({ useForm }: { useForm: any }) {
       title: 'ĐƠN VỊ',
       dataIndex: 'units',
       key: 'units',
-      render: (_, { productKey, product, productUnitId }) => (
+      render: (_, { productKey, product, productUnitId, productUnit }) => (
         <CustomUnitSelect
           options={(() => {
             const productUnitKeysSelected = orderObject[orderActive]?.map(
@@ -204,7 +202,11 @@ export function ProductList({ useForm }: { useForm: any }) {
                 Number(product.productKey.split('-')[1])
             );
 
-            return product.productUnit.map((unit) => ({
+            return product?.productUnit?.map((unit) => ({
+              value: unit.id,
+              label: unit.unitName,
+              disabled: productUnitKeysSelected.includes(unit.id),
+            })) || [productUnit].map((unit) => ({
               value: unit.id,
               label: unit.unitName,
               disabled: productUnitKeysSelected.includes(unit.id),

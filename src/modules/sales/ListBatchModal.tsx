@@ -43,8 +43,6 @@ export function ListBatchModal({
     });
   }, [productKeyAddBatch]);
 
-  console.log('listBatch', listBatch)
-
   const columns: ColumnsType<IBatch> = [
     {
       title: 'Tên',
@@ -121,9 +119,9 @@ export function ListBatchModal({
       <div className="my-5 h-[1px] w-full bg-[#C7C9D9]" />
 
       <CustomTable
-        dataSource={listBatch.map((batch) => ({
+        dataSource={listBatch.map((batch: any) => ({
           ...batch,
-          key: batch.batchId,
+          key: batch.batchId || batch.id,
         }))}
         columns={columns}
         scroll={{ x: 600 }}
@@ -132,13 +130,13 @@ export function ListBatchModal({
           selectedRowKeys: [
             ...listBatch
               .filter((batch) => batch.isSelected)
-              .map((batch) => batch.batchId),
+              .map((batch: any) => batch.batchId || batch.id),
           ],
           onChange(selectedRowKeys) {
             let listBatchClone = cloneDeep(listBatch);
 
-            listBatchClone = listBatchClone.map((batch) => {
-              if (selectedRowKeys.includes(batch.batchId)) {
+            listBatchClone = listBatchClone.map((batch: any) => {
+              if (selectedRowKeys.includes(batch.batchId || batch.id)) {
                 return {
                   ...batch,
                   quantity: batch.quantity || 1,

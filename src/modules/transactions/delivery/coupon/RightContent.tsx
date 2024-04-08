@@ -52,7 +52,6 @@ export function RightContent({ useForm, branchId }: { useForm: any, branchId: nu
         setProductsImport([]);
         // await queryClient.invalidateQueries(['LIST_IMPORT_PRODUCT']);
         // router.push('/products/import');
-        message.success('Tạo phiếu chuyển hàng thành công');
       },
       onError: (err: any) => {
         message.error(err?.message);
