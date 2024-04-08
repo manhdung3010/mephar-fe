@@ -1,7 +1,7 @@
 import { Input } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import Image from 'next/image';
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
 import { message } from 'antd';
 import CloseIcon from '@/assets/closeIcon.svg';
@@ -10,7 +10,7 @@ import SaveIcon from '@/assets/saveIcon.svg';
 import { CustomButton } from '@/components/CustomButton';
 import CustomTable from '@/components/CustomTable';
 import { EGenderLabel, EOrderStatusLabel } from '@/enums';
-import { formatMoney } from '@/helpers';
+import { formatMoney, formatNumber } from '@/helpers';
 
 import { useReactToPrint } from 'react-to-print';
 import SaleInvoicePrint from '@/modules/sales/SaleInvoicePrint';
@@ -112,6 +112,10 @@ export function Info({ record }: { record: IOrder }) {
   const handlePrintInvoice = useReactToPrint({
     content: () => invoiceComponentRef.current,
   });
+
+  const totalNumber = useMemo(() => {
+    return record.products?.reduce((acc, cur) => acc + cur.quantity, 0);
+  }, [record.products]);
 
   return (
     <div className="gap-12 ">
@@ -296,6 +300,10 @@ export function Info({ record }: { record: IOrder }) {
       />
 
       <div className="ml-auto mb-5 w-[300px]">
+        <div className=" mb-3 grid grid-cols-2">
+          <div className="text-gray-main">Tổng số lượng:</div>
+          <div className="text-black-main">{formatNumber(totalNumber)}</div>
+        </div>
         <div className=" mb-3 grid grid-cols-2">
           <div className="text-gray-main">Tổng tiền hàng:</div>
           <div className="text-black-main">{formatMoney(record?.totalPrice + record?.discount)}</div>

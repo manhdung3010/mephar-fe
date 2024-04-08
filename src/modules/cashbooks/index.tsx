@@ -90,99 +90,102 @@ export function Cashbook() {
     },
   ];
   return (
-    <div className="mb-2">
-      <div className="my-3 flex justify-end bg-white p-2">
-        <div className="flex items-center p-4">
-          <div className="mr-4 flex h-[30px] w-[30px] items-center justify-center rounded-full bg-[#0070F4] ">
-            <Image src={DolorIcon} />
-          </div>
-          <div>
-            <div className="text-xs text-[#15171A]">Quỹ đầu kỳ</div>
-            <div className="text-[22px] text-[#0070F4]">0</div>
-          </div>
-        </div>
+    // <div className="mb-2">
+    //   <div className="my-3 flex justify-end bg-white p-2">
+    //     <div className="flex items-center p-4">
+    //       <div className="mr-4 flex h-[30px] w-[30px] items-center justify-center rounded-full bg-[#0070F4] ">
+    //         <Image src={DolorIcon} />
+    //       </div>
+    //       <div>
+    //         <div className="text-xs text-[#15171A]">Quỹ đầu kỳ</div>
+    //         <div className="text-[22px] text-[#0070F4]">0</div>
+    //       </div>
+    //     </div>
 
-        <div className="mx-4 h-20 w-[1px] bg-[#E1E3E6]" />
+    //     <div className="mx-4 h-20 w-[1px] bg-[#E1E3E6]" />
 
-        <div className="flex items-center p-4">
-          <div className="mr-4 flex h-[30px] w-[30px] items-center justify-center rounded-full bg-[#00B63E]">
-            <Image src={DolorIcon} />
-          </div>
-          <div>
-            <div className="text-xs text-[#15171A]">Tổng thu</div>
-            <div className="text-[22px] text-[#00B63E]">0</div>
-          </div>
-        </div>
+    //     <div className="flex items-center p-4">
+    //       <div className="mr-4 flex h-[30px] w-[30px] items-center justify-center rounded-full bg-[#00B63E]">
+    //         <Image src={DolorIcon} />
+    //       </div>
+    //       <div>
+    //         <div className="text-xs text-[#15171A]">Tổng thu</div>
+    //         <div className="text-[22px] text-[#00B63E]">0</div>
+    //       </div>
+    //     </div>
 
-        <div className="mx-4 h-20 w-[1px] bg-[#E1E3E6]" />
+    //     <div className="mx-4 h-20 w-[1px] bg-[#E1E3E6]" />
 
-        <div className="flex items-center p-4">
-          <div className="mr-4 flex h-[30px] w-[30px] items-center justify-center rounded-full bg-[#F32B2B]">
-            <Image src={DolorIcon} />
-          </div>
-          <div>
-            <div className="text-xs text-[#15171A]">Tổng chi</div>
-            <div className="text-[22px] text-[#F32B2B]">0</div>
-          </div>
-        </div>
+    //     <div className="flex items-center p-4">
+    //       <div className="mr-4 flex h-[30px] w-[30px] items-center justify-center rounded-full bg-[#F32B2B]">
+    //         <Image src={DolorIcon} />
+    //       </div>
+    //       <div>
+    //         <div className="text-xs text-[#15171A]">Tổng chi</div>
+    //         <div className="text-[22px] text-[#F32B2B]">0</div>
+    //       </div>
+    //     </div>
 
-        <div className="mx-4 h-20 w-[1px] bg-[#E1E3E6]" />
+    //     <div className="mx-4 h-20 w-[1px] bg-[#E1E3E6]" />
 
-        <div className="flex items-center p-4">
-          <div className="mr-4 flex h-[30px] w-[30px] items-center justify-center rounded-full bg-[#FF8800]">
-            <Image src={DolorIcon} />
-          </div>
-          <div>
-            <div className="text-xs text-[#15171A]">Tồn quỹ</div>
-            <div className="text-[22px] text-[#FF8800]">0</div>
-          </div>
-        </div>
-      </div>
+    //     <div className="flex items-center p-4">
+    //       <div className="mr-4 flex h-[30px] w-[30px] items-center justify-center rounded-full bg-[#FF8800]">
+    //         <Image src={DolorIcon} />
+    //       </div>
+    //       <div>
+    //         <div className="text-xs text-[#15171A]">Tồn quỹ</div>
+    //         <div className="text-[22px] text-[#FF8800]">0</div>
+    //       </div>
+    //     </div>
+    //   </div>
 
-      <div className="mb-3 flex justify-end">
-        <CustomButton
-          type="success"
-          prefixIcon={<Image src={ReceiptIcon} />}
-          wrapClassName="mx-2"
-          onClick={() => setOpenAddCashbookModal(true)}
-        >
-          Lập phiếu thu
-        </CustomButton>
-        <CustomButton
-          type="success"
-          prefixIcon={<Image src={PaymentIcon} />}
-          wrapClassName="mx-2"
-        >
-          Lập phiếu chi
-        </CustomButton>
-        <CustomButton
-          prefixIcon={<Image src={ExportIcon} />}
-          wrapClassName="mx-2"
-        >
-          Xuất file
-        </CustomButton>
-      </div>
+    //   <div className="mb-3 flex justify-end">
+    //     <CustomButton
+    //       type="success"
+    //       prefixIcon={<Image src={ReceiptIcon} />}
+    //       wrapClassName="mx-2"
+    //       onClick={() => setOpenAddCashbookModal(true)}
+    //     >
+    //       Lập phiếu thu
+    //     </CustomButton>
+    //     <CustomButton
+    //       type="success"
+    //       prefixIcon={<Image src={PaymentIcon} />}
+    //       wrapClassName="mx-2"
+    //     >
+    //       Lập phiếu chi
+    //     </CustomButton>
+    //     <CustomButton
+    //       prefixIcon={<Image src={ExportIcon} />}
+    //       wrapClassName="mx-2"
+    //     >
+    //       Xuất file
+    //     </CustomButton>
+    //   </div>
 
-      <Search />
+    //   <Search />
 
-      <CustomTable
-        rowSelection={{
-          type: 'checkbox',
-        }}
-        dataSource={dataSource}
-        columns={columns}
-        expandable={{
-          // eslint-disable-next-line @typescript-eslint/no-shadow
-          expandedRowRender: (record: IRecord) => <RowDetail record={record} />,
-          expandIcon: () => <></>,
-          expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key),
-        }}
-      />
+    //   <CustomTable
+    //     rowSelection={{
+    //       type: 'checkbox',
+    //     }}
+    //     dataSource={dataSource}
+    //     columns={columns}
+    //     expandable={{
+    //       // eslint-disable-next-line @typescript-eslint/no-shadow
+    //       expandedRowRender: (record: IRecord) => <RowDetail record={record} />,
+    //       expandIcon: () => <></>,
+    //       expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key),
+    //     }}
+    //   />
 
-      <AddCashbookModal
-        isOpen={openAddCashbookModal}
-        onCancel={() => setOpenAddCashbookModal(false)}
-      />
+    //   <AddCashbookModal
+    //     isOpen={openAddCashbookModal}
+    //     onCancel={() => setOpenAddCashbookModal(false)}
+    //   />
+    // </div>
+    <div className='my-5'>
+      Đang cập nhật...
     </div>
   );
 }

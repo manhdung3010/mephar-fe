@@ -82,16 +82,19 @@ export function CustomerReport() {
     },
   ];
   return (
-    <div>
-      <div className="my-3 flex justify-end gap-4">
-        <CustomButton prefixIcon={<Image src={ExportIcon} />}>
-          Xuất file
-        </CustomButton>
-      </div>
+    // <div>
+    //   <div className="my-3 flex justify-end gap-4">
+    //     <CustomButton prefixIcon={<Image src={ExportIcon} />}>
+    //       Xuất file
+    //     </CustomButton>
+    //   </div>
 
-      <Search />
+    //   <Search />
 
-      <CustomTable dataSource={dataSource} columns={columns} />
+    //   <CustomTable dataSource={dataSource} columns={columns} />
+    // </div>
+    <div className='my-5'>
+      Đang cập nhật...
     </div>
   );
 }

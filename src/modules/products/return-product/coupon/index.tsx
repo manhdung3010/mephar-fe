@@ -194,19 +194,21 @@ export default function ReturnCoupon() {
       dataIndex: 'action',
       key: 'action',
       render: (_, { id }) => (
-        <Image
-          src={RemoveIcon}
-          className=" cursor-pointer"
-          onClick={() => {
-            const productImportClone = cloneDeep(returnProducts);
-            const index = productImportClone.findIndex(
-              (product) => product.id === id
-            );
-            productImportClone.splice(index, 1);
-            setReturnProducts(productImportClone);
-          }}
-          alt=""
-        />
+        <div className='w-5 flex-shrink-0'>
+          <Image
+            src={RemoveIcon}
+            className=" cursor-pointer"
+            onClick={() => {
+              const productImportClone = cloneDeep(returnProducts);
+              const index = productImportClone.findIndex(
+                (product) => product.id === id
+              );
+              productImportClone.splice(index, 1);
+              setReturnProducts(productImportClone);
+            }}
+            alt=""
+          />
+        </div>
       ),
     },
     {

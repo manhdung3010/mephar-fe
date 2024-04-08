@@ -105,15 +105,6 @@ export function BuyHistory({ record, branchId }: { record: any, branchId: number
         pagination={false}
         className="mb-4"
       />
-
-      <div className="flex justify-end gap-4">
-        <CustomButton
-          type="success"
-          prefixIcon={<Image src={DollarIcon} alt="" />}
-        >
-          Thanh toán
-        </CustomButton>
-      </div>
     </div>
   );
 }
