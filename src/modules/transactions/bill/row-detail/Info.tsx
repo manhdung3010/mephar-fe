@@ -97,11 +97,6 @@ export function Info({ record }: { record: IOrder }) {
       render: (value, { discount }) => formatMoney(+value - +discount),
     },
     {
-      title: 'Giảm giá',
-      dataIndex: 'discount',
-      key: 'discount',
-    },
-    {
       title: 'Thành tiền',
       dataIndex: 'totalPrice',
       key: 'totalPrice',
