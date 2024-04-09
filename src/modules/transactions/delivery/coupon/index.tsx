@@ -405,13 +405,13 @@ export function DeliveryCoupon() {
                             </div>
                           ))}
                         </div>
-                        <InputError
+                        {/* <InputError
                           error={
                             errors?.products &&
                             errors?.products[Number(record.key) - 1]?.batches
                               ?.message
                           }
-                        />
+                        /> */}
                       </div>
                     )}
                   </>

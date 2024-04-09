@@ -8,47 +8,39 @@ import { CustomButton } from '@/components/CustomButton';
 import { CustomTextarea } from '@/components/CustomInput';
 import { CustomSelect } from '@/components/CustomSelect';
 import CustomTable from '@/components/CustomTable';
+import { EDeliveryTransactionStatusLabel } from '@/enums';
+import { formatDateTime, formatNumber } from '@/helpers';
+import { useMemo } from 'react';
 
 interface IRecord {
   key: number;
   id: string;
   name: string;
+  product: any;
   quantity: number;
   totalReceive: number;
 }
 
 export function Info({ record }: { record: any }) {
-  const data = {
-    key: 1,
-    id: 'PN231017090542',
-    name: 'Nước cất tiêm 5ml',
-    quantity: 2,
-    totalReceive: 35000,
-  };
-
-  const dataSource: IRecord[] = Array(1)
-    .fill(0)
-    .map((_, index) => ({ ...data, key: index }));
-
   const columns: ColumnsType<IRecord> = [
     {
       title: 'Mã hàng',
       dataIndex: 'id',
       key: 'id',
-      render: (value) => (
-        <span className="cursor-pointer text-[#0070F4]">{value}</span>
+      render: (_, { product }) => (
+        <span className="cursor-pointer text-[#0070F4]">{product?.code}</span>
       ),
     },
     {
       title: 'Tên hàng',
       dataIndex: 'name',
       key: 'name',
-      render: (value) => (
+      render: (_, { product }) => (
         <div>
-          {value}{' '}
-          <div className="w-fit rounded-sm bg-red-main px-1 py-[2px] text-white">
+          {product?.name}{' '}
+          {/* <div className="w-fit rounded-sm bg-red-main px-1 py-[2px] text-white">
             Pherelive SL1 - 26/07/2023
-          </div>
+          </div> */}
         </div>
       ),
     },
@@ -56,13 +48,19 @@ export function Info({ record }: { record: any }) {
       title: 'Số lượng chuyển',
       dataIndex: 'quantity',
       key: 'quantity',
+      render: (value) => formatNumber(value),
     },
     {
       title: 'Số lượng nhận',
       dataIndex: 'totalReceive',
       key: 'totalReceive',
+      render: (value) => formatNumber(value),
     },
   ];
+
+  const totalQuantity = useMemo(() => {
+    return record?.items?.reduce((total, item) => total + item.quantity, 0);
+  }, [record?.items])
 
   return (
     <div className="gap-12 ">
@@ -70,32 +68,33 @@ export function Info({ record }: { record: any }) {
         <div className="mb-4 grid w-2/3 grid-cols-2 gap-5">
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Mã đơn chuyển hàng:</div>
-            <div className="text-black-main">DQG00006601</div>
+            <div className="text-black-main">{record?.code}</div>
           </div>
 
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Trạng thái:</div>
-            <div className="text-[#0070F4]">Đang vận chuyển</div>
+            <div className="text-[#0070F4]">{EDeliveryTransactionStatusLabel[record?.status]}</div>
           </div>
 
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Từ chi nhánh:</div>
-            <div className="text-black-main">Chi nhánh mặc định</div>
+            <div className="text-black-main">{record?.fromBranch?.name}</div>
           </div>
 
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Tới chi nhánh:</div>
-            <div className="text-black-main">Chi nhánh mặc định</div>
+            <div className="text-black-main">{record?.toBranch?.name}</div>
           </div>
 
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Ngày chuyển:</div>
-            <div className="text-black-main">17/10/2023 09:05:14</div>
+            <div className="text-black-main">{formatDateTime(record?.moveAt)}</div>
           </div>
 
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Ngày nhận:</div>
-            <CustomSelect onChange={() => {}} className="border-underline" />
+            {/* <CustomSelect onChange={() => { }} className="border-underline" /> */}
+            <div className="text-black-main">{record?.receivedAt ? formatDateTime(record?.receivedAt) : ''}</div>
           </div>
 
           <div className="grid grid-cols-2 gap-5">
@@ -105,17 +104,17 @@ export function Info({ record }: { record: any }) {
 
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Ngày tạo:</div>
-            <div className="text-black-main">17/10/2023 09:05:14</div>
+            <div className="text-black-main">{formatDateTime(record?.moveAt)}</div>
           </div>
         </div>
 
         <div className="grow">
-          <CustomTextarea rows={8} placeholder="Ghi chú:" />
+          <CustomTextarea rows={8} placeholder="Ghi chú:" value={record?.note} />
         </div>
       </div>
 
       <CustomTable
-        dataSource={dataSource}
+        dataSource={record?.items || []}
         columns={columns}
         pagination={false}
         className="mb-4"
@@ -124,12 +123,12 @@ export function Info({ record }: { record: any }) {
       <div className="ml-auto mb-5 w-[300px]">
         <div className=" mb-3 grid grid-cols-2">
           <div className="text-gray-main">Tổng số mặt hàng:</div>
-          <div className="text-black-main">2</div>
+          <div className="text-black-main">{formatNumber(record?.items?.length)}</div>
         </div>
 
         <div className=" mb-3 grid grid-cols-2">
           <div className="text-gray-main">Tổng số lượng chuyển:</div>
-          <div className="text-black-main">140,000</div>
+          <div className="text-black-main">{formatNumber(totalQuantity)}</div>
         </div>
       </div>
 
@@ -148,12 +147,12 @@ export function Info({ record }: { record: any }) {
         >
           In mã vạch
         </CustomButton>
-        <CustomButton
+        {/* <CustomButton
           type="success"
           prefixIcon={<Image src={EditIcon} alt="" />}
         >
           Cập nhật
-        </CustomButton>
+        </CustomButton> */}
       </div>
     </div>
   );

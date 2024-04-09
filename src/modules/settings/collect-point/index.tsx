@@ -79,24 +79,27 @@ export function CollectPoint() {
   ];
 
   return (
-    <div className="mb-2">
-      <div className="my-3 flex items-center justify-end gap-4">
-        <CustomButton
-          prefixIcon={<Image src={PlusIcon} />}
-          onClick={() => setOpenSettingCollectPointModal(true)}
-        >
-          Thiết lập tích điểm
-        </CustomButton>
-      </div>
+    // <div className="mb-2">
+    //   <div className="my-3 flex items-center justify-end gap-4">
+    //     <CustomButton
+    //       prefixIcon={<Image src={PlusIcon} />}
+    //       onClick={() => setOpenSettingCollectPointModal(true)}
+    //     >
+    //       Thiết lập tích điểm
+    //     </CustomButton>
+    //   </div>
 
-      <Search />
+    //   <Search />
 
-      <CustomTable dataSource={dataSource} columns={columns} />
+    //   <CustomTable dataSource={dataSource} columns={columns} />
 
-      <SettingCollectPointModal
-        isOpen={openSettingCollectPointModal}
-        onCancel={() => setOpenSettingCollectPointModal(false)}
-      />
+    //   <SettingCollectPointModal
+    //     isOpen={openSettingCollectPointModal}
+    //     onCancel={() => setOpenSettingCollectPointModal(false)}
+    //   />
+    // </div>
+    <div className='my-5'>
+      Đang cập nhật...
     </div>
   );
 }

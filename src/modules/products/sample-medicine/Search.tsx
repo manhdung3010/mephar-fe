@@ -26,25 +26,6 @@ const productStatusData = [
   },
 ]
 
-const productInventoryData = [
-  {
-    value: 1,
-    label: "Dưới định mức tồn",
-  },
-  {
-    value: 2,
-    label: "Vượt định mức tồn",
-  },
-  {
-    value: 3,
-    label: "Còn hàng trong kho",
-  },
-  {
-    value: 4,
-    label: "Hết hàng trong kho",
-  },
-]
-
 const Search = ({ onChange }: { onChange: (value) => void }) => {
 
   const [formFilter, setFormFilter] = useState({

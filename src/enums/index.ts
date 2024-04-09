@@ -66,15 +66,13 @@ export enum EReturnTransactionStatus {
 }
 
 export enum EDeliveryTransactionStatus {
-  DELIVERING = "DELIVERING",
-  STORE = "STORE",
-  DELIVERED = "DELIVERED",
+  MOVING = "MOVING",
+  RECEIVED = "RECEIVED",
 }
 
 export enum EDeliveryTransactionStatusLabel {
-  DELIVERING = "Đang vận chuyển",
-  STORE = "Lưu tạm",
-  DELIVERED = "Hoàn thành",
+  MOVING = "Đang vận chuyển",
+  RECEIVED = "Đã nhận",
 }
 
 export enum EReturnTransactionStatusLabel {

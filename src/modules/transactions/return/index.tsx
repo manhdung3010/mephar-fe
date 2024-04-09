@@ -122,51 +122,54 @@ export function ReturnTransaction() {
     },
   ];
   return (
-    <div>
-      <div className="my-3 flex justify-end gap-4">
-        <CustomButton
-          // onClick={() => router.push("/products/import/coupon")}
-          type="success"
-          prefixIcon={<Image src={ImportIcon} />}
-        >
-          Thêm phiếu trả hàng
-        </CustomButton>
+    // <div>
+    //   <div className="my-3 flex justify-end gap-4">
+    //     <CustomButton
+    //       // onClick={() => router.push("/products/import/coupon")}
+    //       type="success"
+    //       prefixIcon={<Image src={ImportIcon} />}
+    //     >
+    //       Thêm phiếu trả hàng
+    //     </CustomButton>
 
-        <CustomButton prefixIcon={<Image src={ExportIcon} />}>
-          Xuất file
-        </CustomButton>
-      </div>
+    //     <CustomButton prefixIcon={<Image src={ExportIcon} />}>
+    //       Xuất file
+    //     </CustomButton>
+    //   </div>
 
-      <Search />
+    //   <Search />
 
-      <CustomTable
-        rowSelection={{
-          type: 'checkbox',
-        }}
-        dataSource={dataSource}
-        columns={columns}
-        onRow={(record, rowIndex) => {
-          return {
-            onClick: event => {
-              // Toggle expandedRowKeys state here
-              if (expandedRowKeys[record.key]) {
-                const { [record.key]: value, ...remainingKeys } = expandedRowKeys;
-                setExpandedRowKeys(remainingKeys);
-              } else {
-                setExpandedRowKeys({ ...expandedRowKeys, [record.key]: true });
-              }
-            }
-          };
-        }}
-        expandable={{
-          // eslint-disable-next-line @typescript-eslint/no-shadow
-          expandedRowRender: (record: IRecord) => (
-            <ReturnDetail record={record} />
-          ),
-          expandIcon: () => <></>,
-          expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key),
-        }}
-      />
+    //   <CustomTable
+    //     rowSelection={{
+    //       type: 'checkbox',
+    //     }}
+    //     dataSource={dataSource}
+    //     columns={columns}
+    //     onRow={(record, rowIndex) => {
+    //       return {
+    //         onClick: event => {
+    //           // Toggle expandedRowKeys state here
+    //           if (expandedRowKeys[record.key]) {
+    //             const { [record.key]: value, ...remainingKeys } = expandedRowKeys;
+    //             setExpandedRowKeys(remainingKeys);
+    //           } else {
+    //             setExpandedRowKeys({ ...expandedRowKeys, [record.key]: true });
+    //           }
+    //         }
+    //       };
+    //     }}
+    //     expandable={{
+    //       // eslint-disable-next-line @typescript-eslint/no-shadow
+    //       expandedRowRender: (record: IRecord) => (
+    //         <ReturnDetail record={record} />
+    //       ),
+    //       expandIcon: () => <></>,
+    //       expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key),
+    //     }}
+    //   />
+    // </div>
+    <div className='my-5'>
+      Đang cập nhật...
     </div>
   );
 }

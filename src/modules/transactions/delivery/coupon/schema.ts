@@ -10,20 +10,20 @@ export const schema = yup.object().shape({
       discount: yup.number(),
       productUnitId: yup.number(),
       isBatchExpireControl: yup.boolean(),
-      batches: yup
-        .array(
-          yup.object({
-            id: yup.number().required("Đây là trường bắt buộc!"),
-            quantity: yup.number().required("Đây là trường bắt buộc!"),
-            expiryDate: yup.string().required("Đây là trường bắt buộc!"),
-          })
-        )
-        .test("is-required", "Vui lòng chọn lô sản phẩm", (value, context) => {
-          if (context.parent.isBatchExpireControl && !value?.length)
-            return false;
+      // batches: yup
+      //   .array(
+      //     yup.object({
+      //       id: yup.number().required("Đây là trường bắt buộc!"),
+      //       quantity: yup.number().required("Đây là trường bắt buộc!"),
+      //       expiryDate: yup.string().required("Đây là trường bắt buộc!"),
+      //     })
+      //   )
+      //   .test("is-required", "Vui lòng chọn lô sản phẩm", (value, context) => {
+      //     if (context.parent.isBatchExpireControl && !value?.length)
+      //       return false;
 
-          return true;
-        }),
+      //     return true;
+      //   }),
       // .test(
       //   "sum-quantity",
       //   "Số lượng sản phẩm khác với số lượng sản phẩm trong từng lô",

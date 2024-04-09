@@ -116,46 +116,49 @@ export function Discount() {
   ];
 
   return (
-    <div className="mb-2">
-      <div className="my-3 flex items-center justify-end gap-4">
-        <CustomButton
-          prefixIcon={<Image src={PlusIcon} />}
-          onClick={() => router.push('/settings/discount/add-discount')}
-        >
-          Thêm mới khuyến mại
-        </CustomButton>
-      </div>
+    // <div className="mb-2">
+    //   <div className="my-3 flex items-center justify-end gap-4">
+    //     <CustomButton
+    //       prefixIcon={<Image src={PlusIcon} />}
+    //       onClick={() => router.push('/settings/discount/add-discount')}
+    //     >
+    //       Thêm mới khuyến mại
+    //     </CustomButton>
+    //   </div>
 
-      <Search onChange={debounce((value) => {
-        setFormFilter((preValue) => ({
-          ...preValue,
-          keyword: value,
-        }));
-      }, 300)} />
+    //   <Search onChange={debounce((value) => {
+    //     setFormFilter((preValue) => ({
+    //       ...preValue,
+    //       keyword: value,
+    //     }));
+    //   }, 300)} />
 
-      <CustomTable
-        dataSource={discount?.data?.list_promotion_program?.map((item, index) => ({
-          ...item,
-          key: index,
-        }))}
-        columns={columns}
-        loading={isLoading}
-        expandable={{
-          // eslint-disable-next-line @typescript-eslint/no-shadow
-          expandedRowRender: (record: IRecord) => {
-            return <RowDetail record={record} />;
-          },
-          expandIcon: () => <></>,
-          expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key),
-        }}
-      />
-      <CustomPagination
-        page={formFilter.page}
-        pageSize={formFilter.limit}
-        setPage={(value) => setFormFilter({ ...formFilter, page: value })}
-        setPerPage={(value) => setFormFilter({ ...formFilter, limit: value })}
-        total={discount?.data?.totalItem || 0}
-      />
+    //   <CustomTable
+    //     dataSource={discount?.data?.list_promotion_program?.map((item, index) => ({
+    //       ...item,
+    //       key: index,
+    //     }))}
+    //     columns={columns}
+    //     loading={isLoading}
+    //     expandable={{
+    //       // eslint-disable-next-line @typescript-eslint/no-shadow
+    //       expandedRowRender: (record: IRecord) => {
+    //         return <RowDetail record={record} />;
+    //       },
+    //       expandIcon: () => <></>,
+    //       expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key),
+    //     }}
+    //   />
+    //   <CustomPagination
+    //     page={formFilter.page}
+    //     pageSize={formFilter.limit}
+    //     setPage={(value) => setFormFilter({ ...formFilter, page: value })}
+    //     setPerPage={(value) => setFormFilter({ ...formFilter, limit: value })}
+    //     total={discount?.data?.totalItem || 0}
+    //   />
+    // </div>
+    <div className='my-5'>
+      Đang cập nhật...
     </div>
   );
 }

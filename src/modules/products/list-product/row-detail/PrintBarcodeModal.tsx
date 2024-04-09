@@ -17,7 +17,7 @@ const PrintBarcode = ({
   barCode: string;
 }) => {
 
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState<number>(1);
 
   const handlePrint = () => {
     const printWindow: any = window.open('', '_blank');
@@ -49,8 +49,9 @@ const PrintBarcode = ({
           <CustomInput
             className="mt-0 h-[26px]"
             bordered={false}
-            value={quantity > 0 ? quantity : 1}
-            onChange={(e) => setQuantity(e.target.value)}
+            value={quantity}
+            type='number'
+            onChange={(value) => setQuantity(value)}
           />
           <div className="flex h-[28px] border border-[#F2F2F5]">
             <div className="flex cursor-pointer items-center justify-center rounded-l bg-[#3E7BFA] p-2 text-base leading-5 text-white" onClick={() => setQuantity(quantity + 1)}>

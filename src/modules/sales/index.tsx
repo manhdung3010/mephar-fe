@@ -15,7 +15,7 @@ import PlusIcon from '@/assets/plusIcon.svg';
 import SearchIcon from '@/assets/searchIcon.svg';
 import { CustomAutocomplete } from '@/components/CustomAutocomplete';
 import { EPaymentMethod } from '@/enums';
-import { formatMoney, getImage, randomString } from '@/helpers';
+import { formatMoney, formatNumber, getImage, randomString } from '@/helpers';
 import { branchState, orderActiveState, orderState } from '@/recoil/state';
 
 import { SaleHeader } from './Header';
@@ -319,7 +319,7 @@ const Index = () => {
                                 </div>
 
                                 <div className="flex gap-x-3">
-                                  <div>Số lượng: {item.quantity}</div>
+                                  <div>Số lượng: {formatNumber(item.quantity)}</div>
                                   <div>|</div>
                                   <div>
                                     Giá: {formatMoney(item.productUnit.price)}

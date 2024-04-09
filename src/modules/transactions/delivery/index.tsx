@@ -2,7 +2,7 @@ import type { ColumnsType } from 'antd/es/table';
 import cx from 'classnames';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import ExportIcon from '@/assets/exportIcon.svg';
 import PlusIcon from '@/assets/plusWhiteIcon.svg';
@@ -18,47 +18,65 @@ import Search from './Search';
 import CustomPagination from '@/components/CustomPagination';
 import { useRecoilValue } from 'recoil';
 import { branchState } from '@/recoil/state';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { getMove } from '@/api/move';
+import { formatDateTime } from '@/helpers';
+import { debounce, set } from 'lodash';
 
 interface IRecord {
   key: number;
   id: string;
-  fromBranch: string;
-  toBranch: string;
-  fromDate: string;
-  toDate: string;
+  fromBranch: {
+    id: number;
+    name: string;
+  };
+  toBranch: {
+    id: number;
+    name: string;
+  };
+  movedAt: string;
+  receivedAt: string;
   status: EDeliveryTransactionStatus;
 }
 
 export function DeliveryTransaction() {
-  const router = useRouter();
-  const branchId = useRecoilValue(branchState);
-
   const [expandedRowKeys, setExpandedRowKeys] = useState<
     Record<string, boolean>
   >({});
 
+  const queryClient = useQueryClient();
+  const router = useRouter();
+  const branchId = useRecoilValue(branchState);
+
+  const [deletedId, setDeletedId] = useState<number>();
   const [formFilter, setFormFilter] = useState({
     page: 1,
     limit: 20,
     keyword: '',
-    dateRange: { startDate: undefined, endDate: undefined },
-    status: undefined,
-    branchId,
+    status: '',
+    movedBy: '',
+    fromBranchId: '',
+    toBranchId: '',
+    movedAt: '',
+    receivedAt: '',
+    receivedBy: '',
   });
-
-  const record = {
-    key: 1,
-    id: 'PN231017090542',
-    fromBranch: 'Chi nhánh Mễ Trì Thượng',
-    toBranch: 'Chi nhánh Mễ Trì Hạ',
-    fromDate: '17/10/2023 09:05:14',
-    toDate: '17/10/2023 09:05:14',
-    status: EDeliveryTransactionStatus.DELIVERING,
-  };
-
-  const dataSource: IRecord[] = Array(8)
-    .fill(0)
-    .map((_, index) => ({ ...record, key: index + 1 }));
+  const { data: moveList, isLoading } = useQuery(
+    ['MOVE_LIST',
+      formFilter.page,
+      formFilter.limit,
+      formFilter.keyword,
+      formFilter.status,
+      formFilter.movedBy,
+      formFilter.fromBranchId,
+      formFilter.toBranchId,
+      formFilter.movedAt,
+      formFilter.receivedAt,
+      formFilter.receivedBy,
+      branchId
+    ],
+    () => getMove({ ...formFilter, branchId })
+  );
 
   const columns: ColumnsType<IRecord> = [
     {
@@ -68,8 +86,8 @@ export function DeliveryTransaction() {
     },
     {
       title: 'Mã chuyển hàng',
-      dataIndex: 'id',
-      key: 'id',
+      dataIndex: 'code',
+      key: 'code',
       render: (value, _, index) => (
         <span
           className="cursor-pointer text-[#0070F4]"
@@ -92,21 +110,25 @@ export function DeliveryTransaction() {
       title: 'Từ chi nhánh',
       dataIndex: 'fromBranch',
       key: 'fromBranch',
+      render: (_, { fromBranch }) => <div>{fromBranch?.name}</div>,
     },
     {
       title: 'Tới chi nhánh',
       dataIndex: 'toBranch',
       key: 'toBranch',
+      render: (_, { toBranch }) => <div>{toBranch?.name}</div>,
     },
     {
       title: 'Ngày chuyển',
-      dataIndex: 'fromDate',
-      key: 'fromDate',
+      dataIndex: 'movedAt',
+      key: 'movedAt',
+      render: (moveAt) => formatDateTime(moveAt)
     },
     {
       title: 'Ngày nhận',
-      dataIndex: 'toDate',
-      key: 'toDate',
+      dataIndex: 'receivedAt',
+      key: 'receivedAt',
+      render: (receivedAt) => receivedAt ? formatDateTime(receivedAt) : ''
     },
 
     {
@@ -118,11 +140,9 @@ export function DeliveryTransaction() {
           className={cx(
             {
               'text-[#00B63E] border border-[#00B63E] bg-[#DEFCEC]':
-                status === EDeliveryTransactionStatus.DELIVERED,
-              'text-[#6D6D6D] border border-[#6D6D6D] bg-[#F0F1F1]':
-                status === EDeliveryTransactionStatus.STORE,
+                status === EDeliveryTransactionStatus.RECEIVED,
               'text-[#0070F4] border border-[#0070F4] bg-[#E4F0FE]':
-                status === EDeliveryTransactionStatus.STORE,
+                status === EDeliveryTransactionStatus.MOVING,
             },
 
             'px-2 py-1 rounded-2xl w-max'
@@ -149,14 +169,32 @@ export function DeliveryTransaction() {
         </CustomButton>
       </div>
 
-      <Search />
+      <Search
+        onChange={debounce((value) => {
+          setFormFilter((preValue) => ({
+            ...preValue,
+            keyword: value?.keyword,
+            status: value?.status,
+            movedBy: value?.movedBy,
+            fromBranchId: value?.fromBranchId,
+            toBranchId: value?.toBranchId,
+            movedAt: value?.movedAt,
+            receivedAt: value?.receivedAt,
+            receivedBy: value?.receivedBy,
+          }));
+        }, 300)}
+      />
 
       <CustomTable
         rowSelection={{
           type: 'checkbox',
         }}
-        dataSource={dataSource}
+        dataSource={moveList?.data.items?.map((item, index) => ({
+          ...item,
+          key: index + 1,
+        }))}
         columns={columns}
+        loading={isLoading}
         onRow={(record, rowIndex) => {
           return {
             onClick: event => {
@@ -179,13 +217,13 @@ export function DeliveryTransaction() {
           expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key),
         }}
       />
-      {/* <CustomPagination
+      <CustomPagination
         page={formFilter.page}
         pageSize={formFilter.limit}
         setPage={(value) => setFormFilter({ ...formFilter, page: value })}
         setPerPage={(value) => setFormFilter({ ...formFilter, limit: value })}
-        total={orders?.data?.totalItem}
-      /> */}
+        total={moveList?.data?.totalItem}
+      />
     </div>
   );
 }
