@@ -8,9 +8,11 @@ import { CustomButton } from '@/components/CustomButton';
 import { CustomTextarea } from '@/components/CustomInput';
 import { CustomSelect } from '@/components/CustomSelect';
 import CustomTable from '@/components/CustomTable';
-import { EDeliveryTransactionStatusLabel } from '@/enums';
+import { EDeliveryTransactionStatus, EDeliveryTransactionStatusLabel } from '@/enums';
 import { formatDateTime, formatNumber } from '@/helpers';
 import { useMemo } from 'react';
+import PlusIcon from '@/assets/plusWhiteIcon.svg';
+import { useRouter } from 'next/router';
 
 interface IRecord {
   key: number;
@@ -21,7 +23,8 @@ interface IRecord {
   totalReceive: number;
 }
 
-export function Info({ record }: { record: any }) {
+export function Info({ record, branchId }: { record: any, branchId: number }) {
+  const router = useRouter();
   const columns: ColumnsType<IRecord> = [
     {
       title: 'Mã hàng',
@@ -147,12 +150,15 @@ export function Info({ record }: { record: any }) {
         >
           In mã vạch
         </CustomButton>
-        {/* <CustomButton
-          type="success"
-          prefixIcon={<Image src={EditIcon} alt="" />}
-        >
-          Cập nhật
-        </CustomButton> */}
+        {
+          record?.status === EDeliveryTransactionStatus.MOVING && record?.toBranchId === branchId && <CustomButton
+            type="success"
+            prefixIcon={<Image src={PlusIcon} alt="" />}
+            onClick={() => router.push(`/transactions/delivery/coupon?moveId=${record?.id}`)}
+          >
+            Nhận hàng
+          </CustomButton>
+        }
       </div>
     </div>
   );

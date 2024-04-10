@@ -45,14 +45,21 @@ export function ProductList({ useForm }: { useForm: any }) {
       const orderObjectClone = cloneDeep(orderObject);
       orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map(
         (product: ISaleProductLocal, index) => {
+          let newProduct
           if (checkDisplayListBatch(product)) {
             expandedRowKeysClone[index] = true;
           }
+          newProduct = {
+            ...product, batches: product.batches?.map((batch) => ({
+              ...batch,
+              inventory: Math.floor(batch.inventory),
+              newInventory: Math.floor(batch.originalInventory / product.productUnit.exchangeValue),
+            }))
+          }
 
-          return product;
+          return newProduct;
         }
       );
-
       setExpandedRowKeys(expandedRowKeysClone);
     }
   }, [orderObject, orderActive]);
@@ -133,7 +140,6 @@ export function ProductList({ useForm }: { useForm: any }) {
 
     setOrderObject(orderObjectClone);
   };
-
   const columns: ColumnsType<ISaleProductLocal> = [
     {
       title: 'STT',
@@ -229,10 +235,13 @@ export function ProductList({ useForm }: { useForm: any }) {
                       productKey: `${product.product.id}-${value}`,
                       productUnitId: value,
                       productUnit: unit,
+                      // exchangeValue: unit.exchangeValue,
+                      newInventory: Math.floor(product.product.quantity / unit.exchangeValue),
                       batches: product.batches?.map((batch) => ({
                         ...batch,
                         inventory:
-                          (Math.floor(batch.quantity / product.productUnit.exchangeValue))
+                          (Math.floor(batch.quantity)),
+                        newInventory: (Math.floor(batch.originalInventory / unit.exchangeValue)),
                       })),
                     };
                   }
@@ -248,10 +257,10 @@ export function ProductList({ useForm }: { useForm: any }) {
     },
     {
       title: 'Tồn kho',
-      dataIndex: 'price',
-      key: 'price',
-      render: (_, record) => <div>
-        {formatNumber(record.inventory)}
+      dataIndex: 'newInventory',
+      key: 'newInventory',
+      render: (value, record) => <div>
+        {value ? formatNumber(Math.floor(value)) : formatNumber(record.inventory)}
 
       </div>
     },

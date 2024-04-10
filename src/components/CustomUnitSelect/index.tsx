@@ -6,10 +6,12 @@ export function CustomUnitSelect({
   options,
   value,
   onChange,
+  disabled,
 }: {
   options?: { value: any; label: string }[];
   value?: any;
   onChange?: (value: any) => void;
+  disabled?: boolean;
 }) {
   return (
     <UnitSelectedStyled>
@@ -18,6 +20,7 @@ export function CustomUnitSelect({
         style={{ width: 100 }}
         onChange={onChange}
         options={options}
+        disabled={disabled}
         suffixIcon={
           <svg
             xmlns="http://www.w3.org/2000/svg"

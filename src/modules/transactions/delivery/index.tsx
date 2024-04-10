@@ -52,14 +52,14 @@ export function DeliveryTransaction() {
   const [formFilter, setFormFilter] = useState({
     page: 1,
     limit: 20,
-    keyword: '',
-    status: '',
-    movedBy: '',
-    fromBranchId: '',
-    toBranchId: '',
-    movedAt: '',
-    receivedAt: '',
-    receivedBy: '',
+    keyword: null,
+    status: null,
+    movedBy: null,
+    fromBranchId: null,
+    toBranchId: null,
+    movedAt: undefined,
+    receivedAt: undefined,
+    receivedBy: null,
   });
   const { data: moveList, isLoading } = useQuery(
     ['MOVE_LIST',
@@ -211,7 +211,7 @@ export function DeliveryTransaction() {
         expandable={{
           // eslint-disable-next-line @typescript-eslint/no-shadow
           expandedRowRender: (record: IRecord) => (
-            <ReturnDetail record={record} />
+            <ReturnDetail branchId={branchId} record={record} />
           ),
           expandIcon: () => <></>,
           expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key),

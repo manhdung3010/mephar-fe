@@ -4,7 +4,7 @@ import { useState } from 'react';
 // import type { IRecord } from "../types";
 import { Info } from './Info';
 
-const ReturnDetail = ({ record }: { record: any }) => {
+const ReturnDetail = ({ record, branchId }: { record: any, branchId: number }) => {
   const [select, setSelect] = useState(0);
 
   const menu = ['Chi tiết nhận hàng'];
@@ -33,7 +33,7 @@ const ReturnDetail = ({ record }: { record: any }) => {
         </div>
         <div className="h-[1px] w-full bg-[#D64457]" />
       </div>
-      {select === 0 && <Info record={record} />}
+      {select === 0 && <Info record={record} branchId={branchId} />}
     </div>
   );
 };

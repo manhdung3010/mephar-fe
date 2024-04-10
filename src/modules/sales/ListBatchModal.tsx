@@ -37,6 +37,7 @@ export function ListBatchModal({
             ...batch,
             productKey: product.productKey,
             productId: product.productId,
+            newInventory: Math.floor(batch.originalInventory / product.productUnit.exchangeValue),
           }))
         );
       }
@@ -82,9 +83,9 @@ export function ListBatchModal({
     },
     {
       title: 'Số lượng tồn',
-      dataIndex: 'inventory',
-      key: 'inventory',
-      render: (value) => formatNumber(value),
+      dataIndex: 'newInventory',
+      key: 'newInventory',
+      render: (value) => formatNumber(Math.floor(value || 0)),
     },
   ];
 

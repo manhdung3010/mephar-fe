@@ -17,7 +17,7 @@ import { message } from 'antd';
 import { cloneDeep, debounce } from 'lodash';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
-export function RightContent({ useForm, branchId }: { useForm: any, branchId: number }) {
+export function RightContent({ useForm, branchId, moveId }: { useForm: any, branchId: number, moveId: any }) {
   const [searchEmployeeText, setSearchEmployeeText] = useState('');
 
   const { getValues, setValue, handleSubmit, errors, reset } = useForm;
@@ -96,7 +96,7 @@ export function RightContent({ useForm, branchId }: { useForm: any, branchId: nu
     const products = cloneDeep(productsImport).map(
       ({ id, price, product, quantity, discountValue, batches }) => ({
         productId: product.id,
-        importPrice: price,
+        price: price,
         quantity: quantity,
         discount: discountValue,
         productUnitId: id,
@@ -112,10 +112,13 @@ export function RightContent({ useForm, branchId }: { useForm: any, branchId: nu
   };
 
   const onSubmit = () => {
-    console.log(getValues());
-    // console.log("products", getValues('products'))
-    // console.log("userId", getValues('userId'))
-    mutateCreateProductImport();
+    if (moveId) {
+      console.log("value", getValues());
+
+    }
+    else {
+      mutateCreateProductImport();
+    }
   }
 
   console.log("errors", errors)
@@ -166,41 +169,67 @@ export function RightContent({ useForm, branchId }: { useForm: any, branchId: nu
 
             <div className="mb-5 flex justify-between">
               <div className=" leading-normal text-[#828487]">Trạng thái</div>
-              <div className=" leading-normal text-[#19191C]">Phiếu tạm</div>
+              <div className=" leading-normal text-[#19191C]">{moveId ? "Nhận hàng" : "Phiếu tạm"}</div>
             </div>
+            {
+              moveId && (
+                <>
+                  <div className="mb-5 flex justify-between">
+                    <div className=" leading-normal text-[#828487]">Chi nhánh gửi</div>
+                    <div className=" leading-normal text-[#19191C]">{moveId ? "Nhận hàng" : "Phiếu tạm"}</div>
+                  </div>
+                  <div className="mb-5 flex justify-between">
+                    <div className=" leading-normal text-[#828487]">Ngày chuyển</div>
+                    <div className=" leading-normal text-[#19191C]">{moveId ? "Nhận hàng" : "Phiếu tạm"}</div>
+                  </div>
+                </>
+              )
+            }
           </div>
 
           <div className="mb-5">
+            {
+              moveId && <div className="mb-5 flex justify-between">
+                <div className=" leading-normal text-[#828487]">
+                  Tổng số lượng chuyển
+                </div>
+                <div className=" leading-normal text-[#19191C]">{formatNumber(totalItem)}</div>
+              </div>
+            }
             <div className="mb-5 flex justify-between">
               <div className=" leading-normal text-[#828487]">
-                Tổng số lượng
+                Tổng số lượng {moveId ? "nhận" : ""}
               </div>
               <div className=" leading-normal text-[#19191C]">{formatNumber(totalItem)}</div>
             </div>
 
-            <div className="mb-5 flex items-center justify-between">
-              <div className=" leading-normal text-[#828487] flex-shrink-0 w-28">
-                Tới chi nhánh
-              </div>
-              <CustomSelect
-                options={branches?.data?.items?.filter((br) => br.id !== branchId).map((item) => ({
-                  value: item.id,
-                  label: item.name,
-                }))}
-                showSearch={true}
-                value={getValues('toBranchId')}
-                onSearch={debounce((value) => {
-                  setSearchEmployeeText(value);
-                }, 300)}
-                onChange={(value) => {
-                  setValue('toBranchId', value, { shouldValidate: true });
-                }}
-                wrapClassName=""
-                className="border-underline"
-                placeholder="Chọn chi nhánh"
-              />
-              <InputError error={errors.userId?.message} />
-            </div>
+            {
+              !moveId && (
+                <div className="mb-5 flex items-center justify-between">
+                  <div className=" leading-normal text-[#828487] flex-shrink-0 w-28">
+                    Tới chi nhánh
+                  </div>
+                  <CustomSelect
+                    options={branches?.data?.items?.filter((br) => br.id !== branchId).map((item) => ({
+                      value: item.id,
+                      label: item.name,
+                    }))}
+                    showSearch={true}
+                    value={getValues('toBranchId')}
+                    onSearch={debounce((value) => {
+                      setSearchEmployeeText(value);
+                    }, 300)}
+                    onChange={(value) => {
+                      setValue('toBranchId', value, { shouldValidate: true });
+                    }}
+                    wrapClassName=""
+                    className="border-underline"
+                    placeholder="Chọn chi nhánh"
+                  />
+                  <InputError error={errors.userId?.message} />
+                </div>
+              )
+            }
           </div>
         </div>
 

@@ -6,15 +6,18 @@ export function createMoveProduct(payload) {
 export function getMove(params: {
   page: number;
   limit: number;
-  keyword: string;
-  status: string;
-  movedBy: string;
-  fromBranchId: string;
-  toBranchId: string;
-  movedAt: string;
-  receivedAt: string;
-  receivedBy: string;
+  keyword: any;
+  status: any;
+  movedBy: any;
+  fromBranchId: any;
+  toBranchId: any;
+  movedAt: any;
+  receivedAt: any;
+  receivedBy: any;
   branchId: any;
 }) {
   return axiosClient.get("move", { params });
+}
+export function getMoveDetail(id: any) {
+  return axiosClient.get(`move/${id}`);
 }
