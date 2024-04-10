@@ -119,6 +119,25 @@ export function RightContent({ useForm }: { useForm: any }) {
     return '';
   }, [getValues('discount'), getValues('discountType')]);
 
+  useEffect(() => {
+    // get discount from customer when customer change
+    if (getValues('customerId')) {
+      const customer = customers?.data?.items?.find(
+        (item) => item.id === getValues('customerId')
+      );
+
+      if (customer && customer?.groupCustomer?.discount) {
+        setValue('discount', customer?.groupCustomer.discount ?? 0, { shouldValidate: true });
+        setValue('discountType', EDiscountType.PERCENT, { shouldValidate: true });
+      }
+      else {
+        setValue('discount', 0, { shouldValidate: true });
+        setValue('discountType', EDiscountType.PERCENT, { shouldValidate: true });
+
+      }
+    }
+  }, [getValues('customerId')])
+
   const customerMustPay = useMemo(() => {
     if (getValues('discount')) {
       if (getValues('discountType') === EDiscountType.MONEY) {
