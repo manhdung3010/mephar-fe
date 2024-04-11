@@ -3,6 +3,9 @@ import axiosClient from "./index";
 export function createMoveProduct(payload) {
   return axiosClient.post(`move`, payload);
 }
+export function createReceiveMoveProduct(payload, id: number) {
+  return axiosClient.patch(`move/${id}/receive`, payload);
+}
 export function getMove(params: {
   page: number;
   limit: number;

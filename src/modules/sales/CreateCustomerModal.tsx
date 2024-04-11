@@ -39,8 +39,8 @@ export function CreateCustomerModal({
   onSave
 }: {
   isOpen: boolean;
-    onCancel: () => void;
-  onSave: ({customerId,CustomerName}) => void;
+  onCancel: () => void;
+  onSave: ({ customerId, CustomerName }) => void;
 }) {
   const queryClient = useQueryClient();
 
@@ -86,7 +86,7 @@ export function CreateCustomerModal({
             customerId: res.data.id,
             CustomerName: getValues('fullName'),
           });
-          
+
         }
         onCancel();
       },
@@ -432,7 +432,7 @@ export function CreateCustomerModal({
         onCancel={() => {
           setGroupCustomer(false);
         }}
-         onSave={({ groupCustomerId, groupCustomerName }) => {
+        onSave={({ groupCustomerId, groupCustomerName }) => {
           setValue("groupCustomerId", groupCustomerId, {
             shouldValidate: true,
           });

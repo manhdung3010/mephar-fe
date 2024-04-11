@@ -47,6 +47,8 @@ export const schema = yup.object().shape({
   movedBy: yup.number().required("Đây là trường bắt buộc!"),
   toBranchId: yup.number().required("Đây là trường bắt buộc!"),
   fromBranchId: yup.number(),
+  receivedBy: yup.number(),
+  branchId: yup.number(),
   // groupSupplierId: yup.string().required("Đây là trường bắt buộc!"),
 });
 export const receiveSchema = yup.object().shape({
@@ -92,4 +94,6 @@ export const receiveSchema = yup.object().shape({
   code: yup.string(),
   description: yup.string(),
   fromBranchId: yup.number(),
+  receivedBy: yup.number(),
+  branchId: yup.number(),
 });

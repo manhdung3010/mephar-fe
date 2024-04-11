@@ -121,6 +121,10 @@ export interface IImportProductLocal extends IImportProduct {
   discountValue: number; // client
   inventory: number; // client
   productBatchHistories: any[]; // client
+  toBatches?: any;
+  totalQuantity?: any;
+  productUnitId?: number; // client
+  productUnit?: any;
   batches: {
     id: number;
     name: string;

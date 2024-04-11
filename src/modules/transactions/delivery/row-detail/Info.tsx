@@ -9,7 +9,7 @@ import { CustomTextarea } from '@/components/CustomInput';
 import { CustomSelect } from '@/components/CustomSelect';
 import CustomTable from '@/components/CustomTable';
 import { EDeliveryTransactionStatus, EDeliveryTransactionStatusLabel } from '@/enums';
-import { formatDateTime, formatNumber } from '@/helpers';
+import { formatDateTime, formatMoney, formatNumber } from '@/helpers';
 import { useMemo } from 'react';
 import PlusIcon from '@/assets/plusWhiteIcon.svg';
 import { useRouter } from 'next/router';
@@ -54,9 +54,15 @@ export function Info({ record, branchId }: { record: any, branchId: number }) {
       render: (value) => formatNumber(value),
     },
     {
+      title: 'Giá chuyển',
+      dataIndex: 'price',
+      key: 'price',
+      render: (value) => formatMoney(value),
+    },
+    {
       title: 'Số lượng nhận',
-      dataIndex: 'totalReceive',
-      key: 'totalReceive',
+      dataIndex: 'toQuantity',
+      key: 'toQuantity',
       render: (value) => formatNumber(value),
     },
   ];

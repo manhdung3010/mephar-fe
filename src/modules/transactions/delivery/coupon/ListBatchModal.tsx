@@ -13,10 +13,11 @@ import { CustomModal } from '@/components/CustomModal';
 import { CustomSelect } from '@/components/CustomSelect';
 import CustomTable from '@/components/CustomTable';
 import { formatNumber } from '@/helpers';
-import { branchState, productImportState } from '@/recoil/state';
+import { branchState, productImportState, productMoveState } from '@/recoil/state';
+import { IBatch } from '@/modules/products/import-product/interface';
 
-import type { IBatch } from '../interface';
-import { AddBatchModal } from './AddBatchModal';
+// import type { IBatch } from '../interface';
+// import { AddBatchModal } from './AddBatchModal';
 
 export function ListBatchModal({
   isOpen,
@@ -29,10 +30,9 @@ export function ListBatchModal({
   productKeyAddBatch?: string;
   onSave: (value) => void;
 }) {
-  const importProducts = useRecoilValue(productImportState);
+  const importProducts = useRecoilValue(productMoveState);
   const branchId = useRecoilValue(branchState);
 
-  const [openAddBatchModal, setOpenAddBatchModal] = useState(false);
   const [listBatchSelected, setListBatchSelected] = useState<IBatch[]>([]);
 
   useEffect(() => {
@@ -41,11 +41,15 @@ export function ListBatchModal({
         (product) => product.productKey === productKeyAddBatch
       );
 
+      // console.log('product', product)
+
       if (product?.batches) {
         const newBatches = product.batches.map((batch) => ({
           ...batch,
-          inventory: batch.quantity,
+          inventory: batch.inventory,
+          newInventory: Math.floor(batch.originalInventory / product.productUnit.exchangeValue)
         }));
+
         setListBatchSelected(newBatches);
       }
     }
@@ -128,7 +132,7 @@ export function ListBatchModal({
       title: 'Tồn',
       dataIndex: 'inventory',
       key: 'inventory',
-      render: (value) => formatNumber(value),
+      render: (value) => formatNumber(Math.floor(value || 0)),
     },
     {
       title: '',
@@ -222,11 +226,13 @@ export function ListBatchModal({
 
       <div className="mt-5 flex justify-end gap-x-4">
         <CustomButton
-          onClick={() => setOpenAddBatchModal(true)}
-          outline={true}
+          onClick={() => {
+            onCancel();
+          }}
           className="h-[46px] min-w-[150px] py-2 px-4"
+          outline={true}
         >
-          Thêm lô mới
+          Đóng
         </CustomButton>
         <CustomButton
           onClick={() => {
@@ -238,13 +244,6 @@ export function ListBatchModal({
           Lưu
         </CustomButton>
       </div>
-
-      <AddBatchModal
-        isOpen={openAddBatchModal}
-        onCancel={() => setOpenAddBatchModal(false)}
-        productId={Number(productKeyAddBatch?.split('-')[0])}
-        setListBatchSelected={setListBatchSelected}
-      />
     </CustomModal>
   );
 }

@@ -3,22 +3,24 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { getBranch } from '@/api/branch.service';
 import { getEmployee } from '@/api/employee.service';
-import { createMoveProduct } from '@/api/move';
+import { createMoveProduct, createReceiveMoveProduct } from '@/api/move';
 import EditIcon from '@/assets/editIcon.svg';
 import EmployeeIcon from '@/assets/employeeIcon.svg';
 import { CustomButton } from '@/components/CustomButton';
 import { CustomInput } from '@/components/CustomInput';
 import { CustomSelect } from '@/components/CustomSelect';
 import InputError from '@/components/InputError';
-import { formatNumber } from '@/helpers';
+import { formatDate, formatDateTime, formatNumber } from '@/helpers';
 import { productMoveState, profileState } from '@/recoil/state';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { message } from 'antd';
 import { cloneDeep, debounce } from 'lodash';
 import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRouter } from 'next/router';
 
-export function RightContent({ useForm, branchId, moveId }: { useForm: any, branchId: number, moveId: any }) {
+export function RightContent({ useForm, branchId, moveId, moveDetail }: { useForm: any, branchId: number, moveId: any, moveDetail: any }) {
   const [searchEmployeeText, setSearchEmployeeText] = useState('');
+  const router = useRouter()
 
   const { getValues, setValue, handleSubmit, errors, reset } = useForm;
 
@@ -51,7 +53,32 @@ export function RightContent({ useForm, branchId, moveId }: { useForm: any, bran
         // setValue('userId', userId, { shouldValidate: true });
         setProductsImport([]);
         // await queryClient.invalidateQueries(['LIST_IMPORT_PRODUCT']);
-        // router.push('/products/import');
+        router.push('/transactions/delivery');
+      },
+      onError: (err: any) => {
+        message.error(err?.message);
+      },
+    }
+  );
+  const {
+    mutate: mutateReceiveProductImport,
+    isLoading: isLoadingReceiveProductImport,
+  } = useMutation(
+    () => {
+      const products = getValues('items').map(
+        ({ isBatchExpireControl, ...product }) => product
+      );
+
+      return createReceiveMoveProduct({ ...getValues() }, moveId);
+    },
+    {
+      onSuccess: async () => {
+        // const userId = getValues('userId');
+        reset();
+        // setValue('userId', userId, { shouldValidate: true });
+        setProductsImport([]);
+        // await queryClient.invalidateQueries(['LIST_IMPORT_PRODUCT']);
+        router.push('/transactions/delivery');
       },
       onError: (err: any) => {
         message.error(err?.message);
@@ -61,7 +88,7 @@ export function RightContent({ useForm, branchId, moveId }: { useForm: any, bran
 
   useEffect(() => {
     if (profile) {
-      setValue('movedBy', profile.id);
+      moveId ? setValue('receivedBy', profile.id) : setValue('movedBy', profile.id);
     }
   }, [profile])
 
@@ -91,37 +118,53 @@ export function RightContent({ useForm, branchId, moveId }: { useForm: any, bran
 
     return quantity;
   }, [productsImport]);
+  const totalItemMove = useMemo(() => {
+    let quantity = 0;
+
+    if (productsImport?.length) {
+      productsImport.forEach(
+        ({ totalQuantity }) => {
+          quantity += totalQuantity
+        }
+      );
+    }
+
+    return quantity;
+  }, [productsImport]);
 
   const changePayload = () => {
     const products = cloneDeep(productsImport).map(
-      ({ id, price, product, quantity, discountValue, batches }) => ({
+      ({ id, price, product, quantity, batches, toBatches, productUnitId, productUnit }) => ({
         productId: product.id,
         price: price,
-        quantity: quantity,
-        discount: discountValue,
-        productUnitId: id,
+        ...(moveId ? { totalQuantity: quantity } : { quantity: quantity }),
+        id: id,
         isBatchExpireControl: product.isBatchExpireControl,
-        batches: batches?.map(({ id, quantity, expiryDate }) => ({
+        ...(moveId ? {} : { productUnitId: productUnitId }),
+        batches: moveId ? toBatches?.map((item) => (
+          {
+            id: item.batch.id,
+            quantity: item.batch.quantity,
+            expiryDate: item.batch.expiryDate,
+          }
+        )) : batches?.map(({ id, quantity, expiryDate }) => ({
           id,
           quantity,
           expiryDate,
         })),
       })
     );
-    setValue('products', products);
+    moveId ? setValue('items', products) : setValue('products', products);
   };
 
   const onSubmit = () => {
     if (moveId) {
-      console.log("value", getValues());
-
+      mutateReceiveProductImport();
     }
     else {
       mutateCreateProductImport();
     }
   }
-
-  console.log("errors", errors)
 
   return (
     <div className="flex h-[calc(100vh-52px)] w-[360px] min-w-[360px] flex-col border-l border-[#E4E4E4] bg-white">
@@ -132,12 +175,12 @@ export function RightContent({ useForm, branchId, moveId }: { useForm: any, bran
             label: item.fullName,
           }))}
           showSearch={true}
-          value={getValues('movedBy')}
+          value={moveId ? getValues('receivedBy') : getValues('movedBy')}
           onSearch={debounce((value) => {
             setSearchEmployeeText(value);
           }, 300)}
           onChange={(value) => {
-            setValue('movedBy', value, { shouldValidate: true });
+            moveId ? setValue('receivedBy', value, { shouldValidate: true }) : setValue('movedBy', value, { shouldValidate: true });
           }}
           wrapClassName=""
           className="h-[44px]"
@@ -152,20 +195,28 @@ export function RightContent({ useForm, branchId, moveId }: { useForm: any, bran
       <div className="flex grow flex-col px-6">
         <div className="grow">
           <div className="mb-5 border-b-2 border-dashed border-[#E4E4E4]">
-            <div className="mb-5 grid grid-cols-2">
-              <div className=" leading-normal text-[#828487]">
-                Mã chuyển hàng
+            {
+              !moveId && <div className="mb-5 grid grid-cols-2">
+                <div className=" leading-normal text-[#828487]">
+                  Mã chuyển hàng
+                </div>
+                <CustomInput
+                  bordered={false}
+                  placeholder="Mã phiếu tự động"
+                  className="h-6 pr-0 text-end"
+                  value={getValues('code')}
+                  onChange={(value) => {
+                    setValue('code', value, { shouldValidate: true });
+                  }}
+                />
               </div>
-              <CustomInput
-                bordered={false}
-                placeholder="Mã phiếu tự động"
-                className="h-6 pr-0 text-end"
-                value={getValues('code')}
-                onChange={(value) => {
-                  setValue('code', value, { shouldValidate: true });
-                }}
-              />
-            </div>
+            }
+            {
+              moveId && <div className="mb-5 flex justify-between">
+                <div className=" leading-normal text-[#828487]">Mã chuyển hàng</div>
+                <div className=" leading-normal text-[#19191C]">{moveDetail?.code}</div>
+              </div>
+            }
 
             <div className="mb-5 flex justify-between">
               <div className=" leading-normal text-[#828487]">Trạng thái</div>
@@ -176,11 +227,11 @@ export function RightContent({ useForm, branchId, moveId }: { useForm: any, bran
                 <>
                   <div className="mb-5 flex justify-between">
                     <div className=" leading-normal text-[#828487]">Chi nhánh gửi</div>
-                    <div className=" leading-normal text-[#19191C]">{moveId ? "Nhận hàng" : "Phiếu tạm"}</div>
+                    <div className=" leading-normal text-[#19191C]">{moveDetail?.fromBranch?.name}</div>
                   </div>
                   <div className="mb-5 flex justify-between">
                     <div className=" leading-normal text-[#828487]">Ngày chuyển</div>
-                    <div className=" leading-normal text-[#19191C]">{moveId ? "Nhận hàng" : "Phiếu tạm"}</div>
+                    <div className=" leading-normal text-[#19191C]">{formatDate(moveDetail?.movedAt)}</div>
                   </div>
                 </>
               )
@@ -193,7 +244,7 @@ export function RightContent({ useForm, branchId, moveId }: { useForm: any, bran
                 <div className=" leading-normal text-[#828487]">
                   Tổng số lượng chuyển
                 </div>
-                <div className=" leading-normal text-[#19191C]">{formatNumber(totalItem)}</div>
+                <div className=" leading-normal text-[#19191C]">{formatNumber(totalItemMove)}</div>
               </div>
             }
             <div className="mb-5 flex justify-between">
@@ -249,14 +300,17 @@ export function RightContent({ useForm, branchId, moveId }: { useForm: any, bran
 
       <div className="my-4 h-[1px] w-full bg-[#E4E4E4]"></div>
 
-      <div className="grid grid-cols-2 gap-3 px-6 pb-4">
-        <CustomButton className="!h-12 text-lg font-semibold">
+      <div className="grid grid-cols-1 gap-3 px-6 pb-4">
+        {/* <CustomButton className="!h-12 text-lg font-semibold">
           Lưu tạm
-        </CustomButton>
+        </CustomButton> */}
         <CustomButton className="!h-12 text-lg font-semibold" type="success" onClick={() => {
           changePayload();
           handleSubmit(onSubmit)();
-        }}>
+        }}
+          loading={isLoadingCreateProductImport || isLoadingReceiveProductImport}
+          disabled={isLoadingCreateProductImport || isLoadingReceiveProductImport}
+        >
           Hoàn thành
         </CustomButton>
       </div>
