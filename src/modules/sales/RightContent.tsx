@@ -142,14 +142,14 @@ export function RightContent({ useForm }: { useForm: any }) {
     if (getValues('discount')) {
       if (getValues('discountType') === EDiscountType.MONEY) {
         return totalPrice > Number(getValues('discount'))
-          ? totalPrice - Number(getValues('discount'))
+          ? Math.round(totalPrice - Number(getValues('discount')))
           : 0;
       }
 
       if (getValues('discountType') === EDiscountType.PERCENT) {
         const discountValue =
           (totalPrice * Number(getValues('discount'))) / 100;
-        return totalPrice > discountValue ? totalPrice - discountValue : 0;
+        return totalPrice > discountValue ? Math.round(totalPrice - discountValue) : 0;
       }
     }
 

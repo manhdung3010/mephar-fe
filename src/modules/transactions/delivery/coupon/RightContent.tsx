@@ -41,16 +41,24 @@ export function RightContent({ useForm, branchId, moveId, moveDetail }: { useFor
   } = useMutation(
     () => {
       const products = getValues('products').map(
-        ({ isBatchExpireControl, ...product }) => product
+        ({ isBatchExpireControl, ...product }) => (
+          {
+            ...product,
+            batches: product.batches?.filter((item) => item.isSelected)?.map((batch) => (
+              {
+                id: batch.id,
+                quantity: batch.quantity,
+              }
+            )),
+          }
+        )
       );
 
       return createMoveProduct({ ...getValues(), products, totalItem });
     },
     {
       onSuccess: async () => {
-        // const userId = getValues('userId');
         reset();
-        // setValue('userId', userId, { shouldValidate: true });
         setProductsImport([]);
         // await queryClient.invalidateQueries(['LIST_IMPORT_PRODUCT']);
         router.push('/transactions/delivery');
@@ -134,7 +142,7 @@ export function RightContent({ useForm, branchId, moveId, moveDetail }: { useFor
 
   const changePayload = () => {
     const products = cloneDeep(productsImport).map(
-      ({ id, price, product, quantity, batches, toBatches, productUnitId, productUnit }) => ({
+      ({ id, price, product, quantity, batches, toBatches, productUnitId, productUnit }: any) => ({
         productId: product.id,
         price: price,
         ...(moveId ? { totalQuantity: quantity } : { quantity: quantity }),
@@ -146,11 +154,13 @@ export function RightContent({ useForm, branchId, moveId, moveDetail }: { useFor
             id: item.batch.id,
             quantity: item.batch.quantity,
             expiryDate: item.batch.expiryDate,
+            isSelected: item.isSelected,
           }
-        )) : batches?.map(({ id, quantity, expiryDate }) => ({
+        )) : batches?.map(({ id, quantity, expiryDate, isSelected }) => ({
           id,
           quantity,
           expiryDate,
+          isSelected
         })),
       })
     );
@@ -159,7 +169,18 @@ export function RightContent({ useForm, branchId, moveId, moveDetail }: { useFor
 
   const onSubmit = () => {
     if (moveId) {
-      mutateReceiveProductImport();
+      let errorTxt
+      productsImport.forEach((item) => {
+        if (item.quantity > item.totalQuantity) {
+          errorTxt = "Số lượng nhận không được lớn hơn số lượng chuyển";
+          return;
+        }
+      })
+      if (errorTxt) {
+        message.error(errorTxt);
+        return;
+      }
+      return mutateReceiveProductImport();
     }
     else {
       mutateCreateProductImport();
@@ -256,28 +277,32 @@ export function RightContent({ useForm, branchId, moveId, moveDetail }: { useFor
 
             {
               !moveId && (
-                <div className="mb-5 flex items-center justify-between">
-                  <div className=" leading-normal text-[#828487] flex-shrink-0 w-28">
-                    Tới chi nhánh
+                <div className="mb-5 flex flex-col">
+                  <div className='flex items-center'>
+                    <div className=" leading-normal text-[#828487] flex-shrink-0 w-28">
+                      Tới chi nhánh
+                    </div>
+                    <CustomSelect
+                      options={branches?.data?.items?.filter((br) => br.id !== branchId).map((item) => ({
+                        value: item.id,
+                        label: item.name,
+                      }))}
+                      showSearch={true}
+                      value={getValues('toBranchId')}
+                      onSearch={debounce((value) => {
+                        setSearchEmployeeText(value);
+                      }, 300)}
+                      onChange={(value) => {
+                        setValue('toBranchId', value, { shouldValidate: true });
+                      }}
+                      wrapClassName=""
+                      className="border-underline"
+                      placeholder="Chọn chi nhánh"
+                    />
                   </div>
-                  <CustomSelect
-                    options={branches?.data?.items?.filter((br) => br.id !== branchId).map((item) => ({
-                      value: item.id,
-                      label: item.name,
-                    }))}
-                    showSearch={true}
-                    value={getValues('toBranchId')}
-                    onSearch={debounce((value) => {
-                      setSearchEmployeeText(value);
-                    }, 300)}
-                    onChange={(value) => {
-                      setValue('toBranchId', value, { shouldValidate: true });
-                    }}
-                    wrapClassName=""
-                    className="border-underline"
-                    placeholder="Chọn chi nhánh"
-                  />
-                  <InputError error={errors.userId?.message} />
+                  <div className='ml-auto'>
+                    <InputError error={errors.toBranchId?.message} />
+                  </div>
                 </div>
               )
             }

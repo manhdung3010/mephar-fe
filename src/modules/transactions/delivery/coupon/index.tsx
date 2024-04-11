@@ -369,8 +369,6 @@ export function DeliveryCoupon() {
     setImportProducts(products);
   };
 
-  console.log("importProducts: ", importProducts)
-
   return (
     <div className="-mx-8 flex">
       <div className="grow overflow-x-auto">
@@ -530,7 +528,7 @@ export function DeliveryCoupon() {
                             Chọn lô
                           </div>
 
-                          {record.batches?.map((batch) => (
+                          {record.batches?.map((batch) => batch.isSelected && (
                             <div
                               key={batch.id}
                               className="flex items-center rounded bg-red-main py-1 px-2 text-white"
