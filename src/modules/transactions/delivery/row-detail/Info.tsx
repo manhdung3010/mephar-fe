@@ -10,9 +10,12 @@ import { CustomSelect } from '@/components/CustomSelect';
 import CustomTable from '@/components/CustomTable';
 import { EDeliveryTransactionStatus, EDeliveryTransactionStatusLabel } from '@/enums';
 import { formatDateTime, formatMoney, formatNumber } from '@/helpers';
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import PlusIcon from '@/assets/plusWhiteIcon.svg';
 import { useRouter } from 'next/router';
+import { useReactToPrint } from 'react-to-print';
+import DeliveryInvoice from './DeliveryInvoice';
+import styles from './styles.module.css';
 
 interface IRecord {
   key: number;
@@ -25,6 +28,7 @@ interface IRecord {
 
 export function Info({ record, branchId }: { record: any, branchId: number }) {
   const router = useRouter();
+  const invoiceComponentRef = useRef(null);
   const columns: ColumnsType<IRecord> = [
     {
       title: 'Mã hàng',
@@ -71,6 +75,11 @@ export function Info({ record, branchId }: { record: any, branchId: number }) {
     return record?.items?.reduce((total, item) => total + item.quantity, 0);
   }, [record?.items])
 
+  const handlePrintInvoice = useReactToPrint({
+    content: () => invoiceComponentRef.current,
+  });
+
+
   return (
     <div className="gap-12 ">
       <div className="mb-5 flex gap-5">
@@ -108,7 +117,7 @@ export function Info({ record, branchId }: { record: any, branchId: number }) {
 
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Người tạo:</div>
-            <div className="text-black-main">Kimka.nt</div>
+            <div className="text-black-main">{record?.movedByUser?.fullName}</div>
           </div>
 
           <div className="grid grid-cols-2 gap-5">
@@ -146,6 +155,7 @@ export function Info({ record, branchId }: { record: any, branchId: number }) {
           outline={true}
           type="primary"
           prefixIcon={<Image src={PrintOrderIcon} alt="" />}
+          onClick={handlePrintInvoice}
         >
           In phiếu
         </CustomButton>
@@ -165,6 +175,9 @@ export function Info({ record, branchId }: { record: any, branchId: number }) {
             Nhận hàng
           </CustomButton>
         }
+        <div ref={invoiceComponentRef} className={`${styles.invoicePrint} invoice-print`}>
+          <DeliveryInvoice data={record} columns={columns} />
+        </div>
       </div>
     </div>
   );

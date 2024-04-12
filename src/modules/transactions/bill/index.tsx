@@ -99,8 +99,7 @@ export function BillTransaction() {
       title: "Giảm giá",
       dataIndex: "discount",
       key: "discount",
-      render: (_, { discount, discountType }) =>
-        formatMoney(+discount),
+      render: (_, { discount, discountType }) => discountType === 1 ? `${discount}%` : formatMoney(discount),
     },
     {
       title: "Khách đã trả",

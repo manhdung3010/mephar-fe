@@ -94,13 +94,13 @@ export function Info({ record }: { record: IOrder }) {
       title: 'Đơn giá',
       dataIndex: 'price',
       key: 'price',
-      render: (value, { discount }) => formatMoney(+value - +discount),
+      render: (value, { quantity }) => formatMoney(+value / quantity),
     },
     {
       title: 'Thành tiền',
       dataIndex: 'totalPrice',
       key: 'totalPrice',
-      render: (_, { quantity, price }) => formatMoney(quantity * price),
+      render: (_, { quantity, price }) => formatMoney(price),
     },
   ];
 
@@ -111,6 +111,14 @@ export function Info({ record }: { record: IOrder }) {
   const totalNumber = useMemo(() => {
     return record.products?.reduce((acc, cur) => acc + cur.quantity, 0);
   }, [record.products]);
+
+  const getDiscount = (record) => {
+    let total = 0;
+    record.products?.forEach((item) => {
+      total += item.price;
+    });
+    return formatMoney(total);
+  }
 
   return (
     <div className="gap-12 ">
@@ -301,12 +309,12 @@ export function Info({ record }: { record: IOrder }) {
         </div>
         <div className=" mb-3 grid grid-cols-2">
           <div className="text-gray-main">Tổng tiền hàng:</div>
-          <div className="text-black-main">{formatMoney(record?.totalPrice + record?.discount)}</div>
+          <div className="text-black-main">{getDiscount(record)}</div>
         </div>
 
         <div className=" mb-3 grid grid-cols-2">
           <div className="text-gray-main">Giảm giá hóa đơn:</div>
-          <div className="text-black-main">{formatMoney(record?.discount)}</div>
+          <div className="text-black-main">{record?.discountType === 1 ? record?.discount + "%" : formatMoney(record?.discount)}</div>
         </div>
 
         <div className=" mb-3 grid grid-cols-2">
@@ -336,12 +344,12 @@ export function Info({ record }: { record: IOrder }) {
         >
           Hủy bỏ
         </CustomButton>
-        <CustomButton
+        {/* <CustomButton
           type="success"
           prefixIcon={<Image src={PlusIconWhite} alt="" />}
         >
           Trả hàng
-        </CustomButton>
+        </CustomButton> */}
       </div>
 
       <div ref={invoiceComponentRef} className={styles.invoicePrint}>
