@@ -1,6 +1,11 @@
 import type { ColumnsType } from 'antd/es/table';
 
 import CustomTable from '@/components/CustomTable';
+import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { getOrderHistory } from '@/api/order.service';
+import { formatDate, formatMoney } from '@/helpers';
+import { EPaymentMethod } from '@/enums';
 
 interface IRecord {
   key: number;
@@ -13,32 +18,28 @@ interface IRecord {
   totalPrice: number;
 }
 
-const History = () => {
-  const record = {
-    key: 1,
-    id: 'TTHD000046',
-    date: '03/11/2023 22:07',
-    createdBy: 'Người tạo',
-    price: 120000,
-    paymentMethod: 'Tiền mặt',
-    status: 'Đã chuyển khoản',
-    totalPrice: 120000,
-  };
+const History = ({ record }: any) => {
+  const [formFilter, setFormFilter] = useState({
+    page: 1,
+    limit: 20,
+  });
 
-  const dataSource: IRecord[] = Array(1)
-    .fill(0)
-    .map((_, index) => ({ ...record, key: index }));
+  const { data: orderHistory, isLoading } = useQuery(
+    ['ORDER_HISTORY', JSON.stringify(formFilter)],
+    () => getOrderHistory({ ...formFilter }, record.id)
+  );
 
   const columns: ColumnsType<IRecord> = [
     {
       title: 'Mã phiếu',
-      dataIndex: 'id',
-      key: 'id',
+      dataIndex: 'code',
+      key: 'code',
     },
     {
       title: 'Thời gian',
-      dataIndex: 'date',
-      key: 'date',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      render: (value) => formatDate(value),
     },
     {
       title: 'Người tạo',
@@ -47,28 +48,32 @@ const History = () => {
     },
     {
       title: 'Giá trị phiếu',
-      dataIndex: 'price',
-      key: 'price',
+      dataIndex: 'totalAmount',
+      key: 'totalAmount',
+      render: (value) => formatMoney(value),
     },
     {
       title: 'Phương thức',
       dataIndex: 'paymentMethod',
       key: 'paymentMethod',
+      render: (value) => value === EPaymentMethod.CASH ? "Tiền mặt" : value === EPaymentMethod.BANKING ? "Chuyển khoản" : "Khách nợ",
     },
 
     {
       title: 'Trạng thái',
       dataIndex: 'status',
       key: 'status',
+      render: (value) => value === 'DONE' ? 'Đã hoàn thành' : 'Chưa hoàn thành',
     },
     {
       title: 'Tiền thu/chi',
-      dataIndex: 'price',
-      key: 'price',
+      dataIndex: 'amount',
+      key: 'amount',
+      render: (value) => formatMoney(+value),
     },
   ];
 
-  return <CustomTable dataSource={dataSource} columns={columns} />;
+  return <CustomTable dataSource={orderHistory?.data} columns={columns} />;
 };
 
 export default History;

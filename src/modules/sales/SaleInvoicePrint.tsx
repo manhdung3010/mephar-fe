@@ -84,9 +84,9 @@ function SaleInvoicePrint({ saleInvoice }: any) {
       <div className='text-center'>
         {
           saleInvoice?.order ? <p className='italic mt-4'>
-            (Bằng chữ: <span className=''>{convertMoneyToString(+saleInvoice?.order?.totalPrice - +saleInvoice?.order?.discount)} đồng)</span>
+            (Bằng chữ: <span className=''>{convertMoneyToString(+saleInvoice?.order?.totalPrice)} đồng)</span>
           </p> : <p className='italic mt-4'>
-            (Bằng chữ: <span className=''>{convertMoneyToString(+saleInvoice?.totalPrice - +saleInvoice?.discount)} đồng)</span>
+            (Bằng chữ: <span className=''>{convertMoneyToString(+saleInvoice?.totalPrice)} đồng)</span>
           </p>
         }
         <p>

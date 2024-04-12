@@ -35,7 +35,7 @@ const BillDetail = ({ record }: { record: IOrder }) => {
         <div className="h-[1px] w-full bg-[#D64457]" />
       </div>
       {select === 0 && <Info record={record} />}
-      {select === 1 && <History />}
+      {select === 1 && <History record={record} />}
     </div>
   );
 };

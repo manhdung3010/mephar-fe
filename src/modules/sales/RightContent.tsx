@@ -179,6 +179,7 @@ export function RightContent({ useForm }: { useForm: any }) {
 
         return createOrder({
           ...getValues(),
+          // ...(getValues('customerId') === -1 && { customerId: null }),
           products: formatProducts,
           branchId,
         });
@@ -215,6 +216,10 @@ export function RightContent({ useForm }: { useForm: any }) {
     mutateCreateOrder();
   };
 
+  // useEffect(() => {
+  //   setValue("customerId", -1, { shouldValidate: true })
+  // }, [])
+
   return (
     <RightContentStyled className="flex w-[360px] min-w-[360px] flex-col">
       <div className="px-6 pt-5 ">
@@ -239,10 +244,13 @@ export function RightContent({ useForm }: { useForm: any }) {
         <InputError error={errors.userId?.message} />
 
         <CustomSelect
-          options={customers?.data?.items?.map((item) => ({
-            value: item.id,
-            label: item.fullName + " - " + item.phone,
-          }))}
+          options={[
+            // { value: -1, label: 'Khách lẻ' },
+            ...(customers?.data?.items?.map((item) => ({
+              value: item.id,
+              label: item.fullName + " - " + item.phone,
+            })) || [])
+          ]}
           value={getValues('customerId')}
           onSearch={debounce((value) => {
             setSearchCustomerText(value);

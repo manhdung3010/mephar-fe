@@ -11,6 +11,15 @@ export function getOrder(params: {
 }) {
   return axiosClient.get("order", { params });
 }
+export function getOrderHistory(
+  params: {
+    page: number;
+    limit: number;
+  },
+  id: number
+) {
+  return axiosClient.get(`order/${id}/payment-history`, { params });
+}
 
 export function updateOrder(id: number, payload) {
   return axiosClient.patch(`order/${id}`, payload);
