@@ -49,7 +49,7 @@ const RowDetail = ({ record, branchId }: { record: ICustomer, branchId: number }
       </div>
       {select === 0 && <Info record={record} />}
       {/* {select === 1 && <ReceiveAddress record={record} />} */}
-      {select === 1 && <Debt record={record} />}
+      {select === 1 && <Debt record={record} branchId={branchId} />}
       {select === 2 && <BuyHistory record={record} branchId={branchId} />}
       {/* {select === 4 && <ReturnHistory record={record} />} */}
       {/* {select === 5 && <CollectPointHistory record={record} />} */}

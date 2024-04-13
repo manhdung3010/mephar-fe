@@ -1,6 +1,6 @@
 import { Layout } from '@/layouts/Layout';
 import { Meta } from '@/layouts/Meta';
-import { SaleReport } from '@/modules/reports/SaleReport';
+import { SaleReport } from '@/modules/reports/sales-report/SaleReport';
 
 const Index = () => {
   return (

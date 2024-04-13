@@ -32,6 +32,9 @@ export function getOrderDetail(id: number) {
 export function createOrder(payload) {
   return axiosClient.post(`order`, payload);
 }
+export function createOrderDebt(payload, id: number) {
+  return axiosClient.post(`order/${id}/payment`, payload);
+}
 
 export function deleteOrder(id: number) {
   return axiosClient.delete(`order/${id}`);

@@ -101,14 +101,15 @@ export function Customer() {
     },
     {
       title: 'Nợ hiện tại',
-      dataIndex: 'debt',
-      key: 'debt',
+      dataIndex: 'totalDebt',
+      key: 'totalDebt',
       render: (value) => formatMoney(value),
     },
     {
       title: 'Tổng bán',
-      dataIndex: 'totalSell',
-      key: 'totalSell',
+      dataIndex: 'totalOrderPay',
+      key: 'totalOrderPay',
+      render: (value) => formatMoney(value),
     },
     // {
     //   title: 'Điểm hiện tại',

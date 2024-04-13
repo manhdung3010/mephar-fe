@@ -7,6 +7,9 @@ import { CustomButton } from '@/components/CustomButton';
 import CustomTable from '@/components/CustomTable';
 import PaymentModal from './PaymentModal';
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { getCustomerDebt } from '@/api/customer.service';
+import { formatDateTime, formatMoney } from '@/helpers';
 
 const { TextArea } = Input;
 
@@ -19,46 +22,79 @@ interface IRecord {
   createdAt: string;
 }
 
-export function Debt({ record }: { record: any }) {
+export function Debt({ record, branchId }: { record: any, branchId: number }) {
   const [isOpen, setIsOpen] = useState(false);
-  const data = {
-    key: 1,
-    id: '002014',
-    type: 'Bán hàng',
-    price: 120000,
-    debt: 50000,
-    createdAt: '12/10/2023 11:34',
-  };
+  const [paymentRecord, setPaymentRecord] = useState();
 
-  const dataSource: IRecord[] = Array(1)
-    .fill(0)
-    .map((_, index) => ({ ...data, key: index }));
+  const [formFilter, setFormFilter] = useState({
+    page: 1,
+    limit: 99,
+    customerId: record.id,
+    branchId,
+  });
+
+  const { data: orders, isLoading } = useQuery(
+    ['ORDER_LIST_DEBT', JSON.stringify(formFilter), branchId],
+    () => getCustomerDebt({ ...formFilter }, record.id)
+  );
 
   const columns: ColumnsType<IRecord> = [
-    {
-      title: 'Mã phiếu',
-      dataIndex: 'id',
-      key: 'id',
-    },
+    // {
+    //   title: 'Mã phiếu',
+    //   dataIndex: 'id',
+    //   key: 'id',
+    // },
     {
       title: 'Thời gian',
       dataIndex: 'createdAt',
       key: 'createdAt',
+      render: (value) => formatDateTime(value),
     },
     {
       title: 'Loại',
       dataIndex: 'type',
       key: 'type',
+      render: (value) => value === 'ORDER' ? 'Bán hàng' : 'Trả hàng'
     },
     {
       title: 'Giá trị',
-      dataIndex: 'price',
-      key: 'price',
+      dataIndex: 'totalAmount',
+      key: 'totalAmount',
+      render: (value) => formatMoney(value),
     },
     {
       title: 'Dư nợ khách hàng',
-      dataIndex: 'debt',
-      key: 'debt',
+      dataIndex: 'debtAmount',
+      key: 'debtAmount',
+      render: (value) => formatMoney(+value),
+    },
+    {
+      title: 'Thao tác',
+      dataIndex: 'action',
+      key: 'action',
+      render: (_, record: any) => (
+        <div className="flex gap-3">
+          {/* <div
+            className=" cursor-pointer"
+            onClick={() =>
+              // router.push(`/partners/customer/add-customer?id=${id}`)
+              setIsOpen(true)
+            }
+          >
+            <Image src={DollarIcon} />
+          </div> */}
+          <CustomButton
+            type="success"
+            prefixIcon={<Image src={DollarIcon} alt="" />}
+            onClick={() => {
+              setIsOpen(true)
+              setPaymentRecord(record)
+            }}
+          >
+            Thanh toán
+          </CustomButton>
+        </div>
+      ),
     },
   ];
 
@@ -69,13 +105,14 @@ export function Debt({ record }: { record: any }) {
   return (
     <div className="gap-12 ">
       <CustomTable
-        dataSource={dataSource}
+        dataSource={orders?.data}
         columns={columns}
         pagination={false}
         className="mb-4"
+        loading={isLoading}
       />
 
-      <div className="flex justify-end gap-4">
+      {/* <div className="flex justify-end gap-4">
         <CustomButton
           type="success"
           prefixIcon={<Image src={DollarIcon} alt="" />}
@@ -83,9 +120,9 @@ export function Debt({ record }: { record: any }) {
         >
           Thanh toán
         </CustomButton>
-      </div>
+      </div> */}
 
-      <PaymentModal isOpen={isOpen} onCancel={() => setIsOpen(!isOpen)} onSubmit={onSubmit} />
+      <PaymentModal isOpen={isOpen} onCancel={() => setIsOpen(!isOpen)} record={paymentRecord} />
     </div>
   );
 }

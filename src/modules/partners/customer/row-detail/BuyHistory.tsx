@@ -26,18 +26,9 @@ interface IRecord {
 }
 
 export function BuyHistory({ record, branchId }: { record: any, branchId: number }) {
-  const data = {
-    key: 1,
-    id: '002014',
-    totalPrice: 120000,
-    receivePrice: 50000,
-    returnPrice: 0,
-    status: EOrderStatus.SUCCEED,
-    createdAt: '12/10/2023 11:34',
-  };
   const [formFilter, setFormFilter] = useState({
     page: 1,
-    limit: 20,
+    limit: 99,
     customerId: record.id,
     branchId,
   });
@@ -104,6 +95,7 @@ export function BuyHistory({ record, branchId }: { record: any, branchId: number
         columns={columns}
         pagination={false}
         className="mb-4"
+        loading={isLoading}
       />
     </div>
   );

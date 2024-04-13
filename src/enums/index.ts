@@ -223,3 +223,26 @@ export enum EConnectSystemStatusLabel {
   CONNECTED = "Đã kết nối",
   DISCONNECTED = "Chưa kết nối",
 }
+
+export enum ESaleReportConcerns {
+  SALE = 1,
+  PROFIT = 2,
+  WAREHOUSE_VALUE = 3,
+  IMPORT = 4,
+  IMPORT_DETAIL = 5,
+  EXPORT = 6,
+  STAFF_BY_SALES = 7,
+  CUSTOMER_BY_SALES = 8,
+  SUPPLIER_BY_IMPORTS = 9,
+}
+export const saleReportLabels: Record<ESaleReportConcerns, string> = {
+  [ESaleReportConcerns.SALE]: "Bán hàng",
+  [ESaleReportConcerns.PROFIT]: "Lợi nhuận",
+  [ESaleReportConcerns.WAREHOUSE_VALUE]: "Giá trị kho",
+  [ESaleReportConcerns.IMPORT]: "Xuất nhập tồn",
+  [ESaleReportConcerns.IMPORT_DETAIL]: "Xuất nhập tồn",
+  [ESaleReportConcerns.EXPORT]: "Xuất hủy",
+  [ESaleReportConcerns.STAFF_BY_SALES]: "Nhân viên theo hàng bán",
+  [ESaleReportConcerns.CUSTOMER_BY_SALES]: "Khách theo hàng bán",
+  [ESaleReportConcerns.SUPPLIER_BY_IMPORTS]: "NCC theo hàng nhập",
+};

@@ -7,6 +7,16 @@ export function getCustomer(params: {
 }) {
   return axiosClient.get("customer", { params });
 }
+export function getCustomerDebt(
+  params: {
+    page: number;
+    limit: number;
+    keyword?: string;
+  },
+  id: number
+) {
+  return axiosClient.get(`customer/${id}/total-debt`, { params });
+}
 
 export function getCustomerDetail(id: number) {
   return axiosClient.get(`customer/${id}`);

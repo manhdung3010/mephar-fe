@@ -5,33 +5,32 @@ import { useRouter } from 'next/router';
 import ExportIcon from '@/assets/exportIcon.svg';
 import { CustomButton } from '@/components/CustomButton';
 import CustomTable from '@/components/CustomTable';
-
 import Search from './Search';
+
+// import Search from '../Search';
 
 interface IRecord {
   key: number;
+  date: string;
   name: string;
   costPrice: number;
   discountPrice: number;
   earnPrice: number;
-  returnPrice: number;
-  netPrice: number;
   totalCostPrice: number;
   grossPrice: number;
 }
 
-export function CustomerReport() {
+export function SaleReport() {
   const router = useRouter();
 
   const record = {
     key: 1,
     name: 'Hoàng Văn Lâm',
+    date: '2023-10-30 15:49:43',
     costPrice: 20,
     discountPrice: 20,
     earnPrice: 0,
-    returnPrice: 0,
-    netPrice: 0,
-    totalCostPrice: 0,
+    totalCostPrice: 1000000,
     grossPrice: 0,
   };
 
@@ -41,9 +40,14 @@ export function CustomerReport() {
 
   const columns: ColumnsType<IRecord> = [
     {
-      title: 'Khách hàng',
+      title: 'Nhân viên',
       dataIndex: 'name',
       key: 'name',
+    },
+    {
+      title: 'Thời gian',
+      dataIndex: 'date',
+      key: 'date',
     },
     {
       title: 'Tổng tiền hàng',
@@ -51,7 +55,7 @@ export function CustomerReport() {
       key: 'costPrice',
     },
     {
-      title: 'Giảm giá hóa đơn',
+      title: 'Giảm giá',
       dataIndex: 'discountPrice',
       key: 'discountPrice',
     },
@@ -61,40 +65,46 @@ export function CustomerReport() {
       key: 'earnPrice',
     },
     {
-      title: 'Giá trị trả',
-      dataIndex: 'returnPrice',
-      key: 'returnPrice',
-    },
-    {
-      title: 'Doanh thu thuần',
-      dataIndex: 'netPrice',
-      key: 'netPrice',
-    },
-    {
       title: 'Tổng giá vốn',
       dataIndex: 'totalCostPrice',
       key: 'totalCostPrice',
     },
     {
-      title: 'Lợi nhuận gộp',
+      title: 'Lợi nhuận',
       dataIndex: 'grossPrice',
       key: 'grossPrice',
     },
   ];
   return (
-    // <div>
-    //   <div className="my-3 flex justify-end gap-4">
-    //     <CustomButton prefixIcon={<Image src={ExportIcon} />}>
-    //       Xuất file
-    //     </CustomButton>
-    //   </div>
+    <div>
+      <div className="my-3 flex justify-end gap-4">
+      </div>
 
-    //   <Search />
+      <div className='grid grid-cols-12 gap-6 '>
+        <div className='col-span-2'>
+          <Search />
+        </div>
+        <div className='col-span-10'>
+          <div className='p-6 bg-[#88909C]'>
 
-    //   <CustomTable dataSource={dataSource} columns={columns} />
-    // </div>
-    <div className='my-5'>
-      Đang cập nhật...
+            <div className='bg-white p-3'>
+              <div>
+                Ngày lập: 30/10/2023
+              </div>
+              <div className='text-center mb-5 flex flex-col gap-[10px]'>
+                <h4 className='text-2xl font-semibold'>Báo cáo lợi nhuận theo thời gian</h4>
+                <p>Từ ngày 11/12/2023 đến ngày 11/12/2023</p>
+                <p>Chi nhánh: QT Pharma - Dược Quyết Thắng</p>
+                <p>Bảng giá: Tất cả</p>
+              </div>
+              <CustomTable dataSource={dataSource} columns={columns} />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+    // <div className='my-5'>
+    //   Đang cập nhật...
+    // </div>
   );
 }
