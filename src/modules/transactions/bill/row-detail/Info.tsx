@@ -20,6 +20,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteOrder } from '@/api/order.service';
 import { IOrder } from '../../order/type';
 import PlusIconWhite from '@/assets/PlusIconWhite.svg';
+import InvoicePrint from './InvoicePrint';
 
 const { TextArea } = Input;
 
@@ -353,7 +354,7 @@ export function Info({ record }: { record: IOrder }) {
       </div>
 
       <div ref={invoiceComponentRef} className={styles.invoicePrint}>
-        <SaleInvoicePrint saleInvoice={record} />
+        <InvoicePrint saleInvoice={record} totalNumber={totalNumber} />
       </div>
       <CancelBillModal
         isOpen={openCancelBill}

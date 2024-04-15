@@ -10,7 +10,7 @@ import WareHouseCard from './WareHouseCard';
 const ProductDetail = ({ record, onChangeUnit, branchId }: { record: IProduct, onChangeUnit: any, branchId: number }) => {
   const [select, setSelect] = useState(0);
 
-  const menu = ['Thông tin', 'Thẻ kho', 'Tồn kho', 'Lô/hạn sử dụng'];
+  const menu = ['Thông tin', 'Thẻ kho', 'Tồn kho', record?.isBatchExpireControl && 'Lô/hạn sử dụng'];
 
   return (
     <div
@@ -39,7 +39,7 @@ const ProductDetail = ({ record, onChangeUnit, branchId }: { record: IProduct, o
       {select === 0 && <Info record={record} onChangeUnit={onChangeUnit} />}
       {select === 1 && <WareHouseCard productId={record?.id} branchId={branchId} />}
       {select === 2 && <Inventory productId={record?.id} branchId={branchId} />}
-      {select === 3 && <ProductExpire productId={record?.id} branchId={branchId} productUnit={record?.productUnit} />}
+      {select === 3 && record?.isBatchExpireControl && <ProductExpire productId={record?.id} branchId={branchId} productUnit={record?.productUnit} />}
     </div>
   );
 };

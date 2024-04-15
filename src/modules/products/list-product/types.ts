@@ -10,6 +10,7 @@ export interface IProduct {
   groupProduct?: { name: string };
   type: EProductType;
   quantity: number;
+  isBatchExpireControl: boolean;
   price: string;
   primePrice: string;
   shortName: string;

@@ -255,13 +255,13 @@ export function Info({ record }: { record: IRecord }) {
       </div>
 
       <div className="flex justify-end gap-4">
-        <CustomButton
+        {/* <CustomButton
           outline={true}
           type="primary"
           prefixIcon={<Image src={OpenOrderIcon} alt="" />}
         >
           Mở phiếu
-        </CustomButton>
+        </CustomButton> */}
         <CustomButton
           outline={true}
           type="primary"
