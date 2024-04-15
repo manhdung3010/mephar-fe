@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { cloneDeep, debounce } from 'lodash';
+import { cloneDeep } from 'lodash';
 import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 import { useRecoilValue } from 'recoil';
@@ -8,15 +8,12 @@ import { getBatch } from '@/api/batch.service';
 import DeleteIcon from '@/assets/deleteRed.svg';
 import { CustomButton } from '@/components/CustomButton';
 import { CustomInput } from '@/components/CustomInput';
-import Label from '@/components/CustomLabel';
 import { CustomModal } from '@/components/CustomModal';
-import { CustomSelect } from '@/components/CustomSelect';
 import CustomTable from '@/components/CustomTable';
 import { formatNumber } from '@/helpers';
 import { branchState, productReturnState } from '@/recoil/state';
 
 import type { IBatch } from '../interface';
-import { AddBatchModal } from './AddBatchModal';
 
 export function ListBatchModal({
   isOpen,
@@ -46,9 +43,6 @@ export function ListBatchModal({
       }
     }
   }, [productKeyAddBatch]);
-
-  console.log("listBatchSelected", listBatchSelected)
-
 
   const [formFilter, setFormFilter] = useState({
     page: 1,
@@ -175,7 +169,7 @@ export function ListBatchModal({
     >
       <div className="my-5 h-[1px] w-full bg-[#C7C9D9]" />
 
-      <div className="mb-4">
+      {/* <div className="mb-4">
         <Label label="Lô sản phẩm" hasInfoIcon={false} />
         <CustomSelect
           onChange={(value) => {
@@ -221,14 +215,39 @@ export function ListBatchModal({
           className="h-11 !rounded"
           placeholder="Chọn lô"
         />
-      </div>
+      </div> */}
       <CustomTable
         dataSource={listBatchSelected?.map((item, index) => ({
           ...item,
-          key: index + 1,
+          key: item.batchId || item.id,
         }))}
         columns={columns}
         scroll={{ x: 600 }}
+        rowSelection={{
+          type: 'checkbox',
+          selectedRowKeys: [
+            ...listBatchSelected
+              .filter((batch) => batch.isSelected)
+              .map((batch: any) => batch.batchId || batch.id),
+          ],
+          onChange(selectedRowKeys) {
+            let listBatchClone = cloneDeep(listBatchSelected);
+
+            listBatchClone = listBatchClone.map((batch: any) => {
+              if (selectedRowKeys.includes(batch.batchId || batch.id)) {
+                return {
+                  ...batch,
+                  quantity: batch.quantity || 1,
+                  isSelected: true,
+                };
+              }
+
+              return { ...batch, isSelected: false, quantity: 0 };
+            });
+
+            setListBatchSelected(listBatchClone);
+          },
+        }}
       />
 
       <div className="mt-5 flex justify-end gap-x-4">
@@ -249,13 +268,6 @@ export function ListBatchModal({
           Lưu
         </CustomButton>
       </div>
-
-      <AddBatchModal
-        isOpen={openAddBatchModal}
-        onCancel={() => setOpenAddBatchModal(false)}
-        productId={Number(productKeyAddBatch?.split('-')[0])}
-        setListBatchSelected={setListBatchSelected}
-      />
     </CustomModal>
   );
 }

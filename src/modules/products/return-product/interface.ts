@@ -1,4 +1,4 @@
-import type { EReturnProductStatus } from '@/enums';
+import type { EReturnProductStatus } from "@/enums";
 
 export interface IRecord {
   key: number;
@@ -109,6 +109,8 @@ export interface IProduct {
 
 export interface IBatch {
   id: number;
+  batchId?: number;
+  isSelected?: boolean;
   name: string;
   quantity: number;
   inventory: number; // client;

@@ -1,22 +1,20 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useQuery } from '@tanstack/react-query';
 import type { ColumnsType } from 'antd/es/table';
-import { cloneDeep, debounce, set } from 'lodash';
+import { cloneDeep, debounce } from 'lodash';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
-import { getInboundProducts } from '@/api/product.service';
+import { getSaleProducts } from '@/api/product.service';
 import CloseIcon from '@/assets/closeWhiteIcon.svg';
 import RemoveIcon from '@/assets/removeIcon.svg';
 import SearchIcon from '@/assets/searchIcon.svg';
 import { CustomInput } from '@/components/CustomInput';
-import { CustomSelect } from '@/components/CustomSelect';
 import CustomTable from '@/components/CustomTable';
 import { CustomUnitSelect } from '@/components/CustomUnitSelect';
 import InputError from '@/components/InputError';
-import { EProductType } from '@/enums';
 import { formatMoney, getImage } from '@/helpers';
 import type {
   IImportProduct,
@@ -24,14 +22,13 @@ import type {
 } from '@/modules/products/import-product/coupon/interface';
 import { branchState, productReturnState, profileState } from '@/recoil/state';
 
-import type { IBatch, IRecord } from '../interface';
+import { getImportProductDetail } from '@/api/import-product.service';
+import { CustomAutocomplete } from '@/components/CustomAutocomplete';
+import { useRouter } from 'next/router';
+import type { IBatch } from '../interface';
 import { ListBatchModal } from './ListBatchModal';
 import { RightContent } from './RightContent';
 import { schema } from './schema';
-import { CustomAutocomplete } from '@/components/CustomAutocomplete';
-import { useRouter } from 'next/router';
-import { getReturnProductDetail } from '@/api/return-product.service';
-import { getImportProductDetail } from '@/api/import-product.service';
 
 export default function ReturnCoupon() {
   const profile = useRecoilValue(profileState);
@@ -132,17 +129,32 @@ export default function ReturnCoupon() {
     page: 1,
     limit: 20,
     keyword: '',
+    isSale: true,
   });
 
-  const { data: products } = useQuery<{ data: { items: IImportProduct[] } }>(
+  // const { data: products } = useQuery<{ data: { items: IImportProduct[] } }>(
+  //   [
+  //     'LIST_IMPORT_PRODUCT',
+  //     formFilter.page,
+  //     formFilter.limit,
+  //     formFilter.keyword,
+  //     branchId,
+  //   ],
+  //   () => getInboundProducts({ ...formFilter, branchId })
+  // );
+
+  const { data: products, isLoading: isLoadingProduct } = useQuery<{
+    data?: { items: IImportProduct[] };
+  }>(
     [
       'LIST_IMPORT_PRODUCT',
       formFilter.page,
       formFilter.limit,
       formFilter.keyword,
+      formFilter.isSale,
       branchId,
     ],
-    () => getInboundProducts({ ...formFilter, branchId })
+    () => getSaleProducts({ ...formFilter, branchId }),
   );
 
   const [expandedRowKeys, setExpandedRowKeys] = useState<
@@ -395,7 +407,17 @@ export default function ReturnCoupon() {
       if (product.productKey === productKey) {
         return {
           ...product,
-          batches: product.batches?.filter((batch) => batch.id !== batchId),
+          batches: product.batches?.map((batch) => {
+            if (batch.id === batchId) {
+              return {
+                ...batch,
+                quantity: 0,
+                isSelected: false,
+              };
+            }
+
+            return batch;
+          }),
         };
       }
       return product;
@@ -427,14 +449,31 @@ export default function ReturnCoupon() {
               disabled={id ? true : false}
               onSelect={(value) => {
                 const product: IImportProduct = JSON.parse(value);
-
+                let isSelectedUnit = true;
                 const localProduct: IImportProductLocal = {
                   ...product,
                   productKey: `${product.product.id}-${product.id}`,
                   inventory: product.quantity,
                   quantity: 1,
                   discountValue: 0,
-                  batches: [],
+                  batches: product.batches?.map((batch) => {
+                    const inventory =
+                      (batch.quantity / product.productUnit.exchangeValue)
+
+                    const newBatch = {
+                      ...batch,
+                      inventory,
+                      originalInventory: batch.quantity,
+                      quantity: 0,
+                      isSelected: inventory >= 1 ? isSelectedUnit : false,
+                    };
+
+                    if (inventory >= 1 && isSelectedUnit) {
+                      isSelectedUnit = false;
+                      newBatch.quantity = 1;
+                    }
+                    return newBatch;
+                  }),
                   productBatchHistories: product?.productBatchHistories,
                 };
 
@@ -458,7 +497,6 @@ export default function ReturnCoupon() {
                 } else {
                   cloneImportProducts.push(localProduct);
                 }
-
                 setReturnProducts(cloneImportProducts);
               }}
               showSearch={true}
@@ -537,7 +575,7 @@ export default function ReturnCoupon() {
                             Chọn lô
                           </div>
 
-                          {record.batches?.map((batch: any) => (
+                          {record.batches?.map((batch: any) => batch.isSelected && (
                             <div
                               key={batch.id}
                               className="flex items-center rounded bg-red-main py-1 px-2 text-white"

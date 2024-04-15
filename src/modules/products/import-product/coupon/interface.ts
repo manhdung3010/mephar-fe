@@ -4,6 +4,15 @@ export interface IImportProduct {
   id: number;
   unitName: string;
   exchangeValue: number;
+  batches: {
+    id: number;
+    name: string;
+    quantity: number;
+    expiryDate: string;
+    inventory: number;
+    originalInventory: number;
+  }[];
+  productUnit?: any;
   price: number;
   productId: number;
   code: string;

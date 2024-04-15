@@ -15,6 +15,7 @@ import { formatMoney } from "@/helpers";
 import { EditPriceModal } from "./EditPriceModal";
 import { useRecoilValue } from "recoil";
 import { branchState } from "@/recoil/state";
+import Search from "./Search";
 
 interface IRecord {
   key: number;
@@ -58,34 +59,6 @@ export function PriceSetting() {
     ],
     () => getPriceSetting({ ...formFilter, branchId })
   );
-
-  const filterData = (keyword: string) => {
-    if (!keyword) {
-      setFilteredData([]);
-      return;
-    }
-    const searchKeyword = keyword.toLowerCase().trim();
-
-    const filtered = priceSettings?.data?.items?.filter((item: IRecord) => {
-      const productName = item.product.name.toLowerCase();
-      const productCode = item.product.code.toLowerCase();
-
-      return (
-        productName.includes(searchKeyword) ||
-        productCode.includes(searchKeyword)
-      );
-    });
-
-    setFilteredData(filtered || []);
-  };
-
-  const handleSearch = debounce((value: string) => {
-    setFormFilter((prevValue) => ({
-      ...prevValue,
-      keyword: value,
-    }));
-    filterData(value);
-  }, 300);
 
   useEffect(() => {
     if (!formFilter.keyword.trim()) {
@@ -165,13 +138,7 @@ export function PriceSetting() {
 
   return (
     <div className="my-6 bg-white">
-      <div className="p-4">
-        <input
-          className="w-full px-2 py-1 outline-none border rounded"
-          placeholder="Tìm kiếm theo tên, mã"
-          onChange={(e) => handleSearch(e.target.value)}
-        />
-      </div>
+      <Search setFormFilter={setFormFilter} formFilter={formFilter} />
 
       <CustomTable
         dataSource={(filteredData.length > 0

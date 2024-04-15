@@ -179,7 +179,7 @@ export function RightContent({ useForm }: { useForm: any }) {
 
         return createOrder({
           ...getValues(),
-          // ...(getValues('customerId') === -1 && { customerId: null }),
+          ...(getValues('customerId') === -1 && { customerId: null }),
           products: formatProducts,
           branchId,
         });
@@ -245,7 +245,6 @@ export function RightContent({ useForm }: { useForm: any }) {
 
         <CustomSelect
           options={[
-            // { value: -1, label: 'Khách lẻ' },
             ...(customers?.data?.items?.map((item) => ({
               value: item.id,
               label: item.fullName + " - " + item.phone,

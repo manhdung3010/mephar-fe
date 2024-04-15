@@ -1,9 +1,21 @@
 import { convertMoneyToString, formatDateTime, formatMoney, formatNumber } from '@/helpers'
 import Image from 'next/image'
-import React from 'react'
+import React, { useMemo } from 'react'
 import Logo from '@/public/apple-touch-icon.png';
 
 function SaleInvoicePrint({ saleInvoice }: any) {
+  const getDiscount = (record) => {
+    let total = 0;
+    record.products?.forEach((item) => {
+      total += item.price;
+    });
+    return formatMoney(total);
+  }
+
+  console.log("saleInvoice", saleInvoice)
+  const totalNumber = useMemo(() => {
+    return saleInvoice.products?.reduce((acc, cur) => acc + cur.quantity, 0);
+  }, [saleInvoice.products]);
   return (
     <div >
       <div className='flex items-center flex-col'>
@@ -52,8 +64,7 @@ function SaleInvoicePrint({ saleInvoice }: any) {
         </table>
       </div>
 
-      <div className="ml-auto mb-5 w-[200px]">
-
+      {/* <div className="ml-auto mb-5 w-[200px]">
         <div className="grid grid-cols-2">
           <div className="">Tổng cộng:</div>
           <div className="text-black-main text-right">
@@ -79,6 +90,35 @@ function SaleInvoicePrint({ saleInvoice }: any) {
               {formatMoney(+saleInvoice?.totalPrice)}
             </div>
           }
+        </div>
+      </div> */}
+      <div className="ml-auto mb-5 w-[300px]">
+        <div className=" mb-3 grid grid-cols-2">
+          <div className="text-gray-main">Tổng số lượng:</div>
+          <div className="text-black-main">{formatNumber(totalNumber)}</div>
+        </div>
+        <div className=" mb-3 grid grid-cols-2">
+          <div className="text-gray-main">Tổng tiền hàng:</div>
+          <div className="text-black-main">{getDiscount(saleInvoice)}</div>
+        </div>
+
+        <div className=" mb-3 grid grid-cols-2">
+          <div className="text-gray-main">Giảm giá hóa đơn:</div>
+          <div className="text-black-main">{saleInvoice?.order?.discountType === 1 ? saleInvoice?.order?.discount + "%" : formatMoney(saleInvoice?.order?.discount)}</div>
+        </div>
+
+        <div className=" mb-3 grid grid-cols-2">
+          <div className="text-gray-main">Khách cần trả:</div>
+          <div className="text-black-main">{formatMoney(saleInvoice?.order?.totalPrice)}</div>
+        </div>
+
+        <div className=" mb-3 grid grid-cols-2">
+          <div className="text-gray-main">Khách đã trả:</div>
+          <div className="text-black-main">{formatMoney(saleInvoice?.order?.cashOfCustomer)}</div>
+        </div>
+        <div className=" mb-3 grid grid-cols-2">
+          <div className="text-gray-main">Dư nợ hiện tại:</div>
+          <div className="text-black-main">{formatMoney(saleInvoice?.order?.cashOfCustomer - saleInvoice?.order?.totalPrice)}</div>
         </div>
       </div>
       <div className='text-center'>
