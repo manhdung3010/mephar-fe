@@ -154,11 +154,11 @@ export function Info({ record }: { record: IOrder }) {
             className="mb-5 flex items-center gap-x-3"
           >
             <div className="rounded border border-gray-500 p-1 w-[60px] h-[60px]">
-              {product.product.image?.path && (
+              {product.product?.image?.path && (
                 <Image
                   width={60}
                   height={60}
-                  src={product.product.image.path}
+                  src={product.product?.image?.path}
                   alt=""
                   objectFit="cover"
                 />
