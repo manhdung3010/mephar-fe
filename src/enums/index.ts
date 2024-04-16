@@ -225,6 +225,20 @@ export enum EConnectSystemStatusLabel {
 }
 
 export enum ESaleReportConcerns {
+  TIME = 1,
+  PROFIT = 2,
+  DISCOUNT = 3,
+  RETURN = 4,
+  EMPLOYEES = 5,
+}
+export const saleReportLabels: Record<ESaleReportConcerns, string> = {
+  [ESaleReportConcerns.TIME]: "Thời gian",
+  [ESaleReportConcerns.PROFIT]: "Lợi nhuận",
+  [ESaleReportConcerns.DISCOUNT]: "Giảm giá hóa đơn",
+  [ESaleReportConcerns.RETURN]: "Trả hàng",
+  [ESaleReportConcerns.EMPLOYEES]: "Nhân viên",
+};
+export enum ETestReportConcerns {
   SALE = 1,
   PROFIT = 2,
   WAREHOUSE_VALUE = 3,
@@ -235,14 +249,14 @@ export enum ESaleReportConcerns {
   CUSTOMER_BY_SALES = 8,
   SUPPLIER_BY_IMPORTS = 9,
 }
-export const saleReportLabels: Record<ESaleReportConcerns, string> = {
-  [ESaleReportConcerns.SALE]: "Bán hàng",
-  [ESaleReportConcerns.PROFIT]: "Lợi nhuận",
-  [ESaleReportConcerns.WAREHOUSE_VALUE]: "Giá trị kho",
-  [ESaleReportConcerns.IMPORT]: "Xuất nhập tồn",
-  [ESaleReportConcerns.IMPORT_DETAIL]: "Xuất nhập tồn",
-  [ESaleReportConcerns.EXPORT]: "Xuất hủy",
-  [ESaleReportConcerns.STAFF_BY_SALES]: "Nhân viên theo hàng bán",
-  [ESaleReportConcerns.CUSTOMER_BY_SALES]: "Khách theo hàng bán",
-  [ESaleReportConcerns.SUPPLIER_BY_IMPORTS]: "NCC theo hàng nhập",
+export const testReportLabels: Record<ETestReportConcerns, string> = {
+  [ETestReportConcerns.SALE]: "Bán hàng",
+  [ETestReportConcerns.PROFIT]: "Lợi nhuận",
+  [ETestReportConcerns.WAREHOUSE_VALUE]: "Giá trị kho",
+  [ETestReportConcerns.IMPORT]: "Xuất nhập tồn",
+  [ETestReportConcerns.IMPORT_DETAIL]: "Xuất nhập tồn",
+  [ETestReportConcerns.EXPORT]: "Xuất hủy",
+  [ETestReportConcerns.STAFF_BY_SALES]: "Nhân viên theo hàng bán",
+  [ETestReportConcerns.CUSTOMER_BY_SALES]: "Khách theo hàng bán",
+  [ETestReportConcerns.SUPPLIER_BY_IMPORTS]: "NCC theo hàng nhập",
 };

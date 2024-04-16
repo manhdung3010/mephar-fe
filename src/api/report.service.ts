@@ -15,3 +15,10 @@ export function getRevenueReport(params: {
 }) {
   return axiosClient.get("report/revenues-report", { params });
 }
+export function getSaleReport(params: {
+  from: string;
+  to: string;
+  branchId?: number;
+}) {
+  return axiosClient.get("report/sales-report", { params });
+}
