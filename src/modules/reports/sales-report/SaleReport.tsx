@@ -8,14 +8,33 @@ import { ESaleReportConcerns, saleReportLabels } from '@/enums';
 import { formatMoney, formatNumber } from '@/helpers';
 import { branchState } from '@/recoil/state';
 import { useQuery } from '@tanstack/react-query';
-import Table from 'antd/es/table';
+import { Table } from 'antd';
 import dayjs from 'dayjs';
 import { useMemo, useState } from 'react';
 import { useRecoilState } from 'recoil';
 import Search from './Search';
 import RowDetail from './row-detail';
 import { Bar } from 'react-chartjs-2';
+import {
+  BarElement,
+  CategoryScale,
+  Chart as ChartJS,
+  Legend,
+  LinearScale,
+  Title,
+  Tooltip,
+} from 'chart.js';
 // import { options } from '@/modules/home/RevenueChart';
+
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 interface IRecord {
   key: number;
@@ -301,8 +320,6 @@ export function SaleReport() {
     }),
     [saleReport]
   );
-
-  console.log("formFilter", formFilter)
 
 
   return (
