@@ -18,6 +18,7 @@ export function getRevenueReport(params: {
 export function getSaleReport(params: {
   from: string;
   to: string;
+  concern?: string;
   branchId?: number;
 }) {
   return axiosClient.get("report/sales-report", { params });

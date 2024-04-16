@@ -6,13 +6,13 @@ import { useQuery } from '@tanstack/react-query';
 import { ColumnsType } from 'antd/es/table';
 import { useState } from 'react';
 
-function RowDetail({ record, branchId, from, to }: any) {
+function RowDetail({ record, branchId, from, to, fromTime, toTime }: any) {
 
   const [formFilter, setFormFilter] = useState({
     page: 1,
-    limit: 20,
+    limit: 99,
     keyword: '',
-    dateRange: JSON.stringify({ startDate: from, endDate: to }),
+    ...(fromTime ? { from: from + " " + fromTime, to: to + " " + toTime } : { dateRange: JSON.stringify({ startDate: from, endDate: to }) }),
     status: undefined,
     branchId,
   });

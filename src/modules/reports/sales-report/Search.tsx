@@ -1,25 +1,15 @@
-import { DatePicker, Select, TimeRangePickerProps } from 'antd';
+import { DatePicker, TimeRangePickerProps } from 'antd';
 import Image from 'next/image';
 
-import ArrowDownGray from '@/assets/arrowDownGray.svg';
 import DateIcon from '@/assets/dateIcon.svg';
-import FilterIcon from '@/assets/filterIcon.svg';
-import SearchIcon from '@/assets/searchIcon.svg';
-import { CustomButton } from '@/components/CustomButton';
-import { CustomInput } from '@/components/CustomInput';
 import ExportIcon from '@/assets/exportIcon.svg';
+import { CustomButton } from '@/components/CustomButton';
 import Label from '@/components/CustomLabel';
 import { CustomRadio } from '@/components/CustomRadio';
-import { saleReportLabels } from '@/enums';
 import { CustomSelect } from '@/components/CustomSelect';
+import { saleReportLabels } from '@/enums';
 import dayjs, { Dayjs } from 'dayjs';
 import quarterOfYear from 'dayjs/plugin/quarterOfYear';
-import { useEffect, useState } from 'react';
-import { set } from 'lodash';
-import { getBranch } from '@/api/branch.service';
-import { useQuery } from '@tanstack/react-query';
-import { useRecoilState } from 'recoil';
-import { branchState } from '@/recoil/state';
 
 dayjs.extend(quarterOfYear);
 
@@ -70,24 +60,21 @@ const Search = ({ formFilter, setFormFilter, branches, branch }: any) => {
         </div>
         <div className='bg-white p-5 w-full rounded-lg'>
           <Label label='Mối quan tâm' hasInfoIcon={false} />
-
           <CustomRadio
             options={Object.keys(saleReportLabels).map((item) => ({
-              value: +item,
+              value: item,
               label: saleReportLabels[item],
             }))}
             className='flex - flex-col'
             onChange={(value) =>
-              // setValue("type", value, { shouldValidate: true })
-              setFormFilter({ ...formFilter, interest: value })
+              setFormFilter({ ...formFilter, concern: value })
             }
-            value={formFilter.interest}
+            value={formFilter.concern}
           />
         </div>
 
         <div className='bg-white p-5 w-full rounded-lg'>
           <Label label='Chi nhánh' hasInfoIcon={false} />
-
           <CustomSelect
             className="border-underline w-full"
             options={branches?.data?.items?.map((item) => ({
@@ -103,7 +90,6 @@ const Search = ({ formFilter, setFormFilter, branches, branch }: any) => {
 
         <div className='bg-white p-5 w-full rounded-lg'>
           <Label label='Thời gian' hasInfoIcon={false} />
-
           <RangePicker
             className='border-underline w-full'
             placeholder={['Từ ngày', 'Đến ngày']}
@@ -112,46 +98,6 @@ const Search = ({ formFilter, setFormFilter, branches, branch }: any) => {
             value={[formFilter.from ? dayjs(formFilter.from) : null, formFilter.to ? dayjs(formFilter.to) : null]}
           />
         </div>
-
-        {/* <div className="flex rounded-l-[3px] border border-[#D3D5D7]">
-          <RangePicker
-            bordered={false}
-            placeholder={['Từ ngày', 'Đến ngày']}
-            suffixIcon={<Image src={DateIcon} />}
-          />
-          <div className="w-[1px] bg-[#D3D5D7]" />
-          <Select
-            bordered={false}
-            suffixIcon={<Image src={ArrowDownGray} alt="" />}
-            placeholder="Nhóm khách hàng"
-            optionFilterProp="children"
-            onChange={onChange}
-            onSearch={onSearch}
-            options={[
-              {
-                value: 'jack',
-                label: 'Jack',
-              },
-              {
-                value: 'lucy',
-                label: 'Lucy',
-              },
-              {
-                value: 'tom',
-                label: 'Tom',
-              },
-            ]}
-          />
-        </div> */}
-
-        {/* <CustomButton
-          type="original"
-          outline={true}
-          className="h-auto w-[130px] rounded-[3px]"
-          suffixIcon={<Image src={FilterIcon} />}
-        >
-          Lưu bộ lọc
-        </CustomButton> */}
       </div>
     </div>
   );

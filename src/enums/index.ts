@@ -225,18 +225,18 @@ export enum EConnectSystemStatusLabel {
 }
 
 export enum ESaleReportConcerns {
-  TIME = 1,
-  PROFIT = 2,
-  DISCOUNT = 3,
-  RETURN = 4,
-  EMPLOYEES = 5,
+  TIME = "TIME",
+  REVENUE = "REVENUE",
+  DISCOUNT = "DISCOUNT",
+  SALE_RETURN = "SALE_RETURN",
+  EMPLOYEE = "EMPLOYEE",
 }
 export const saleReportLabels: Record<ESaleReportConcerns, string> = {
   [ESaleReportConcerns.TIME]: "Thời gian",
-  [ESaleReportConcerns.PROFIT]: "Lợi nhuận",
+  [ESaleReportConcerns.REVENUE]: "Lợi nhuận",
   [ESaleReportConcerns.DISCOUNT]: "Giảm giá hóa đơn",
-  [ESaleReportConcerns.RETURN]: "Trả hàng",
-  [ESaleReportConcerns.EMPLOYEES]: "Nhân viên",
+  [ESaleReportConcerns.SALE_RETURN]: "Trả hàng",
+  [ESaleReportConcerns.EMPLOYEE]: "Nhân viên",
 };
 export enum ETestReportConcerns {
   SALE = 1,
