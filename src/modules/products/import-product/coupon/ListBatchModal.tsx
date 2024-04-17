@@ -126,8 +126,8 @@ export function ListBatchModal({
     },
     {
       title: 'Tồn',
-      dataIndex: 'inventory',
-      key: 'inventory',
+      dataIndex: 'originalInventory',
+      key: 'originalInventory',
       render: (value) => formatNumber(value),
     },
     {
@@ -179,7 +179,7 @@ export function ListBatchModal({
                   ...preValue,
                   {
                     ...record,
-                    originalInventory: record.inventory,
+                    originalInventory: record.quantity,
                     inventory: record.inventory / exchangeValue,
                     quantity,
                   },
@@ -191,7 +191,7 @@ export function ListBatchModal({
                 ...preValue,
                 {
                   ...record,
-                  originalInventory: record.inventory,
+                  originalInventory: record.quantity,
                   inventory: record.inventory / exchangeValue,
                   quantity: 1,
                 },

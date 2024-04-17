@@ -1,12 +1,12 @@
 import type { MenuProps } from 'antd';
-import { Menu } from 'antd';
+import { Button, Menu } from 'antd';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
-import { useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 
 import CashbookIcon from '@/assets/cashbookIcon.svg';
-import HomeIcon from '@/assets/homeIcon.svg';
+import HomeIcon from '@/assets/homeIcon1.svg';
 import MarketIcon from '@/assets/marketIcon.svg';
 import MedicineIcon from '@/assets/medicine.svg';
 import PartnerIcon from '@/assets/partner.svg';
@@ -18,7 +18,8 @@ import TransactionIcon from '@/assets/transactionIcon.svg';
 import { hasMultiplePermission, hasPermission } from '@/helpers';
 import { RoleModel } from '@/modules/settings/role/role.enum';
 import Logo from '@/public/logo.png';
-import { profileState } from '@/recoil/state';
+import BarIcon from '@/assets/barIcon.svg';
+import { collapsedState, profileState } from '@/recoil/state';
 
 import { SideBarStyled } from './styled';
 
@@ -135,10 +136,10 @@ const keyMenu = {
 
 const items = (permissions: { model: string; action: string }[]) => [
   hasPermission(permissions, RoleModel.home) &&
-    getItem('Tổng quan', keyMenu.HOME, <Image src={HomeIcon} />),
+  getItem('Tổng quan', keyMenu.HOME, <Image src={HomeIcon} />),
 
   hasPermission(permissions, RoleModel.sale) &&
-    getItem('Bán hàng', keyMenu.SALE, <Image src={SellIcon} />),
+  getItem('Bán hàng', keyMenu.SALE, <Image src={SellIcon} />),
 
   hasMultiplePermission(permissions, [
     RoleModel.list_product,
@@ -147,37 +148,37 @@ const items = (permissions: { model: string; action: string }[]) => [
     RoleModel.check_inventory,
     RoleModel.price_setting,
   ]) &&
-    getItem('Sản phẩm', keyMenu.PRODUCT, <Image src={ProductIcon} />, [
-      hasPermission(permissions, RoleModel.list_product) &&
-        getItem('Danh sách sản phẩm', keyMenu.PRODUCT_LIST),
-      hasPermission(permissions, RoleModel.list_product) &&
-        getItem('Danh sách đơn thuốc mẫu', keyMenu.PRODUCT_MEDICINE_SAMPLE),
-      hasPermission(permissions, RoleModel.import_product) &&
-        getItem('Nhập sản phẩm', keyMenu.PRODUCT_IMPORT),
-      hasPermission(permissions, RoleModel.return_product) &&
-        getItem('Trả hàng nhập', keyMenu.PRODUCT_RETURN),
-      hasPermission(permissions, RoleModel.check_inventory) &&
-        getItem('Kiểm kho', keyMenu.PRODUCT_CHECK),
-      hasPermission(permissions, RoleModel.price_setting) &&
-        getItem('Thiết lập giá', keyMenu.PRODUCT_PRICE),
-    ]),
+  getItem('Sản phẩm', keyMenu.PRODUCT, <Image src={ProductIcon} />, [
+    hasPermission(permissions, RoleModel.list_product) &&
+    getItem('Danh sách sản phẩm', keyMenu.PRODUCT_LIST),
+    hasPermission(permissions, RoleModel.list_product) &&
+    getItem('Danh sách đơn thuốc mẫu', keyMenu.PRODUCT_MEDICINE_SAMPLE),
+    hasPermission(permissions, RoleModel.import_product) &&
+    getItem('Nhập sản phẩm', keyMenu.PRODUCT_IMPORT),
+    hasPermission(permissions, RoleModel.return_product) &&
+    getItem('Trả hàng nhập', keyMenu.PRODUCT_RETURN),
+    hasPermission(permissions, RoleModel.check_inventory) &&
+    getItem('Kiểm kho', keyMenu.PRODUCT_CHECK),
+    hasPermission(permissions, RoleModel.price_setting) &&
+    getItem('Thiết lập giá', keyMenu.PRODUCT_PRICE),
+  ]),
 
   hasMultiplePermission(permissions, [
     RoleModel.market_common,
     RoleModel.market_store,
     RoleModel.market_setting,
   ]) &&
-    getItem('Chợ', keyMenu.MARKET, <Image src={MarketIcon} />, [
-      hasPermission(permissions, RoleModel.market_common) &&
-        getItem('Chợ', keyMenu.MARKET_COMMON),
-      hasPermission(permissions, RoleModel.market_store) &&
-        getItem('Chợ đại lý', keyMenu.MARKET_STORE),
-      hasPermission(permissions, RoleModel.market_setting) &&
-        getItem('Cấu hình sản phẩm', keyMenu.MARKET_SETTING),
-    ]),
+  getItem('Chợ', keyMenu.MARKET, <Image src={MarketIcon} />, [
+    hasPermission(permissions, RoleModel.market_common) &&
+    getItem('Chợ', keyMenu.MARKET_COMMON),
+    hasPermission(permissions, RoleModel.market_store) &&
+    getItem('Chợ đại lý', keyMenu.MARKET_STORE),
+    hasPermission(permissions, RoleModel.market_setting) &&
+    getItem('Cấu hình sản phẩm', keyMenu.MARKET_SETTING),
+  ]),
 
   hasPermission(permissions, RoleModel.medicine_category) &&
-    getItem('Danh mục thuốc', keyMenu.MEDICINE, <Image src={MedicineIcon} />),
+  getItem('Danh mục thuốc', keyMenu.MEDICINE, <Image src={MedicineIcon} />),
 
   hasMultiplePermission(permissions, [
     RoleModel.bill,
@@ -185,16 +186,16 @@ const items = (permissions: { model: string; action: string }[]) => [
     RoleModel.return,
     RoleModel.delivery,
   ]) &&
-    getItem('Giao dịch', keyMenu.TRANSACTION, <Image src={TransactionIcon} />, [
-      hasPermission(permissions, RoleModel.bill) &&
-        getItem('Hóa đơn', keyMenu.BILL),
-      hasPermission(permissions, RoleModel.order) &&
-        getItem('Đơn hàng', keyMenu.ORDER),
-      hasPermission(permissions, RoleModel.return) &&
-        getItem('Trả hàng', keyMenu.RETURN),
-      hasPermission(permissions, RoleModel.delivery) &&
-        getItem('Chuyển hàng', keyMenu.DELIVERY),
-    ]),
+  getItem('Giao dịch', keyMenu.TRANSACTION, <Image src={TransactionIcon} />, [
+    hasPermission(permissions, RoleModel.bill) &&
+    getItem('Hóa đơn', keyMenu.BILL),
+    hasPermission(permissions, RoleModel.order) &&
+    getItem('Đơn hàng', keyMenu.ORDER),
+    hasPermission(permissions, RoleModel.return) &&
+    getItem('Trả hàng', keyMenu.RETURN),
+    hasPermission(permissions, RoleModel.delivery) &&
+    getItem('Chuyển hàng', keyMenu.DELIVERY),
+  ]),
 
   hasMultiplePermission(permissions, [
     RoleModel.customer,
@@ -203,21 +204,21 @@ const items = (permissions: { model: string; action: string }[]) => [
     RoleModel.group_provider,
     RoleModel.doctor,
   ]) &&
-    getItem('Đối tác', keyMenu.PARTNER, <Image src={PartnerIcon} />, [
-      hasPermission(permissions, RoleModel.customer) &&
-        getItem('Khách hàng', keyMenu.PARTNERS_CUSTOMER),
-      hasPermission(permissions, RoleModel.group_customer) &&
-        getItem('Nhóm khách hàng', keyMenu.PARTNERS_GROUP_CUSTOMER),
-      hasPermission(permissions, RoleModel.provider) &&
-        getItem('Nhà cung cấp', keyMenu.PARTNERS_PROVIDER),
-      hasPermission(permissions, RoleModel.group_provider) &&
-        getItem('Nhóm nhà cung cấp', keyMenu.PARTNERS_GROUP_PROVIDER),
-      hasPermission(permissions, RoleModel.doctor) &&
-        getItem('Bác sĩ', keyMenu.PARTNERS_DOCTOR_LIST),
-    ]),
+  getItem('Đối tác', keyMenu.PARTNER, <Image src={PartnerIcon} />, [
+    hasPermission(permissions, RoleModel.customer) &&
+    getItem('Khách hàng', keyMenu.PARTNERS_CUSTOMER),
+    hasPermission(permissions, RoleModel.group_customer) &&
+    getItem('Nhóm khách hàng', keyMenu.PARTNERS_GROUP_CUSTOMER),
+    hasPermission(permissions, RoleModel.provider) &&
+    getItem('Nhà cung cấp', keyMenu.PARTNERS_PROVIDER),
+    hasPermission(permissions, RoleModel.group_provider) &&
+    getItem('Nhóm nhà cung cấp', keyMenu.PARTNERS_GROUP_PROVIDER),
+    hasPermission(permissions, RoleModel.doctor) &&
+    getItem('Bác sĩ', keyMenu.PARTNERS_DOCTOR_LIST),
+  ]),
 
   hasPermission(permissions, RoleModel.cashbook) &&
-    getItem('Sổ quỹ', keyMenu.CASHBOOK, <Image src={CashbookIcon} />),
+  getItem('Sổ quỹ', keyMenu.CASHBOOK, <Image src={CashbookIcon} />),
 
   hasMultiplePermission(permissions, [
     RoleModel.customer_report,
@@ -226,18 +227,18 @@ const items = (permissions: { model: string; action: string }[]) => [
     RoleModel.sale_report,
     RoleModel.product_report,
   ]) &&
-    getItem('Báo cáo', keyMenu.REPORT, <Image src={ReportIcon} />, [
-      hasPermission(permissions, RoleModel.customer_report) &&
-        getItem('Báo cáo khách hàng', keyMenu.REPORTS_CUSTOMER),
-      hasPermission(permissions, RoleModel.provider_report) &&
-        getItem('Báo cáo nhà cung cấp', keyMenu.REPORTS_PROVIDER),
-      hasPermission(permissions, RoleModel.employee_report) &&
-        getItem('Báo cáo nhân viên', keyMenu.REPORTS_EMPLOYEE),
-      hasPermission(permissions, RoleModel.sale_report) &&
-        getItem('Báo cáo bán hàng', keyMenu.REPORTS_SALE),
-      hasPermission(permissions, RoleModel.product_report) &&
-        getItem('Báo cáo sản phẩm', keyMenu.REPORTS_PRODUCT),
-    ]),
+  getItem('Báo cáo', keyMenu.REPORT, <Image src={ReportIcon} />, [
+    hasPermission(permissions, RoleModel.customer_report) &&
+    getItem('Báo cáo khách hàng', keyMenu.REPORTS_CUSTOMER),
+    hasPermission(permissions, RoleModel.provider_report) &&
+    getItem('Báo cáo nhà cung cấp', keyMenu.REPORTS_PROVIDER),
+    hasPermission(permissions, RoleModel.employee_report) &&
+    getItem('Báo cáo nhân viên', keyMenu.REPORTS_EMPLOYEE),
+    hasPermission(permissions, RoleModel.sale_report) &&
+    getItem('Báo cáo bán hàng', keyMenu.REPORTS_SALE),
+    hasPermission(permissions, RoleModel.product_report) &&
+    getItem('Báo cáo sản phẩm', keyMenu.REPORTS_PRODUCT),
+  ]),
 
   hasMultiplePermission(permissions, [
     RoleModel.store,
@@ -256,6 +257,7 @@ const SideBar = () => {
   const router = useRouter();
 
   const profile = useRecoilValue(profileState);
+  const [collapsedVal, setCollapsedVal] = useRecoilState(collapsedState);
 
   const [menuActive, setMenuActive] = useState<any>([]);
   const [menu, setMenu] = useState<any>([]);
@@ -288,21 +290,23 @@ const SideBar = () => {
 
   return (
     <SideBarStyled
-      style={{ width: 230, minWidth: 230 }}
-      className="h-screen min-h-screen overflow-y-auto bg-[#182537]"
+      // style={{ width: 230, minWidth: 230 }}
+      className={`h-screen min-h-screen overflow-y-auto bg-[#182537] ${collapsedVal ? "" : "pr-5"}`}
     >
-      <div className="flex items-center py-3 px-4">
-        <Image src={Logo} alt="Logo" />
+      <div className={`flex items-center ${collapsedVal ? "justify-center" : "justify-between"} py-3 px-4`}>
+        {!collapsedVal && (<Image src={Logo} alt="Logo" />)}
+        <Image src={BarIcon} className='cursor-pointer' onClick={() => setCollapsedVal(!collapsedVal)} alt="bar-icon" />
       </div>
 
       <div className="mb-2 h-[1px] w-full bg-[#263D53]" />
-
       <Menu
         selectedKeys={menuActive}
         openKeys={menuActive}
         mode="inline"
         theme="dark"
         items={menu}
+        style={{ width: collapsedVal ? 80 : 230 }}
+        inlineCollapsed={collapsedVal}
         onSelect={({ selectedKeys }) => {
           router.push(selectedKeys[0] as string);
 

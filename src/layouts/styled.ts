@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled from "styled-components";
 
 export const SideBarStyled = styled.div`
   .sidebar-logo {
@@ -79,5 +79,21 @@ export const SideBarStyled = styled.div`
     background: #d64457 !important;
     color: #ffffff !important;
     font-weight: 600;
+  }
+  .ant-menu-inline-collapsed .ant-menu-title-content {
+    display: none;
+  }
+  .ant-menu-inline-collapsed .ant-menu-submenu-title {
+    display: flex;
+    justify-content: center;
+  }
+  .ant-menu-item,
+  .ant-menu-submenu-title {
+    display: flex;
+    gap: 10px;
+  }
+
+  .ant-menu-inline-collapsed .ant-menu-item {
+    justify-content: center;
   }
 `;

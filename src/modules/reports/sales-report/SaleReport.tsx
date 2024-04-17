@@ -326,12 +326,11 @@ export function SaleReport() {
     <div>
       <div className="my-3 flex justify-end gap-4">
       </div>
-
       <div className='grid grid-cols-12 gap-6 '>
-        <div className='col-span-3'>
+        <div className='col-span-2'>
           <Search formFilter={formFilter} setFormFilter={setFormFilter} branches={branches} />
         </div>
-        <div className='col-span-9'>
+        <div className='col-span-10'>
           {
             formFilter.type === 1 ? (
               <div className='bg-white h-full p-5 rounded'>

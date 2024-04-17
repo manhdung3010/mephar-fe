@@ -39,6 +39,10 @@ export const profileState = atom<any>({
   key: "PROFILE_STATE",
   default: null,
 });
+export const collapsedState = atom<any>({
+  key: "COLLAPSED_STATE",
+  default: false,
+});
 
 export const branchState = atom<any>({
   key: "BRANCH_STATE",
