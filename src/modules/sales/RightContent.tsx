@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { message } from 'antd';
 import cx from 'classnames';
-import { cloneDeep, debounce, set } from 'lodash';
+import { cloneDeep, debounce } from 'lodash';
 import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -57,11 +57,9 @@ export function RightContent({ useForm }: { useForm: any }) {
 
   const [isOpenScanQrModal, setIsOpenScanQrModal] = useState(false);
   const [isOpenOrderSuccessModal, setIsOpenOrderSuccessModal] = useState(false);
-
   const [isOpenPrescriptionModal, setIsOpenPrescriptionModal] = useState(false);
   const [isOpenAddCustomerModal, setIsOpenAddCustomerModal] = useState(false);
   const [isOpenAddDiscountModal, setIsOpenAddDiscountModal] = useState(false);
-
   const [searchEmployeeText, setSearchEmployeeText] = useState('');
   const [searchCustomerText, setSearchCustomerText] = useState('');
   const [saleInvoice, setSaleInvoice] = useState();
@@ -190,19 +188,10 @@ export function RightContent({ useForm }: { useForm: any }) {
           if (res.data) {
             setSaleInvoice(res.data);
           }
-
           const orderClone = cloneDeep(orderObject);
-
           orderClone[orderActive] = [];
-
           setOrderObject(orderClone);
-
-          // if (getValues('paymentType') === EPaymentMethod.BANKING) {
-          //   setIsOpenScanQrModal(true);
-          // } else {
-          // }
           setIsOpenOrderSuccessModal(true);
-
           reset();
           setValue('userId', profile.id, { shouldValidate: true });
         },
@@ -215,10 +204,6 @@ export function RightContent({ useForm }: { useForm: any }) {
   const onSubmit = () => {
     mutateCreateOrder();
   };
-
-  // useEffect(() => {
-  //   setValue("customerId", -1, { shouldValidate: true })
-  // }, [])
 
   return (
     <RightContentStyled className="flex w-[360px] min-w-[360px] flex-col">
@@ -291,7 +276,6 @@ export function RightContent({ useForm }: { useForm: any }) {
       </div>
 
       <div className="my-6 h-[1px] w-full bg-[#E4E4E4]"></div>
-
       <div className="flex grow flex-col px-6">
         <div className="grow">
           <div className="mb-5 border-b-2 border-dashed border-[#E4E4E4]">
@@ -465,9 +449,6 @@ export function RightContent({ useForm }: { useForm: any }) {
         <CustomButton
           onClick={() => {
             const products: ISaleProductLocal[] = orderObject[orderActive];
-
-            console.log("products: ", products)
-
             const formatProducts = products.map((product) => ({
               productId: product.productId,
               productUnitId: product.productUnitId,

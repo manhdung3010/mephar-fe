@@ -93,13 +93,25 @@ export function BillTransaction() {
       title: "Tổng tiền hàng",
       dataIndex: "totalPrice",
       key: "totalPrice",
-      render: (value) => formatMoney(value),
+      render: (_, record) => {
+        let total = 0;
+        record.products?.forEach((item) => {
+          total += item.price;
+        });
+        return formatMoney(total);
+      },
     },
     {
       title: "Giảm giá",
       dataIndex: "discount",
       key: "discount",
       render: (_, { discount, discountType }) => discountType === 1 ? `${discount}%` : formatMoney(discount),
+    },
+    {
+      title: "Tổng tiền sau giảm giá",
+      dataIndex: "totalPrice",
+      key: "totalPrice",
+      render: (value) => formatMoney(value),
     },
     {
       title: "Khách đã trả",

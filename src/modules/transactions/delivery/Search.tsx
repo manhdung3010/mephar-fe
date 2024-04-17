@@ -1,6 +1,5 @@
 import { DatePicker, Select, Tag } from 'antd';
 import Image from 'next/image';
-
 import { getBranch } from '@/api/branch.service';
 import { getEmployee } from '@/api/employee.service';
 import { getPosition } from '@/api/product.service';
@@ -9,7 +8,6 @@ import DateIcon from '@/assets/dateIcon.svg';
 import SearchIcon from '@/assets/searchIcon.svg';
 import { CustomInput } from '@/components/CustomInput';
 import { EDeliveryTransactionStatus, EDeliveryTransactionStatusLabel } from '@/enums';
-import { EProductStatus, EProductStatusLabel } from '@/enums/filter';
 import { formatDate } from '@/helpers';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';

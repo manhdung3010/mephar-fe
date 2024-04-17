@@ -31,7 +31,7 @@ export function ReturnProduct() {
   });
 
   const { data: returnProducts, isLoading } = useQuery(
-    ['LIST_IMPORT_PRODUCT', JSON.stringify(formFilter), branchId],
+    ['LIST_RETURN_PRODUCT', JSON.stringify(formFilter), branchId],
     () => getReturnProduct({ ...formFilter, branchId })
   );
 

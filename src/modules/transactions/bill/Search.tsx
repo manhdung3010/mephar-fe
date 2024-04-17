@@ -6,7 +6,6 @@ import Image from 'next/image';
 import { useState } from 'react';
 
 import { getEmployee } from '@/api/employee.service';
-import { getProvider } from '@/api/provider.service';
 import ArrowDownGray from '@/assets/arrowDownGray.svg';
 import DateIcon from '@/assets/dateIcon.svg';
 import SearchIcon from '@/assets/searchIcon.svg';

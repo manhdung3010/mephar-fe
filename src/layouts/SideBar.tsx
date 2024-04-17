@@ -228,16 +228,16 @@ const items = (permissions: { model: string; action: string }[]) => [
     RoleModel.product_report,
   ]) &&
   getItem('Báo cáo', keyMenu.REPORT, <Image src={ReportIcon} />, [
+    hasPermission(permissions, RoleModel.sale_report) &&
+    getItem('Báo cáo bán hàng', keyMenu.REPORTS_SALE),
     hasPermission(permissions, RoleModel.customer_report) &&
     getItem('Báo cáo khách hàng', keyMenu.REPORTS_CUSTOMER),
+    hasPermission(permissions, RoleModel.product_report) &&
+    getItem('Báo cáo sản phẩm', keyMenu.REPORTS_PRODUCT),
     hasPermission(permissions, RoleModel.provider_report) &&
     getItem('Báo cáo nhà cung cấp', keyMenu.REPORTS_PROVIDER),
     hasPermission(permissions, RoleModel.employee_report) &&
     getItem('Báo cáo nhân viên', keyMenu.REPORTS_EMPLOYEE),
-    hasPermission(permissions, RoleModel.sale_report) &&
-    getItem('Báo cáo bán hàng', keyMenu.REPORTS_SALE),
-    hasPermission(permissions, RoleModel.product_report) &&
-    getItem('Báo cáo sản phẩm', keyMenu.REPORTS_PRODUCT),
   ]),
 
   hasMultiplePermission(permissions, [

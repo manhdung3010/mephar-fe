@@ -75,7 +75,7 @@ export const schema = yup.object().shape({
   paymentType: yup.string().required("Đây là trường bắt buộc!"),
   description: yup.string(),
   userId: yup.number().required("Đây là trường bắt buộc!"),
-  customerId: yup.number().required("Đây là trường bắt buộc!"),
+  customerId: yup.number(),
   branchId: yup.number(),
   prescriptionId: yup.number(),
 });

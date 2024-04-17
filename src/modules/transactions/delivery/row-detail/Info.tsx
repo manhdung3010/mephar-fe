@@ -2,17 +2,15 @@ import type { ColumnsType } from 'antd/es/table';
 import Image from 'next/image';
 
 import BarcodeIcon from '@/assets/barcodeBlue.svg';
-import EditIcon from '@/assets/editWhite.svg';
+import PlusIcon from '@/assets/plusWhiteIcon.svg';
 import PrintOrderIcon from '@/assets/printOrder.svg';
 import { CustomButton } from '@/components/CustomButton';
 import { CustomTextarea } from '@/components/CustomInput';
-import { CustomSelect } from '@/components/CustomSelect';
 import CustomTable from '@/components/CustomTable';
 import { EDeliveryTransactionStatus, EDeliveryTransactionStatusLabel } from '@/enums';
 import { formatDateTime, formatMoney, formatNumber } from '@/helpers';
-import { useMemo, useRef } from 'react';
-import PlusIcon from '@/assets/plusWhiteIcon.svg';
 import { useRouter } from 'next/router';
+import { useMemo, useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import DeliveryInvoice from './DeliveryInvoice';
 import styles from './styles.module.css';
@@ -127,7 +125,7 @@ export function Info({ record, branchId }: { record: any, branchId: number }) {
         </div>
 
         <div className="grow">
-          <CustomTextarea rows={8} placeholder="Ghi chú:" value={record?.note} />
+          <CustomTextarea rows={8} placeholder="Ghi chú:" value={record?.fromBranchId === branchId ? record?.note : record?.receiveNote} />
         </div>
       </div>
 

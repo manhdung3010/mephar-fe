@@ -43,7 +43,7 @@ export function Info({ record }: { record: IRecord }) {
   const { mutate: mutateCancelImportProduct, isLoading: isLoadingDeleteProduct } =
     useMutation(() => deleteImportProduct(Number(record.id)), {
       onSuccess: async () => {
-        await queryClient.invalidateQueries(['LIST_PRODUCT']);
+        await queryClient.invalidateQueries(['LIST_IMPORT_PRODUCT']);
         setOpenCancelPrintProduct(false);
       },
       onError: (err: any) => {
