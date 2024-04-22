@@ -219,8 +219,8 @@ export function SaleReport() {
           <Table.Summary.Row className='bg-[#e6fff6] font-semibold text-base'>
             <Table.Summary.Cell index={0}>{null}</Table.Summary.Cell>
             <Table.Summary.Cell index={0}>{null}</Table.Summary.Cell>
-            <Table.Summary.Cell index={1}>{formatMoney(saleReport?.data?.summary?.totalPrice)}</Table.Summary.Cell> {/* Empty cell */}
-            <Table.Summary.Cell index={2}>{formatMoney(saleReport?.data?.summary?.totalDiscount)}</Table.Summary.Cell>
+            <Table.Summary.Cell index={1}>{formatMoney(saleReport?.data?.summary?.totalRevenue)}</Table.Summary.Cell> {/* Empty cell */}
+            <Table.Summary.Cell index={2}>{formatMoney(saleReport?.data?.summary?.saleReturn)}</Table.Summary.Cell>
             <Table.Summary.Cell index={3}>{formatMoney(saleReport?.data?.summary?.realRevenue)}</Table.Summary.Cell>
           </Table.Summary.Row>
         )

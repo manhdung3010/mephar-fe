@@ -13,11 +13,13 @@ import Image from 'next/image';
 import { useMemo, useState } from 'react';
 import { Bar } from 'react-chartjs-2';
 
-import { getRevenueReport } from '@/api/report.service';
+import { getRevenueReport, getSaleReport } from '@/api/report.service';
 import ArrowRight from '@/assets/arrow-right.svg';
 import { CustomSelect } from '@/components/CustomSelect';
 
 import { getDateRange } from './BestSellerProductChart';
+import dayjs from 'dayjs';
+import { formatMoney } from '@/helpers';
 
 ChartJS.register(
   CategoryScale,
@@ -64,6 +66,25 @@ export function RevenueChart({ branchId }: { branchId: number }) {
     viewType: ViewType.Date,
   });
 
+  const [formFilter, setFormFilter] = useState({
+    type: 1,
+    concern: 'TIME',
+    branchId: branchId ? branchId : undefined,
+    from: dayjs().startOf('month').format("YYYY-MM-DD"),
+    to: dayjs().format("YYYY-MM-DD"),
+  });
+
+  const { data: saleReport, isLoading } = useQuery(
+    [
+      'SALE_REPORT',
+      formFilter.from,
+      formFilter.to,
+      formFilter.concern,
+      formFilter.branchId,
+    ],
+    () => getSaleReport({ from: formFilter.from, to: formFilter.to, branchId: formFilter.branchId, concern: formFilter.concern })
+  );
+
   const { data } = useQuery(
     ['REVENUE_CHART', revenueFilter.viewType, revenueFilter.dateRange, branchId],
     () =>
@@ -103,7 +124,7 @@ export function RevenueChart({ branchId }: { branchId: number }) {
               <Image src={ArrowRight} alt="" />
             </div>
 
-            <div className="text-red-main">2,274,000</div>
+            <div className="text-red-main">{formatMoney(saleReport?.data?.summary?.realRevenue)}</div>
           </div>
 
           <div className="mb-8 flex">

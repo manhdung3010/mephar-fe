@@ -238,25 +238,23 @@ export const saleReportLabels: Record<ESaleReportConcerns, string> = {
   [ESaleReportConcerns.SALE_RETURN]: "Trả hàng",
   [ESaleReportConcerns.EMPLOYEE]: "Nhân viên",
 };
-export enum ETestReportConcerns {
-  SALE = 1,
-  PROFIT = 2,
-  WAREHOUSE_VALUE = 3,
-  IMPORT = 4,
-  IMPORT_DETAIL = 5,
-  EXPORT = 6,
-  STAFF_BY_SALES = 7,
-  CUSTOMER_BY_SALES = 8,
-  SUPPLIER_BY_IMPORTS = 9,
+export enum EProductReportConcerns {
+  SALE = "SALE",
+  REVENUE = "REVENUE",
+  WAREHOUSE_VALUE = "WAREHOUSE_VALUE",
+  INVENTORY = "INVENTORY",
+  INVENTORY_DETAIL = "INVENTORY_DETAIL",
+  CANCEL = "CANCEL",
+  EMPLOYEE = "EMPLOYEE",
+  CUSTOMER = "CUSTOMER",
 }
-export const testReportLabels: Record<ETestReportConcerns, string> = {
-  [ETestReportConcerns.SALE]: "Bán hàng",
-  [ETestReportConcerns.PROFIT]: "Lợi nhuận",
-  [ETestReportConcerns.WAREHOUSE_VALUE]: "Giá trị kho",
-  [ETestReportConcerns.IMPORT]: "Xuất nhập tồn",
-  [ETestReportConcerns.IMPORT_DETAIL]: "Xuất nhập tồn",
-  [ETestReportConcerns.EXPORT]: "Xuất hủy",
-  [ETestReportConcerns.STAFF_BY_SALES]: "Nhân viên theo hàng bán",
-  [ETestReportConcerns.CUSTOMER_BY_SALES]: "Khách theo hàng bán",
-  [ETestReportConcerns.SUPPLIER_BY_IMPORTS]: "NCC theo hàng nhập",
+export const productReportLabels: Record<EProductReportConcerns, string> = {
+  [EProductReportConcerns.SALE]: "Bán hàng",
+  [EProductReportConcerns.REVENUE]: "Lợi nhuận",
+  [EProductReportConcerns.WAREHOUSE_VALUE]: "Giá trị kho",
+  [EProductReportConcerns.INVENTORY]: "Xuất nhập tồn",
+  [EProductReportConcerns.INVENTORY_DETAIL]: "Xuất nhập tồn chi tiết",
+  [EProductReportConcerns.CANCEL]: "Xuất hủy",
+  [EProductReportConcerns.EMPLOYEE]: "Nhân viên theo hàng bán",
+  [EProductReportConcerns.CUSTOMER]: "Khách theo hàng bán",
 };
