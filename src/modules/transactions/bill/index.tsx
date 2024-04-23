@@ -14,16 +14,18 @@ import { CustomButton } from "@/components/CustomButton";
 import CustomPagination from "@/components/CustomPagination";
 import CustomTable from "@/components/CustomTable";
 import { EOrderStatus, EOrderStatusLabel } from "@/enums";
-import { formatMoney, formatNumber } from "@/helpers";
-import { branchState } from "@/recoil/state";
+import { formatMoney, formatNumber, hasPermission } from "@/helpers";
+import { branchState, profileState } from "@/recoil/state";
 
 
 import BillDetail from "./row-detail";
 import Search from "./Search";
 import { IOrder } from "../order/type";
+import { RoleAction, RoleModel } from "@/modules/settings/role/role.enum";
 
 export function BillTransaction() {
   const branchId = useRecoilValue(branchState);
+  const profile = useRecoilValue(profileState);
 
   const router = useRouter();
 
@@ -141,14 +143,17 @@ export function BillTransaction() {
   return (
     <div>
       <div className="my-3 flex justify-end gap-4">
-        <CustomButton
-          onClick={() => router.push("/sales/")}
-          type="success"
-          prefixIcon={<Image src={PlusIconWhite} />}
-        >
-          Thêm hóa đơn
-        </CustomButton>
-
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.sale, RoleAction.read) && (
+            <CustomButton
+              onClick={() => router.push("/sales/")}
+              type="success"
+              prefixIcon={<Image src={PlusIconWhite} />}
+            >
+              Thêm hóa đơn
+            </CustomButton>
+          )
+        }
         <CustomButton prefixIcon={<Image src={ExportIcon} />}>
           Xuất file
         </CustomButton>

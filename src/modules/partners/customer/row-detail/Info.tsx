@@ -13,12 +13,17 @@ import DeleteModal from '@/components/CustomModal/ModalDeleteItem';
 
 import { ECustomerStatus, ECustomerStatusLabel } from '@/enums';
 import type { ICustomer } from '../type';
+import { hasPermission } from '@/helpers';
+import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
+import { useRecoilValue } from 'recoil';
+import { profileState } from '@/recoil/state';
 
 const { TextArea } = Input;
 
 export function Info({ record }: { record: ICustomer }) {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const profile = useRecoilValue(profileState);
 
   const [deletedId, setDeletedId] = useState<number>();
   const [statusId, setStatusId] = useState<number>();
@@ -130,33 +135,44 @@ export function Info({ record }: { record: ICustomer }) {
       </div>
 
       <div className="flex justify-end gap-4">
-        <CustomButton
-          type={`disable`}
-          outline={true}
-          prefixIcon={<Image src={LockIcon} alt="" />}
-          onClick={() => handleUpdateStatus(record.id as any, String(record?.status) === "active" ? ECustomerStatus.inactive : ECustomerStatus.active)}
-        >
-          {String(record?.status) === "active" ? ECustomerStatusLabel.inactive : ECustomerStatusLabel.active}
-        </CustomButton>
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.customer, RoleAction.update) && (
+            <CustomButton
+              type={`disable`}
+              outline={true}
+              prefixIcon={<Image src={LockIcon} alt="" />}
+              onClick={() => handleUpdateStatus(record.id as any, String(record?.status) === "active" ? ECustomerStatus.inactive : ECustomerStatus.active)}
+            >
+              {String(record?.status) === "active" ? ECustomerStatusLabel.inactive : ECustomerStatusLabel.active}
+            </CustomButton>
+          )
+        }
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.customer, RoleAction.delete) && (
+            <CustomButton
+              type="danger"
+              outline={true}
+              prefixIcon={<Image src={DeleteIcon} alt="" />}
+              onClick={() => setDeletedId(record.id)}
+            >
+              Xóa
+            </CustomButton>
+          )
+        }
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.customer, RoleAction.update) && (
+            <CustomButton
+              type="success"
+              prefixIcon={<Image src={EditIcon} alt="" />}
+              onClick={() =>
+                router.push(`/partners/customer/add-customer?id=${record.id}`)
+              }
+            >
+              Cập nhật
+            </CustomButton>
+          )
+        }
 
-        <CustomButton
-          type="danger"
-          outline={true}
-          prefixIcon={<Image src={DeleteIcon} alt="" />}
-          onClick={() => setDeletedId(record.id)}
-        >
-          Xóa
-        </CustomButton>
-
-        <CustomButton
-          type="success"
-          prefixIcon={<Image src={EditIcon} alt="" />}
-          onClick={() =>
-            router.push(`/partners/customer/add-customer?id=${record.id}`)
-          }
-        >
-          Cập nhật
-        </CustomButton>
       </div>
 
       <DeleteModal

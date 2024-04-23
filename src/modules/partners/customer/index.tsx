@@ -18,13 +18,14 @@ import DeleteModal from '@/components/CustomModal/ModalDeleteItem';
 import CustomPagination from '@/components/CustomPagination';
 import CustomTable from '@/components/CustomTable';
 import { ECustomerStatus, ECustomerStatusLabel } from '@/enums';
-import { formatMoney } from '@/helpers';
+import { formatMoney, hasPermission } from '@/helpers';
 
 import RowDetail from './row-detail';
 import Search from './Search';
 import type { ICustomer } from './type';
 import { useRecoilValue } from 'recoil';
-import { branchState } from '@/recoil/state';
+import { branchState, profileState } from '@/recoil/state';
+import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
 
 interface IRecord {
   key: number;
@@ -44,6 +45,7 @@ export function Customer() {
   const queryClient = useQueryClient();
   const router = useRouter();
   const branchId = useRecoilValue(branchState);
+  const profile = useRecoilValue(profileState);
 
   const [deletedId, setDeletedId] = useState<number>();
   const [formFilter, setFormFilter] = useState({
@@ -152,17 +154,27 @@ export function Customer() {
       key: 'action',
       render: (_, { id }) => (
         <div className="flex gap-3">
-          <div className=" cursor-pointer" onClick={() => setDeletedId(id)}>
-            <Image src={DeleteIcon} />
-          </div>
-          <div
-            className=" cursor-pointer"
-            onClick={() =>
-              router.push(`/partners/customer/add-customer?id=${id}`)
-            }
-          >
-            <Image src={EditIcon} />
-          </div>
+          {
+            hasPermission(profile?.role?.permissions, RoleModel.customer, RoleAction.delete) && (
+              <div className=" cursor-pointer" onClick={() => setDeletedId(id)}>
+                <Image src={DeleteIcon} />
+              </div>
+            )
+          }
+
+          {
+            hasPermission(profile?.role?.permissions, RoleModel.customer, RoleAction.update) && (
+              <div
+                className=" cursor-pointer"
+                onClick={() =>
+                  router.push(`/partners/customer/add-customer?id=${id}`)
+                }
+              >
+                <Image src={EditIcon} />
+              </div>
+            )
+          }
+
         </div>
       ),
     },
@@ -196,12 +208,17 @@ export function Customer() {
           <Image src={ImportIcon} /> Nhập file
         </div>
 
-        <CustomButton
-          prefixIcon={<Image src={PlusIcon} />}
-          onClick={() => router.push('/partners/customer/add-customer')}
-        >
-          Thêm khách hàng
-        </CustomButton>
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.customer, RoleAction.create) && (
+            <CustomButton
+              prefixIcon={<Image src={PlusIcon} />}
+              onClick={() => router.push('/partners/customer/add-customer')}
+            >
+              Thêm khách hàng
+            </CustomButton>
+          )
+        }
+
       </div>
 
       <Search

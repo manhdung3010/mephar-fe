@@ -25,6 +25,10 @@ import { useAddress } from '@/hooks/useAddress';
 
 import { AddGroupProviderModal } from '../../group-provider/AddGroupProviderModal';
 import { schema } from './schema';
+import { useRecoilValue } from 'recoil';
+import { profileState } from '@/recoil/state';
+import { hasPermission } from '@/helpers';
+import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
 
 export function AddProvider({ providerId }: { providerId?: string }) {
   const queryClient = useQueryClient();
@@ -82,6 +86,16 @@ export function AddProvider({ providerId }: { providerId?: string }) {
   const onSubmit = () => {
     mutateCreateProvider();
   };
+
+  const profile = useRecoilValue(profileState);
+  useEffect(() => {
+    if (profile?.role?.permissions) {
+      if (!hasPermission(profile?.role?.permissions, RoleModel.provider, RoleAction.create)) {
+        message.error('Bạn không có quyền truy cập vào trang này');
+        router.push('/partners/provider');
+      }
+    }
+  }, [profile?.role?.permissions]);
 
   useEffect(() => {
     if (providerDetail?.data) {

@@ -15,7 +15,7 @@ import { CustomInput } from '@/components/CustomInput';
 import CustomTable from '@/components/CustomTable';
 import { CustomUnitSelect } from '@/components/CustomUnitSelect';
 import InputError from '@/components/InputError';
-import { formatMoney, getImage } from '@/helpers';
+import { formatMoney, getImage, hasPermission } from '@/helpers';
 import type {
   IImportProduct,
   IImportProductLocal,
@@ -29,6 +29,8 @@ import type { IBatch } from '../interface';
 import { ListBatchModal } from './ListBatchModal';
 import { RightContent } from './RightContent';
 import { schema } from './schema';
+import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
+import { message } from 'antd';
 
 export default function ReturnCoupon() {
   const profile = useRecoilValue(profileState);
@@ -132,17 +134,6 @@ export default function ReturnCoupon() {
     isSale: true,
   });
 
-  // const { data: products } = useQuery<{ data: { items: IImportProduct[] } }>(
-  //   [
-  //     'LIST_IMPORT_PRODUCT',
-  //     formFilter.page,
-  //     formFilter.limit,
-  //     formFilter.keyword,
-  //     branchId,
-  //   ],
-  //   () => getInboundProducts({ ...formFilter, branchId })
-  // );
-
   const { data: products, isLoading: isLoadingProduct } = useQuery<{
     data?: { items: IImportProduct[] };
   }>(
@@ -160,6 +151,15 @@ export default function ReturnCoupon() {
   const [expandedRowKeys, setExpandedRowKeys] = useState<
     Record<string, boolean>
   >({});
+
+  useEffect(() => {
+    if (profile?.role?.permissions) {
+      if (!hasPermission(profile?.role?.permissions, RoleModel.return_product, RoleAction.create)) {
+        message.error('Bạn không có quyền truy cập vào trang này');
+        router.push('/products/list');
+      }
+    }
+  }, [profile?.role?.permissions]);
 
   useEffect(() => {
     if (returnProducts.length) {

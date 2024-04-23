@@ -8,12 +8,15 @@ import { CustomButton } from '@/components/CustomButton';
 import { CustomTextarea } from '@/components/CustomInput';
 import CustomTable from '@/components/CustomTable';
 import { EDeliveryTransactionStatus, EDeliveryTransactionStatusLabel } from '@/enums';
-import { formatDateTime, formatMoney, formatNumber } from '@/helpers';
+import { formatDateTime, formatMoney, formatNumber, hasPermission } from '@/helpers';
 import { useRouter } from 'next/router';
 import { useMemo, useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import DeliveryInvoice from './DeliveryInvoice';
 import styles from './styles.module.css';
+import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
+import { useRecoilValue } from 'recoil';
+import { profileState } from '@/recoil/state';
 
 interface IRecord {
   key: number;
@@ -27,6 +30,8 @@ interface IRecord {
 export function Info({ record, branchId }: { record: any, branchId: number }) {
   const router = useRouter();
   const invoiceComponentRef = useRef(null);
+  const profile = useRecoilValue(profileState);
+
   const columns: ColumnsType<IRecord> = [
     {
       title: 'Mã hàng',
@@ -165,7 +170,7 @@ export function Info({ record, branchId }: { record: any, branchId: number }) {
           In mã vạch
         </CustomButton>
         {
-          record?.status === EDeliveryTransactionStatus.MOVING && record?.toBranchId === branchId && <CustomButton
+          hasPermission(profile?.role?.permissions, RoleModel.delivery, RoleAction.create) && record?.status === EDeliveryTransactionStatus.MOVING && record?.toBranchId === branchId && <CustomButton
             type="success"
             prefixIcon={<Image src={PlusIcon} alt="" />}
             onClick={() => router.push(`/transactions/delivery/coupon?moveId=${record?.id}`)}

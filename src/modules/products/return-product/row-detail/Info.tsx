@@ -10,7 +10,7 @@ import PrintOrderIcon from '@/assets/printOrder.svg';
 import { CustomButton } from '@/components/CustomButton';
 import CustomTable from '@/components/CustomTable';
 import { EReturnProductStatus, EReturnProductStatusLabel } from '@/enums';
-import { formatMoney, formatNumber } from '@/helpers';
+import { formatMoney, formatNumber, hasPermission } from '@/helpers';
 
 import { message } from 'antd';
 import { useReactToPrint } from 'react-to-print';
@@ -18,10 +18,14 @@ import type { IProduct, IRecord } from '../interface';
 import CancleReturnProduct from './CancleReturnProduct';
 import InvoicePrint from './InvoicePrint';
 import styles from "./invoice.module.css";
+import { useRecoilValue } from 'recoil';
+import { profileState } from '@/recoil/state';
+import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
 
 export function Info({ record }: { record: IRecord }) {
 
   const queryClient = useQueryClient();
+  const profile = useRecoilValue(profileState);
 
   const invoiceComponentRef = useRef<HTMLDivElement>(null);
   const [openCancelPrintProduct, setOpenCancelPrintProduct] = useState(false);
@@ -287,13 +291,18 @@ export function Info({ record }: { record: IRecord }) {
         >
           In phiếu
         </CustomButton>
-        <CustomButton
-          outline={true}
-          prefixIcon={<Image src={CloseIcon} alt="" />}
-          onClick={() => setOpenCancelPrintProduct(true)}
-        >
-          Hủy bỏ
-        </CustomButton>
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.return_product, RoleAction.delete) && (
+            <CustomButton
+              outline={true}
+              prefixIcon={<Image src={CloseIcon} alt="" />}
+              onClick={() => setOpenCancelPrintProduct(true)}
+            >
+              Hủy bỏ
+            </CustomButton>
+          )
+        }
+
       </div>
 
       <CancleReturnProduct

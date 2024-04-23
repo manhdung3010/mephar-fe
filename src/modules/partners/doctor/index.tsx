@@ -18,6 +18,10 @@ import { EDoctorStatus, EDoctorStatusLabel, getEnumKeyByValue } from '@/enums';
 
 import RowDetail from './row-detail';
 import Search from './Search';
+import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
+import { hasPermission } from '@/helpers';
+import { useRecoilValue } from 'recoil';
+import { profileState } from '@/recoil/state';
 
 export interface IRecord {
   key: number;
@@ -46,6 +50,7 @@ export interface IRecord {
 
 export function Doctor() {
   const router = useRouter();
+  const profile = useRecoilValue(profileState);
 
   const [formFilter, setFormFilter] = useState({
     page: 1,
@@ -135,11 +140,6 @@ export function Doctor() {
       ),
     },
   ];
-
-  console.log(doctors?.data?.items?.map((item, index) => ({
-    ...item,
-    key: index,
-  })))
   return (
     <div className="mb-2">
       <div className="my-3 flex items-center justify-end gap-4">
@@ -153,12 +153,17 @@ export function Doctor() {
           <Image src={ImportIcon} /> Nhập file
         </div>
 
-        <CustomButton
-          prefixIcon={<Image src={PlusIcon} />}
-          onClick={() => router.push('/partners/doctor/add-doctor')}
-        >
-          Thêm bác sĩ
-        </CustomButton>
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.doctor, RoleAction.create) && (
+            <CustomButton
+              prefixIcon={<Image src={PlusIcon} />}
+              onClick={() => router.push('/partners/doctor/add-doctor')}
+            >
+              Thêm bác sĩ
+            </CustomButton>
+          )
+        }
+
       </div>
 
       <Search

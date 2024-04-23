@@ -10,7 +10,7 @@ import SaveIcon from '@/assets/saveIcon.svg';
 import { CustomButton } from '@/components/CustomButton';
 import CustomTable from '@/components/CustomTable';
 import { EGenderLabel, EOrderStatusLabel } from '@/enums';
-import { formatMoney, formatNumber } from '@/helpers';
+import { formatMoney, formatNumber, hasPermission } from '@/helpers';
 
 import { useReactToPrint } from 'react-to-print';
 import SaleInvoicePrint from '@/modules/sales/SaleInvoicePrint';
@@ -21,6 +21,9 @@ import { deleteOrder } from '@/api/order.service';
 import { IOrder } from '../../order/type';
 import PlusIconWhite from '@/assets/PlusIconWhite.svg';
 import InvoicePrint from './InvoicePrint';
+import { useRecoilValue } from 'recoil';
+import { profileState } from '@/recoil/state';
+import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
 
 const { TextArea } = Input;
 
@@ -40,6 +43,7 @@ export function Info({ record }: { record: IOrder }) {
     Record<string, boolean>
   >({});
   const [openCancelBill, setOpenCancelBill] = useState(false)
+  const profile = useRecoilValue(profileState);
 
   const queryClient = useQueryClient();
 
@@ -338,13 +342,18 @@ export function Info({ record }: { record: IOrder }) {
         >
           In phiếu
         </CustomButton>
-        <CustomButton
-          outline={true}
-          prefixIcon={<Image src={CloseIcon} alt="" />}
-          onClick={() => setOpenCancelBill(true)}
-        >
-          Hủy bỏ
-        </CustomButton>
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.bill, RoleAction.delete) && (
+            <CustomButton
+              outline={true}
+              prefixIcon={<Image src={CloseIcon} alt="" />}
+              onClick={() => setOpenCancelBill(true)}
+            >
+              Hủy bỏ
+            </CustomButton>
+          )
+        }
+
         {/* <CustomButton
           type="success"
           prefixIcon={<Image src={PlusIconWhite} alt="" />}

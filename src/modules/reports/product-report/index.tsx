@@ -10,7 +10,7 @@ import { branchState } from '@/recoil/state';
 import { useQuery } from '@tanstack/react-query';
 import { Table } from 'antd';
 import dayjs from 'dayjs';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRecoilState } from 'recoil';
 import Search from './Search';
 // import RowDetail from './row-detail';
@@ -70,7 +70,7 @@ export function ProductReport() {
       formFilter.concern,
       formFilter.branchId,
     ],
-    () => getProductReport({ from: formFilter.from, to: formFilter.to, branchId: formFilter.branchId, concern: formFilter.concern })
+    () => getProductReport(formFilter)
   );
 
   const { data: branches } = useQuery(['SETTING_BRANCH'], () => getBranch());

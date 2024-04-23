@@ -16,6 +16,10 @@ import CustomTable from '@/components/CustomTable';
 
 import { AddGroupProviderModal } from './AddGroupProviderModal';
 import { RemoveGroupProviderModal } from './RemoveGroupProviderModal';
+import { hasPermission } from '@/helpers';
+import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
+import { useRecoilValue } from 'recoil';
+import { profileState } from '@/recoil/state';
 
 interface IRecord {
   key: number;
@@ -60,27 +64,41 @@ export function GroupProvider() {
       key: 'action',
       render: (_, { id }) => (
         <div className="flex gap-3">
-          <div className=" cursor-pointer" onClick={() => setDeletedId(id)}>
-            <Image src={DeleteIcon} />
-          </div>
-          <div className=" cursor-pointer" onClick={() => setEditId(id)}>
-            <Image src={EditIcon} />
-          </div>
+          {
+            hasPermission(profile?.role?.permissions, RoleModel.group_provider, RoleAction.delete) && (
+              <div className=" cursor-pointer" onClick={() => setDeletedId(id)}>
+                <Image src={DeleteIcon} />
+              </div>
+            )
+          }
+          {
+            hasPermission(profile?.role?.permissions, RoleModel.group_provider, RoleAction.update) && (
+              <div className=" cursor-pointer" onClick={() => setEditId(id)}>
+                <Image src={EditIcon} />
+              </div>
+            )
+          }
         </div>
       ),
     },
   ];
 
+  const profile = useRecoilValue(profileState);
+
   return (
     <div className="mb-2">
       <div className="my-3 flex items-center justify-end gap-4">
-        <CustomButton
-          onClick={() => setOpenAddGroupProviderModal(true)}
-          type="danger"
-          prefixIcon={<Image src={PlusIcon} />}
-        >
-          Thêm nhóm NCC
-        </CustomButton>
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.group_provider, RoleAction.create) && (
+            <CustomButton
+              onClick={() => setOpenAddGroupProviderModal(true)}
+              type="danger"
+              prefixIcon={<Image src={PlusIcon} />}
+            >
+              Thêm nhóm NCC
+            </CustomButton>
+          )
+        }
       </div>
 
       <div className="bg-white p-4">

@@ -10,15 +10,19 @@ import DolarIcon from '@/assets/dolarBlueIcon.svg';
 import ReportIcon from '@/assets/reportBlueIcon.svg';
 import { CustomButton } from '@/components/CustomButton';
 import { EOrderStatus, EOrderStatusLabel } from '@/enums';
-import { formatMoney, formatNumber } from '@/helpers';
+import { formatMoney, formatNumber, hasPermission } from '@/helpers';
 
 
 import { OrderHistoryModal } from './HistoryModal';
 import { IOrder } from '../type';
+import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
+import { useRecoilValue } from 'recoil';
+import { profileState } from '@/recoil/state';
 
 export function Info({ record }: { record: IOrder }) {
   const router = useRouter();
   const [totalPrice, setTotalPrice] = useState(0);
+  const profile = useRecoilValue(profileState);
 
   useEffect(() => {
     const total = record.products.reduce((acc, product) => {
@@ -218,13 +222,18 @@ export function Info({ record }: { record: IOrder }) {
         >
           Đã thanh toán
         </CustomButton> */}
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.order, RoleAction.delete) && (
+            <CustomButton
+              outline={true}
+              prefixIcon={<Image src={CloseIcon} alt="" />}
+            >
+              Hủy bỏ
+            </CustomButton>
+          )
+        }
 
-        <CustomButton
-          outline={true}
-          prefixIcon={<Image src={CloseIcon} alt="" />}
-        >
-          Hủy bỏ
-        </CustomButton>
+
       </div>
 
       <OrderHistoryModal

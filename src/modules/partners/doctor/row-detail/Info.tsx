@@ -13,12 +13,17 @@ import DeleteModal from '@/components/CustomModal/ModalDeleteItem';
 import { EGenderLabel } from '@/enums';
 
 import type { IRecord } from '..';
+import { hasPermission } from '@/helpers';
+import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
+import { useRecoilValue } from 'recoil';
+import { profileState } from '@/recoil/state';
 
 const { TextArea } = Input;
 
 export function Info({ record }: { record: IRecord }) {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const profile = useRecoilValue(profileState);
 
   const [deletedId, setDeletedId] = useState<number>();
 
@@ -113,32 +118,42 @@ export function Info({ record }: { record: IRecord }) {
       </div>
 
       <div className="flex justify-end gap-4">
-        <CustomButton
-          type="disable"
-          outline={true}
-          prefixIcon={<Image src={LockIcon} alt="" />}
-        >
-          Ngưng hoạt động
-        </CustomButton>
-
-        <CustomButton
-          type="danger"
-          outline={true}
-          prefixIcon={<Image src={DeleteIcon} alt="" />}
-          onClick={() => setDeletedId(record.id)}
-        >
-          Xóa
-        </CustomButton>
-
-        <CustomButton
-          type="success"
-          prefixIcon={<Image src={EditIcon} alt="" />}
-          onClick={() =>
-            router.push(`/partners/doctor/add-doctor?id=${record.id}`)
-          }
-        >
-          Cập nhật
-        </CustomButton>
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.doctor, RoleAction.update) && (
+            <CustomButton
+              type="disable"
+              outline={true}
+              prefixIcon={<Image src={LockIcon} alt="" />}
+            >
+              Ngưng hoạt động
+            </CustomButton>
+          )
+        }
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.doctor, RoleAction.delete) && (
+            <CustomButton
+              type="danger"
+              outline={true}
+              prefixIcon={<Image src={DeleteIcon} alt="" />}
+              onClick={() => setDeletedId(record.id)}
+            >
+              Xóa
+            </CustomButton>
+          )
+        }
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.doctor, RoleAction.update) && (
+            <CustomButton
+              type="success"
+              prefixIcon={<Image src={EditIcon} alt="" />}
+              onClick={() =>
+                router.push(`/partners/doctor/add-doctor?id=${record.id}`)
+              }
+            >
+              Cập nhật
+            </CustomButton>
+          )
+        }
       </div>
 
       <DeleteModal

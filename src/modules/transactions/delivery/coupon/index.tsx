@@ -12,9 +12,9 @@ import { getInboundProducts, getSaleProducts } from '@/api/product.service';
 import { CustomAutocomplete } from '@/components/CustomAutocomplete';
 import InputError from '@/components/InputError';
 import { EProductType } from '@/enums';
-import { formatMoney, formatNumber, getImage } from '@/helpers';
+import { formatMoney, formatNumber, getImage, hasPermission } from '@/helpers';
 import { IImportProduct, IImportProductLocal } from '@/modules/products/import-product/coupon/interface';
-import { branchState, productMoveState } from '@/recoil/state';
+import { branchState, productMoveState, profileState } from '@/recoil/state';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useQuery } from '@tanstack/react-query';
 import { cloneDeep, debounce } from 'lodash';
@@ -27,6 +27,8 @@ import { getMoveDetail } from '@/api/move';
 import { useRouter } from 'next/router';
 import { ListBatchModal } from './ListBatchModal';
 import { ISaleProduct } from '@/modules/sales/interface';
+import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
+import { message } from 'antd';
 
 interface IRecord {
   key: number;
@@ -77,17 +79,15 @@ export function DeliveryCoupon() {
       fromBranchId: branchId,
     },
   });
-
-  // const { data: products } = useQuery<{ data: { items: IImportProduct[] } }>(
-  //   [
-  //     "LIST_IMPORT_PRODUCT",
-  //     formFilter.page,
-  //     formFilter.limit,
-  //     formFilter.keyword,
-  //     branchId,
-  //   ],
-  //   () => getInboundProducts({ ...formFilter, branchId })
-  // );
+  const profile = useRecoilValue(profileState);
+  useEffect(() => {
+    if (profile?.role?.permissions) {
+      if (!hasPermission(profile?.role?.permissions, RoleModel.delivery, RoleAction.create)) {
+        message.error('Bạn không có quyền truy cập vào trang này');
+        router.push('/transactions/delivery');
+      }
+    }
+  }, [profile?.role?.permissions]);
   const { data: products, isLoading: isLoadingProduct } = useQuery<{
     data?: { items: ISaleProduct[] };
   }>(

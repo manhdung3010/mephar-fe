@@ -17,14 +17,14 @@ export function hasMultiplePermission(
   models: string[],
   action?: string
 ) {
-  // return permissions?.find((permission) => {
-  //   if (action) {
-  //     return models.includes(permission.model) && permission.action === action;
-  //   }
+  return permissions?.find((permission) => {
+    if (action) {
+      return models.includes(permission.model) && permission.action === action;
+    }
 
-  //   return models.includes(permission.model);
-  // });
-  return true;
+    return models.includes(permission.model);
+  });
+  // return true;
 }
 
 export function hasPermission(
@@ -32,15 +32,15 @@ export function hasPermission(
   model: string,
   action?: string
 ) {
-  // return permissions?.find((permission) => {
-  //   if (action) {
-  //     return permission.model === model && permission.action === action;
-  //   }
+  return permissions?.find((permission) => {
+    if (action) {
+      return permission.model === model && permission.action === action;
+    }
 
-  //   return permission.model === model;
-  // });
+    return permission.model === model;
+  });
 
-  return true;
+  // return true;
 }
 
 export function formatMoney(value?: string | number) {

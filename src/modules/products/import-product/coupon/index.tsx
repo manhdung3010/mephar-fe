@@ -17,7 +17,7 @@ import CustomTable from "@/components/CustomTable";
 import { CustomUnitSelect } from "@/components/CustomUnitSelect";
 import InputError from "@/components/InputError";
 import { EProductType } from "@/enums";
-import { formatMoney, getImage } from "@/helpers";
+import { formatMoney, getImage, hasPermission } from "@/helpers";
 import type {
   IImportProduct,
   IImportProductLocal,
@@ -31,6 +31,8 @@ import { schema } from './schema';
 import { CustomAutocomplete } from '@/components/CustomAutocomplete';
 import { useRouter } from "next/router";
 import { getImportProductDetail } from "@/api/import-product.service";
+import { RoleAction, RoleModel } from "@/modules/settings/role/role.enum";
+import { message } from "antd";
 
 export default function ImportCoupon() {
   const profile = useRecoilValue(profileState);
@@ -70,6 +72,15 @@ export default function ImportCoupon() {
       setValue("userId", profile.id);
     }
   }, [profile]);
+
+  useEffect(() => {
+    if (profile?.role?.permissions) {
+      if (!hasPermission(profile?.role?.permissions, RoleModel.import_product, RoleAction.create)) {
+        message.error('Bạn không có quyền truy cập vào trang này');
+        router.push('/products/list');
+      }
+    }
+  }, [profile?.role?.permissions]);
 
   useEffect(() => {
     if (branchId) {

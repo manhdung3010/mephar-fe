@@ -24,12 +24,14 @@ import Tab from '@/components/CustomTab';
 import { CustomUpload } from '@/components/CustomUpload';
 import NormalUpload from '@/components/CustomUpload/NormalUpload';
 import { EProductStatus, EProductType } from '@/enums';
-import { branchState } from '@/recoil/state';
+import { branchState, profileState } from '@/recoil/state';
 
 import { AddManufactureModal } from '../components/AddManufacture';
 import Detail from './Detail';
 import Info from './Info';
 import { schema } from './schema';
+import { hasPermission } from '@/helpers';
+import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
 
 const AddMedicine = ({
   productId,
@@ -62,6 +64,8 @@ const AddMedicine = ({
     },
   });
 
+  const profile = useRecoilValue(profileState);
+
   const [isOpenManufactureModal, setIsOpenManufactureModal] = useState(false);
   const [manufactureKeyword, setManufactureKeyword] = useState();
   const [countryKeyword, setCountryKeyword] = useState();
@@ -82,6 +86,15 @@ const AddMedicine = ({
     () => getProductDetail(Number(productId)),
     { enabled: !!productId }
   );
+
+  useEffect(() => {
+    if (profile?.role?.permissions) {
+      if (!hasPermission(profile?.role?.permissions, RoleModel.list_product, RoleAction.create)) {
+        message.error('Bạn không có quyền truy cập vào trang này');
+        router.push('/products/list');
+      }
+    }
+  }, [profile?.role?.permissions]);
 
   useEffect(() => {
     if (selectedMedicineCategory) {

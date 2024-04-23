@@ -28,7 +28,7 @@ import {
   EPaymentMethod,
   getEnumKeyByValue,
 } from '@/enums';
-import { formatMoney } from '@/helpers';
+import { formatMoney, hasPermission } from '@/helpers';
 import {
   branchState,
   orderActiveState,
@@ -43,6 +43,7 @@ import type { ISaleProductLocal } from './interface';
 import { OrderSuccessModal } from './OrderSuccessModal';
 import { ScanQrModal } from './ScanQrModal';
 import { RightContentStyled } from './styled';
+import { RoleAction, RoleModel } from '../settings/role/role.enum';
 
 export function RightContent({ useForm }: { useForm: any }) {
   const queryClient = useQueryClient();
@@ -247,14 +248,20 @@ export function RightContent({ useForm }: { useForm: any }) {
           className="h-[44px]"
           placeholder="Thêm khách vào đơn F4"
           suffixIcon={
-            <Image
-              src={PlusIcon}
-              onClick={(e) => {
-                setIsOpenAddCustomerModal(true);
-                e.stopPropagation();
-              }}
-              alt=""
-            />
+            <>
+              {
+                hasPermission(profile?.role?.permissions, RoleModel.customer, RoleAction.create) && (
+                  <Image
+                    src={PlusIcon}
+                    onClick={(e) => {
+                      setIsOpenAddCustomerModal(true);
+                      e.stopPropagation();
+                    }}
+                    alt=""
+                  />
+                )
+              }
+            </>
           }
           prefixIcon={<Image src={CustomerIcon} alt="" />}
         />

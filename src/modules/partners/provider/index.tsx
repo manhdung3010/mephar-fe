@@ -17,6 +17,10 @@ import CustomTable from '@/components/CustomTable';
 
 import RowDetail from './row-detail';
 import Search from './Search';
+import { hasPermission } from '@/helpers';
+import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
+import { useRecoilValue } from 'recoil';
+import { profileState } from '@/recoil/state';
 
 export interface IRecord {
   key: number;
@@ -56,6 +60,7 @@ export function Provider() {
     keyword: '',
   });
   const [deletedId, setDeletedId] = useState<number>();
+  const profile = useRecoilValue(profileState);
 
   const { data: providers, isLoading } = useQuery(
     ['PROVIDER_LIST', formFilter.page, formFilter.limit, formFilter.keyword],
@@ -126,17 +131,25 @@ export function Provider() {
       key: 'action',
       render: (_, { id }) => (
         <div className="flex gap-3">
-          <div className=" cursor-pointer" onClick={() => setDeletedId(id)}>
-            <Image src={DeleteIcon} />
-          </div>
-          <div
-            className=" cursor-pointer"
-            onClick={() =>
-              router.push(`/partners/provider/add-provider?id=${id}`)
-            }
-          >
-            <Image src={EditIcon} />
-          </div>
+          {
+            hasPermission(profile?.role?.permissions, RoleModel.provider, RoleAction.delete) && (
+              <div className=" cursor-pointer" onClick={() => setDeletedId(id)}>
+                <Image src={DeleteIcon} />
+              </div>
+            )
+          }
+          {
+            hasPermission(profile?.role?.permissions, RoleModel.provider, RoleAction.update) && (
+              <div
+                className=" cursor-pointer"
+                onClick={() =>
+                  router.push(`/partners/provider/add-provider?id=${id}`)
+                }
+              >
+                <Image src={EditIcon} />
+              </div>
+            )
+          }
         </div>
       ),
     },
@@ -160,12 +173,16 @@ export function Provider() {
   return (
     <div className="mb-2">
       <div className="my-3 flex items-center justify-end gap-4">
-        <CustomButton
-          prefixIcon={<Image src={PlusIcon} />}
-          onClick={() => router.push('/partners/provider/add-provider')}
-        >
-          Thêm nhà cung cấp
-        </CustomButton>
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.provider, RoleAction.create) && (
+            <CustomButton
+              prefixIcon={<Image src={PlusIcon} />}
+              onClick={() => router.push('/partners/provider/add-provider')}
+            >
+              Thêm nhà cung cấp
+            </CustomButton>
+          )
+        }
       </div>
 
       <Search

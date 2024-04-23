@@ -27,11 +27,14 @@ import { CustomSelect } from "@/components/CustomSelect";
 import { CustomUpload } from "@/components/CustomUpload";
 import InputError from "@/components/InputError";
 import { ECustomerStatus, ECustomerType, EGender } from "@/enums";
-import { formatDate } from "@/helpers";
+import { formatDate, hasPermission } from "@/helpers";
 import { useAddress } from "@/hooks/useAddress";
 
 import { AddGroupCustomerModal } from "../../group-customer/AddGroupCustomerModal";
 import { schema } from "./schema";
+import { useRecoilValue } from "recoil";
+import { profileState } from "@/recoil/state";
+import { RoleAction, RoleModel } from "@/modules/settings/role/role.enum";
 
 export function AddCustomer({ customerId }: { customerId?: string }) {
   const queryClient = useQueryClient();
@@ -57,8 +60,6 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
     () => getCustomerDetail(Number(customerId)),
     { enabled: !!customerId }
   );
-
-  console.log("customerDetail: ", customerDetail);
 
   const { provinces, districts, wards } = useAddress(
     getValues("provinceId"),
@@ -107,6 +108,16 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
     mutateCreateCustomer();
 
   };
+
+  const profile = useRecoilValue(profileState);
+  useEffect(() => {
+    if (profile?.role?.permissions) {
+      if (!hasPermission(profile?.role?.permissions, RoleModel.customer, RoleAction.create)) {
+        message.error('Bạn không có quyền truy cập vào trang này');
+        router.push('/partners/customer');
+      }
+    }
+  }, [profile?.role?.permissions]);
 
   useEffect(() => {
     if (customerDetail?.data) {
@@ -199,14 +210,20 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
                 className=" h-11 !rounded"
                 placeholder="Chọn nhóm khách hàng"
                 suffixIcon={
-                  <div className="flex items-center">
-                    <Image src={ArrowDownIcon} alt="" />
-                    <Image
-                      src={PlusCircleIcon}
-                      alt=""
-                      onClick={() => setOpenAddGroupCustomerModal(true)}
-                    />
-                  </div>
+                  <>
+                    {
+                      hasPermission(profile?.role?.permissions, RoleModel.group_customer, RoleAction.create) && (
+                        <div className="flex items-center">
+                          <Image src={ArrowDownIcon} alt="" />
+                          <Image
+                            src={PlusCircleIcon}
+                            alt=""
+                            onClick={() => setOpenAddGroupCustomerModal(true)}
+                          />
+                        </div>
+                      )
+                    }
+                  </>
                 }
               />
               <InputError error={errors.groupCustomerId?.message} />

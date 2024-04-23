@@ -13,7 +13,7 @@ import PrintOrderIcon from "@/assets/printOrder.svg";
 import { CustomButton } from "@/components/CustomButton";
 import CustomTable from "@/components/CustomTable";
 import { EImportProductStatus, EImportProductStatusLabel } from "@/enums";
-import { formatMoney, formatNumber } from "@/helpers";
+import { formatMoney, formatNumber, hasPermission } from "@/helpers";
 import PrintBarcodeModal from "../../list-product/row-detail/PrintBarcodeModal";
 
 import type { IProduct, IRecord } from '../interface';
@@ -22,12 +22,16 @@ import { useRouter } from 'next/router';
 import InvoicePrint from './InvoicePrint';
 import { useReactToPrint } from 'react-to-print';
 import styles from "./invoice.module.css"
+import { useRecoilValue } from 'recoil';
+import { profileState } from '@/recoil/state';
+import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
 
 export function Info({ record }: { record: IRecord }) {
   const [openPrintBarcodeModal, setOpenPrintBarcodeModal] = useState(false);
   const [openCancelPrintProduct, setOpenCancelPrintProduct] = useState(false);
   const router = useRouter();
   const queryClient = useQueryClient();
+  const profile = useRecoilValue(profileState);
 
   const { data: importProductDetail, isLoading } = useQuery<{
     data: { inbound: IRecord; products: any };
@@ -323,20 +327,29 @@ export function Info({ record }: { record: IRecord }) {
           In phiếu
         </CustomButton>
 
-        <CustomButton
-          outline={true}
-          prefixIcon={<Image src={CloseIcon} alt="" />}
-          onClick={() => setOpenCancelPrintProduct(true)}
-        >
-          Hủy bỏ
-        </CustomButton>
-        <CustomButton
-          type="success"
-          prefixIcon={<Image src={PlusIcon} alt="" />}
-          onClick={() => router.push(`/products/return/coupon/?id=${record.id}`)}
-        >
-          Trả hàng nhập
-        </CustomButton>
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.import_product, RoleAction.delete) && (
+            <CustomButton
+              outline={true}
+              prefixIcon={<Image src={CloseIcon} alt="" />}
+              onClick={() => setOpenCancelPrintProduct(true)}
+            >
+              Hủy bỏ
+            </CustomButton>
+          )
+        }
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.return_product, RoleAction.create) && (
+            <CustomButton
+              type="success"
+              prefixIcon={<Image src={PlusIcon} alt="" />}
+              onClick={() => router.push(`/products/return/coupon/?id=${record.id}`)}
+            >
+              Trả hàng nhập
+            </CustomButton>
+          )
+        }
+
       </div>
 
       <CancelProductModal

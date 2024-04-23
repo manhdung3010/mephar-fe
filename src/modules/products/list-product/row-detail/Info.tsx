@@ -21,16 +21,20 @@ import {
   EProductType,
   getEnumKeyByValue,
 } from '@/enums';
-import { formatMoney, getImage } from '@/helpers';
+import { formatMoney, getImage, hasPermission } from '@/helpers';
 
 import type { IProduct } from '../types';
 import DeleteProductModal from './DeleteProduct';
 import PrintBarcodeModal from './PrintBarcodeModal';
 import ListUnit from '../ListUnit';
+import { useRecoilValue } from 'recoil';
+import { profileState } from '@/recoil/state';
+import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
 
 const Info = ({ record, onChangeUnit }: { record: IProduct, onChangeUnit: any }) => {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const profile = useRecoilValue(profileState);
 
   const [openPrintBarcodeModal, setOpenPrintBarcodeModal] = useState(false);
   const [openDeleteProductModal, setOpenDeleteProductModal] = useState(false);
@@ -242,25 +246,29 @@ const Info = ({ record, onChangeUnit }: { record: IProduct, onChangeUnit: any })
         </div>
       </div>
       <div className="flex justify-end gap-4">
-        <CustomButton
-          type={
-            record.status === EProductStatus.inactive ? 'success' : 'disable'
-          }
-          outline={true}
-          prefixIcon={
-            record.status === EProductStatus.inactive ? (
-              <div></div>
-            ) : (
-              <Image src={LockGrayIcon} alt="" />
-            )
-          }
-          onClick={() => setOpenUpdateProductStatusModal(true)}
-          disabled={isLoadingUpdateStatusProduct}
-        >
-          {record.status === EProductStatus.inactive
-            ? 'Mở bán'
-            : 'Ngưng kinh doanh'}
-        </CustomButton>
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.list_product, RoleAction.update) && (
+            <CustomButton
+              type={
+                record.status === EProductStatus.inactive ? 'success' : 'disable'
+              }
+              outline={true}
+              prefixIcon={
+                record.status === EProductStatus.inactive ? (
+                  <div></div>
+                ) : (
+                  <Image src={LockGrayIcon} alt="" />
+                )
+              }
+              onClick={() => setOpenUpdateProductStatusModal(true)}
+              disabled={isLoadingUpdateStatusProduct}
+            >
+              {record.status === EProductStatus.inactive
+                ? 'Mở bán'
+                : 'Ngưng kinh doanh'}
+            </CustomButton>
+          )
+        }
         <CustomButton
           type="primary"
           outline={true}
@@ -276,30 +284,41 @@ const Info = ({ record, onChangeUnit }: { record: IProduct, onChangeUnit: any })
         >
           In mã vạch
         </CustomButton>
-        <CustomButton
-          type="primary"
-          outline={true}
-          prefixIcon={<Image src={CopyBlueIcon} alt="" />}
-          onClick={redirectCopy}
-        >
-          Sao chép
-        </CustomButton>
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.list_product, RoleAction.create) && (
+            <CustomButton
+              type="primary"
+              outline={true}
+              prefixIcon={<Image src={CopyBlueIcon} alt="" />}
+              onClick={redirectCopy}
+            >
+              Sao chép
+            </CustomButton>
+          )
+        }
 
-        <CustomButton
-          outline={true}
-          onClick={() => setOpenDeleteProductModal(true)}
-          prefixIcon={<Image src={DeleteRedIcon} alt="" />}
-        >
-          Xoá
-        </CustomButton>
-
-        <CustomButton
-          type="success"
-          prefixIcon={<Image src={EditWhiteIcon} alt="" />}
-          onClick={redirectUpdate}
-        >
-          Cập nhật
-        </CustomButton>
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.list_product, RoleAction.delete) && (
+            <CustomButton
+              outline={true}
+              onClick={() => setOpenDeleteProductModal(true)}
+              prefixIcon={<Image src={DeleteRedIcon} alt="" />}
+            >
+              Xoá
+            </CustomButton>
+          )
+        }
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.list_product, RoleAction.update) && (
+            <CustomButton
+              type="success"
+              prefixIcon={<Image src={EditWhiteIcon} alt="" />}
+              onClick={redirectUpdate}
+            >
+              Cập nhật
+            </CustomButton>
+          )
+        }
       </div>
 
       <PrintBarcodeModal
