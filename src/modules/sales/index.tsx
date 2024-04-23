@@ -28,6 +28,8 @@ import { LeftMenu } from './LeftMenu';
 import { ProductList } from './ProductList';
 import { RightContent } from './RightContent';
 import { schema } from './schema';
+import { on } from 'stream';
+import BarcodeScanner from '@/components/BarcodeScanner';
 
 const Index = () => {
   const branchId = useRecoilValue(branchState);
@@ -248,10 +250,10 @@ const Index = () => {
                       setFormFilter((pre) => ({ ...pre, keyword: '' }));
                       setSearchKeyword('');
                     }}
-                    onSearch={debounce((value) => {
+                    onSearch={(value) => {
                       setSearchKeyword(value);
                       onSearch(value);
-                    }, 300)}
+                    }}
                     showSearch={true}
                     className="h-[48px]  rounded-[30px] bg-white text-base"
                     wrapClassName="!w-[466px]"
