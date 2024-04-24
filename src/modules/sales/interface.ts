@@ -2,6 +2,7 @@ import type { EProductStatus, EProductType } from "@/enums";
 
 export interface IBatch {
   productId: number;
+  id: number;
   productKey: string;
   batchId: number;
   productUnitId: number;

@@ -109,7 +109,7 @@ export function Info({ record, branchId }: { record: any, branchId: number }) {
 
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Ngày chuyển:</div>
-            <div className="text-black-main">{formatDateTime(record?.moveAt)}</div>
+            <div className="text-black-main">{record?.movedAt ? formatDateTime(record?.movedAt) : ''}</div>
           </div>
 
           <div className="grid grid-cols-2 gap-5">

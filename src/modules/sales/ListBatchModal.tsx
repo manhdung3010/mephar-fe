@@ -35,6 +35,7 @@ export function ListBatchModal({
         setListBatch(
           product.batches?.map((batch) => ({
             ...batch,
+            batchId: batch.id,
             productKey: product.productKey,
             productId: product.productId,
             newInventory: Math.floor(batch.originalInventory / product.productUnit.exchangeValue),

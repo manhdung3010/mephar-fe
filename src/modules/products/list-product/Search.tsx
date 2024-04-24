@@ -83,6 +83,7 @@ const Search = ({ onChange }: { onChange: (value) => void }) => {
 
         <div className="flex rounded-l-[3px] border border-[#D3D5D7]">
           <Select
+            className="w-[150px]"
             bordered={false}
             suffixIcon={<Image src={ArrowDownGray} alt="" />}
             placeholder="Loại sản phẩm"
@@ -94,6 +95,7 @@ const Search = ({ onChange }: { onChange: (value) => void }) => {
           />
           <div className="w-[1px] bg-[#D3D5D7]" />
           <Select
+            className="w-[150px]"
             bordered={false}
             suffixIcon={<Image src={ArrowDownGray} alt="" />}
             placeholder="Trạng thái"
@@ -103,6 +105,7 @@ const Search = ({ onChange }: { onChange: (value) => void }) => {
             value={productStatusData.find((item) => item.value === formFilter?.status) || undefined}
           />
           <Select
+            className="w-[150px]"
             bordered={false}
             suffixIcon={<Image src={ArrowDownGray} alt="" />}
             placeholder="Tồn kho"
