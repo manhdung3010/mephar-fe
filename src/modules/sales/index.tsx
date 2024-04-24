@@ -4,7 +4,7 @@ import { Popover } from 'antd';
 import cx from 'classnames';
 import { cloneDeep, debounce } from 'lodash';
 import Image from 'next/image';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
@@ -18,18 +18,17 @@ import { EPaymentMethod } from '@/enums';
 import { formatMoney, formatNumber, getImage, randomString } from '@/helpers';
 import { branchState, orderActiveState, orderState } from '@/recoil/state';
 
+import useBarcodeScanner from '@/hooks/useBarcodeScanner';
 import { SaleHeader } from './Header';
+import { LeftMenu } from './LeftMenu';
+import { ProductList } from './ProductList';
+import { RightContent } from './RightContent';
 import type {
   ISaleProduct,
   ISaleProductLocal,
   ISampleMedicine,
 } from './interface';
-import { LeftMenu } from './LeftMenu';
-import { ProductList } from './ProductList';
-import { RightContent } from './RightContent';
 import { schema } from './schema';
-import { on } from 'stream';
-import BarcodeScanner from '@/components/BarcodeScanner';
 
 const Index = () => {
   const branchId = useRecoilValue(branchState);
@@ -57,7 +56,7 @@ const Index = () => {
     },
   });
 
-  const { data: products, isLoading: isLoadingProduct } = useQuery<{
+  const { data: products, isLoading: isLoadingProduct, isSuccess } = useQuery<{
     data?: { items: ISaleProduct[] };
   }>(
     [
@@ -89,6 +88,24 @@ const Index = () => {
 
   const [orderActive, setOrderActive] = useRecoilState(orderActiveState);
   const [orderObject, setOrderObject] = useRecoilState(orderState);
+
+  const scannedData = useBarcodeScanner();
+
+  // barcode scanner
+  useEffect(() => {
+    if (scannedData) {
+      setFormFilter((pre) => ({ ...pre, keyword: scannedData }));
+      let product;
+      if ((products?.data?.items?.length ?? 0) > 0 && !isSearchSampleMedicine && isSuccess) {
+        product = products?.data?.items?.find((item) => item.barCode === scannedData);
+      }
+
+      if (product) {
+        onSelectedProduct(JSON.stringify(product));
+        return;
+      }
+    }
+  }, [scannedData, products?.data?.items, isSuccess, isSearchSampleMedicine]);
 
   const onSelectedProduct = (value) => {
     const product: ISaleProduct = JSON.parse(value);
@@ -233,7 +250,6 @@ const Index = () => {
             <span className="mr-1 text-[#D64457]">Dashboard / </span>
             <span>Bán hàng</span>
           </div>
-
           <div className="bg-red-main pr-6">
             <div className="hidden-scrollbar overflow-x-auto overflow-y-hidden">
               <div className="flex h-[62px] min-w-[800px]  items-center  px-6">

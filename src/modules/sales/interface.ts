@@ -37,6 +37,7 @@ export interface ISaleProduct {
   id: number;
   storeId: number;
   code: string;
+  barCode: string;
   branchId: number;
   productId: number;
   batchId: number;

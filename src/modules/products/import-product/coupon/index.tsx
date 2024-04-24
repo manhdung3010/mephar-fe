@@ -33,6 +33,7 @@ import { useRouter } from "next/router";
 import { getImportProductDetail } from "@/api/import-product.service";
 import { RoleAction, RoleModel } from "@/modules/settings/role/role.enum";
 import { message } from "antd";
+import useBarcodeScanner from "@/hooks/useBarcodeScanner";
 
 export default function ImportCoupon() {
   const profile = useRecoilValue(profileState);
@@ -96,7 +97,7 @@ export default function ImportCoupon() {
     keyword: "",
   });
 
-  const { data: products } = useQuery<{ data: { items: IImportProduct[] } }>(
+  const { data: products, isSuccess } = useQuery<{ data: { items: IImportProduct[] } }>(
     [
       "LIST_IMPORT_PRODUCT",
       formFilter.page,
@@ -341,6 +342,60 @@ export default function ImportCoupon() {
     );
   };
 
+  const handleSelectProduct = (value) => {
+    const product: IImportProduct = JSON.parse(value);
+
+    const localProduct: IImportProductLocal = {
+      ...product,
+      productKey: `${product.product.id}-${product.id}`,
+      inventory: product.quantity,
+      quantity: 1,
+      discountValue: 0,
+      batches: [],
+    };
+
+    let cloneImportProducts = cloneDeep(importProducts);
+
+    if (
+      importProducts.find(
+        (p) => p.productKey === localProduct.productKey
+      )
+    ) {
+      cloneImportProducts = cloneImportProducts.map((product) => {
+        if (product.productKey === localProduct.productKey) {
+          return {
+            ...product,
+            quantity: product.quantity + 1,
+          };
+        }
+
+        return product;
+      });
+    } else {
+      cloneImportProducts.push(localProduct);
+    }
+
+    setImportProducts(cloneImportProducts);
+  }
+
+  const scannedData = useBarcodeScanner();
+
+  // barcode scanner
+  useEffect(() => {
+    if (scannedData) {
+      setFormFilter((pre) => ({ ...pre, keyword: scannedData }));
+      let product;
+      if ((products?.data?.items?.length ?? 0) > 0 && isSuccess) {
+        product = products?.data?.items?.find((item) => item.barCode === scannedData);
+      }
+
+      if (product) {
+        handleSelectProduct(JSON.stringify(product));
+        return;
+      }
+    }
+  }, [scannedData, products?.data?.items, isSuccess]);
+
   return (
     <div className="-mx-8 flex">
       <div className="grow overflow-x-auto">
@@ -351,41 +406,7 @@ export default function ImportCoupon() {
               prefixIcon={<Image src={SearchIcon} alt="" />}
               placeholder="Tìm kiếm theo mã nhập hàng"
               wrapClassName="w-full !rounded bg-white"
-              onSelect={(value) => {
-                const product: IImportProduct = JSON.parse(value);
-
-                const localProduct: IImportProductLocal = {
-                  ...product,
-                  productKey: `${product.product.id}-${product.id}`,
-                  inventory: product.quantity,
-                  quantity: 1,
-                  discountValue: 0,
-                  batches: [],
-                };
-
-                let cloneImportProducts = cloneDeep(importProducts);
-
-                if (
-                  importProducts.find(
-                    (p) => p.productKey === localProduct.productKey
-                  )
-                ) {
-                  cloneImportProducts = cloneImportProducts.map((product) => {
-                    if (product.productKey === localProduct.productKey) {
-                      return {
-                        ...product,
-                        quantity: product.quantity + 1,
-                      };
-                    }
-
-                    return product;
-                  });
-                } else {
-                  cloneImportProducts.push(localProduct);
-                }
-
-                setImportProducts(cloneImportProducts);
-              }}
+              onSelect={(value) => handleSelectProduct(value)}
               showSearch={true}
               listHeight={512}
               onSearch={debounce((value) => {
