@@ -36,6 +36,7 @@ interface IRecord {
   price: number;
   totalPrice: number;
   refund: number;
+  unitName: string;
 }
 
 export function Info({ record }: { record: IOrder }) {
@@ -89,6 +90,11 @@ export function Info({ record }: { record: IOrder }) {
       title: 'Tên hàng',
       dataIndex: 'name',
       key: 'name',
+    },
+    {
+      title: 'Đơn vị',
+      dataIndex: 'unitName',
+      key: 'unitName',
     },
     {
       title: 'Số lượng',
@@ -168,7 +174,7 @@ export function Info({ record }: { record: IOrder }) {
 
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Người tạo:</div>
-            <div className="text-black-main">{record?.user?.fullName}</div>
+            <div className="text-black-main">{profile?.fullName}</div>
           </div>
 
           <div className="grid grid-cols-2 gap-5">
@@ -284,6 +290,7 @@ export function Info({ record }: { record: IOrder }) {
           quantity: item.quantity,
           discount: item.discount,
           price: item.price,
+          unitName: item.productUnit.unitName,
         }))}
         columns={columns}
         pagination={false}

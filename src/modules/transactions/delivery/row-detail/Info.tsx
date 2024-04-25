@@ -122,6 +122,10 @@ export function Info({ record, branchId }: { record: any, branchId: number }) {
             <div className="text-gray-main">Người tạo:</div>
             <div className="text-black-main">{record?.movedByUser?.fullName}</div>
           </div>
+          <div className="grid grid-cols-2 gap-5">
+            <div className="text-gray-main">Người nhận:</div>
+            <div className="text-black-main">{record?.receivedByUser?.fullName}</div>
+          </div>
 
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Ngày tạo:</div>

@@ -28,7 +28,7 @@ export const warehouseStatus = {
 const warehouseStatusLable = {
   [warehouseStatus.INBOUND]: 'Nhập hàng',
   [warehouseStatus.ORDER]: 'Đặt hàng',
-  [warehouseStatus.INBOUND_RETURN]: 'Trả hàng',
+  [warehouseStatus.INBOUND_RETURN]: 'Trả hàng nhập',
   [warehouseStatus.MOVE]: 'Chuyển hàng',
   [warehouseStatus.ADJUSTMENT]: 'Kiểm kho',
 }
