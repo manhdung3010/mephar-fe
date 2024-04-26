@@ -8,6 +8,7 @@ export interface IOrder {
   quantity: number;
   cashOfCustomer: number;
   earnMoney: number;
+  creator?: any;
   customer: { fullName: string };
   delivery: string;
   status: EOrderStatus;

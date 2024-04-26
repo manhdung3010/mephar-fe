@@ -17,11 +17,15 @@ import {
 } from '@/recoil/state';
 
 import { LeftMenuStyled } from './styled';
+import InvoiceModal from './return-product/InvoiceModal';
+import { useState } from 'react';
 
 export function LeftMenu() {
   const resetOrderObject = useResetRecoilState(orderState);
   const resetOrderActive = useResetRecoilState(orderActiveState);
   const resetProductsImport = useResetRecoilState(productImportState);
+
+  const [openInvoiceModal, setOpenInvoiceModal] = useState(false);
 
   const clearCache = () => {
     resetOrderObject();
@@ -59,7 +63,7 @@ export function LeftMenu() {
           </div>
         </div>
 
-        <div className="mb-3 flex h-[99px] flex-col items-center justify-center rounded-lg bg-[#FBECEE] py-3 px-2">
+        <div onClick={() => setOpenInvoiceModal(true)} className="mb-3 flex h-[99px] flex-col items-center justify-center rounded-lg bg-[#FBECEE] py-3 px-2 cursor-pointer">
           <Image src={ReturnOrder} />
           <div className=" mt-2 text-center font-medium leading-tight text-red-main">
             Đổi trả đơn hàng
@@ -97,6 +101,10 @@ export function LeftMenu() {
           </div>
         </div>
       </div>
+
+      <InvoiceModal
+        isOpen={!!openInvoiceModal}
+        onCancel={() => setOpenInvoiceModal(false)} />
     </LeftMenuStyled>
   );
 }

@@ -274,8 +274,7 @@ export function ProductList({ useForm }: { useForm: any }) {
           className="!h-6 !w-[80px] text-center"
           hasMinus={true}
           hasPlus={true}
-          defaultValue={quantity}
-          value={quantity}
+          value={isNaN(quantity) ? 0 : quantity}
           type="number"
           onChange={(value) => onChangeQuantity(productKey, value)}
           onMinus={async (value) => {

@@ -110,6 +110,7 @@ const Index = () => {
   const onSelectedProduct = (value) => {
     const product: ISaleProduct = JSON.parse(value);
 
+
     const productKey = `${product.product.id}-${product.productUnit.id}`;
 
     const orderObjectClone = cloneDeep(orderObject);
@@ -165,6 +166,7 @@ const Index = () => {
     }
 
     setOrderObject(orderObjectClone);
+    setFormFilter((pre) => ({ ...pre, keyword: '' }));
   };
 
   const onSelectedSampleMedicine = (value) => {
