@@ -49,9 +49,15 @@ const ProductList = () => {
   >({});
 
   useEffect(() => {
-    setSelectedList(products?.data?.items?.map((item) => ({ ...item, unitId: item?.productUnit?.find((unit) => unit.isBaseUnit)?.id, unitQuantity: item?.inventory / item?.productUnit?.find((unit) => unit.isBaseUnit)?.exchangeValue }))?.sort(function (a, b) {
-      return b.id - a.id;
-    }));
+    setSelectedList(products?.data?.items?.map((item) => (
+      {
+        ...item,
+        unitId: item?.productUnit?.find((unit) => unit.isBaseUnit)?.id,
+        unitQuantity: item?.inventory / item?.productUnit?.find((unit) => unit.isBaseUnit)?.exchangeValue,
+        tempPrimePrice: item?.primePrice * item?.productUnit?.find((unit) => unit.isBaseUnit)?.exchangeValue,
+      }))?.sort(function (a, b) {
+        return b.id - a.id;
+      }));
   }, [formFilter, products?.data?.items])
 
   const columns: ColumnsType<IProduct> = [
@@ -123,8 +129,8 @@ const ProductList = () => {
     },
     {
       title: 'Giá vốn',
-      dataIndex: 'primePrice',
-      key: 'primePrice',
+      dataIndex: 'tempPrimePrice',
+      key: 'tempPrimePrice',
       render: (value) => formatMoney(value),
     },
   ];
@@ -133,7 +139,7 @@ const ProductList = () => {
     setValueChange(value);
     const filter = selectedList.filter((item) => item?.id !== record.id);
     const newRecord = record?.productUnit?.find((unit) => unit.id === value);
-    setSelectedList([...filter, { ...record, price: newRecord?.price, code: newRecord?.code, barCode: newRecord.barCode, unitId: value, unitQuantity: Number(record?.inventory) / newRecord?.exchangeValue }]?.sort(function (a, b) {
+    setSelectedList([...filter, { ...record, price: newRecord?.price, code: newRecord?.code, barCode: newRecord.barCode, unitId: value, unitQuantity: Number(record?.inventory) / newRecord?.exchangeValue, tempPrimePrice: record?.primePrice * newRecord?.exchangeValue }]?.sort(function (a, b) {
       return b.id - a.id;
     }));
   }

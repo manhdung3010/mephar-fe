@@ -93,18 +93,21 @@ const Index = () => {
 
   // barcode scanner
   useEffect(() => {
-    if (scannedData) {
-      setFormFilter((pre) => ({ ...pre, keyword: scannedData }));
-      let product;
-      if ((products?.data?.items?.length ?? 0) > 0 && !isSearchSampleMedicine && isSuccess) {
-        product = products?.data?.items?.find((item) => item.barCode === scannedData);
-      }
+    async function handleScannedData() {
+      if (scannedData) {
+        const productsScan = await getSaleProducts({ ...formFilter, keyword: scannedData, branchId })
+        let product;
+        if (productsScan?.data?.items?.length > 0 && !isSearchSampleMedicine) {
+          product = productsScan?.data?.items?.find((item) => item.barCode === scannedData);
+        }
 
-      if (product) {
-        onSelectedProduct(JSON.stringify(product));
-        return;
+        if (product) {
+          onSelectedProduct(JSON.stringify(product));
+          return;
+        }
       }
     }
+    handleScannedData()
   }, [scannedData, products?.data?.items, isSuccess, isSearchSampleMedicine]);
 
   const onSelectedProduct = (value) => {
@@ -161,7 +164,6 @@ const Index = () => {
           return newBatch;
         }),
       };
-
       orderObjectClone[orderActive]?.push(productLocal);
     }
 
@@ -237,7 +239,7 @@ const Index = () => {
         keyword: value,
       }));
     }, 300),
-    []
+    [formFilter]
   );
 
   return (

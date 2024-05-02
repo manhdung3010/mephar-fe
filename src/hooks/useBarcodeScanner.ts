@@ -1,4 +1,3 @@
-import { set } from "lodash";
 import { useState, useEffect } from "react";
 
 const useBarcodeScanner = () => {
@@ -8,6 +7,7 @@ const useBarcodeScanner = () => {
   useEffect(() => {
     const handleBarcodeScanned = (event) => {
       if (event.code === "Enter") {
+        event.preventDefault();
         setScannedData(tempData);
         setTempData("");
       } else {

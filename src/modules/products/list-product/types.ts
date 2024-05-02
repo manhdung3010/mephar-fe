@@ -13,6 +13,7 @@ export interface IProduct {
   isBatchExpireControl: boolean;
   price: string;
   primePrice: string;
+  tempPrimePrice: string;
   shortName: string;
   weight: string;
   productPosition?: { name: string };
@@ -26,7 +27,12 @@ export interface IProduct {
   packingSpecification: string;
   description: string;
   activeElement: string;
-  productUnit: { id: number; unitName: string; isBaseUnit: boolean }[];
+  productUnit: {
+    id: number;
+    unitName: string;
+    isBaseUnit: boolean;
+    exchangeValue: string;
+  }[];
   content: string;
   country?: { name: string };
   status: EProductStatus;
