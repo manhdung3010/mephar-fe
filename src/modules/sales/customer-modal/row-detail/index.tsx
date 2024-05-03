@@ -1,14 +1,11 @@
 import classNames from 'classnames';
 import { useState } from 'react';
 
-import type { ICustomer } from '../type';
+// import type { ICustomer } from '../type';
+import { ICustomer } from '@/modules/partners/customer/type';
 import { BuyHistory } from './BuyHistory';
-import { CollectPointHistory } from './CollectPointHistory';
 import { Debt } from './Debt';
 import { Info } from './Info';
-import { Note } from './Note';
-import { ReceiveAddress } from './ReceiveAddress';
-import { ReturnHistory } from './ReturnHistory';
 
 const RowDetail = ({ record, branchId }: { record: ICustomer, branchId: number }) => {
   const [select, setSelect] = useState(0);

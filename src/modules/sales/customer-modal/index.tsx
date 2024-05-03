@@ -1,23 +1,17 @@
-import { getOrder } from '@/api/order.service';
-import { CustomModal } from '@/components/CustomModal'
+import { getCustomer } from '@/api/customer.service';
+import { CustomModal } from '@/components/CustomModal';
 import CustomPagination from '@/components/CustomPagination';
 import CustomTable from '@/components/CustomTable';
-import { EOrderStatus, EOrderStatusLabel } from '@/enums';
 import { formatMoney } from '@/helpers';
-import { IOrder } from '@/modules/transactions/order/type';
+import { ICustomer } from '@/modules/partners/customer/type';
 import { branchState, profileState } from '@/recoil/state';
 import { useQuery } from '@tanstack/react-query';
-import { ColumnsType } from 'antd/es/table';
-import { useRouter } from 'next/router';
-import cx from "classnames";
-import React, { useState } from 'react'
-import { useRecoilValue } from 'recoil';
-import { CustomButton } from '@/components/CustomButton';
-import Search from './Search';
-import { getCustomer } from '@/api/customer.service';
-import { ICustomer } from '@/modules/partners/customer/type';
-import RowDetail from './row-detail';
 import { debounce } from 'lodash';
+import { useRouter } from 'next/router';
+import { useState } from 'react';
+import { useRecoilValue } from 'recoil';
+import Search from './Search';
+import RowDetail from './row-detail';
 
 function CustomerModal({
   isOpen,
