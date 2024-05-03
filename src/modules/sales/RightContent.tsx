@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { message } from 'antd';
 import cx from 'classnames';
-import { cloneDeep, debounce } from 'lodash';
+import { cloneDeep, debounce, get } from 'lodash';
 import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -455,6 +455,10 @@ export function RightContent({ useForm }: { useForm: any }) {
 
         <CustomButton
           onClick={() => {
+            if (!getValues('customerId') && getValues('paymentType') === EPaymentMethod.DEBT) {
+              message.error("Vui lòng chọn khách hàng trước khi thanh toán nợ");
+              return;
+            }
             const products: ISaleProductLocal[] = orderObject[orderActive];
             const formatProducts = products.map((product) => ({
               productId: product.productId,

@@ -19,6 +19,8 @@ import {
 import { LeftMenuStyled } from './styled';
 import InvoiceModal from './return-product/InvoiceModal';
 import { useState } from 'react';
+import { Customer } from '../partners/customer';
+import CustomerModal from './customer-modal';
 
 export function LeftMenu() {
   const resetOrderObject = useResetRecoilState(orderState);
@@ -26,6 +28,8 @@ export function LeftMenu() {
   const resetProductsImport = useResetRecoilState(productImportState);
 
   const [openInvoiceModal, setOpenInvoiceModal] = useState(false);
+  const [openCustomer, setOpenCustomer] = useState(false);
+  const [openInvoice, setOpenInvoice] = useState(false);
 
   const clearCache = () => {
     resetOrderObject();
@@ -56,7 +60,7 @@ export function LeftMenu() {
           </div>
         </div>
 
-        <div className="mb-3 flex h-[99px] flex-col items-center justify-center rounded-lg bg-[#FBECEE] py-3 px-2">
+        <div onClick={() => setOpenCustomer(true)} className="mb-3 flex h-[99px] flex-col items-center justify-center rounded-lg bg-[#FBECEE] py-3 px-2 cursor-pointer">
           <Image src={User} />
           <div className=" mt-2 text-center font-medium leading-tight text-red-main">
             Thông tin khách hàng
@@ -77,7 +81,7 @@ export function LeftMenu() {
           </div>
         </div>
 
-        <div className="mb-3 flex h-[99px] flex-col items-center justify-center rounded-lg bg-[#FBECEE] py-3 px-2">
+        <div onClick={() => setOpenInvoice(true)} className="mb-3 flex h-[99px] flex-col items-center justify-center rounded-lg bg-[#FBECEE] py-3 px-2 cursor-pointer">
           <Image src={ListOrder} />
           <div className=" mt-2 text-center font-medium leading-tight text-red-main">
             Danh sách đơn hàng
@@ -104,7 +108,12 @@ export function LeftMenu() {
 
       <InvoiceModal
         isOpen={!!openInvoiceModal}
-        onCancel={() => setOpenInvoiceModal(false)} />
+        onCancel={() => setOpenInvoiceModal(false)}
+      />
+      <CustomerModal
+        isOpen={!!openCustomer}
+        onCancel={() => setOpenCustomer(false)}
+      />
     </LeftMenuStyled>
   );
 }

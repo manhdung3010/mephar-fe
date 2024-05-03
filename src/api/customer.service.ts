@@ -4,6 +4,7 @@ export function getCustomer(params: {
   page: number;
   limit: number;
   keyword?: string;
+  isDefault?: boolean;
 }) {
   return axiosClient.get("customer", { params });
 }
