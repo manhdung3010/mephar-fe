@@ -12,11 +12,12 @@ import { CustomButton } from '@/components/CustomButton';
 import DeleteModal from '@/components/CustomModal/ModalDeleteItem';
 
 import { ECustomerStatus, ECustomerStatusLabel } from '@/enums';
-import type { ICustomer } from '../type';
+// import type { ICustomer } from '../type';
 import { hasPermission } from '@/helpers';
 import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
 import { useRecoilValue } from 'recoil';
 import { profileState } from '@/recoil/state';
+import { ICustomer } from '@/modules/partners/customer/type';
 
 const { TextArea } = Input;
 
