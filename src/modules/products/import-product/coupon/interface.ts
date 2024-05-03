@@ -129,6 +129,7 @@ export interface IImportProductLocal extends IImportProduct {
   productKey: string; // client
   discountValue: number; // client
   inventory: number; // client
+  primePrice?: number; // client
   productBatchHistories: any[]; // client
   toBatches?: any;
   totalQuantity?: any;

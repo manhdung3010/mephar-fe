@@ -29,6 +29,7 @@ export function CustomInput({
   onMinus,
   onPlus,
   allowDecimal = false,
+  refInput,
   ...rest
 }: InputProps & {
   className?: string;
@@ -50,6 +51,7 @@ export function CustomInput({
   onMinus?: (value) => void;
   onPlus?: (value) => void;
   allowDecimal?: boolean;
+  refInput?: any;
 }) {
   const ref = useRef<any>(null);
   const [label, setLabel] = useState<string>();
@@ -141,7 +143,7 @@ export function CustomInput({
         suffix={suffixIcon}
         onChange={onChangeValue}
         onClick={onClickInput}
-        ref={ref}
+        ref={refInput ? refInput : ref}
         value={forceValue ?? label}
         {...rest}
       />

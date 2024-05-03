@@ -4,8 +4,8 @@ import { Popover } from 'antd';
 import cx from 'classnames';
 import { cloneDeep, debounce } from 'lodash';
 import Image from 'next/image';
-import { useCallback, useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { set, useForm } from 'react-hook-form';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
 import { getSaleProducts, getSampleMedicines } from '@/api/product.service';
@@ -13,6 +13,7 @@ import CloseIcon from '@/assets/closeIcon.svg';
 import FilterIcon from '@/assets/filterIcon.svg';
 import PlusIcon from '@/assets/plusIcon.svg';
 import SearchIcon from '@/assets/searchIcon.svg';
+import BarcodeIcon from '@/assets/barcode.svg';
 import { CustomAutocomplete } from '@/components/CustomAutocomplete';
 import { EPaymentMethod } from '@/enums';
 import { formatMoney, formatNumber, getImage, randomString } from '@/helpers';
@@ -29,6 +30,7 @@ import type {
   ISampleMedicine,
 } from './interface';
 import { schema } from './schema';
+import { CustomInput } from '@/components/CustomInput';
 
 const Index = () => {
   const branchId = useRecoilValue(branchState);
@@ -40,6 +42,7 @@ const Index = () => {
     keyword: '',
   });
   const [isSearchSampleMedicine, setIsSearchSampleMedicine] = useState(false);
+  const [isScanBarcode, setIsScanBarcode] = useState(false);
 
   const {
     getValues,
@@ -89,7 +92,7 @@ const Index = () => {
   const [orderActive, setOrderActive] = useRecoilState(orderActiveState);
   const [orderObject, setOrderObject] = useRecoilState(orderState);
 
-  const scannedData = useBarcodeScanner();
+  const { scannedData, isScanned } = useBarcodeScanner();
 
   // barcode scanner
   useEffect(() => {
@@ -258,129 +261,162 @@ const Index = () => {
             <div className="hidden-scrollbar overflow-x-auto overflow-y-hidden">
               <div className="flex h-[62px] min-w-[800px]  items-center  px-6">
                 <div className="py-3">
-                  <CustomAutocomplete
-                    onSelect={(value) => {
-                      if (isSearchSampleMedicine) {
-                        onSelectedSampleMedicine(value);
-                        return;
-                      }
-
-                      onSelectedProduct(value);
-
-                      setFormFilter((pre) => ({ ...pre, keyword: '' }));
-                      setSearchKeyword('');
-                    }}
-                    onSearch={(value) => {
-                      setSearchKeyword(value);
-                      onSearch(value);
-                    }}
-                    showSearch={true}
-                    className="h-[48px]  rounded-[30px] bg-white text-base"
-                    wrapClassName="!w-[466px]"
-                    prefixIcon={<Image src={SearchIcon} alt="" />}
-                    suffixIcon={
-                      <Popover
-                        content={
-                          isSearchSampleMedicine
-                            ? 'Tìm kiếm theo đơn thuốc mẫu'
-                            : 'Tìm kiếm theo thuốc, hàng hóa'
+                  {
+                    !isScanBarcode ? <CustomAutocomplete
+                      onSelect={(value) => {
+                        if (isSearchSampleMedicine) {
+                          onSelectedSampleMedicine(value);
+                          return;
                         }
-                      >
-                        <div
-                          className={`flex cursor-pointer items-center ${isSearchSampleMedicine
-                            ? 'rounded border border-blue-500'
-                            : ''
-                            }`}
+
+                        onSelectedProduct(value);
+
+                        setFormFilter((pre) => ({ ...pre, keyword: '' }));
+                        setSearchKeyword('');
+                      }}
+                      onSearch={(value) => {
+                        setSearchKeyword(value);
+                        onSearch(value);
+                      }}
+                      showSearch={true}
+                      className="h-[48px]  rounded-[30px] bg-white text-base"
+                      wrapClassName="!w-[466px]"
+                      prefixIcon={<Image src={SearchIcon} alt="" />}
+                      suffixIcon={
+                        <Popover
+                          content={
+                            isSearchSampleMedicine
+                              ? 'Tìm kiếm theo đơn thuốc mẫu'
+                              : 'Tìm kiếm theo thuốc, hàng hóa'
+                          }
                         >
-                          <Image
-                            src={FilterIcon}
-                            alt=""
-                            onClick={(e) => {
-                              setIsSearchSampleMedicine((pre) => !pre);
-                              e.stopPropagation();
-                            }}
-                          />
-                        </div>
-                      </Popover>
+                          <div
+                            className={`flex cursor-pointer items-center ${isSearchSampleMedicine
+                              ? 'rounded border border-blue-500'
+                              : ''
+                              }`}
+                          >
+                            <Image
+                              src={FilterIcon}
+                              alt=""
+                              onClick={(e) => {
+                                setIsSearchSampleMedicine((pre) => !pre);
+                                e.stopPropagation();
+                              }}
+                            />
+                          </div>
+                        </Popover>
+                      }
+                      placeholder="Thêm sản phẩm mới vào đơn F3"
+                      options={
+                        !isSearchSampleMedicine
+                          ? products?.data?.items?.map((item) => ({
+                            value: JSON.stringify(item),
+                            label: (
+                              <div className="flex items-center gap-x-4 p-2">
+                                <div className=" flex h-12 w-[68px] items-center rounded border border-gray-300 p-[2px]">
+                                  {item.product?.image?.path && (
+                                    <Image
+                                      src={getImage(item.product?.image?.path)}
+                                      height={40}
+                                      width={68}
+                                      alt=""
+                                      objectFit="cover"
+                                    />
+                                  )}
+                                </div>
+
+                                <div>
+                                  <div className="mb-2 flex gap-x-3">
+                                    <div>
+                                      <span>{item.code}</span> {" - "}
+                                      <span>{item.product.name}</span>
+                                    </div>
+                                    <div className="rounded bg-red-main px-2 py-[2px] text-white">
+                                      {item.productUnit.unitName}
+                                    </div>
+                                    {
+                                      item.quantity <= 0 && (
+                                        <div className="rounded text-red-main py-[2px] italic">
+                                          Hết hàng
+                                        </div>
+                                      )
+                                    }
+                                  </div>
+
+                                  <div className="flex gap-x-3">
+                                    <div>Số lượng: {formatNumber(item.quantity)}</div>
+                                    <div>|</div>
+                                    <div>
+                                      Giá: {formatMoney(item.productUnit.price)}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            ),
+                          }))
+                          : sampleMedicines?.data?.items?.map((item) => ({
+                            value: JSON.stringify(item),
+                            label: (
+                              <div className="flex items-center gap-x-4 p-2">
+                                <div className=" flex h-12 w-[68px] items-center rounded border border-gray-300 p-[2px]">
+                                  {item.image?.path && (
+                                    <Image
+                                      src={getImage(item.image?.path)}
+                                      height={40}
+                                      width={68}
+                                      alt=""
+                                      objectFit="cover"
+                                    />
+                                  )}
+                                </div>
+
+                                <div>
+                                  <div className="mb-2 flex gap-x-5">
+                                    <div>{item.name}</div>
+                                  </div>
+                                </div>
+                              </div>
+                            ),
+                          }))
+                      }
+                      value={searchKeyword}
+                      isLoading={isLoadingProduct || isLoadingSampleMedicines}
+                      listHeight={512}
+                      popupClassName="search-product"
+                    /> : <CustomInput
+                      className="h-[48px] w-[466px] rounded-[30px] bg-white text-sm"
+                      placeholder='Thêm sản phẩm mới vào đơn F3'
+                      onChange={(value) => {
+
+                      }}
+                      prefixIcon={<Image src={SearchIcon} alt="" />} />
+                  }
+                </div>
+
+                <div className='ml-2'>
+                  <Popover
+                    content={
+                      "Quét mã vạch"
                     }
-                    placeholder="Thêm sản phẩm mới vào đơn F3"
-                    options={
-                      !isSearchSampleMedicine
-                        ? products?.data?.items?.map((item) => ({
-                          value: JSON.stringify(item),
-                          label: (
-                            <div className="flex items-center gap-x-4 p-2">
-                              <div className=" flex h-12 w-[68px] items-center rounded border border-gray-300 p-[2px]">
-                                {item.product?.image?.path && (
-                                  <Image
-                                    src={getImage(item.product?.image?.path)}
-                                    height={40}
-                                    width={68}
-                                    alt=""
-                                    objectFit="cover"
-                                  />
-                                )}
-                              </div>
-
-                              <div>
-                                <div className="mb-2 flex gap-x-3">
-                                  <div>
-                                    <span>{item.code}</span> {" - "}
-                                    <span>{item.product.name}</span>
-                                  </div>
-                                  <div className="rounded bg-red-main px-2 py-[2px] text-white">
-                                    {item.productUnit.unitName}
-                                  </div>
-                                  {
-                                    item.quantity <= 0 && (
-                                      <div className="rounded text-red-main py-[2px] italic">
-                                        Hết hàng
-                                      </div>
-                                    )
-                                  }
-                                </div>
-
-                                <div className="flex gap-x-3">
-                                  <div>Số lượng: {formatNumber(item.quantity)}</div>
-                                  <div>|</div>
-                                  <div>
-                                    Giá: {formatMoney(item.productUnit.price)}
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          ),
-                        }))
-                        : sampleMedicines?.data?.items?.map((item) => ({
-                          value: JSON.stringify(item),
-                          label: (
-                            <div className="flex items-center gap-x-4 p-2">
-                              <div className=" flex h-12 w-[68px] items-center rounded border border-gray-300 p-[2px]">
-                                {item.image?.path && (
-                                  <Image
-                                    src={getImage(item.image?.path)}
-                                    height={40}
-                                    width={68}
-                                    alt=""
-                                    objectFit="cover"
-                                  />
-                                )}
-                              </div>
-
-                              <div>
-                                <div className="mb-2 flex gap-x-5">
-                                  <div>{item.name}</div>
-                                </div>
-                              </div>
-                            </div>
-                          ),
-                        }))
-                    }
-                    value={searchKeyword}
-                    isLoading={isLoadingProduct || isLoadingSampleMedicines}
-                    listHeight={512}
-                    popupClassName="search-product"
-                  />
+                  >
+                    <div
+                      className={`flex cursor-pointer items-center ${isScanBarcode
+                        ? 'rounded border border-blue-500'
+                        : ''
+                        }`}
+                    >
+                      <Image
+                        src={BarcodeIcon}
+                        className={`w-[24px] h-[24px] cursor-pointer text-[#D64457]`}
+                        alt=""
+                        onClick={(e) => {
+                          setIsScanBarcode((pre) => !pre);
+                          e.stopPropagation();
+                        }}
+                      />
+                    </div>
+                  </Popover>
                 </div>
 
                 {Object.keys(orderObject).map((order, index) => (

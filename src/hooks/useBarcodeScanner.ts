@@ -2,14 +2,17 @@ import { useState, useEffect } from "react";
 
 const useBarcodeScanner = () => {
   const [scannedData, setScannedData] = useState("");
+  const [isScanned, setIsScanned] = useState(false);
   const [tempData, setTempData] = useState("");
 
   useEffect(() => {
     const handleBarcodeScanned = (event) => {
-      if (event.code === "Enter") {
+      setIsScanned(false);
+      if (event.keyCode === 13) {
         event.preventDefault();
-        setScannedData(tempData);
         setTempData("");
+        setScannedData(tempData);
+        setIsScanned(true);
       } else {
         setScannedData("");
         const scannedValue = event.key;
@@ -25,7 +28,7 @@ const useBarcodeScanner = () => {
     };
   }, [tempData]);
 
-  return scannedData;
+  return { scannedData, isScanned };
 };
 
 export default useBarcodeScanner;

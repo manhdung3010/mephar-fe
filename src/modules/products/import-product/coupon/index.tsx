@@ -284,13 +284,13 @@ export default function ImportCoupon() {
       title: "Đơn giá",
       dataIndex: "primePrice",
       key: "primePrice",
-      render: (_, { productKey, price }) => (
+      render: (_, { productKey, price, product }) => (
         <CustomInput
           type="number"
           bordered={false}
           onChange={(value) => onChangeValueProduct(productKey, "price", value)}
           wrapClassName="w-[100px]"
-          defaultValue={price}
+          defaultValue={product.primePrice}
         />
       ),
     },
@@ -378,7 +378,7 @@ export default function ImportCoupon() {
     setImportProducts(cloneImportProducts);
   }
 
-  const scannedData = useBarcodeScanner();
+  const { scannedData, isScanned } = useBarcodeScanner();
 
   // barcode scanner
   useEffect(() => {

@@ -66,7 +66,6 @@ export default function ReturnCoupon() {
     }
   );
 
-
   useEffect(() => {
     if (importProductDetail) {
       importProductDetail?.data?.products?.forEach((product) => {
@@ -201,7 +200,7 @@ export default function ReturnCoupon() {
     setReturnProducts(productImportClone);
   };
 
-  const scannedData = useBarcodeScanner();
+  const { scannedData, isScanned } = useBarcodeScanner();
 
   // barcode scanner
   useEffect(() => {
@@ -282,7 +281,7 @@ export default function ReturnCoupon() {
       key: 'units',
       render: (_, record: any) => {
         if (id) {
-          return record.productUnit.find((item, index) => index === 0)?.unitName
+          return record.productUnit?.unitName
         }
         return <CustomUnitSelect
           options={(() => {
@@ -302,7 +301,7 @@ export default function ReturnCoupon() {
 
             returnProductsClone = returnProductsClone.map((product) => {
               if (product.productKey === record?.productKey) {
-                const productUnit = product.product.productUnit.find(
+                const productUnit: any = product.product.productUnit.find(
                   (unit) => unit.id === value
                 );
 
@@ -310,6 +309,7 @@ export default function ReturnCoupon() {
                   ...product,
                   productKey: `${product.product.id}-${value}`,
                   ...productUnit,
+                  primePrice: product.product.primePrice * productUnit.exchangeValue,
                   batches: product.batches?.map((batch) => ({
                     ...batch,
                     inventory:
@@ -359,15 +359,15 @@ export default function ReturnCoupon() {
       ),
     },
     {
-      title: id ? "Giá nhập" : 'Đơn giá',
+      title: "Giá nhập",
       dataIndex: 'primePrice',
       key: 'primePrice',
-      render: (_, record: any) => id ? <CustomInput
+      render: (primePrice, record: any) => id ? <CustomInput
         type="number"
         bordered={false}
         onChange={(value) => onChangeValueProduct(record?.productKey, 'price', value)}
         wrapClassName="w-[100px]"
-        defaultValue={record?.productBatchHistories.find((item, index) => index === 0)?.importPrice}
+        defaultValue={record?.productBatchHistories?.find((item, index) => index === 0)?.importPrice}
         disabled
       /> : (
         <CustomInput
@@ -375,26 +375,10 @@ export default function ReturnCoupon() {
           bordered={false}
           onChange={(value) => onChangeValueProduct(record?.productKey, 'price', value)}
           wrapClassName="w-[100px]"
-          defaultValue={record?.price}
+          defaultValue={primePrice}
         />
       ),
     },
-    (id ? {} : {
-      title: 'Giảm giá',
-      dataIndex: 'discountValue',
-      key: 'discountValue',
-      render: (value, { productKey }) => (
-        <CustomInput
-          type="number"
-          bordered={false}
-          onChange={(value) =>
-            onChangeValueProduct(productKey, 'discountValue', value)
-          }
-          wrapClassName="w-[100px]"
-          defaultValue={value}
-        />
-      ),
-    }),
     (id ? {
       title: "Giá trả lại",
       dataIndex: 'price',
@@ -411,11 +395,11 @@ export default function ReturnCoupon() {
       title: 'Thành tiền',
       dataIndex: 'totalPrice',
       key: 'totalPrice',
-      render: (_, { quantity, discountValue, price }) => {
+      render: (_, { quantity, discountValue, price, primePrice }) => {
         if (id) {
           return formatMoney(quantity * price)
         }
-        return formatMoney(quantity * price - discountValue)
+        return formatMoney(quantity * (primePrice ?? 0))
       },
     },
   ];
@@ -463,6 +447,7 @@ export default function ReturnCoupon() {
       inventory: product.quantity,
       quantity: 1,
       discountValue: 0,
+      primePrice: product.product.primePrice * product.productUnit.exchangeValue,
       batches: product.batches?.map((batch) => {
         const inventory =
           (batch.quantity / product.productUnit.exchangeValue)
@@ -603,7 +588,7 @@ export default function ReturnCoupon() {
                               className="flex items-center rounded bg-red-main py-1 px-2 text-white"
                             >
                               <span className="mr-2">
-                                {batch.name || batch.batch.name} - {batch.expiryDate} - SL:{' '}
+                                {batch?.name || batch?.batch?.name} - {batch.expiryDate} - SL:{' '}
                                 {batch.quantity}
                               </span>{' '}
                               <Image
