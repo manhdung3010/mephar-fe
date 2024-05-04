@@ -38,6 +38,8 @@ export function ProductList({ useForm }: { useForm: any }) {
     );
   };
 
+  console.log("orderObject[orderActive]", orderObject[orderActive])
+
   useEffect(() => {
     if (orderObject[orderActive]) {
       const expandedRowKeysClone = { ...expandedRowKeys };

@@ -77,11 +77,6 @@ const Index = () => {
     { enabled: !isSearchSampleMedicine }
   );
 
-  const { data: orderDetail, isLoading } = useQuery(
-    ['ORDER_DETAIL', JSON.stringify(formFilter), branchId],
-    () => getOrderDetail(Number(id)),
-  );
-
   const { data: sampleMedicines, isLoading: isLoadingSampleMedicines } =
     useQuery<{
       data?: { items: ISampleMedicine[] };
@@ -100,6 +95,88 @@ const Index = () => {
 
   const [orderActive, setOrderActive] = useRecoilState(orderActiveState);
   const [orderObject, setOrderObject] = useRecoilState(orderState);
+
+  useEffect(() => {
+    const getDataDetail = async () => {
+      if (id) {
+        const orderDetail = await getOrderDetail(Number(id))
+        if (orderDetail?.data?.products) {
+          // add order detail to order object when order detail is loaded
+          const orderObjectClone = cloneDeep(orderObject);
+
+          orderObjectClone[orderActive + 1] = orderDetail?.data?.products.map(
+            (product) => {
+              const productKey = `${product.product?.id}-${product.productUnit?.id}`;
+
+              return {
+                ...product,
+                productKey,
+                productUnit: { ...product.productUnit, code: product.product?.code },
+                quantity: product.quantity,
+                productUnitId: product.productUnit.id,
+                originProductUnitId: product.productUnit.id,
+                batches: product.batches?.map((batch) => {
+                  const inventory =
+                    (batch.quantity / product.productUnit.exchangeValue)
+
+                  const newBatch = {
+                    ...batch,
+                    inventory,
+                    originalInventory: batch.quantity,
+                    quantity: 0,
+                    isSelected: inventory >= 1,
+                  };
+
+                  return newBatch;
+                }),
+              };
+            }
+          );
+          setOrderActive(orderActive + 1)
+          setOrderObject({ ...orderObject, ...orderObjectClone });
+        }
+      }
+    }
+    getDataDetail()
+  }, [id])
+
+
+  // useEffect(() => {
+  //   if (orderDetail?.data?.products) {
+  //     // add order detail to order object when order detail is loaded
+  //     const orderObjectClone = cloneDeep(orderObject);
+  //     orderObjectClone[orderActive] = orderDetail?.data?.products.map(
+  //       (product) => {
+  //         const productKey = `${product.product.id}-${product.productUnit.id}`;
+
+  //         return {
+  //           ...product,
+  //           productKey,
+  //           productUnit: { ...product.productUnit, code: product.product.code },
+  //           quantity: product.quantity,
+  //           productUnitId: product.productUnit.id,
+  //           originProductUnitId: product.productUnit.id,
+  //           batches: product.batches?.map((batch) => {
+  //             const inventory =
+  //               (batch.quantity / product.productUnit.exchangeValue)
+
+  //             const newBatch = {
+  //               ...batch,
+  //               inventory,
+  //               originalInventory: batch.quantity,
+  //               quantity: 0,
+  //               isSelected: inventory >= 1,
+  //             };
+
+  //             return newBatch;
+  //           }),
+  //         };
+  //       }
+  //     );
+
+  //     setOrderObject(orderObjectClone);
+  //   }
+  // }, [orderDetail?.data?.products, id])
 
   const { scannedData, isScanned } = useBarcodeScanner();
 
@@ -488,7 +565,7 @@ const Index = () => {
             </div>
           </div>
 
-          <ProductList useForm={{ errors, setError }} products={products ? orderDetail?.data?.products : []} />
+          <ProductList useForm={{ errors, setError }} />
         </div>
 
         <RightContent

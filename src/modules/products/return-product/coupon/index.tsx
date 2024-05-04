@@ -204,20 +204,22 @@ export default function ReturnCoupon() {
 
   // barcode scanner
   useEffect(() => {
-    if (scannedData) {
-      if (id) return;
-      setFormFilter((pre) => ({ ...pre, keyword: scannedData }));
-      let product;
-      if ((products?.data?.items?.length ?? 0) > 0 && isSuccess && !isLoadingProduct) {
-        product = products?.data?.items?.find((item) => item.barCode === scannedData);
-      }
+    const getData = async () => {
+      if (scannedData) {
+        const productsScan = await getSaleProducts({ ...formFilter, keyword: scannedData, branchId })
+        let product;
+        if ((productsScan?.data?.items?.length ?? 0) > 0 && isSuccess) {
+          product = productsScan?.data?.items?.find((item) => item.barCode === scannedData);
+        }
 
-      if (product) {
-        handleSelectProduct(JSON.stringify(product));
-        return;
+        if (product) {
+          handleSelectProduct(JSON.stringify(product));
+          return;
+        }
       }
     }
-  }, [scannedData, products?.data?.items, isSuccess]);
+    getData();
+  }, [scannedData]);
 
   const columns: ColumnsType<IImportProductLocal> = [
     {

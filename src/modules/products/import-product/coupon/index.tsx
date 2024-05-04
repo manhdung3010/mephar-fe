@@ -346,7 +346,6 @@ export default function ImportCoupon() {
 
   const handleSelectProduct = (value) => {
     const product: IImportProduct = JSON.parse(value);
-    console.log("product", product)
 
     const localProduct: IImportProductLocal = {
       ...product,
@@ -357,8 +356,6 @@ export default function ImportCoupon() {
       discountValue: 0,
       batches: [],
     };
-
-    console.log("localProduct", localProduct)
 
     let cloneImportProducts = cloneDeep(importProducts);
 
@@ -388,19 +385,22 @@ export default function ImportCoupon() {
 
   // barcode scanner
   useEffect(() => {
-    if (scannedData) {
-      setFormFilter((pre) => ({ ...pre, keyword: scannedData }));
-      let product;
-      if ((products?.data?.items?.length ?? 0) > 0 && isSuccess) {
-        product = products?.data?.items?.find((item) => item.barCode === scannedData);
-      }
+    const getData = async () => {
+      if (scannedData) {
+        const productsScan = await getInboundProducts({ ...formFilter, keyword: scannedData, branchId })
+        let product;
+        if ((productsScan?.data?.items?.length ?? 0) > 0 && isSuccess) {
+          product = productsScan?.data?.items?.find((item) => item.barCode === scannedData);
+        }
 
-      if (product) {
-        handleSelectProduct(JSON.stringify(product));
-        return;
+        if (product) {
+          handleSelectProduct(JSON.stringify(product));
+          return;
+        }
       }
     }
-  }, [scannedData, products?.data?.items, isSuccess]);
+    getData();
+  }, [scannedData]);
 
   return (
     <div className="-mx-8 flex">
