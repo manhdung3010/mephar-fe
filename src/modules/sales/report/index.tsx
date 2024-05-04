@@ -13,10 +13,12 @@ import cx from "classnames";
 import React, { useState } from 'react'
 import { useRecoilValue } from 'recoil';
 import { CustomButton } from '@/components/CustomButton';
-import Search from './Search';
-import BillDetail from './row-detail';
+import classNames from 'classnames';
+import { SaleReport } from './sales-report/SaleReport';
+import { ProductReport } from './product-report';
+// import Search from './Search';
 
-function Invoice({
+function ReportModal({
   isOpen,
   onCancel,
   onSave,
@@ -38,6 +40,10 @@ function Invoice({
     status: undefined,
     branchId,
   });
+
+  const [select, setSelect] = useState(0);
+
+  const menu = ['Báo cáo bán hàng', 'Báo cáo sản phẩm', 'Báo cáo khách hàng', 'Báo cáo nhân viên', "Báo cáo nhà cung cấp"];
 
   const { data: orders, isLoading } = useQuery(
     ['ORDER_LIST', JSON.stringify(formFilter), branchId],
@@ -77,13 +83,19 @@ function Invoice({
       key: "createdAt",
     },
     {
+      title: "Nhân viên",
+      dataIndex: "customer",
+      key: "customer",
+      render: (data, record) => record?.creator?.fullName,
+    },
+    {
       title: "Khách hàng",
       dataIndex: "customer",
       key: "customer",
       render: (data) => data?.fullName,
     },
     {
-      title: "Tổng tiền hàng",
+      title: "Tổng cộng",
       dataIndex: "totalPrice",
       key: "totalPrice",
       render: (_, record) => {
@@ -95,76 +107,53 @@ function Invoice({
       },
     },
     {
-      title: "Giảm giá",
-      dataIndex: "discount",
-      key: "discount",
-      render: (_, { discount, discountType }) => discountType === 1 ? `${discount}%` : formatMoney(discount),
-    },
-    {
-      title: "Tổng tiền sau giảm giá",
-      dataIndex: "totalPrice",
-      key: "totalPrice",
-      render: (value) => formatMoney(value),
-    },
-    {
-      title: "Khách đã trả",
-      dataIndex: "cashOfCustomer",
-      key: "cashOfCustomer",
-      render: (value) => formatMoney(value),
+      title: "Tác vụ",
+      dataIndex: "action",
+      key: "action",
+      render: (_, record) => (
+        <CustomButton outline>Chọn</CustomButton>
+      ),
     },
   ];
   return (
     <CustomModal
       isOpen={isOpen}
       onCancel={onCancel}
-      title="Danh sách đơn hàng"
+      title="Báo cáo"
       width={1114}
       onSubmit={onCancel}
       customFooter={true}
       forceRender={true}
     >
-      <Search setFormFilter={setFormFilter} formFilter={formFilter} />
-
-      <CustomTable
-        dataSource={orders?.data?.items?.map((item, index) => ({
-          ...item,
-          key: index + 1,
-        }))}
-        columns={columns}
-        loading={isLoading}
-        onRow={(record, rowIndex) => {
-          return {
-            onClick: (event) => {
-              // Toggle expandedRowKeys state here
-              if (expandedRowKeys[record.key - 1]) {
-                const { [record.key - 1]: value, ...remainingKeys } =
-                  expandedRowKeys;
-                setExpandedRowKeys(remainingKeys);
-              } else {
-                setExpandedRowKeys({
-                  ...expandedRowKeys,
-                  [record.key - 1]: true,
-                });
-              }
-            },
-          };
-        }}
-        expandable={{
-          // eslint-disable-next-line @typescript-eslint/no-shadow
-          expandedRowRender: (record: IOrder) => <BillDetail record={record} />,
-          expandIcon: () => <></>,
-          expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key + 1),
-        }}
-      />
-      <CustomPagination
-        page={formFilter.page}
-        pageSize={formFilter.limit}
-        setPage={(value) => setFormFilter({ ...formFilter, page: value })}
-        setPerPage={(value) => setFormFilter({ ...formFilter, limit: value })}
-        total={orders?.data?.totalItem}
-      />
+      {/* <Search formFilter={formFilter} setFormFilter={setFormFilter} /> */}
+      <div
+        className="flex flex-col gap-5 bg-white  pt-4 pb-5"
+        style={{ boxShadow: '0px 8px 13px -3px rgba(0, 0, 0, 0.07)' }}
+      >
+        <div className="flex flex-col">
+          <div className="flex gap-3">
+            {menu.map((item, index) => (
+              <div
+                key={index}
+                className={classNames(
+                  'cursor-pointer px-5 py-[6px] rounded-t-lg',
+                  index === select
+                    ? 'bg-[#D64457] text-[white]'
+                    : 'text-black-main'
+                )}
+                onClick={() => setSelect(index)}
+              >
+                {item}
+              </div>
+            ))}
+          </div>
+          <div className="h-[1px] w-full bg-[#D64457]" />
+        </div>
+        {select === 0 && <SaleReport />}
+        {select === 1 && <ProductReport />}
+      </div>
     </CustomModal>
   )
 }
 
-export default Invoice
+export default ReportModal

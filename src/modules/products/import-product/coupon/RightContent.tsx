@@ -49,11 +49,10 @@ export function RightContent({ useForm }: { useForm: any }) {
 
   const totalPrice = useMemo(() => {
     let price = 0;
-
     if (productsImport?.length) {
       productsImport.forEach(
-        ({ price: unitPrice, quantity, discountValue }) => {
-          price += unitPrice * quantity - discountValue;
+        ({ product, quantity, discountValue, price: productPrice }) => {
+          price += productPrice * quantity - discountValue;
         }
       );
     }

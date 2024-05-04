@@ -16,11 +16,12 @@ import {
   productImportState,
 } from '@/recoil/state';
 
-import { LeftMenuStyled } from './styled';
-import InvoiceModal from './return-product/InvoiceModal';
 import { useState } from 'react';
-import { Customer } from '../partners/customer';
 import CustomerModal from './customer-modal';
+import Invoice from './invoice';
+import InvoiceModal from './return-product/InvoiceModal';
+import { LeftMenuStyled } from './styled';
+import ReportModal from './report';
 
 export function LeftMenu() {
   const resetOrderObject = useResetRecoilState(orderState);
@@ -30,6 +31,7 @@ export function LeftMenu() {
   const [openInvoiceModal, setOpenInvoiceModal] = useState(false);
   const [openCustomer, setOpenCustomer] = useState(false);
   const [openInvoice, setOpenInvoice] = useState(false);
+  const [openReport, setOpenReport] = useState(false);
 
   const clearCache = () => {
     resetOrderObject();
@@ -74,7 +76,7 @@ export function LeftMenu() {
           </div>
         </div>
 
-        <div className="mb-3 flex h-[99px] flex-col items-center justify-center rounded-lg bg-[#FBECEE] py-3 px-2">
+        <div onClick={() => setOpenReport(true)} className="mb-3 flex h-[99px] flex-col items-center justify-center rounded-lg bg-[#FBECEE] py-3 px-2 cursor-pointer">
           <Image src={PayLoan} />
           <div className=" mt-2 text-center font-medium leading-tight text-red-main">
             Khách trả nợ
@@ -88,7 +90,7 @@ export function LeftMenu() {
           </div>
         </div>
 
-        <div className="mb-3 flex h-[99px] flex-col items-center justify-center rounded-lg bg-[#FBECEE] py-3 px-2">
+        <div onClick={() => setOpenReport(true)} className="mb-3 flex h-[99px] flex-col items-center justify-center rounded-lg bg-[#FBECEE] py-3 px-2 cursor-pointer">
           <Image src={Document} />
           <div className=" mt-2 text-center font-medium leading-tight text-red-main">
             Xem báo cáo
@@ -110,9 +112,17 @@ export function LeftMenu() {
         isOpen={!!openInvoiceModal}
         onCancel={() => setOpenInvoiceModal(false)}
       />
+      <Invoice
+        isOpen={!!openInvoice}
+        onCancel={() => setOpenInvoice(false)}
+      />
       <CustomerModal
         isOpen={!!openCustomer}
         onCancel={() => setOpenCustomer(false)}
+      />
+      <ReportModal
+        isOpen={!!openReport}
+        onCancel={() => setOpenReport(false)}
       />
     </LeftMenuStyled>
   );

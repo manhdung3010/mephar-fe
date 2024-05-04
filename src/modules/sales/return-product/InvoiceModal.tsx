@@ -22,7 +22,7 @@ function InvoiceModal({
 }: {
   isOpen: boolean;
   onCancel: () => void;
-  onSave?: (value) => void;
+  onSave?: any;
 }) {
   const branchId = useRecoilValue(branchState);
   const profile = useRecoilValue(profileState);
@@ -46,6 +46,11 @@ function InvoiceModal({
   const [expandedRowKeys, setExpandedRowKeys] = useState<
     Record<string, boolean>
   >({});
+
+  const onSelectInvoice = (record) => {
+    router.push(`/sales?id=${record.id}`);
+    onCancel();
+  }
 
   const columns: ColumnsType<IOrder> = [
     {
@@ -104,7 +109,7 @@ function InvoiceModal({
       dataIndex: "action",
       key: "action",
       render: (_, record) => (
-        <CustomButton outline>Chọn</CustomButton>
+        <CustomButton outline onClick={() => onSelectInvoice(record)}>Chọn</CustomButton>
       ),
     },
   ];

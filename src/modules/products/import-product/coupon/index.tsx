@@ -227,6 +227,7 @@ export default function ImportCoupon() {
           value={id}
           onChange={(value) => {
             let importProductsClone = cloneDeep(importProducts);
+            console.log("importProductsClone", importProductsClone)
 
             importProductsClone = importProductsClone.map((product) => {
               if (product.productKey === productKey) {
@@ -237,6 +238,7 @@ export default function ImportCoupon() {
                 return {
                   ...product,
                   code: productUnit?.code || '', // Assign an empty string if productUnit.code is undefined
+                  price: product.product.primePrice * Number(productUnit?.exchangeValue),
                   productKey: `${product.product.id}-${value}`,
                   ...productUnit,
                   batches: product.batches?.map((batch) => ({
@@ -284,13 +286,13 @@ export default function ImportCoupon() {
       title: "Đơn giá",
       dataIndex: "primePrice",
       key: "primePrice",
-      render: (_, { productKey, price, product }) => (
+      render: (value, { productKey, price, product }) => (
         <CustomInput
           type="number"
           bordered={false}
           onChange={(value) => onChangeValueProduct(productKey, "price", value)}
           wrapClassName="w-[100px]"
-          defaultValue={product.primePrice}
+          value={price}
         />
       ),
     },
@@ -314,7 +316,7 @@ export default function ImportCoupon() {
       title: "Thành tiền",
       dataIndex: "totalPrice",
       key: "totalPrice",
-      render: (_, { quantity, discountValue, price }) =>
+      render: (_, { quantity, discountValue, product, price }) =>
         formatMoney(quantity * price - discountValue),
     },
   ];
@@ -344,15 +346,19 @@ export default function ImportCoupon() {
 
   const handleSelectProduct = (value) => {
     const product: IImportProduct = JSON.parse(value);
+    console.log("product", product)
 
     const localProduct: IImportProductLocal = {
       ...product,
       productKey: `${product.product.id}-${product.id}`,
+      primePrice: product.product.primePrice * Number(product.product.productUnit?.find((unit) => unit.id === product.id)?.exchangeValue),
       inventory: product.quantity,
       quantity: 1,
       discountValue: 0,
       batches: [],
     };
+
+    console.log("localProduct", localProduct)
 
     let cloneImportProducts = cloneDeep(importProducts);
 

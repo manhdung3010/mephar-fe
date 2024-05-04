@@ -31,9 +31,13 @@ import type {
 } from './interface';
 import { schema } from './schema';
 import { CustomInput } from '@/components/CustomInput';
+import { getOrderDetail } from '@/api/order.service';
+import { useRouter } from 'next/router';
 
 const Index = () => {
   const branchId = useRecoilValue(branchState);
+  const router = useRouter();
+  const { id } = router.query;
 
   const [formFilter, setFormFilter] = useState({
     page: 1,
@@ -71,6 +75,11 @@ const Index = () => {
     ],
     () => getSaleProducts({ ...formFilter, branchId }),
     { enabled: !isSearchSampleMedicine }
+  );
+
+  const { data: orderDetail, isLoading } = useQuery(
+    ['ORDER_DETAIL', JSON.stringify(formFilter), branchId],
+    () => getOrderDetail(Number(id)),
   );
 
   const { data: sampleMedicines, isLoading: isLoadingSampleMedicines } =
@@ -479,7 +488,7 @@ const Index = () => {
             </div>
           </div>
 
-          <ProductList useForm={{ errors, setError }} />
+          <ProductList useForm={{ errors, setError }} products={products ? orderDetail?.data?.products : []} />
         </div>
 
         <RightContent
