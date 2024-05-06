@@ -33,6 +33,7 @@ import type {
   ISampleMedicine,
 } from './interface';
 import { schema } from './schema';
+import { RightContentReturn } from './RightContentReturn';
 
 const Index = () => {
   const branchId = useRecoilValue(branchState);
@@ -47,6 +48,7 @@ const Index = () => {
   });
   const [isSearchSampleMedicine, setIsSearchSampleMedicine] = useState(false);
   const [isScanBarcode, setIsScanBarcode] = useState(false);
+  const [orderDetail, setOrderDetail] = useState<any>(null);
   const [valueScanBarcode, setValueScanBarcode] = useState('');
 
   const {
@@ -102,12 +104,14 @@ const Index = () => {
   useEffect(() => {
     const getDataDetail = async () => {
       if (id) {
-        const orderDetail = await getOrderDetail(Number(id))
+        const orderDetail: any = await getOrderDetail(Number(id))
         if (orderDetail?.data?.products) {
+          setOrderDetail(orderDetail?.data)
+          setValue("customerId", orderDetail?.order?.customerId, { shouldValidate: true })
           // add order detail to order object when order detail is loaded
           const orderObjectClone = cloneDeep(orderObject);
 
-          orderObjectClone[orderActive + 1] = orderDetail?.data?.products.map(
+          orderObjectClone[orderActive + "-RETURN"] = orderDetail?.data?.products.map(
             (product) => {
               const productKey = `${product.product?.id}-${product.productUnit?.id}`;
 
@@ -135,51 +139,13 @@ const Index = () => {
               };
             }
           );
-          setOrderActive(orderActive + 1)
+          setOrderActive(orderActive + "-RETURN")
           setOrderObject({ ...orderObject, ...orderObjectClone });
         }
       }
     }
     getDataDetail()
   }, [id])
-
-
-  // useEffect(() => {
-  //   if (orderDetail?.data?.products) {
-  //     // add order detail to order object when order detail is loaded
-  //     const orderObjectClone = cloneDeep(orderObject);
-  //     orderObjectClone[orderActive] = orderDetail?.data?.products.map(
-  //       (product) => {
-  //         const productKey = `${product.product.id}-${product.productUnit.id}`;
-
-  //         return {
-  //           ...product,
-  //           productKey,
-  //           productUnit: { ...product.productUnit, code: product.product.code },
-  //           quantity: product.quantity,
-  //           productUnitId: product.productUnit.id,
-  //           originProductUnitId: product.productUnit.id,
-  //           batches: product.batches?.map((batch) => {
-  //             const inventory =
-  //               (batch.quantity / product.productUnit.exchangeValue)
-
-  //             const newBatch = {
-  //               ...batch,
-  //               inventory,
-  //               originalInventory: batch.quantity,
-  //               quantity: 0,
-  //               isSelected: inventory >= 1,
-  //             };
-
-  //             return newBatch;
-  //           }),
-  //         };
-  //       }
-  //     );
-
-  //     setOrderObject(orderObjectClone);
-  //   }
-  // }, [orderDetail?.data?.products, id])
 
   const { scannedData, isScanned } = useBarcodeScanner();
 
@@ -333,6 +299,8 @@ const Index = () => {
     }, 300),
     [formFilter]
   );
+
+  console.log("orderObject", orderObject)
 
   return (
     <div>
@@ -513,7 +481,7 @@ const Index = () => {
                   </Popover>
                 </div>
 
-                {Object.keys(orderObject).map((order, index) => (
+                {Object.keys(orderObject).map((order: any, index) => (
                   <div key={order} className="flex">
                     <div className="mx-6 h-[62px] w-[1px] bg-[#E4E4E4]" />
 
@@ -528,7 +496,7 @@ const Index = () => {
                         )}
                       >
                         <span className={cx('mr-1 text-base font-medium')}>
-                          Đơn {index + 1}
+                          Đơn {order.split("-")[1] === "RETURN" ? "trả" : "bán"} {index + 1}
                         </span>
 
                         <Image
@@ -576,9 +544,14 @@ const Index = () => {
           <ProductList useForm={{ errors, setError }} />
         </div>
 
-        <RightContent
-          useForm={{ getValues, setValue, handleSubmit, errors, reset }}
-        />
+        {
+          orderActive.split("-")[1] === "RETURN" ? <RightContentReturn
+            useForm={{ getValues, setValue, handleSubmit, errors, reset }}
+            customerId={orderObject[orderActive]?.[0]?.customerId}
+          /> : <RightContent
+            useForm={{ getValues, setValue, handleSubmit, errors, reset }}
+          />
+        }
       </div>
     </div>
   );

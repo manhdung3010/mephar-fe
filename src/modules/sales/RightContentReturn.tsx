@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { message } from 'antd';
-import cx from 'classnames';
-import { cloneDeep, debounce, get } from 'lodash';
+import { cloneDeep, debounce } from 'lodash';
 import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -13,12 +12,8 @@ import CustomerIcon from '@/assets/customerIcon.svg';
 import DolarIcon from '@/assets/dolarIcon.svg';
 import EditIcon from '@/assets/editIcon.svg';
 import EmployeeIcon from '@/assets/employeeIcon.svg';
-import Bank from '@/assets/images/bank.png';
-import Cash from '@/assets/images/cash.png';
-import Debt from '@/assets/images/debt.png';
 import PlusIcon from '@/assets/plusIcon.svg';
 import { CustomButton } from '@/components/CustomButton';
-import { CustomCheckbox } from '@/components/CustomCheckbox';
 import { CustomInput } from '@/components/CustomInput';
 import { CustomSelect } from '@/components/CustomSelect';
 import InputError from '@/components/InputError';
@@ -36,16 +31,16 @@ import {
   profileState,
 } from '@/recoil/state';
 
+import { RoleAction, RoleModel } from '../settings/role/role.enum';
 import { CreateCustomerModal } from './CreateCustomerModal';
 import { CreateDiscountModal } from './CreateDiscountModal';
 import { CreatePrescriptionModal } from './CreatePrescriptionModal';
-import type { ISaleProductLocal } from './interface';
 import { OrderSuccessModal } from './OrderSuccessModal';
 import { ScanQrModal } from './ScanQrModal';
+import type { ISaleProductLocal } from './interface';
 import { RightContentStyled } from './styled';
-import { RoleAction, RoleModel } from '../settings/role/role.enum';
 
-export function RightContent({ useForm }: { useForm: any }) {
+export function RightContentReturn({ useForm, customerId }: { useForm: any, customerId: string }) {
   const queryClient = useQueryClient();
 
   const { getValues, setValue, handleSubmit, errors, reset } = useForm;
@@ -79,6 +74,12 @@ export function RightContent({ useForm }: { useForm: any }) {
       setValue('userId', profile.id);
     }
   }, [profile]);
+
+  useEffect(() => {
+    if (customerId) {
+      setValue('customerId', customerId, { shouldValidate: true });
+    }
+  }, [customerId])
 
   useEffect(() => {
     const orderKeys = Object.keys(orderObject);
@@ -247,6 +248,7 @@ export function RightContent({ useForm }: { useForm: any }) {
           wrapClassName="mt-3"
           className="h-[44px]"
           placeholder="Thêm khách vào đơn F4"
+          disabled
           suffixIcon={
             <>
               {
@@ -266,29 +268,28 @@ export function RightContent({ useForm }: { useForm: any }) {
           prefixIcon={<Image src={CustomerIcon} alt="" />}
         />
         <InputError error={errors.customerId?.message} />
-
-        <CustomCheckbox
-          className="mt-3"
-          onChange={(e) => {
-            if (e.target.checked) {
-              setIsOpenPrescriptionModal(true);
-            } else {
-              setValue('prescriptionId', undefined, { shouldValidate: true });
-            }
-          }}
-          checked={!!getValues('prescriptionId')}
-        >
-          Bán thuốc theo đơn
-        </CustomCheckbox>
       </div>
 
       <div className="my-6 h-[1px] w-full bg-[#E4E4E4]"></div>
       <div className="flex grow flex-col px-6">
+        <div className='text-[#3E7BFA] text-xl mb-5'>Trả hàng</div>
         <div className="grow">
           <div className="mb-5 border-b-2 border-dashed border-[#E4E4E4]">
             <div className="mb-3 flex justify-between">
               <div className="text-lg leading-normal text-[#828487]">
-                Tổng tiền (
+                Tổng giá gốc hàng mua (
+                <span className="text-lg">
+                  {orderObject[orderActive]?.length ?? 0} sp
+                </span>
+                )
+              </div>
+              <div className="text-lg leading-normal text-[#19191C]">
+                {formatMoney(totalPrice)}
+              </div>
+            </div>
+            <div className="mb-3 flex justify-between">
+              <div className="text-lg leading-normal text-[#828487]">
+                Tổng tiền hàng trả (
                 <span className="text-lg">
                   {orderObject[orderActive]?.length ?? 0} sp
                 </span>
@@ -301,7 +302,7 @@ export function RightContent({ useForm }: { useForm: any }) {
 
             <div className="mb-3 flex justify-between">
               <div className="text-lg leading-normal text-[#828487]">
-                Chiết khấu
+                Giảm giá
               </div>
               <div className="w-[120px] ">
                 <CustomInput
@@ -318,115 +319,31 @@ export function RightContent({ useForm }: { useForm: any }) {
                 />
               </div>
             </div>
+            <div className="mb-3 flex justify-between">
+              <div className="text-lg leading-normal text-[#828487]">
+                Phí trả hàng
+              </div>
+              <div className="w-[120px] ">
+                <CustomInput
+                  bordered={false}
+                  className="h-6 pr-0 text-end text-lg"
+                  blurAfterClick={true}
+                  forceValue={discount}
+                  onChange={() => {
+                    // nothing
+                  }}
+                />
+              </div>
+            </div>
           </div>
 
           <div className="mb-5 border-b-2 border-dashed border-[#E4E4E4]">
             <div className="mb-5 flex justify-between">
               <div className="text-lg leading-normal text-[#000] ">
-                KHÁCH PHẢI TRẢ
+                CẦN TRẢ KHÁCH
               </div>
               <div className="text-lg leading-normal text-red-main">
                 {formatMoney(customerMustPay)}
-              </div>
-            </div>
-
-            <div className="mb-3 ">
-              <div className="flex justify-between">
-                <div className="text-lg leading-normal text-[#828487]">
-                  Tiền khách đưa <span className='text-red-500'>*</span>
-                </div>
-                <div className="w-[120px]">
-                  <CustomInput
-                    bordered={false}
-                    className="h-6 pr-0 text-end text-lg"
-                    onChange={(value) => {
-                      setValue('cashOfCustomer', value, {
-                        shouldValidate: true,
-                      });
-                    }}
-                    type="number"
-                    hideArrow={true}
-                    value={getValues('cashOfCustomer')}
-                  />
-                </div>
-              </div>
-
-              <InputError error={errors.cashOfCustomer?.message} />
-            </div>
-
-            <div className="mb-5 flex justify-between">
-              <div className="text-lg leading-normal text-[#828487]">
-                Tiền thừa trả khách
-              </div>
-              <div className="text-lg leading-normal text-[#19191C]">
-                {formatMoney(returnPrice)}
-              </div>
-            </div>
-          </div>
-
-          <div className="mb-5">
-            <div className="mb-5 flex justify-between">
-              <div className="text-lg leading-normal text-[#828487]">
-                Phương thức thanh toán
-              </div>
-              <div className="text-lg leading-normal text-[#19191C]">
-                {getValues('paymentType') === EPaymentMethod.CASH ? "Tiền mặt" : getValues('paymentType') === EPaymentMethod.BANKING ? "Chuyển khoản" : "Khách nợ"}
-              </div>
-            </div>
-
-            <div className="flex justify-between">
-              <div
-                className={cx(' rounded-[18px] w-[96px] h-[99px]', {
-                  'border-2 border-red-main':
-                    getValues('paymentType') === EPaymentMethod.CASH,
-                })}
-              >
-                <Image
-                  src={Cash}
-                  onClick={() =>
-                    setValue('paymentType', EPaymentMethod.CASH, {
-                      shouldValidate: true,
-                    })
-                  }
-                  className=" cursor-pointer"
-                  alt=""
-                />
-              </div>
-
-              <div
-                className={cx(' rounded-[18px] w-[96px] h-[99px]', {
-                  'border-2 border-red-main':
-                    getValues('paymentType') === EPaymentMethod.BANKING,
-                })}
-              >
-                <Image
-                  src={Bank}
-                  onClick={() =>
-                    setValue('paymentType', EPaymentMethod.BANKING, {
-                      shouldValidate: true,
-                    })
-                  }
-                  className=" cursor-pointer"
-                  alt=""
-                />
-              </div>
-
-              <div
-                className={cx(' rounded-[18px] w-[96px] h-[99px]', {
-                  'border-2 border-red-main':
-                    getValues('paymentType') === EPaymentMethod.DEBT,
-                })}
-              >
-                <Image
-                  src={Debt}
-                  onClick={() =>
-                    setValue('paymentType', EPaymentMethod.DEBT, {
-                      shouldValidate: true,
-                    })
-                  }
-                  className=" cursor-pointer"
-                  alt=""
-                />
               </div>
             </div>
           </div>
@@ -449,10 +366,6 @@ export function RightContent({ useForm }: { useForm: any }) {
       <div className="my-4 h-[1px] w-full bg-[#E4E4E4]"></div>
 
       <div className="px-6 pb-6">
-        <div className="mb-4 text-center text-red-main">
-          Liên thông dược quốc gia
-        </div>
-
         <CustomButton
           onClick={() => {
             if (!getValues('customerId') && getValues('paymentType') === EPaymentMethod.DEBT) {
@@ -486,7 +399,7 @@ export function RightContent({ useForm }: { useForm: any }) {
           type={!orderObject[orderActive]?.length ? 'disable' : 'danger'}
           loading={isLoadingCreateOrder}
         >
-          <Image src={DolarIcon} alt="" /> Thanh toán
+          <Image src={DolarIcon} alt="" /> Trả hàng
         </CustomButton>
       </div>
 
