@@ -67,6 +67,11 @@ export default function ReturnCoupon() {
   );
 
   useEffect(() => {
+    setReturnProducts([]);
+
+  }, [id])
+
+  useEffect(() => {
     if (importProductDetail) {
       importProductDetail?.data?.products?.forEach((product) => {
         const newProduct = {
@@ -312,6 +317,7 @@ export default function ReturnCoupon() {
                   productKey: `${product.product.id}-${value}`,
                   ...productUnit,
                   primePrice: product.product.primePrice * productUnit.exchangeValue,
+                  price: product.product.primePrice * productUnit.exchangeValue,
                   batches: product.batches?.map((batch) => ({
                     ...batch,
                     inventory:
@@ -364,24 +370,16 @@ export default function ReturnCoupon() {
       title: "Giá nhập",
       dataIndex: 'primePrice',
       key: 'primePrice',
-      render: (primePrice, record: any) => id ? <CustomInput
+      render: (primePrice, record: any) => <CustomInput
         type="number"
         bordered={false}
         onChange={(value) => onChangeValueProduct(record?.productKey, 'price', value)}
         wrapClassName="w-[100px]"
-        defaultValue={record?.productBatchHistories?.find((item, index) => index === 0)?.importPrice}
+        defaultValue={id ? record?.productBatchHistories?.find((item, index) => index === 0)?.importPrice : primePrice}
         disabled
-      /> : (
-        <CustomInput
-          type="number"
-          bordered={false}
-          onChange={(value) => onChangeValueProduct(record?.productKey, 'price', value)}
-          wrapClassName="w-[100px]"
-          defaultValue={primePrice}
-        />
-      ),
+      />,
     },
-    (id ? {
+    {
       title: "Giá trả lại",
       dataIndex: 'price',
       key: 'price',
@@ -390,18 +388,15 @@ export default function ReturnCoupon() {
         bordered={false}
         onChange={(value) => onChangeValueProduct(record?.productKey, 'price', value)}
         wrapClassName="w-[100px]"
-        defaultValue={price}
+        defaultValue={id ? record?.productBatchHistories?.find((item, index) => index === 0)?.importPrice : record?.primePrice}
       />
-    } : {}),
+    },
     {
       title: 'Thành tiền',
       dataIndex: 'totalPrice',
       key: 'totalPrice',
       render: (_, { quantity, discountValue, price, primePrice }) => {
-        if (id) {
-          return formatMoney(quantity * price)
-        }
-        return formatMoney(quantity * (primePrice ?? 0))
+        return formatMoney(quantity * price)
       },
     },
   ];
@@ -446,6 +441,7 @@ export default function ReturnCoupon() {
     const localProduct: IImportProductLocal = {
       ...product,
       productKey: `${product.product.id}-${product.id}`,
+      price: id ? product.productBatchHistories[0].importPrice : product.product.primePrice * product.productUnit.exchangeValue,
       inventory: product.quantity,
       quantity: 1,
       discountValue: 0,

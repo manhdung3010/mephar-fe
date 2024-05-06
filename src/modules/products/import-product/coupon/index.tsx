@@ -227,8 +227,6 @@ export default function ImportCoupon() {
           value={id}
           onChange={(value) => {
             let importProductsClone = cloneDeep(importProducts);
-            console.log("importProductsClone", importProductsClone)
-
             importProductsClone = importProductsClone.map((product) => {
               if (product.productKey === productKey) {
                 const productUnit = product.product.productUnit.find(
@@ -239,6 +237,7 @@ export default function ImportCoupon() {
                   ...product,
                   code: productUnit?.code || '', // Assign an empty string if productUnit.code is undefined
                   price: product.product.primePrice * Number(productUnit?.exchangeValue),
+                  primePrice: product.product.primePrice * Number(productUnit?.exchangeValue),
                   productKey: `${product.product.id}-${value}`,
                   ...productUnit,
                   batches: product.batches?.map((batch) => ({
@@ -248,10 +247,9 @@ export default function ImportCoupon() {
                   })),
                 };
               }
-
               return product;
             });
-
+            console.log("importProductsClone", importProductsClone)
             setImportProducts(importProductsClone);
           }}
         />
@@ -290,9 +288,9 @@ export default function ImportCoupon() {
         <CustomInput
           type="number"
           bordered={false}
-          onChange={(value) => onChangeValueProduct(productKey, "price", value)}
+          onChange={(value) => onChangeValueProduct(productKey, "primePrice", value)}
           wrapClassName="w-[100px]"
-          value={price}
+          value={value}
         />
       ),
     },
@@ -316,8 +314,8 @@ export default function ImportCoupon() {
       title: "Thành tiền",
       dataIndex: "totalPrice",
       key: "totalPrice",
-      render: (_, { quantity, discountValue, product, price }) =>
-        formatMoney(quantity * price - discountValue),
+      render: (_, { quantity, discountValue, product, primePrice }) =>
+        formatMoney(quantity * Number(primePrice) - discountValue),
     },
   ];
 
@@ -350,6 +348,7 @@ export default function ImportCoupon() {
     const localProduct: IImportProductLocal = {
       ...product,
       productKey: `${product.product.id}-${product.id}`,
+      price: product.product.primePrice * Number(product.product.productUnit?.find((unit) => unit.id === product.id)?.exchangeValue),
       primePrice: product.product.primePrice * Number(product.product.productUnit?.find((unit) => unit.id === product.id)?.exchangeValue),
       inventory: product.quantity,
       quantity: 1,

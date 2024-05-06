@@ -5,21 +5,24 @@ import cx from 'classnames';
 import { cloneDeep, debounce } from 'lodash';
 import Image from 'next/image';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { set, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
 import { getSaleProducts, getSampleMedicines } from '@/api/product.service';
+import BarcodeIcon from '@/assets/barcode.svg';
 import CloseIcon from '@/assets/closeIcon.svg';
 import FilterIcon from '@/assets/filterIcon.svg';
 import PlusIcon from '@/assets/plusIcon.svg';
 import SearchIcon from '@/assets/searchIcon.svg';
-import BarcodeIcon from '@/assets/barcode.svg';
 import { CustomAutocomplete } from '@/components/CustomAutocomplete';
 import { EPaymentMethod } from '@/enums';
 import { formatMoney, formatNumber, getImage, randomString } from '@/helpers';
 import { branchState, orderActiveState, orderState } from '@/recoil/state';
 
+import { getOrderDetail } from '@/api/order.service';
+import { CustomInput } from '@/components/CustomInput';
 import useBarcodeScanner from '@/hooks/useBarcodeScanner';
+import { useRouter } from 'next/router';
 import { SaleHeader } from './Header';
 import { LeftMenu } from './LeftMenu';
 import { ProductList } from './ProductList';
@@ -30,9 +33,6 @@ import type {
   ISampleMedicine,
 } from './interface';
 import { schema } from './schema';
-import { CustomInput } from '@/components/CustomInput';
-import { getOrderDetail } from '@/api/order.service';
-import { useRouter } from 'next/router';
 
 const Index = () => {
   const branchId = useRecoilValue(branchState);
@@ -47,6 +47,7 @@ const Index = () => {
   });
   const [isSearchSampleMedicine, setIsSearchSampleMedicine] = useState(false);
   const [isScanBarcode, setIsScanBarcode] = useState(false);
+  const [valueScanBarcode, setValueScanBarcode] = useState('');
 
   const {
     getValues,
@@ -95,6 +96,8 @@ const Index = () => {
 
   const [orderActive, setOrderActive] = useRecoilState(orderActiveState);
   const [orderObject, setOrderObject] = useRecoilState(orderState);
+
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const getDataDetail = async () => {
@@ -255,7 +258,7 @@ const Index = () => {
       };
       orderObjectClone[orderActive]?.push(productLocal);
     }
-
+    inputRef.current?.select();
     setOrderObject(orderObjectClone);
     setFormFilter((pre) => ({ ...pre, keyword: '' }));
   };
@@ -474,9 +477,14 @@ const Index = () => {
                       className="h-[48px] w-[466px] rounded-[30px] bg-white text-sm"
                       placeholder='Thêm sản phẩm mới vào đơn F3'
                       onChange={(value) => {
-
+                        setValueScanBarcode(value);
                       }}
-                      prefixIcon={<Image src={SearchIcon} alt="" />} />
+                      refInput={inputRef}
+                      value={valueScanBarcode}
+                      onFocus={(e) => e.target.select()}
+                      autoFocus
+                      prefixIcon={<Image src={SearchIcon} alt="" />}
+                    />
                   }
                 </div>
 

@@ -51,8 +51,8 @@ export function RightContent({ useForm }: { useForm: any }) {
     let price = 0;
     if (productsImport?.length) {
       productsImport.forEach(
-        ({ product, quantity, discountValue, price: productPrice }) => {
-          price += productPrice * quantity - discountValue;
+        ({ product, quantity, discountValue, primePrice }) => {
+          price += Number(primePrice) * quantity - discountValue;
         }
       );
     }

@@ -47,17 +47,17 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
   );
 
   const totalPrice = useMemo(() => {
-    let price = 0;
+    let priceTotal = 0;
 
     if (productsReturn?.length) {
       productsReturn.forEach(
-        ({ product, quantity, discountValue, productUnit }) => {
-          price += product.primePrice * productUnit?.exchangeValue * quantity;
+        ({ product, quantity, discountValue, productUnit, price }) => {
+          priceTotal += price * quantity;
         }
       );
     }
 
-    return price;
+    return priceTotal;
   }, [productsReturn]);
 
   const totalPriceAfterDiscount = useMemo(() => {
