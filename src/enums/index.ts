@@ -258,3 +258,18 @@ export const productReportLabels: Record<EProductReportConcerns, string> = {
   [EProductReportConcerns.EMPLOYEE]: "Nhân viên theo hàng bán",
   [EProductReportConcerns.CUSTOMER]: "Khách theo hàng bán",
 };
+
+export const saleReturn = [
+  {
+    key: "DRAFT",
+    value: "Lưu tạm",
+  },
+  {
+    key: "SUCCEED",
+    value: "Hoàn thành",
+  },
+  {
+    key: "CANCELLED",
+    value: "Hủy bỏ",
+  },
+];

@@ -1,5 +1,5 @@
 import type { ColumnsType } from 'antd/es/table';
-import { cloneDeep, orderBy } from 'lodash';
+import { cloneDeep, divide, orderBy } from 'lodash';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -18,7 +18,7 @@ import type { IBatch, IProductUnit, ISaleProductLocal } from './interface';
 import { ListBatchModal } from './ListBatchModal';
 import { ProductTableStyled } from './styled';
 
-export function ProductList({ useForm }: { useForm: any }) {
+export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetail: any }) {
   const { errors, setError } = useForm;
 
   const [orderObject, setOrderObject] = useRecoilState(orderState);
@@ -37,8 +37,6 @@ export function ProductList({ useForm }: { useForm: any }) {
         product.product.isBatchExpireControl)
     );
   };
-
-  console.log("orderObject[orderActive]", orderObject[orderActive])
 
   useEffect(() => {
     if (orderObject[orderActive]) {
@@ -257,15 +255,17 @@ export function ProductList({ useForm }: { useForm: any }) {
         />
       ),
     },
-    {
-      title: 'Tồn kho',
-      dataIndex: 'newInventory',
-      key: 'newInventory',
-      render: (value, record) => <div>
-        {value ? formatNumber(Math.floor(value)) : formatNumber(record.inventory)}
+    ...(
+      orderActive.split("-")[1] === "RETURN" ? [] : [{
+        title: 'Tồn kho',
+        dataIndex: 'newInventory',
+        key: 'newInventory',
+        render: (value, record) => <div>
+          {value ? formatNumber(Math.floor(value)) : formatNumber(record.inventory)}
 
-      </div>
-    },
+        </div>
+      },]
+    ),
     {
       title: 'SỐ LƯỢNG',
       dataIndex: 'quantity',
@@ -291,6 +291,44 @@ export function ProductList({ useForm }: { useForm: any }) {
         />
       ),
     },
+    ...(orderActive.split("-")[1] === "RETURN" ? [
+      {
+        title: 'GIÁ TRẢ',
+        dataIndex: 'price',
+        key: 'price',
+        render: (_, { productUnit, productKey }) => (
+          // input return price
+          <CustomInput
+            wrapClassName="!w-[110px]"
+            className="!h-6 !w-[80px] text-center"
+            hasMinus={false}
+            hasPlus={false}
+            value={productUnit.returnPrice}
+            type="number"
+            onChange={(value) => {
+              const orderObjectClone = cloneDeep(orderObject);
+
+              orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map(
+                (product: ISaleProductLocal) => {
+                  if (product.productKey === productKey) {
+                    return {
+                      ...product,
+                      productUnit: {
+                        ...product.productUnit,
+                        returnPrice: value,
+                      },
+                    };
+                  }
+
+                  return product;
+                }
+              );
+
+              setOrderObject(orderObjectClone);
+            }} />
+        ),
+      },
+    ] : []),
     {
       title: 'ĐƠN GIÁ',
       dataIndex: 'price',
@@ -302,7 +340,7 @@ export function ProductList({ useForm }: { useForm: any }) {
       dataIndex: 'totalPrice',
       key: 'totalPrice',
       render: (_, { quantity, productUnit }) =>
-        formatMoney(quantity * productUnit.price),
+        orderDetail ? formatMoney(Number(productUnit.returnPrice) * quantity) : formatMoney(productUnit.price * quantity),
     },
   ];
 
@@ -345,8 +383,41 @@ export function ProductList({ useForm }: { useForm: any }) {
         scroll={{ x: 900 }}
         expandable={{
           defaultExpandAllRows: true,
-          // eslint-disable-next-line @typescript-eslint/no-shadow
-          expandedRowRender: (record: ISaleProductLocal) => (
+          expandedRowRender: (record: ISaleProductLocal) => orderActive.split("-")[1] === "RETURN" ? (
+            <div>
+              <div className="bg-[#FFF3E6] px-6 py-2 ">
+                <div className="hidden-scrollbar overflow-x-auto overflow-y-hidden">
+                  <div className="flex items-center gap-x-3">
+                    {record?.batches?.map(
+                      (batch: any) =>
+                      (
+                        <div
+                          key={batch.batchId}
+                          className="flex min-w-fit items-center rounded bg-red-main py-1 px-2 text-white"
+                        >
+                          <span className="mr-2">
+                            {batch.batch?.name} - {batch?.batch?.expiryDate} - SL:{' '}
+                            {record.quantity}
+                          </span>{' '}
+                          <Image
+                            className=" cursor-pointer"
+                            src={CloseIcon}
+                            onClick={() => {
+                              handleRemoveBatch(
+                                record.productKey,
+                                batch.batchId
+                              );
+                            }}
+                            alt=""
+                          />
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
             <>
               {checkDisplayListBatch(record) && (
                 <div className="bg-[#FFF3E6] px-6 py-2 ">

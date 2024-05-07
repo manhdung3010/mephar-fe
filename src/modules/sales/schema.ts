@@ -79,6 +79,25 @@ export const schema = yup.object().shape({
   branchId: yup.number(),
   prescriptionId: yup.number(),
 });
+export const schemaReturn = yup.object().shape({
+  products: yup.array(
+    yup.object({
+      productId: yup.number().required("Đây là trường bắt buộc!"),
+      productUnitId: yup.number().required("Đây là trường bắt buộc!"),
+      // productType: yup.number().required("Đây là trường bắt buộc!"),
+      quantity: yup.number().required("Đây là trường bắt buộc!"),
+      // returnPrice: yup.number().required("Đây là trường bắt buộc!"),
+    })
+  ),
+  paymentType: yup.string().required("Đây là trường bắt buộc!"),
+  paid: yup.number().required("Đây là trường bắt buộc!"),
+  discount: yup.number(),
+  returnFee: yup.number(),
+  description: yup.string(),
+  userId: yup.number().required("Đây là trường bắt buộc!"),
+  customerId: yup.number(),
+  branchId: yup.number(),
+});
 
 export const prescriptionSchema = yup.object().shape({
   name: yup.string().required("Đây là trường bắt buộc!"),

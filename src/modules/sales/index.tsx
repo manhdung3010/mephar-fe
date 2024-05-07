@@ -32,8 +32,9 @@ import type {
   ISaleProductLocal,
   ISampleMedicine,
 } from './interface';
-import { schema } from './schema';
+import { schema, schemaReturn } from './schema';
 import { RightContentReturn } from './RightContentReturn';
+import { CustomButton } from '@/components/CustomButton';
 
 const Index = () => {
   const branchId = useRecoilValue(branchState);
@@ -60,6 +61,20 @@ const Index = () => {
     reset,
   } = useForm({
     resolver: yupResolver(schema),
+    mode: 'onChange',
+    defaultValues: {
+      paymentType: EPaymentMethod.CASH,
+    },
+  });
+  const {
+    getValues: getValuesReturn,
+    setValue: setValueReturn,
+    handleSubmit: handleSubmitReturn,
+    formState: { errors: errorsReturn },
+    setError: setErrorReturn,
+    reset: resetReturn,
+  } = useForm({
+    resolver: yupResolver(schemaReturn),
     mode: 'onChange',
     defaultValues: {
       paymentType: EPaymentMethod.CASH,
@@ -118,7 +133,7 @@ const Index = () => {
               return {
                 ...product,
                 productKey,
-                productUnit: { ...product.productUnit, code: product.product?.code },
+                productUnit: { ...product.productUnit, code: product.product?.code, returnPrice: product.productUnit.price },
                 quantity: product.quantity,
                 productUnitId: product.productUnit.id,
                 originProductUnitId: product.productUnit.id,
@@ -441,6 +456,7 @@ const Index = () => {
                       isLoading={isLoadingProduct || isLoadingSampleMedicines}
                       listHeight={512}
                       popupClassName="search-product"
+                      disabled={orderActive.split("-")[1] === "RETURN"}
                     /> : <CustomInput
                       className="h-[48px] w-[466px] rounded-[30px] bg-white text-sm"
                       placeholder='Thêm sản phẩm mới vào đơn F3'
@@ -456,7 +472,7 @@ const Index = () => {
                   }
                 </div>
 
-                <div className='ml-2'>
+                <CustomButton outline disabled={orderActive.split("-")[1] === "RETURN"}>
                   <Popover
                     content={
                       "Quét mã vạch"
@@ -479,7 +495,7 @@ const Index = () => {
                       />
                     </div>
                   </Popover>
-                </div>
+                </CustomButton>
 
                 {Object.keys(orderObject).map((order: any, index) => (
                   <div key={order} className="flex">
@@ -541,13 +557,14 @@ const Index = () => {
             </div>
           </div>
 
-          <ProductList useForm={{ errors, setError }} />
+          <ProductList useForm={{ errors, setError }} orderDetail={orderDetail} />
         </div>
 
         {
           orderActive.split("-")[1] === "RETURN" ? <RightContentReturn
-            useForm={{ getValues, setValue, handleSubmit, errors, reset }}
+            useForm={{ getValuesReturn, setValueReturn, handleSubmitReturn, errorsReturn, resetReturn }}
             customerId={orderObject[orderActive]?.[0]?.customerId}
+            orderDetail={orderDetail}
           /> : <RightContent
             useForm={{ getValues, setValue, handleSubmit, errors, reset }}
           />

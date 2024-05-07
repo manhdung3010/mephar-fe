@@ -8,6 +8,8 @@ import SaveIcon from '@/assets/saveIcon.svg';
 import { CustomButton } from '@/components/CustomButton';
 import { CustomSelect } from '@/components/CustomSelect';
 import CustomTable from '@/components/CustomTable';
+import { formatDateTime, formatMoney, formatNumber } from '@/helpers';
+import { useMemo } from 'react';
 
 const { TextArea } = Input;
 
@@ -32,45 +34,59 @@ export function Info({ record }: { record: any }) {
     totalPrice: 140000,
   };
 
-  const dataSource: IRecord[] = Array(1)
-    .fill(0)
-    .map((_, index) => ({ ...data, key: index }));
-
-  const columns: ColumnsType<IRecord> = [
+  const columns: ColumnsType<any> = [
     {
       title: 'Mã hàng',
-      dataIndex: 'id',
-      key: 'id',
-      render: (value, _, index) => (
-        <span className="cursor-pointer text-[#0070F4]">{value}</span>
+      dataIndex: 'code',
+      key: 'code',
+      render: (value, { productUnit }, index) => (
+        <span className="cursor-pointer text-[#0070F4]">{productUnit?.code}</span>
       ),
     },
     {
       title: 'Tên hàng',
       dataIndex: 'name',
       key: 'name',
+      render: (value, { productUnit }, index) => (
+        <span>{productUnit.product.name}</span>
+      )
     },
     {
       title: 'Số lượng',
       dataIndex: 'quantity',
       key: 'quantity',
+      render: (value) => formatNumber(value)
     },
     {
       title: 'Đơn giá',
       dataIndex: 'price',
       key: 'price',
+      render: (value) => formatMoney(value)
     },
     {
       title: 'Giảm giá',
       dataIndex: 'discount',
       key: 'discount',
+      render: (value) => formatMoney(value)
     },
     {
       title: 'Thành tiền',
       dataIndex: 'totalPrice',
       key: 'totalPrice',
+      render: (value, { quantity, price, discount }) => formatMoney(quantity * price - discount)
     },
   ];
+
+  const totalPrice = useMemo(() => {
+    return record?.items?.reduce((acc: number, item: any) => {
+      return acc + item.quantity * item.price;
+    }, 0);
+  }, [record?.items])
+  const totalReturnPrice = useMemo(() => {
+    return record?.items?.reduce((acc: number, item: any) => {
+      return acc + item.quantity * item.price - item.discount;
+    }, 0);
+  }, [record?.items])
 
   return (
     <div className="gap-12 ">
@@ -78,52 +94,47 @@ export function Info({ record }: { record: any }) {
         <div className="mb-4 grid w-2/3 grid-cols-2 gap-5">
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Mã đơn trả:</div>
-            <div className="text-black-main">DQG00006601</div>
+            <div className="text-black-main">{record?.code}</div>
           </div>
 
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Chi nhánh:</div>
-            <div className="text-black-main">Chi nhánh mặc định</div>
+            <div className="text-black-main">{record?.branch?.name}</div>
           </div>
 
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Thời gian:</div>
-            <div className="text-black-main">17/10/2023 09:05:14</div>
+            <div className="text-black-main">{formatDateTime(record?.createdAt)}</div>
           </div>
 
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Người nhận trả:</div>
-            <CustomSelect onChange={() => {}} className="border-underline" />
+            <div className="text-black-main">{record?.creator?.fullName}</div>
           </div>
 
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Khách hàng:</div>
-            <div className="text-black-main">Khách lẻ</div>
+            <div className="text-black-main">{record?.customer?.fullName}</div>
           </div>
 
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Người tạo:</div>
-            <div className="text-black-main">Kimka.nt</div>
+            <div className="text-black-main">{record?.creator?.fullName}</div>
           </div>
 
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Mã hóa đơn:</div>
             <div className="text-black-main">DQG00006601</div>
           </div>
-
-          <div className="grid grid-cols-2 gap-5">
-            <div className="text-gray-main">Ngày tạo:</div>
-            <div className="text-black-main">17/10/2023 09:05:14</div>
-          </div>
         </div>
 
         <div className="grow">
-          <TextArea rows={8} placeholder="Ghi chú:" />
+          <TextArea rows={8} placeholder="Ghi chú:" value={record?.note} onChange={() => undefined} />
         </div>
       </div>
 
       <CustomTable
-        dataSource={dataSource}
+        dataSource={record?.items}
         columns={columns}
         pagination={false}
         className="mb-4"
@@ -131,32 +142,32 @@ export function Info({ record }: { record: any }) {
 
       <div className="ml-auto mb-5 w-[300px]">
         <div className=" mb-3 grid grid-cols-2">
-          <div className="text-gray-main">Tổng thực tế:</div>
-          <div className="text-black-main">2</div>
+          <div className="text-gray-main">Tổng số mặt hàng:</div>
+          <div className="text-black-main">{record?.items?.length}</div>
         </div>
 
         <div className=" mb-3 grid grid-cols-2">
           <div className="text-gray-main">Tổng tiền hàng trả:</div>
-          <div className="text-black-main">1400000</div>
+          <div className="text-black-main">{formatMoney(totalPrice)}</div>
         </div>
 
         <div className=" mb-3 grid grid-cols-2">
           <div className="text-gray-main">Giảm giá phiếu trả:</div>
-          <div className="text-black-main">0</div>
+          <div className="text-black-main">{formatMoney(record?.discount)}</div>
         </div>
 
         <div className=" mb-3 grid grid-cols-2">
           <div className="text-gray-main">Phí trả hàng:</div>
-          <div className="text-black-main">0</div>
+          <div className="text-black-main">{formatMoney(record?.returnFee)}</div>
         </div>
         <div className=" mb-3 grid grid-cols-2">
           <div className="text-gray-main">Cần trả khách:</div>
-          <div className="text-black-main">1400000</div>
+          <div className="text-black-main">{formatMoney(totalReturnPrice)}</div>
         </div>
 
         <div className=" mb-3 grid grid-cols-2">
           <div className="text-gray-main">Đã trả khách:</div>
-          <div className="text-black-main">140,000</div>
+          <div className="text-black-main">{formatMoney(record?.paid)}</div>
         </div>
       </div>
 
@@ -173,13 +184,6 @@ export function Info({ record }: { record: any }) {
           prefixIcon={<Image src={CloseIcon} alt="" />}
         >
           Hủy bỏ
-        </CustomButton>
-        <CustomButton
-          outline={true}
-          type="success"
-          prefixIcon={<Image src={SaveIcon} alt="" />}
-        >
-          Lưu
         </CustomButton>
       </div>
     </div>

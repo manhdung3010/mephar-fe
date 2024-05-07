@@ -7,31 +7,28 @@ import { useRecoilState, useRecoilValue } from 'recoil';
 
 import { getCustomer } from '@/api/customer.service';
 import { getEmployee } from '@/api/employee.service';
-import { createOrder } from '@/api/order.service';
+import { createOrderReturn } from '@/api/order.service';
 import CustomerIcon from '@/assets/customerIcon.svg';
 import DolarIcon from '@/assets/dolarIcon.svg';
 import EditIcon from '@/assets/editIcon.svg';
 import EmployeeIcon from '@/assets/employeeIcon.svg';
-import PlusIcon from '@/assets/plusIcon.svg';
 import { CustomButton } from '@/components/CustomButton';
 import { CustomInput } from '@/components/CustomInput';
 import { CustomSelect } from '@/components/CustomSelect';
 import InputError from '@/components/InputError';
 import {
-  EDiscountLabel,
   EDiscountType,
-  EPaymentMethod,
-  getEnumKeyByValue,
+  EPaymentMethod
 } from '@/enums';
-import { formatMoney, hasPermission } from '@/helpers';
+import { formatMoney } from '@/helpers';
 import {
   branchState,
   orderActiveState,
   orderState,
   profileState,
 } from '@/recoil/state';
+import cx from 'classnames';
 
-import { RoleAction, RoleModel } from '../settings/role/role.enum';
 import { CreateCustomerModal } from './CreateCustomerModal';
 import { CreateDiscountModal } from './CreateDiscountModal';
 import { CreatePrescriptionModal } from './CreatePrescriptionModal';
@@ -39,11 +36,14 @@ import { OrderSuccessModal } from './OrderSuccessModal';
 import { ScanQrModal } from './ScanQrModal';
 import type { ISaleProductLocal } from './interface';
 import { RightContentStyled } from './styled';
+import Bank from '@/assets/images/bank.png';
+import Cash from '@/assets/images/cash.png';
+import Debt from '@/assets/images/debt.png';
 
-export function RightContentReturn({ useForm, customerId }: { useForm: any, customerId: string }) {
+export function RightContentReturn({ useForm, customerId, orderDetail }: { useForm: any, customerId: string, orderDetail: any }) {
   const queryClient = useQueryClient();
 
-  const { getValues, setValue, handleSubmit, errors, reset } = useForm;
+  const { getValuesReturn, setValueReturn, handleSubmitReturn, errorsReturn, resetReturn } = useForm;
 
   const [orderObject, setOrderObject] = useRecoilState(orderState);
   const [orderActive, setOrderActive] = useRecoilState(orderActiveState);
@@ -71,13 +71,13 @@ export function RightContentReturn({ useForm, customerId }: { useForm: any, cust
 
   useEffect(() => {
     if (profile) {
-      setValue('userId', profile.id);
+      setValueReturn('userId', profile.id);
     }
   }, [profile]);
 
   useEffect(() => {
     if (customerId) {
-      setValue('customerId', customerId, { shouldValidate: true });
+      setValueReturn('customerId', customerId, { shouldValidate: true });
     }
   }, [customerId])
 
@@ -92,82 +92,89 @@ export function RightContentReturn({ useForm, customerId }: { useForm: any, cust
   const totalPrice = useMemo(() => {
     let price = 0;
 
-    orderObject[orderActive]?.forEach((product: ISaleProductLocal) => {
-      const unit = product.product.productUnit?.find(
-        (unit) => unit.id === product.productUnitId
-      );
-
+    //caculate total price
+    orderObject[orderActive]?.forEach((product: any) => {
+      const unit = product.productUnit;
       price += Number(unit?.price ?? 0) * product.quantity;
     });
 
     return price;
   }, [orderObject, orderActive]);
+  const totalReturnPrice = useMemo(() => {
+    let price = 0;
 
-  const discount = useMemo(() => {
-    if (getValues('discount')) {
-      const discountValue = Number(getValues('discount')).toLocaleString(
-        'en-US'
-      );
-      const discountType =
-        EDiscountLabel[
-        getEnumKeyByValue(EDiscountType, getValues('discountType'))
-        ];
+    //caculate total return price
+    orderObject[orderActive]?.forEach((product: any) => {
+      const unit = product.productUnit;
+      price += Number(unit?.returnPrice ?? 0) * product.quantity;
+    });
 
-      return `${discountValue}${discountType}`;
-    }
+    return price;
+  }, [orderObject, orderActive]);
 
-    return '';
-  }, [getValues('discount'), getValues('discountType')]);
+  const totalMustPay = useMemo(() => {
+    let price = 0;
 
-  useEffect(() => {
-    // get discount from customer when customer change
-    if (getValues('customerId')) {
-      const customer = customers?.data?.items?.find(
-        (item) => item.id === getValues('customerId')
-      );
+    //caculate total return price
+    orderObject[orderActive]?.forEach((product: any) => {
+      const unit = product.productUnit;
+      price += Number(unit?.returnPrice ?? 0) * product.quantity;
+    });
 
-      if (customer && customer?.groupCustomer?.discount) {
-        setValue('discount', customer?.groupCustomer.discount ?? 0, { shouldValidate: true });
-        setValue('discountType', EDiscountType.PERCENT, { shouldValidate: true });
-      }
-      else {
-        setValue('discount', 0, { shouldValidate: true });
-        setValue('discountType', EDiscountType.PERCENT, { shouldValidate: true });
+    price = price - (getValuesReturn('discount') ?? 0) - (getValuesReturn('returnFee') ?? 0);
 
-      }
-    }
-  }, [getValues('customerId')])
+    return price;
+  }, [orderObject, orderActive, getValuesReturn('discount'), getValuesReturn('returnFee')]);
+
+  // useEffect(() => {
+  //   // get discount from customer when customer change
+  //   if (getValuesReturn('customerId')) {
+  //     const customer = customers?.data?.items?.find(
+  //       (item) => item.id === getValuesReturn('customerId')
+  //     );
+
+  //     if (customer && customer?.groupCustomer?.discount) {
+  //       setValueReturn('discount', customer?.groupCustomer.discount ?? 0, { shouldValidate: true });
+  //       setValueReturn('discountType', EDiscountType.PERCENT, { shouldValidate: true });
+  //     }
+  //     else {
+  //       setValueReturn('discount', 0, { shouldValidate: true });
+  //       setValueReturn('discountType', EDiscountType.PERCENT, { shouldValidate: true });
+
+  //     }
+  //   }
+  // }, [getValuesReturn('customerId')])
 
   const customerMustPay = useMemo(() => {
-    if (getValues('discount')) {
-      if (getValues('discountType') === EDiscountType.MONEY) {
-        return totalPrice > Number(getValues('discount'))
-          ? Math.round(totalPrice - Number(getValues('discount')))
+    if (getValuesReturn('discount')) {
+      if (getValuesReturn('discountType') === EDiscountType.MONEY) {
+        return totalPrice > Number(getValuesReturn('discount'))
+          ? Math.round(totalPrice - Number(getValuesReturn('discount')))
           : 0;
       }
 
-      if (getValues('discountType') === EDiscountType.PERCENT) {
+      if (getValuesReturn('discountType') === EDiscountType.PERCENT) {
         const discountValue =
-          (totalPrice * Number(getValues('discount'))) / 100;
+          (totalPrice * Number(getValuesReturn('discount'))) / 100;
         return totalPrice > discountValue ? Math.round(totalPrice - discountValue) : 0;
       }
     }
 
     return totalPrice;
-  }, [totalPrice, getValues('discount'), getValues('discountType')]);
+  }, [totalPrice, getValuesReturn('discount'), getValuesReturn('discountType')]);
 
   const returnPrice = useMemo(() => {
-    if (getValues('cashOfCustomer')) {
-      return Number(getValues('cashOfCustomer')) - customerMustPay;
+    if (getValuesReturn('cashOfCustomer')) {
+      return Number(getValuesReturn('cashOfCustomer')) - customerMustPay;
     }
 
     return 0;
-  }, [customerMustPay, getValues('cashOfCustomer')]);
+  }, [customerMustPay, getValuesReturn('cashOfCustomer')]);
 
   const { mutate: mutateCreateOrder, isLoading: isLoadingCreateOrder } =
     useMutation(
       () => {
-        const formatProducts = getValues('products')?.map(
+        const formatProducts = getValuesReturn('products')?.map(
           ({ isBatchExpireControl, ...product }) => ({
             ...product,
             batches: product.batches?.map((batch) => ({
@@ -177,25 +184,33 @@ export function RightContentReturn({ useForm, customerId }: { useForm: any, cust
           })
         );
 
-        return createOrder({
-          ...getValues(),
-          ...(getValues('customerId') === -1 && { customerId: null }),
+        return createOrderReturn({
+          ...getValuesReturn(),
+          ...(getValuesReturn('customerId') === -1 && { customerId: null }),
           products: formatProducts,
+          orderId: orderDetail?.order?.id,
           branchId,
         });
       },
       {
         onSuccess: async (res) => {
           await queryClient.invalidateQueries(['LIST_SALE_PRODUCT']);
-          if (res.data) {
-            setSaleInvoice(res.data);
+          if (res.data?.saleReturn) {
+            setSaleInvoice(res.data?.saleReturn);
           }
           const orderClone = cloneDeep(orderObject);
           orderClone[orderActive] = [];
           setOrderObject(orderClone);
+          // delete tab order object return
+          const orderKeys = Object.keys(orderObject);
+          const newOrderObject = { ...orderObject };
+          delete newOrderObject[orderActive];
+          setOrderObject(newOrderObject);
+          setOrderActive(String(orderKeys[0]));
+
           setIsOpenOrderSuccessModal(true);
-          reset();
-          setValue('userId', profile.id, { shouldValidate: true });
+          resetReturn();
+          setValueReturn('userId', profile.id, { shouldValidate: true });
         },
         onError: (err: any) => {
           message.error(err?.message);
@@ -207,6 +222,7 @@ export function RightContentReturn({ useForm, customerId }: { useForm: any, cust
     mutateCreateOrder();
   };
 
+
   return (
     <RightContentStyled className="flex w-[360px] min-w-[360px] flex-col">
       <div className="px-6 pt-5 ">
@@ -216,19 +232,19 @@ export function RightContentReturn({ useForm, customerId }: { useForm: any, cust
             label: item.fullName,
           }))}
           showSearch={true}
-          value={getValues('userId')}
+          value={getValuesReturn('userId')}
           onSearch={debounce((value) => {
             setSearchEmployeeText(value);
           }, 300)}
           onChange={(value) => {
-            setValue('userId', value, { shouldValidate: true });
+            setValueReturn('userId', value, { shouldValidate: true });
           }}
           wrapClassName=""
           className="h-[44px]"
           placeholder="Chọn nhân viên bán hàng"
           prefixIcon={<Image src={EmployeeIcon} alt="" />}
         />
-        <InputError error={errors.userId?.message} />
+        <InputError error={errorsReturn.userId?.message} />
 
         <CustomSelect
           options={[
@@ -237,37 +253,21 @@ export function RightContentReturn({ useForm, customerId }: { useForm: any, cust
               label: item.fullName + " - " + item.phone,
             })) || [])
           ]}
-          value={getValues('customerId')}
+          value={getValuesReturn('customerId')}
           onSearch={debounce((value) => {
             setSearchCustomerText(value);
           }, 300)}
           showSearch={true}
           onChange={(value) => {
-            setValue('customerId', value, { shouldValidate: true });
+            setValueReturn('customerId', value, { shouldValidate: true });
           }}
           wrapClassName="mt-3"
           className="h-[44px]"
           placeholder="Thêm khách vào đơn F4"
           disabled
-          suffixIcon={
-            <>
-              {
-                hasPermission(profile?.role?.permissions, RoleModel.customer, RoleAction.create) && (
-                  <Image
-                    src={PlusIcon}
-                    onClick={(e) => {
-                      setIsOpenAddCustomerModal(true);
-                      e.stopPropagation();
-                    }}
-                    alt=""
-                  />
-                )
-              }
-            </>
-          }
           prefixIcon={<Image src={CustomerIcon} alt="" />}
         />
-        <InputError error={errors.customerId?.message} />
+        <InputError error={errorsReturn.customerId?.message} />
       </div>
 
       <div className="my-6 h-[1px] w-full bg-[#E4E4E4]"></div>
@@ -296,7 +296,7 @@ export function RightContentReturn({ useForm, customerId }: { useForm: any, cust
                 )
               </div>
               <div className="text-lg leading-normal text-[#19191C]">
-                {formatMoney(totalPrice)}
+                {formatMoney(totalReturnPrice)}
               </div>
             </div>
 
@@ -308,13 +308,11 @@ export function RightContentReturn({ useForm, customerId }: { useForm: any, cust
                 <CustomInput
                   bordered={false}
                   className="h-6 pr-0 text-end text-lg"
-                  onClick={() => {
-                    setIsOpenAddDiscountModal(true);
-                  }}
-                  blurAfterClick={true}
-                  forceValue={discount}
-                  onChange={() => {
+                  value={getValuesReturn('discount') ?? 0}
+                  type='number'
+                  onChange={(value) => {
                     // nothing
+                    setValueReturn('discount', value, { shouldValidate: true });
                   }}
                 />
               </div>
@@ -327,10 +325,11 @@ export function RightContentReturn({ useForm, customerId }: { useForm: any, cust
                 <CustomInput
                   bordered={false}
                   className="h-6 pr-0 text-end text-lg"
-                  blurAfterClick={true}
-                  forceValue={discount}
-                  onChange={() => {
+                  value={getValuesReturn('returnFee') ?? 0}
+                  type='number'
+                  onChange={(value) => {
                     // nothing
+                    setValueReturn('returnFee', value, { shouldValidate: true });
                   }}
                 />
               </div>
@@ -343,7 +342,97 @@ export function RightContentReturn({ useForm, customerId }: { useForm: any, cust
                 CẦN TRẢ KHÁCH
               </div>
               <div className="text-lg leading-normal text-red-main">
-                {formatMoney(customerMustPay)}
+                {formatMoney(totalMustPay)}
+              </div>
+            </div>
+            <div className="flex flex-col mb-5">
+              <div className='flex justify-between'>
+                <div className="text-lg leading-normal text-[#828487]">
+                  Tiền trả khách <span className='text-red-500'>*</span>
+                </div>
+                <div className="w-[120px]">
+                  <CustomInput
+                    bordered={false}
+                    className="h-6 pr-0 text-end text-lg"
+                    onChange={(value) => {
+                      setValueReturn('paid', value, {
+                        shouldValidate: true,
+                      });
+                    }}
+                    type="number"
+                    hideArrow={true}
+                    value={getValuesReturn('paid')}
+                  />
+                </div>
+              </div>
+              <div className='text-right'>
+                <InputError error={errorsReturn.paid?.message} />
+              </div>
+            </div>
+            <div className="mb-5">
+              <div className="mb-5 flex justify-between">
+                <div className="text-lg leading-normal text-[#828487]">
+                  Phương thức thanh toán
+                </div>
+                <div className="text-lg leading-normal text-[#19191C]">
+                  {getValuesReturn('paymentType') === EPaymentMethod.CASH ? "Tiền mặt" : getValuesReturn('paymentType') === EPaymentMethod.BANKING ? "Chuyển khoản" : "Khách nợ"}
+                </div>
+              </div>
+
+              <div className="flex justify-between">
+                <div
+                  className={cx(' rounded-[18px] w-[96px] h-[99px]', {
+                    'border-2 border-red-main':
+                      getValuesReturn('paymentType') === EPaymentMethod.CASH,
+                  })}
+                >
+                  <Image
+                    src={Cash}
+                    onClick={() =>
+                      setValueReturn('paymentType', EPaymentMethod.CASH, {
+                        shouldValidate: true,
+                      })
+                    }
+                    className=" cursor-pointer"
+                    alt=""
+                  />
+                </div>
+
+                <div
+                  className={cx(' rounded-[18px] w-[96px] h-[99px]', {
+                    'border-2 border-red-main':
+                      getValuesReturn('paymentType') === EPaymentMethod.BANKING,
+                  })}
+                >
+                  <Image
+                    src={Bank}
+                    onClick={() =>
+                      setValueReturn('paymentType', EPaymentMethod.BANKING, {
+                        shouldValidate: true,
+                      })
+                    }
+                    className=" cursor-pointer"
+                    alt=""
+                  />
+                </div>
+
+                <div
+                  className={cx(' rounded-[18px] w-[96px] h-[99px]', {
+                    'border-2 border-red-main':
+                      getValuesReturn('paymentType') === EPaymentMethod.DEBT,
+                  })}
+                >
+                  <Image
+                    src={Debt}
+                    onClick={() =>
+                      setValueReturn('paymentType', EPaymentMethod.DEBT, {
+                        shouldValidate: true,
+                      })
+                    }
+                    className=" cursor-pointer"
+                    alt=""
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -356,9 +445,9 @@ export function RightContentReturn({ useForm, customerId }: { useForm: any, cust
             placeholder="Thêm ghi chú"
             className="text-sm"
             onChange={(value) =>
-              setValue('description', value, { shouldValidate: true })
+              setValueReturn('description', value, { shouldValidate: true })
             }
-            value={getValues('description')}
+            value={getValuesReturn('description')}
           />
         </div>
       </div>
@@ -368,31 +457,23 @@ export function RightContentReturn({ useForm, customerId }: { useForm: any, cust
       <div className="px-6 pb-6">
         <CustomButton
           onClick={() => {
-            if (!getValues('customerId') && getValues('paymentType') === EPaymentMethod.DEBT) {
-              message.error("Vui lòng chọn khách hàng trước khi thanh toán nợ");
-              return;
-            }
             const products: ISaleProductLocal[] = orderObject[orderActive];
             const formatProducts = products.map((product) => ({
               productId: product.productId,
               productUnitId: product.productUnitId,
-              originProductUnitId: product.originProductUnitId,
-              productType: product.product.type,
               quantity: product.quantity,
-              isBatchExpireControl: product.product.isBatchExpireControl,
+              price: product.productUnit.returnPrice,
               batches: product.batches
                 .filter((batch) => batch.isSelected)
                 .map((batch: any) => ({
-                  id: batch.id,
-                  quantity: batch.quantity,
-                  inventory: batch.inventory,
+                  id: batch.batch.id,
+                  quantity: product.quantity,
                 })),
             }));
 
-            setValue('products', formatProducts, { shouldValidate: true });
-            setValue('totalPrice', customerMustPay, { shouldValidate: true });
+            setValueReturn('products', formatProducts, { shouldValidate: true });
 
-            handleSubmit(onSubmit)();
+            handleSubmitReturn(onSubmit)();
           }}
           className="!h-11"
           disabled={isLoadingCreateOrder || !orderObject[orderActive]?.length}
@@ -403,36 +484,11 @@ export function RightContentReturn({ useForm, customerId }: { useForm: any, cust
         </CustomButton>
       </div>
 
-      <CreatePrescriptionModal
-        isOpen={isOpenPrescriptionModal}
-        onCancel={() => setIsOpenPrescriptionModal(false)}
-        setOrderValue={setValue}
-      />
-
-      <CreateCustomerModal
-        isOpen={isOpenAddCustomerModal}
-        onCancel={() => setIsOpenAddCustomerModal(false)}
-        onSave={({ customerId, CustomerName }) => {
-          setValue("customerId", customerId, {
-            shouldValidate: true,
-          });
-          setSearchCustomerText(CustomerName);
-        }}
-      />
-
       <CreateDiscountModal
         isOpen={isOpenAddDiscountModal}
         onCancel={() => setIsOpenAddDiscountModal(false)}
-        setValue={setValue}
-        getValues={getValues}
-      />
-
-      <ScanQrModal
-        isOpen={isOpenScanQrModal}
-        onCancel={() => {
-          setIsOpenScanQrModal(false);
-          setIsOpenOrderSuccessModal(true);
-        }}
+        setValue={setValueReturn}
+        getValues={getValuesReturn}
       />
 
       <OrderSuccessModal

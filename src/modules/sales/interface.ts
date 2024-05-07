@@ -18,6 +18,7 @@ export interface IBatch {
     exchangeValue: number;
     price: number;
     isBaseUnit: boolean;
+    returnPrice?: number;
   };
 }
 
@@ -32,6 +33,7 @@ export interface IProductUnit {
   isDirectSale: boolean;
   isBaseUnit: boolean;
   point: number;
+  returnPrice?: number;
 }
 
 export interface ISaleProduct {
