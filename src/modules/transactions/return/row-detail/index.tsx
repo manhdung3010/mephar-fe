@@ -8,7 +8,7 @@ import { Info } from './Info';
 const ReturnDetail = ({ record }: { record: any }) => {
   const [select, setSelect] = useState(0);
 
-  const menu = ['Thông tin', 'Hóa đơn đổi trả', 'Lịch sử thanh toán'];
+  const menu = ['Thông tin', 'Lịch sử thanh toán'];
 
   console.log("record", record)
 

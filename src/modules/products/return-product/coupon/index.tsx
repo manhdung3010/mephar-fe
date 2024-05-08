@@ -77,7 +77,7 @@ export default function ReturnCoupon() {
         const newProduct = {
           ...product,
           // productId: product.productId,
-          productUnit: [product.productBatchHistories[0].productUnit],
+          productUnit: [product.productBatchHistories[0]?.productUnit],
         }
         const localProduct: IImportProductLocal = {
           ...newProduct,
@@ -85,7 +85,7 @@ export default function ReturnCoupon() {
           inventory: product.quantity,
           productId: product.productId,
           quantity: 1,
-          price: product.productBatchHistories[0].importPrice,
+          price: product.productBatchHistories[0]?.importPrice,
           discountValue: 0,
           batches: id ? product.productBatchHistories : [],
         };
