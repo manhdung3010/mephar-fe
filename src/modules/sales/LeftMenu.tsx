@@ -16,14 +16,18 @@ import {
   productImportState,
 } from '@/recoil/state';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import CustomerModal from './customer-modal';
 import Invoice from './invoice';
 import InvoiceModal from './return-product/InvoiceModal';
 import { LeftMenuStyled } from './styled';
 import ReportModal from './report';
+import { useRouter } from 'next/router';
 
 export function LeftMenu() {
+  const router = useRouter();
+  const { isReturn } = router.query;
+
   const resetOrderObject = useResetRecoilState(orderState);
   const resetOrderActive = useResetRecoilState(orderActiveState);
   const resetProductsImport = useResetRecoilState(productImportState);
@@ -32,6 +36,12 @@ export function LeftMenu() {
   const [openCustomer, setOpenCustomer] = useState(false);
   const [openInvoice, setOpenInvoice] = useState(false);
   const [openReport, setOpenReport] = useState(false);
+
+  useEffect(() => {
+    if (isReturn) {
+      setOpenInvoiceModal(true)
+    }
+  }, [isReturn])
 
   const clearCache = () => {
     resetOrderObject();

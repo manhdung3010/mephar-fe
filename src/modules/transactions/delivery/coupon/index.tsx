@@ -276,6 +276,7 @@ export function DeliveryCoupon() {
                   ...product,
                   code: productUnit?.code || '', // Assign an empty string if productUnit.code is undefined
                   productKey: `${product.product.id}-${value}`,
+                  primePrice: product.product.primePrice * productUnit.exchangeValue,
                   ...productUnit,
                   productUnitId: value,
                   newInventory: Math.floor(product.product.quantity / productUnit.exchangeValue),
@@ -338,12 +339,17 @@ export function DeliveryCoupon() {
         />
       ),
     },
-    {
+    ...(moveDetail ? [{
       title: 'Giá chuyển',
       dataIndex: 'price',
       key: 'price',
       render: (price, { productKey }) => <CustomInput className="!w-[110px]" type='number' onChange={(value) => onChangeValueProduct(productKey, "price", value)} value={price} defaultValue={price} />,
-    },
+    }] : [{
+      title: 'Giá chuyển',
+      dataIndex: 'primePrice',
+      key: 'primePrice',
+      render: (price, { productKey }) => <CustomInput className="!w-[110px]" type='number' onChange={(value) => onChangeValueProduct(productKey, "primePrice", value)} value={price} defaultValue={price} />,
+    }]),
   ];
 
   const checkDisplayListBatch = (product: IImportProductLocal) => {
@@ -386,6 +392,7 @@ export function DeliveryCoupon() {
 
                 const localProduct: IImportProductLocal = {
                   ...product,
+                  primePrice: product.product.primePrice * product.productUnit.exchangeValue,
                   productKey: `${product.product.id}-${product.id}`,
                   inventory: product.quantity,
                   productUnitId: product.product.productUnit.find((item) => item.unitName === product.unitName)?.id,

@@ -44,6 +44,7 @@ export function RightContent({ useForm, branchId, moveId, moveDetail }: { useFor
         ({ isBatchExpireControl, ...product }) => (
           {
             ...product,
+            price: product.primePrice,
             batches: product.batches?.filter((item) => item.isSelected)?.map((batch) => (
               {
                 id: batch.id,
@@ -142,9 +143,10 @@ export function RightContent({ useForm, branchId, moveId, moveDetail }: { useFor
 
   const changePayload = () => {
     const products = cloneDeep(productsImport).map(
-      ({ id, price, product, quantity, batches, toBatches, productUnitId, productUnit }: any) => ({
+      ({ id, price, product, quantity, batches, toBatches, productUnitId, primePrice }: any) => ({
         productId: product.id,
         price: price,
+        primePrice: primePrice,
         ...(moveId ? { totalQuantity: quantity } : { quantity: quantity }),
         id: id,
         isBatchExpireControl: product.isBatchExpireControl,

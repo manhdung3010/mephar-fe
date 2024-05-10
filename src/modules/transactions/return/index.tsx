@@ -147,13 +147,13 @@ export function ReturnTransaction() {
   return (
     <div>
       <div className="my-3 flex justify-end gap-4">
-        {/* <CustomButton
-          // onClick={() => router.push("/products/import/coupon")}
+        <CustomButton
+          onClick={() => router.push("/sales?isReturn=true")}
           type="success"
           prefixIcon={<Image src={ImportIcon} />}
         >
           Thêm phiếu trả hàng
-        </CustomButton> */}
+        </CustomButton>
 
         <CustomButton prefixIcon={<Image src={ExportIcon} />}>
           Xuất file
