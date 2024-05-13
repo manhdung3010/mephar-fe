@@ -3,27 +3,26 @@ import type { ColumnsType } from 'antd/es/table';
 import Image from 'next/image';
 import { useMemo, useRef, useState } from 'react';
 
-import { message } from 'antd';
 import CloseIcon from '@/assets/closeIcon.svg';
 import PrintOrderIcon from '@/assets/printOrder.svg';
-import SaveIcon from '@/assets/saveIcon.svg';
 import { CustomButton } from '@/components/CustomButton';
 import CustomTable from '@/components/CustomTable';
 import { EGenderLabel, EOrderStatusLabel } from '@/enums';
 import { formatMoney, formatNumber, hasPermission } from '@/helpers';
+import { message } from 'antd';
 
-import { useReactToPrint } from 'react-to-print';
-import SaleInvoicePrint from '@/modules/sales/SaleInvoicePrint';
-import styles from "./invoicePrint.module.css";
-import CancelBillModal from './CancelBillModal';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteOrder } from '@/api/order.service';
-import { IOrder } from '../../order/type';
 import PlusIconWhite from '@/assets/PlusIconWhite.svg';
-import InvoicePrint from './InvoicePrint';
-import { useRecoilValue } from 'recoil';
-import { profileState } from '@/recoil/state';
 import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
+import { profileState } from '@/recoil/state';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useReactToPrint } from 'react-to-print';
+import { useRecoilValue } from 'recoil';
+import { IOrder } from '../../order/type';
+import CancelBillModal from './CancelBillModal';
+import InvoicePrint from './InvoicePrint';
+import styles from "./invoicePrint.module.css";
+import { useRouter } from 'next/router';
 
 const { TextArea } = Input;
 
@@ -47,6 +46,7 @@ export function Info({ record }: { record: IOrder }) {
   const profile = useRecoilValue(profileState);
 
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const { mutate: mutateCancelImportProduct, isLoading: isLoadingDeleteProduct } =
     useMutation(() => deleteOrder(Number(record.id)), {
@@ -361,12 +361,13 @@ export function Info({ record }: { record: IOrder }) {
           )
         }
 
-        {/* <CustomButton
+        <CustomButton
           type="success"
           prefixIcon={<Image src={PlusIconWhite} alt="" />}
+          onClick={() => router.push("/sales?isReturn=true")}
         >
           Trả hàng
-        </CustomButton> */}
+        </CustomButton>
       </div>
 
       <div ref={invoiceComponentRef} className={styles.invoicePrint}>

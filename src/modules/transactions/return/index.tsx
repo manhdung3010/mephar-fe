@@ -171,6 +171,7 @@ export function ReturnTransaction() {
           key: index + 1,
         }))}
         columns={columns}
+        loading={isLoading}
         onRow={(record, rowIndex) => {
           return {
             onClick: event => {

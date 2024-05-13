@@ -9,7 +9,9 @@ import { CustomButton } from '@/components/CustomButton';
 import { CustomSelect } from '@/components/CustomSelect';
 import CustomTable from '@/components/CustomTable';
 import { formatDateTime, formatMoney, formatNumber } from '@/helpers';
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
+import { useReactToPrint } from 'react-to-print';
+import InvoicePrint from './InvoicePrint';
 
 const { TextArea } = Input;
 
@@ -24,15 +26,7 @@ interface IRecord {
 }
 
 export function Info({ record }: { record: any }) {
-  const data = {
-    key: 1,
-    id: 'PN231017090542',
-    name: 'Nước cất tiêm 5ml',
-    quantity: 2,
-    price: 70000,
-    discount: 2,
-    totalPrice: 140000,
-  };
+  const invoiceComponentRef = useRef(null);
 
   const columns: ColumnsType<any> = [
     {
@@ -88,6 +82,10 @@ export function Info({ record }: { record: any }) {
     }, 0);
   }, [record?.items])
 
+  const handlePrintInvoice = useReactToPrint({
+    content: () => invoiceComponentRef.current,
+  });
+
   return (
     <div className="gap-12 ">
       <div className="mb-5 flex gap-5">
@@ -140,6 +138,10 @@ export function Info({ record }: { record: any }) {
         className="mb-4"
       />
 
+      <div ref={invoiceComponentRef} className='fixed top-0 right-[-300px] w-full -z-10 invisible print:relative print:visible print:right-0 print:p-[50px] print:z-10 print:text-base'>
+        <InvoicePrint record={record} />
+      </div>
+
       <div className="ml-auto mb-5 w-[300px]">
         <div className=" mb-3 grid grid-cols-2">
           <div className="text-gray-main">Tổng số mặt hàng:</div>
@@ -176,6 +178,7 @@ export function Info({ record }: { record: any }) {
           outline={true}
           type="primary"
           prefixIcon={<Image src={PrintOrderIcon} alt="" />}
+          onClick={handlePrintInvoice}
         >
           In phiếu
         </CustomButton>
