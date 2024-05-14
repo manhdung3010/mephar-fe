@@ -4,11 +4,12 @@ import { useState } from 'react';
 import History from './history';
 import { Info } from './Info';
 import { IOrder } from '../../order/type';
+import HistoryReturn from './HistoryReturn';
 
 const BillDetail = ({ record }: { record: IOrder }) => {
   const [select, setSelect] = useState(0);
 
-  const menu = ['Thông tin', 'Lịch sử thanh toán'];
+  const menu = ['Thông tin', 'Lịch sử thanh toán', 'Lịch sử trả hàng'];
 
   return (
     <div
@@ -36,6 +37,7 @@ const BillDetail = ({ record }: { record: IOrder }) => {
       </div>
       {select === 0 && <Info record={record} />}
       {select === 1 && <History record={record} />}
+      {select === 2 && <HistoryReturn record={record} />}
     </div>
   );
 };

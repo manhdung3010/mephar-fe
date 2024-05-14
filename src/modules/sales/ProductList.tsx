@@ -63,6 +63,18 @@ export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetai
       setExpandedRowKeys(expandedRowKeysClone);
     }
   }, [orderObject, orderActive]);
+  useEffect(() => {
+    if (orderObject[orderActive].length) {
+      const expandedRowKeysClone = { ...expandedRowKeys };
+      orderObject[orderActive].forEach((product, index) => {
+        if (orderActive.split("-")[1] === "RETURN" && product.batches.length > 0) {
+          expandedRowKeysClone[index] = true;
+        }
+      });
+
+      setExpandedRowKeys(expandedRowKeysClone);
+    }
+  }, [orderObject, orderActive]);
 
   const onChangeQuantity = async (productKey, newValue) => {
     const orderObjectClone = cloneDeep(orderObject);
@@ -205,7 +217,7 @@ export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetai
           options={(() => {
             const productUnitKeysSelected = orderObject[orderActive]?.map(
               (product: ISaleProductLocal) =>
-                Number(product.productKey.split('-')[1])
+                Number(product.productKey?.split('-')[1])
             );
 
             return product?.productUnit?.map((unit) => ({
@@ -219,6 +231,7 @@ export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetai
             }));
           })()}
           value={productUnitId}
+          disabled={orderActive.split("-")[1] === "RETURN" ? true : false}
           onChange={(value) => {
             const orderObjectClone = cloneDeep(orderObject);
 
@@ -398,18 +411,7 @@ export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetai
                           <span className="mr-2">
                             {batch.batch?.name} - {batch?.batch?.expiryDate} - SL:{' '}
                             {record.quantity}
-                          </span>{' '}
-                          <Image
-                            className=" cursor-pointer"
-                            src={CloseIcon}
-                            onClick={() => {
-                              handleRemoveBatch(
-                                record.productKey,
-                                batch.batchId
-                              );
-                            }}
-                            alt=""
-                          />
+                          </span>
                         </div>
                       )
                     )}

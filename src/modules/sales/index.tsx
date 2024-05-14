@@ -315,8 +315,6 @@ const Index = () => {
     [formFilter]
   );
 
-  console.log("orderObject", orderObject)
-
   return (
     <div>
       <SaleHeader />

@@ -89,6 +89,7 @@ export function RightContentReturn({ useForm, customerId, orderDetail }: { useFo
     }
   }, [orderActive]);
 
+
   const totalPrice = useMemo(() => {
     let price = 0;
 
@@ -122,6 +123,8 @@ export function RightContentReturn({ useForm, customerId, orderDetail }: { useFo
     });
 
     price = price - (getValuesReturn('discount') ?? 0) - (getValuesReturn('returnFee') ?? 0);
+
+    setValueReturn('paid', price, { shouldValidate: true });
 
     return price;
   }, [orderObject, orderActive, getValuesReturn('discount'), getValuesReturn('returnFee')]);
@@ -350,7 +353,7 @@ export function RightContentReturn({ useForm, customerId, orderDetail }: { useFo
                 <div className="text-lg leading-normal text-[#828487]">
                   Tiền trả khách <span className='text-red-500'>*</span>
                 </div>
-                <div className="w-[120px]">
+                <div className="w-[160px]">
                   <CustomInput
                     bordered={false}
                     className="h-6 pr-0 text-end text-lg"

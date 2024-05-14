@@ -6,6 +6,7 @@ import PlusCircleIcon from '@/assets/plus-circle.svg';
 import { CustomInput } from '@/components/CustomInput';
 
 import { EDiscountUnit } from './Info';
+import { useState } from 'react';
 
 export const BillDiscount = ({
   discountUnit,
@@ -14,6 +15,16 @@ export const BillDiscount = ({
   discountUnit: EDiscountUnit;
   setDiscountUnit: (value: EDiscountUnit) => void;
 }) => {
+  const [rows, setRows] = useState([{}]); // Initialize with one row
+
+  const handleAddRow = () => {
+    setRows(prevRows => [...prevRows, {}]);
+  };
+
+  const handleDeleteRow = (indexToDelete) => {
+    if (rows.length === 1) return; // Prevent deleting the last row
+    setRows(prevRows => prevRows.filter((_, index) => index !== indexToDelete));
+  };
   return (
     <>
       <div className="my-5 flex flex-col gap-2">
@@ -24,58 +35,62 @@ export const BillDiscount = ({
           <div className="flex-1 p-4"></div>
         </div>
 
-        <div className="flex gap-3">
-          <div className="flex flex-[2] items-center gap-2 px-4">
-            Từ
-            <CustomInput
-              className="mt-0 h-11"
-              wrapClassName="w-full"
-              onChange={() => {}}
-            />
-          </div>
-          <div className="flex flex-[2] items-center gap-2 px-4">
-            Giảm
-            <CustomInput
-              className="mt-0 h-11 w-full"
-              wrapClassName="w-full"
-              onChange={() => {}}
-            />
-          </div>
-          <div className="flex-[2] px-4">
-            <div className="flex h-full w-fit items-center rounded border border-[#E8EAEB]">
-              <div
-                className={cx(
-                  'h-full w-[50px] text-center rounded-tl rounded-bl flex items-center justify-center cursor-pointer',
-                  {
-                    'bg-[#3E7BFA] text-white':
-                      discountUnit === EDiscountUnit.MONEY,
-                  }
-                )}
-                onClick={() => setDiscountUnit(EDiscountUnit.MONEY)}
-              >
-                VND
+        {
+          rows.map((row, index) => (
+            <div className="flex gap-3">
+              <div className="flex flex-[2] items-center gap-2 px-4">
+                Từ
+                <CustomInput
+                  className="mt-0 h-11"
+                  wrapClassName="w-full"
+                  onChange={() => { }}
+                />
               </div>
-              <div
-                className={cx(
-                  'h-full w-[50px] text-center rounded-tr rounded-br flex items-center justify-center cursor-pointer',
-                  {
-                    'bg-[#3E7BFA] text-white':
-                      discountUnit === EDiscountUnit.PERCENT,
-                  }
-                )}
-                onClick={() => setDiscountUnit(EDiscountUnit.PERCENT)}
-              >
-                %
+              <div className="flex flex-[2] items-center gap-2 px-4">
+                Giảm
+                <CustomInput
+                  className="mt-0 h-11 w-full"
+                  wrapClassName="w-full"
+                  onChange={() => { }}
+                />
+              </div>
+              <div className="flex-[2] px-4">
+                <div className="flex h-full w-fit items-center rounded border border-[#E8EAEB]">
+                  <div
+                    className={cx(
+                      'h-full w-[50px] text-center rounded-tl rounded-bl flex items-center justify-center cursor-pointer',
+                      {
+                        'bg-[#3E7BFA] text-white':
+                          discountUnit === EDiscountUnit.MONEY,
+                      }
+                    )}
+                    onClick={() => setDiscountUnit(EDiscountUnit.MONEY)}
+                  >
+                    VND
+                  </div>
+                  <div
+                    className={cx(
+                      'h-full w-[50px] text-center rounded-tr rounded-br flex items-center justify-center cursor-pointer',
+                      {
+                        'bg-[#3E7BFA] text-white':
+                          discountUnit === EDiscountUnit.PERCENT,
+                      }
+                    )}
+                    onClick={() => setDiscountUnit(EDiscountUnit.PERCENT)}
+                  >
+                    %
+                  </div>
+                </div>
+              </div>
+              <div onClick={() => handleDeleteRow(index)} className="flex flex-1 items-center justify-center px-4 cursor-pointer">
+                <Image src={DeleteRedIcon} alt="" />
               </div>
             </div>
-          </div>
-          <div className="flex flex-1 items-center justify-center px-4">
-            <Image src={DeleteRedIcon} alt="" />
-          </div>
-        </div>
+          ))
+        }
       </div>
 
-      <div className="flex gap-3 text-[16px] font-semibold text-[#D64457]">
+      <div onClick={handleAddRow} className="flex gap-3 text-[16px] font-semibold text-[#D64457] cursor-pointer w-40">
         <Image src={PlusCircleIcon} alt="" />
         <div>Thêm điều kiện</div>
       </div>

@@ -15,7 +15,7 @@ export function getOrder(params: {
 export function getSaleReturn(params: {
   page: number;
   limit: number;
-  keyword: string;
+  keyword?: string;
   branchId: number;
   storeId?: number;
   from?: string;

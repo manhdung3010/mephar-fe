@@ -14,8 +14,13 @@ import Search from './Search';
 import { useQuery } from '@tanstack/react-query';
 import { getDiscount } from '@/api/discount.service';
 import CustomPagination from '@/components/CustomPagination';
-import { formatDateTime } from '@/helpers';
+import { formatDateTime, hasPermission } from '@/helpers';
 import { debounce } from 'lodash';
+import DeleteIcon from '@/assets/deleteRed.svg';
+import EditIcon from '@/assets/editGreenIcon.svg';
+import { RoleAction, RoleModel } from '../role/role.enum';
+import { useRecoilValue } from 'recoil';
+import { profileState } from '@/recoil/state';
 
 interface IRecord {
   key: number;
@@ -30,6 +35,8 @@ interface IRecord {
 
 export function Discount() {
   const router = useRouter();
+  const profile = useRecoilValue(profileState);
+  const [deletedId, setDeletedId] = useState<string>();
 
   const [expandedRowKeys, setExpandedRowKeys] = useState<
     Record<string, boolean>
@@ -113,52 +120,96 @@ export function Discount() {
       dataIndex: 'alt',
       key: 'alt',
     },
+    {
+      title: 'Thao tác',
+      dataIndex: 'action',
+      key: 'action',
+      render: (_, { id }) => (
+        <div className="flex gap-3">
+          {
+            hasPermission(profile?.role?.permissions, RoleModel.discount, RoleAction.delete) && (
+              <div className=" cursor-pointer" onClick={() => setDeletedId(id)}>
+                <Image src={DeleteIcon} />
+              </div>
+            )
+          }
+
+          {
+            hasPermission(profile?.role?.permissions, RoleModel.discount, RoleAction.update) && (
+              <div
+                className=" cursor-pointer"
+                onClick={() =>
+                  router.push(`/settings/discount/add-discount?id=${id}`)
+                }
+              >
+                <Image src={EditIcon} />
+              </div>
+            )
+          }
+
+        </div>
+      ),
+    },
   ];
 
   return (
-    // <div className="mb-2">
-    //   <div className="my-3 flex items-center justify-end gap-4">
-    //     <CustomButton
-    //       prefixIcon={<Image src={PlusIcon} />}
-    //       onClick={() => router.push('/settings/discount/add-discount')}
-    //     >
-    //       Thêm mới khuyến mại
-    //     </CustomButton>
-    //   </div>
+    <div className="mb-2">
+      <div className="my-3 flex items-center justify-end gap-4">
+        <CustomButton
+          prefixIcon={<Image src={PlusIcon} />}
+          onClick={() => router.push('/settings/discount/add-discount')}
+        >
+          Thêm mới khuyến mại
+        </CustomButton>
+      </div>
 
-    //   <Search onChange={debounce((value) => {
-    //     setFormFilter((preValue) => ({
-    //       ...preValue,
-    //       keyword: value,
-    //     }));
-    //   }, 300)} />
+      <Search onChange={debounce((value) => {
+        setFormFilter((preValue) => ({
+          ...preValue,
+          keyword: value,
+        }));
+      }, 300)} />
 
-    //   <CustomTable
-    //     dataSource={discount?.data?.list_promotion_program?.map((item, index) => ({
-    //       ...item,
-    //       key: index,
-    //     }))}
-    //     columns={columns}
-    //     loading={isLoading}
-    //     expandable={{
-    //       // eslint-disable-next-line @typescript-eslint/no-shadow
-    //       expandedRowRender: (record: IRecord) => {
-    //         return <RowDetail record={record} />;
-    //       },
-    //       expandIcon: () => <></>,
-    //       expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key),
-    //     }}
-    //   />
-    //   <CustomPagination
-    //     page={formFilter.page}
-    //     pageSize={formFilter.limit}
-    //     setPage={(value) => setFormFilter({ ...formFilter, page: value })}
-    //     setPerPage={(value) => setFormFilter({ ...formFilter, limit: value })}
-    //     total={discount?.data?.totalItem || 0}
-    //   />
-    // </div>
-    <div className='my-5'>
-      Đang cập nhật...
+      <CustomTable
+        dataSource={discount?.data?.list_promotion_program?.map((item, index) => ({
+          ...item,
+          key: index,
+        }))}
+        columns={columns}
+        loading={isLoading}
+        onRow={(record, rowIndex) => {
+          return {
+            onClick: event => {
+              // Check if the click came from the action column
+              if ((event.target as Element).closest('.ant-table-cell:last-child')) {
+                return;
+              }
+              // Toggle expandedRowKeys state here
+              if (expandedRowKeys[record.key]) {
+                const { [record.key]: value, ...remainingKeys } = expandedRowKeys;
+                setExpandedRowKeys(remainingKeys);
+              } else {
+                setExpandedRowKeys({ ...expandedRowKeys, [record.key]: true });
+              }
+            }
+          };
+        }}
+        expandable={{
+          // eslint-disable-next-line @typescript-eslint/no-shadow
+          expandedRowRender: (record: IRecord) => {
+            return <RowDetail record={record} />;
+          },
+          expandIcon: () => <></>,
+          expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key),
+        }}
+      />
+      <CustomPagination
+        page={formFilter.page}
+        pageSize={formFilter.limit}
+        setPage={(value) => setFormFilter({ ...formFilter, page: value })}
+        setPerPage={(value) => setFormFilter({ ...formFilter, limit: value })}
+        total={discount?.data?.totalItem || 0}
+      />
     </div>
   );
 }

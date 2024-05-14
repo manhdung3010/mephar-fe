@@ -81,13 +81,13 @@ export default function ReturnCoupon() {
         }
         const localProduct: IImportProductLocal = {
           ...newProduct,
-          productKey: `${product.product.id || product.productId}-${product.id}`,
+          productKey: `${product.productId || product.productId}-${product.id}`,
           inventory: product.quantity,
           productId: product.productId,
           quantity: 1,
           price: product.productBatchHistories[0]?.importPrice,
           discountValue: 0,
-          batches: id ? product.productBatchHistories : [],
+          batches: product.batches,
         };
 
         let cloneImportProducts = cloneDeep(returnProducts);

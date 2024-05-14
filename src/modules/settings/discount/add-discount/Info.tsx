@@ -26,11 +26,15 @@ export enum EDiscountTypeLabel {
 export enum EDiscountBillMethod {
   GIVE_GOODS = 'GIVE_GOODS',
   DISCOUNT_BILL = 'DISCOUNT_BILL',
+  DISCOUNT_PRODUCT = 'DISCOUNT_PRODUCT',
+  GIVE_POINT = 'GIVE_POINT',
 }
 
 export enum EDiscountBillMethodLabel {
   GIVE_GOODS = 'Tặng hàng',
   DISCOUNT_BILL = 'Giảm giá hóa đơn',
+  DISCOUNT_PRODUCT = 'Giảm giá hàng',
+  GIVE_POINT = 'Tặng điểm',
 }
 
 export enum EDiscountGoodsMethod {
@@ -65,7 +69,7 @@ const Info = () => {
           <CustomInput
             placeholder="Mã tự động"
             className="h-11"
-            onChange={() => {}}
+            onChange={() => { }}
           />
         </div>
 
@@ -86,7 +90,7 @@ const Info = () => {
           <CustomInput
             placeholder="Tên chương trình khuyến mại"
             className="h-11"
-            onChange={() => {}}
+            onChange={() => { }}
           />
         </div>
 
@@ -95,7 +99,7 @@ const Info = () => {
           <CustomInput
             placeholder="Ghi chú"
             className="h-11"
-            onChange={() => {}}
+            onChange={() => { }}
           />
         </div>
       </div>
@@ -133,13 +137,13 @@ const Info = () => {
             options={
               discountType === EDiscountType.BILL
                 ? Object.values(EDiscountBillMethod).map((value) => ({
-                    value,
-                    label: EDiscountBillMethodLabel[value],
-                  }))
+                  value,
+                  label: EDiscountBillMethodLabel[value],
+                }))
                 : Object.values(EDiscountGoodsMethod).map((value) => ({
-                    value,
-                    label: EDiscountGoodsMethodLabel[value],
-                  }))
+                  value,
+                  label: EDiscountGoodsMethodLabel[value],
+                }))
             }
             value={discountMethod}
             className="h-11 !rounded"
@@ -155,6 +159,7 @@ const Info = () => {
         )}
       </div>
 
+      {/* Bill */}
       {discountType === EDiscountType.BILL &&
         discountMethod === EDiscountBillMethod.DISCOUNT_BILL && (
           <BillDiscount
@@ -170,7 +175,22 @@ const Info = () => {
             setDiscountUnit={setDiscountUnit}
           />
         )}
+      {discountType === EDiscountType.BILL &&
+        discountMethod === EDiscountBillMethod.DISCOUNT_PRODUCT && (
+          <BillDiscount
+            discountUnit={discountUnit}
+            setDiscountUnit={setDiscountUnit}
+          />
+        )}
+      {discountType === EDiscountType.BILL &&
+        discountMethod === EDiscountBillMethod.GIVE_POINT && (
+          <BillDiscount
+            discountUnit={discountUnit}
+            setDiscountUnit={setDiscountUnit}
+          />
+        )}
 
+      {/* Product */}
       {discountType === EDiscountType.GOODS &&
         discountMethod === EDiscountGoodsMethod.DISCOUNT_GOODS && (
           <GoodsDiscount

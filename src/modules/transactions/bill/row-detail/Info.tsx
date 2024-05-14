@@ -364,7 +364,7 @@ export function Info({ record }: { record: IOrder }) {
         <CustomButton
           type="success"
           prefixIcon={<Image src={PlusIconWhite} alt="" />}
-          onClick={() => router.push("/sales?isReturn=true")}
+          onClick={() => router.push(`/sales?id=${record.id}`)}
         >
           Trả hàng
         </CustomButton>
