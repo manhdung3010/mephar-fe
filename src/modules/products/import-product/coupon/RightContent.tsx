@@ -1,7 +1,7 @@
 /* eslint-disable unused-imports/no-unused-vars */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { message } from 'antd';
-import { cloneDeep, debounce } from 'lodash';
+import { cloneDeep, debounce, set } from 'lodash';
 import Image from 'next/image';
 import { useMemo, useState } from 'react';
 import { useRecoilState } from 'recoil';
@@ -49,12 +49,16 @@ export function RightContent({ useForm }: { useForm: any }) {
 
   const totalPrice = useMemo(() => {
     let price = 0;
-    if (productsImport?.length) {
+    if (productsImport?.length > 0) {
       productsImport.forEach(
         ({ product, quantity, discountValue, primePrice }) => {
           price += Number(primePrice) * quantity - discountValue;
         }
       );
+      setValue('paid', price, { shouldValidate: true });
+    }
+    else {
+      setValue('paid', 0, { shouldValidate: true });
     }
 
     return price;

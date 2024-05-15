@@ -163,6 +163,15 @@ export function RightContent({ useForm }: { useForm: any }) {
     return 0;
   }, [customerMustPay, getValues('cashOfCustomer')]);
 
+  useEffect(() => {
+    if ((customerMustPay > 0 && orderObject[orderActive]?.length > 0)) {
+      setValue('cashOfCustomer', customerMustPay, { shouldValidate: true });
+    }
+    else {
+      setValue('cashOfCustomer', 0, { shouldValidate: true });
+    }
+  }, [customerMustPay, orderObject[orderActive]])
+
   const { mutate: mutateCreateOrder, isLoading: isLoadingCreateOrder } =
     useMutation(
       () => {

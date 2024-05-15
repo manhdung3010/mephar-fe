@@ -206,7 +206,7 @@ export function Info({ record }: { record: IRecord }) {
               {record.product?.isBatchExpireControl && (
                 <div className="bg-[#FFF3E6] px-6 py-2 ">
                   <div className="flex items-center gap-x-3">
-                    {record?.productBatchHistories?.map(
+                    {record?.batches?.map(
                       ({ batch, quantity }) => (
                         <>
                           {batch && (

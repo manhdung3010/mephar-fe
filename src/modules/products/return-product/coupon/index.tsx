@@ -1,7 +1,7 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useQuery } from '@tanstack/react-query';
 import type { ColumnsType } from 'antd/es/table';
-import { cloneDeep, debounce } from 'lodash';
+import { cloneDeep, debounce, divide } from 'lodash';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -162,7 +162,7 @@ export default function ReturnCoupon() {
   }, [profile?.role?.permissions]);
 
   useEffect(() => {
-    if (returnProducts.length) {
+    if (returnProducts.length > 0) {
       const expandedRowKeysClone = { ...expandedRowKeys };
       returnProducts.forEach((_, index) => {
         expandedRowKeysClone[index] = true;
@@ -560,55 +560,87 @@ export default function ReturnCoupon() {
               pagination={false}
               expandable={{
                 defaultExpandAllRows: true,
-                expandedRowRender: (record: IImportProductLocal) => (
-                  <>
-                    {checkDisplayListBatch(record) && (
+                expandedRowRender: (record: IImportProductLocal) => {
+                  if (importProductDetail) {
+                    return (
                       <div className="bg-[#FFF3E6] px-6 py-2 ">
                         <div className="flex items-center gap-x-3">
-                          <div
-                            className="ml-1 cursor-pointer font-medium text-[#0070F4]"
-                            onClick={() => {
-                              setProductKeyAddBatch(record.productKey);
-                              setOpenListBatchModal(true);
-                            }}
-                          >
-                            Chọn lô
-                          </div>
-
-                          {record.batches?.map((batch: any) => batch.isSelected && (
+                          {record.batches?.map((batch: any) => (
                             <div
                               key={batch.id}
                               className="flex items-center rounded bg-red-main py-1 px-2 text-white"
                             >
                               <span className="mr-2">
-                                {batch?.name || batch?.batch?.name} - {batch.expiryDate} - SL:{' '}
+                                {batch?.name || batch?.batch?.name} - {batch.batch.expiryDate} - SL:{' '}
                                 {batch.quantity}
                               </span>{' '}
                               <Image
                                 className=" cursor-pointer"
                                 src={CloseIcon}
-                                onClick={() => {
-                                  handleRemoveBatch(
-                                    record.productKey,
-                                    batch.id
-                                  );
-                                }}
+                                // onClick={() => {
+                                //   handleRemoveBatch(
+                                //     record.productKey,
+                                //     batch.id
+                                //   );
+                                // }}
                                 alt=""
                               />
                             </div>
                           ))}
                         </div>
-                        <InputError
-                          error={
-                            errors?.products &&
-                            errors?.products[Number(record.key) - 1]?.batches
-                              ?.message
-                          }
-                        />
                       </div>
-                    )}
-                  </>
-                ),
+                    )
+                  }
+                  return (
+                    <>
+                      {checkDisplayListBatch(record) && (
+                        <div className="bg-[#FFF3E6] px-6 py-2 ">
+                          <div className="flex items-center gap-x-3">
+                            <div
+                              className="ml-1 cursor-pointer font-medium text-[#0070F4]"
+                              onClick={() => {
+                                setProductKeyAddBatch(record.productKey);
+                                setOpenListBatchModal(true);
+                              }}
+                            >
+                              Chọn lô
+                            </div>
+
+                            {record.batches?.map((batch: any) => batch.isSelected && (
+                              <div
+                                key={batch.id}
+                                className="flex items-center rounded bg-red-main py-1 px-2 text-white"
+                              >
+                                <span className="mr-2">
+                                  {batch?.name || batch?.batch?.name} - {batch.expiryDate} - SL:{' '}
+                                  {batch.quantity}
+                                </span>{' '}
+                                <Image
+                                  className=" cursor-pointer"
+                                  src={CloseIcon}
+                                  onClick={() => {
+                                    handleRemoveBatch(
+                                      record.productKey,
+                                      batch.id
+                                    );
+                                  }}
+                                  alt=""
+                                />
+                              </div>
+                            ))}
+                          </div>
+                          <InputError
+                            error={
+                              errors?.products &&
+                              errors?.products[Number(record.key) - 1]?.batches
+                                ?.message
+                            }
+                          />
+                        </div>
+                      )}
+                    </>
+                  )
+                },
                 expandIcon: () => <></>,
                 expandedRowKeys: Object.keys(expandedRowKeys).map(
                   (key) => +key + 1
