@@ -31,11 +31,7 @@ export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetai
   const [productKeyAddBatch, setProductKeyAddBatch] = useState<string>();
 
   const checkDisplayListBatch = (product: ISaleProductLocal) => {
-    return (
-      product.product.type === EProductType.MEDICINE ||
-      (product.product.type === EProductType.PACKAGE &&
-        product.product.isBatchExpireControl)
-    );
+    return product.product.isBatchExpireControl
   };
 
   useEffect(() => {
@@ -64,7 +60,7 @@ export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetai
     }
   }, [orderObject, orderActive]);
   useEffect(() => {
-    if (orderObject[orderActive].length) {
+    if (orderObject[orderActive].length && orderActive.split("-")[1] === "RETURN") {
       const expandedRowKeysClone = { ...expandedRowKeys };
       orderObject[orderActive].forEach((product, index) => {
         if (orderActive.split("-")[1] === "RETURN" && product.batches.length > 0) {

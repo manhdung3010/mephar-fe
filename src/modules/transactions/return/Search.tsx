@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { DatePicker, Select, Tag } from 'antd';
+import { DatePicker, Select, Spin, Tag } from 'antd';
 import dayjs from 'dayjs';
 import { debounce } from 'lodash';
 import Image from 'next/image';
@@ -15,6 +15,7 @@ import { formatDate } from '@/helpers';
 import { billStatusData } from '../bill/interface';
 import { saleReturn } from '@/enums';
 import { getCustomer } from '@/api/customer.service';
+const { Option } = Select;
 
 const { RangePicker } = DatePicker;
 
@@ -22,16 +23,15 @@ const Search = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void,
   const [searchEmployeeText, setSearchEmployeeText] = useState('');
   const [searchCustomerText, setSearchCustomerText] = useState('');
 
-  const { data: employees } = useQuery(
-    ['EMPLOYEE_LIST', searchEmployeeText],
+  const { data: employees, isLoading: isLoadingEm } = useQuery(
+    ['EMPLOYEE_LIST', 1, 20, searchEmployeeText],
     () => getEmployee({ page: 1, limit: 20, keyword: searchEmployeeText })
   );
 
   const { data: customers, isLoading } = useQuery(
-    ['CUSTOMER_LIST', formFilter.page, formFilter.limit, formFilter.keyword],
-    () => getCustomer({ page: 1, limit: 20, keyword: searchCustomerText })
+    ['CUSTOMER_LIST', formFilter.page, formFilter.limit, searchCustomerText],
+    () => getCustomer({ page: 1, limit: formFilter.limit, keyword: searchCustomerText })
   );
-
 
   return (
     <div className="bg-white">
@@ -80,6 +80,7 @@ const Search = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void,
             bordered={false}
             suffixIcon={<Image src={ArrowDownGray} alt="" />}
             placeholder="Người bán"
+            // optionFilterProp="label"
             optionFilterProp="children"
             onChange={(value) => {
               if (value) {
@@ -99,18 +100,23 @@ const Search = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void,
               setSearchEmployeeText(value);
             }, 300)}
             showSearch={true}
-            options={employees?.data?.items?.map((item) => ({
-              value: item.id,
-              label: item.fullName,
-            }))}
+            notFoundContent={isLoadingEm ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
             value={employees?.data?.items?.find((item) => item?.id === formFilter?.userId)?.fullName || undefined}
-          />
+          >
+            {
+              employees?.data?.items?.map((item) => (
+                <Option key={item.id} value={item.id}>
+                  {item.fullName}
+                </Option>
+              ))
+            }
+          </Select>
           <Select
             className="w-[150px]"
             bordered={false}
             suffixIcon={<Image src={ArrowDownGray} alt="" />}
             placeholder="Trạng thái"
-            optionFilterProp="children"
+            optionFilterProp="label"
             onChange={(value) => {
               if (value) {
                 setFormFilter((preValue) => ({
@@ -157,15 +163,21 @@ const Search = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void,
               }
             }}
             onSearch={debounce((value) => {
-              setSearchEmployeeText(value);
+              setSearchCustomerText(value);
             }, 300)}
             showSearch={true}
-            options={customers?.data?.items?.map((item) => ({
-              value: item.id,
-              label: item.fullName,
-            }))}
+            loading={isLoading}
+            notFoundContent={isLoading ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
             value={customers?.data?.items?.find((item) => item?.id === formFilter?.userId)?.fullName || undefined}
-          />
+          >
+            {
+              customers?.data?.items?.map((item) => (
+                <Option key={item.id} value={item.id}>
+                  {item.fullName}
+                </Option>
+              ))
+            }
+          </Select>
         </div>
       </div>
       <div className='flex items-center gap-4 p-4'>

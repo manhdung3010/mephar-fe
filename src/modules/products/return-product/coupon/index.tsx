@@ -43,6 +43,8 @@ export default function ReturnCoupon() {
   const [returnProducts, setReturnProducts] =
     useRecoilState(productReturnState);
 
+  console.log("returnProducts", returnProducts)
+
   const {
     getValues,
     setValue,
@@ -73,25 +75,18 @@ export default function ReturnCoupon() {
 
   useEffect(() => {
     if (importProductDetail) {
+      let cloneImportProducts = cloneDeep(returnProducts);
       importProductDetail?.data?.products?.forEach((product) => {
-        const newProduct = {
-          ...product,
-          // productId: product.productId,
-          productUnit: [product.productBatchHistories[0]?.productUnit],
-        }
         const localProduct: IImportProductLocal = {
-          ...newProduct,
+          ...product,
+          productUnit: product?.productUnit,
           productKey: `${product.productId || product.productId}-${product.id}`,
-          inventory: product.quantity,
           productId: product.productId,
-          quantity: 1,
-          price: product.productBatchHistories[0]?.importPrice,
+          quantity: product.quantity,
+          price: +product.price,
           discountValue: 0,
           batches: product.batches,
         };
-
-        let cloneImportProducts = cloneDeep(returnProducts);
-
         if (
           returnProducts.find(
             (p) => p.productKey === localProduct.productKey
@@ -111,8 +106,8 @@ export default function ReturnCoupon() {
           cloneImportProducts.push(localProduct);
         }
 
-        setReturnProducts(cloneImportProducts);
       });
+      setReturnProducts(cloneImportProducts);
       setValue('supplierId', importProductDetail?.data?.inbound.supplierId, { shouldValidate: true });
     }
   }, [importProductDetail])
@@ -375,7 +370,7 @@ export default function ReturnCoupon() {
         bordered={false}
         onChange={(value) => onChangeValueProduct(record?.productKey, 'price', value)}
         wrapClassName="w-[100px]"
-        defaultValue={id ? record?.productBatchHistories?.find((item, index) => index === 0)?.importPrice : primePrice}
+        defaultValue={id ? record?.price : primePrice}
         disabled
       />,
     },
@@ -388,7 +383,7 @@ export default function ReturnCoupon() {
         bordered={false}
         onChange={(value) => onChangeValueProduct(record?.productKey, 'price', value)}
         wrapClassName="w-[100px]"
-        defaultValue={id ? record?.productBatchHistories?.find((item, index) => index === 0)?.importPrice : record?.primePrice}
+        defaultValue={id ? price : record?.primePrice}
       />
     },
     {

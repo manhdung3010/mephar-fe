@@ -78,17 +78,17 @@ export function Info({ record }: { record: IRecord }) {
     },
     {
       title: "Đơn vị",
-      dataIndex: "productBatchHistories",
-      key: "productBatchHistories",
-      render: (productBatchs) => productBatchs[0]?.productUnit?.unitName,
+      dataIndex: "productUnit",
+      key: "productUnit",
+      render: (productUnit) => productUnit?.unitName,
     },
     {
       title: "Số lượng",
-      dataIndex: "totalQuantity",
-      key: "totalQuantity",
-      render: (_, { productBatchHistories }) =>
+      dataIndex: "quantity",
+      key: "quantity",
+      render: (quantity) =>
         formatNumber(
-          productBatchHistories.reduce((acc, obj) => acc + obj.quantity, 0)
+          quantity
         ),
     },
     // {
@@ -100,22 +100,22 @@ export function Info({ record }: { record: IRecord }) {
       title: "Giảm giá",
       dataIndex: "discount",
       key: "discount",
-      render: (_, { productBatchHistories }) =>
-        formatMoney(productBatchHistories[0]?.discount),
+      render: (discount) =>
+        formatMoney(discount),
     },
     {
       title: "Giá nhập",
-      dataIndex: "importPrice",
-      key: "importPrice",
-      render: (_, { productBatchHistories }) =>
-        formatMoney(productBatchHistories[0]?.importPrice),
+      dataIndex: "price",
+      key: "price",
+      render: (price) =>
+        formatMoney(+price),
     },
     {
       title: "Thành tiền",
       dataIndex: "totalPrice",
       key: "totalPrice",
-      render: (_, { productBatchHistories }) =>
-        formatMoney(productBatchHistories[0]?.totalPrice),
+      render: (_, record: any) =>
+        formatMoney(record.price * record.quantity - record.discount),
     },
   ];
 
@@ -135,9 +135,7 @@ export function Info({ record }: { record: IRecord }) {
 
     if (importProductDetail) {
       importProductDetail.data.products.forEach((product) => {
-        product.productBatchHistories.forEach((batch) => {
-          total += batch.quantity;
-        });
+        total += product.quantity;
       });
     }
 
@@ -232,7 +230,7 @@ export function Info({ record }: { record: IRecord }) {
               {record.product?.isBatchExpireControl && (
                 <div className="bg-[#FFF3E6] px-6 py-2 ">
                   <div className="flex items-center gap-x-3">
-                    {record?.productBatchHistories?.map(
+                    {record?.batches?.map(
                       ({ batch, quantity }) => (
                         <>
                           {batch && (
