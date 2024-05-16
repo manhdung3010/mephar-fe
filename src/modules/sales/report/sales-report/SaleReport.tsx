@@ -48,7 +48,7 @@ interface IRecord {
 
 
 
-export function SaleReport() {
+export function SaleReport({ isOpen }) {
   const router = useRouter();
   const [branch] = useRecoilState(branchState);
 
@@ -71,8 +71,12 @@ export function SaleReport() {
       formFilter.to,
       formFilter.concern,
       formFilter.branchId,
+      isOpen
     ],
-    () => getSaleReport({ from: formFilter.from, to: formFilter.to, branchId: formFilter.branchId, concern: formFilter.concern })
+    () => getSaleReport({ from: formFilter.from, to: formFilter.to, branchId: formFilter.branchId, concern: formFilter.concern }),
+    {
+      enabled: !!isOpen,
+    }
   );
 
   const { data: branches } = useQuery(['SETTING_BRANCH'], () => getBranch());

@@ -40,8 +40,11 @@ function Invoice({
   });
 
   const { data: orders, isLoading } = useQuery(
-    ['ORDER_LIST', JSON.stringify(formFilter), branchId],
-    () => getOrder({ ...formFilter, branchId })
+    ['ORDER_LIST', JSON.stringify(formFilter), branchId, isOpen],
+    () => getOrder({ ...formFilter, branchId }),
+    {
+      enabled: !!isOpen,
+    }
   );
 
   const [expandedRowKeys, setExpandedRowKeys] = useState<

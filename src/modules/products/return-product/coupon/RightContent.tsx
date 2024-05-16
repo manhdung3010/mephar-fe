@@ -105,16 +105,16 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
 
   const changePayload = (status: EImportProductStatus) => {
     const products = cloneDeep(productsReturn).map(
-      ({ id, price, product, quantity, discountValue, batches, productBatchHistories }) => ({
-        productId: product.id || productBatchHistories[0].productId,
+      ({ id, price, product, quantity, discountValue, productUnitId, batches, productId }: any) => ({
+        productId: product.id || productId,
         importPrice: price,
         totalQuantity: quantity,
         totalPrice: price * quantity - discountValue,
         discount: discountValue,
-        productUnitId: importId ? productBatchHistories[0].productUnitId : id,
+        productUnitId: importId ? productUnitId : id,
         isBatchExpireControl: product.isBatchExpireControl,
         ...(!product.isBatchExpireControl ? null : {
-          batches: importId ? [{ ...productBatchHistories[0]?.batch, quantity }] : batches?.map(({ id, quantity, expiryDate }) => ({
+          batches: importId ? batches?.map((batch: any) => ({ id: batch.batch?.id, quantity, expiryDate: batch?.expiryDate })) : batches?.map(({ id, quantity, expiryDate }) => ({
             id,
             quantity,
             expiryDate,

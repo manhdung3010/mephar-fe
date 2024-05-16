@@ -44,12 +44,18 @@ export function CreatePrescriptionModal({
   const [hospitalKeyword, setHospitalKeyword] = useState();
   const [doctorKeyword, setDoctorKeyword] = useState();
 
-  const { data: hospitals } = useQuery(['HOSPITAL', hospitalKeyword], () =>
-    getHospital({ page: 1, limit: 20, keyword: hospitalKeyword })
+  const { data: hospitals } = useQuery(['HOSPITAL', hospitalKeyword, isOpen], () =>
+    getHospital({ page: 1, limit: 20, keyword: hospitalKeyword }),
+    {
+      enabled: !!isOpen,
+    }
   );
 
-  const { data: doctors } = useQuery(['DOCTOR_LIST', doctorKeyword], () =>
-    getDoctor({ page: 1, limit: 20, keyword: doctorKeyword })
+  const { data: doctors } = useQuery(['DOCTOR_LIST', doctorKeyword, isOpen], () =>
+    getDoctor({ page: 1, limit: 20, keyword: doctorKeyword }),
+    {
+      enabled: !!isOpen,
+    }
   );
 
   const {
@@ -124,7 +130,7 @@ export function CreatePrescriptionModal({
                   value: item.id,
                   label: item.name,
                 }))}
-                 value={getValues('doctorId')}
+                value={getValues('doctorId')}
                 onChange={(e) =>
                   setValue('doctorId', e, { shouldValidate: true })
                 }
@@ -346,7 +352,7 @@ export function CreatePrescriptionModal({
       <CreateDoctorModal
         isOpen={isOpenCreateDoctorModal}
         onCancel={() => setIsOpenCreateDoctorModal(false)}
-         onSave={({ doctorId, doctorName }) => {
+        onSave={({ doctorId, doctorName }) => {
           setValue("doctorId", doctorId, {
             shouldValidate: true,
           });

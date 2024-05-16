@@ -34,8 +34,11 @@ function CustomerModal({
   });
 
   const { data: customers, isLoading } = useQuery(
-    ['CUSTOMER_LIST', formFilter.page, formFilter.limit, formFilter.keyword],
-    () => getCustomer(formFilter)
+    ['CUSTOMER_LIST', formFilter.page, formFilter.limit, formFilter.keyword, isOpen],
+    () => getCustomer(formFilter),
+    {
+      enabled: !!isOpen,
+    }
   );
 
   const [expandedRowKeys, setExpandedRowKeys] = useState<

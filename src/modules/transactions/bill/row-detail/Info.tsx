@@ -290,7 +290,7 @@ export function Info({ record }: { record: IOrder }) {
           quantity: item.quantity,
           discount: item.discount,
           price: item.price,
-          unitName: item.productUnit.unitName,
+          unitName: item.productUnit?.unitName,
         }))}
         columns={columns}
         pagination={false}

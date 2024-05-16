@@ -34,8 +34,11 @@ export function Debt({ record, branchId }: { record: any, branchId: number }) {
   });
 
   const { data: orders, isLoading } = useQuery(
-    ['ORDER_LIST_DEBT', JSON.stringify(formFilter), branchId],
-    () => getCustomerDebt({ ...formFilter }, record.id)
+    ['ORDER_LIST_DEBT', JSON.stringify(formFilter), branchId, record.id],
+    () => getCustomerDebt({ ...formFilter }, record.id),
+    {
+      enabled: !!record.id,
+    }
   );
 
   const columns: ColumnsType<IRecord> = [

@@ -39,8 +39,11 @@ function InvoiceModal({
   });
 
   const { data: orders, isLoading } = useQuery(
-    ['ORDER_LIST', JSON.stringify(formFilter), branchId],
-    () => getOrder({ ...formFilter, branchId })
+    ['ORDER_LIST', JSON.stringify(formFilter), branchId, isOpen],
+    () => isOpen ? getOrder({ ...formFilter, branchId }) : {},
+    {
+      enabled: !!isOpen,
+    }
   );
 
   const [expandedRowKeys, setExpandedRowKeys] = useState<
@@ -125,7 +128,7 @@ function InvoiceModal({
     >
       <Search formFilter={formFilter} setFormFilter={setFormFilter} />
       <CustomTable
-        dataSource={orders?.data?.items?.map((item, index) => ({
+        dataSource={(orders as { data: { items: any[] } })?.data?.items?.map((item, index) => ({
           ...item,
           key: index + 1,
         }))}
@@ -154,7 +157,7 @@ function InvoiceModal({
         pageSize={formFilter.limit}
         setPage={(value) => setFormFilter({ ...formFilter, page: value })}
         setPerPage={(value) => setFormFilter({ ...formFilter, limit: value })}
-        total={orders?.data?.totalItem}
+        total={(orders as { data: { totalItem: number } })?.data?.totalItem}
       />
     </CustomModal>
   )

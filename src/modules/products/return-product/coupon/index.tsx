@@ -43,8 +43,6 @@ export default function ReturnCoupon() {
   const [returnProducts, setReturnProducts] =
     useRecoilState(productReturnState);
 
-  console.log("returnProducts", returnProducts)
-
   const {
     getValues,
     setValue,
@@ -574,20 +572,27 @@ export default function ReturnCoupon() {
                                 {batch?.name || batch?.batch?.name} - {batch.batch.expiryDate} - SL:{' '}
                                 {batch.quantity}
                               </span>{' '}
-                              <Image
+                              {/* <Image
                                 className=" cursor-pointer"
                                 src={CloseIcon}
-                                // onClick={() => {
-                                //   handleRemoveBatch(
-                                //     record.productKey,
-                                //     batch.id
-                                //   );
-                                // }}
+                                onClick={() => {
+                                  handleRemoveBatch(
+                                    record.productKey,
+                                    batch.id
+                                  );
+                                }}
                                 alt=""
-                              />
+                              /> */}
                             </div>
                           ))}
                         </div>
+                        <InputError
+                          error={
+                            errors?.products &&
+                            errors?.products[Number(record.key) - 1]?.batches
+                              ?.message
+                          }
+                        />
                       </div>
                     )
                   }

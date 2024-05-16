@@ -45,13 +45,9 @@ interface IRecord {
   totalCostPrice: number;
   grossPrice: number;
 }
-export function ProductReport() {
+export function ProductReport({ isOpen }) {
   const router = useRouter();
   const [branch] = useRecoilState(branchState);
-
-  const [expandedRowKeys, setExpandedRowKeys] = useState<
-    Record<string, boolean>
-  >({});
 
   const [formFilter, setFormFilter] = useState({
     type: 1,
@@ -68,8 +64,12 @@ export function ProductReport() {
       formFilter.to,
       formFilter.concern,
       formFilter.branchId,
+      isOpen
     ],
-    () => getProductReport(formFilter)
+    () => getProductReport(formFilter),
+    {
+      enabled: !!isOpen,
+    }
   );
 
   const { data: branches } = useQuery(['SETTING_BRANCH'], () => getBranch());
@@ -182,47 +182,6 @@ export function ProductReport() {
           label: 'Số lượng bán',
           data: saleReport?.data?.items?.map((item) => Number(item.totalSell)),
           backgroundColor: '#0070F4',
-        },
-      ],
-    }),
-    [saleReport]
-  );
-  const revenueDataSource = useMemo(
-    () => ({
-      labels,
-      datasets: [
-        {
-          label: 'Lợi nhuận',
-          data: saleReport?.data?.items?.map((item) => Number(item.profit)),
-          backgroundColor: '#0070F4',
-        },
-        {
-          label: 'Doanh thu',
-          data: saleReport?.data?.items?.map((item) => Number(item.totalRevenue)),
-          backgroundColor: '#00B63E',
-        },
-        {
-          label: 'Giá vốn',
-          data: saleReport?.data?.items?.map((item) => Number(item.totalPrime)),
-          backgroundColor: '#FFBA00',
-        },
-      ],
-    }),
-    [saleReport]
-  );
-  const discountDataSource = useMemo(
-    () => ({
-      labels,
-      datasets: [
-        {
-          label: 'Giá trị hóa đơn',
-          data: saleReport?.data?.items?.map((item) => Number(item.totalPrice)),
-          backgroundColor: '#0070F4',
-        },
-        {
-          label: 'Giảm giá hóa đơn',
-          data: saleReport?.data?.items?.map((item) => Number(item.totalDiscount)),
-          backgroundColor: '#00B63E',
         },
       ],
     }),

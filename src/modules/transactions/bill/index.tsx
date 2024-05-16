@@ -82,8 +82,9 @@ export function BillTransaction() {
     },
     {
       title: "Mã trả hàng",
-      dataIndex: "returnId",
-      key: "returnId",
+      dataIndex: "saleReturn",
+      key: "saleReturn",
+      render: (value) => value ? value[0]?.code : '',
     },
     {
       title: "Khách hàng",

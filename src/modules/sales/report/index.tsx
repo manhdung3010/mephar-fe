@@ -45,11 +45,6 @@ function ReportModal({
 
   const menu = ['Báo cáo bán hàng', 'Báo cáo sản phẩm', 'Báo cáo khách hàng', 'Báo cáo nhân viên', "Báo cáo nhà cung cấp"];
 
-  const { data: orders, isLoading } = useQuery(
-    ['ORDER_LIST', JSON.stringify(formFilter), branchId],
-    () => getOrder({ ...formFilter, branchId })
-  );
-
   const [expandedRowKeys, setExpandedRowKeys] = useState<
     Record<string, boolean>
   >({});
@@ -149,8 +144,8 @@ function ReportModal({
           </div>
           <div className="h-[1px] w-full bg-[#D64457]" />
         </div>
-        {select === 0 && <SaleReport />}
-        {select === 1 && <ProductReport />}
+        {select === 0 && <SaleReport isOpen={isOpen} />}
+        {select === 1 && <ProductReport isOpen={isOpen} />}
       </div>
     </CustomModal>
   )
