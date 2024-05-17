@@ -60,7 +60,7 @@ export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetai
     }
   }, [orderObject, orderActive]);
   useEffect(() => {
-    if (orderObject[orderActive].length && orderActive.split("-")[1] === "RETURN") {
+    if (orderObject[orderActive]?.length > 0 && orderActive.split("-")[1] === "RETURN") {
       const expandedRowKeysClone = { ...expandedRowKeys };
       orderObject[orderActive].forEach((product, index) => {
         if (orderActive.split("-")[1] === "RETURN" && product.batches.length > 0) {

@@ -14,6 +14,7 @@ export function CustomDatePicker({
   format,
   value,
   bordered = true,
+  showTime = false,
 }: {
   className?: string;
   suffixIcon?: ReactNode;
@@ -22,6 +23,7 @@ export function CustomDatePicker({
   format?: string;
   value?: string;
   bordered?: boolean;
+  showTime?: boolean;
 }) {
   return (
     <DatePicker
@@ -38,6 +40,7 @@ export function CustomDatePicker({
       placeholder={placeholder}
       format={format || 'DD-MM-YYYY'}
       defaultValue={value ? dayjs(value) : undefined}
+      showTime={showTime}
     />
   );
 }

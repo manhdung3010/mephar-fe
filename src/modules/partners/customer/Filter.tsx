@@ -23,12 +23,12 @@ const Filter = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void,
 
   const { data: employees } = useQuery(
     ['EMPLOYEE_LIST', searchEmployeeText],
-    () => getEmployee({ page: 1, limit: 20, keyword: searchEmployeeText })
+    () => getEmployee({ page: 1, limit: 99, keyword: searchEmployeeText })
   );
 
   const { data: groupCustomer, isLoading } = useQuery(
     ['GROUP_CUSTOMER', formFilter.page, formFilter.limit, formFilter.keyword],
-    () => getGroupCustomer({ page: 1, limit: 20, keyword: searchGroupCustomer })
+    () => getGroupCustomer({ page: 1, limit: 99, keyword: searchGroupCustomer })
   );
 
   const { data: branches } = useQuery(['SETTING_BRANCH'], () => getBranch());
@@ -38,14 +38,14 @@ const Filter = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void,
     <div className="">
       <div className="flex  items-center gap-4 px-4">
         <div className="flex flex-col gap-5 grow rounded-l-[3px] ">
-          <div className='bg-white rounded p-5 shadow-sm'>
+          <div className='bg-white rounded-lg p-5 shadow-sm'>
             <h4 className='text-sm font-semibold mb-2'>Nhóm khách hàng</h4>
             <Select
               className="w-full border-b border-[#D3D5D7]"
               bordered={false}
               suffixIcon={<Image src={ArrowDownGray} alt="" />}
               placeholder="Nhóm khách hàng"
-              optionFilterProp="children"
+              optionFilterProp="label"
               onChange={(value) => {
                 if (value) {
                   setFormFilter((preValue) => ({
@@ -64,10 +64,14 @@ const Filter = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void,
                 setSearchGroupCustomer(value);
               }, 300)}
               showSearch={true}
-              options={groupCustomer?.data?.items?.map((item) => ({
-                value: item.id,
-                label: item.name,
-              }))}
+              defaultValue={""}
+              options={[
+                { value: "", label: 'Tất cả' },
+                ...(groupCustomer?.data?.items?.map((item) => ({
+                  value: item.id,
+                  label: item.name,
+                })) || []),
+              ]}
               value={groupCustomer?.data?.items?.find((item) => item?.id === formFilter?.groupCustomerId)?.id || undefined}
             />
           </div>
@@ -94,14 +98,14 @@ const Filter = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void,
               }
             }}
           /> */}
-          <div className='bg-white rounded p-5  shadow-sm'>
+          <div className='bg-white rounded-lg p-5  shadow-sm'>
             <h4 className='text-sm font-semibold mb-2'>Người tạo</h4>
             <Select
               className="w-full border-b border-[#D3D5D7]"
               bordered={false}
               suffixIcon={<Image src={ArrowDownGray} alt="" />}
               placeholder="Người tạo"
-              optionFilterProp="children"
+              optionFilterProp="label"
               onChange={(value) => {
                 if (value) {
                   setFormFilter((preValue) => ({
@@ -116,18 +120,22 @@ const Filter = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void,
                   }));
                 }
               }}
-              onSearch={debounce((value) => {
-                setSearchEmployeeText(value);
-              }, 300)}
+              // onSearch={debounce((value) => {
+              //   setSearchEmployeeText(value);
+              // }, 300)}
               showSearch={true}
-              options={employees?.data?.items?.map((item) => ({
-                value: item.id,
-                label: item.fullName,
-              }))}
+              defaultValue={""}
+              options={[
+                { value: "", label: 'Tất cả' },
+                ...(employees?.data?.items?.map((item) => ({
+                  value: item.id,
+                  label: item.fullName,
+                })) || []),
+              ]}
               value={employees?.data?.items?.find((item) => item?.id === formFilter?.userId)?.fullName || undefined}
             />
           </div>
-          <div className='bg-white rounded p-5  shadow-sm'>
+          <div className='bg-white rounded-lg p-5  shadow-sm'>
             <h4 className='text-sm font-semibold mb-2'>Ngày tạo</h4>
             <CustomDatePicker
               className="border-b border-[#D3D5D7] h-8"
@@ -150,7 +158,7 @@ const Filter = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void,
               value={formFilter?.createdAt}
             />
           </div>
-          <div className='bg-white rounded p-5  shadow-sm'>
+          <div className='bg-white rounded-lg p-5  shadow-sm'>
             <h4 className='text-sm font-semibold mb-2'>Sinh nhật</h4>
             <RangePicker
               bordered={false}
@@ -175,7 +183,7 @@ const Filter = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void,
               }}
             />
           </div>
-          <div className='bg-white rounded p-5  shadow-sm'>
+          <div className='bg-white rounded-lg p-5  shadow-sm'>
             <h4 className='text-sm font-semibold mb-2'>Chi nhánh tạo</h4>
             <Select
               bordered={false}
@@ -201,14 +209,18 @@ const Filter = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void,
                 setSearchGroupCustomer(value);
               }, 300)}
               showSearch={true}
-              options={branches?.data?.items?.map((item) => ({
-                value: item.id,
-                label: item.name,
-              }))}
+              defaultValue={""}
+              options={[
+                { value: "", label: 'Tất cả' },
+                ...(branches?.data?.items?.map((item) => ({
+                  value: item.id,
+                  label: item.name,
+                })) || []),
+              ]}
               value={branches?.data?.items?.find((item) => item?.id === formFilter?.branchId)?.id || undefined}
             />
           </div>
-          <div className='bg-white rounded p-5  shadow-sm'>
+          <div className='bg-white rounded-lg p-5  shadow-sm'>
             <h4 className='text-sm font-semibold mb-2'>Tổng bán</h4>
             <div>
               <div className='flex items-center mb-4'>
@@ -242,7 +254,7 @@ const Filter = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void,
               </div>
             </div>
           </div>
-          <div className='bg-white rounded p-5  shadow-sm'>
+          <div className='bg-white rounded-lg p-5  shadow-sm'>
             <h4 className='text-sm font-semibold mb-2'>Nợ hiện tại</h4>
             <div>
               <div className='flex items-center mb-4'>
@@ -274,7 +286,7 @@ const Filter = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void,
               </div>
             </div>
           </div>
-          <div className='bg-white rounded p-5  shadow-sm'>
+          <div className='bg-white rounded-lg p-5  shadow-sm'>
             <h4 className='text-sm font-semibold mb-2'>Điểm hiện tại</h4>
             <div>
               <div className='flex items-center mb-4'>
@@ -307,7 +319,7 @@ const Filter = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void,
               </div>
             </div>
           </div>
-          <div className='bg-white rounded p-5  shadow-sm'>
+          <div className='bg-white rounded-lg p-5  shadow-sm'>
             <h4 className='text-sm font-semibold mb-2'>Loại khách</h4>
             <Select
               bordered={false}
@@ -344,7 +356,7 @@ const Filter = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void,
               value={formFilter?.type || undefined}
             />
           </div>
-          <div className='bg-white rounded p-5  shadow-sm'>
+          <div className='bg-white rounded-lg p-5  shadow-sm'>
             <h4 className='text-sm font-semibold mb-2'>Giới tính</h4>
             <Select
               bordered={false}
@@ -381,7 +393,7 @@ const Filter = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void,
               value={formFilter?.gender || undefined}
             />
           </div>
-          <div className='bg-white rounded p-5  shadow-sm'>
+          <div className='bg-white rounded-lg p-5  shadow-sm'>
             <h4 className='text-sm font-semibold mb-2'>Trạng thái</h4>
             <Select
               bordered={false}

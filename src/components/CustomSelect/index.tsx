@@ -22,6 +22,8 @@ export function CustomSelect({
   isLoading,
   listHeight = 256,
   disabled,
+  mode,
+  size
 }: {
   onChange: (value: any) => void;
   defaultValue?: any;
@@ -37,6 +39,8 @@ export function CustomSelect({
   isLoading?: boolean;
   listHeight?: number;
   disabled?: boolean;
+  mode?: "multiple" | "tags";
+  size?: "large" | "middle" | "small";
 }) {
 
   // const filterOption = (input, option) => {
@@ -62,6 +66,7 @@ export function CustomSelect({
       <Select
         showSearch={!!showSearch}
         filterOption={filterOption}
+        mode={mode}
         onChange={onChange}
         onSearch={onSearch}
         options={options}
@@ -80,6 +85,7 @@ export function CustomSelect({
           "suffix-icon": !!suffixIcon,
           "prefix-icon": !!prefixIcon,
         })}
+        size={size}
         loading={isLoading}
         disabled={disabled}
       />

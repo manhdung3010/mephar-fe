@@ -245,7 +245,7 @@ export function Customer() {
           <Filter setFormFilter={setFormFilter} formFilter={formFilter} />
         </div>
         <div className='col-span-10'>
-          <div className='sticky top-0'>
+          <div className='sticky top-0 rounded-lg overflow-hidden'>
             <Search setFormFilter={setFormFilter} formFilter={formFilter} />
 
             <CustomTable

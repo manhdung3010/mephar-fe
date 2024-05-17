@@ -12,39 +12,44 @@ import { BillDiscount } from './BillDiscount';
 import { BillDiscountGiveGoods } from './BillDiscountGiveGoods';
 import { GoodsDiscount } from './GoodsDiscount';
 import { GoodsDiscountGiveGoods } from './GoodsDiscountGiveGoods';
+import InputError from '@/components/InputError';
 
 export enum EDiscountType {
-  BILL = 'BILL',
-  GOODS = 'GOODS',
+  ORDER = 'ORDER',
+  PRODUCT = 'PRODUCT',
 }
 
 export enum EDiscountTypeLabel {
-  BILL = 'Hóa đơn',
-  GOODS = 'Hàng hóa',
+  ORDER = 'Hóa đơn',
+  PRODUCT = 'Hàng hóa',
 }
 
 export enum EDiscountBillMethod {
-  GIVE_GOODS = 'GIVE_GOODS',
-  DISCOUNT_BILL = 'DISCOUNT_BILL',
-  DISCOUNT_PRODUCT = 'DISCOUNT_PRODUCT',
-  GIVE_POINT = 'GIVE_POINT',
+  ORDER_PRICE = 'ORDER_PRICE',
+  PRODUCT_PRICE = 'PRODUCT_PRICE',
+  GIFT = 'GIFT',
+  LOYALTY = 'LOYALTY',
 }
 
 export enum EDiscountBillMethodLabel {
-  GIVE_GOODS = 'Tặng hàng',
-  DISCOUNT_BILL = 'Giảm giá hóa đơn',
-  DISCOUNT_PRODUCT = 'Giảm giá hàng',
-  GIVE_POINT = 'Tặng điểm',
+  GIFT = 'Tặng hàng',
+  ORDER_PRICE = 'Giảm giá hóa đơn',
+  PRODUCT_PRICE = 'Giảm giá hàng',
+  LOYALTY = 'Tặng điểm',
 }
 
 export enum EDiscountGoodsMethod {
-  DISCOUNT_GOODS = 'DISCOUNT_GOODS',
-  GIVE_GOODS = 'GIVE_GOODS',
+  PRODUCT_PRICE = 'PRODUCT_PRICE',
+  GIFT = 'GIFT',
+  LOYALTY = 'LOYALTY',
+  PRICE_BY_BUY_NUMBER = 'PRICE_BY_BUY_NUMBER'
 }
 
 export enum EDiscountGoodsMethodLabel {
-  DISCOUNT_GOODS = 'Mua hàng giảm giá hàng',
-  GIVE_GOODS = 'Mua hàng tặng hàng',
+  PRODUCT_PRICE = 'Mua hàng giảm giá hàng',
+  GIFT = 'Mua hàng tặng hàng',
+  LOYALTY = 'Mua hàng tặng điểm',
+  PRICE_BY_BUY_NUMBER = 'Giảm giá theo số lượng mua'
 }
 
 export enum EDiscountUnit {
@@ -52,25 +57,29 @@ export enum EDiscountUnit {
   PERCENT = 'PERCENT',
 }
 
-const Info = () => {
-  const [discountType, setDiscountType] = useState(EDiscountType.BILL);
+const Info = ({ setValue, getValues, errors }: any) => {
+  const [discountType, setDiscountType] = useState(EDiscountType.ORDER);
   const [discountUnit, setDiscountUnit] = useState(EDiscountUnit.MONEY);
 
   const [discountMethod, setDiscountMethod] = useState<
     EDiscountBillMethod | EDiscountGoodsMethod
-  >(EDiscountBillMethod.DISCOUNT_BILL);
+  >(EDiscountBillMethod.ORDER_PRICE);
   return (
     <div className="mt-5">
       <h2 className="mb-4 text-xl font-medium text-[#999]">THÔNG TIN</h2>
 
       <div className="mb-5 grid grid-cols-2 gap-x-[42px] gap-y-5">
         <div>
-          <Label infoText="" label="Mã chương trình" required />
+          <Label infoText="" label="Mã chương trình" />
           <CustomInput
             placeholder="Mã tự động"
             className="h-11"
-            onChange={() => { }}
+            onChange={(value) =>
+              setValue("code", value, { shouldValidate: true })
+            }
+            value={getValues("code")}
           />
+          <InputError error={errors.code?.message} />
         </div>
 
         <div>
@@ -78,9 +87,11 @@ const Info = () => {
           <div className="h-11 rounded-md border border-[#d9d9d9] px-4 py-[2px]">
             <CustomRadio
               options={[
-                { value: 0, label: 'Kích hoạt' },
-                { value: 1, label: 'Chưa áp dụng' },
+                { value: "ACTIVE", label: 'Kích hoạt' },
+                { value: "INACTIVE", label: 'Chưa áp dụng' },
               ]}
+              onChange={(value) => setValue("status", value, { shouldValidate: true })}
+              value={getValues("status")}
             />
           </div>
         </div>
@@ -90,8 +101,12 @@ const Info = () => {
           <CustomInput
             placeholder="Tên chương trình khuyến mại"
             className="h-11"
-            onChange={() => { }}
+            onChange={(value) =>
+              setValue("name", value, { shouldValidate: true })
+            }
+            value={getValues("name")}
           />
+          <InputError error={errors.name?.message} />
         </div>
 
         <div>
@@ -99,7 +114,10 @@ const Info = () => {
           <CustomInput
             placeholder="Ghi chú"
             className="h-11"
-            onChange={() => { }}
+            onChange={(value) =>
+              setValue("note", value, { shouldValidate: true })
+            }
+            value={getValues("note")}
           />
         </div>
       </div>
@@ -112,7 +130,7 @@ const Info = () => {
         className="grid grid-cols-2 gap-x-[42px] gap-y-5"
         style={{
           gridTemplateColumns:
-            discountType === EDiscountType.BILL
+            discountType === EDiscountType.ORDER
               ? 'repeat(2, minmax(0, 1fr))'
               : 'repeat(3, minmax(0, 1fr))',
         }}
@@ -135,7 +153,7 @@ const Info = () => {
           <CustomSelect
             onChange={(value) => setDiscountMethod(value)}
             options={
-              discountType === EDiscountType.BILL
+              discountType === EDiscountType.ORDER
                 ? Object.values(EDiscountBillMethod).map((value) => ({
                   value,
                   label: EDiscountBillMethodLabel[value],
@@ -150,7 +168,7 @@ const Info = () => {
           />
         </div>
 
-        {discountType === EDiscountType.GOODS && (
+        {discountType === EDiscountType.PRODUCT && (
           <div className="flex items-end gap-2">
             <Checkbox />
             <div>Không nhân theo số lượng mua</div>
@@ -160,30 +178,30 @@ const Info = () => {
       </div>
 
       {/* Bill */}
-      {discountType === EDiscountType.BILL &&
-        discountMethod === EDiscountBillMethod.DISCOUNT_BILL && (
+      {discountType === EDiscountType.ORDER &&
+        discountMethod === EDiscountBillMethod.ORDER_PRICE && (
           <BillDiscount
             discountUnit={discountUnit}
             setDiscountUnit={setDiscountUnit}
           />
         )}
 
-      {discountType === EDiscountType.BILL &&
-        discountMethod === EDiscountBillMethod.GIVE_GOODS && (
+      {discountType === EDiscountType.ORDER &&
+        discountMethod === EDiscountBillMethod.PRODUCT_PRICE && (
           <BillDiscountGiveGoods
             discountUnit={discountUnit}
             setDiscountUnit={setDiscountUnit}
           />
         )}
-      {discountType === EDiscountType.BILL &&
-        discountMethod === EDiscountBillMethod.DISCOUNT_PRODUCT && (
+      {discountType === EDiscountType.ORDER &&
+        discountMethod === EDiscountBillMethod.GIFT && (
           <BillDiscount
             discountUnit={discountUnit}
             setDiscountUnit={setDiscountUnit}
           />
         )}
-      {discountType === EDiscountType.BILL &&
-        discountMethod === EDiscountBillMethod.GIVE_POINT && (
+      {discountType === EDiscountType.ORDER &&
+        discountMethod === EDiscountBillMethod.LOYALTY && (
           <BillDiscount
             discountUnit={discountUnit}
             setDiscountUnit={setDiscountUnit}
@@ -191,16 +209,30 @@ const Info = () => {
         )}
 
       {/* Product */}
-      {discountType === EDiscountType.GOODS &&
-        discountMethod === EDiscountGoodsMethod.DISCOUNT_GOODS && (
+      {discountType === EDiscountType.PRODUCT &&
+        discountMethod === EDiscountGoodsMethod.PRODUCT_PRICE && (
           <GoodsDiscount
             discountUnit={discountUnit}
             setDiscountUnit={setDiscountUnit}
           />
         )}
 
-      {discountType === EDiscountType.GOODS &&
-        discountMethod === EDiscountGoodsMethod.GIVE_GOODS && (
+      {discountType === EDiscountType.PRODUCT &&
+        discountMethod === EDiscountGoodsMethod.GIFT && (
+          <GoodsDiscountGiveGoods
+            discountUnit={discountUnit}
+            setDiscountUnit={setDiscountUnit}
+          />
+        )}
+      {discountType === EDiscountType.PRODUCT &&
+        discountMethod === EDiscountGoodsMethod.LOYALTY && (
+          <GoodsDiscountGiveGoods
+            discountUnit={discountUnit}
+            setDiscountUnit={setDiscountUnit}
+          />
+        )}
+      {discountType === EDiscountType.PRODUCT &&
+        discountMethod === EDiscountGoodsMethod.PRICE_BY_BUY_NUMBER && (
           <GoodsDiscountGiveGoods
             discountUnit={discountUnit}
             setDiscountUnit={setDiscountUnit}
