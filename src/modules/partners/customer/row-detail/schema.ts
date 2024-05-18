@@ -3,7 +3,18 @@ import * as yup from "yup";
 
 export const schema = yup.object().shape({
   totalAmount: yup.number(),
-  amount: yup.number().required("Đây là trường bắt buộc!"),
+  amount: yup
+    .number()
+    .required("Đây là trường bắt buộc!")
+    .test(
+      "is-required",
+      "Thu từ khách phải nhỏ hơn hoặc bằng nợ hiện tại",
+      (value, context) => {
+        if (value > context.parent.totalAmount) return false;
+
+        return true;
+      }
+    ),
   debt: yup.number(),
   paymentMethod: yup.string(),
   // description: yup.string(),

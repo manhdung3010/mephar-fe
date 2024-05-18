@@ -28,7 +28,6 @@ function PaymentModal({ isOpen, onCancel, branches, branchId, isLoadingCreateCus
     resolver: yupResolver(schema),
     mode: 'onChange',
   });
-  console.log("record", record)
 
   const queryClient = useQueryClient();
 
@@ -36,10 +35,10 @@ function PaymentModal({ isOpen, onCancel, branches, branchId, isLoadingCreateCus
     useMutation(
       () => {
         return createOrderDebt(getValues(), record.orderId);
-
       },
       {
         onSuccess: async () => {
+          await queryClient.invalidateQueries(['CUSTOMER_LIST']);
           await queryClient.invalidateQueries(["ORDER_LIST_DEBT"]);
           reset();
           onCancle();
@@ -51,14 +50,15 @@ function PaymentModal({ isOpen, onCancel, branches, branchId, isLoadingCreateCus
     );
 
   useEffect(() => {
-    setValue("totalAmount", Number(record?.debtAmount))
-    setValue("paymentMethod", "CASH")
-  }, [record])
+    if (!!isOpen && record?.debtAmount) {
+      setValue("totalAmount", Number(record?.debtAmount), { shouldValidate: true })
+      setValue("paymentMethod", "CASH", { shouldValidate: true })
+    }
+  }, [isOpen, record?.debtAmount])
 
   const onSubmit = () => {
     mutateCreateCustomer();
   }
-  // console.log("errors", errors)
 
   const onCancle = () => {
     reset();
@@ -87,7 +87,7 @@ function PaymentModal({ isOpen, onCancel, branches, branchId, isLoadingCreateCus
                 placeholder="Nợ hiện tại"
                 className="h-11"
                 onChange={(e) => setValue("totalAmount", e, { shouldValidate: true })}
-                value={getValues("totalAmount") ? formatNumber(getValues("totalAmount")) : formatNumber(record?.debtAmount)}
+                value={getValues("totalAmount") ? formatNumber(getValues("totalAmount")) : formatNumber(+record?.debtAmount)}
                 disabled
               />
             </div>
@@ -123,7 +123,7 @@ function PaymentModal({ isOpen, onCancel, branches, branchId, isLoadingCreateCus
                   { value: "BANK", label: "Chuyển khoản" },
                 ]}
                 onChange={(value) => {
-                  // setPerPage(value);
+                  setValue("paymentMethod", value, { shouldValidate: true })
                 }}
               />
             </div>

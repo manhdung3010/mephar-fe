@@ -241,10 +241,10 @@ export function Customer() {
       </div>
 
       <div className='grid grid-cols-12'>
-        <div className='col-span-2'>
+        <div className='2xl:col-span-2 col-span-3'>
           <Filter setFormFilter={setFormFilter} formFilter={formFilter} />
         </div>
-        <div className='col-span-10'>
+        <div className='2xl:col-span-10 col-span-9'>
           <div className='sticky top-0 rounded-lg overflow-hidden'>
             <Search setFormFilter={setFormFilter} formFilter={formFilter} />
 

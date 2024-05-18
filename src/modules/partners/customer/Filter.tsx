@@ -37,7 +37,7 @@ const Filter = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void,
   return (
     <div className="">
       <div className="flex  items-center gap-4 px-4">
-        <div className="flex flex-col gap-5 grow rounded-l-[3px] ">
+        <div className="flex flex-col gap-5 grow rounded-l-[3px] w-full">
           <div className='bg-white rounded-lg p-5 shadow-sm'>
             <h4 className='text-sm font-semibold mb-2'>Nhóm khách hàng</h4>
             <Select
