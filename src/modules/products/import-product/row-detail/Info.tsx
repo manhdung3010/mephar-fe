@@ -22,8 +22,8 @@ import { useRouter } from 'next/router';
 import InvoicePrint from './InvoicePrint';
 import { useReactToPrint } from 'react-to-print';
 import styles from "./invoice.module.css"
-import { useRecoilValue } from 'recoil';
-import { profileState } from '@/recoil/state';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { productReturnState, profileState } from '@/recoil/state';
 import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
 
 export function Info({ record }: { record: IRecord }) {
@@ -32,6 +32,8 @@ export function Info({ record }: { record: IRecord }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const profile = useRecoilValue(profileState);
+  const [returnProducts, setReturnProducts] =
+    useRecoilState(productReturnState);
 
   const { data: importProductDetail, isLoading } = useQuery<{
     data: { inbound: IRecord; products: any };
@@ -147,6 +149,11 @@ export function Info({ record }: { record: IRecord }) {
   const handlePrintInvoice = useReactToPrint({
     content: () => invoiceComponentRef.current,
   });
+
+  const handleRouterReturn = () => {
+    setReturnProducts([])
+    router.push(`/products/return/coupon/?id=${record.id}`)
+  }
 
   return (
     <div className="gap-12 ">
@@ -341,7 +348,7 @@ export function Info({ record }: { record: IRecord }) {
             <CustomButton
               type="success"
               prefixIcon={<Image src={PlusIcon} alt="" />}
-              onClick={() => router.push(`/products/return/coupon/?id=${record.id}`)}
+              onClick={handleRouterReturn}
             >
               Trả hàng nhập
             </CustomButton>

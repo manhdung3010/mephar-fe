@@ -67,11 +67,6 @@ export default function ReturnCoupon() {
   );
 
   useEffect(() => {
-    setReturnProducts([]);
-
-  }, [id])
-
-  useEffect(() => {
     if (importProductDetail) {
       let cloneImportProducts = cloneDeep(returnProducts);
       importProductDetail?.data?.products?.forEach((product) => {
@@ -79,6 +74,7 @@ export default function ReturnCoupon() {
           ...product,
           productUnit: product?.productUnit,
           productKey: `${product.productId || product.productId}-${product.id}`,
+          primePrice: +product.price,
           productId: product.productId,
           quantity: product.quantity,
           price: +product.price,
@@ -366,9 +362,9 @@ export default function ReturnCoupon() {
       render: (primePrice, record: any) => <CustomInput
         type="number"
         bordered={false}
-        onChange={(value) => onChangeValueProduct(record?.productKey, 'price', value)}
+        onChange={(value) => { }}
         wrapClassName="w-[100px]"
-        defaultValue={id ? record?.price : primePrice}
+        defaultValue={primePrice}
         disabled
       />,
     },
@@ -559,7 +555,7 @@ export default function ReturnCoupon() {
               expandable={{
                 defaultExpandAllRows: true,
                 expandedRowRender: (record: IImportProductLocal) => {
-                  if (importProductDetail) {
+                  if (importProductDetail && record?.batches?.length > 0) {
                     return (
                       <div className="bg-[#FFF3E6] px-6 py-2 ">
                         <div className="flex items-center gap-x-3">
