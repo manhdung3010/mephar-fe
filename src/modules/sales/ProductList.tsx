@@ -380,6 +380,8 @@ export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetai
     setOrderObject(orderObjectClone);
   };
 
+  console.log("orderObject[orderActive]", orderObject[orderActive])
+
   return (
     <ProductTableStyled className="p-4">
       <CustomTable
@@ -397,6 +399,15 @@ export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetai
               <div className="bg-[#FFF3E6] px-6 py-2 ">
                 <div className="hidden-scrollbar overflow-x-auto overflow-y-hidden">
                   <div className="flex items-center gap-x-3">
+                    <div
+                      className="min-w-fit cursor-pointer pl-1 font-medium text-[#0070F4]"
+                      onClick={() => {
+                        setProductKeyAddBatch(record.productKey);
+                        setOpenListBatchModal(true);
+                      }}
+                    >
+                      Chọn lô
+                    </div>
                     {record?.batches?.map(
                       (batch: any) =>
                       (
@@ -406,7 +417,7 @@ export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetai
                         >
                           <span className="mr-2">
                             {batch.batch?.name} - {batch?.batch?.expiryDate} - SL:{' '}
-                            {record.quantity}
+                            {batch.inventory}
                           </span>
                         </div>
                       )

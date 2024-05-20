@@ -1,7 +1,7 @@
 import { Input } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import Image from 'next/image';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import CloseIcon from '@/assets/closeIcon.svg';
 import PrintOrderIcon from '@/assets/printOrder.svg';
@@ -63,6 +63,19 @@ export function Info({ record }: { record: IOrder }) {
 
   const invoiceComponentRef = useRef(null);
 
+  useEffect(() => {
+    if (record?.products?.length) {
+      const expandedRowKeysClone = { ...expandedRowKeys };
+      record?.products?.forEach((_, index) => {
+        expandedRowKeysClone[index] = true;
+      });
+
+      setExpandedRowKeys(expandedRowKeysClone);
+    }
+  }, [record?.products]);
+
+  console.log("expandedRowKeys", expandedRowKeys)
+
   const columns: ColumnsType<IRecord> = [
     {
       title: 'Mã hàng',
@@ -72,14 +85,14 @@ export function Info({ record }: { record: IOrder }) {
         <span
           className="cursor-pointer text-[#0070F4]"
           onClick={() => {
-            const currentState = expandedRowKeys[`${index}`];
-            const temp = { ...expandedRowKeys };
-            if (currentState) {
-              delete temp[`${index}`];
-            } else {
-              temp[`${index}`] = true;
-            }
-            setExpandedRowKeys({ ...temp });
+            // const currentState = expandedRowKeys[`${index}`];
+            // const temp = { ...expandedRowKeys };
+            // if (currentState) {
+            //   delete temp[`${index}`];
+            // } else {
+            //   temp[`${index}`] = true;
+            // }
+            // setExpandedRowKeys({ ...temp });
           }}
         >
           {value}
@@ -130,6 +143,8 @@ export function Info({ record }: { record: IOrder }) {
     });
     return formatMoney(total);
   }
+
+  console.log("Object.keys(expandedRowKeys)", Object.keys(expandedRowKeys))
 
   return (
     <div className="gap-12 ">
@@ -310,7 +325,9 @@ export function Info({ record }: { record: IOrder }) {
             </div>
           ),
           expandIcon: () => <></>,
-          expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key),
+          expandedRowKeys: Object.keys(expandedRowKeys).map(
+            (key) => +key
+          ),
         }}
       />
 
