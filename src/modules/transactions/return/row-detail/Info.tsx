@@ -107,7 +107,7 @@ export function Info({ record }: { record: any }) {
 
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Người nhận trả:</div>
-            <div className="text-black-main">{record?.customer?.fullName}</div>
+            <div className="text-black-main">{record?.user?.fullName || record?.creator?.fullName}</div>
           </div>
 
           <div className="grid grid-cols-2 gap-5">
@@ -120,10 +120,10 @@ export function Info({ record }: { record: any }) {
             <div className="text-black-main">{record?.creator?.fullName}</div>
           </div>
 
-          <div className="grid grid-cols-2 gap-5">
+          {/* <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Mã hóa đơn:</div>
             <div className="text-black-main">---</div>
-          </div>
+          </div> */}
         </div>
 
         <div className="grow">

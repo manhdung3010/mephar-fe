@@ -11,6 +11,7 @@ export interface IBatch {
   originalInventory: number;
   isSelected: boolean;
   expiryDate: string;
+  saleQuantity?: number;
   batch: { id: number; name: string };
   productUnit: {
     id: number;

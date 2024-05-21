@@ -287,15 +287,38 @@ export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetai
           hasPlus={true}
           value={isNaN(quantity) ? 0 : quantity}
           type="number"
-          onChange={(value) => onChangeQuantity(productKey, value)}
+          onChange={(value) => {
+            if (orderActive.split("-")[1] === "RETURN") {
+              setProductKeyAddBatch(productKey);
+              setOpenListBatchModal(true);
+              return;
+            }
+            onChangeQuantity(productKey, value)
+          }}
           onMinus={async (value) => {
+            if (orderActive.split("-")[1] === "RETURN") {
+              setProductKeyAddBatch(productKey);
+              setOpenListBatchModal(true);
+              return;
+            }
             await onExpandMoreBatches(productKey, value);
           }}
           onPlus={async (value) => {
+            if (orderActive.split("-")[1] === "RETURN") {
+              setProductKeyAddBatch(productKey);
+              setOpenListBatchModal(true);
+              return;
+            }
             await onExpandMoreBatches(productKey, value);
           }}
-          onBlur={(e) =>
+          onBlur={(e) => {
+            if (orderActive.split("-")[1] === "RETURN") {
+              setProductKeyAddBatch(productKey);
+              setOpenListBatchModal(true);
+              return;
+            }
             onExpandMoreBatches(productKey, Number(e.target.value))
+          }
           }
         />
       ),
@@ -377,6 +400,22 @@ export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetai
         return product;
       }
     );
+    // caculate quantity
+    orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map(
+      (product: ISaleProductLocal) => {
+        if (product.productKey === productKey) {
+          return {
+            ...product,
+            quantity: product.batches.reduce(
+              (acc, obj) => acc + (obj.isSelected ? obj.quantity : 0),
+              0
+            ),
+          };
+        }
+
+        return product;
+      }
+    );
     setOrderObject(orderObjectClone);
   };
 
@@ -394,7 +433,7 @@ export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetai
         scroll={{ x: 900 }}
         expandable={{
           defaultExpandAllRows: true,
-          expandedRowRender: (record: ISaleProductLocal) => orderActive.split("-")[1] === "RETURN" ? (
+          expandedRowRender: (record: ISaleProductLocal) => orderActive.split("-")[1] === "RETURN" && record?.batches?.length > 0 ? (
             <div>
               <div className="bg-[#FFF3E6] px-6 py-2 ">
                 <div className="hidden-scrollbar overflow-x-auto overflow-y-hidden">
@@ -410,17 +449,28 @@ export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetai
                     </div>
                     {record?.batches?.map(
                       (batch: any) =>
-                      (
-                        <div
-                          key={batch.batchId}
-                          className="flex min-w-fit items-center rounded bg-red-main py-1 px-2 text-white"
-                        >
-                          <span className="mr-2">
-                            {batch.batch?.name} - {batch?.batch?.expiryDate} - SL:{' '}
-                            {batch.inventory}
-                          </span>
-                        </div>
-                      )
+                        batch && batch.isSelected && (
+                          <div
+                            key={batch.batchId}
+                            className="flex min-w-fit items-center rounded bg-red-main py-1 px-2 text-white"
+                          >
+                            <span className="mr-2">
+                              {batch.batch?.name} - {batch?.batch?.expiryDate} - SL:{' '}
+                              {batch.quantity}
+                            </span>
+                            <Image
+                              className=" cursor-pointer"
+                              src={CloseIcon}
+                              onClick={() => {
+                                handleRemoveBatch(
+                                  record.productKey,
+                                  batch.batchId
+                                );
+                              }}
+                              alt=""
+                            />
+                          </div>
+                        )
                     )}
                   </div>
                 </div>

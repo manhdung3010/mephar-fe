@@ -128,7 +128,7 @@ const Index = () => {
 
           orderObjectClone[orderActive + "-RETURN"] = orderDetail?.data?.products.map(
             (product) => {
-              const productKey = `${product.product?.id}-${product.productUnit?.id}`;
+              const productKey = `${product?.productId}-${product.productUnit?.id}`;
 
               return {
                 ...product,
@@ -139,14 +139,21 @@ const Index = () => {
                 originProductUnitId: product.productUnit.id,
                 batches: product.batches?.map((batch) => {
                   const inventory =
-                    (batch.quantity / product.productUnit.exchangeValue)
+                    (batch.batch.quantity / product.productUnit.exchangeValue)
 
                   const newBatch = {
                     ...batch,
                     inventory,
-                    originalInventory: batch.quantity,
-                    quantity: 0,
-                    isSelected: inventory >= 1,
+                    productKey,
+                    productId: product.productId,
+                    id: batch.batch.id,
+                    batchId: batch.batch.id,
+                    expiryDate: batch.batch.expiryDate,
+                    name: batch.batch.name,
+                    originalInventory: batch.batch.quantity,
+                    saleQuantity: batch.quantity,
+                    quantity: batch.quantity,
+                    isSelected: true,
                   };
 
                   return newBatch;

@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 
-import { deleteCustomer, updateCustomer } from '@/api/customer.service';
+import { deleteCustomer, updateCustomer, updateStatusCustomer } from '@/api/customer.service';
 import DeleteIcon from '@/assets/deleteRed.svg';
 import EditIcon from '@/assets/editWhite.svg';
 import LockIcon from '@/assets/lockGray.svg';
@@ -17,6 +17,7 @@ import { hasPermission } from '@/helpers';
 import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
 import { useRecoilValue } from 'recoil';
 import { profileState } from '@/recoil/state';
+import UpdateStatusModal from './UpdateStatusModal';
 
 const { TextArea } = Input;
 
@@ -26,6 +27,7 @@ export function Info({ record }: { record: ICustomer }) {
   const profile = useRecoilValue(profileState);
 
   const [deletedId, setDeletedId] = useState<number>();
+  const [openStatus, setOpenStatus] = useState<boolean>(false);
   const [statusId, setStatusId] = useState<number>();
   const [status, setStatus] = useState<ECustomerStatus>();
 
@@ -40,7 +42,7 @@ export function Info({ record }: { record: ICustomer }) {
       },
     });
   const { mutate: mutateUpdateCustomer, isLoading: isLoadingUpdateCustomer } =
-    useMutation((data: { id: number, status: ECustomerStatus }) => updateCustomer(Number(data.id), { status: data?.status }), {
+    useMutation((data: { id: number, status: ECustomerStatus }) => updateStatusCustomer(Number(data.id), { status: data?.status }), {
       onSuccess: async () => {
         await queryClient.invalidateQueries(['CUSTOMER_LIST']);
       },
@@ -54,7 +56,8 @@ export function Info({ record }: { record: ICustomer }) {
   };
 
   const handleUpdateStatus = (id: number, status: ECustomerStatus) => {
-    mutateUpdateCustomer({ id, status });
+    // mutateUpdateCustomer({ id, status });
+    setOpenStatus(true);
   }
 
   return (
@@ -138,12 +141,14 @@ export function Info({ record }: { record: ICustomer }) {
         {
           hasPermission(profile?.role?.permissions, RoleModel.customer, RoleAction.update) && (
             <CustomButton
-              type={`disable`}
+              type={String(record?.status) === ECustomerStatus.active ? `disable` : "success"}
               outline={true}
-              prefixIcon={<Image src={LockIcon} alt="" />}
-              onClick={() => handleUpdateStatus(record.id as any, String(record?.status) === "active" ? ECustomerStatus.inactive : ECustomerStatus.active)}
+              // prefixIcon={<Image src={LockIcon} alt="" />}
+              loading={isLoadingUpdateCustomer}
+              disabled={isLoadingUpdateCustomer}
+              onClick={() => handleUpdateStatus(record.id as any, String(record?.status) === ECustomerStatus.active ? ECustomerStatus.inactive : ECustomerStatus.active)}
             >
-              {String(record?.status) === "active" ? ECustomerStatusLabel.inactive : ECustomerStatusLabel.active}
+              {String(record?.status) === ECustomerStatus.active ? ECustomerStatusLabel.inactive : ECustomerStatusLabel.active}
             </CustomButton>
           )
         }
@@ -181,6 +186,15 @@ export function Info({ record }: { record: ICustomer }) {
         onSuccess={onSubmit}
         content="khách hàng"
         isLoading={isLoadingDeleteCustomer}
+      />
+      <UpdateStatusModal
+        isOpen={openStatus}
+        onCancel={() => setOpenStatus(false)}
+        onSuccess={() => {
+          mutateUpdateCustomer({ id: record.id, status: String(record?.status) === ECustomerStatus.active ? ECustomerStatus.inactive : ECustomerStatus.active });
+          setOpenStatus(false);
+        }}
+        content="khách hàng"
       />
     </div>
   );

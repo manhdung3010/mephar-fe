@@ -51,7 +51,7 @@ export function Info({ record }: { record: IOrder }) {
   const { mutate: mutateCancelImportProduct, isLoading: isLoadingDeleteProduct } =
     useMutation(() => deleteOrder(Number(record.id)), {
       onSuccess: async () => {
-        await queryClient.invalidateQueries(['ORDERS_PRODUCT']);
+        await queryClient.invalidateQueries(['ORDER_LIST']);
         setOpenCancelBill(false);
       },
       onError: (err: any) => {

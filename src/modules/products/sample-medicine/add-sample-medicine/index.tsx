@@ -230,6 +230,7 @@ const AddSampleMedicine = ({
       dataIndex: 'price',
       key: 'price',
       render: (value, { id }) => <CustomInput
+        disabled
         value={value}
         className="h-11 w-[200px]"
         onChange={(value) => onChangeValueProduct(id, 'price', value)}

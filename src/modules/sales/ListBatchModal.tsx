@@ -1,6 +1,6 @@
 import { message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, set } from 'lodash';
 import { useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 
@@ -27,7 +27,11 @@ export function ListBatchModal({
   const orderActive = useRecoilValue(orderActiveState);
   const orderObject = useRecoilValue(orderState);
 
+  const [batchErr, setBatchErr] = useState<any[]>([]);
+
   const [listBatch, setListBatch] = useState<IBatch[]>([]);
+
+  const isSaleReturn = orderActive.split("-")[1] === "RETURN";
 
   useEffect(() => {
     orderObject[orderActive]?.forEach((product: any) => {
@@ -61,25 +65,42 @@ export function ListBatchModal({
       title: 'Số lượng',
       dataIndex: 'quantity',
       key: 'quantity',
-      render: (quantity, { batchId }) => (
-        <CustomInput
-          bordered={false}
-          onChange={(value) => {
-            let batchesClone = cloneDeep(listBatch);
-            batchesClone = batchesClone.map((batch) => {
-              if (batch.batchId === batchId) {
-                return { ...batch, quantity: value };
-              }
+      render: (quantity, { batchId, saleQuantity }) => (
+        <div className='flex items-center gap-2'>
+          <CustomInput
+            bordered={false}
+            onChange={(value) => {
+              let batchesClone = cloneDeep(listBatch);
+              batchesClone = batchesClone.map((batch: any) => {
+                if (batch.batchId === batchId) {
+                  // if (value > batch.saleQuantity) {
+                  //   message.error('Số lượng sản phẩm chọn phải nhỏ hơn hoặc bằng số lượng bán');
+                  //   // set error with key and value to batchErr, filter duplicate key
+                  //   setBatchErr([...batchErr, { [batchId]: true }]);
 
-              return batch;
-            });
+                  //   return { ...batch, quantity: saleQuantity };
+                  // }
+                  // set error with key and value to batchErr, filter duplicate key
+                  setBatchErr(batchErr.filter((item) => item[batchId] !== true));
+                  return { ...batch, quantity: value };
+                }
 
-            setListBatch(batchesClone);
-          }}
-          wrapClassName="w-[100px]"
-          type="number"
-          defaultValue={quantity}
-        />
+                return batch;
+              });
+
+              setListBatch(batchesClone);
+            }}
+            value={listBatch.find((batch) => batch.batchId === batchId)?.quantity || 0}
+            wrapClassName="w-[100px]"
+            type="number"
+            defaultValue={quantity}
+          />
+          {
+            isSaleReturn && (
+              <span>/ {formatNumber(saleQuantity)}</span>
+            )
+          }
+        </div>
       ),
     },
     {
@@ -96,6 +117,14 @@ export function ListBatchModal({
       if (batch.isSelected && batch.quantity === 0) {
         message.error('Số lượng sản phẩm chọn phải lớn hơn hoặc bằng 1');
         return false;
+      }
+
+      if (batch.isSelected && batch.quantity > (batch.saleQuantity ?? 0)) {
+        message.error('Số lượng sản phẩm chọn phải nhỏ hơn hoặc bằng số lượng bán');
+        // set error with key and value to batchErr, filter duplicate key
+        // setBatchErr([...batchErr, { [batch.batchId]: true }]);
+
+        return false
       }
 
       if (batch.isSelected && batch.quantity > batch.inventory) {
@@ -170,6 +199,8 @@ export function ListBatchModal({
             }
           }}
           className="h-[46px] min-w-[150px] py-2 px-4"
+        // type={isSaleReturn && batchErr.length > 0 ? 'disable' : 'danger'}
+        // disabled={isSaleReturn && batchErr.length > 0 ? true : false}
         >
           Lưu
         </CustomButton>
