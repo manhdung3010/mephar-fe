@@ -29,16 +29,13 @@ import {
 } from '@/recoil/state';
 import cx from 'classnames';
 
-import { CreateCustomerModal } from './CreateCustomerModal';
-import { CreateDiscountModal } from './CreateDiscountModal';
-import { CreatePrescriptionModal } from './CreatePrescriptionModal';
-import { OrderSuccessModal } from './OrderSuccessModal';
-import { ScanQrModal } from './ScanQrModal';
-import type { ISaleProductLocal } from './interface';
-import { RightContentStyled } from './styled';
 import Bank from '@/assets/images/bank.png';
 import Cash from '@/assets/images/cash.png';
 import Debt from '@/assets/images/debt.png';
+import { CreateDiscountModal } from './CreateDiscountModal';
+import { OrderSuccessModal } from './OrderSuccessModal';
+import type { ISaleProductLocal } from './interface';
+import { RightContentStyled } from './styled';
 
 export function RightContentReturn({ useForm, customerId, orderDetail }: { useForm: any, customerId: string, orderDetail: any }) {
   const queryClient = useQueryClient();

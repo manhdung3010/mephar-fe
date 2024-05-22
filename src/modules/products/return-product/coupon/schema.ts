@@ -19,8 +19,7 @@ export const schema = yup.object().shape({
         // })
         ()
         .test("is-required", "Vui lòng chọn lô sản phẩm", (value, context) => {
-          if (context.parent.isBatchExpireControl && !value?.length)
-            return false;
+          if (!value?.length) return false;
 
           return true;
         }),
@@ -43,18 +42,17 @@ export const schema = yup.object().shape({
     })
   ),
   code: yup.string(),
-  paid: yup
-    .number()
-    .test(
-      "is-less-than",
-      "Vui lòng nhập nhỏ hơn hoặc bằng tiền tổng hóa đơn",
-      (value, context) => {
-        if (Number(value || 0) > context.parent.totalPrice ?? 0) {
-          return false;
-        }
-        return true;
-      }
-    ),
+  paid: yup.number(),
+  // .test(
+  //   "is-less-than",
+  //   "Vui lòng nhập nhỏ hơn hoặc bằng tiền tổng hóa đơn",
+  //   (value, context) => {
+  //     if (Number(value || 0) > context.parent.totalPrice ?? 0) {
+  //       return false;
+  //     }
+  //     return true;
+  //   }
+  // ),
   debt: yup.number(),
   status: yup.string(),
   totalPrice: yup.number(),
