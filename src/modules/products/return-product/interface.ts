@@ -116,4 +116,5 @@ export interface IBatch {
   inventory: number; // client;
   expiryDate: string;
   originalInventory: number; // client;
+  saleQuantity?: number;
 }

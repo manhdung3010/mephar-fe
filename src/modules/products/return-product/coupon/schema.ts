@@ -49,7 +49,9 @@ export const schema = yup.object().shape({
       "is-less-than",
       "Vui lòng nhập nhỏ hơn hoặc bằng tiền tổng hóa đơn",
       (value, context) => {
-        if (value && Number(value) > context.parent.totalPrice) return false;
+        if (Number(value || 0) > context.parent.totalPrice ?? 0) {
+          return false;
+        }
         return true;
       }
     ),
