@@ -60,7 +60,8 @@ const Search = ({ onChange }: { onChange: (value) => void }) => {
   const [formFilter, setFormFilter] = useState({
     keyword: '',
     status: null,
-    type: null
+    type: null,
+    inventoryType: null,
   });
 
   const handleChangeFormFilter = (key, value) => {
@@ -105,44 +106,16 @@ const Search = ({ onChange }: { onChange: (value) => void }) => {
             value={productStatusData.find((item) => item.value === formFilter?.status) || undefined}
           />
           <Select
-            className="w-[150px]"
+            className="w-[200px]"
             bordered={false}
             suffixIcon={<Image src={ArrowDownGray} alt="" />}
             placeholder="Tồn kho"
             optionFilterProp="children"
-            // onChange={onChange}
-            // onSearch={onSearch}
+            onChange={(value) => handleChangeFormFilter('inventoryType', value)}
+            value={productInventoryData.find((item) => item.value === formFilter?.inventoryType) || undefined}
             options={productInventoryData}
           />
-          {/* <Select
-            bordered={false}
-            suffixIcon={<Image src={ArrowDownGray} alt="" />}
-            placeholder="Tích điểm"
-            optionFilterProp="children"
-            // onChange={onChange}
-            // onSearch={onSearch}
-            options={[
-              {
-                value: 1,
-                label: "Có tích điểm",
-              },
-              {
-                value: 0,
-                label: "Không tích điểm",
-              }
-            ]}
-          /> */}
         </div>
-
-        {/* <CustomButton
-          type="original"
-          outline={true}
-          className="h-auto w-[130px] rounded-[3px]"
-          suffixIcon={<Image src={FilterIcon} />}
-          disabled={true}
-        >
-          Lưu bộ lọc
-        </CustomButton> */}
       </div>
       <div className='flex items-center gap-4 p-4'>
         {
@@ -161,7 +134,6 @@ const Search = ({ onChange }: { onChange: (value) => void }) => {
         }
         {
           formFilter?.status !== null && <Tag
-            // key={tag}
             closable={true}
             style={{ userSelect: 'none' }}
             onClose={() => handleChangeFormFilter('status', null)}
@@ -173,30 +145,20 @@ const Search = ({ onChange }: { onChange: (value) => void }) => {
             <span className='ml-1 font-semibold'>{formFilter?.status === 1 ? "Đang hoạt động" : "Ngừng hoạt động"}</span>
           </Tag>
         }
-        {/* <Tag
-          // key={tag}
-          closable={true}
-          style={{ userSelect: 'none' }}
-          // onClose={() => handleClose(tag)}
-          className='py-1 px-4'
-        >
-          <span>
-            Tồn kho:
-          </span>
-          <span>Thuốc</span>
-        </Tag> */}
-        {/* <Tag
-          // key={tag}
-          closable={true}
-          style={{ userSelect: 'none' }}
-          // onClose={() => handleClose(tag)}
-          className='py-1 px-4'
-        >
-          <span>
-            Tích điểm:
-          </span>
-          <span>Thuốc</span>
-        </Tag> */}
+        {
+          formFilter?.inventoryType !== null && <Tag
+            // key={tag}
+            closable={true}
+            style={{ userSelect: 'none' }}
+            onClose={() => handleChangeFormFilter('inventoryType', null)}
+            className='py-1 px-4'
+          >
+            <span>
+              Tồn kho:
+            </span>
+            <span className='ml-1 font-semibold'>{productInventoryData?.find((item) => item.value === formFilter?.inventoryType)?.label}</span>
+          </Tag>
+        }
       </div>
     </div>
   );

@@ -171,6 +171,8 @@ export function RightContentReturn({ useForm, customerId, orderDetail }: { useFo
     return 0;
   }, [customerMustPay, getValuesReturn('cashOfCustomer')]);
 
+  console.log("products", getValuesReturn('products'))
+
   const { mutate: mutateCreateOrder, isLoading: isLoadingCreateOrder } =
     useMutation(
       () => {
@@ -467,7 +469,7 @@ export function RightContentReturn({ useForm, customerId, orderDetail }: { useFo
                 .filter((batch) => batch.isSelected)
                 .map((batch: any) => ({
                   id: batch.batch.id,
-                  quantity: product.quantity,
+                  quantity: batch.quantity,
                 })),
             }));
 

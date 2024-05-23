@@ -119,11 +119,8 @@ export function ListBatchModal({
         return false;
       }
 
-      if (batch.isSelected && batch.quantity > (batch.saleQuantity ?? 0)) {
+      if (isSaleReturn && batch.isSelected && batch.quantity > (batch.saleQuantity ?? 0)) {
         message.error('Số lượng sản phẩm chọn phải nhỏ hơn hoặc bằng số lượng bán');
-        // set error with key and value to batchErr, filter duplicate key
-        // setBatchErr([...batchErr, { [batch.batchId]: true }]);
-
         return false
       }
 

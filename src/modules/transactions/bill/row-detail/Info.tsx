@@ -8,7 +8,7 @@ import PrintOrderIcon from '@/assets/printOrder.svg';
 import { CustomButton } from '@/components/CustomButton';
 import CustomTable from '@/components/CustomTable';
 import { EGenderLabel, EOrderStatusLabel } from '@/enums';
-import { formatMoney, formatNumber, hasPermission } from '@/helpers';
+import { formatDate, formatMoney, formatNumber, hasPermission } from '@/helpers';
 import { message } from 'antd';
 
 import { deleteOrder } from '@/api/order.service';
@@ -36,6 +36,7 @@ interface IRecord {
   totalPrice: number;
   refund: number;
   unitName: string;
+  batches?: any[];
 }
 
 export function Info({ record }: { record: IOrder }) {
@@ -73,8 +74,6 @@ export function Info({ record }: { record: IOrder }) {
       setExpandedRowKeys(expandedRowKeysClone);
     }
   }, [record?.products]);
-
-  console.log("expandedRowKeys", expandedRowKeys)
 
   const columns: ColumnsType<IRecord> = [
     {
@@ -144,7 +143,6 @@ export function Info({ record }: { record: IOrder }) {
     return formatMoney(total);
   }
 
-  console.log("Object.keys(expandedRowKeys)", Object.keys(expandedRowKeys))
 
   return (
     <div className="gap-12 ">
@@ -299,13 +297,15 @@ export function Info({ record }: { record: IOrder }) {
       )}
 
       <CustomTable
-        dataSource={record.products?.map((item) => ({
+        dataSource={record.products?.map((item, index) => ({
+          ...item,
           code: item.product.code,
           name: item.product.name,
           quantity: item.quantity,
           discount: item.discount,
           price: item.price,
           unitName: item.productUnit?.unitName,
+          key: index,
         }))}
         columns={columns}
         pagination={false}
@@ -314,14 +314,14 @@ export function Info({ record }: { record: IOrder }) {
           defaultExpandAllRows: true,
           // eslint-disable-next-line @typescript-eslint/no-shadow
           expandedRowRender: (record: IRecord) => (
-            <div className="flex items-center bg-[#FFF3E6] px-6 py-2">
-              <div className="mr-3 cursor-pointer font-medium text-[#0070F4]">
-                Chọn lô
-              </div>
-              <div className="flex items-center rounded bg-red-main py-1 px-2 text-white">
-                <span className="mr-2">Pherelive SL1 - 26/07/2023</span>{' '}
-                <Image className=" cursor-pointer" src={CloseIcon} />
-              </div>
+            <div className="flex items-center bg-[#FFF3E6] px-6 py-2 gap-2">
+              {
+                record?.batches && record?.batches?.length > 0 && record?.batches?.map((b, index) => (
+                  <div className="flex items-center rounded bg-red-main py-1 px-2 text-white">
+                    <span className="mr-2">{b.batch?.name} - {formatDate(b?.batch?.expiryDate)} - SL: {formatNumber(b?.quantity)} </span>
+                  </div>
+                ))
+              }
             </div>
           ),
           expandIcon: () => <></>,

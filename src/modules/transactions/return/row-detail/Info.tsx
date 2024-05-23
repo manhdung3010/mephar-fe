@@ -4,12 +4,10 @@ import Image from 'next/image';
 
 import CloseIcon from '@/assets/closeIcon.svg';
 import PrintOrderIcon from '@/assets/printOrder.svg';
-import SaveIcon from '@/assets/saveIcon.svg';
 import { CustomButton } from '@/components/CustomButton';
-import { CustomSelect } from '@/components/CustomSelect';
 import CustomTable from '@/components/CustomTable';
-import { formatDateTime, formatMoney, formatNumber } from '@/helpers';
-import { useMemo, useRef } from 'react';
+import { formatDate, formatDateTime, formatMoney, formatNumber } from '@/helpers';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import InvoicePrint from './InvoicePrint';
 
@@ -23,10 +21,14 @@ interface IRecord {
   discount: number;
   price: number;
   totalPrice: number;
+  batches?: any;
 }
 
 export function Info({ record }: { record: any }) {
   const invoiceComponentRef = useRef(null);
+  const [expandedRowKeys, setExpandedRowKeys] = useState<
+    Record<string, boolean>
+  >({});
 
   const columns: ColumnsType<any> = [
     {
@@ -44,6 +46,12 @@ export function Info({ record }: { record: any }) {
       render: (value, { productUnit }, index) => (
         <span>{productUnit.product.name}</span>
       )
+    },
+    {
+      title: 'Đơn vị',
+      dataIndex: 'productUnit',
+      key: 'productUnit',
+      render: (productUnit) => (productUnit?.unitName)
     },
     {
       title: 'Số lượng',
@@ -71,6 +79,17 @@ export function Info({ record }: { record: any }) {
     },
   ];
 
+  useEffect(() => {
+    if (record?.items?.length) {
+      const expandedRowKeysClone = { ...expandedRowKeys };
+      record?.items?.forEach((_, index) => {
+        expandedRowKeysClone[index] = true;
+      });
+
+      setExpandedRowKeys(expandedRowKeysClone);
+    }
+  }, [record?.items]);
+
   const totalPrice = useMemo(() => {
     return record?.items?.reduce((acc: number, item: any) => {
       return acc + item.quantity * item.price;
@@ -85,7 +104,6 @@ export function Info({ record }: { record: any }) {
   const handlePrintInvoice = useReactToPrint({
     content: () => invoiceComponentRef.current,
   });
-
   return (
     <div className="gap-12 ">
       <div className="mb-5 flex gap-5">
@@ -132,10 +150,35 @@ export function Info({ record }: { record: any }) {
       </div>
 
       <CustomTable
-        dataSource={record?.items}
+        dataSource={record?.items?.map((item, index) => (
+          {
+            key: index,
+            ...item,
+          }
+        ))
+        }
         columns={columns}
         pagination={false}
         className="mb-4"
+        expandable={{
+          defaultExpandAllRows: true,
+          // eslint-disable-next-line @typescript-eslint/no-shadow
+          expandedRowRender: (row: IRecord) => row?.batches?.length > 0 && (
+            <div className="flex items-center bg-[#FFF3E6] px-6 py-2 gap-2">
+              {
+                row?.batches?.map((b, index) => (
+                  <div className="flex items-center rounded bg-red-main py-1 px-2 text-white">
+                    <span className="mr-2">{b.batch?.name} - {formatDate(b?.batch?.expiryDate)} - SL: {formatNumber(b?.quantity)} </span>
+                  </div>
+                ))
+              }
+            </div>
+          ),
+          expandIcon: () => <></>,
+          expandedRowKeys: Object.keys(expandedRowKeys).map(
+            (key) => +key
+          ),
+        }}
       />
 
       <div ref={invoiceComponentRef} className='fixed top-0 right-[-300px] w-full -z-10 invisible print:relative print:visible print:right-0 print:p-[50px] print:z-10 print:text-base'>

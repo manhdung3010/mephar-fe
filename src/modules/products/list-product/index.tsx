@@ -26,6 +26,7 @@ const ProductList = () => {
     keyword: '',
     type: null,
     status: null,
+    inventoryType: null,
   });
 
   const [valueChange, setValueChange] = useState<number | undefined>(undefined);
@@ -39,7 +40,8 @@ const ProductList = () => {
       formFilter.keyword,
       branchId,
       formFilter.status,
-      formFilter.type
+      formFilter.type,
+      formFilter.inventoryType,
     ],
     () => getProduct({ ...formFilter, branchId })
   );
@@ -154,6 +156,7 @@ const ProductList = () => {
             keyword: value?.keyword,
             status: value?.status,
             type: value?.type,
+            inventoryType: value?.inventoryType,
           }));
         }, 300)}
       />
