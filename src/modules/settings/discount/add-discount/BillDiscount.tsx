@@ -9,22 +9,68 @@ import { EDiscountUnit } from './Info';
 import { useState } from 'react';
 
 export const BillDiscount = ({
-  discountUnit,
-  setDiscountUnit,
+  setValue,
+  getValues,
+  errors,
 }: {
-  discountUnit: EDiscountUnit;
-  setDiscountUnit: (value: EDiscountUnit) => void;
+  setValue: any;
+  getValues: any;
+  errors: any;
 }) => {
-  const [rows, setRows] = useState([{}]); // Initialize with one row
 
+  const [rows, setRows] = useState([
+    {
+      from: 0,
+      discountValue: 0,
+      discountType: EDiscountUnit.MONEY
+    }
+  ]); // Initialize with one row
   const handleAddRow = () => {
-    setRows(prevRows => [...prevRows, {}]);
+    setRows(prevRows => [...prevRows, {
+      from: 0,
+      discountValue: 0,
+      discountType: EDiscountUnit.MONEY
+    }]);
   };
 
   const handleDeleteRow = (indexToDelete) => {
     if (rows.length === 1) return; // Prevent deleting the last row
     setRows(prevRows => prevRows.filter((_, index) => index !== indexToDelete));
+
+    // Update value items
+    const newRowFormat = rows.filter((_, index) => index !== indexToDelete).map(row => ({
+      condition: {
+        order: {
+          from: row.from
+        }
+      },
+      apply: {
+        discountValue: row.discountValue,
+        discountType: row.discountType
+      }
+    }));
+    setValue('items', newRowFormat);
   };
+
+  const handleChangeRow = (index, key, value) => {
+    const newRows: any = [...rows];
+    newRows[index][key] = value;
+    setRows(newRows);
+
+    const newRowFormat = newRows.map(row => ({
+      condition: {
+        order: {
+          from: row.from
+        }
+      },
+      apply: {
+        discountValue: row.discountValue,
+        discountType: row.discountType
+      }
+    }));
+
+    setValue('items', newRowFormat);
+  }
   return (
     <>
       <div className="my-5 flex flex-col gap-2">
@@ -43,7 +89,9 @@ export const BillDiscount = ({
                 <CustomInput
                   className="mt-0 h-11"
                   wrapClassName="w-full"
-                  onChange={() => { }}
+                  value={row.from}
+                  type='number'
+                  onChange={(value) => handleChangeRow(index, 'from', value)}
                 />
               </div>
               <div className="flex flex-[2] items-center gap-2 px-4">
@@ -51,7 +99,9 @@ export const BillDiscount = ({
                 <CustomInput
                   className="mt-0 h-11 w-full"
                   wrapClassName="w-full"
-                  onChange={() => { }}
+                  type='number'
+                  value={row.discountValue}
+                  onChange={(value) => handleChangeRow(index, 'discountValue', value)}
                 />
               </div>
               <div className="flex-[2] px-4">
@@ -61,10 +111,10 @@ export const BillDiscount = ({
                       'h-full w-[50px] text-center rounded-tl rounded-bl flex items-center justify-center cursor-pointer',
                       {
                         'bg-[#3E7BFA] text-white':
-                          discountUnit === EDiscountUnit.MONEY,
+                          row.discountType === EDiscountUnit.MONEY,
                       }
                     )}
-                    onClick={() => setDiscountUnit(EDiscountUnit.MONEY)}
+                    onClick={() => handleChangeRow(index, 'discountType', EDiscountUnit.MONEY)}
                   >
                     VND
                   </div>
@@ -73,10 +123,10 @@ export const BillDiscount = ({
                       'h-full w-[50px] text-center rounded-tr rounded-br flex items-center justify-center cursor-pointer',
                       {
                         'bg-[#3E7BFA] text-white':
-                          discountUnit === EDiscountUnit.PERCENT,
+                          row.discountType === EDiscountUnit.PERCENT,
                       }
                     )}
-                    onClick={() => setDiscountUnit(EDiscountUnit.PERCENT)}
+                    onClick={() => handleChangeRow(index, 'discountType', EDiscountUnit.PERCENT)}
                   >
                     %
                   </div>

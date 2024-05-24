@@ -75,8 +75,6 @@ export function Customer() {
     () => getCustomer(formFilter)
   );
 
-  console.log("formFilter", formFilter)
-
   const [expandedRowKeys, setExpandedRowKeys] = useState<
     Record<string, boolean>
   >({});

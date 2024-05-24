@@ -8,3 +8,7 @@ export function getDiscount(params: {
 }) {
   return axiosClient.get("promotion-program", { params });
 }
+
+export function createDiscount(payload) {
+  return axiosClient.post("discount", payload);
+}

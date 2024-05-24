@@ -7,6 +7,10 @@ import TimeApplication from './TimeApplication';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { schema } from './schema';
+import { useMutation } from '@tanstack/react-query';
+import { createDiscount } from '@/api/discount.service';
+import { message } from 'antd';
+import { useRouter } from 'next/router';
 
 const AddDiscount = () => {
   const {
@@ -19,13 +23,39 @@ const AddDiscount = () => {
     mode: "onChange",
     defaultValues: {
       status: "ACTIVE",
-      branch: 1,
+      branchOp: 1,
+      groupCustomerOp: 1,
+      target: "ORDER",
+      type: "ORDER_PRICE",
     },
   });
+
+  const router = useRouter();
+
+  const { mutate: mutateCreateDiscount, isLoading } =
+    useMutation(
+      () => {
+        const discountData = getValues();
+
+        return createDiscount(discountData);
+      },
+      {
+        onSuccess: async () => {
+          // await queryClient.invalidateQueries(["CUSTOMER_LIST"]);
+          router.push("/settings/discount");
+        },
+        onError: (err: any) => {
+          message.error(err?.message);
+        },
+      }
+    );
+
   const onSubmit = () => {
     // console.log(data);
     console.log("values", getValues());
   }
+
+  console.log("errors", errors)
   return (
     <>
       <div className="mt-6 flex items-center justify-between bg-white p-5">
@@ -49,7 +79,7 @@ const AddDiscount = () => {
             menu={['Thông tin', 'Thời gian áp dụng', 'Phạm vi áp dụng']}
             components={[
               <Info key="0" setValue={setValue} getValues={getValues} errors={errors} />,
-              <TimeApplication key="1" setValue={setValue} getValues={getValues} />,
+              <TimeApplication key="1" setValue={setValue} getValues={getValues} errors={errors} />,
               <ScopeApplication key="2" setValue={setValue} getValues={getValues} />,
             ]}
           />

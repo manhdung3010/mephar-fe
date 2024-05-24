@@ -87,8 +87,8 @@ const Info = ({ setValue, getValues, errors }: any) => {
           <div className="h-11 rounded-md border border-[#d9d9d9] px-4 py-[2px]">
             <CustomRadio
               options={[
-                { value: "ACTIVE", label: 'Kích hoạt' },
-                { value: "INACTIVE", label: 'Chưa áp dụng' },
+                { value: "active", label: 'Kích hoạt' },
+                { value: "inactive", label: 'Chưa áp dụng' },
               ]}
               onChange={(value) => setValue("status", value, { shouldValidate: true })}
               value={getValues("status")}
@@ -138,20 +138,24 @@ const Info = ({ setValue, getValues, errors }: any) => {
         <div>
           <Label infoText="" label="Khuyến mại theo" />
           <CustomSelect
-            onChange={(value) => setDiscountType(value)}
+            onChange={(value) => {
+              setValue("target", value, { shouldValidate: true })
+            }}
             className="h-11 !rounded"
             options={Object.values(EDiscountType).map((value) => ({
               value,
               label: EDiscountTypeLabel[value],
             }))}
-            value={discountType}
+            value={getValues("target")}
           />
         </div>
 
         <div>
           <Label infoText="" label="Hình thức" />
           <CustomSelect
-            onChange={(value) => setDiscountMethod(value)}
+            onChange={(value) => {
+              setValue("type", value, { shouldValidate: true })
+            }}
             options={
               discountType === EDiscountType.ORDER
                 ? Object.values(EDiscountBillMethod).map((value) => ({
@@ -163,7 +167,7 @@ const Info = ({ setValue, getValues, errors }: any) => {
                   label: EDiscountGoodsMethodLabel[value],
                 }))
             }
-            value={discountMethod}
+            value={getValues("type")}
             className="h-11 !rounded"
           />
         </div>
@@ -181,8 +185,9 @@ const Info = ({ setValue, getValues, errors }: any) => {
       {discountType === EDiscountType.ORDER &&
         discountMethod === EDiscountBillMethod.ORDER_PRICE && (
           <BillDiscount
-            discountUnit={discountUnit}
-            setDiscountUnit={setDiscountUnit}
+            setValue={setValue}
+            getValues={getValues}
+            errors={errors}
           />
         )}
 
@@ -193,7 +198,7 @@ const Info = ({ setValue, getValues, errors }: any) => {
             setDiscountUnit={setDiscountUnit}
           />
         )}
-      {discountType === EDiscountType.ORDER &&
+      {/* {discountType === EDiscountType.ORDER &&
         discountMethod === EDiscountBillMethod.GIFT && (
           <BillDiscount
             discountUnit={discountUnit}
@@ -206,7 +211,7 @@ const Info = ({ setValue, getValues, errors }: any) => {
             discountUnit={discountUnit}
             setDiscountUnit={setDiscountUnit}
           />
-        )}
+        )} */}
 
       {/* Product */}
       {discountType === EDiscountType.PRODUCT &&
