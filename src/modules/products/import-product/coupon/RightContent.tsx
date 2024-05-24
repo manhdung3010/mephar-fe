@@ -107,12 +107,13 @@ export function RightContent({ useForm }: { useForm: any }) {
   );
 
   const changePayload = (status: EImportProductStatus) => {
+    console.log("productsImport", productsImport)
     const products = cloneDeep(productsImport).map(
-      ({ id, price, product, quantity, discountValue, batches }) => ({
+      ({ id, price, product, quantity, discountValue, batches, primePrice }) => ({
         productId: product.id,
-        importPrice: price,
+        importPrice: primePrice,
         totalQuantity: quantity,
-        totalPrice: price * quantity - discountValue,
+        totalPrice: (primePrice ?? 0) * quantity - discountValue,
         discount: discountValue,
         productUnitId: id,
         isBatchExpireControl: product.isBatchExpireControl,

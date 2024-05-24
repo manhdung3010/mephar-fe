@@ -43,16 +43,15 @@ export const schema = yup.object().shape({
     })
   ),
   code: yup.string(),
-  paid: yup
-    .string()
-    .test(
-      "is-less-than",
-      "Vui lòng nhập nhỏ hơn hoặc bằng tiền tổng hóa đơn",
-      (value, context) => {
-        if (value && value > context.parent.totalPrice) return false;
-        return true;
-      }
-    ),
+  paid: yup.string(),
+  // .test(
+  //   "is-less-than",
+  //   "Vui lòng nhập nhỏ hơn hoặc bằng tiền tổng hóa đơn",
+  //   (value, context) => {
+  //     if (value && value > context.parent.totalPrice) return false;
+  //     return true;
+  //   }
+  // ),
   debt: yup.number(),
   status: yup.string(),
   totalPrice: yup.number(),

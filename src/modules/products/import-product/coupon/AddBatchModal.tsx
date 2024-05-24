@@ -124,7 +124,7 @@ export function AddBatchModal({
           onChange={(e) => setValue('quantity', e, { shouldValidate: true })}
           value={getValues('quantity')}
           type="number"
-          // allowDecimal={true}
+        // allowDecimal={true}
         />
         <InputError error={errors.quantity?.message} />
       </div>

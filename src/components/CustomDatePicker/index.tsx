@@ -20,7 +20,7 @@ export function CustomDatePicker({
   suffixIcon?: ReactNode;
   placeholder?: string;
   onChange?: (value) => void;
-  format?: string;
+  format?: any;
   value?: string;
   bordered?: boolean;
   showTime?: boolean;
@@ -38,7 +38,7 @@ export function CustomDatePicker({
       )}
       suffixIcon={suffixIcon || <Image src={DateIcon} alt="" />}
       placeholder={placeholder}
-      format={format || 'DD-MM-YYYY'}
+      format={format || { format: 'DD/MM/YYYY', type: 'mask' }}
       defaultValue={value ? dayjs(value) : undefined}
       showTime={showTime}
     />

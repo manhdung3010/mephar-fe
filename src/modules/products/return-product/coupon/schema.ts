@@ -19,7 +19,9 @@ export const schema = yup.object().shape({
         // })
         ()
         .test("is-required", "Vui lòng chọn lô sản phẩm", (value, context) => {
-          if (!value?.length) return false;
+          console.log("context", context);
+          if (context.parent.isBatchExpireControl && !value?.length)
+            return false;
 
           return true;
         }),
