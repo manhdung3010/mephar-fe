@@ -165,7 +165,7 @@ const Filter = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void,
               className='border-b border-[#D3D5D7]'
               placeholder={['Từ ngày', 'Đến ngày']}
               suffixIcon={<Image src={DateIcon} />}
-              format="DD/MM/YYYY"
+              format={{ format: 'DD/MM/YYYY', type: 'mask' }}
               onChange={(value) => {
                 if (value) {
                   setFormFilter((preValue) => ({

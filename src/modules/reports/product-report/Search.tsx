@@ -93,6 +93,7 @@ const Search = ({ formFilter, setFormFilter, branches, branch }: any) => {
           <RangePicker
             className='border-underline w-full'
             placeholder={['Từ ngày', 'Đến ngày']}
+            format={{ format: 'DD/MM/YYYY', type: 'mask' }}
             suffixIcon={<Image src={DateIcon} alt='date-icon' />}
             presets={rangePresets} onChange={onRangeChange}
             value={[formFilter.from ? dayjs(formFilter.from) : null, formFilter.to ? dayjs(formFilter.to) : null]}
