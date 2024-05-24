@@ -47,7 +47,7 @@ const Search = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void,
             placeholder={['Từ ngày', 'Đến ngày']}
             suffixIcon={<Image src={DateIcon} />}
             className="grow"
-            format={{ format: 'DD/MM/YYYY', type: 'mask' }}
+            format="DD/MM/YYYY"
             onChange={(value) => {
               if (value) {
                 setFormFilter((preValue) => ({
