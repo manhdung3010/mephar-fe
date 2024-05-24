@@ -34,6 +34,8 @@ export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetai
     return product.product.isBatchExpireControl
   };
 
+  const isSaleReturn = orderActive.split("-")[1] === "RETURN";
+
   useEffect(() => {
     if (orderObject[orderActive]) {
       const expandedRowKeysClone = { ...expandedRowKeys };
@@ -60,10 +62,10 @@ export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetai
     }
   }, [orderObject, orderActive]);
   useEffect(() => {
-    if (orderObject[orderActive]?.length > 0 && orderActive.split("-")[1] === "RETURN") {
+    if (orderObject[orderActive]?.length > 0 && isSaleReturn) {
       const expandedRowKeysClone = { ...expandedRowKeys };
       orderObject[orderActive].forEach((product, index) => {
-        if (orderActive.split("-")[1] === "RETURN" && product.batches.length > 0) {
+        if (isSaleReturn && product.batches.length > 0) {
           expandedRowKeysClone[index] = true;
         }
       });
@@ -227,7 +229,7 @@ export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetai
             }));
           })()}
           value={productUnitId}
-          disabled={orderActive.split("-")[1] === "RETURN" ? true : false}
+          disabled={isSaleReturn ? true : false}
           onChange={(value) => {
             const orderObjectClone = cloneDeep(orderObject);
 
@@ -265,7 +267,7 @@ export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetai
       ),
     },
     ...(
-      orderActive.split("-")[1] === "RETURN" ? [] : [{
+      isSaleReturn ? [] : [{
         title: 'Tồn kho',
         dataIndex: 'newInventory',
         key: 'newInventory',
@@ -279,7 +281,7 @@ export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetai
       title: 'SỐ LƯỢNG',
       dataIndex: 'quantity',
       key: 'quantity',
-      render: (quantity, { productKey }) => (
+      render: (quantity, { productKey, batches }) => (
         <CustomInput
           wrapClassName="!w-[110px]"
           className="!h-6 !w-[80px] text-center"
@@ -287,8 +289,9 @@ export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetai
           hasPlus={true}
           value={isNaN(quantity) ? 0 : quantity}
           type="number"
+          disabled={isSaleReturn && batches?.length > 0 ? true : false}
           onChange={(value) => {
-            if (orderActive.split("-")[1] === "RETURN") {
+            if (isSaleReturn && batches?.length > 0) {
               setProductKeyAddBatch(productKey);
               setOpenListBatchModal(true);
               return;
@@ -296,7 +299,7 @@ export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetai
             onChangeQuantity(productKey, value)
           }}
           onMinus={async (value) => {
-            if (orderActive.split("-")[1] === "RETURN") {
+            if (isSaleReturn && batches?.length > 0) {
               setProductKeyAddBatch(productKey);
               setOpenListBatchModal(true);
               return;
@@ -304,7 +307,7 @@ export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetai
             await onExpandMoreBatches(productKey, value);
           }}
           onPlus={async (value) => {
-            if (orderActive.split("-")[1] === "RETURN") {
+            if (isSaleReturn && batches?.length > 0) {
               setProductKeyAddBatch(productKey);
               setOpenListBatchModal(true);
               return;
@@ -312,7 +315,7 @@ export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetai
             await onExpandMoreBatches(productKey, value);
           }}
           onBlur={(e) => {
-            if (orderActive.split("-")[1] === "RETURN") {
+            if (isSaleReturn && batches?.length > 0) {
               setProductKeyAddBatch(productKey);
               setOpenListBatchModal(true);
               return;
@@ -323,7 +326,7 @@ export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetai
         />
       ),
     },
-    ...(orderActive.split("-")[1] === "RETURN" ? [
+    ...(isSaleReturn ? [
       {
         title: 'GIÁ TRẢ',
         dataIndex: 'price',
@@ -419,8 +422,6 @@ export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetai
     setOrderObject(orderObjectClone);
   };
 
-  console.log("orderObject[orderActive]", orderObject[orderActive])
-
   return (
     <ProductTableStyled className="p-4">
       <CustomTable
@@ -433,7 +434,7 @@ export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetai
         scroll={{ x: 900 }}
         expandable={{
           defaultExpandAllRows: true,
-          expandedRowRender: (record: ISaleProductLocal) => orderActive.split("-")[1] === "RETURN" && record?.batches?.length > 0 ? (
+          expandedRowRender: (record: ISaleProductLocal) => isSaleReturn && record?.batches?.length > 0 ? (
             <div>
               <div className="bg-[#FFF3E6] px-6 py-2 ">
                 <div className="hidden-scrollbar overflow-x-auto overflow-y-hidden">
