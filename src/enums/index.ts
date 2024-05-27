@@ -134,8 +134,8 @@ export enum EEmployeeStatusLabel {
 }
 
 export enum EDiscountStatus {
-  active = 1,
-  inactive = 0,
+  active = "active",
+  inactive = "inactive",
 }
 
 export enum EDiscountStatusLabel {

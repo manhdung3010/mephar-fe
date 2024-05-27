@@ -6,7 +6,7 @@ const Label = ({
   required,
   infoText,
   label,
-  hasInfoIcon = true,
+  hasInfoIcon = false,
   className
 }: {
   required?: boolean;

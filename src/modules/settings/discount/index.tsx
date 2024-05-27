@@ -21,6 +21,7 @@ import EditIcon from '@/assets/editGreenIcon.svg';
 import { RoleAction, RoleModel } from '../role/role.enum';
 import { useRecoilValue } from 'recoil';
 import { profileState } from '@/recoil/state';
+import { EDiscountBillMethod, EDiscountBillMethodLabel } from './add-discount/Info';
 
 interface IRecord {
   key: number;
@@ -48,15 +49,15 @@ export function Discount() {
   });
 
   const { data: discount, isLoading } = useQuery(
-    ['promotion-program', formFilter.page, formFilter.limit, formFilter.keyword],
+    ['DISCOUNT_LIST', formFilter.page, formFilter.limit, formFilter.keyword],
     () => getDiscount(formFilter)
   );
 
   const columns: ColumnsType<IRecord> = [
     {
       title: 'Mã chương trình',
-      dataIndex: 'id',
-      key: 'id',
+      dataIndex: 'code',
+      key: 'code',
       render: (value, _, index) => (
         <span
           className="cursor-pointer text-[#0070F4]"
@@ -77,20 +78,20 @@ export function Discount() {
     },
     {
       title: 'Tên chương trình',
-      dataIndex: 'title',
-      key: 'title',
+      dataIndex: 'name',
+      key: 'name',
     },
     {
       title: 'Từ ngày',
-      dataIndex: 'startTime',
-      key: 'startTime',
-      render: (value) => <span>{formatDateTime(value)}</span>,
+      dataIndex: 'discountTime',
+      key: 'discountTime',
+      render: (discountTime) => <span>{formatDateTime(discountTime[0]?.dateFrom)}</span>,
     },
     {
       title: 'Đến ngày',
-      dataIndex: 'endTime',
-      key: 'endTime',
-      render: (value) => <span>{formatDateTime(value)}</span>,
+      dataIndex: 'discountTime',
+      key: 'discountTime',
+      render: (discountTime) => <span>{formatDateTime(discountTime[0]?.dateTo)}</span>,
     },
     {
       title: 'Người tạo',
@@ -117,8 +118,9 @@ export function Discount() {
     },
     {
       title: 'Hình thức khuyến mại',
-      dataIndex: 'alt',
-      key: 'alt',
+      dataIndex: 'type',
+      key: 'type',
+      render: (type) => <span>{EDiscountBillMethodLabel[type.toUpperCase()]}</span>,
     },
     {
       title: 'Thao tác',
@@ -171,7 +173,7 @@ export function Discount() {
       }, 300)} />
 
       <CustomTable
-        dataSource={discount?.data?.list_promotion_program?.map((item, index) => ({
+        dataSource={discount?.data?.data?.items?.map((item, index) => ({
           ...item,
           key: index,
         }))}

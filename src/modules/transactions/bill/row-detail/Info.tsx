@@ -313,10 +313,10 @@ export function Info({ record }: { record: IOrder }) {
         expandable={{
           defaultExpandAllRows: true,
           // eslint-disable-next-line @typescript-eslint/no-shadow
-          expandedRowRender: (record: IRecord) => (
+          expandedRowRender: (record: IRecord) => record?.batches && record?.batches?.length > 0 && (
             <div className="flex items-center bg-[#FFF3E6] px-6 py-2 gap-2">
               {
-                record?.batches && record?.batches?.length > 0 && record?.batches?.map((b, index) => (
+                record?.batches?.map((b, index) => (
                   <div className="flex items-center rounded bg-red-main py-1 px-2 text-white">
                     <span className="mr-2">{b.batch?.name} - {formatDate(b?.batch?.expiryDate)} - SL: {formatNumber(b?.quantity)} </span>
                   </div>

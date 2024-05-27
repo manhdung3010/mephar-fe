@@ -1,50 +1,46 @@
 import { getBranch } from '@/api/branch.service';
 import { getCustomer } from '@/api/customer.service';
+import { getGroupCustomer } from '@/api/group-customer';
 import { CustomRadio } from '@/components/CustomRadio';
 import { CustomSelect } from '@/components/CustomSelect';
 import { useQuery } from '@tanstack/react-query';
 import { Select } from 'antd';
+import { get } from 'lodash';
 import { useState } from 'react';
 
 const ScopeApplication = ({ setValue, getValues }: any) => {
-  const [scope, setScope] = useState({
-    branch: {
-      isAll: true,
-      ids: [],
-    },
-    customer: {
-      isAll: true,
-      ids: [],
-    },
-  });
-  const [branch, setBranch] = useState(1); // 1: Toàn hệ thống, 2: Chi nhánh
-  const [customer, setCustomer] = useState(1); // 1: Toàn bộ khách hàng, 2: Nhóm khách hàng
+  // const [scope, setScope] = useState({
+  //   branch: {
+  //     isAll: true,
+  //     ids: [],
+  //   },
+  //   customer: {
+  //     isAll: true,
+  //     ids: [],
+  //   },
+  // });
+  const [branch, setBranch] = useState(getValues('scope')?.branch?.isAll ? 1 : 2); // 1: Toàn hệ thống, 2: Chi nhánh
+  const [customer, setCustomer] = useState(getValues('scope')?.customer?.isAll ? 1 : 2); // 1: Toàn bộ khách hàng, 2: Nhóm khách hàng
   const handleChange = (key, value) => {
+    let newScope = { ...getValues('scope') };
     if (key === 'branch') {
-      setScope((prev) => ({
-        ...prev,
-        [key]: {
-          isAll: branch === 1,
-          ids: branch === 1 ? [] : value,
-        },
-      }));
+      newScope.branch = {
+        isAll: branch === 1,
+        ids: branch === 1 ? [] : value,
+      };
     }
     else {
-      setScope((prev) => ({
-        ...prev,
-        [key]: {
-          isAll: customer === 1,
-          ids: customer === 1 ? [] : value,
-        },
-      }));
+      newScope.customer = {
+        isAll: customer === 1,
+        ids: customer === 1 ? [] : value,
+      };
     }
-
-    setValue('scope', scope);
+    setValue('scope', newScope);
   }
 
   const { data: customers, isLoading } = useQuery(
-    ['CUSTOMER_DISCOUNT', 1, 999],
-    () => getCustomer({ page: 1, limit: 999 }),
+    ['CUSTOMER_GROUP_DISCOUNT', 1, 999],
+    () => getGroupCustomer({ page: 1, limit: 999 }),
     {
       enabled: customer === 2,
     }
@@ -57,8 +53,6 @@ const ScopeApplication = ({ setValue, getValues }: any) => {
       enabled: branch === 2,
     }
   );
-
-  console.log("scope", scope)
   return (
     <div className="mt-5 grid grid-cols-2 gap-x-[42px]">
       <div className='flex items-end gap-5'>
@@ -80,6 +74,7 @@ const ScopeApplication = ({ setValue, getValues }: any) => {
         <Select
           mode='multiple'
           onChange={(value) => handleChange('branch', value)}
+          defaultValue={getValues('scope')?.branch?.ids || []}
           disabled={branch === 1}
           className=" border-underline grow"
           placeholder="Chọn chi nhánh áp dụng"
@@ -111,10 +106,11 @@ const ScopeApplication = ({ setValue, getValues }: any) => {
           mode='multiple'
           disabled={customer === 1}
           onChange={(value) => handleChange('customer', value)}
+          defaultValue={getValues('scope')?.customer?.ids || []}
           className=" border-underline grow"
           placeholder="Chọn nhóm khách hàng áp dụng"
           options={customers?.data?.items.map((c) => ({
-            label: c.fullName,
+            label: c.name,
             value: c.id,
           })) || []
           }

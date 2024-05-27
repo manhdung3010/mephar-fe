@@ -5,17 +5,20 @@ import DeleteRedIcon from '@/assets/deleteRed.svg';
 import PlusCircleIcon from '@/assets/plus-circle.svg';
 import { CustomInput } from '@/components/CustomInput';
 
-import { EDiscountUnit } from './Info';
+import { EDiscountUnit } from '../Info';
 import { useState } from 'react';
+import InputError from '@/components/InputError';
 
 export const BillDiscount = ({
   setValue,
   getValues,
   errors,
+  isProductPrice = false
 }: {
   setValue: any;
   getValues: any;
   errors: any;
+  isProductPrice?: boolean
 }) => {
 
   const [rows, setRows] = useState([
@@ -31,6 +34,20 @@ export const BillDiscount = ({
       discountValue: 0,
       discountType: EDiscountUnit.MONEY
     }]);
+    setValue('items', [
+      ...getValues('items'),
+      {
+        condition: {
+          order: {
+            from: 0
+          }
+        },
+        apply: {
+          discountValue: 0,
+          discountType: EDiscountUnit.MONEY
+        }
+      }
+    ]);
   };
 
   const handleDeleteRow = (indexToDelete) => {
@@ -75,43 +92,53 @@ export const BillDiscount = ({
     <>
       <div className="my-5 flex flex-col gap-2">
         <div className="flex bg-[#FBECEE]">
-          <div className="flex-[2] p-4">Tên đơn vị</div>
-          <div className="flex-[2] p-4">Giá trị quy đổi</div>
+          <div className="flex-[2] p-4 font-semibold">Tên đơn vị</div>
+          <div className="flex-[2] p-4 font-semibold">Giá trị quy đổi</div>
           <div className="flex-[2] p-4"></div>
           <div className="flex-1 p-4"></div>
         </div>
 
         {
-          rows.map((row, index) => (
-            <div className="flex gap-3">
-              <div className="flex flex-[2] items-center gap-2 px-4">
-                Từ
-                <CustomInput
-                  className="mt-0 h-11"
-                  wrapClassName="w-full"
-                  value={row.from}
-                  type='number'
-                  onChange={(value) => handleChangeRow(index, 'from', value)}
-                />
+          getValues("items")?.map((row, index) => (
+            <div className="flex items-center gap-3">
+              <div className="flex flex-[2] flex-col px-4">
+                <div className='w-full flex items-center gap-x-2'>
+                  Từ
+                  <CustomInput
+                    className="mt-0 h-11"
+                    wrapClassName="w-full"
+                    value={row?.condition?.order?.from || 0}
+                    type='number'
+                    onChange={(value) => handleChangeRow(index, 'from', value)}
+                  />
+                </div>
+                {
+                  errors?.items && <InputError className='ml-6' error={errors?.items[index]?.condition?.order?.from?.message} />
+                }
               </div>
-              <div className="flex flex-[2] items-center gap-2 px-4">
-                Giảm
-                <CustomInput
-                  className="mt-0 h-11 w-full"
-                  wrapClassName="w-full"
-                  type='number'
-                  value={row.discountValue}
-                  onChange={(value) => handleChangeRow(index, 'discountValue', value)}
-                />
+              <div className="flex flex-[2] flex-col px-4">
+                <div className='w-full flex items-center gap-x-2'>
+                  Giảm
+                  <CustomInput
+                    className="mt-0 h-11 w-full"
+                    wrapClassName="w-full"
+                    type='number'
+                    value={row?.apply?.discountValue || 0}
+                    onChange={(value) => handleChangeRow(index, 'discountValue', value)}
+                  />
+                </div>
+                {
+                  errors?.items && <InputError className='ml-10' error={errors?.items[index]?.apply?.discountValue?.message} />
+                }
               </div>
               <div className="flex-[2] px-4">
-                <div className="flex h-full w-fit items-center rounded border border-[#E8EAEB]">
+                <div className="flex h-11 w-fit items-center rounded border border-[#E8EAEB]">
                   <div
                     className={cx(
                       'h-full w-[50px] text-center rounded-tl rounded-bl flex items-center justify-center cursor-pointer',
                       {
                         'bg-[#3E7BFA] text-white':
-                          row.discountType === EDiscountUnit.MONEY,
+                          row?.apply?.discountType === EDiscountUnit.MONEY,
                       }
                     )}
                     onClick={() => handleChangeRow(index, 'discountType', EDiscountUnit.MONEY)}
@@ -123,7 +150,7 @@ export const BillDiscount = ({
                       'h-full w-[50px] text-center rounded-tr rounded-br flex items-center justify-center cursor-pointer',
                       {
                         'bg-[#3E7BFA] text-white':
-                          row.discountType === EDiscountUnit.PERCENT,
+                          row?.apply?.discountType === EDiscountUnit.PERCENT,
                       }
                     )}
                     onClick={() => handleChangeRow(index, 'discountType', EDiscountUnit.PERCENT)}

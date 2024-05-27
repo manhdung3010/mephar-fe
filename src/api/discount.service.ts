@@ -5,8 +5,12 @@ export function getDiscount(params: {
   limit: number;
   keyword?: string;
   name?: string;
+  target?: string;
+  method?: string;
+  status?: string;
+  effective?: string;
 }) {
-  return axiosClient.get("promotion-program", { params });
+  return axiosClient.get("discount", { params });
 }
 
 export function createDiscount(payload) {

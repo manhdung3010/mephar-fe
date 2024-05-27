@@ -1,8 +1,9 @@
-import { Checkbox, DatePicker, Select } from 'antd';
+import { Checkbox, Select } from 'antd';
 
 import { CustomDatePicker } from '@/components/CustomDatePicker';
 import Label from '@/components/CustomLabel';
 import { CustomSelect } from '@/components/CustomSelect';
+import InputError from '@/components/InputError';
 import dayjs from 'dayjs';
 import { useState } from 'react';
 
@@ -332,28 +333,34 @@ const TimeApplication = ({ setValue, getValues, errors }: any) => {
       [key]: value
     }
     setTimes(timesFormat)
-    setValue('times', timesFormat, { shouldValidate: true })
+    setValue('time', timesFormat, { shouldValidate: true })
   }
 
   return (
     <div className="mt-5">
       <div className="mb-5 grid grid-cols-2 gap-x-[42px] gap-y-5">
         <div>
-          <Label infoText="" label="Thời gian" />
+          <Label label="Thời gian" required />
           <div className="grid grid-cols-2 gap-2">
-            <CustomDatePicker
-              showTime placeholder='Chọn ngày'
-              className="h-10"
-              onChange={(value) => handleChange("dateFrom", dayjs(value).format("YYYY-MM-DD HH:mm:ss"))}
-              value={getValues("times")?.dateFrom}
-            />
-            <CustomDatePicker
-              showTime
-              placeholder='Chọn ngày'
-              className="h-10"
-              onChange={(value) => handleChange("dateTo", dayjs(value).format("YYYY-MM-DD HH:mm:ss"))}
-              value={getValues("times")?.dateTo}
-            />
+            <div>
+              <CustomDatePicker
+                showTime placeholder='Chọn ngày'
+                className="h-10"
+                onChange={(value) => handleChange("dateFrom", dayjs(value).format("YYYY-MM-DD HH:mm:ss"))}
+                value={getValues("times")?.dateFrom}
+              />
+              <InputError error={errors?.time?.dateFrom?.message} />
+            </div>
+            <div>
+              <CustomDatePicker
+                showTime
+                placeholder='Chọn ngày'
+                className="h-10"
+                onChange={(value) => handleChange("dateTo", dayjs(value).format("YYYY-MM-DD HH:mm:ss"))}
+                value={getValues("times")?.dateTo}
+              />
+              <InputError error={errors?.time?.dateTo?.message} />
+            </div>
           </div>
         </div>
 
@@ -419,7 +426,7 @@ const TimeApplication = ({ setValue, getValues, errors }: any) => {
       </div>
       <div className='grid grid-cols-2 gap-x-[42px] gap-y-5'>
         <div className="flex gap-2">
-          <Checkbox checked={getValues("times")?.isBirthday} onChange={(e) => handleChange("isBirthday", e.target.checked)} />
+          <Checkbox checked={getValues("time")?.isBirthday} onChange={(e) => handleChange("isBirthday", e.target.checked)} />
           <div className="flex items-center gap-2">
             <div>Áp dụng vào</div>
             <CustomSelect
@@ -433,7 +440,7 @@ const TimeApplication = ({ setValue, getValues, errors }: any) => {
         </div>
 
         <div className="flex gap-2">
-          <Checkbox checked={getValues("times")?.isWarning} onChange={(e) => handleChange("isWarning", e.target.checked)} />
+          <Checkbox checked={getValues("time")?.isWarning} onChange={(e) => handleChange("isWarning", e.target.checked)} />
           <div className="flex items-center gap-2">
             <CustomSelect
               onChange={() => { }}

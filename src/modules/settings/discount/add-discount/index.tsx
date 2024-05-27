@@ -7,7 +7,7 @@ import TimeApplication from './TimeApplication';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { schema } from './schema';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createDiscount } from '@/api/discount.service';
 import { message } from 'antd';
 import { useRouter } from 'next/router';
@@ -22,15 +22,42 @@ const AddDiscount = () => {
     resolver: yupResolver(schema),
     mode: "onChange",
     defaultValues: {
-      status: "ACTIVE",
+      status: "active",
       branchOp: 1,
       groupCustomerOp: 1,
       target: "ORDER",
       type: "ORDER_PRICE",
+      items: [
+        {
+          condition: {
+            order: {
+              from: 0,
+            },
+          },
+          apply: {
+            discountValue: 0,
+            discountType: "AMOUNT",
+            productUnitId: [],
+            maxQuantity: 1,
+            isGift: false
+          },
+        }
+      ],
+      scope: {
+        customer: {
+          isAll: true,
+          ids: []
+        },
+        branch: {
+          isAll: true,
+          ids: []
+        },
+      },
     },
   });
 
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const { mutate: mutateCreateDiscount, isLoading } =
     useMutation(
@@ -41,7 +68,7 @@ const AddDiscount = () => {
       },
       {
         onSuccess: async () => {
-          // await queryClient.invalidateQueries(["CUSTOMER_LIST"]);
+          await queryClient.invalidateQueries(["DISCOUNT_LIST"]);
           router.push("/settings/discount");
         },
         onError: (err: any) => {
@@ -51,11 +78,10 @@ const AddDiscount = () => {
     );
 
   const onSubmit = () => {
-    // console.log(data);
-    console.log("values", getValues());
+    mutateCreateDiscount()
+    // console.log("values", getValues())
   }
 
-  console.log("errors", errors)
   return (
     <>
       <div className="mt-6 flex items-center justify-between bg-white p-5">
