@@ -19,11 +19,10 @@ import { useQuery } from '@tanstack/react-query';
 import { debounce, set } from 'lodash';
 const { Option } = Select
 
-export const BillDiscountProduct = ({
+export const ProductGiftPoint = ({
   setValue,
   getValues,
   errors,
-  isProductPrice = true
 }: {
   setValue: any;
   getValues: any;
@@ -54,16 +53,16 @@ export const BillDiscountProduct = ({
 
   const [rows, setRows] = useState([
     {
-      from: 0,
-      discountValue: 0,
-      discountType: EDiscountUnit.MONEY
+      from: 1,
+      pointValue: 0,
+      pointType: EDiscountUnit.MONEY
     }
   ]); // Initialize with one row
   const handleAddRow = () => {
     setRows(prevRows => [...prevRows, {
       from: 0,
-      discountValue: 0,
-      discountType: EDiscountUnit.MONEY
+      pointValue: 0,
+      pointType: EDiscountUnit.MONEY
     }]);
     setValue('items', [
       ...getValues('items'),
@@ -71,11 +70,14 @@ export const BillDiscountProduct = ({
         condition: {
           order: {
             from: 0
+          },
+          product: {
+            from: 1
           }
         },
         apply: {
-          discountValue: 0,
-          discountType: EDiscountUnit.MONEY
+          pointValue: 0,
+          pointType: EDiscountUnit.MONEY,
         }
       }
     ]);
@@ -89,12 +91,18 @@ export const BillDiscountProduct = ({
     const newRowFormat = rows.filter((_, index) => index !== indexToDelete).map(row => ({
       condition: {
         order: {
-          from: row.from
+          from: 1
+        },
+        product: {
+          from: 1
         }
       },
+      product: {
+        from: row.from
+      },
       apply: {
-        discountValue: row.discountValue,
-        discountType: row.discountType
+        pointValue: row.pointValue,
+        pointType: row.pointType,
       }
     }));
     setValue('items', newRowFormat);
@@ -107,57 +115,87 @@ export const BillDiscountProduct = ({
 
     const newRowFormat = newRows.map(row => ({
       condition: {
+        product: {
+          from: row.from || 1
+        },
         order: {
-          from: row.from
-        }
+          from: 1
+        },
+        productUnitId: row.productId,
       },
       apply: {
-        discountValue: row.discountValue,
-        discountType: row.discountType,
-        productUnitId: row.productUnitId,
-        maxQuantity: row.maxQuantity ?? 1
+        discountValue: 1,
+        pointValue: row.pointValue,
+        pointType: row.pointType,
       }
     }));
 
     setValue('items', newRowFormat);
   }
+  console.log("items", getValues("items"));
   return (
     <>
       <div className="my-5 flex flex-col gap-2">
         <div className="flex bg-[#FBECEE]">
-          <div className="flex-[2] p-4 font-semibold">Tổng tiền hàng</div>
-          <div className="flex-[2] p-4 font-semibold">Giá trị khuyến mại</div>
-          <div className="flex-[4] p-4 font-semibold">Hàng/Nhóm hàng được giảm giá</div>
+          <div className="flex-[3] p-4 font-semibold">Hàng/Nhóm hàng mua</div>
+          <div className="flex-[3] p-4 font-semibold">Điểm cộng</div>
           <div className="flex-1 p-4"></div>
         </div>
 
         {
           getValues("items")?.map((row, index) => (
-            <div className="flex items-center gap-3">
-              <div className="flex flex-[2] flex-col px-4">
+            <div className="flex items-center gap-2">
+              <div className="flex flex-[3] flex-col px-4">
                 <div className='w-full flex items-center gap-x-2'>
-                  Từ
                   <CustomInput
-                    className="mt-0 h-11"
-                    wrapClassName="w-full"
-                    value={row?.condition?.order?.from || 0}
+                    className="mt-0 h-11 w-14"
+                    value={row?.condition?.product?.from || 0}
                     type='number'
                     onChange={(value) => handleChangeRow(index, 'from', value)}
                   />
+                  <Select
+                    mode="multiple"
+                    className="!rounded w-full"
+                    placeholder='Nhập tên hàng, sản phẩm, nhóm hàng...'
+                    optionFilterProp="children"
+                    showSearch
+                    onSearch={debounce((value) => {
+                      setFormFilter({
+                        ...formFilter,
+                        keyword: value
+                      })
+                    }, 300)}
+                    onChange={(value) => {
+                      handleChangeRow(index, 'productId', value)
+                    }}
+                    loading={isLoadingProduct}
+                    defaultValue={row?.apply?.productUnitId}
+                    suffixIcon={<Image src={DocumentIcon} />}
+                    value={getValues("times")?.byWeekDay}
+                    notFoundContent={isLoadingProduct ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
+                    size='large'
+                  >
+                    {
+                      products?.data?.items?.map((product) => (
+                        <Option key={product.id} value={product.productUnit?.id}>
+                          {product?.productUnit?.code} - {product?.product?.name} - {product?.productUnit?.unitName}
+                        </Option>
+                      ))
+                    }
+                  </Select>
                 </div>
                 {
-                  errors?.items && <InputError className='ml-6' error={errors?.items[index]?.condition?.order?.from?.message} />
+                  errors?.items && <InputError className='' error={errors?.items[index]?.condition?.product?.from?.message} />
                 }
               </div>
-              <div className="flex flex-[2] flex-col px-4">
+              <div className="flex flex-[3] flex-col px-4">
                 <div className='w-full flex items-center gap-x-2'>
-                  Giảm
                   <CustomInput
                     className="mt-0 h-11 w-full"
                     wrapClassName="w-full"
                     type='number'
-                    value={row?.apply?.discountValue || 0}
-                    onChange={(value) => handleChangeRow(index, 'discountValue', value)}
+                    value={row?.apply?.pointValue || 0}
+                    onChange={(value) => handleChangeRow(index, 'pointValue', value)}
                   />
                   <div className="flex h-11 w-fit items-center rounded border border-[#E8EAEB]">
                     <div
@@ -165,69 +203,30 @@ export const BillDiscountProduct = ({
                         'h-full w-[50px] text-center rounded-tl rounded-bl flex items-center justify-center cursor-pointer',
                         {
                           'bg-[#3E7BFA] text-white':
-                            row?.apply?.discountType === EDiscountUnit.MONEY,
+                            row?.apply?.pointType === EDiscountUnit.MONEY,
                         }
                       )}
-                      onClick={() => handleChangeRow(index, 'discountType', EDiscountUnit.MONEY)}
+                      onClick={() => handleChangeRow(index, 'pointType', EDiscountUnit.MONEY)}
                     >
-                      VND
+                      Điểm
                     </div>
                     <div
                       className={cx(
                         'h-full w-[50px] text-center rounded-tr rounded-br flex items-center justify-center cursor-pointer',
                         {
                           'bg-[#3E7BFA] text-white':
-                            row?.apply?.discountType === EDiscountUnit.PERCENT,
+                            row?.apply?.pointType === EDiscountUnit.PERCENT,
                         }
                       )}
-                      onClick={() => handleChangeRow(index, 'discountType', EDiscountUnit.PERCENT)}
+                      onClick={() => handleChangeRow(index, 'pointType', EDiscountUnit.PERCENT)}
                     >
                       %
                     </div>
                   </div>
                 </div>
                 {
-                  errors?.items && <InputError className='ml-10' error={errors?.items[index]?.apply?.discountValue?.message} />
+                  errors?.items && <InputError className='' error={errors?.items[index]?.apply?.pointType?.message} />
                 }
-              </div>
-              <div className="flex-[4] px-4 flex gap-2">
-                <CustomInput
-                  className='h-11 w-16'
-                  onChange={(value) => handleChangeRow(index, 'maxQuantity', value)}
-                  placeholder='Số lượng'
-                  value={row?.apply?.maxQuantity}
-                  type='number'
-                />
-                <Select
-                  mode="multiple"
-                  className="!rounded w-full"
-                  placeholder='Nhập tên hàng, sản phẩm, nhóm hàng...'
-                  optionFilterProp="children"
-                  showSearch
-                  onSearch={debounce((value) => {
-                    setFormFilter({
-                      ...formFilter,
-                      keyword: value
-                    })
-                  }, 300)}
-                  onChange={(value) => {
-                    handleChangeRow(index, 'productUnitId', value)
-                  }}
-                  loading={isLoadingProduct}
-                  defaultValue={row?.apply?.productUnitId}
-                  suffixIcon={<Image src={DocumentIcon} />}
-                  value={getValues("times")?.byWeekDay}
-                  notFoundContent={isLoadingProduct ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
-                  size='large'
-                >
-                  {
-                    products?.data?.items?.map((product) => (
-                      <Option key={product.id} value={product.productUnit?.id}>
-                        {product?.productUnit?.code} - {product?.product?.name} - {product?.productUnit?.unitName}
-                      </Option>
-                    ))
-                  }
-                </Select>
               </div>
               <div onClick={() => handleDeleteRow(index)} className="flex flex-1 items-center justify-center px-4 cursor-pointer">
                 <Image src={DeleteRedIcon} alt="" />

@@ -5,7 +5,7 @@ import PlusCircleIcon from '@/assets/plus-circle.svg';
 import SearchIcon from '@/assets/searchIcon.svg';
 import { CustomInput } from '@/components/CustomInput';
 
-import type { EDiscountUnit } from './Info';
+import type { EDiscountUnit } from '../Info';
 
 export const GoodsDiscountGiveGoods = ({
   discountUnit,
@@ -28,14 +28,14 @@ export const GoodsDiscountGiveGoods = ({
             <CustomInput
               className="mt-0 h-11"
               wrapClassName="w-20"
-              onChange={() => {}}
+              onChange={() => { }}
             />
             <CustomInput
               className="mt-0 h-11"
               wrapClassName="grow"
               placeholder="Tìm kiếm hàng hóa"
               prefixIcon={<Image src={SearchIcon} />}
-              onChange={() => {}}
+              onChange={() => { }}
             />
           </div>
 
@@ -43,14 +43,14 @@ export const GoodsDiscountGiveGoods = ({
             <CustomInput
               className="mt-0 h-11"
               wrapClassName="w-20"
-              onChange={() => {}}
+              onChange={() => { }}
             />
             <CustomInput
               className="mt-0 h-11"
               wrapClassName="grow"
               placeholder="Tìm kiếm hàng hóa"
               prefixIcon={<Image src={SearchIcon} />}
-              onChange={() => {}}
+              onChange={() => { }}
             />
           </div>
 

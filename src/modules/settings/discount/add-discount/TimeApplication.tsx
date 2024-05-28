@@ -5,7 +5,7 @@ import Label from '@/components/CustomLabel';
 import { CustomSelect } from '@/components/CustomSelect';
 import InputError from '@/components/InputError';
 import dayjs from 'dayjs';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const dayWeekOptions = [
   {
@@ -344,10 +344,11 @@ const TimeApplication = ({ setValue, getValues, errors }: any) => {
           <div className="grid grid-cols-2 gap-2">
             <div>
               <CustomDatePicker
-                showTime placeholder='Chọn ngày'
+                showTime
+                placeholder='Chọn ngày'
                 className="h-10"
                 onChange={(value) => handleChange("dateFrom", dayjs(value).format("YYYY-MM-DD HH:mm:ss"))}
-                value={getValues("times")?.dateFrom}
+                value={getValues("time")?.dateFrom}
               />
               <InputError error={errors?.time?.dateFrom?.message} />
             </div>
@@ -357,7 +358,7 @@ const TimeApplication = ({ setValue, getValues, errors }: any) => {
                 placeholder='Chọn ngày'
                 className="h-10"
                 onChange={(value) => handleChange("dateTo", dayjs(value).format("YYYY-MM-DD HH:mm:ss"))}
-                value={getValues("times")?.dateTo}
+                value={getValues("time")?.dateTo}
               />
               <InputError error={errors?.time?.dateTo?.message} />
             </div>
@@ -373,7 +374,7 @@ const TimeApplication = ({ setValue, getValues, errors }: any) => {
             optionFilterProp="label"
             showSearch
             onChange={(value) => handleChange("byWeekDay", value)}
-            value={getValues("times")?.byWeekDay}
+            value={getValues("time")?.byWeekDay}
             options={dayWeekOptions}
             size='large'
           />
@@ -386,7 +387,7 @@ const TimeApplication = ({ setValue, getValues, errors }: any) => {
             className="!rounded w-full"
             placeholder="Chọn tháng"
             onChange={(value) => handleChange("byMonth", value)}
-            value={getValues("times")?.byMonth}
+            value={getValues("time")?.byMonth}
             optionFilterProp="label"
             showSearch
             options={monthOptions}
@@ -401,7 +402,7 @@ const TimeApplication = ({ setValue, getValues, errors }: any) => {
             className="!rounded w-full"
             placeholder="Chọn ngày"
             onChange={(value) => handleChange("byDay", value)}
-            value={getValues("times")?.byDay}
+            value={getValues("time")?.byDay}
             options={dayOptions}
             optionFilterProp="label"
             showSearch
@@ -415,7 +416,7 @@ const TimeApplication = ({ setValue, getValues, errors }: any) => {
             className="!rounded w-full"
             placeholder="Chọn giờ"
             onChange={(value) => handleChange("byHour", value)}
-            value={getValues("times")?.byHour}
+            value={getValues("time")?.byHour}
             options={hourOptions}
             optionFilterProp="label"
             showSearch

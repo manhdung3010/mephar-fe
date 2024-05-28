@@ -8,12 +8,14 @@ import Label from '@/components/CustomLabel';
 import { CustomRadio } from '@/components/CustomRadio';
 import { CustomSelect } from '@/components/CustomSelect';
 
-import { BillDiscount } from './bill-target/BillDiscount';
-import { GoodsDiscount } from './GoodsDiscount';
-import { GoodsDiscountGiveGoods } from './GoodsDiscountGiveGoods';
 import InputError from '@/components/InputError';
+import { BillDiscount } from './bill-target/BillDiscount';
 import { BillDiscountProduct } from './bill-target/BillDiscountProduct';
+import { BillGiftPoint } from './bill-target/BillGiftPoint';
 import { BillGiftProduct } from './bill-target/BillGiftProduct';
+import { ProductDiscountProduct } from './product-target/ProductDiscountProduct';
+import { ProductGiftProduct } from './product-target/ProductGiftProduct';
+import { ProductGiftPoint } from './product-target/ProductGiftPoint';
 
 export enum EDiscountType {
   ORDER = 'ORDER',
@@ -60,12 +62,6 @@ export enum EDiscountUnit {
 
 const Info = ({ setValue, getValues, errors }: any) => {
   const [discountType, setDiscountType] = useState(EDiscountType.ORDER);
-  const [discountUnit, setDiscountUnit] = useState(EDiscountUnit.MONEY);
-
-  const [discountMethod, setDiscountMethod] = useState<
-    EDiscountBillMethod | EDiscountGoodsMethod
-  >(EDiscountBillMethod.ORDER_PRICE);
-
   return (
     <div className="mt-5">
       <h2 className="mb-4 text-xl font-medium text-[#999]">THÔNG TIN</h2>
@@ -132,7 +128,7 @@ const Info = ({ setValue, getValues, errors }: any) => {
         className="grid grid-cols-2 gap-x-[42px] gap-y-5"
         style={{
           gridTemplateColumns:
-            discountType === EDiscountType.ORDER
+            getValues('target') === EDiscountType.ORDER
               ? 'repeat(2, minmax(0, 1fr))'
               : 'repeat(3, minmax(0, 1fr))',
         }}
@@ -142,6 +138,7 @@ const Info = ({ setValue, getValues, errors }: any) => {
           <CustomSelect
             onChange={(value) => {
               setValue("target", value, { shouldValidate: true })
+              value === "PRODUCT" && setValue("type", "PRODUCT_PRICE")
             }}
             className="h-11 !rounded"
             options={Object.values(EDiscountType).map((value) => ({
@@ -176,7 +173,7 @@ const Info = ({ setValue, getValues, errors }: any) => {
 
         {getValues('target') === EDiscountType.PRODUCT && (
           <div className="flex items-end gap-2">
-            <Checkbox />
+            <Checkbox checked={getValues("isMultiple")} onChange={(e) => setValue("isMultiple", e.target.checked, { shouldValidate: true })} />
             <div>Không nhân theo số lượng mua</div>
             <Image src={InfoIcon} alt="" />
           </div>
@@ -209,31 +206,42 @@ const Info = ({ setValue, getValues, errors }: any) => {
             errors={errors}
           />
         )}
-      {/* {discountType === EDiscountType.ORDER &&
-        discountMethod === EDiscountBillMethod.GIFT && (
-          <BillDiscount
-            discountUnit={discountUnit}
-            setDiscountUnit={setDiscountUnit}
+      {getValues('target') === EDiscountType.ORDER &&
+        getValues('type') === EDiscountBillMethod.LOYALTY && (
+          <BillGiftPoint
+            setValue={setValue}
+            getValues={getValues}
+            errors={errors}
           />
         )}
-      {discountType === EDiscountType.ORDER &&
-        discountMethod === EDiscountBillMethod.LOYALTY && (
-          <BillDiscount
-            discountUnit={discountUnit}
-            setDiscountUnit={setDiscountUnit}
-          />
-        )} */}
 
       {/* Product */}
       {getValues('target') === EDiscountType.PRODUCT &&
         getValues('type') === EDiscountGoodsMethod.PRODUCT_PRICE && (
-          <GoodsDiscount
-            discountUnit={discountUnit}
-            setDiscountUnit={setDiscountUnit}
+          <ProductDiscountProduct
+            setValue={setValue}
+            getValues={getValues}
+            errors={errors}
+          />
+        )}
+      {getValues('target') === EDiscountType.PRODUCT &&
+        getValues('type') === EDiscountGoodsMethod.GIFT && (
+          <ProductGiftProduct
+            setValue={setValue}
+            getValues={getValues}
+            errors={errors}
+          />
+        )}
+      {getValues('target') === EDiscountType.PRODUCT &&
+        getValues('type') === EDiscountGoodsMethod.LOYALTY && (
+          <ProductGiftPoint
+            setValue={setValue}
+            getValues={getValues}
+            errors={errors}
           />
         )}
 
-      {getValues('target') === EDiscountType.PRODUCT &&
+      {/* {getValues('target') === EDiscountType.PRODUCT &&
         getValues('type') === EDiscountGoodsMethod.GIFT && (
           <GoodsDiscountGiveGoods
             discountUnit={discountUnit}
@@ -253,7 +261,7 @@ const Info = ({ setValue, getValues, errors }: any) => {
             discountUnit={discountUnit}
             setDiscountUnit={setDiscountUnit}
           />
-        )}
+        )} */}
     </div>
   );
 };

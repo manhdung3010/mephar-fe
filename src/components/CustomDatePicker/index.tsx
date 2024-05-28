@@ -38,7 +38,7 @@ export function CustomDatePicker({
       )}
       suffixIcon={suffixIcon || <Image src={DateIcon} alt="" />}
       placeholder={placeholder}
-      format={format || { format: 'DD/MM/YYYY', type: 'mask' }}
+      format={format || { format: showTime ? 'DD/MM/YYYY hh:mm:ss' : 'DD/MM/YYYY', type: 'mask' }}
       defaultValue={value ? dayjs(value) : undefined}
       showTime={showTime}
     />

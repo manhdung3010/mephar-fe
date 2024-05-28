@@ -6,13 +6,19 @@ import ScopeApplication from './ScopeApplication';
 import TimeApplication from './TimeApplication';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { schema } from './schema';
+import { productSchema, schema } from './schema';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createDiscount } from '@/api/discount.service';
 import { message } from 'antd';
 import { useRouter } from 'next/router';
+import { useState } from 'react';
+import dayjs from 'dayjs';
 
 const AddDiscount = () => {
+  const [target, setTarget] = useState('ORDER');
+  const currentDate = dayjs();
+  const dateFromDefault = currentDate.format("YYYY-MM-DD HH:mm:ss");
+  const dateToDefault = currentDate.add(6, 'month').format("YYYY-MM-DD HH:mm:ss");
   const {
     getValues,
     setValue,
@@ -27,19 +33,25 @@ const AddDiscount = () => {
       groupCustomerOp: 1,
       target: "ORDER",
       type: "ORDER_PRICE",
+      isMultiple: false,
       items: [
         {
           condition: {
             order: {
               from: 0,
             },
+            product: {
+              from: 1
+            }
           },
           apply: {
             discountValue: 0,
             discountType: "AMOUNT",
+            pointType: "AMOUNT",
             productUnitId: [],
             maxQuantity: 1,
-            isGift: false
+            isGift: false,
+            pointValue: 0,
           },
         }
       ],
@@ -53,6 +65,10 @@ const AddDiscount = () => {
           ids: []
         },
       },
+      time: {
+        dateFrom: dateFromDefault,
+        dateTo: dateToDefault,
+      }
     },
   });
 
@@ -62,7 +78,22 @@ const AddDiscount = () => {
   const { mutate: mutateCreateDiscount, isLoading } =
     useMutation(
       () => {
-        const discountData = getValues();
+        const discountData: any = getValues();
+        const items = discountData.items.map((item: any) => {
+          return {
+            ...(item.condition.product ? { condition: { product: item.condition.product } } : { condition: { order: item.condition.order } }),
+            apply: {
+              ...(item.apply.isGift || item.apply.pointValue > 0 ? {} : { discountValue: item.apply.discountValue }),
+              pointValue: item.apply.pointValue,
+              pointType: item.apply.pointType,
+              discountType: item.apply.discountType,
+              productUnitId: item.apply.productUnitId,
+              maxQuantity: item.apply.maxQuantity,
+              isGift: item.apply.isGift
+            }
+          }
+        });
+        discountData.items = items;
 
         return createDiscount(discountData);
       },
@@ -81,6 +112,8 @@ const AddDiscount = () => {
     mutateCreateDiscount()
     // console.log("values", getValues())
   }
+
+  console.log("errors", errors)
 
   return (
     <>
@@ -104,7 +137,7 @@ const AddDiscount = () => {
           <Tab
             menu={['Thông tin', 'Thời gian áp dụng', 'Phạm vi áp dụng']}
             components={[
-              <Info key="0" setValue={setValue} getValues={getValues} errors={errors} />,
+              <Info key="0" setValue={setValue} getValues={getValues} errors={errors} useForm={useForm} />,
               <TimeApplication key="1" setValue={setValue} getValues={getValues} errors={errors} />,
               <ScopeApplication key="2" setValue={setValue} getValues={getValues} />,
             ]}

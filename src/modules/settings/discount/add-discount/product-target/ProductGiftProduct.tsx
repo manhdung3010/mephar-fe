@@ -19,7 +19,7 @@ import { useQuery } from '@tanstack/react-query';
 import { debounce, set } from 'lodash';
 const { Option } = Select
 
-export const BillGiftProduct = ({
+export const ProductGiftProduct = ({
   setValue,
   getValues,
   errors,
@@ -27,6 +27,7 @@ export const BillGiftProduct = ({
   setValue: any;
   getValues: any;
   errors: any;
+  isProductPrice?: boolean
 }) => {
   const branchId = useRecoilValue(branchState);
 
@@ -69,9 +70,15 @@ export const BillGiftProduct = ({
         condition: {
           order: {
             from: 0
+          },
+          product: {
+            from: 1
           }
         },
         apply: {
+          isGift: true,
+          productUnitId: [],
+          maxQuantity: 1,
           discountValue: 1,
         }
       }
@@ -86,12 +93,18 @@ export const BillGiftProduct = ({
     const newRowFormat = rows.filter((_, index) => index !== indexToDelete).map(row => ({
       condition: {
         order: {
-          from: row.from
+          from: 1
+        },
+        product: {
+          from: 1
         }
+      },
+      product: {
+        from: row.from
       },
       apply: {
         discountValue: row.discountValue,
-        discountType: row.discountType
+        discountType: row.discountType,
       }
     }));
     setValue('items', newRowFormat);
@@ -104,15 +117,19 @@ export const BillGiftProduct = ({
 
     const newRowFormat = newRows.map(row => ({
       condition: {
-        order: {
+        product: {
           from: row.from
-        }
+        },
+        order: {
+          from: 1
+        },
+        productUnitId: row.productId,
       },
       apply: {
+        isGift: true,
         productUnitId: row.productUnitId,
         maxQuantity: row.maxQuantity ?? 1,
         discountValue: 1,
-        isGift: true
       }
     }));
 
@@ -122,30 +139,58 @@ export const BillGiftProduct = ({
     <>
       <div className="my-5 flex flex-col gap-2">
         <div className="flex bg-[#FBECEE]">
-          <div className="flex-[2] p-4 font-semibold">Tổng tiền hàng</div>
-          <div className="flex-[4] p-4 font-semibold">Hàng/Nhóm hàng được tặng</div>
+          <div className="flex-[3] p-4 font-semibold">Hàng/Nhóm hàng mua</div>
+          <div className="flex-[3] p-4 font-semibold">Hàng/nhóm hàng được giảm giá</div>
           <div className="flex-1 p-4"></div>
         </div>
 
         {
           getValues("items")?.map((row, index) => (
-            <div className="flex items-center gap-3">
-              <div className="flex flex-[2] flex-col px-4">
+            <div className="flex items-center gap-2">
+              <div className="flex flex-[3] flex-col px-4">
                 <div className='w-full flex items-center gap-x-2'>
-                  Từ
                   <CustomInput
-                    className="mt-0 h-11"
-                    wrapClassName="w-full"
-                    value={row?.condition?.order?.from || 0}
+                    className="mt-0 h-11 w-14"
+                    value={row?.condition?.product?.from || 0}
                     type='number'
                     onChange={(value) => handleChangeRow(index, 'from', value)}
                   />
+                  <Select
+                    mode="multiple"
+                    className="!rounded w-full"
+                    placeholder='Nhập tên hàng, sản phẩm, nhóm hàng...'
+                    optionFilterProp="children"
+                    showSearch
+                    onSearch={debounce((value) => {
+                      setFormFilter({
+                        ...formFilter,
+                        keyword: value
+                      })
+                    }, 300)}
+                    onChange={(value) => {
+                      handleChangeRow(index, 'productId', value)
+                    }}
+                    loading={isLoadingProduct}
+                    defaultValue={row?.apply?.productUnitId}
+                    suffixIcon={<Image src={DocumentIcon} />}
+                    value={getValues("times")?.byWeekDay}
+                    notFoundContent={isLoadingProduct ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
+                    size='large'
+                  >
+                    {
+                      products?.data?.items?.map((product) => (
+                        <Option key={product.id} value={product.productUnit?.id}>
+                          {product?.productUnit?.code} - {product?.product?.name} - {product?.productUnit?.unitName}
+                        </Option>
+                      ))
+                    }
+                  </Select>
                 </div>
                 {
-                  errors?.items && <InputError className='ml-6' error={errors?.items[index]?.condition?.order?.from?.message} />
+                  errors?.items && <InputError className='' error={errors?.items[index]?.condition?.product?.from?.message} />
                 }
               </div>
-              <div className="flex-[4] px-4 flex gap-2">
+              <div className="flex-[3] px-4 flex gap-2">
                 <CustomInput
                   className='h-11 w-16'
                   onChange={(value) => handleChangeRow(index, 'maxQuantity', value)}
