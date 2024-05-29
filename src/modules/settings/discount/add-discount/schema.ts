@@ -25,7 +25,23 @@ export const schema = yup.object().shape({
             ),
         }),
         product: yup.object({
-          from: yup.number(),
+          type: yup.string(),
+          from: yup.number().when("type", ([type], schema) => {
+            if (
+              type === "PRODUCT_PRICE" ||
+              type === "GIFT" ||
+              type === "LOYALTY"
+            ) {
+              return schema
+                .required("Đây là trường bắt buộc!")
+                .test(
+                  "check-value-discount",
+                  "Giá trị phải lớn hơn 0",
+                  (value) => value > 0
+                );
+            }
+            return schema.notRequired();
+          }),
         }),
       }),
       apply: yup.object({
@@ -38,11 +54,39 @@ export const schema = yup.object().shape({
             (value) => value > 0
           ),
         discountType: yup.string(),
-        productUnitId: yup.array(),
-        maxQuantity: yup.number(),
+        productUnitId: yup.array().when("type", ([type], schema) => {
+          if (type === "PRODUCT_PRICE" || type === "GIFT") {
+            return schema.required("Đây là trường bắt buộc!");
+          }
+          return schema.notRequired();
+        }),
+        maxQuantity: yup.number().when("type", ([type], schema) => {
+          if (type === "PRODUCT_PRICE" || type === "GIFT") {
+            return schema
+              .required("Đây là trường bắt buộc!")
+              .test(
+                "check-value-discount",
+                "Giá trị phải lớn hơn 0",
+                (value) => value > 0
+              );
+          }
+          return schema.notRequired();
+        }),
         isGift: yup.boolean(),
-        pointValue: yup.number(),
+        pointValue: yup.number().when("type", ([type], schema) => {
+          if (type === "LOYALTY") {
+            return schema
+              .required("Đây là trường bắt buộc!")
+              .test(
+                "check-value-discount",
+                "Giá trị phải lớn hơn 0",
+                (value) => value > 0
+              );
+          }
+          return schema.notRequired();
+        }),
         pointType: yup.string(),
+        type: yup.string(),
       }),
     })
   ),

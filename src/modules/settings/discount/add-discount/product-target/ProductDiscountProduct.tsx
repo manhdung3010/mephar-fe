@@ -16,7 +16,7 @@ import { useRecoilValue } from 'recoil';
 import { branchState } from '@/recoil/state';
 import { getProduct, getSaleProducts } from '@/api/product.service';
 import { useQuery } from '@tanstack/react-query';
-import { debounce, set } from 'lodash';
+import { debounce, get, set } from 'lodash';
 const { Option } = Select
 
 export const ProductDiscountProduct = ({
@@ -53,16 +53,18 @@ export const ProductDiscountProduct = ({
 
   const [rows, setRows] = useState([
     {
-      from: 0,
+      from: 1,
       discountValue: 0,
-      discountType: EDiscountUnit.MONEY
+      discountType: EDiscountUnit.MONEY,
+      type: getValues('type')
     }
   ]); // Initialize with one row
   const handleAddRow = () => {
     setRows(prevRows => [...prevRows, {
-      from: 0,
+      from: 1,
       discountValue: 0,
-      discountType: EDiscountUnit.MONEY
+      discountType: EDiscountUnit.MONEY,
+      type: getValues('type')
     }]);
     setValue('items', [
       ...getValues('items'),
@@ -72,13 +74,15 @@ export const ProductDiscountProduct = ({
             from: 0
           },
           product: {
-            from: 1
+            from: 1,
+            type: getValues('type')
           }
         },
         apply: {
           discountValue: 0,
           discountType: EDiscountUnit.MONEY,
-          maxQuantity: 1
+          maxQuantity: 1,
+          type: getValues('type')
         }
       }
     ]);
@@ -95,7 +99,8 @@ export const ProductDiscountProduct = ({
           from: 1
         },
         product: {
-          from: 1
+          from: 1,
+          type: getValues('type')
         }
       },
       product: {
@@ -103,7 +108,8 @@ export const ProductDiscountProduct = ({
       },
       apply: {
         discountValue: row.discountValue,
-        discountType: row.discountType
+        discountType: row.discountType,
+        type: getValues('type')
       }
     }));
     setValue('items', newRowFormat);
@@ -114,10 +120,12 @@ export const ProductDiscountProduct = ({
     newRows[index][key] = value;
     setRows(newRows);
 
+
     const newRowFormat = newRows.map(row => ({
       condition: {
         product: {
-          from: row.from
+          from: row.from,
+          type: getValues('type')
         },
         order: {
           from: 1
@@ -128,7 +136,8 @@ export const ProductDiscountProduct = ({
         discountValue: row.discountValue,
         discountType: row.discountType,
         productUnitId: row.productUnitId,
-        maxQuantity: row.maxQuantity ?? 1
+        maxQuantity: row.maxQuantity,
+        type: row.type
       }
     }));
 
@@ -146,60 +155,64 @@ export const ProductDiscountProduct = ({
 
         {
           getValues("items")?.map((row, index) => (
-            <div className="flex items-center gap-2">
+            <div key={index} className="flex items-baseline gap-2">
               <div className="flex flex-[3] flex-col px-4">
-                <div className='w-full flex items-center gap-x-2'>
-                  <CustomInput
-                    className="mt-0 h-11 w-14"
-                    value={row?.condition?.product?.from || 0}
-                    type='number'
-                    onChange={(value) => handleChangeRow(index, 'from', value)}
-                  />
-                  <Select
-                    mode="multiple"
-                    className="!rounded w-full"
-                    placeholder='Nhập tên hàng, sản phẩm, nhóm hàng...'
-                    optionFilterProp="children"
-                    showSearch
-                    onSearch={debounce((value) => {
-                      setFormFilter({
-                        ...formFilter,
-                        keyword: value
-                      })
-                    }, 300)}
-                    onChange={(value) => {
-                      handleChangeRow(index, 'productId', value)
-                    }}
-                    loading={isLoadingProduct}
-                    defaultValue={row?.apply?.productUnitId}
-                    suffixIcon={<Image src={DocumentIcon} />}
-                    value={getValues("times")?.byWeekDay}
-                    notFoundContent={isLoadingProduct ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
-                    size='large'
-                  >
+                <div className='w-full flex items-baseline gap-x-2'>
+                  <div className='w-24'>
+                    <CustomInput
+                      className="mt-0 h-10"
+                      value={row?.condition?.product?.from}
+                      type='number'
+                      onChange={(value) => handleChangeRow(index, 'from', value)}
+                    />
                     {
-                      products?.data?.items?.map((product) => (
-                        <Option key={product.id} value={product.productUnit?.id}>
-                          {product?.productUnit?.code} - {product?.product?.name} - {product?.productUnit?.unitName}
-                        </Option>
-                      ))
+                      errors?.items && <InputError className='' error={errors?.items[index]?.condition?.product?.from?.message} />
                     }
-                  </Select>
+                  </div>
+                  <div className='w-full'>
+                    <Select
+                      mode="multiple"
+                      className="!rounded w-full"
+                      placeholder='Nhập tên hàng, sản phẩm, nhóm hàng...'
+                      optionFilterProp="children"
+                      showSearch
+                      onSearch={debounce((value) => {
+                        setFormFilter({
+                          ...formFilter,
+                          keyword: value
+                        })
+                      }, 300)}
+                      onChange={(value) => {
+                        handleChangeRow(index, 'productId', value)
+                      }}
+                      loading={isLoadingProduct}
+                      defaultValue={row?.apply?.productUnitId}
+                      suffixIcon={<Image src={DocumentIcon} />}
+                      value={getValues("times")?.byWeekDay}
+                      notFoundContent={isLoadingProduct ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
+                      size='large'
+                    >
+                      {
+                        products?.data?.items?.map((product) => (
+                          <Option key={product.id} value={product.productUnit?.id}>
+                            {product?.productUnit?.code} - {product?.product?.name} - {product?.productUnit?.unitName}
+                          </Option>
+                        ))
+                      }
+                    </Select>
+                  </div>
                 </div>
-                {
-                  errors?.items && <InputError className='' error={errors?.items[index]?.condition?.product?.from?.message} />
-                }
               </div>
               <div className="flex flex-[2] flex-col px-4">
                 <div className='w-full flex items-center gap-x-2'>
                   <CustomInput
-                    className="mt-0 h-11 w-full"
+                    className="mt-0 h-10 w-full"
                     wrapClassName="w-full"
                     type='number'
                     value={row?.apply?.discountValue || 0}
                     onChange={(value) => handleChangeRow(index, 'discountValue', value)}
                   />
-                  <div className="flex h-11 w-fit items-center rounded border border-[#E8EAEB]">
+                  <div className="flex h-10 w-fit items-center rounded border border-[#E8EAEB]">
                     <div
                       className={cx(
                         'h-full w-[50px] text-center rounded-tl rounded-bl flex items-center justify-center cursor-pointer',
@@ -231,43 +244,53 @@ export const ProductDiscountProduct = ({
                 }
               </div>
               <div className="flex-[3] px-4 flex gap-2">
-                <CustomInput
-                  className='h-11 w-16'
-                  onChange={(value) => handleChangeRow(index, 'maxQuantity', value)}
-                  placeholder='Số lượng'
-                  value={row?.apply?.maxQuantity}
-                  type='number'
-                />
-                <Select
-                  mode="multiple"
-                  className="!rounded w-full"
-                  placeholder='Nhập tên hàng, sản phẩm, nhóm hàng...'
-                  optionFilterProp="children"
-                  showSearch
-                  onSearch={debounce((value) => {
-                    setFormFilter({
-                      ...formFilter,
-                      keyword: value
-                    })
-                  }, 300)}
-                  onChange={(value) => {
-                    handleChangeRow(index, 'productUnitId', value)
-                  }}
-                  loading={isLoadingProduct}
-                  defaultValue={row?.apply?.productUnitId}
-                  suffixIcon={<Image src={DocumentIcon} />}
-                  value={getValues("times")?.byWeekDay}
-                  notFoundContent={isLoadingProduct ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
-                  size='large'
-                >
+                <div className='w-24'>
+                  <CustomInput
+                    className='h-10'
+                    onChange={(value) => handleChangeRow(index, 'maxQuantity', value)}
+                    placeholder='Số lượng'
+                    value={row?.apply?.maxQuantity}
+                    type='number'
+                  />
                   {
-                    products?.data?.items?.map((product) => (
-                      <Option key={product.id} value={product.productUnit?.id}>
-                        {product?.productUnit?.code} - {product?.product?.name} - {product?.productUnit?.unitName}
-                      </Option>
-                    ))
+                    errors?.items && <InputError className='' error={errors?.items[index]?.apply?.maxQuantity?.message} />
                   }
-                </Select>
+                </div>
+                <div className='w-full'>
+                  <Select
+                    mode="multiple"
+                    className="!rounded w-full"
+                    placeholder='Nhập tên hàng, sản phẩm, nhóm hàng...'
+                    optionFilterProp="children"
+                    showSearch
+                    onSearch={debounce((value) => {
+                      setFormFilter({
+                        ...formFilter,
+                        keyword: value
+                      })
+                    }, 300)}
+                    onChange={(value) => {
+                      handleChangeRow(index, 'productUnitId', value)
+                    }}
+                    loading={isLoadingProduct}
+                    defaultValue={row?.apply?.productUnitId}
+                    suffixIcon={<Image src={DocumentIcon} />}
+                    value={getValues("times")?.byWeekDay}
+                    notFoundContent={isLoadingProduct ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
+                    size='large'
+                  >
+                    {
+                      products?.data?.items?.map((product) => (
+                        <Option key={product.id} value={product.productUnit?.id}>
+                          {product?.productUnit?.code} - {product?.product?.name} - {product?.productUnit?.unitName}
+                        </Option>
+                      ))
+                    }
+                  </Select>
+                  {
+                    errors?.items && <InputError className='' error={errors?.items[index]?.apply?.productUnitId?.message} />
+                  }
+                </div>
               </div>
               <div onClick={() => handleDeleteRow(index)} className="flex flex-1 items-center justify-center px-4 cursor-pointer">
                 <Image src={DeleteRedIcon} alt="" />

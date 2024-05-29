@@ -55,14 +55,16 @@ export const ProductGiftProduct = ({
     {
       from: 0,
       discountValue: 0,
-      discountType: EDiscountUnit.MONEY
+      discountType: EDiscountUnit.MONEY,
+      type: getValues('type')
     }
   ]); // Initialize with one row
   const handleAddRow = () => {
     setRows(prevRows => [...prevRows, {
       from: 0,
       discountValue: 0,
-      discountType: EDiscountUnit.MONEY
+      discountType: EDiscountUnit.MONEY,
+      type: getValues('type')
     }]);
     setValue('items', [
       ...getValues('items'),
@@ -72,7 +74,8 @@ export const ProductGiftProduct = ({
             from: 0
           },
           product: {
-            from: 1
+            from: 1,
+            type: getValues('type')
           }
         },
         apply: {
@@ -80,6 +83,7 @@ export const ProductGiftProduct = ({
           productUnitId: [],
           maxQuantity: 1,
           discountValue: 1,
+          type: getValues('type')
         }
       }
     ]);
@@ -96,7 +100,8 @@ export const ProductGiftProduct = ({
           from: 1
         },
         product: {
-          from: 1
+          from: 1,
+          type: getValues('type')
         }
       },
       product: {
@@ -105,6 +110,7 @@ export const ProductGiftProduct = ({
       apply: {
         discountValue: row.discountValue,
         discountType: row.discountType,
+        type: getValues('type')
       }
     }));
     setValue('items', newRowFormat);
@@ -118,7 +124,8 @@ export const ProductGiftProduct = ({
     const newRowFormat = newRows.map(row => ({
       condition: {
         product: {
-          from: row.from
+          from: row.from,
+          type: getValues('type')
         },
         order: {
           from: 1
@@ -130,6 +137,7 @@ export const ProductGiftProduct = ({
         productUnitId: row.productUnitId,
         maxQuantity: row.maxQuantity ?? 1,
         discountValue: 1,
+        type: getValues('type')
       }
     }));
 
@@ -146,15 +154,69 @@ export const ProductGiftProduct = ({
 
         {
           getValues("items")?.map((row, index) => (
-            <div className="flex items-center gap-2">
+            <div className="flex items-baseline gap-2">
               <div className="flex flex-[3] flex-col px-4">
-                <div className='w-full flex items-center gap-x-2'>
+                <div className='w-full flex items-baseline gap-x-2'>
+                  <div className='w-24'>
+                    <CustomInput
+                      className="mt-0 h-10"
+                      value={row?.condition?.product?.from || 0}
+                      type='number'
+                      onChange={(value) => handleChangeRow(index, 'from', value)}
+                    />
+                    {
+                      errors?.items && <InputError className='' error={errors?.items[index]?.condition?.product?.from?.message} />
+                    }
+                  </div>
+                  <div className='w-full'>
+                    <Select
+                      mode="multiple"
+                      className="!rounded w-full"
+                      placeholder='Nhập tên hàng, sản phẩm, nhóm hàng...'
+                      optionFilterProp="children"
+                      showSearch
+                      onSearch={debounce((value) => {
+                        setFormFilter({
+                          ...formFilter,
+                          keyword: value
+                        })
+                      }, 300)}
+                      onChange={(value) => {
+                        handleChangeRow(index, 'productId', value)
+                      }}
+                      loading={isLoadingProduct}
+                      defaultValue={row?.apply?.productUnitId}
+                      suffixIcon={<Image src={DocumentIcon} />}
+                      value={getValues("times")?.byWeekDay}
+                      notFoundContent={isLoadingProduct ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
+                      size='large'
+                    >
+                      {
+                        products?.data?.items?.map((product) => (
+                          <Option key={product.id} value={product.productUnit?.id}>
+                            {product?.productUnit?.code} - {product?.product?.name} - {product?.productUnit?.unitName}
+                          </Option>
+                        ))
+                      }
+                    </Select>
+                  </div>
+                </div>
+
+              </div>
+              <div className="flex-[3] px-4 flex items-baseline gap-2">
+                <div className='w-24'>
                   <CustomInput
-                    className="mt-0 h-11 w-14"
-                    value={row?.condition?.product?.from || 0}
+                    className='h-10'
+                    onChange={(value) => handleChangeRow(index, 'maxQuantity', value)}
+                    placeholder='Số lượng'
+                    value={row?.apply?.maxQuantity}
                     type='number'
-                    onChange={(value) => handleChangeRow(index, 'from', value)}
                   />
+                  {
+                    errors?.items && <InputError className='' error={errors?.items[index]?.apply?.maxQuantity?.message} />
+                  }
+                </div>
+                <div className='w-full'>
                   <Select
                     mode="multiple"
                     className="!rounded w-full"
@@ -168,7 +230,7 @@ export const ProductGiftProduct = ({
                       })
                     }, 300)}
                     onChange={(value) => {
-                      handleChangeRow(index, 'productId', value)
+                      handleChangeRow(index, 'productUnitId', value)
                     }}
                     loading={isLoadingProduct}
                     defaultValue={row?.apply?.productUnitId}
@@ -185,49 +247,10 @@ export const ProductGiftProduct = ({
                       ))
                     }
                   </Select>
-                </div>
-                {
-                  errors?.items && <InputError className='' error={errors?.items[index]?.condition?.product?.from?.message} />
-                }
-              </div>
-              <div className="flex-[3] px-4 flex gap-2">
-                <CustomInput
-                  className='h-11 w-16'
-                  onChange={(value) => handleChangeRow(index, 'maxQuantity', value)}
-                  placeholder='Số lượng'
-                  value={row?.apply?.maxQuantity}
-                  type='number'
-                />
-                <Select
-                  mode="multiple"
-                  className="!rounded w-full"
-                  placeholder='Nhập tên hàng, sản phẩm, nhóm hàng...'
-                  optionFilterProp="children"
-                  showSearch
-                  onSearch={debounce((value) => {
-                    setFormFilter({
-                      ...formFilter,
-                      keyword: value
-                    })
-                  }, 300)}
-                  onChange={(value) => {
-                    handleChangeRow(index, 'productUnitId', value)
-                  }}
-                  loading={isLoadingProduct}
-                  defaultValue={row?.apply?.productUnitId}
-                  suffixIcon={<Image src={DocumentIcon} />}
-                  value={getValues("times")?.byWeekDay}
-                  notFoundContent={isLoadingProduct ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
-                  size='large'
-                >
                   {
-                    products?.data?.items?.map((product) => (
-                      <Option key={product.id} value={product.productUnit?.id}>
-                        {product?.productUnit?.code} - {product?.product?.name} - {product?.productUnit?.unitName}
-                      </Option>
-                    ))
+                    errors?.items && <InputError className='' error={errors?.items[index]?.apply?.productUnitId?.message} />
                   }
-                </Select>
+                </div>
               </div>
               <div onClick={() => handleDeleteRow(index)} className="flex flex-1 items-center justify-center px-4 cursor-pointer">
                 <Image src={DeleteRedIcon} alt="" />

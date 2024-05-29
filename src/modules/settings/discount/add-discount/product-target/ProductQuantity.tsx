@@ -5,21 +5,23 @@ import DeleteRedIcon from '@/assets/deleteRed.svg';
 import PlusCircleIcon from '@/assets/plus-circle.svg';
 import { CustomInput } from '@/components/CustomInput';
 
-import { EDiscountUnit } from '../Info';
-import { useState } from 'react';
-import SearchIcon from '@/assets/searchIcon.svg';
+import { getSaleProducts } from '@/api/product.service';
 import DocumentIcon from '@/assets/documentIcon.svg';
 import InputError from '@/components/InputError';
-import { Select, Spin } from 'antd';
 import { ISaleProduct } from '@/modules/sales/interface';
-import { useRecoilValue } from 'recoil';
 import { branchState } from '@/recoil/state';
-import { getProduct, getSaleProducts } from '@/api/product.service';
 import { useQuery } from '@tanstack/react-query';
-import { debounce, set } from 'lodash';
+import { Select, Spin } from 'antd';
+import { debounce } from 'lodash';
+import { useState } from 'react';
+import { useRecoilValue } from 'recoil';
+import { EDiscountUnit } from '../Info';
+import { CustomSelect } from '@/components/CustomSelect';
+import { CustomButton } from '@/components/CustomButton';
+import PlusIcon from '@/assets/plusWhiteIcon.svg';
 const { Option } = Select
 
-export const ProductGiftPoint = ({
+export const ProductQuantity = ({
   setValue,
   getValues,
   errors,
@@ -143,34 +145,19 @@ export const ProductGiftPoint = ({
   return (
     <>
       <div className="my-5 flex flex-col gap-2">
-        <div className="flex bg-[#FBECEE]">
-          <div className="flex-[3] p-4 font-semibold">Hàng/Nhóm hàng mua</div>
-          <div className="flex-[3] p-4 font-semibold">Điểm cộng</div>
-          <div className="flex-1 p-4"></div>
-        </div>
-
         {
           getValues("items")?.map((row, index) => (
-            <div className="flex items-baseline gap-2">
-              <div className="flex flex-[3] flex-col px-4">
+            <div className="flex items-baseline gap-2 border-[1px] border-[#d9d9d9] rounded shadow-lg p-8">
+              <div className="flex flex-[1] flex-col px-4 font-semibold">
+                Khi mua
+              </div>
+              <div className="flex flex-[5] flex-col px-4 gap-5">
                 <div className='w-full flex items-baseline gap-x-2'>
-                  <div className='w-24'>
-                    <CustomInput
-                      className="mt-0 h-10"
-                      value={row?.condition?.product?.from}
-                      placeholder='Số lượng mua'
-                      type='number'
-                      onChange={(value) => handleChangeRow(index, 'from', value)}
-                    />
-                    {
-                      errors?.items && <InputError className='' error={errors?.items[index]?.condition?.product?.from?.message} />
-                    }
-                  </div>
                   <div className='w-full'>
                     <Select
                       mode="multiple"
                       className="!rounded w-full"
-                      placeholder='Nhập tên hàng, sản phẩm, nhóm hàng...'
+                      placeholder='Chọn hàng mua'
                       optionFilterProp="children"
                       showSearch
                       onSearch={debounce((value) => {
@@ -199,21 +186,31 @@ export const ProductGiftPoint = ({
                     </Select>
                   </div>
                 </div>
-              </div>
-              <div className="flex flex-[3] flex-col px-4">
-                <div className='w-full flex items-center gap-x-2'>
-                  <div className='w-full'>
-                    <CustomInput
-                      className="mt-0 h-10 w-full"
-                      wrapClassName="w-full"
-                      type='number'
-                      value={row?.apply?.pointValue || 0}
-                      onChange={(value) => handleChangeRow(index, 'pointValue', value)}
-                    />
-                    {
-                      errors?.items && <InputError className='' error={errors?.items[index]?.apply?.pointValue?.message} />
-                    }
-                  </div>
+                <div className='flex items-center gap-3'>
+                  <span className='font-semibold'>Số lượng từ</span>
+                  <CustomInput
+                    type="number"
+                    className="w-24 h-10"
+                    value={row?.condition?.order?.from}
+                    onChange={(e) => handleChangeRow(index, 'from', e.target.value)}
+                  />
+                  <Select
+                    className="w-32"
+                    value={row?.apply?.pointType}
+                    onChange={(value) => handleChangeRow(index, 'pointType', value)}
+                    options={[
+                      { label: 'Giá bán', value: "TYPE_PRICE" },
+                      { label: 'Giảm giá', value: "TYPE_DISCOUNT" },
+                    ]}
+                    size='large'
+                  />
+
+                  <CustomInput
+                    type="number"
+                    className="w-24 h-10"
+                    value={row?.apply?.pointValue}
+                    onChange={(e) => handleChangeRow(index, 'pointValue', e.target.value)}
+                  />
                   <div className="flex h-10 w-fit items-center rounded border border-[#E8EAEB]">
                     <div
                       className={cx(
@@ -241,10 +238,21 @@ export const ProductGiftPoint = ({
                     </div>
                   </div>
                 </div>
-                {
-                  errors?.items && <InputError className='' error={errors?.items[index]?.apply?.pointType?.message} />
-                }
+                <div className='w-fit'>
+                  <CustomButton
+                    prefixIcon={<Image src={PlusIcon} />}
+                    type='danger'
+                    // onClick={() => router.push('/settings/discount/add-discount')}
+                    onClick={() => {
+                      // write logic to add a child row
+
+                    }}
+                  >
+                    Thêm dòng
+                  </CustomButton>
+                </div>
               </div>
+
               <div onClick={() => handleDeleteRow(index)} className="flex flex-1 items-center justify-center px-4 cursor-pointer">
                 <Image src={DeleteRedIcon} alt="" />
               </div>

@@ -99,12 +99,12 @@ export const BillGiftPoint = ({
 
         {
           getValues("items")?.map((row, index) => (
-            <div className="flex items-center gap-3">
+            <div className="flex items-baseline gap-3">
               <div className="flex flex-[2] flex-col px-4">
                 <div className='w-full flex items-center gap-x-2'>
                   Từ
                   <CustomInput
-                    className="mt-0 h-11"
+                    className="mt-0 h-10"
                     wrapClassName="w-full"
                     value={row?.condition?.order?.from || 0}
                     type='number'
@@ -118,7 +118,7 @@ export const BillGiftPoint = ({
               <div className="flex flex-[2] flex-col px-4">
                 <div className='w-full flex items-center gap-x-2'>
                   <CustomInput
-                    className="mt-0 h-11 w-full"
+                    className="mt-0 h-10 w-full"
                     wrapClassName="w-full"
                     type='number'
                     value={row?.apply?.pointValue || 0}
@@ -126,11 +126,11 @@ export const BillGiftPoint = ({
                   />
                 </div>
                 {
-                  errors?.items && <InputError className='ml-10' error={errors?.items[index]?.apply?.discountValue?.message} />
+                  errors?.items && <InputError className='' error={errors?.items[index]?.apply?.discountValue?.message} />
                 }
               </div>
               <div className="flex-[2] px-4">
-                <div className="flex h-11 w-fit items-center rounded border border-[#E8EAEB]">
+                <div className="flex h-10 w-fit items-center rounded border border-[#E8EAEB]">
                   <div
                     className={cx(
                       'h-full w-[50px] text-center rounded-tl rounded-bl flex items-center justify-center cursor-pointer',

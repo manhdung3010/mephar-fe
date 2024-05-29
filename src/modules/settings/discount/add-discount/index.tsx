@@ -48,7 +48,6 @@ const AddDiscount = () => {
             discountValue: 0,
             discountType: "AMOUNT",
             pointType: "AMOUNT",
-            productUnitId: [],
             maxQuantity: 1,
             isGift: false,
             pointValue: 0,

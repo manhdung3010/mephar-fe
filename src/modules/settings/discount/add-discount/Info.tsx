@@ -16,6 +16,7 @@ import { BillGiftProduct } from './bill-target/BillGiftProduct';
 import { ProductDiscountProduct } from './product-target/ProductDiscountProduct';
 import { ProductGiftProduct } from './product-target/ProductGiftProduct';
 import { ProductGiftPoint } from './product-target/ProductGiftPoint';
+import { ProductQuantity } from './product-target/ProductQuantity';
 
 export enum EDiscountType {
   ORDER = 'ORDER',
@@ -61,7 +62,6 @@ export enum EDiscountUnit {
 }
 
 const Info = ({ setValue, getValues, errors }: any) => {
-  const [discountType, setDiscountType] = useState(EDiscountType.ORDER);
   return (
     <div className="mt-5">
       <h2 className="mb-4 text-xl font-medium text-[#999]">THÔNG TIN</h2>
@@ -154,6 +154,28 @@ const Info = ({ setValue, getValues, errors }: any) => {
           <CustomSelect
             onChange={(value) => {
               setValue("type", value, { shouldValidate: true })
+              const newItems = [
+                {
+                  condition: {
+                    order: {
+                      from: 0,
+                    },
+                    product: {
+                      type: value
+                    }
+                  },
+                  apply: {
+                    discountValue: 0,
+                    discountType: "AMOUNT",
+                    pointType: "AMOUNT",
+                    maxQuantity: 1,
+                    isGift: false,
+                    pointValue: 0,
+                    type: value
+                  },
+                }
+              ]
+              setValue("items", newItems, { shouldValidate: true })
             }}
             options={
               getValues('target') === EDiscountType.ORDER
@@ -240,28 +262,15 @@ const Info = ({ setValue, getValues, errors }: any) => {
             errors={errors}
           />
         )}
-
-      {/* {getValues('target') === EDiscountType.PRODUCT &&
-        getValues('type') === EDiscountGoodsMethod.GIFT && (
-          <GoodsDiscountGiveGoods
-            discountUnit={discountUnit}
-            setDiscountUnit={setDiscountUnit}
-          />
-        )}
-      {getValues('target') === EDiscountType.PRODUCT &&
-        getValues('type') === EDiscountGoodsMethod.LOYALTY && (
-          <GoodsDiscountGiveGoods
-            discountUnit={discountUnit}
-            setDiscountUnit={setDiscountUnit}
-          />
-        )}
       {getValues('target') === EDiscountType.PRODUCT &&
         getValues('type') === EDiscountGoodsMethod.PRICE_BY_BUY_NUMBER && (
-          <GoodsDiscountGiveGoods
-            discountUnit={discountUnit}
-            setDiscountUnit={setDiscountUnit}
+          <ProductQuantity
+            setValue={setValue}
+            getValues={getValues}
+            errors={errors}
           />
-        )} */}
+        )}
+
     </div>
   );
 };

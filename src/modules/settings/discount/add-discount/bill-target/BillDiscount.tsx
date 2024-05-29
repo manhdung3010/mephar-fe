@@ -5,22 +5,19 @@ import DeleteRedIcon from '@/assets/deleteRed.svg';
 import PlusCircleIcon from '@/assets/plus-circle.svg';
 import { CustomInput } from '@/components/CustomInput';
 
-import { EDiscountUnit } from '../Info';
-import { useState } from 'react';
 import InputError from '@/components/InputError';
+import { useState } from 'react';
+import { EDiscountUnit } from '../Info';
 
 export const BillDiscount = ({
   setValue,
   getValues,
   errors,
-  isProductPrice = false
 }: {
   setValue: any;
   getValues: any;
   errors: any;
-  isProductPrice?: boolean
 }) => {
-
   const [rows, setRows] = useState([
     {
       from: 0,
@@ -100,7 +97,7 @@ export const BillDiscount = ({
 
         {
           getValues("items")?.map((row, index) => (
-            <div className="flex items-center gap-3">
+            <div className="flex gap-3">
               <div className="flex flex-[2] flex-col px-4">
                 <div className='w-full flex items-center gap-x-2'>
                   Từ
