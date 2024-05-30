@@ -158,7 +158,7 @@ const Info = ({ setValue, getValues, errors }: any) => {
                 {
                   condition: {
                     order: {
-                      from: 0,
+                      from: 1,
                     },
                     product: {
                       type: value
@@ -173,6 +173,23 @@ const Info = ({ setValue, getValues, errors }: any) => {
                     pointValue: 0,
                     type: value
                   },
+
+                  ...(value === EDiscountGoodsMethod.PRICE_BY_BUY_NUMBER && {
+                    childItems: [
+                      {
+                        condition: {
+                          product: {
+                            from: 1
+                          },
+                          productUnitId: []
+                        },
+                        apply: {
+                          changeType: "TYPE_PRICE",
+                          fixedPrice: 0,
+                        }
+                      }
+                    ]
+                  })
                 }
               ]
               setValue("items", newItems, { shouldValidate: true })

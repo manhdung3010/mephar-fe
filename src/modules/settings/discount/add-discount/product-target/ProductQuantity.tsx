@@ -73,7 +73,7 @@ export const ProductQuantity = ({
       {
         condition: {
           order: {
-            from: 0
+            from: 1
           },
           product: {
             from: 1,
@@ -84,7 +84,21 @@ export const ProductQuantity = ({
           pointValue: 0,
           pointType: EDiscountUnit.MONEY,
           type: getValues("type")
-        }
+        },
+        childItems: [
+          {
+            condition: {
+              product: {
+                from: 1
+              },
+              productUnitId: []
+            },
+            apply: {
+              changeType: "TYPE_PRICE",
+              fixedPrice: 0,
+            }
+          }
+        ]
       }
     ]);
   };
@@ -94,7 +108,7 @@ export const ProductQuantity = ({
     setRows(prevRows => prevRows.filter((_, index) => index !== indexToDelete));
 
     // Update value items
-    const newRowFormat = rows.filter((_, index) => index !== indexToDelete).map(row => ({
+    const newRowFormat = rows.filter((_, index) => index !== indexToDelete).map((row: any) => ({
       condition: {
         order: {
           from: 1
@@ -111,7 +125,8 @@ export const ProductQuantity = ({
         pointValue: row.pointValue,
         pointType: row.pointType,
         type: getValues("type")
-      }
+      },
+      childItems: row.childItems
     }));
     setValue('items', newRowFormat);
   };
@@ -142,6 +157,7 @@ export const ProductQuantity = ({
 
     setValue('items', newRowFormat);
   }
+  console.log("getValues('items')", getValues('items'))
   return (
     <>
       <div className="my-5 flex flex-col gap-2">
@@ -167,7 +183,11 @@ export const ProductQuantity = ({
                         })
                       }, 300)}
                       onChange={(value) => {
-                        handleChangeRow(index, 'productId', value)
+                        // change row of items
+                        const newRows: any = [...getValues('items')];
+                        newRows[index].condition.productUnitId = value;
+                        setRows(newRows);
+                        setValue('items', newRows);
                       }}
                       loading={isLoadingProduct}
                       defaultValue={row?.apply?.productUnitId}
@@ -186,70 +206,150 @@ export const ProductQuantity = ({
                     </Select>
                   </div>
                 </div>
-                <div className='flex items-center gap-3'>
-                  <span className='font-semibold'>Số lượng từ</span>
-                  <CustomInput
-                    type="number"
-                    className="w-24 h-10"
-                    value={row?.condition?.order?.from}
-                    onChange={(e) => handleChangeRow(index, 'from', e.target.value)}
-                  />
-                  <Select
-                    className="w-32"
-                    value={row?.apply?.pointType}
-                    onChange={(value) => handleChangeRow(index, 'pointType', value)}
-                    options={[
-                      { label: 'Giá bán', value: "TYPE_PRICE" },
-                      { label: 'Giảm giá', value: "TYPE_DISCOUNT" },
-                    ]}
-                    size='large'
-                  />
+                {
+                  row?.childItems?.map((childItem, childIndex) => (
+                    <div className='flex items-center gap-3' key={childIndex}>
+                      <span className='font-semibold'>Số lượng từ</span>
+                      <CustomInput
+                        type="number"
+                        className="w-24 h-10"
+                        value={childItem?.condition?.product?.from}
+                        onChange={(value) => {
+                          // change row of childItems
+                          const newRows: any = [...getValues('items')];
+                          newRows[index].childItems[childIndex].condition.product.from = value;
+                          setRows(newRows);
+                          setValue('items', newRows);
+                        }}
+                      />
+                      <Select
+                        className="w-32"
+                        value={childItem?.apply?.changeType}
+                        defaultValue={childItem?.apply?.changeType}
+                        onChange={(value) => {
+                          // change row of childItems
+                          const newRows: any = [...getValues('items')];
+                          newRows[index].childItems[childIndex].apply.changeType = value;
+                          setRows(newRows);
+                          setValue('items', newRows);
 
-                  <CustomInput
-                    type="number"
-                    className="w-24 h-10"
-                    value={row?.apply?.pointValue}
-                    onChange={(e) => handleChangeRow(index, 'pointValue', e.target.value)}
-                  />
-                  <div className="flex h-10 w-fit items-center rounded border border-[#E8EAEB]">
-                    <div
-                      className={cx(
-                        'h-full w-[50px] text-center rounded-tl rounded-bl flex items-center justify-center cursor-pointer',
-                        {
-                          'bg-[#3E7BFA] text-white':
-                            row?.apply?.pointType === EDiscountUnit.MONEY,
+                        }}
+                        options={[
+                          { label: 'Giá bán', value: "TYPE_PRICE" },
+                          { label: 'Giảm giá', value: "TYPE_DISCOUNT" },
+                        ]}
+                        size='large'
+                      />
+
+                      <CustomInput
+                        type="number"
+                        className="w-24 h-10"
+                        value={childItem?.apply?.fixedPrice}
+                        onChange={(value) => {
+                          // change row of childItems
+                          const newRows: any = [...getValues('items')];
+                          newRows[index].childItems[childIndex].apply.fixedPrice = value;
+                          setRows(newRows);
+                          setValue('items', newRows);
+                        }}
+                      />
+                      {
+                        childItem?.apply?.changeType === "TYPE_DISCOUNT" && (
+                          <div className="flex h-10 w-fit items-center rounded border border-[#E8EAEB]">
+                            <div
+                              className={cx(
+                                'h-full w-[50px] text-center rounded-tl rounded-bl flex items-center justify-center cursor-pointer',
+                                {
+                                  'bg-[#3E7BFA] text-white':
+                                    childItem?.apply?.changeType === "TYPE_PRICE",
+                                }
+                              )}
+                              onClick={() => {
+                                // change row of childItems
+                                const newRows: any = [...getValues('items')];
+                                newRows[index].childItems[childIndex].apply.changeType = "TYPE_PRICE";
+                                setRows(newRows);
+                                setValue('items', newRows);
+                              }}
+                            >
+                              Điểm
+                            </div>
+                            <div
+                              className={cx(
+                                'h-full w-[50px] text-center rounded-tr rounded-br flex items-center justify-center cursor-pointer',
+                                {
+                                  'bg-[#3E7BFA] text-white':
+                                    childItem?.apply?.changeType === "TYPE_DISCOUNT",
+                                }
+                              )}
+                              onClick={() => {
+                                // change row of childItems
+                                const newRows: any = [...getValues('items')];
+                                newRows[index].childItems[childIndex].apply.changeType = "TYPE_PRICE";
+                                setRows(newRows);
+                                setValue('items', newRows);
+                              }}
+                            >
+                              %
+                            </div>
+                          </div>
+                        )
+                      }
+                      <div className='cursor-pointer ml-5' onClick={() => {
+                        // remove row from childItems
+                        const newRows: any = [...getValues('items')];
+                        // check if childItems have more than 1 item then remove
+                        if (newRows[index].childItems.length > 1) {
+                          newRows[index].childItems = newRows[index].childItems.filter((_, i) => i !== childIndex);
+                          setRows(newRows);
+                          setValue('items', newRows);
                         }
-                      )}
-                      onClick={() => handleChangeRow(index, 'pointType', EDiscountUnit.MONEY)}
-                    >
-                      Điểm
+
+                      }}>
+                        <Image src={DeleteRedIcon} alt="" />
+                      </div>
                     </div>
-                    <div
-                      className={cx(
-                        'h-full w-[50px] text-center rounded-tr rounded-br flex items-center justify-center cursor-pointer',
-                        {
-                          'bg-[#3E7BFA] text-white':
-                            row?.apply?.pointType === EDiscountUnit.PERCENT,
-                        }
-                      )}
-                      onClick={() => handleChangeRow(index, 'pointType', EDiscountUnit.PERCENT)}
-                    >
-                      %
-                    </div>
-                  </div>
-                </div>
+                  ))
+                }
                 <div className='w-fit'>
-                  <CustomButton
-                    prefixIcon={<Image src={PlusIcon} />}
-                    type='danger'
-                    // onClick={() => router.push('/settings/discount/add-discount')}
-                    onClick={() => {
-                      // write logic to add a child row
+                  <div onClick={() => {
+                    // add new row to childItems
+                    const newRows: any = [...getValues('items')];
+                    if (!newRows[index].childItems) {
+                      newRows[index].childItems = [
+                        {
+                          condition: {
+                            product: {
+                              from: 1,
+                              type: getValues("type")
+                            }
+                          },
+                          apply: {
+                            changeType: "TYPE_PRICE",
+                            fixedPrice: 0,
+                          }
+                        }
+                      ];
+                    }
+                    newRows[index].childItems.push({
+                      condition: {
+                        product: {
+                          from: 1,
+                          type: getValues("type")
+                        }
+                      },
+                      apply: {
+                        changeType: "TYPE_PRICE",
+                        fixedPrice: 0,
+                      }
+                    });
+                    setRows(newRows);
+                    setValue('items', newRows);
 
-                    }}
-                  >
-                    Thêm dòng
-                  </CustomButton>
+                  }} className="flex gap-2 text-[16px] font-semibold text-[#D64457] cursor-pointer">
+                    <Image src={PlusCircleIcon} alt="" />
+                    <div>Thêm dòng</div>
+                  </div>
                 </div>
               </div>
 
@@ -260,10 +360,14 @@ export const ProductQuantity = ({
           ))
         }
       </div>
-
-      <div onClick={handleAddRow} className="flex gap-3 text-[16px] font-semibold text-[#D64457] cursor-pointer w-40">
-        <Image src={PlusCircleIcon} alt="" />
-        <div>Thêm điều kiện</div>
+      <div className='w-fit'>
+        <CustomButton
+          prefixIcon={<Image src={PlusIcon} />}
+          type='danger'
+          onClick={handleAddRow}
+        >
+          Thêm điều kiện
+        </CustomButton>
       </div>
     </>
   );

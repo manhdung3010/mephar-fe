@@ -52,6 +52,20 @@ const AddDiscount = () => {
             isGift: false,
             pointValue: 0,
           },
+          childItems: [
+            {
+              condition: {
+                product: {
+                  from: 1
+                },
+                productUnitId: []
+              },
+              apply: {
+                changeType: "TYPE_PRICE",
+                fixedPrice: 0,
+              }
+            }
+          ]
         }
       ],
       scope: {
@@ -77,24 +91,52 @@ const AddDiscount = () => {
   const { mutate: mutateCreateDiscount, isLoading } =
     useMutation(
       () => {
-        const discountData: any = getValues();
-        const items = discountData.items.map((item: any) => {
-          return {
-            ...(item.condition.product ? { condition: { product: item.condition.product } } : { condition: { order: item.condition.order } }),
-            apply: {
-              ...(item.apply.isGift || item.apply.pointValue > 0 ? {} : { discountValue: item.apply.discountValue }),
-              pointValue: item.apply.pointValue,
-              pointType: item.apply.pointType,
-              discountType: item.apply.discountType,
-              productUnitId: item.apply.productUnitId,
-              maxQuantity: item.apply.maxQuantity,
-              isGift: item.apply.isGift
-            }
-          }
-        });
-        discountData.items = items;
+        if (getValues("type") === "PRICE_BY_BUY_NUMBER") {
+          // Combine all childItems of each item into 1 array
+          const items: any = getValues("items");
+          const childItems = items.map((item: any) => {
+            return item.childItems.map((childItem: any) => {
+              return {
+                condition: {
+                  product: {
+                    from: childItem.condition.product.from
+                  },
+                  productUnitId: item.condition.productUnitId
+                },
+                apply: {
+                  changeType: "TYPE_PRICE",
+                  fixedPrice: childItem.apply.fixedPrice,
+                }
+              }
+            })
 
-        return createDiscount(discountData);
+          }).flat();
+
+          return createDiscount({
+            ...getValues(),
+            items: childItems
+          });
+        }
+        else {
+          const discountData: any = getValues();
+          const items = discountData.items.map((item: any) => {
+            return {
+              ...(item.condition.product ? { condition: { product: item.condition.product } } : { condition: { order: item.condition.order } }),
+              apply: {
+                ...(item.apply.isGift || item.apply.pointValue > 0 ? {} : { discountValue: item.apply.discountValue }),
+                pointValue: item.apply.pointValue,
+                pointType: item.apply.pointType,
+                discountType: item.apply.discountType,
+                productUnitId: item.apply.productUnitId,
+                maxQuantity: item.apply.maxQuantity,
+                isGift: item.apply.isGift
+              }
+            }
+          });
+          discountData.items = items;
+
+          return createDiscount(discountData);
+        }
       },
       {
         onSuccess: async () => {
@@ -109,10 +151,9 @@ const AddDiscount = () => {
 
   const onSubmit = () => {
     mutateCreateDiscount()
+
     // console.log("values", getValues())
   }
-
-  console.log("errors", errors)
 
   return (
     <>

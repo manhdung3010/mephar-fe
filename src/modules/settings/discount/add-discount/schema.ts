@@ -45,14 +45,18 @@ export const schema = yup.object().shape({
         }),
       }),
       apply: yup.object({
-        discountValue: yup
-          .number()
-          .required("Đây là trường bắt buộc!")
-          .test(
-            "check-value-discount",
-            "Giá trị phải lớn hơn 0",
-            (value) => value > 0
-          ),
+        discountValue: yup.number().when("type", ([type], schema) => {
+          if (type === "PRICE_BY_BUY_NUMBER") {
+            return schema.notRequired();
+          }
+          return schema
+            .required("Đây là trường bắt buộc!")
+            .test(
+              "check-value-discount",
+              "Giá trị phải lớn hơn 0",
+              (value) => value > 0
+            );
+        }),
         discountType: yup.string(),
         productUnitId: yup.array().when("type", ([type], schema) => {
           if (type === "PRODUCT_PRICE" || type === "GIFT") {
@@ -88,6 +92,7 @@ export const schema = yup.object().shape({
         pointType: yup.string(),
         type: yup.string(),
       }),
+      childItems: yup.array(),
     })
   ),
 
