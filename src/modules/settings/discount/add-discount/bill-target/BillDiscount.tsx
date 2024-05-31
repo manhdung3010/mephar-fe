@@ -48,42 +48,68 @@ export const BillDiscount = ({
   };
 
   const handleDeleteRow = (indexToDelete) => {
-    if (rows.length === 1) return; // Prevent deleting the last row
-    setRows(prevRows => prevRows.filter((_, index) => index !== indexToDelete));
+    if (getValues("items").length === 1) return; // Prevent deleting the last row
+    // setRows(prevRows => prevRows.filter((_, index) => index !== indexToDelete));
 
-    // Update value items
-    const newRowFormat = rows.filter((_, index) => index !== indexToDelete).map(row => ({
-      condition: {
-        order: {
-          from: row.from
-        }
-      },
-      apply: {
-        discountValue: row.discountValue,
-        discountType: row.discountType
-      }
-    }));
-    setValue('items', newRowFormat);
+    // update value items when delete
+    const newRowFormat = getValues("items").filter((_, index) => index !== indexToDelete);
+    setValue('items', newRowFormat, { shouldValidate: true });
+
+    // // Update value items
+    // const newRowFormat = rows.filter((_, index) => index !== indexToDelete).map(row => ({
+    //   condition: {
+    //     order: {
+    //       from: row.from
+    //     }
+    //   },
+    //   apply: {
+    //     discountValue: row.discountValue,
+    //     discountType: row.discountType
+    //   }
+    // }));
+    // setValue('items', newRowFormat);
   };
 
   const handleChangeRow = (index, key, value) => {
-    const newRows: any = [...rows];
-    newRows[index][key] = value;
-    setRows(newRows);
+    // const newRows: any = [...rows];
+    // newRows[index][key] = value;
+    // setRows(newRows);
 
-    const newRowFormat = newRows.map(row => ({
-      condition: {
-        order: {
-          from: row.from
+    // const newRowFormat = newRows.map(row => ({
+    //   condition: {
+    //     order: {
+    //       from: row.from
+    //     }
+    //   },
+    //   apply: {
+    //     discountValue: row.discountValue,
+    //     discountType: row.discountType
+    //   }
+    // }));
+
+    // update value items when change
+    const newRowFormat = getValues("items").map((row, rowIndex) => {
+      if (rowIndex === index) {
+        return {
+          ...row,
+          condition: {
+            ...row.condition,
+            order: {
+              ...row.condition.order,
+              [key]: value
+            }
+          },
+          apply: {
+            ...row.apply,
+            [key]: value
+          }
         }
-      },
-      apply: {
-        discountValue: row.discountValue,
-        discountType: row.discountType
       }
-    }));
+      return row;
+    });
+    setValue('items', newRowFormat, { shouldValidate: true });
 
-    setValue('items', newRowFormat);
+    // setValue('items', newRowFormat);
   }
   return (
     <>

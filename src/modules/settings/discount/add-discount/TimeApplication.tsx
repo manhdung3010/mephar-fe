@@ -317,14 +317,14 @@ const hourOptions = [
 const TimeApplication = ({ setValue, getValues, errors }: any) => {
 
   const [times, setTimes] = useState({
-    dateFrom: '',
-    dateTo: '',
-    byDay: [],
-    byMonth: [],
-    byHour: [],
-    byWeekDay: [],
-    isWarning: false,
-    isBirthday: false,
+    dateFrom: getValues("time")?.dateFrom || '',
+    dateTo: getValues("time")?.dateTo || '',
+    byDay: getValues("time")?.byDay || [],
+    byMonth: getValues("time")?.byMonth || [],
+    byHour: getValues("time")?.byHour || [],
+    byWeekDay: getValues("time")?.byWeekDay || [],
+    isWarning: getValues("time")?.isWarning || false,
+    isBirthday: getValues("time")?.isBirthday || false,
   })
 
   const handleChange = (key, value) => {

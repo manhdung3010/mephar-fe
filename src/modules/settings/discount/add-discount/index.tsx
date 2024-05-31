@@ -7,11 +7,11 @@ import TimeApplication from './TimeApplication';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { productSchema, schema } from './schema';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createDiscount } from '@/api/discount.service';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { createDiscount, getDiscountDetail, updateDiscount } from '@/api/discount.service';
 import { message } from 'antd';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 
 const AddDiscount = () => {
@@ -19,6 +19,17 @@ const AddDiscount = () => {
   const currentDate = dayjs();
   const dateFromDefault = currentDate.format("YYYY-MM-DD HH:mm:ss");
   const dateToDefault = currentDate.add(6, 'month').format("YYYY-MM-DD HH:mm:ss");
+
+  const router = useRouter();
+  const { id } = router.query;
+  const queryClient = useQueryClient();
+
+  const { data: discountDetail } = useQuery(
+    ['DISCOUNT_DETAIL', id],
+    () => getDiscountDetail(Number(id)),
+    { enabled: !!id }
+  );
+  const dcDetail = discountDetail?.data?.data;
   const {
     getValues,
     setValue,
@@ -28,12 +39,15 @@ const AddDiscount = () => {
     resolver: yupResolver(schema),
     mode: "onChange",
     defaultValues: {
-      status: "active",
+      status: dcDetail?.status || "active",
+      code: dcDetail?.code || "",
+      name: dcDetail?.name || "",
+      note: dcDetail?.note || "",
       branchOp: 1,
       groupCustomerOp: 1,
-      target: "ORDER",
-      type: "ORDER_PRICE",
-      isMultiple: false,
+      target: dcDetail?.target?.toUpperCase() || "ORDER",
+      type: dcDetail?.type?.toUpperCase() || "ORDER_PRICE",
+      isMultiple: dcDetail?.isMultiple || false,
       items: [
         {
           condition: {
@@ -85,8 +99,77 @@ const AddDiscount = () => {
     },
   });
 
-  const router = useRouter();
-  const queryClient = useQueryClient();
+  console.log("errors", errors);
+
+  useEffect(() => {
+    if (dcDetail) {
+      setValue("code", dcDetail.code, { shouldValidate: true });
+      setValue("name", dcDetail.name);
+      setValue("note", dcDetail.note || "");
+      setValue("status", dcDetail.status);
+      setValue("target", dcDetail.target?.toUpperCase());
+      setValue("type", dcDetail.type?.toUpperCase());
+      setValue("isMultiple", dcDetail.isMultiple);
+      setValue("items", dcDetail.items);
+      if (dcDetail.type === "order_price") {
+        const formatItem = dcDetail.discountItem.map((item: any) => {
+          return {
+            condition: {
+              order: {
+                from: item.orderFrom,
+              },
+            },
+            apply: {
+              discountValue: item.discountValue,
+              discountType: item.discountType?.toUpperCase(),
+            }
+          }
+        });
+        setValue("items", formatItem);
+      }
+      else if (dcDetail.type === "product_price") {
+        const formatItem = dcDetail.discountItem.map((item: any) => {
+          return {
+            condition: {
+              order: {
+                from: item.orderFrom,
+              },
+            },
+            apply: {
+              discountValue: item.discountValue,
+              discountType: item.discountType?.toUpperCase(),
+              productUnitId: item.productDiscount?.map((product: any) => product.productUnitId),
+              maxQuantity: item.maxQuantity,
+            }
+          }
+        });
+        setValue("items", formatItem);
+      }
+      setValue("scope", {
+        customer: {
+          isAll: dcDetail.discountCustomer?.length > 0 ? false : true,
+          ids: dcDetail.discountCustomer?.length > 0 ? dcDetail.discountCustomer.map((customer: any) => customer.customerId) : []
+        },
+        branch: {
+          isAll: dcDetail.discountBranch?.length > 0 ? false : true,
+          ids: dcDetail.discountBranch?.length > 0 ? dcDetail.discountBranch.map((customer: any) => customer.branchId) : []
+        }
+      });
+      setValue("time", {
+        dateFrom: dcDetail.discountTime[0].dateFrom,
+        dateTo: dcDetail.discountTime[0].dateTo,
+        byDay: dcDetail.discountTime[0].byDay?.split("//").filter(element => element !== "").map(Number),
+        byMonth: dcDetail.discountTime[0].byMonth?.split("//").filter(element => element !== "").map(Number),
+        byHour: dcDetail.discountTime[0].byHour?.split("//").filter(element => element !== "").map(Number),
+        byWeekDay: dcDetail.discountTime[0].byWeekDay?.split("//").filter(element => element !== "").map(Number),
+        isWarning: dcDetail.discountTime[0].isWarning,
+        isBirthDay: dcDetail.discountTime[0].isBirthDay,
+      }, { shouldValidate: true });
+    }
+  }, [dcDetail]);
+
+  console.log("values", getValues())
+
 
   const { mutate: mutateCreateDiscount, isLoading } =
     useMutation(
@@ -112,7 +195,10 @@ const AddDiscount = () => {
 
           }).flat();
 
-          return createDiscount({
+          return id ? updateDiscount({
+            ...getValues(),
+            items: childItems
+          }, Number(id)) : createDiscount({
             ...getValues(),
             items: childItems
           });
@@ -135,7 +221,7 @@ const AddDiscount = () => {
           });
           discountData.items = items;
 
-          return createDiscount(discountData);
+          return id ? updateDiscount(discountData, Number(id)) : createDiscount(discountData);
         }
       },
       {
@@ -148,6 +234,8 @@ const AddDiscount = () => {
         },
       }
     );
+
+
 
   const onSubmit = () => {
     mutateCreateDiscount()

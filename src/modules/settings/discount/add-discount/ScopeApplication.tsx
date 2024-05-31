@@ -25,13 +25,13 @@ const ScopeApplication = ({ setValue, getValues }: any) => {
     let newScope = { ...getValues('scope') };
     if (key === 'branch') {
       newScope.branch = {
-        isAll: branch === 1,
+        isAll: value?.length === 0,
         ids: branch === 1 ? [] : value,
       };
     }
     else {
       newScope.customer = {
-        isAll: customer === 1,
+        isAll: value?.length === 0,
         ids: customer === 1 ? [] : value,
       };
     }
@@ -60,6 +60,7 @@ const ScopeApplication = ({ setValue, getValues }: any) => {
           className='flex flex-col'
           onChange={(value) => {
             setBranch(value)
+            handleChange('branch', [])
           }}
           value={branch}
           options={[{
@@ -73,7 +74,9 @@ const ScopeApplication = ({ setValue, getValues }: any) => {
         />
         <Select
           mode='multiple'
-          onChange={(value) => handleChange('branch', value)}
+          onChange={(value) => {
+            handleChange('branch', value)
+          }}
           defaultValue={getValues('scope')?.branch?.ids || []}
           disabled={branch === 1}
           className=" border-underline grow"
@@ -91,7 +94,10 @@ const ScopeApplication = ({ setValue, getValues }: any) => {
       <div className='flex items-end gap-5'>
         <CustomRadio
           className='flex flex-col w-52'
-          onChange={(value) => setCustomer(value)}
+          onChange={(value) => {
+            setCustomer(value)
+            handleChange('customer', [])
+          }}
           value={customer}
           options={[{
             value: 1,
