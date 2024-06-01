@@ -19,6 +19,9 @@ export function createDiscount(payload) {
 export function updateDiscount(payload, id: number) {
   return axiosClient.put(`discount/${id}`, payload);
 }
+export function deleteDiscount(id: number) {
+  return axiosClient.delete(`discount/${id}`);
+}
 export function getDiscountDetail(id: number) {
   return axiosClient.get(`discount/${id}`);
 }

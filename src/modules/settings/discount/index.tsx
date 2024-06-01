@@ -11,8 +11,8 @@ import { EDiscountStatus, EDiscountStatusLabel } from '@/enums';
 
 import RowDetail from './row-detail';
 import Search from './Search';
-import { useQuery } from '@tanstack/react-query';
-import { getDiscount } from '@/api/discount.service';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { deleteDiscount, getDiscount } from '@/api/discount.service';
 import CustomPagination from '@/components/CustomPagination';
 import { formatDateTime, hasPermission } from '@/helpers';
 import { debounce } from 'lodash';
@@ -22,6 +22,8 @@ import { RoleAction, RoleModel } from '../role/role.enum';
 import { useRecoilValue } from 'recoil';
 import { profileState } from '@/recoil/state';
 import { EDiscountBillMethod, EDiscountBillMethodLabel, EDiscountGoodsMethodLabel } from './add-discount/Info';
+import DeleteModal from './DeleteModal';
+import { message } from 'antd';
 
 interface IRecord {
   key: number;
@@ -39,6 +41,7 @@ export function Discount() {
   const router = useRouter();
   const profile = useRecoilValue(profileState);
   const [deletedId, setDeletedId] = useState<string>();
+  const queryClient = useQueryClient();
 
   const [expandedRowKeys, setExpandedRowKeys] = useState<
     Record<string, boolean>
@@ -155,6 +158,21 @@ export function Discount() {
     },
   ];
 
+  const { mutate: mutateDeleteDiscount, isLoading: isLoadingDeleteDiscount } =
+    useMutation(() => deleteDiscount(Number(deletedId)), {
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(['DISCOUNT_LIST']);
+        setDeletedId(undefined);
+      },
+      onError: (err: any) => {
+        message.error(err?.message);
+      },
+    });
+
+  const onSubmit = () => {
+    mutateDeleteDiscount();
+  };
+
   return (
     <div className="mb-2">
       <div className="my-3 flex items-center justify-end gap-4">
@@ -212,6 +230,14 @@ export function Discount() {
         setPage={(value) => setFormFilter({ ...formFilter, page: value })}
         setPerPage={(value) => setFormFilter({ ...formFilter, limit: value })}
         total={discount?.data?.data?.totalItem || 0}
+      />
+
+      <DeleteModal
+        isOpen={!!deletedId}
+        onCancel={() => setDeletedId(undefined)}
+        onSuccess={onSubmit}
+        content="chương trình khuyến mại"
+        isLoading={isLoadingDeleteDiscount}
       />
     </div>
   );

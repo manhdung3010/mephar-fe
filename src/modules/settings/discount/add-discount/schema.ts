@@ -13,6 +13,7 @@ export const schema = yup.object().shape({
   isMultiple: yup.boolean(),
   items: yup.array(
     yup.object({
+      id: yup.number(),
       condition: yup.object({
         order: yup.object({
           from: yup

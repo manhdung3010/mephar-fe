@@ -113,6 +113,7 @@ const AddDiscount = () => {
       if (dcDetail.type === "order_price") {
         const formatItem = dcDetail.discountItem.map((item: any) => {
           return {
+            id: item?.id,
             condition: {
               order: {
                 from: item.orderFrom,
@@ -129,6 +130,7 @@ const AddDiscount = () => {
       else if (dcDetail.target === "order" && dcDetail.type === "product_price") {
         const formatItem = dcDetail.discountItem.map((item: any) => {
           return {
+            id: item?.id,
             condition: {
               order: {
                 from: item.orderFrom,
@@ -147,6 +149,7 @@ const AddDiscount = () => {
       else if (dcDetail.target === "order" && dcDetail.type === "gift") {
         const formatItem = dcDetail.discountItem.map((item: any) => {
           return {
+            id: item?.id,
             condition: {
               order: {
                 from: item.orderFrom,
@@ -166,6 +169,7 @@ const AddDiscount = () => {
       else if (dcDetail.target === "order" && dcDetail.type === "loyalty") {
         const formatItem = dcDetail.discountItem.map((item: any) => {
           return {
+            id: item?.id,
             condition: {
               order: {
                 from: item.orderFrom,
@@ -183,6 +187,7 @@ const AddDiscount = () => {
       else if (dcDetail.target === "product" && dcDetail.type === "product_price") {
         const formatItem = dcDetail.discountItem.map((item: any) => {
           return {
+            id: item?.id,
             condition: {
               product: {
                 from: item.fromQuantity,
@@ -205,6 +210,7 @@ const AddDiscount = () => {
       else if (dcDetail.target === "product" && dcDetail.type === "gift") {
         const formatItem = dcDetail.discountItem.map((item: any) => {
           return {
+            id: item?.id,
             condition: {
               product: {
                 from: item.fromQuantity,
@@ -228,6 +234,7 @@ const AddDiscount = () => {
       else if (dcDetail.target === "product" && dcDetail.type === "loyalty") {
         const formatItem = dcDetail.discountItem.map((item: any) => {
           return {
+            id: item?.id,
             condition: {
               product: {
                 from: item.fromQuantity,
@@ -249,6 +256,7 @@ const AddDiscount = () => {
       else {
         const formatItem = dcDetail.discountItem.map((item: any) => {
           return {
+            id: item?.id,
             condition: {
               order: {
                 from: item.orderFrom,
