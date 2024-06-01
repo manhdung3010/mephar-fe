@@ -49,43 +49,71 @@ export const BillGiftPoint = ({
   };
 
   const handleDeleteRow = (indexToDelete) => {
-    if (rows.length === 1) return; // Prevent deleting the last row
-    setRows(prevRows => prevRows.filter((_, index) => index !== indexToDelete));
+    if (getValues("items").length === 1) return; // Prevent deleting the last row
+    // setRows(prevRows => prevRows.filter((_, index) => index !== indexToDelete));
 
-    // Update value items
-    const newRowFormat = rows.filter((_, index) => index !== indexToDelete).map(row => ({
-      condition: {
-        order: {
-          from: row.from
-        }
-      },
-      apply: {
-        discountValue: 1,
-        discountType: row.discountType
-      }
-    }));
-    setValue('items', newRowFormat);
+    // // Update value items
+    // const newRowFormat = rows.filter((_, index) => index !== indexToDelete).map(row => ({
+    //   condition: {
+    //     order: {
+    //       from: row.from
+    //     }
+    //   },
+    //   apply: {
+    //     discountValue: 1,
+    //     discountType: row.discountType
+    //   }
+    // }));
+    // setValue('items', newRowFormat);
+
+    // delete row index keep old data
+    const newRowFormat = getValues("items").filter((_, index) => index !== indexToDelete);
+    setValue('items', newRowFormat, { shouldValidate: true });
   };
 
   const handleChangeRow = (index, key, value) => {
-    const newRows: any = [...rows];
-    newRows[index][key] = value;
-    setRows(newRows);
+    // const newRows: any = [...rows];
+    // newRows[index][key] = value;
+    // setRows(newRows);
 
-    const newRowFormat = newRows.map(row => ({
-      condition: {
-        order: {
-          from: row.from
+    // const newRowFormat = newRows.map(row => ({
+    //   condition: {
+    //     order: {
+    //       from: row.from
+    //     }
+    //   },
+    //   apply: {
+    //     pointValue: row.pointValue,
+    //     discountValue: 1,
+    //     discountType: row.discountType
+    //   }
+    // }));
+
+    // setValue('items', newRowFormat);
+
+    const newRowFormat = getValues("items").map((row, rowIndex) => {
+      if (rowIndex === index) {
+        return {
+          ...row,
+          condition: {
+            order: {
+              ...row.condition.order,
+              [key]: value
+            },
+            product: {
+              from: 1,
+            }
+          },
+          apply: {
+            ...row.apply,
+            discountValue: 1,
+            [key]: value
+          }
         }
-      },
-      apply: {
-        pointValue: row.pointValue,
-        discountValue: 1,
-        discountType: row.discountType
       }
-    }));
-
-    setValue('items', newRowFormat);
+      return row;
+    });
+    setValue('items', newRowFormat, { shouldValidate: true });
   }
   return (
     <>
@@ -126,7 +154,7 @@ export const BillGiftPoint = ({
                   />
                 </div>
                 {
-                  errors?.items && <InputError className='' error={errors?.items[index]?.apply?.discountValue?.message} />
+                  errors?.items && <InputError className='' error={errors?.items[index]?.apply?.pointValue?.message} />
                 }
               </div>
               <div className="flex-[2] px-4">

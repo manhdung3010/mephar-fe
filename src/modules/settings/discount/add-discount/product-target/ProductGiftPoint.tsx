@@ -88,57 +88,62 @@ export const ProductGiftPoint = ({
   };
 
   const handleDeleteRow = (indexToDelete) => {
-    if (rows.length === 1) return; // Prevent deleting the last row
-    setRows(prevRows => prevRows.filter((_, index) => index !== indexToDelete));
-
-    // Update value items
-    const newRowFormat = rows.filter((_, index) => index !== indexToDelete).map(row => ({
-      condition: {
-        order: {
-          from: 1
-        },
-        product: {
-          from: 1,
-          type: getValues("type")
-        }
-      },
-      product: {
-        from: row.from
-      },
-      apply: {
-        pointValue: row.pointValue,
-        pointType: row.pointType,
-        type: getValues("type")
-      }
-    }));
-    setValue('items', newRowFormat);
+    if (getValues('items').length === 1) return; // Prevent deleting the last row
+    const newRowFormat = getValues('items').filter((_, index) => index !== indexToDelete);
+    setValue('items', newRowFormat, { shouldValidate: true });
   };
 
   const handleChangeRow = (index, key, value) => {
-    const newRows: any = [...rows];
-    newRows[index][key] = value;
-    setRows(newRows);
+    // const newRows: any = [...rows];
+    // newRows[index][key] = value;
+    // setRows(newRows);
 
-    const newRowFormat = newRows.map(row => ({
-      condition: {
-        product: {
-          from: row.from,
-          type: getValues("type")
-        },
-        order: {
-          from: 1
-        },
-        productUnitId: row.productId,
-      },
-      apply: {
-        discountValue: 1,
-        pointValue: row.pointValue,
-        pointType: row.pointType,
-        type: getValues("type")
+    // const newRowFormat = newRows.map(row => ({
+    //   condition: {
+    //     product: {
+    //       from: row.from,
+    //       type: getValues("type")
+    //     },
+    //     order: {
+    //       from: 1
+    //     },
+    //     productUnitId: row.productId,
+    //   },
+    //   apply: {
+    //     discountValue: 1,
+    //     pointValue: row.pointValue,
+    //     pointType: row.pointType,
+    //     type: getValues("type")
+    //   }
+    // }));
+
+    // setValue('items', newRowFormat);
+    const newRowFormat = getValues("items").map((row, rowIndex) => {
+      if (rowIndex === index) {
+        return {
+          ...row,
+          condition: {
+            order: {
+              from: 1
+            },
+            product: {
+              ...row.condition.product,
+              type: getValues('type'),
+              [key]: value
+            },
+            productUnitId: key === 'productId' ? value : row.condition.productUnitId
+          },
+          apply: {
+            ...row.apply,
+            discountValue: 1,
+            type: getValues('type'),
+            [key]: value
+          }
+        }
       }
-    }));
-
-    setValue('items', newRowFormat);
+      return row;
+    });
+    setValue('items', newRowFormat, { shouldValidate: true });
   }
   return (
     <>
@@ -183,9 +188,9 @@ export const ProductGiftPoint = ({
                         handleChangeRow(index, 'productId', value)
                       }}
                       loading={isLoadingProduct}
-                      defaultValue={row?.apply?.productUnitId}
+                      defaultValue={row?.condition?.productUnitId}
                       suffixIcon={<Image src={DocumentIcon} />}
-                      value={getValues("times")?.byWeekDay}
+                      value={row?.condition?.productUnitId}
                       notFoundContent={isLoadingProduct ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
                       size='large'
                     >

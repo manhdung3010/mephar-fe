@@ -40,7 +40,6 @@ const AddDiscount = () => {
     mode: "onChange",
     defaultValues: {
       status: dcDetail?.status || "active",
-      code: dcDetail?.code || "",
       name: dcDetail?.name || "",
       note: dcDetail?.note || "",
       branchOp: 1,
@@ -103,7 +102,7 @@ const AddDiscount = () => {
 
   useEffect(() => {
     if (dcDetail) {
-      setValue("code", dcDetail.code, { shouldValidate: true });
+      dcDetail.code ? setValue("code", dcDetail.code) : undefined;
       setValue("name", dcDetail.name);
       setValue("note", dcDetail.note || "");
       setValue("status", dcDetail.status);
@@ -127,7 +126,7 @@ const AddDiscount = () => {
         });
         setValue("items", formatItem);
       }
-      else if (dcDetail.type === "product_price") {
+      else if (dcDetail.target === "order" && dcDetail.type === "product_price") {
         const formatItem = dcDetail.discountItem.map((item: any) => {
           return {
             condition: {
@@ -144,6 +143,163 @@ const AddDiscount = () => {
           }
         });
         setValue("items", formatItem);
+      }
+      else if (dcDetail.target === "order" && dcDetail.type === "gift") {
+        const formatItem = dcDetail.discountItem.map((item: any) => {
+          return {
+            condition: {
+              order: {
+                from: item.orderFrom,
+              },
+            },
+            apply: {
+              discountValue: 1,
+              discountType: item.discountType?.toUpperCase(),
+              productUnitId: item.productDiscount?.map((product: any) => product.productUnitId),
+              maxQuantity: item.maxQuantity,
+              isGift: item.isGift,
+            }
+          }
+        });
+        setValue("items", formatItem);
+      }
+      else if (dcDetail.target === "order" && dcDetail.type === "loyalty") {
+        const formatItem = dcDetail.discountItem.map((item: any) => {
+          return {
+            condition: {
+              order: {
+                from: item.orderFrom,
+              },
+            },
+            apply: {
+              pointValue: item.pointValue,
+              discountType: item.discountType?.toUpperCase(),
+              discountValue: 1,
+            }
+          }
+        });
+        setValue("items", formatItem);
+      }
+      else if (dcDetail.target === "product" && dcDetail.type === "product_price") {
+        const formatItem = dcDetail.discountItem.map((item: any) => {
+          return {
+            condition: {
+              product: {
+                from: item.fromQuantity,
+              },
+              order: {
+                from: 1
+              },
+              productUnitId: item.productDiscount?.map((product: any) => product.productUnitId),
+            },
+            apply: {
+              discountValue: item.discountValue,
+              discountType: item.discountType?.toUpperCase(),
+              maxQuantity: item.maxQuantity,
+              productUnitId: item.productDiscount?.map((product: any) => product.productUnitId),
+            }
+          }
+        });
+        setValue("items", formatItem);
+      }
+      else if (dcDetail.target === "product" && dcDetail.type === "gift") {
+        const formatItem = dcDetail.discountItem.map((item: any) => {
+          return {
+            condition: {
+              product: {
+                from: item.fromQuantity,
+              },
+              order: {
+                from: 1
+              },
+              productUnitId: item.productDiscount?.map((product: any) => product.productUnitId),
+            },
+            apply: {
+              discountValue: 1,
+              discountType: item.discountType?.toUpperCase(),
+              maxQuantity: item.maxQuantity,
+              productUnitId: item.productDiscount?.map((product: any) => product.productUnitId),
+              isGift: item.isGift,
+            }
+          }
+        });
+        setValue("items", formatItem);
+      }
+      else if (dcDetail.target === "product" && dcDetail.type === "loyalty") {
+        const formatItem = dcDetail.discountItem.map((item: any) => {
+          return {
+            condition: {
+              product: {
+                from: item.fromQuantity,
+              },
+              order: {
+                from: 1
+              },
+              productUnitId: item.productDiscount?.map((product: any) => product.productUnitId),
+            },
+            apply: {
+              pointValue: item.pointValue,
+              pointType: item.pointType?.toUpperCase(),
+              discountValue: 1,
+            }
+          }
+        });
+        setValue("items", formatItem);
+      }
+      else {
+        const formatItem = dcDetail.discountItem.map((item: any) => {
+          return {
+            condition: {
+              order: {
+                from: item.orderFrom,
+              },
+              product: {
+                from: item.fromQuantity,
+              },
+              productUnitId: item.productDiscount?.map((product: any) => product.productUnitId),
+            },
+            apply: {
+              discountValue: item.discountValue,
+              discountType: item.discountType?.toUpperCase(),
+              maxQuantity: item.maxQuantity,
+              productUnitId: item.productDiscount?.map((product: any) => product.productUnitId),
+            }
+          }
+        });
+        // Combine items with the same productUnitId into 1 item, that item is push in key childItems
+        const items = formatItem.reduce((acc: any, item: any) => {
+          const existingItem = acc.find((i: any) => i.condition.productUnitId[0] === item.condition.productUnitId[0]);
+          if (existingItem) {
+            existingItem.childItems.push(item);
+          } else {
+            acc.push({
+              condition: {
+                productUnitId: item.condition.productUnitId
+              },
+              apply: {
+                productUnitId: item.condition.productUnitId
+              },
+              childItems: [item]
+            });
+          }
+          return acc;
+        }, []);
+
+        // const items = formatItem.reduce((acc: any, item: any) => {
+        //   const existingItem = acc.find((i: any) => i.condition.productUnitId[0] === item.condition.productUnitId[0]);
+        //   if (existingItem) {
+        //     existingItem.condition.order.from = Math.min(existingItem.condition.order.from, item.condition.order.from);
+        //     existingItem.condition.product.from = Math.min(existingItem.condition.product.from, item.condition.product.from);
+        //     existingItem.apply.discountValue = Math.min(existingItem.apply.discountValue, item.apply.discountValue);
+        //     existingItem.apply.discountType = existingItem.apply.discountValue === item.apply.discountValue ? item.apply.discountType : "PERCENT";
+        //     existingItem.apply.maxQuantity = Math.max(existingItem.apply.maxQuantity, item.apply.maxQuantity);
+        //   } else {
+        //     acc.push(item);
+        //   }
+        //   return acc;
+        // }, []);
+
+        setValue("items", items);
       }
       setValue("scope", {
         customer: {
@@ -207,7 +363,7 @@ const AddDiscount = () => {
           const discountData: any = getValues();
           const items = discountData.items.map((item: any) => {
             return {
-              ...(item.condition.product ? { condition: { product: item.condition.product } } : { condition: { order: item.condition.order } }),
+              ...item,
               apply: {
                 ...(item.apply.isGift || item.apply.pointValue > 0 ? {} : { discountValue: item.apply.discountValue }),
                 pointValue: item.apply.pointValue,
@@ -250,8 +406,8 @@ const AddDiscount = () => {
           THÊM MỚI KHUYẾN MẠI
         </div>
         <div className="flex gap-4">
-          <CustomButton outline={true}>Hủy bỏ</CustomButton>
-          <CustomButton onClick={handleSubmit(onSubmit)}>Lưu</CustomButton>
+          <CustomButton outline={true} onClick={() => router.push("/settings/discount")}>Hủy bỏ</CustomButton>
+          <CustomButton onClick={handleSubmit(onSubmit)} loading={isLoading} disabled={isLoading}>Lưu</CustomButton>
         </div>
       </div>
 

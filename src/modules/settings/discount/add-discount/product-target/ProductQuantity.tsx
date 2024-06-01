@@ -19,6 +19,7 @@ import { EDiscountUnit } from '../Info';
 import { CustomSelect } from '@/components/CustomSelect';
 import { CustomButton } from '@/components/CustomButton';
 import PlusIcon from '@/assets/plusWhiteIcon.svg';
+import { useRouter } from 'next/router';
 const { Option } = Select
 
 export const ProductQuantity = ({
@@ -32,6 +33,8 @@ export const ProductQuantity = ({
   isProductPrice?: boolean
 }) => {
   const branchId = useRecoilValue(branchState);
+  const router = useRouter();
+  const { id } = router.query;
 
   const [formFilter, setFormFilter] = useState({
     page: 1,
@@ -131,31 +134,11 @@ export const ProductQuantity = ({
     setValue('items', newRowFormat);
   };
 
-  const handleChangeRow = (index, key, value) => {
-    const newRows: any = [...rows];
-    newRows[index][key] = value;
+  const handleChangeRow = (value, index) => {
+    const newRows: any = [...getValues('items')];
+    newRows[index].condition.productUnitId = value;
     setRows(newRows);
-
-    const newRowFormat = newRows.map(row => ({
-      condition: {
-        product: {
-          from: row.from,
-          type: getValues("type")
-        },
-        order: {
-          from: 1
-        },
-        productUnitId: row.productId,
-      },
-      apply: {
-        discountValue: 1,
-        pointValue: row.pointValue,
-        pointType: row.pointType,
-        type: getValues("type")
-      }
-    }));
-
-    setValue('items', newRowFormat);
+    setValue('items', newRows);
   }
   console.log("getValues('items')", getValues('items'))
   return (
@@ -295,8 +278,9 @@ export const ProductQuantity = ({
                           </div>
                         )
                       }
-                      <div className='cursor-pointer ml-5' onClick={() => {
+                      <div className={`${id ? "cursor-not-allowed" : "cursor-pointer"} ml-5`} onClick={() => {
                         // remove row from childItems
+                        if (id) return;
                         const newRows: any = [...getValues('items')];
                         // check if childItems have more than 1 item then remove
                         if (newRows[index].childItems.length > 1) {
@@ -311,9 +295,10 @@ export const ProductQuantity = ({
                     </div>
                   ))
                 }
-                <div className='w-fit'>
+                <div className={`w-fit ${id ? "cursor-not-allowed" : "cursor-pointer"}`}>
                   <div onClick={() => {
                     // add new row to childItems
+                    if (id) return;
                     const newRows: any = [...getValues('items')];
                     if (!newRows[index].childItems) {
                       newRows[index].childItems = [
@@ -346,14 +331,17 @@ export const ProductQuantity = ({
                     setRows(newRows);
                     setValue('items', newRows);
 
-                  }} className="flex gap-2 text-[16px] font-semibold text-[#D64457] cursor-pointer">
+                  }} className="flex gap-2 text-[16px] font-semibold text-[#D64457]">
                     <Image src={PlusCircleIcon} alt="" />
                     <div>Thêm dòng</div>
                   </div>
                 </div>
               </div>
 
-              <div onClick={() => handleDeleteRow(index)} className="flex flex-1 items-center justify-center px-4 cursor-pointer">
+              <div onClick={() => {
+                if (id) return;
+                handleDeleteRow(index)
+              }} className={`flex flex-1 items-center justify-center px-4 ${id ? "cursor-not-allowed" : "cursor-pointer"}`}>
                 <Image src={DeleteRedIcon} alt="" />
               </div>
             </div>
@@ -365,6 +353,7 @@ export const ProductQuantity = ({
           prefixIcon={<Image src={PlusIcon} />}
           type='danger'
           onClick={handleAddRow}
+          disabled={id ? true : false}
         >
           Thêm điều kiện
         </CustomButton>

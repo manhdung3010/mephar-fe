@@ -86,7 +86,7 @@ export const BillDiscountProduct = ({
   };
 
   const handleDeleteRow = (indexToDelete) => {
-    if (rows.length === 1) return; // Prevent deleting the last row
+    if (getValues("items").length === 1) return; // Prevent deleting the last row
     setRows(prevRows => prevRows.filter((_, index) => index !== indexToDelete));
 
     // Update value items
@@ -106,26 +106,30 @@ export const BillDiscountProduct = ({
   };
 
   const handleChangeRow = (index, key, value) => {
-    const newRows: any = [...rows];
-    newRows[index][key] = value;
-    setRows(newRows);
-
-    const newRowFormat = newRows.map(row => ({
-      condition: {
-        order: {
-          from: row.from
+    const newRowFormat = getValues("items").map((row, rowIndex) => {
+      if (rowIndex === index) {
+        return {
+          ...row,
+          condition: {
+            order: {
+              ...row.condition.order,
+              [key]: value
+            },
+            product: {
+              from: 1,
+            }
+          },
+          apply: {
+            ...row.apply,
+            type: getValues("type"),
+            [key]: value
+          }
         }
-      },
-      apply: {
-        discountValue: row.discountValue,
-        discountType: row.discountType,
-        productUnitId: row.productUnitId,
-        maxQuantity: row.maxQuantity ?? 1,
-        type: row?.type
       }
-    }));
+      return row;
+    });
+    setValue('items', newRowFormat, { shouldValidate: true });
 
-    setValue('items', newRowFormat);
   }
   return (
     <>
@@ -228,7 +232,7 @@ export const BillDiscountProduct = ({
                     loading={isLoadingProduct}
                     defaultValue={row?.apply?.productUnitId}
                     suffixIcon={<Image src={DocumentIcon} />}
-                    value={getValues("times")?.byWeekDay}
+                    value={row?.apply?.productUnitId}
                     notFoundContent={isLoadingProduct ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
                     size='large'
                   >

@@ -89,59 +89,59 @@ export const ProductDiscountProduct = ({
   };
 
   const handleDeleteRow = (indexToDelete) => {
-    if (rows.length === 1) return; // Prevent deleting the last row
-    setRows(prevRows => prevRows.filter((_, index) => index !== indexToDelete));
+    if (getValues('items').length === 1) return; // Prevent deleting the last row
+    // setRows(prevRows => prevRows.filter((_, index) => index !== indexToDelete));
 
-    // Update value items
-    const newRowFormat = rows.filter((_, index) => index !== indexToDelete).map(row => ({
-      condition: {
-        order: {
-          from: 1
-        },
-        product: {
-          from: 1,
-          type: getValues('type')
-        }
-      },
-      product: {
-        from: row.from
-      },
-      apply: {
-        discountValue: row.discountValue,
-        discountType: row.discountType,
-        type: getValues('type')
-      }
-    }));
-    setValue('items', newRowFormat);
+    // // Update value items
+    // const newRowFormat = getValues('items').filter((_, index) => index !== indexToDelete).map(row => ({
+    //   condition: {
+    //     order: {
+    //       from: 1
+    //     },
+    //     product: {
+    //       from: row.from,
+    //     },
+    //     productUnitId: row?.condition?.productUnitId
+    //   },
+    //   apply: {
+    //     discountValue: row.discountValue,
+    //     discountType: row.discountType,
+    //     maxQuantity: row?.apply?.maxQuantity,
+    //     productUnitId: row?.apply?.productUnitId,
+    //     type: row?.type
+    //   }
+    // }));
+    // setValue('items', newRowFormat);
+
+    // delete row items by index
+    const newRowFormat = getValues('items').filter((_, index) => index !== indexToDelete);
+    setValue('items', newRowFormat, { shouldValidate: true });
   };
 
   const handleChangeRow = (index, key, value) => {
-    const newRows: any = [...rows];
-    newRows[index][key] = value;
-    setRows(newRows);
-
-
-    const newRowFormat = newRows.map(row => ({
-      condition: {
-        product: {
-          from: row.from,
-          type: getValues('type')
-        },
-        order: {
-          from: 1
-        },
-        productUnitId: row.productId,
-      },
-      apply: {
-        discountValue: row.discountValue,
-        discountType: row.discountType,
-        productUnitId: row.productUnitId,
-        maxQuantity: row.maxQuantity,
-        type: row.type
+    const newRowFormat = getValues("items").map((row, rowIndex) => {
+      if (rowIndex === index) {
+        return {
+          ...row,
+          condition: {
+            order: {
+              from: 1
+            },
+            product: {
+              ...row.condition.product,
+              [key]: value
+            },
+            productUnitId: row?.condition?.productUnitId
+          },
+          apply: {
+            ...row.apply,
+            [key]: value
+          }
+        }
       }
-    }));
-
-    setValue('items', newRowFormat);
+      return row;
+    });
+    setValue('items', newRowFormat, { shouldValidate: true });
   }
   return (
     <>
@@ -188,7 +188,7 @@ export const ProductDiscountProduct = ({
                       loading={isLoadingProduct}
                       defaultValue={row?.apply?.productUnitId}
                       suffixIcon={<Image src={DocumentIcon} />}
-                      value={getValues("times")?.byWeekDay}
+                      value={row?.apply?.productUnitId}
                       notFoundContent={isLoadingProduct ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
                       size='large'
                     >
@@ -275,7 +275,7 @@ export const ProductDiscountProduct = ({
                     loading={isLoadingProduct}
                     defaultValue={row?.apply?.productUnitId}
                     suffixIcon={<Image src={DocumentIcon} />}
-                    value={getValues("times")?.byWeekDay}
+                    value={row?.apply?.productUnitId}
                     notFoundContent={isLoadingProduct ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
                     size='large'
                   >

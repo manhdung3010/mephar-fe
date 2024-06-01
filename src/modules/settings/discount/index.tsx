@@ -93,11 +93,11 @@ export function Discount() {
       key: 'discountTime',
       render: (discountTime) => <span>{formatDateTime(discountTime[0]?.dateTo)}</span>,
     },
-    {
-      title: 'Người tạo',
-      dataIndex: 'createdBy',
-      key: 'createdBy',
-    },
+    // {
+    //   title: 'Người tạo',
+    //   dataIndex: 'createdBy',
+    //   key: 'createdBy',
+    // },
 
     {
       title: 'Trạng thái',
@@ -210,7 +210,7 @@ export function Discount() {
         pageSize={formFilter.limit}
         setPage={(value) => setFormFilter({ ...formFilter, page: value })}
         setPerPage={(value) => setFormFilter({ ...formFilter, limit: value })}
-        total={discount?.data?.totalItem || 0}
+        total={discount?.data?.data?.totalItem || 0}
       />
     </div>
   );
