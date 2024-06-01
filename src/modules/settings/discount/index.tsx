@@ -21,7 +21,7 @@ import EditIcon from '@/assets/editGreenIcon.svg';
 import { RoleAction, RoleModel } from '../role/role.enum';
 import { useRecoilValue } from 'recoil';
 import { profileState } from '@/recoil/state';
-import { EDiscountBillMethod, EDiscountBillMethodLabel } from './add-discount/Info';
+import { EDiscountBillMethod, EDiscountBillMethodLabel, EDiscountGoodsMethodLabel } from './add-discount/Info';
 
 interface IRecord {
   key: number;
@@ -32,6 +32,7 @@ interface IRecord {
   createdBy: string;
   status: EDiscountStatus;
   type: string;
+  target: string;
 }
 
 export function Discount() {
@@ -120,7 +121,7 @@ export function Discount() {
       title: 'Hình thức khuyến mại',
       dataIndex: 'type',
       key: 'type',
-      render: (type) => <span>{EDiscountBillMethodLabel[type.toUpperCase()]}</span>,
+      render: (type, { target }) => <span>{target === "order" ? EDiscountBillMethodLabel[type.toUpperCase()] : EDiscountGoodsMethodLabel[type.toUpperCase()]}</span>,
     },
     {
       title: 'Thao tác',
