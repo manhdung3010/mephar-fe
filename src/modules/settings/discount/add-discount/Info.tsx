@@ -61,6 +61,44 @@ export enum EDiscountUnit {
   PERCENT = 'PERCENT',
 }
 
+export const orderOptionData = [
+  {
+    value: EDiscountBillMethod.ORDER_PRICE,
+    label: EDiscountBillMethodLabel.ORDER_PRICE,
+  },
+  {
+    value: EDiscountBillMethod.PRODUCT_PRICE,
+    label: EDiscountBillMethodLabel.PRODUCT_PRICE,
+  },
+  {
+    value: EDiscountBillMethod.GIFT,
+    label: EDiscountBillMethodLabel.GIFT,
+  },
+  {
+    value: EDiscountBillMethod.LOYALTY,
+    label: EDiscountBillMethodLabel.LOYALTY,
+  }
+]
+
+export const productOptionData = [
+  {
+    value: EDiscountGoodsMethod.PRODUCT_PRICE,
+    label: EDiscountGoodsMethodLabel.PRODUCT_PRICE,
+  },
+  {
+    value: EDiscountGoodsMethod.GIFT,
+    label: EDiscountGoodsMethodLabel.GIFT,
+  },
+  {
+    value: EDiscountGoodsMethod.LOYALTY,
+    label: EDiscountGoodsMethodLabel.LOYALTY,
+  },
+  {
+    value: EDiscountGoodsMethod.PRICE_BY_BUY_NUMBER,
+    label: EDiscountGoodsMethodLabel.PRICE_BY_BUY_NUMBER,
+  }
+]
+
 const Info = ({ setValue, getValues, errors }: any) => {
   return (
     <div className="mt-5">

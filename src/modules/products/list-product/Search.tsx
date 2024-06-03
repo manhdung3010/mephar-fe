@@ -2,13 +2,10 @@ import { Select, Tag } from 'antd';
 import Image from 'next/image';
 
 import ArrowDownGray from '@/assets/arrowDownGray.svg';
-import FilterIcon from '@/assets/filterIcon.svg';
 import SearchIcon from '@/assets/searchIcon.svg';
-import { CustomButton } from '@/components/CustomButton';
 import { CustomInput } from '@/components/CustomInput';
-import { useEffect, useState } from 'react';
-import { set } from 'lodash';
 import { EProductType, EProductTypeLabel, getEnumKeyByValue } from '@/enums';
+import { useState } from 'react';
 
 const productTypeData = [
   {

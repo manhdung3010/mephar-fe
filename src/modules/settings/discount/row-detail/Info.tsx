@@ -3,12 +3,18 @@ import Image from 'next/image';
 
 import DeleteIcon from '@/assets/deleteRed.svg';
 import { CustomButton } from '@/components/CustomButton';
-import { formatDateTime } from '@/helpers';
+import { formatDateTime, hasPermission } from '@/helpers';
 import cx from 'classnames';
 import { EDiscountStatus, EDiscountStatusLabel } from '@/enums';
+import { useRecoilValue } from 'recoil';
+import { profileState } from '@/recoil/state';
+import { RoleAction, RoleModel } from '../../role/role.enum';
+import CopyBlueIcon from '@/assets/copyBlue.svg';
+import { useRouter } from 'next/router';
 
 export function Info({ record }: { record: any }) {
-  console.log(record, 'record')
+  const router = useRouter();
+  const profile = useRecoilValue(profileState);
   return (
     <div className="gap-12 ">
       <div className="mb-4 grid grid-cols-2 gap-5">
@@ -73,14 +79,31 @@ export function Info({ record }: { record: any }) {
         </div>
       </div>
 
-      <div className="flex justify-end">
-        <CustomButton
-          type="danger"
-          outline={true}
-          prefixIcon={<Image src={DeleteIcon} alt="" />}
-        >
-          Xóa
-        </CustomButton>
+      <div className="flex justify-end gap-2">
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.discount, RoleAction.create) && (
+            <CustomButton
+              type="primary"
+              outline={true}
+              prefixIcon={<Image src={CopyBlueIcon} alt="" />}
+              onClick={() => router.push(`/settings/discount/add-discount?id=${record?.id}&copy=true`)}
+            >
+              Sao chép
+            </CustomButton>
+          )
+        }
+        {
+
+          hasPermission(profile?.role?.permissions, RoleModel.discount, RoleAction.delete) && (
+            <CustomButton
+              type="danger"
+              outline={true}
+              prefixIcon={<Image src={DeleteIcon} alt="" />}
+            >
+              Xóa
+            </CustomButton>
+          )
+        }
       </div>
     </div>
   );

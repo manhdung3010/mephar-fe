@@ -50,10 +50,12 @@ export function Discount() {
     page: 1,
     limit: 20,
     keyword: '',
+    status: undefined,
+    effective: undefined,
   });
 
   const { data: discount, isLoading } = useQuery(
-    ['DISCOUNT_LIST', formFilter.page, formFilter.limit, formFilter.keyword],
+    ['DISCOUNT_LIST', formFilter],
     () => getDiscount(formFilter)
   );
 
@@ -124,7 +126,10 @@ export function Discount() {
       title: 'Hình thức khuyến mại',
       dataIndex: 'type',
       key: 'type',
-      render: (type, { target }) => <span>{target === "order" ? EDiscountBillMethodLabel[type.toUpperCase()] : EDiscountGoodsMethodLabel[type.toUpperCase()]}</span>,
+      render: (type, { target }) => <span>
+        {target === "order" ? "Hóa đơn - " : "Hàng hóa - "}
+        {target === "order" ? EDiscountBillMethodLabel[type.toUpperCase()] : EDiscountGoodsMethodLabel[type.toUpperCase()]}
+      </span>,
     },
     {
       title: 'Thao tác',
@@ -176,20 +181,33 @@ export function Discount() {
   return (
     <div className="mb-2">
       <div className="my-3 flex items-center justify-end gap-4">
-        <CustomButton
-          prefixIcon={<Image src={PlusIcon} />}
-          onClick={() => router.push('/settings/discount/add-discount')}
-        >
-          Thêm mới khuyến mại
-        </CustomButton>
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.discount, RoleAction.create) && (
+            <CustomButton
+              prefixIcon={<Image src={PlusIcon} />}
+              onClick={() => router.push('/settings/discount/add-discount')}
+            >
+              Thêm mới khuyến mại
+            </CustomButton>
+          )
+        }
       </div>
-
-      <Search onChange={debounce((value) => {
+      {/* <Search onChange={debounce((value) => {
         setFormFilter((preValue) => ({
           ...preValue,
           keyword: value,
         }));
-      }, 300)} />
+      }, 300)} /> */}
+      <Search
+        onChange={debounce((value) => {
+          setFormFilter((preValue) => ({
+            ...preValue,
+            keyword: value?.keyword,
+            status: value?.status,
+            effective: value?.effective,
+          }));
+        }, 300)}
+      />
 
       <CustomTable
         dataSource={discount?.data?.data?.items?.map((item, index) => ({

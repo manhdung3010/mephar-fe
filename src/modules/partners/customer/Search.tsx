@@ -18,28 +18,12 @@ import { getBranch } from '@/api/branch.service';
 const { RangePicker } = DatePicker;
 
 const Search = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void, formFilter: any }) => {
-  const [searchEmployeeText, setSearchEmployeeText] = useState('');
-  const [searchGroupCustomer, setSearchGroupCustomer] = useState('');
-
-  const { data: employees } = useQuery(
-    ['EMPLOYEE_LIST', searchEmployeeText],
-    () => getEmployee({ page: 1, limit: 20, keyword: searchEmployeeText })
-  );
-
-  const { data: groupCustomer, isLoading } = useQuery(
-    ['GROUP_CUSTOMER', formFilter.page, formFilter.limit, formFilter.keyword],
-    () => getGroupCustomer({ page: 1, limit: 20, keyword: searchGroupCustomer })
-  );
-
-  const { data: branches } = useQuery(['SETTING_BRANCH'], () => getBranch());
-
-
   return (
     <div className="bg-white">
       <div className="flex items-center gap-4 p-4">
         <div className="w-full">
           <CustomInput
-            placeholder="Tìm kiếm theo mã nhập hàng"
+            placeholder="Tìm kiếm theo mã khách hàng"
             prefixIcon={<Image src={SearchIcon} alt="" />}
             className=""
             onChange={debounce((value) => {

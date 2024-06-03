@@ -21,13 +21,13 @@ const AddDiscount = () => {
   const dateToDefault = currentDate.add(6, 'month').format("YYYY-MM-DD HH:mm:ss");
 
   const router = useRouter();
-  const { id } = router.query;
+  const { id, copy } = router.query;
   const queryClient = useQueryClient();
 
   const { data: discountDetail } = useQuery(
     ['DISCOUNT_DETAIL', id],
     () => getDiscountDetail(Number(id)),
-    { enabled: !!id }
+    { enabled: !!id || !!copy }
   );
   const dcDetail = discountDetail?.data?.data;
   const {
@@ -332,8 +332,6 @@ const AddDiscount = () => {
     }
   }, [dcDetail]);
 
-  console.log("values", getValues())
-
 
   const { mutate: mutateCreateDiscount, isLoading } =
     useMutation(
@@ -359,7 +357,7 @@ const AddDiscount = () => {
 
           }).flat();
 
-          return id ? updateDiscount({
+          return (id && !copy) ? updateDiscount({
             ...getValues(),
             items: childItems
           }, Number(id)) : createDiscount({
@@ -385,7 +383,7 @@ const AddDiscount = () => {
           });
           discountData.items = items;
 
-          return id ? updateDiscount(discountData, Number(id)) : createDiscount(discountData);
+          return (id && !copy) ? updateDiscount(discountData, Number(id)) : createDiscount(discountData);
         }
       },
       {

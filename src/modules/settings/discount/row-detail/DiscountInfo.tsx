@@ -117,20 +117,22 @@ export function DiscountInfo({ record }: any) {
       render: (text) => <span>{formatNumber(text)}</span>,
     },
   ];
+  const checkType = (target: string, type: string) => {
+    if (target === "order" && type === "order_price") {
+      return columns
+    } else if (target === "order" && type === "product_price") {
+      return columns2
+    } else {
+      return columns3
+    }
+  }
 
   return <CustomTable
     dataSource={
 
       record?.discountItem
     }
-    columns={
-      record?.target === "order" && record?.type === "order_price"
-        ? columns
-        : record?.target === "order" && record?.type === "product_price"
-          ? columns2
-          : columns2
-
-    }
+    columns={checkType(record?.target, record?.type)}
     bordered
     loading={isLoadingProduct}
   />;

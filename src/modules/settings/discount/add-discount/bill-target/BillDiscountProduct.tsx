@@ -113,7 +113,8 @@ export const BillDiscountProduct = ({
           condition: {
             order: {
               ...row.condition.order,
-              [key]: value
+              ...(key === "productUnitId" && {}),
+              ...(key === "from" && { from: value }),
             },
             product: {
               from: 1,
@@ -131,6 +132,8 @@ export const BillDiscountProduct = ({
     setValue('items', newRowFormat, { shouldValidate: true });
 
   }
+
+  console.log("getValues('items')", getValues('items'))
   return (
     <>
       <div className="my-5 flex flex-col gap-2">
@@ -150,7 +153,7 @@ export const BillDiscountProduct = ({
                   <CustomInput
                     className="mt-0 h-10"
                     wrapClassName="w-full"
-                    value={row?.condition?.order?.from || 0}
+                    value={row?.condition?.order?.from}
                     type='number'
                     onChange={(value) => handleChangeRow(index, 'from', value)}
                   />
