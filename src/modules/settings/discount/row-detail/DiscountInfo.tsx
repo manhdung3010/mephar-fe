@@ -6,7 +6,7 @@ import { ISaleProduct } from '@/modules/sales/interface';
 import { useQuery } from '@tanstack/react-query';
 import { useRecoilValue } from 'recoil';
 import { branchState } from '@/recoil/state';
-import { getSaleProducts } from '@/api/product.service';
+import { getGroupProduct, getSaleProducts } from '@/api/product.service';
 
 interface IRecord {
   key: number;
@@ -18,8 +18,6 @@ interface IRecord {
 }
 
 export function DiscountInfo({ record }: any) {
-  console.log("record", record)
-
   const branchId = useRecoilValue(branchState);
   const { data: products, isLoading: isLoadingProduct, isSuccess } = useQuery<{
     data?: { items: ISaleProduct[] };
@@ -32,6 +30,17 @@ export function DiscountInfo({ record }: any) {
       branchId,
     ],
     () => getSaleProducts({ page: 1, limit: 999, keyword: "", branchId }),
+  );
+  const { data: groupProduct, isLoading: isLoadingGroup } = useQuery<{
+    data?: any;
+  }>(
+    [
+      'LIST_GROUP_PRODUCT_DISCOUNT',
+      1,
+      999,
+      "",
+    ],
+    () => getGroupProduct({ page: 1, limit: 999, keyword: "" }),
   );
 
   const columns: ColumnsType<IRecord> = [
@@ -69,12 +78,20 @@ export function DiscountInfo({ record }: any) {
       className: 'max-w-[50%] w-1/2',
       render: (text, { productDiscount }) => <div className='flex gap-2 flex-wrap'>{
         // map item to product name from productDiscount
-        productDiscount.map((item) => {
-          const product = products?.data?.items.find((product) => product.productUnit?.id === item.productUnitId);
-          return product;
-        }).map((product, index) => (
-          <span className='bg-[#f0f0f0] rounded px-2 py-1' key={index}>{product?.productUnit?.code + " - " + product?.product?.name + " - " + product?.productUnit?.unitName}</span>
-        ))
+        productDiscount[0]?.groupId ?
+          productDiscount.map((item) => {
+            const product = groupProduct?.data?.items.find((product) => product?.id === item.groupId);
+            return product;
+          }).map((product, index) => (
+            <span className='bg-[#f0f0f0] rounded px-2 py-1' key={index}>{product?.name}</span>
+          ))
+
+          : productDiscount.map((item) => {
+            const product = products?.data?.items.find((product) => product.productUnit?.id === item.productUnitId);
+            return product;
+          }).map((product, index) => (
+            <span className='bg-[#f0f0f0] rounded px-2 py-1' key={index}>{product?.productUnit?.code + " - " + product?.product?.name + " - " + product?.productUnit?.unitName}</span>
+          ))
 
       }</div>,
     },
@@ -91,22 +108,29 @@ export function DiscountInfo({ record }: any) {
       title: 'Tổng tiền hàng từ',
       dataIndex: 'orderFrom',
       key: 'orderFrom',
-      className: 'max-w-[50%] w-1/2',
+      className: '',
       render: (text) => <span>{formatMoney(text)}</span>,
     },
     {
       title: 'Hàng/Nhóm hàng tặng',
       dataIndex: 'orderFrom',
       key: 'orderFrom',
-      className: 'max-w-[50%] w-1/2',
+      className: '',
       render: (text, { productDiscount }) => <div className='flex gap-2 flex-wrap'>{
         // map item to product name from productDiscount
-        productDiscount.map((item) => {
-          const product = products?.data?.items.find((product) => product.productUnit?.id === item.productUnitId);
-          return product;
-        }).map((product, index) => (
-          <span className='bg-[#f0f0f0] rounded px-2 py-1' key={index}>{product?.productUnit?.code + " - " + product?.product?.name + " - " + product?.productUnit?.unitName}</span>
-        ))
+        productDiscount[0]?.groupId ?
+          productDiscount.map((item) => {
+            const product = groupProduct?.data?.items.find((product) => product?.id === item.groupId);
+            return product;
+          }).map((product, index) => (
+            <span className='bg-[#f0f0f0] rounded px-2 py-1' key={index}>{product?.name}</span>
+          ))
+          : productDiscount.map((item) => {
+            const product = products?.data?.items.find((product) => product.productUnit?.id === item.productUnitId);
+            return product;
+          }).map((product, index) => (
+            <span className='bg-[#f0f0f0] rounded px-2 py-1' key={index}>{product?.productUnit?.code + " - " + product?.product?.name + " - " + product?.productUnit?.unitName}</span>
+          ))
 
       }</div>,
     },
@@ -114,7 +138,7 @@ export function DiscountInfo({ record }: any) {
       title: 'Số lượng',
       dataIndex: 'maxQuantity',
       key: 'maxQuantity',
-      className: 'max-w-[50%] w-1/2',
+      className: '',
       render: (text) => <span>{formatNumber(text)}</span>,
     },
   ];

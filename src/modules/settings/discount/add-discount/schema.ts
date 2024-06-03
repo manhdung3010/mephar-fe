@@ -59,12 +59,15 @@ export const schema = yup.object().shape({
             );
         }),
         discountType: yup.string(),
-        productUnitId: yup.array().when("type", ([type], schema) => {
-          if (type === "PRODUCT_PRICE" || type === "GIFT") {
-            return schema.required("Đây là trường bắt buộc!");
-          }
-          return schema.notRequired();
-        }),
+        productUnitId: yup
+          .array()
+          .when(["type", "groupId"], ([type, groupId], schema) => {
+            if ((type === "PRODUCT_PRICE" || type === "GIFT") && !groupId) {
+              return schema.required("Đây là trường bắt buộc!");
+            }
+            return schema.notRequired();
+          }),
+        groupId: yup.array(),
         maxQuantity: yup.number().when("type", ([type], schema) => {
           if (type === "PRODUCT_PRICE" || type === "GIFT") {
             return schema

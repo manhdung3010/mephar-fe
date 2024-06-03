@@ -363,7 +363,8 @@ const AddDiscount = () => {
                 discountType: item.apply.discountType,
                 productUnitId: item.apply.productUnitId,
                 maxQuantity: item.apply.maxQuantity,
-                isGift: item.apply.isGift
+                isGift: item.apply.isGift,
+                groupId: item.apply.groupId,
               }
             }
           });
