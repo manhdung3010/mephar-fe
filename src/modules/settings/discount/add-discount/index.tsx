@@ -64,21 +64,7 @@ const AddDiscount = () => {
             maxQuantity: 1,
             isGift: false,
             pointValue: 0,
-          },
-          childItems: [
-            {
-              condition: {
-                product: {
-                  from: 1
-                },
-                productUnitId: []
-              },
-              apply: {
-                changeType: "TYPE_PRICE",
-                fixedPrice: 0,
-              }
-            }
-          ]
+          }
         }
       ],
       scope: {
@@ -195,13 +181,13 @@ const AddDiscount = () => {
               order: {
                 from: 1
               },
-              productUnitId: item.productDiscount?.map((product: any) => product.productUnitId),
+              productUnitId: item.productDiscount?.filter((item) => item.isCondition)?.map((product: any) => product.productUnitId),
             },
             apply: {
               discountValue: item.discountValue,
               discountType: item.discountType?.toUpperCase(),
               maxQuantity: item.maxQuantity,
-              productUnitId: item.productDiscount?.map((product: any) => product.productUnitId),
+              productUnitId: item.productDiscount?.filter((item) => !item.isCondition)?.map((product: any) => product.productUnitId),
             }
           }
         });

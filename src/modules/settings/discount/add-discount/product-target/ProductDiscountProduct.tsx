@@ -115,6 +115,8 @@ export const ProductDiscountProduct = ({
 
     // delete row items by index
     const newRowFormat = getValues('items').filter((_, index) => index !== indexToDelete);
+    // Update value items
+
     setValue('items', newRowFormat, { shouldValidate: true });
   };
 
@@ -129,9 +131,9 @@ export const ProductDiscountProduct = ({
             },
             product: {
               ...row.condition.product,
-              [key]: value
+              ...(key === "from" ? { from: value } : {})
             },
-            productUnitId: row?.condition?.productUnitId
+            productUnitId: key === "productId" ? value : row?.condition?.productUnitId
           },
           apply: {
             ...row.apply,
@@ -186,9 +188,9 @@ export const ProductDiscountProduct = ({
                         handleChangeRow(index, 'productId', value)
                       }}
                       loading={isLoadingProduct}
-                      defaultValue={row?.apply?.productUnitId}
+                      defaultValue={row?.condition?.productUnitId}
                       suffixIcon={<Image src={DocumentIcon} />}
-                      value={row?.apply?.productUnitId}
+                      value={row?.condition?.productUnitId}
                       notFoundContent={isLoadingProduct ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
                       size='large'
                     >

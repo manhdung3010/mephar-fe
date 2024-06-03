@@ -4,28 +4,7 @@ import Image from 'next/image';
 import ArrowDownGray from '@/assets/arrowDownGray.svg';
 import SearchIcon from '@/assets/searchIcon.svg';
 import { CustomInput } from '@/components/CustomInput';
-import { EProductType, EProductTypeLabel, getEnumKeyByValue } from '@/enums';
 import { useState } from 'react';
-import { orderOptionData, productOptionData } from './add-discount/Info';
-
-const productInventoryData = [
-  {
-    value: 1,
-    label: "Dưới định mức tồn",
-  },
-  {
-    value: 2,
-    label: "Vượt định mức tồn",
-  },
-  {
-    value: 3,
-    label: "Còn hàng trong kho",
-  },
-  {
-    value: 4,
-    label: "Hết hàng trong kho",
-  },
-]
 
 
 const Search = ({ onChange }: { onChange: (value) => void }) => {
@@ -65,10 +44,6 @@ const Search = ({ onChange }: { onChange: (value) => void }) => {
             // onSearch={true}
             options={[
               {
-                value: null,
-                label: "Tất cả",
-              },
-              {
                 value: "ACTIVE",
                 label: 'Hoạt động',
               },
@@ -90,10 +65,6 @@ const Search = ({ onChange }: { onChange: (value) => void }) => {
             value={formFilter?.effective}
             options={[
               {
-                value: null,
-                label: "Tất cả",
-              },
-              {
                 value: 2,
                 label: "Còn hiệu lực",
               },
@@ -103,37 +74,6 @@ const Search = ({ onChange }: { onChange: (value) => void }) => {
               },
             ]}
           />
-          {/* <div className="w-[1px] bg-[#D3D5D7]" />
-          <Select
-            className="w-[200px]"
-            bordered={false}
-            suffixIcon={<Image src={ArrowDownGray} alt="" />}
-            placeholder="Khuyến mại theo"
-            optionFilterProp="children"
-            onChange={(value) => handleChangeFormFilter('target', value)}
-            value={formFilter?.target}
-            options={[
-              {
-                value: "ORDER",
-                label: "Hóa đơn",
-              },
-              {
-                value: "PRODUCT",
-                label: "Hàng hóa",
-              },
-            ]}
-          />
-          <div className="w-[1px] bg-[#D3D5D7]" />
-          <Select
-            className="w-[200px]"
-            bordered={false}
-            suffixIcon={<Image src={ArrowDownGray} alt="" />}
-            placeholder="Hình thức khuyến mại"
-            optionFilterProp="children"
-            onChange={(value) => handleChangeFormFilter('effective', value)}
-            value={formFilter?.medthod}
-            options={formFilter?.target === "ORDER" ? orderOptionData : productOptionData}
-          /> */}
         </div>
       </div>
       <div className='flex items-center gap-4 p-4'>

@@ -54,7 +54,7 @@ export const ProductGiftProduct = ({
   const [rows, setRows] = useState([
     {
       from: 0,
-      discountValue: 0,
+      discountValue: 1,
       discountType: EDiscountUnit.MONEY,
       type: getValues('type')
     }
@@ -62,7 +62,7 @@ export const ProductGiftProduct = ({
   const handleAddRow = () => {
     setRows(prevRows => [...prevRows, {
       from: 0,
-      discountValue: 0,
+      discountValue: 1,
       discountType: EDiscountUnit.MONEY,
       type: getValues('type')
     }]);
@@ -91,29 +91,6 @@ export const ProductGiftProduct = ({
 
   const handleDeleteRow = (indexToDelete) => {
     if (getValues('items').length === 1) return; // Prevent deleting the last row
-    // setRows(prevRows => prevRows.filter((_, index) => index !== indexToDelete));
-
-    // // Update value items
-    // const newRowFormat = rows.filter((_, index) => index !== indexToDelete).map(row => ({
-    //   condition: {
-    //     order: {
-    //       from: 1
-    //     },
-    //     product: {
-    //       from: 1,
-    //       type: getValues('type')
-    //     }
-    //   },
-    //   product: {
-    //     from: row.from
-    //   },
-    //   apply: {
-    //     discountValue: row.discountValue,
-    //     discountType: row.discountType,
-    //     type: getValues('type')
-    //   }
-    // }));
-    // setValue('items', newRowFormat);
     const newRowFormat = getValues('items').filter((_, index) => index !== indexToDelete);
     setValue('items', newRowFormat, { shouldValidate: true });
   };
@@ -154,15 +131,16 @@ export const ProductGiftProduct = ({
             },
             product: {
               ...row.condition.product,
+              ...(key === "from" ? { from: value } : {}),
               type: getValues('type'),
-              [key]: value
             },
-            productUnitId: row?.condition?.productUnitId
+            productUnitId: key === "productId" ? value : row?.condition?.productUnitId
           },
           apply: {
             ...row.apply,
             type: getValues('type'),
             isGift: true,
+            discountValue: 1,
             [key]: value
           }
         }
