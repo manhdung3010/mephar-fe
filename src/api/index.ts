@@ -43,7 +43,12 @@ axiosClient.interceptors.response.use(
     }
 
     if (response.config.method === "post") {
-      const excludeUrl = ["auth/login", "external/image/upload", "order"];
+      const excludeUrl = [
+        "auth/login",
+        "external/image/upload",
+        "order",
+        "discount/order",
+      ];
 
       if (!excludeUrl.includes(response.config?.url as string)) {
         message.success("Thêm mới thành công!");

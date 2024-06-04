@@ -257,7 +257,7 @@ export const BillDiscountProduct = ({
                         ))
                           :
                           groupProduct?.data?.items?.map((product) => (
-                            <Option key={product.id} value={product.productUnit?.id}>
+                            <Option key={product.id} value={product?.id}>
                               {
                                 product?.name
                               }

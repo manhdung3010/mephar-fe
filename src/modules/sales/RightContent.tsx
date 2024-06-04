@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { message } from 'antd';
+import { Tooltip, message } from 'antd';
 import cx from 'classnames';
 import { cloneDeep, debounce, get } from 'lodash';
 import Image from 'next/image';
@@ -13,6 +13,7 @@ import CustomerIcon from '@/assets/customerIcon.svg';
 import DolarIcon from '@/assets/dolarIcon.svg';
 import EditIcon from '@/assets/editIcon.svg';
 import EmployeeIcon from '@/assets/employeeIcon.svg';
+import DiscountIcon from '@/assets/gift.svg'
 import Bank from '@/assets/images/bank.png';
 import Cash from '@/assets/images/cash.png';
 import Debt from '@/assets/images/debt.png';
@@ -44,6 +45,7 @@ import { OrderSuccessModal } from './OrderSuccessModal';
 import { ScanQrModal } from './ScanQrModal';
 import { RightContentStyled } from './styled';
 import { RoleAction, RoleModel } from '../settings/role/role.enum';
+import { OrderDiscountModal } from './OrderDiscountModal';
 
 export function RightContent({ useForm }: { useForm: any }) {
   const queryClient = useQueryClient();
@@ -61,6 +63,7 @@ export function RightContent({ useForm }: { useForm: any }) {
   const [isOpenPrescriptionModal, setIsOpenPrescriptionModal] = useState(false);
   const [isOpenAddCustomerModal, setIsOpenAddCustomerModal] = useState(false);
   const [isOpenAddDiscountModal, setIsOpenAddDiscountModal] = useState(false);
+  const [isOpenDiscountModal, setIsOpenDiscountModal] = useState(false);
   const [searchEmployeeText, setSearchEmployeeText] = useState('');
   const [searchCustomerText, setSearchCustomerText] = useState('');
   const [saleInvoice, setSaleInvoice] = useState();
@@ -215,6 +218,19 @@ export function RightContent({ useForm }: { useForm: any }) {
     mutateCreateOrder();
   };
 
+  const getDiscountPostData = () => {
+    const products = orderObject[orderActive]?.map((product: ISaleProductLocal) => ({
+      productUnitId: product.productUnitId,
+      quantity: product.quantity,
+    }));
+    return {
+      products,
+      totalPrice: totalPrice,
+      customerId: getValues('customerId'),
+      branchId: branchId,
+    }
+  }
+
   return (
     <RightContentStyled className="flex w-[360px] min-w-[360px] flex-col">
       <div className="px-6 pt-5 ">
@@ -296,12 +312,21 @@ export function RightContent({ useForm }: { useForm: any }) {
         <div className="grow">
           <div className="mb-5 border-b-2 border-dashed border-[#E4E4E4]">
             <div className="mb-3 flex justify-between">
-              <div className="text-lg leading-normal text-[#828487]">
-                Tổng tiền (
-                <span className="text-lg">
-                  {orderObject[orderActive]?.length ?? 0} sp
+              <div className="text-lg leading-normal text-[#828487] flex items-center gap-2">
+                <span>
+                  Tổng tiền (
+                  <span className="text-lg">
+                    {orderObject[orderActive]?.length ?? 0} sp
+                  </span>
+                  )
                 </span>
-                )
+                {
+                  getValues('customerId') && orderObject[orderActive]?.length > 0 && (
+                    <Tooltip title="KM hóa đơn" className='cursor-pointer'>
+                      <Image src={DiscountIcon} onClick={() => setIsOpenDiscountModal(!isOpenDiscountModal)} alt='discount-icon' />
+                    </Tooltip>
+                  )
+                }
               </div>
               <div className="text-lg leading-normal text-[#19191C]">
                 {formatMoney(totalPrice)}
@@ -537,6 +562,15 @@ export function RightContent({ useForm }: { useForm: any }) {
           setIsOpenOrderSuccessModal(false);
         }}
         saleInvoice={saleInvoice}
+      />
+
+      <OrderDiscountModal
+        isOpen={isOpenDiscountModal}
+        onCancel={() => setIsOpenDiscountModal(false)}
+        onSave={() => {
+
+        }}
+        data={getDiscountPostData()}
       />
     </RightContentStyled>
   );

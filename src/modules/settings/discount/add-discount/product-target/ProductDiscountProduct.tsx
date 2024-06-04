@@ -10,11 +10,11 @@ import { useState } from 'react';
 import SearchIcon from '@/assets/searchIcon.svg';
 import DocumentIcon from '@/assets/documentIcon.svg';
 import InputError from '@/components/InputError';
-import { Select, Spin } from 'antd';
+import { Select, Spin, Tooltip } from 'antd';
 import { ISaleProduct } from '@/modules/sales/interface';
 import { useRecoilValue } from 'recoil';
 import { branchState } from '@/recoil/state';
-import { getProduct, getSaleProducts } from '@/api/product.service';
+import { getGroupProduct, getProduct, getSaleProducts } from '@/api/product.service';
 import { useQuery } from '@tanstack/react-query';
 import { debounce, get, set } from 'lodash';
 const { Option } = Select
@@ -30,6 +30,8 @@ export const ProductDiscountProduct = ({
   isProductPrice?: boolean
 }) => {
   const branchId = useRecoilValue(branchState);
+  const [isProduct, setIsProduct] = useState(true);
+  const [isProductDiscount, setIsProductDiscount] = useState(true);
 
   const [formFilter, setFormFilter] = useState({
     page: 1,
@@ -49,6 +51,19 @@ export const ProductDiscountProduct = ({
       branchId,
     ],
     () => getSaleProducts(formFilter),
+  );
+
+  const { data: groupProduct, isLoading: isLoadingGroup } = useQuery<{
+    data?: any;
+  }>(
+    [
+      'LIST_GROUP_PRODUCT_DISCOUNT',
+      formFilter.page,
+      formFilter.limit,
+      formFilter.keyword,
+      branchId,
+    ],
+    () => getGroupProduct(formFilter),
   );
 
   const [rows, setRows] = useState([
@@ -133,10 +148,12 @@ export const ProductDiscountProduct = ({
               ...row.condition.product,
               ...(key === "from" ? { from: value } : {})
             },
-            productUnitId: key === "productId" ? value : row?.condition?.productUnitId
+            productUnitId: key === "productId" ? value : row?.condition?.productUnitId,
+            groupId: key === "groupId" ? value : row?.condition?.groupId
           },
           apply: {
             ...row.apply,
+            ...(key === "groupIdDiscount" ? { groupId: value } : {}),
             [key]: value
           }
         }
@@ -172,36 +189,45 @@ export const ProductDiscountProduct = ({
                     }
                   </div>
                   <div className='w-full'>
-                    <Select
-                      mode="multiple"
-                      className="!rounded w-full"
-                      placeholder='Nhập tên hàng, sản phẩm, nhóm hàng...'
-                      optionFilterProp="children"
-                      showSearch
-                      onSearch={debounce((value) => {
-                        setFormFilter({
-                          ...formFilter,
-                          keyword: value
-                        })
-                      }, 300)}
-                      onChange={(value) => {
-                        handleChangeRow(index, 'productId', value)
-                      }}
-                      loading={isLoadingProduct}
-                      defaultValue={row?.condition?.productUnitId}
-                      suffixIcon={<Image src={DocumentIcon} />}
-                      value={row?.condition?.productUnitId}
-                      notFoundContent={isLoadingProduct ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
-                      size='large'
-                    >
-                      {
-                        products?.data?.items?.map((product) => (
-                          <Option key={product.id} value={product.productUnit?.id}>
-                            {product?.productUnit?.code} - {product?.product?.name} - {product?.productUnit?.unitName}
-                          </Option>
-                        ))
-                      }
-                    </Select>
+                    <div className='flex gap-2'>
+                      <Select
+                        mode="multiple"
+                        className="!rounded w-full"
+                        placeholder={isProduct ? 'Nhập tên hàng, sản phẩm...' : "Nhập tên nhóm hàng..."}
+                        optionFilterProp="children"
+                        showSearch
+                        onSearch={debounce((value) => {
+                          setFormFilter({
+                            ...formFilter,
+                            keyword: value
+                          })
+                        }, 300)}
+                        onChange={(value) => {
+                          handleChangeRow(index, isProduct ? 'productId' : 'groupId', value)
+                        }}
+                        loading={isLoadingProduct}
+                        defaultValue={row?.condition?.productUnitId}
+                        value={row?.condition?.productUnitId}
+                        notFoundContent={isLoadingProduct ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
+                        size='large'
+                      >
+                        {
+                          isProduct ? products?.data?.items?.map((product) => (
+                            <Option key={product.id} value={product.productUnit?.id}>
+                              {product?.productUnit?.code} - {product?.product?.name} - {product?.productUnit?.unitName}
+                            </Option>
+                          ))
+                            : groupProduct?.data?.items?.map((product) => (
+                              <Option key={product.id} value={product?.id}>
+                                {product?.name}
+                              </Option>
+                            ))
+                        }
+                      </Select>
+                      <Tooltip title="Nhóm hàng">
+                        <Image onClick={() => setIsProduct(!isProduct)} src={DocumentIcon} className='cursor-pointer' />
+                      </Tooltip>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -259,36 +285,45 @@ export const ProductDiscountProduct = ({
                   }
                 </div>
                 <div className='w-full'>
-                  <Select
-                    mode="multiple"
-                    className="!rounded w-full"
-                    placeholder='Nhập tên hàng, sản phẩm, nhóm hàng...'
-                    optionFilterProp="children"
-                    showSearch
-                    onSearch={debounce((value) => {
-                      setFormFilter({
-                        ...formFilter,
-                        keyword: value
-                      })
-                    }, 300)}
-                    onChange={(value) => {
-                      handleChangeRow(index, 'productUnitId', value)
-                    }}
-                    loading={isLoadingProduct}
-                    defaultValue={row?.apply?.productUnitId}
-                    suffixIcon={<Image src={DocumentIcon} />}
-                    value={row?.apply?.productUnitId}
-                    notFoundContent={isLoadingProduct ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
-                    size='large'
-                  >
-                    {
-                      products?.data?.items?.map((product) => (
-                        <Option key={product.id} value={product.productUnit?.id}>
-                          {product?.productUnit?.code} - {product?.product?.name} - {product?.productUnit?.unitName}
-                        </Option>
-                      ))
-                    }
-                  </Select>
+                  <div className='flex gap-2'>
+                    <Select
+                      mode="multiple"
+                      className="!rounded w-full"
+                      placeholder={isProductDiscount ? 'Nhập tên hàng, sản phẩm, nhóm hàng...' : 'Nhập tên nhóm hàng...'}
+                      optionFilterProp="children"
+                      showSearch
+                      onSearch={debounce((value) => {
+                        setFormFilter({
+                          ...formFilter,
+                          keyword: value
+                        })
+                      }, 300)}
+                      onChange={(value) => {
+                        handleChangeRow(index, isProductDiscount ? 'productUnitId' : 'groupIdDiscount', value)
+                      }}
+                      loading={isLoadingProduct || isLoadingGroup}
+                      defaultValue={isProductDiscount ? row?.apply?.productUnitId : row?.apply?.groupId}
+                      value={isProductDiscount ? row?.apply?.productUnitId : row?.apply?.groupId}
+                      notFoundContent={isLoadingProduct || isLoadingGroup ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
+                      size='large'
+                    >
+                      {
+                        isProductDiscount ? products?.data?.items?.map((product) => (
+                          <Option key={product.id} value={product.productUnit?.id}>
+                            {product?.productUnit?.code} - {product?.product?.name} - {product?.productUnit?.unitName}
+                          </Option>
+                        ))
+                          : groupProduct?.data?.items?.map((product) => (
+                            <Option key={product.id} value={product?.id}>
+                              {product?.name}
+                            </Option>
+                          ))
+                      }
+                    </Select>
+                    <Tooltip title="Nhóm hàng">
+                      <Image onClick={() => setIsProductDiscount(!isProductDiscount)} src={DocumentIcon} className='cursor-pointer' />
+                    </Tooltip>
+                  </div>
                   {
                     errors?.items && <InputError className='' error={errors?.items[index]?.apply?.productUnitId?.message} />
                   }
