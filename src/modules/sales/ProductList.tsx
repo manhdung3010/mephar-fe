@@ -12,17 +12,18 @@ import { CustomUnitSelect } from '@/components/CustomUnitSelect';
 import InputError from '@/components/InputError';
 import { EProductType } from '@/enums';
 import { formatMoney, formatNumber, roundNumber } from '@/helpers';
-import { orderActiveState, orderState } from '@/recoil/state';
+import { orderActiveState, orderDiscountSelected, orderState } from '@/recoil/state';
 
 import type { IBatch, IProductUnit, ISaleProductLocal } from './interface';
 import { ListBatchModal } from './ListBatchModal';
 import { ProductTableStyled } from './styled';
 
-export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetail: any }) {
+export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: any, orderDetail: any, listDiscount: any }) {
   const { errors, setError } = useForm;
 
   const [orderObject, setOrderObject] = useRecoilState(orderState);
   const orderActive = useRecoilValue(orderActiveState);
+  const [orderDiscount, setOrderDiscount] = useRecoilState(orderDiscountSelected);
 
   const [expandedRowKeys, setExpandedRowKeys] = useState<
     Record<string, boolean>
@@ -35,6 +36,8 @@ export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetai
   };
 
   const isSaleReturn = orderActive.split("-")[1] === "RETURN";
+
+  console.log("orderObject", orderObject[orderActive])
 
   useEffect(() => {
     if (orderObject[orderActive]) {
@@ -171,7 +174,7 @@ export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetai
               orderObjectClone[orderActive] = productsClone.filter(
                 (product) => product.id !== id
               );
-
+              setOrderDiscount([])
               setOrderObject(orderObjectClone);
             }}
             alt=""
@@ -189,9 +192,14 @@ export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetai
       title: 'TÊN SẢN PHẨM',
       dataIndex: 'name',
       key: 'name',
-      render: (_, { product, batches }) => (
+      render: (_, { product, batches, isDiscount }) => (
         <div>
-          <div className=" font-medium">{product.name}</div>
+          <div className=" font-medium flex gap-2 items-center">
+            {product.name}
+            {
+              isDiscount && <span className="text-red-500 px-2  bg-[#fde6f8] rounded">KM</span>
+            }
+          </div>
           {/* <div className="cursor-pointer font-medium text-[#0070F4]">
             {batches?.length ? 'Lô sản xuất' : ''}
           </div> */}
@@ -210,7 +218,7 @@ export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetai
       title: 'ĐƠN VỊ',
       dataIndex: 'units',
       key: 'units',
-      render: (_, { productKey, product, productUnitId, productUnit }) => (
+      render: (_, { productKey, product, productUnitId, productUnit, isDiscount }) => (
         <CustomUnitSelect
           options={(() => {
             const productUnitKeysSelected = orderObject[orderActive]?.map(
@@ -229,7 +237,7 @@ export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetai
             }));
           })()}
           value={productUnitId}
-          disabled={isSaleReturn ? true : false}
+          disabled={isSaleReturn || isDiscount ? true : false}
           onChange={(value) => {
             const orderObjectClone = cloneDeep(orderObject);
 
@@ -281,7 +289,7 @@ export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetai
       title: 'SỐ LƯỢNG',
       dataIndex: 'quantity',
       key: 'quantity',
-      render: (quantity, { productKey, batches }) => (
+      render: (quantity, { productKey, batches, isDiscount }) => (
         <CustomInput
           wrapClassName="!w-[110px]"
           className="!h-6 !w-[80px] text-center"
@@ -289,8 +297,9 @@ export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetai
           hasPlus={true}
           value={isNaN(quantity) ? 0 : quantity}
           type="number"
-          disabled={isSaleReturn && batches?.length > 0 ? true : false}
+          disabled={(isSaleReturn && batches?.length > 0) || isDiscount ? true : false}
           onChange={(value) => {
+            if (isDiscount) return
             if (isSaleReturn && batches?.length > 0) {
               setProductKeyAddBatch(productKey);
               setOpenListBatchModal(true);
@@ -299,6 +308,7 @@ export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetai
             onChangeQuantity(productKey, value)
           }}
           onMinus={async (value) => {
+            if (isDiscount) return
             if (isSaleReturn && batches?.length > 0) {
               setProductKeyAddBatch(productKey);
               setOpenListBatchModal(true);
@@ -307,6 +317,7 @@ export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetai
             await onExpandMoreBatches(productKey, value);
           }}
           onPlus={async (value) => {
+            if (isDiscount) return
             if (isSaleReturn && batches?.length > 0) {
               setProductKeyAddBatch(productKey);
               setOpenListBatchModal(true);
@@ -315,6 +326,7 @@ export function ProductList({ useForm, orderDetail }: { useForm: any, orderDetai
             await onExpandMoreBatches(productKey, value);
           }}
           onBlur={(e) => {
+            if (isDiscount) return
             if (isSaleReturn && batches?.length > 0) {
               setProductKeyAddBatch(productKey);
               setOpenListBatchModal(true);

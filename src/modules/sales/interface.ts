@@ -182,6 +182,7 @@ export interface ISaleProductLocal extends Omit<ISaleProduct, "batches"> {
       isBaseUnit: boolean;
     };
   }[];
+  isDiscount?: boolean;
 }
 
 export interface ISampleMedicine {

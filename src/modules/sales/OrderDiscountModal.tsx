@@ -11,27 +11,22 @@ import { getOrderDiscountList } from '@/api/discount.service';
 import { EDiscountBillMethodLabel, EDiscountGoodsMethodLabel } from '../settings/discount/add-discount/Info';
 import { cloneDeep } from 'lodash';
 import { useEffect, useState } from 'react';
+import { useRecoilState } from 'recoil';
+import { orderDiscountSelected, orderState } from '@/recoil/state';
 
 export function OrderDiscountModal({
   isOpen,
   onCancel,
   onSave,
-  data
+  discountList
 }: {
   isOpen: boolean;
   onCancel: () => void;
   onSave: (value) => void;
-  data: any
+  discountList: any
 }) {
   const [listDiscount, setListDiscount] = useState<any[]>([]);
-
-  const { data: discountList, isLoading } = useQuery(['ORDER_LIST', isOpen], () =>
-    getOrderDiscountList(data),
-    {
-      enabled: !!isOpen && !!data,
-    }
-  );
-
+  const [orderDiscount, setOrderDiscount] = useRecoilState(orderDiscountSelected);
   useEffect(() => {
     if (discountList?.data?.data?.items) {
       const listBatchClone = cloneDeep(discountList?.data?.data?.items);
@@ -65,10 +60,10 @@ export function OrderDiscountModal({
               Giảm giá
               <span className='text-[#d64457]'>
                 {
-                  " " + formatNumber(items[0]?.apply?.discountValue)
+                  " " + formatNumber(items?.apply?.discountValue)
                 }
                 <span>
-                  {(items[0]?.apply?.discountType === "amount" ? "đ" : "%")}
+                  {(items?.apply?.discountType === "amount" ? "đ" : "%")}
                 </span>
               </span>
             </div>
@@ -79,11 +74,11 @@ export function OrderDiscountModal({
                 Tặng
                 <span className='text-[#d64457]'>
                   {
-                    " " + formatNumber(items[0]?.apply?.pointValue)
+                    " " + formatNumber(items?.apply?.pointValue)
                   }
                 </span>
                 {
-                  (items[0]?.apply?.pointType === "amount" ? "" : "%") + " điểm"
+                  (items?.apply?.pointType === "amount" ? "" : "%") + " điểm"
                 }
               </div>
             )
@@ -93,6 +88,10 @@ export function OrderDiscountModal({
     },
   ];
 
+  useEffect(() => {
+    const selectedDiscount = listDiscount.filter((batch) => batch.isSelected);
+    setOrderDiscount(selectedDiscount);
+  }, [])
 
   return (
     <CustomModal
@@ -107,13 +106,13 @@ export function OrderDiscountModal({
       <div className="my-5 h-[1px] w-full bg-[#C7C9D9]" />
 
       <CustomTable
-        dataSource={listDiscount?.map((item: any) => ({
+        dataSource={listDiscount && listDiscount?.map((item: any) => ({
           ...item,
           key: item.id,
         }))}
         columns={columns}
         scroll={{ x: 600 }}
-        loading={isLoading}
+        // loading={isLoading}
         rowSelection={{
           type: 'checkbox',
           selectedRowKeys: [
@@ -148,7 +147,9 @@ export function OrderDiscountModal({
         </CustomButton>
         <CustomButton
           onClick={() => {
-
+            const selectedDiscount = listDiscount.filter((batch) => batch.isSelected);
+            setOrderDiscount(selectedDiscount);
+            // onSave(selectedDiscount);
           }}
           className="h-[46px] min-w-[150px] py-2 px-4"
         // type={isSaleReturn && batchErr.length > 0 ? 'disable' : 'danger'}

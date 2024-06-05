@@ -98,22 +98,10 @@ export const BillDiscountProduct = ({
 
   const handleDeleteRow = (indexToDelete) => {
     if (getValues("items").length === 1) return; // Prevent deleting the last row
-    setRows(prevRows => prevRows.filter((_, index) => index !== indexToDelete));
 
     // Update value items
-    const newRowFormat = rows.filter((_, index) => index !== indexToDelete).map(row => ({
-      condition: {
-        order: {
-          from: row.from
-        }
-      },
-      apply: {
-        discountValue: row.discountValue,
-        discountType: row.discountType,
-        type: row?.type
-      }
-    }));
-    setValue('items', newRowFormat);
+    const newRowFormat = getValues("items").filter((_, index) => index !== indexToDelete);
+    setValue('items', newRowFormat, { shouldValidate: true });
   };
 
   const handleChangeRow = (index, key, value) => {

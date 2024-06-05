@@ -4,7 +4,7 @@ import { Popover } from 'antd';
 import cx from 'classnames';
 import { cloneDeep, debounce } from 'lodash';
 import Image from 'next/image';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
@@ -17,7 +17,7 @@ import SearchIcon from '@/assets/searchIcon.svg';
 import { CustomAutocomplete } from '@/components/CustomAutocomplete';
 import { EPaymentMethod } from '@/enums';
 import { formatMoney, formatNumber, getImage, randomString } from '@/helpers';
-import { branchState, orderActiveState, orderState } from '@/recoil/state';
+import { branchState, orderActiveState, orderDiscountSelected, orderState } from '@/recoil/state';
 
 import { getOrderDetail } from '@/api/order.service';
 import { CustomInput } from '@/components/CustomInput';
@@ -35,6 +35,7 @@ import type {
 import { schema, schemaReturn } from './schema';
 import { RightContentReturn } from './RightContentReturn';
 import { CustomButton } from '@/components/CustomButton';
+import { getOrderDiscountList } from '@/api/discount.service';
 
 const Index = () => {
   const branchId = useRecoilValue(branchState);
@@ -81,6 +82,11 @@ const Index = () => {
     },
   });
 
+  const [orderActive, setOrderActive] = useRecoilState(orderActiveState);
+  const [orderObject, setOrderObject] = useRecoilState(orderState);
+  const [orderDiscount, setOrderDiscount] = useRecoilState(orderDiscountSelected);
+
+
   const { data: products, isLoading: isLoadingProduct, isSuccess } = useQuery<{
     data?: { items: ISaleProduct[] };
   }>(
@@ -109,11 +115,39 @@ const Index = () => {
       () => getSampleMedicines({ ...formFilter, branchId, status: 1 }),
       { enabled: !!isSearchSampleMedicine }
     );
+  const totalPrice = useMemo(() => {
+    let price = 0;
+
+    orderObject[orderActive]?.forEach((product: ISaleProductLocal) => {
+      const unit = product.product.productUnit?.find(
+        (unit) => unit.id === product.productUnitId
+      );
+
+      price += Number(unit?.price ?? 0) * product.quantity;
+    });
+
+    return price;
+  }, [orderObject, orderActive]);
+  const getDiscountPostData = () => {
+    const products = orderObject[orderActive]?.map((product: ISaleProductLocal) => ({
+      productUnitId: product.productUnitId,
+      quantity: product.quantity,
+    }));
+    return {
+      products,
+      totalPrice: totalPrice,
+      customerId: getValues('customerId'),
+      branchId: branchId,
+    }
+  }
+  const data: any = getDiscountPostData()
+  const { data: discountList, isLoading } = useQuery(['ORDER_DISCOUNT_LIST'], () =>
+    getOrderDiscountList(data),
+    {
+      enabled: !!getValues('customerId') && totalPrice > 0,
+    }
+  );
   const [searchKeyword, setSearchKeyword] = useState('');
-
-  const [orderActive, setOrderActive] = useRecoilState(orderActiveState);
-  const [orderObject, setOrderObject] = useRecoilState(orderState);
-
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -190,10 +224,69 @@ const Index = () => {
     handleScannedData()
   }, [scannedData, products?.data?.items, isSuccess, isSearchSampleMedicine]);
 
+  // get product discount
+  useEffect(() => {
+    function handleGetProductDiscount() {
+      if (discountList && orderDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
+        let orderDiscountClone: any = cloneDeep(orderDiscount)
+        orderDiscountClone = orderDiscountClone?.forEach((item) => {
+          const list = item?.items?.apply?.productUnitId
+          for (const l of list) {
+            let product = {}
+            const productsScan = getSaleProducts({ ...formFilter, keyword: "", branchId, productUnit: l }).then((res) => {
+              if (res?.data?.items?.length > 0) {
+                product = {
+                  ...res?.data?.items[0],
+                  quantity: item.items.apply.maxQuantity,
+                  isDiscount: true,
+                  discountType: item?.items?.apply?.discountType,
+                  discountValue: item?.items?.apply?.discountValue,
+                  isGift: item?.items?.apply?.isGift,
+                }
+                if (res) {
+                  onSelectedProduct(JSON.stringify({
+                    ...res?.data?.items[0],
+                    quantity: item.items.apply.maxQuantity,
+                    isDiscount: true,
+                    discountType: item?.items?.apply?.discountType,
+                    discountValue: item?.items?.apply?.discountValue,
+                    isGift: item?.items?.apply?.isGift,
+                  }));
+                }
+              }
+            }
+            )
+
+            // }
+            // product = {
+            //   ...productsScan?.data?.items[0],
+            //   quantity: item.items.apply.maxQuantity,
+            //   isDiscount: true,
+            //   discountType: item?.items?.apply?.discountType,
+            //   discountValue: item?.items?.apply?.discountValue,
+            //   isGift: item?.items?.apply?.isGift,
+            // }
+            // if (productsScan) {
+            //   onSelectedProduct(JSON.stringify({
+            //     ...productsScan?.data?.items[0],
+            //     quantity: item.items.apply.maxQuantity,
+            //     isDiscount: true,
+            //     discountType: item?.items?.apply?.discountType,
+            //     discountValue: item?.items?.apply?.discountValue,
+            //     isGift: item?.items?.apply?.isGift,
+            //   }));
+            // }
+          }
+        })
+      }
+    }
+    handleGetProductDiscount()
+  }, [orderDiscount]);
+
+
+  // select product
   const onSelectedProduct = (value) => {
     const product: ISaleProduct = JSON.parse(value);
-
-
     const productKey = `${product.product.id}-${product.productUnit.id}`;
 
     const orderObjectClone = cloneDeep(orderObject);
@@ -215,6 +308,7 @@ const Index = () => {
           return product;
         }
       );
+      setOrderObject((pre) => ({ ...pre, ...orderObjectClone }));
     } else {
       let isSelectedUnit = true;
 
@@ -244,10 +338,12 @@ const Index = () => {
           return newBatch;
         }),
       };
-      orderObjectClone[orderActive]?.push(productLocal);
+      // orderObjectClone[orderActive]?.push(productLocal);
+      setOrderObject((pre) => ({ ...pre, [orderActive]: [...pre[orderActive], productLocal] }));
     }
+    // setOrderObject((pre) => ({ ...pre, ...orderObjectClone }));
     inputRef.current?.select();
-    setOrderObject(orderObjectClone);
+    // setOrderObject(orderObjectClone);
     setFormFilter((pre) => ({ ...pre, keyword: '' }));
   };
 
@@ -312,6 +408,7 @@ const Index = () => {
     setOrderObject(orderObjectClone);
   };
 
+  // Search product
   const onSearch = useCallback(
     debounce((value) => {
       setFormFilter((preValue) => ({
@@ -562,8 +659,24 @@ const Index = () => {
             </div>
           </div>
 
-          <ProductList useForm={{ errors, setError }} orderDetail={orderDetail} />
-          {/* <div></div> */}
+          <ProductList useForm={{ errors, setError }} orderDetail={orderDetail} listDiscount={discountList} />
+          {
+            orderDiscount && orderDiscount.length > 0 && (
+              <div className='bg-[#fbecee] rounded-lg shadow-sm p-5 mx-4'>
+                <h3 className='text-base font-medium'>Khuyến mại hóa đơn</h3>
+                <div className='grid grid-cols-1'>
+                  {
+                    orderDiscount?.map((item, index) => (
+                      <div key={index} className='flex items-center gap-x-2'>
+                        <div className='text-sm'>{item?.name}</div>
+                        <div className='text-sm'>{item?.items?.apply?.discountValue}</div>
+                      </div>
+                    ))
+                  }
+                </div>
+              </div>
+            )
+          }
         </div>
 
         {
@@ -573,6 +686,7 @@ const Index = () => {
             orderDetail={orderDetail}
           /> : <RightContent
             useForm={{ getValues, setValue, handleSubmit, errors, reset }}
+            discountList={discountList}
           />
         }
       </div>

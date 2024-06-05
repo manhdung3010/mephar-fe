@@ -47,7 +47,7 @@ import { RightContentStyled } from './styled';
 import { RoleAction, RoleModel } from '../settings/role/role.enum';
 import { OrderDiscountModal } from './OrderDiscountModal';
 
-export function RightContent({ useForm }: { useForm: any }) {
+export function RightContent({ useForm, discountList }: { useForm: any, discountList: any }) {
   const queryClient = useQueryClient();
 
   const { getValues, setValue, handleSubmit, errors, reset } = useForm;
@@ -570,7 +570,7 @@ export function RightContent({ useForm }: { useForm: any }) {
         onSave={() => {
 
         }}
-        data={getDiscountPostData()}
+        discountList={discountList}
       />
     </RightContentStyled>
   );
