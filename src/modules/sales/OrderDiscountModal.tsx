@@ -5,14 +5,11 @@ import { CustomModal } from '@/components/CustomModal';
 import CustomTable from '@/components/CustomTable';
 import { formatNumber } from '@/helpers';
 
-import type { IBatch } from './interface';
-import { useQuery } from '@tanstack/react-query';
-import { getOrderDiscountList } from '@/api/discount.service';
-import { EDiscountBillMethodLabel, EDiscountGoodsMethodLabel } from '../settings/discount/add-discount/Info';
+import { orderDiscountSelected } from '@/recoil/state';
 import { cloneDeep } from 'lodash';
 import { useEffect, useState } from 'react';
 import { useRecoilState } from 'recoil';
-import { orderDiscountSelected, orderState } from '@/recoil/state';
+import { EDiscountBillMethodLabel, EDiscountGoodsMethodLabel } from '../settings/discount/add-discount/Info';
 
 export function OrderDiscountModal({
   isOpen,

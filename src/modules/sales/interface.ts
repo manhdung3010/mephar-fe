@@ -183,6 +183,9 @@ export interface ISaleProductLocal extends Omit<ISaleProduct, "batches"> {
     };
   }[];
   isDiscount?: boolean;
+  price?: any;
+  discountValue?: any;
+  discountType?: string;
 }
 
 export interface ISampleMedicine {

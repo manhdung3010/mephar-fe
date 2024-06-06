@@ -29,10 +29,11 @@ import {
   EPaymentMethod,
   getEnumKeyByValue,
 } from '@/enums';
-import { formatMoney, hasPermission } from '@/helpers';
+import { formatMoney, formatNumber, hasPermission } from '@/helpers';
 import {
   branchState,
   orderActiveState,
+  orderDiscountSelected,
   orderState,
   profileState,
 } from '@/recoil/state';
@@ -54,6 +55,7 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
 
   const [orderObject, setOrderObject] = useRecoilState(orderState);
   const [orderActive, setOrderActive] = useRecoilState(orderActiveState);
+  const [orderDiscount, setOrderDiscount] = useRecoilState(orderDiscountSelected);
 
   const branchId = useRecoilValue(branchState);
   const profile = useRecoilValue(profileState);
@@ -67,6 +69,7 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
   const [searchEmployeeText, setSearchEmployeeText] = useState('');
   const [searchCustomerText, setSearchCustomerText] = useState('');
   const [saleInvoice, setSaleInvoice] = useState();
+  const [oldTotal, setOldTotal] = useState(0);
 
   const { data: employees } = useQuery(
     ['EMPLOYEE_LIST', searchEmployeeText],
@@ -93,17 +96,35 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
 
   const totalPrice = useMemo(() => {
     let price = 0;
-
+    let discount = 0;
     orderObject[orderActive]?.forEach((product: ISaleProductLocal) => {
       const unit = product.product.productUnit?.find(
         (unit) => unit.id === product.productUnitId
       );
 
-      price += Number(unit?.price ?? 0) * product.quantity;
+      const discountVal = (product?.discountType === "amount" ? product?.discountValue : (unit?.price * product?.discountValue) / 100) || 0;
+      price += (Number(unit?.price ?? 0) - discountVal) * product.quantity;
+      oldTotal += (Number(unit?.price ?? 0)) * product.quantity;
     });
+    if (orderDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
+      orderDiscount?.forEach((item) => {
+        if (item.type === "order_price") {
+          if (item?.items?.apply?.discountType === "percent") {
+            discount += (price * item?.items?.apply?.discountValue) / 100;
+          }
+          else {
+            discount += item?.items?.apply?.discountValue;
+          }
 
+        }
+      })
+    }
+    let oldTotal = price;
+    price = price - discount;
+    oldTotal = oldTotal - price;
+    setOldTotal(oldTotal);
     return price;
-  }, [orderObject, orderActive]);
+  }, [orderObject, orderActive, orderDiscount]);
 
   const discount = useMemo(() => {
     if (getValues('discount')) {
@@ -178,6 +199,26 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
   const { mutate: mutateCreateOrder, isLoading: isLoadingCreateOrder } =
     useMutation(
       () => {
+        if (orderDiscount?.length > 0) {
+          const formatProducts = getValues('products')?.map(
+            ({ isBatchExpireControl, ...product }) => ({
+              ...product,
+              batches: product.batches?.map((batch) => ({
+                id: batch.id,
+                quantity: batch.quantity,
+              })),
+              isDiscount: product?.isDiscount || false,
+            })
+          );
+          return createOrder({
+            ...getValues(),
+            discountOrder: oldTotal,
+            listDiscountId: orderDiscount?.map((item) => item.id),
+            ...(getValues('customerId') === -1 && { customerId: null }),
+            products: formatProducts,
+            branchId,
+          });
+        }
         const formatProducts = getValues('products')?.map(
           ({ isBatchExpireControl, ...product }) => ({
             ...product,
@@ -204,6 +245,7 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
           const orderClone = cloneDeep(orderObject);
           orderClone[orderActive] = [];
           setOrderObject(orderClone);
+          setOrderDiscount([]);
           setIsOpenOrderSuccessModal(true);
           reset();
           setValue('userId', profile.id, { shouldValidate: true });
@@ -311,9 +353,9 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
       <div className="flex grow flex-col px-6">
         <div className="grow">
           <div className="mb-5 border-b-2 border-dashed border-[#E4E4E4]">
-            <div className="mb-3 flex justify-between">
+            <div className="mb-3 flex justify-between items-start">
               <div className="text-lg leading-normal text-[#828487] flex items-center gap-2">
-                <span>
+                <span className='text-lg'>
                   Tổng tiền (
                   <span className="text-lg">
                     {orderObject[orderActive]?.length ?? 0} sp
@@ -328,8 +370,22 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
                   )
                 }
               </div>
-              <div className="text-lg leading-normal text-[#19191C]">
-                {formatMoney(totalPrice)}
+              <div className="text-lg leading-normal text-[#19191C] flex flex-col items-end">
+                <div className='text-lg'>
+                  {formatMoney(totalPrice)}
+                </div>
+                {
+                  orderDiscount?.map((item) => {
+                    if (item.type === "order_price") {
+                      return (
+                        <div key={item.id} className="text-[#828487] text-base">
+                          <span className="text-red-500 px-2  bg-[#fde6f8] rounded">KM</span> {formatNumber(item?.items?.apply?.discountValue)}{item?.items?.apply?.discountType === "percent" ? "%" : "đ"}
+                        </div>
+                      )
+                    }
+                    return null;
+                  })
+                }
               </div>
             </div>
 
@@ -494,21 +550,32 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
               return;
             }
             const products: ISaleProductLocal[] = orderObject[orderActive];
-            const formatProducts = products.map((product) => ({
-              productId: product.productId,
-              productUnitId: product.productUnitId,
-              originProductUnitId: product.originProductUnitId,
-              productType: product.product.type,
-              quantity: product.quantity,
-              isBatchExpireControl: product.product.isBatchExpireControl,
-              batches: product.batches
-                .filter((batch) => batch.isSelected)
-                .map((batch: any) => ({
-                  id: batch.id,
-                  quantity: batch.quantity,
-                  inventory: batch.inventory,
-                })),
-            }));
+            const formatProducts = products.map((product) => {
+              const unit = product.product.productUnit?.find(
+                (unit) => unit.id === product.productUnitId
+              );
+
+              const discountVal = (product?.discountType === "amount" ? product?.discountValue : (unit?.price * product?.discountValue) / 100) || 0;
+              return {
+                productId: product.productId,
+                productUnitId: product.productUnitId,
+                originProductUnitId: product.originProductUnitId,
+                productType: product.product.type,
+                quantity: product.quantity,
+                isDiscount: product.isDiscount,
+                ...(product.isDiscount && {
+                  itemPrice: Number(product.price - discountVal),
+                }),
+                isBatchExpireControl: product.product.isBatchExpireControl,
+                batches: product.batches
+                  .filter((batch) => batch.isSelected)
+                  .map((batch: any) => ({
+                    id: batch.id,
+                    quantity: batch.quantity,
+                    inventory: batch.inventory,
+                  })),
+              }
+            });
 
             setValue('products', formatProducts, { shouldValidate: true });
             setValue('totalPrice', customerMustPay, { shouldValidate: true });

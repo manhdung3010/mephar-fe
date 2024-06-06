@@ -150,6 +150,8 @@ const Index = () => {
   const [searchKeyword, setSearchKeyword] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
+  console.log("orderDiscount", orderDiscount)
+
   useEffect(() => {
     const getDataDetail = async () => {
       if (id) {
@@ -224,6 +226,10 @@ const Index = () => {
     handleScannedData()
   }, [scannedData, products?.data?.items, isSuccess, isSearchSampleMedicine]);
 
+  useEffect(() => {
+    setOrderDiscount([])
+  }, [orderActive])
+
   // get product discount
   useEffect(() => {
     function handleGetProductDiscount() {
@@ -231,57 +237,90 @@ const Index = () => {
         let orderDiscountClone: any = cloneDeep(orderDiscount)
         orderDiscountClone = orderDiscountClone?.forEach((item) => {
           const list = item?.items?.apply?.productUnitId
-          for (const l of list) {
-            let product = {}
-            const productsScan = getSaleProducts({ ...formFilter, keyword: "", branchId, productUnit: l }).then((res) => {
-              if (res?.data?.items?.length > 0) {
-                product = {
-                  ...res?.data?.items[0],
-                  quantity: item.items.apply.maxQuantity,
-                  isDiscount: true,
-                  discountType: item?.items?.apply?.discountType,
-                  discountValue: item?.items?.apply?.discountValue,
-                  isGift: item?.items?.apply?.isGift,
-                }
-                if (res) {
-                  onSelectedProduct(JSON.stringify({
+          if (list?.length > 0) {
+            for (const l of list) {
+              let product = {}
+              const productsScan = getSaleProducts({ ...formFilter, keyword: "", branchId, productUnit: l }).then((res) => {
+                if (res?.data?.items?.length > 0) {
+                  product = {
                     ...res?.data?.items[0],
                     quantity: item.items.apply.maxQuantity,
                     isDiscount: true,
                     discountType: item?.items?.apply?.discountType,
                     discountValue: item?.items?.apply?.discountValue,
                     isGift: item?.items?.apply?.isGift,
-                  }));
+                  }
+                  let discountValue = item?.items?.apply?.discountValue;
+                  let discountType = item?.items?.apply?.discountType;
+                  if (item?.items?.apply?.isGift) {
+                    discountType = "amount";
+                    discountValue = res?.data?.items[0]?.price;
+                  }
+                  else {
+                    if (discountType === "percent" && discountValue > 100) {
+                      discountValue = 100;
+                    }
+                    else if (discountType === "amount" && +discountValue > +res?.data?.items[0]?.price) {
+                      discountValue = res?.data?.items[0]?.price;
+                    }
+                  }
+
+                  if (res) {
+                    onSelectedProduct(JSON.stringify({
+                      ...res?.data?.items[0],
+                      quantity: item.items.apply.maxQuantity,
+                      isDiscount: true,
+                      discountType: discountType,
+                      discountValue: discountValue,
+                      isGift: item?.items?.apply?.isGift,
+                    }));
+                  }
                 }
               }
-            }
-            )
+              )
 
-            // }
-            // product = {
-            //   ...productsScan?.data?.items[0],
-            //   quantity: item.items.apply.maxQuantity,
-            //   isDiscount: true,
-            //   discountType: item?.items?.apply?.discountType,
-            //   discountValue: item?.items?.apply?.discountValue,
-            //   isGift: item?.items?.apply?.isGift,
-            // }
-            // if (productsScan) {
-            //   onSelectedProduct(JSON.stringify({
-            //     ...productsScan?.data?.items[0],
-            //     quantity: item.items.apply.maxQuantity,
-            //     isDiscount: true,
-            //     discountType: item?.items?.apply?.discountType,
-            //     discountValue: item?.items?.apply?.discountValue,
-            //     isGift: item?.items?.apply?.isGift,
-            //   }));
-            // }
+              // }
+              // product = {
+              //   ...productsScan?.data?.items[0],
+              //   quantity: item.items.apply.maxQuantity,
+              //   isDiscount: true,
+              //   discountType: item?.items?.apply?.discountType,
+              //   discountValue: item?.items?.apply?.discountValue,
+              //   isGift: item?.items?.apply?.isGift,
+              // }
+              // if (productsScan) {
+              //   onSelectedProduct(JSON.stringify({
+              //     ...productsScan?.data?.items[0],
+              //     quantity: item.items.apply.maxQuantity,
+              //     isDiscount: true,
+              //     discountType: item?.items?.apply?.discountType,
+              //     discountValue: item?.items?.apply?.discountValue,
+              //     isGift: item?.items?.apply?.isGift,
+              //   }));
+              // }
+            }
+          }
+          else {
+            // remove product added by discount before
+            const orderObjectClone = cloneDeep(orderObject);
+            orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
+            setOrderObject(orderObjectClone);
           }
         })
       }
     }
     handleGetProductDiscount()
-  }, [orderDiscount]);
+  }, [orderDiscount, orderActive, discountList]);
+
+  useEffect(() => {
+    // update product when order discount is changed
+    if (orderDiscount?.length <= 0) {
+      const orderObjectClone = cloneDeep(orderObject);
+      orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
+      setOrderObject(orderObjectClone);
+    }
+
+  }, [orderDiscount])
 
 
   // select product
@@ -298,7 +337,7 @@ const Index = () => {
     ) {
       orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map(
         (product: ISaleProductLocal) => {
-          if (product.productKey === productKey) {
+          if (product.productKey === productKey && !product.isDiscount) {
             return {
               ...product,
               quantity: product.quantity + 1,
@@ -660,23 +699,6 @@ const Index = () => {
           </div>
 
           <ProductList useForm={{ errors, setError }} orderDetail={orderDetail} listDiscount={discountList} />
-          {
-            orderDiscount && orderDiscount.length > 0 && (
-              <div className='bg-[#fbecee] rounded-lg shadow-sm p-5 mx-4'>
-                <h3 className='text-base font-medium'>Khuyến mại hóa đơn</h3>
-                <div className='grid grid-cols-1'>
-                  {
-                    orderDiscount?.map((item, index) => (
-                      <div key={index} className='flex items-center gap-x-2'>
-                        <div className='text-sm'>{item?.name}</div>
-                        <div className='text-sm'>{item?.items?.apply?.discountValue}</div>
-                      </div>
-                    ))
-                  }
-                </div>
-              </div>
-            )
-          }
         </div>
 
         {
