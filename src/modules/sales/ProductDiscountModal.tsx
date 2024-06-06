@@ -11,7 +11,7 @@ import { useEffect, useState } from 'react';
 import { useRecoilState } from 'recoil';
 import { EDiscountBillMethodLabel, EDiscountGoodsMethodLabel } from '../settings/discount/add-discount/Info';
 
-export function OrderDiscountModal({
+export function ProductDiscountModal({
   isOpen,
   onCancel,
   onSave,
@@ -20,17 +20,17 @@ export function OrderDiscountModal({
   isOpen: boolean;
   onCancel: () => void;
   onSave: (value) => void;
-  discountList: any
+  discountList?: any
 }) {
   const [listDiscount, setListDiscount] = useState<any[]>([]);
   const [orderDiscount, setOrderDiscount] = useRecoilState(orderDiscountSelected);
   const [discountType, setDiscountType] = useRecoilState(discountTypeState);
   useEffect(() => {
-    if (discountList?.data?.data?.items) {
-      const listBatchClone = cloneDeep(discountList?.data?.data?.items);
+    if (discountList) {
+      const listBatchClone = cloneDeep(discountList);
       setListDiscount(listBatchClone);
     }
-  }, [discountList?.data?.data?.items]);
+  }, [discountList]);
 
   const columns: ColumnsType<any> = [
     {
@@ -89,14 +89,14 @@ export function OrderDiscountModal({
   useEffect(() => {
     const selectedDiscount = listDiscount.filter((batch) => batch.isSelected);
     setOrderDiscount(selectedDiscount);
-    setDiscountType("order");
+    setDiscountType("product")
   }, [])
 
   return (
     <CustomModal
       isOpen={isOpen}
       onCancel={onCancel}
-      title="Khuyến mại trên hóa đơn"
+      title="Khuyến mại trên hàng hóa"
       width={980}
       onSubmit={onCancel}
       customFooter={true}
@@ -105,7 +105,7 @@ export function OrderDiscountModal({
       <div className="my-5 h-[1px] w-full bg-[#C7C9D9]" />
 
       <CustomTable
-        dataSource={listDiscount && listDiscount?.map((item: any) => ({
+        dataSource={discountList && discountList?.map((item: any) => ({
           ...item,
           key: item.id,
         }))}
@@ -113,7 +113,7 @@ export function OrderDiscountModal({
         scroll={{ x: 600 }}
         // loading={isLoading}
         rowSelection={{
-          type: 'checkbox',
+          type: 'radio',
           selectedRowKeys: [
             ...listDiscount
               .filter((batch) => batch.isSelected)
@@ -148,8 +148,8 @@ export function OrderDiscountModal({
           onClick={() => {
             const selectedDiscount = listDiscount.filter((batch) => batch.isSelected);
             setOrderDiscount(selectedDiscount);
-            setDiscountType("order");
-            onSave(selectedDiscount);
+            setDiscountType("product")
+            // onSave(selectedDiscount);
           }}
           className="h-[46px] min-w-[150px] py-2 px-4"
         // type={isSaleReturn && batchErr.length > 0 ? 'disable' : 'danger'}

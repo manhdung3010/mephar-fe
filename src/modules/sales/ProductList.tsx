@@ -1,21 +1,23 @@
 import type { ColumnsType } from 'antd/es/table';
-import { cloneDeep, divide, orderBy } from 'lodash';
+import { cloneDeep, orderBy } from 'lodash';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
 import CloseIcon from '@/assets/closeWhiteIcon.svg';
+import DiscountIcon from '@/assets/gift.svg';
 import RemoveIcon from '@/assets/removeIcon.svg';
 import { CustomInput } from '@/components/CustomInput';
 import CustomTable from '@/components/CustomTable';
 import { CustomUnitSelect } from '@/components/CustomUnitSelect';
 import InputError from '@/components/InputError';
-import { EProductType } from '@/enums';
 import { formatMoney, formatNumber, roundNumber } from '@/helpers';
-import { orderActiveState, orderDiscountSelected, orderState } from '@/recoil/state';
+import { discountTypeState, orderActiveState, orderDiscountSelected, orderState } from '@/recoil/state';
 
-import type { IBatch, IProductUnit, ISaleProductLocal } from './interface';
+import { Tooltip } from 'antd';
 import { ListBatchModal } from './ListBatchModal';
+import { ProductDiscountModal } from './ProductDiscountModal';
+import type { IBatch, IProductUnit, ISaleProductLocal } from './interface';
 import { ProductTableStyled } from './styled';
 
 export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: any, orderDetail: any, listDiscount: any }) {
@@ -24,11 +26,14 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
   const [orderObject, setOrderObject] = useRecoilState(orderState);
   const orderActive = useRecoilValue(orderActiveState);
   const [orderDiscount, setOrderDiscount] = useRecoilState(orderDiscountSelected);
+  const [discountType, setDiscountType] = useRecoilState(discountTypeState);
 
   const [expandedRowKeys, setExpandedRowKeys] = useState<
     Record<string, boolean>
   >({});
   const [openListBatchModal, setOpenListBatchModal] = useState(false);
+  const [openProductDiscountList, setOpenProductDiscountList] = useState(false);
+  const [itemDiscount, setItemDiscount] = useState();
   const [productKeyAddBatch, setProductKeyAddBatch] = useState<string>();
 
   const checkDisplayListBatch = (product: ISaleProductLocal) => {
@@ -36,6 +41,8 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
   };
 
   const isSaleReturn = orderActive.split("-")[1] === "RETURN";
+
+  console.log("discountType", discountType)
 
   useEffect(() => {
     if (orderObject[orderActive]) {
@@ -174,6 +181,7 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
                 (product) => product.id !== id
               );
               setOrderDiscount([])
+              setDiscountType("order")
               setOrderObject(orderObjectClone);
             }}
             alt=""
@@ -191,12 +199,22 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
       title: 'TÊN SẢN PHẨM',
       dataIndex: 'name',
       key: 'name',
-      render: (_, { product, batches, isDiscount }) => (
+      render: (_, { product, batches, isDiscount, itemDiscountProduct }) => (
         <div>
           <div className=" font-medium flex gap-2 items-center">
             {product.name}
             {
               isDiscount && <span className="text-red-500 px-2  bg-[#fde6f8] rounded">KM</span>
+            }
+            {
+              !isDiscount && itemDiscountProduct?.length > 0 && (
+                <Tooltip title="KM hàng hóa" className='cursor-pointer'>
+                  <Image src={DiscountIcon} onClick={() => {
+                    setOpenProductDiscountList(!openProductDiscountList)
+                    setItemDiscount(itemDiscountProduct)
+                  }} alt='discount-icon' />
+                </Tooltip>
+              )
             }
           </div>
           {/* <div className="cursor-pointer font-medium text-[#0070F4]">
@@ -572,7 +590,7 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
       />
 
       {
-        orderObject[orderActive]?.length > 0 && orderDiscount?.length > 0 && (
+        discountType === "order" && orderObject[orderActive]?.length > 0 && orderDiscount?.length > 0 && (
           <div className='bg-[#fbecee] rounded-lg shadow-sm p-5 mt-5'>
             <h3 className='text-lg font-medium mb-2'>Khuyến mại hóa đơn</h3>
             <div className='grid grid-cols-1 gap-2'>
@@ -640,6 +658,7 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
           setError('products', { message: undefined });
         }}
       />
+      <ProductDiscountModal isOpen={openProductDiscountList} onCancel={() => setOpenProductDiscountList(false)} onSave={() => { }} discountList={itemDiscount} />
     </ProductTableStyled>
   );
 }

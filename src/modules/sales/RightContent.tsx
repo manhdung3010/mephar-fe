@@ -635,7 +635,7 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
         isOpen={isOpenDiscountModal}
         onCancel={() => setIsOpenDiscountModal(false)}
         onSave={() => {
-
+          setIsOpenDiscountModal(false);
         }}
         discountList={discountList}
       />

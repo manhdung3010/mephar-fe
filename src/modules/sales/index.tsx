@@ -35,7 +35,7 @@ import type {
 import { schema, schemaReturn } from './schema';
 import { RightContentReturn } from './RightContentReturn';
 import { CustomButton } from '@/components/CustomButton';
-import { getOrderDiscountList } from '@/api/discount.service';
+import { getOrderDiscountList, getProductDiscountList } from '@/api/discount.service';
 
 const Index = () => {
   const branchId = useRecoilValue(branchState);
@@ -351,34 +351,45 @@ const Index = () => {
     } else {
       let isSelectedUnit = true;
 
-      const productLocal: any = {
-        ...product,
-        inventory: product.quantity,
-        productKey,
-        quantity: 1,
-        productUnitId: product.id,
-        originProductUnitId: product.id,
-        batches: product.batches?.map((batch) => {
-          const inventory =
-            (batch.quantity / product.productUnit.exchangeValue)
+      let itemDiscountProduct;
 
-          const newBatch = {
-            ...batch,
-            inventory,
-            originalInventory: batch.quantity,
-            quantity: 0,
-            isSelected: inventory >= 1 ? isSelectedUnit : false,
+      const res = getProductDiscountList({ productUnitId: product?.id, branchId: branchId, quantity: 1, customerId: getValues("customerId") }).then((res) => {
+        if (res?.data) {
+          itemDiscountProduct = res?.data?.data?.items
+
+          const productLocal: any = {
+            ...product,
+            inventory: product.quantity,
+            productKey,
+            quantity: 1,
+            productUnitId: product.id,
+            itemDiscountProduct: itemDiscountProduct,
+            originProductUnitId: product.id,
+            batches: product.batches?.map((batch) => {
+              const inventory =
+                (batch.quantity / product.productUnit.exchangeValue)
+
+              const newBatch = {
+                ...batch,
+                inventory,
+                originalInventory: batch.quantity,
+                quantity: 0,
+                isSelected: inventory >= 1 ? isSelectedUnit : false,
+              };
+
+              if (inventory >= 1 && isSelectedUnit) {
+                isSelectedUnit = false;
+                newBatch.quantity = 1;
+              }
+              return newBatch;
+            }),
           };
+          // orderObjectClone[orderActive]?.push(productLocal);
+          setOrderObject((pre) => ({ ...pre, [orderActive]: [...pre[orderActive], productLocal] }));
+        }
+      })
 
-          if (inventory >= 1 && isSelectedUnit) {
-            isSelectedUnit = false;
-            newBatch.quantity = 1;
-          }
-          return newBatch;
-        }),
-      };
-      // orderObjectClone[orderActive]?.push(productLocal);
-      setOrderObject((pre) => ({ ...pre, [orderActive]: [...pre[orderActive], productLocal] }));
+
     }
     // setOrderObject((pre) => ({ ...pre, ...orderObjectClone }));
     inputRef.current?.select();

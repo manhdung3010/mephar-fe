@@ -186,6 +186,7 @@ export interface ISaleProductLocal extends Omit<ISaleProduct, "batches"> {
   price?: any;
   discountValue?: any;
   discountType?: string;
+  itemDiscountProduct?: any;
 }
 
 export interface ISampleMedicine {

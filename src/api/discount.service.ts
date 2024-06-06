@@ -28,3 +28,6 @@ export function getDiscountDetail(id: number) {
 export function getOrderDiscountList(payload) {
   return axiosClient.post("discount/order", payload);
 }
+export function getProductDiscountList(payload) {
+  return axiosClient.post("discount/product", payload);
+}
