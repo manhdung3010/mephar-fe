@@ -48,6 +48,7 @@ axiosClient.interceptors.response.use(
         "external/image/upload",
         "order",
         "discount/order",
+        "discount/product",
       ];
 
       if (!excludeUrl.includes(response.config?.url as string)) {

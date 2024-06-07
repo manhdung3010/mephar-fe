@@ -663,21 +663,20 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
         isOpen={openProductDiscountList}
         onCancel={() => setOpenProductDiscountList(false)}
         onSave={(selectedDiscount) => {
-          //set selected discount to setValue products
-          // const orderObjectClone = cloneDeep(orderObject);
-          // orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map(
-          //   (product: ISaleProductLocal) => {
-          //     if (product.productUnitId === selectedDiscount[0]?.items?.condition?.productUnitId[0]) {
-          //       return {
-          //         ...product,
-          //         discountSelected: selectedDiscount
-          //       }
-          //     }
-          //     return product
-          //   }
-          // )
-          // setOrderObject(orderObjectClone)
-
+          // set selected discount to setValue products
+          const orderObjectClone = cloneDeep(orderObject);
+          orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map(
+            (product: ISaleProductLocal) => {
+              if (product.productUnitId === selectedDiscount[0]?.items[0]?.condition?.productUnitId[0]) {
+                return {
+                  ...product,
+                  discountSelected: selectedDiscount
+                }
+              }
+              return product
+            }
+          )
+          setOrderObject(orderObjectClone)
           setOpenProductDiscountList(false)
         }}
         discountList={itemDiscount}
