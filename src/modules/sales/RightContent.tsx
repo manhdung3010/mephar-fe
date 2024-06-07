@@ -32,9 +32,11 @@ import {
 import { formatMoney, formatNumber, hasPermission } from '@/helpers';
 import {
   branchState,
+  discountTypeState,
   orderActiveState,
   orderDiscountSelected,
   orderState,
+  productDiscountSelected,
   profileState,
 } from '@/recoil/state';
 
@@ -56,6 +58,8 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
   const [orderObject, setOrderObject] = useRecoilState(orderState);
   const [orderActive, setOrderActive] = useRecoilState(orderActiveState);
   const [orderDiscount, setOrderDiscount] = useRecoilState(orderDiscountSelected);
+  const [productDiscount, setProductDiscount] = useRecoilState(productDiscountSelected);
+  const [discountType, setDiscountType] = useRecoilState(discountTypeState);
 
   const branchId = useRecoilValue(branchState);
   const profile = useRecoilValue(profileState);
@@ -110,18 +114,18 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
       orderDiscount?.forEach((item) => {
         if (item.type === "order_price") {
           if (item?.items?.apply?.discountType === "percent") {
-            discount += (price * item?.items?.apply?.discountValue) / 100;
+            discount += (price * item?.items[0]?.apply?.discountValue) / 100;
           }
           else {
-            discount += item?.items?.apply?.discountValue;
+            discount += item?.items[0]?.apply?.discountValue;
           }
 
         }
       })
     }
     let oldTotal = price;
-    price = price - discount;
-    oldTotal = oldTotal - price;
+    price = price;
+    oldTotal = oldTotal - price - discount;
     setOldTotal(oldTotal);
     return price;
   }, [orderObject, orderActive, orderDiscount]);
@@ -162,22 +166,36 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
   }, [getValues('customerId')])
 
   const customerMustPay = useMemo(() => {
+    let discount = 0;
+    if (orderDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
+      orderDiscount?.forEach((item) => {
+        if (item.type === "order_price") {
+          if (item?.items[0]?.apply?.discountType === "percent") {
+            discount += (totalPrice * item?.items[0]?.apply?.discountValue) / 100;
+          }
+          else {
+            discount += item?.items[0]?.apply?.discountValue;
+          }
+
+        }
+      })
+    }
     if (getValues('discount')) {
       if (getValues('discountType') === EDiscountType.MONEY) {
         return totalPrice > Number(getValues('discount'))
-          ? Math.round(totalPrice - Number(getValues('discount')))
+          ? Math.round(totalPrice - discount - Number(getValues('discount')))
           : 0;
       }
 
       if (getValues('discountType') === EDiscountType.PERCENT) {
         const discountValue =
           (totalPrice * Number(getValues('discount'))) / 100;
-        return totalPrice > discountValue ? Math.round(totalPrice - discountValue) : 0;
+        return totalPrice > discountValue ? Math.round(totalPrice - discount - discountValue) : 0;
       }
     }
 
-    return totalPrice;
-  }, [totalPrice, getValues('discount'), getValues('discountType')]);
+    return totalPrice - discount;
+  }, [totalPrice, getValues('discount'), getValues('discountType'), getValues('customerId')]);
 
   const returnPrice = useMemo(() => {
     if (getValues('cashOfCustomer')) {
@@ -199,7 +217,7 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
   const { mutate: mutateCreateOrder, isLoading: isLoadingCreateOrder } =
     useMutation(
       () => {
-        if (orderDiscount?.length > 0) {
+        if (discountType === "order" && orderDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
           const formatProducts = getValues('products')?.map(
             ({ isBatchExpireControl, ...product }) => ({
               ...product,
@@ -214,6 +232,26 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
             ...getValues(),
             discountOrder: oldTotal,
             listDiscountId: orderDiscount?.map((item) => item.id),
+            ...(getValues('customerId') === -1 && { customerId: null }),
+            products: formatProducts,
+            branchId,
+          });
+        }
+        if (discountType === "product" && productDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
+          const formatProducts = getValues('products')?.map(
+            ({ isBatchExpireControl, ...product }) => ({
+              ...product,
+              batches: product.batches?.map((batch) => ({
+                id: batch.id,
+                quantity: batch.quantity,
+              })),
+              isDiscount: product?.isDiscount || false,
+            })
+          );
+          return createOrder({
+            ...getValues(),
+            discountOrder: oldTotal,
+            listDiscountId: productDiscount?.map((item) => item.id),
             ...(getValues('customerId') === -1 && { customerId: null }),
             products: formatProducts,
             branchId,
@@ -379,7 +417,7 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
                     if (item.type === "order_price") {
                       return (
                         <div key={item.id} className="text-[#828487] text-base">
-                          <span className="text-red-500 px-2  bg-[#fde6f8] rounded">KM</span> {formatNumber(item?.items?.apply?.discountValue)}{item?.items?.apply?.discountType === "percent" ? "%" : "đ"}
+                          <span className="text-red-500 px-2  bg-[#fde6f8] rounded">KM</span> {formatNumber(item?.items[0]?.apply?.discountValue)}{item?.items?.apply?.discountType === "percent" ? "%" : "đ"}
                         </div>
                       )
                     }

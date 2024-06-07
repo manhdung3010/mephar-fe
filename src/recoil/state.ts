@@ -88,6 +88,11 @@ export const orderDiscountSelected = atom<any[]>({
   default: [],
   effects: [localStorageEffect("ORDER_DISCOUNT_SELECTED")],
 });
+export const productDiscountSelected = atom<any[]>({
+  key: "PRODUCT_DISCOUNT_SELECTED",
+  default: [],
+  effects: [localStorageEffect("PRODUCT_DISCOUNT_SELECTED")],
+});
 export const discountTypeState = atom<string>({
   key: "DISCOUNT_TYPE_STATE",
   default: "",

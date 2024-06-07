@@ -5,7 +5,7 @@ import { CustomModal } from '@/components/CustomModal';
 import CustomTable from '@/components/CustomTable';
 import { formatNumber } from '@/helpers';
 
-import { discountTypeState, orderDiscountSelected } from '@/recoil/state';
+import { discountTypeState, orderDiscountSelected, productDiscountSelected } from '@/recoil/state';
 import { cloneDeep } from 'lodash';
 import { useEffect, useState } from 'react';
 import { useRecoilState } from 'recoil';
@@ -24,6 +24,7 @@ export function ProductDiscountModal({
 }) {
   const [listDiscount, setListDiscount] = useState<any[]>([]);
   const [orderDiscount, setOrderDiscount] = useRecoilState(orderDiscountSelected);
+  const [productDiscount, setProductDiscount] = useRecoilState(productDiscountSelected);
   const [discountType, setDiscountType] = useRecoilState(discountTypeState);
   useEffect(() => {
     if (discountList) {
@@ -147,9 +148,10 @@ export function ProductDiscountModal({
         <CustomButton
           onClick={() => {
             const selectedDiscount = listDiscount.filter((batch) => batch.isSelected);
-            setOrderDiscount(selectedDiscount);
+            // setProductDiscount([...productDiscount, ...selectedDiscount].filter((v, i, a) => a.findIndex(t => (t.id === v.id)) === i));
+            setProductDiscount(selectedDiscount);
             setDiscountType("product")
-            // onSave(selectedDiscount);
+            onSave(selectedDiscount);
           }}
           className="h-[46px] min-w-[150px] py-2 px-4"
         // type={isSaleReturn && batchErr.length > 0 ? 'disable' : 'danger'}

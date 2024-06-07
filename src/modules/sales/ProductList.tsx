@@ -12,7 +12,7 @@ import CustomTable from '@/components/CustomTable';
 import { CustomUnitSelect } from '@/components/CustomUnitSelect';
 import InputError from '@/components/InputError';
 import { formatMoney, formatNumber, roundNumber } from '@/helpers';
-import { discountTypeState, orderActiveState, orderDiscountSelected, orderState } from '@/recoil/state';
+import { discountTypeState, orderActiveState, orderDiscountSelected, orderState, productDiscountSelected } from '@/recoil/state';
 
 import { Tooltip } from 'antd';
 import { ListBatchModal } from './ListBatchModal';
@@ -26,6 +26,7 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
   const [orderObject, setOrderObject] = useRecoilState(orderState);
   const orderActive = useRecoilValue(orderActiveState);
   const [orderDiscount, setOrderDiscount] = useRecoilState(orderDiscountSelected);
+  const [productDiscount, setProductDiscount] = useRecoilState(productDiscountSelected);
   const [discountType, setDiscountType] = useRecoilState(discountTypeState);
 
   const [expandedRowKeys, setExpandedRowKeys] = useState<
@@ -41,8 +42,6 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
   };
 
   const isSaleReturn = orderActive.split("-")[1] === "RETURN";
-
-  console.log("discountType", discountType)
 
   useEffect(() => {
     if (orderObject[orderActive]) {
@@ -181,6 +180,7 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
                 (product) => product.id !== id
               );
               setOrderDiscount([])
+              setProductDiscount([])
               setDiscountType("order")
               setOrderObject(orderObjectClone);
             }}
@@ -322,6 +322,7 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
               setOpenListBatchModal(true);
               return;
             }
+            setProductDiscount([])
             onChangeQuantity(productKey, value)
           }}
           onMinus={async (value) => {
@@ -428,6 +429,7 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
   ];
 
   console.log("orderObject", orderObject[orderActive])
+  console.log("productDiscount", productDiscount)
 
   const handleRemoveBatch = (productKey: string, batchId: number) => {
     const orderObjectClone = cloneDeep(orderObject);
@@ -588,7 +590,6 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
           expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key + 1),
         }}
       />
-
       {
         discountType === "order" && orderObject[orderActive]?.length > 0 && orderDiscount?.length > 0 && (
           <div className='bg-[#fbecee] rounded-lg shadow-sm p-5 mt-5'>
@@ -601,13 +602,13 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
                     {
                       item?.type === "product_price" && (
                         <div className='text-base'>
-                          Giảm giá hàng {formatNumber(item?.items?.apply?.discountValue)} {item?.items?.apply?.discountType === "percent" ? "%" : "đ"}
+                          Giảm giá hàng {formatNumber(item?.items[0]?.apply?.discountValue)} {item?.items[0]?.apply?.discountType === "percent" ? "%" : "đ"}
                         </div>
                       )
                     }
                     {
                       item?.type === "order_price" && (
-                        <div className='text-base'>Giảm giá hóa đơn {formatNumber(item?.items?.apply?.discountValue)} {item?.items?.apply?.discountType === "percent" ? "%" : "đ"}</div>
+                        <div className='text-base'>Giảm giá hóa đơn {formatNumber(item?.items[0]?.apply?.discountValue)} {item?.items[0]?.apply?.discountType === "percent" ? "%" : "đ"}</div>
                       )
                     }
 
@@ -618,7 +619,7 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
                     }
                     {
                       item?.type === "loyalty" && (
-                        <div className='text-base'>Tặng điểm: {formatNumber(item?.items?.apply?.pointValue)}{item?.items?.apply?.discountType === "percent" ? "% điểm" : "điểm"} trên tổng hóa đơn</div>
+                        <div className='text-base'>Tặng điểm: {formatNumber(item?.items[0]?.apply?.pointValue)}{item?.items[0]?.apply?.discountType === "percent" ? "% điểm" : "điểm"} trên tổng hóa đơn</div>
                       )
                     }
                   </div>
@@ -658,7 +659,29 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
           setError('products', { message: undefined });
         }}
       />
-      <ProductDiscountModal isOpen={openProductDiscountList} onCancel={() => setOpenProductDiscountList(false)} onSave={() => { }} discountList={itemDiscount} />
+      <ProductDiscountModal
+        isOpen={openProductDiscountList}
+        onCancel={() => setOpenProductDiscountList(false)}
+        onSave={(selectedDiscount) => {
+          //set selected discount to setValue products
+          // const orderObjectClone = cloneDeep(orderObject);
+          // orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map(
+          //   (product: ISaleProductLocal) => {
+          //     if (product.productUnitId === selectedDiscount[0]?.items?.condition?.productUnitId[0]) {
+          //       return {
+          //         ...product,
+          //         discountSelected: selectedDiscount
+          //       }
+          //     }
+          //     return product
+          //   }
+          // )
+          // setOrderObject(orderObjectClone)
+
+          setOpenProductDiscountList(false)
+        }}
+        discountList={itemDiscount}
+      />
     </ProductTableStyled>
   );
 }

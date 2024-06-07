@@ -58,10 +58,10 @@ export function OrderDiscountModal({
               Giảm giá
               <span className='text-[#d64457]'>
                 {
-                  " " + formatNumber(items?.apply?.discountValue)
+                  " " + formatNumber(items[0]?.apply?.discountValue)
                 }
                 <span>
-                  {(items?.apply?.discountType === "amount" ? "đ" : "%")}
+                  {(items[0]?.apply?.discountType === "amount" ? "đ" : "%")}
                 </span>
               </span>
             </div>
@@ -72,11 +72,11 @@ export function OrderDiscountModal({
                 Tặng
                 <span className='text-[#d64457]'>
                   {
-                    " " + formatNumber(items?.apply?.pointValue)
+                    " " + formatNumber(items[0]?.apply?.pointValue)
                   }
                 </span>
                 {
-                  (items?.apply?.pointType === "amount" ? "" : "%") + " điểm"
+                  (items[0]?.apply?.pointType === "amount" ? "" : "%") + " điểm"
                 }
               </div>
             )
