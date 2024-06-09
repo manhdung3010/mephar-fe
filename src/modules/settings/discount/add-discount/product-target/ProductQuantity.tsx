@@ -43,6 +43,8 @@ export const ProductQuantity = ({
     branchId
   })
 
+  const [typePrice, setTypePrice] = useState(1);
+
   const { data: products, isLoading: isLoadingProduct, isSuccess } = useQuery<{
     data?: { items: ISaleProduct[] };
   }>(
@@ -211,9 +213,11 @@ export const ProductQuantity = ({
                         defaultValue={childItem?.apply?.changeType}
                         onChange={(value) => {
                           // change row of childItems
+                          console.log("value", value)
                           const newRows: any = [...getValues('items')];
                           newRows[index].childItems[childIndex].apply.changeType = value;
                           setRows(newRows);
+                          console.log("newRows", newRows)
                           setValue('items', newRows);
 
                         }}
@@ -244,37 +248,39 @@ export const ProductQuantity = ({
                                 'h-full w-[50px] text-center rounded-tl rounded-bl flex items-center justify-center cursor-pointer',
                                 {
                                   'bg-[#3E7BFA] text-white':
-                                    childItem?.apply?.changeType === "TYPE_PRICE",
+                                    typePrice === 1,
                                 }
                               )}
                               onClick={() => {
                                 // change row of childItems
-                                const newRows: any = [...getValues('items')];
-                                newRows[index].childItems[childIndex].apply.changeType = "TYPE_PRICE";
-                                setRows(newRows);
-                                setValue('items', newRows);
+                                // const newRows: any = [...getValues('items')];
+                                // newRows[index].childItems[childIndex].apply.changeType = "TYPE_PRICE";
+                                // setRows(newRows);
+                                // setValue('items', newRows);
+
+                                setTypePrice(1);
                               }}
                             >
-                              Điểm
+                              Đồng
                             </div>
-                            <div
+                            {/* <div
                               className={cx(
                                 'h-full w-[50px] text-center rounded-tr rounded-br flex items-center justify-center cursor-pointer',
                                 {
                                   'bg-[#3E7BFA] text-white':
-                                    childItem?.apply?.changeType === "TYPE_DISCOUNT",
+                                    typePrice === "TYPE_DISCOUNT",
                                 }
                               )}
                               onClick={() => {
                                 // change row of childItems
-                                const newRows: any = [...getValues('items')];
-                                newRows[index].childItems[childIndex].apply.changeType = "TYPE_PRICE";
-                                setRows(newRows);
-                                setValue('items', newRows);
+                                // const newRows: any = [...getValues('items')];
+                                // newRows[index].childItems[childIndex].apply.changeType = "TYPE_PRICE";
+                                // setRows(newRows);
+                                // setValue('items', newRows);
                               }}
                             >
                               %
-                            </div>
+                            </div> */}
                           </div>
                         )
                       }

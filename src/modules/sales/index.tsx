@@ -314,10 +314,13 @@ const Index = () => {
   // product discount
   useEffect(() => {
     function handleGetProductDiscount() {
-      if (productDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
-        let productDiscountClone: any = cloneDeep(productDiscount)
+      // if (productDiscount) {
+      let productDiscountClone: any = cloneDeep(productDiscount)
+      if (productDiscountClone?.length > 0) {
         productDiscountClone = productDiscountClone?.forEach((item) => {
-          const list = item?.items[0]?.apply?.productUnitId
+          const list = item?.items[0]?.apply?.productUnitId;
+          let fixedPrice = item?.items[0]?.apply?.fixedPrice;
+          let changeType = item?.items[0]?.apply?.changeType;
           if (list?.length > 0) {
             for (const l of list) {
               let product = {}
@@ -325,6 +328,7 @@ const Index = () => {
                 if (res?.data?.items?.length > 0) {
                   let discountValue = item?.items[0]?.apply?.discountValue;
                   let discountType = item?.items[0]?.apply?.discountType;
+
                   if (item?.items[0]?.apply?.isGift) {
                     discountType = "amount";
                     discountValue = res?.data?.items[0]?.price;
@@ -338,53 +342,73 @@ const Index = () => {
                     }
                   }
 
-                  if (res) {
-                    onSelectedProduct(JSON.stringify({
-                      ...res?.data?.items[0],
-                      quantity: item.items[0].apply.maxQuantity,
-                      isDiscount: true,
-                      discountType: discountType,
-                      discountValue: discountValue,
-                      isGift: item?.items[0]?.apply?.isGift,
-                    }));
-                  }
+                  return onSelectedProduct(JSON.stringify({
+                    ...res?.data?.items[0],
+                    quantity: item.items[0].apply.maxQuantity,
+                    isDiscount: true,
+                    discountType: discountType,
+                    discountValue: discountValue,
+                    isGift: item?.items[0]?.apply?.isGift,
+                  }));
                 }
               }
               )
-
-              // }
-              // product = {
-              //   ...productsScan?.data?.items[0],
-              //   quantity: item.items.apply.maxQuantity,
-              //   isDiscount: true,
-              //   discountType: item?.items?.apply?.discountType,
-              //   discountValue: item?.items?.apply?.discountValue,
-              //   isGift: item?.items?.apply?.isGift,
-              // }
-              // if (productsScan) {
-              //   onSelectedProduct(JSON.stringify({
-              //     ...productsScan?.data?.items[0],
-              //     quantity: item.items.apply.maxQuantity,
-              //     isDiscount: true,
-              //     discountType: item?.items?.apply?.discountType,
-              //     discountValue: item?.items?.apply?.discountValue,
-              //     isGift: item?.items?.apply?.isGift,
-              //   }));
-              // }
             }
           }
           else {
-            // remove product added by discount before
-            const orderObjectClone = cloneDeep(orderObject);
-            orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
-            setOrderObject(orderObjectClone);
+            if (fixedPrice > 0 && changeType === "type_price") {
+              // update price of product same productUnitId
+              const orderObjectClone = cloneDeep(orderObject);
+              orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map(
+                (product: ISaleProductLocal) => {
+                  if (product.productUnitId === item?.items[0]?.condition?.productUnitId[0] && !product.isDiscount) {
+                    return {
+                      ...product,
+                      productUnit: { ...product.productUnit, oldPrice: product.productUnit.price, price: fixedPrice },
+                    };
+                  }
+                  return product;
+                }
+              );
+              setOrderObject(orderObjectClone);
+            }
+            else if (fixedPrice > 0 && changeType === "type_discount") {
+              // update price of product same productUnitId
+              const orderObjectClone = cloneDeep(orderObject);
+              orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map(
+                (product: ISaleProductLocal) => {
+                  if (product.productUnitId === item?.items[0]?.condition?.productUnitId[0] && !product.isDiscount) {
+                    return {
+                      ...product,
+                      discountValue: fixedPrice,
+                      discountType: "amount",
+                      isBuyByNumber: true
+                    };
+                  }
+                  return product;
+                }
+              );
+              setOrderObject(orderObjectClone);
+            }
+            else {
+              // remove product added by discount before
+              const orderObjectClone = cloneDeep(orderObject);
+              orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
+              return setOrderObject(orderObjectClone);
+            }
           }
         })
       }
+      else {
+        // remove product added by discount before
+        const orderObjectClone = cloneDeep(orderObject);
+        orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
+        return setOrderObject(orderObjectClone);
+      }
+      // }
     }
     handleGetProductDiscount()
-  }, [productDiscount, orderActive]);
-
+  }, [productDiscount]);
   useEffect(() => {
     // update product when order discount is changed
     if (orderDiscount?.length <= 0) {

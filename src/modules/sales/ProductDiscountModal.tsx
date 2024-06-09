@@ -106,7 +106,7 @@ export function ProductDiscountModal({
       <div className="my-5 h-[1px] w-full bg-[#C7C9D9]" />
 
       <CustomTable
-        dataSource={discountList && discountList?.map((item: any) => ({
+        dataSource={listDiscount && listDiscount?.map((item: any) => ({
           ...item,
           key: item.id,
         }))}
@@ -147,11 +147,34 @@ export function ProductDiscountModal({
         </CustomButton>
         <CustomButton
           onClick={() => {
-            const selectedDiscount = listDiscount.filter((batch) => batch.isSelected);
+            const selectedDiscount = listDiscount.find((batch) => batch.isSelected);
             // setProductDiscount([...productDiscount, ...selectedDiscount].filter((v, i, a) => a.findIndex(t => (t.id === v.id)) === i));
-            setProductDiscount(selectedDiscount);
+            const selectedDiscountProduct = {
+              ...selectedDiscount,
+              discountKey: selectedDiscount?.id + "-" + selectedDiscount?.items[0]?.condition?.productUnitId[0],
+              productUnitId: selectedDiscount?.items[0]?.condition?.productUnitId[0]
+            }
+            // set selectedDiscountProduct to productDiscount, check if it's already exist in productDiscount then replace it
+            const index = productDiscount.findIndex((item) => item.discountKey === selectedDiscountProduct.discountKey);
+            if (index !== -1) {
+              setProductDiscount([...productDiscount.slice(0, index), selectedDiscountProduct, ...productDiscount.slice(index + 1)]);
+            } else {
+              setProductDiscount([...productDiscount, selectedDiscountProduct]);
+            }
+
             setDiscountType("product")
-            onSave(selectedDiscount);
+            onSave(selectedDiscountProduct);
+
+
+            // setProductDiscount({
+            //   ...selectedDiscount,
+            //   discountKey: selectedDiscount?.id + "-" + selectedDiscount?.items[0]?.condition?.productUnitId[0],
+            // });
+            // setDiscountType("product")
+            // onSave({
+            //   ...selectedDiscount,
+            //   discountKey: selectedDiscount?.id + "-" + selectedDiscount?.items[0]?.condition?.productUnitId[0],
+            // });
           }}
           className="h-[46px] min-w-[150px] py-2 px-4"
         // type={isSaleReturn && batchErr.length > 0 ? 'disable' : 'danger'}

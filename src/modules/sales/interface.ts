@@ -35,6 +35,7 @@ export interface IProductUnit {
   isBaseUnit: boolean;
   point: number;
   returnPrice?: number;
+  oldPrice?: number;
 }
 
 export interface ISaleProduct {
@@ -165,6 +166,7 @@ export interface ISaleProductLocal extends Omit<ISaleProduct, "batches"> {
   originProductUnitId: number;
   product: any;
   inventory?: number;
+  isBuyByNumber?: boolean;
   batches: {
     batchId: number;
     productUnitId: number;

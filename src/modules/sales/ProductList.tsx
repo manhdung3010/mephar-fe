@@ -12,13 +12,14 @@ import CustomTable from '@/components/CustomTable';
 import { CustomUnitSelect } from '@/components/CustomUnitSelect';
 import InputError from '@/components/InputError';
 import { formatMoney, formatNumber, roundNumber } from '@/helpers';
-import { discountTypeState, orderActiveState, orderDiscountSelected, orderState, productDiscountSelected } from '@/recoil/state';
+import { branchState, discountTypeState, orderActiveState, orderDiscountSelected, orderState, productDiscountSelected } from '@/recoil/state';
 
 import { Tooltip } from 'antd';
 import { ListBatchModal } from './ListBatchModal';
 import { ProductDiscountModal } from './ProductDiscountModal';
 import type { IBatch, IProductUnit, ISaleProductLocal } from './interface';
 import { ProductTableStyled } from './styled';
+import { getProductDiscountList } from '@/api/discount.service';
 
 export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: any, orderDetail: any, listDiscount: any }) {
   const { errors, setError } = useForm;
@@ -40,6 +41,7 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
   const checkDisplayListBatch = (product: ISaleProductLocal) => {
     return product.product.isBatchExpireControl
   };
+  const branchId = useRecoilValue(branchState);
 
   const isSaleReturn = orderActive.split("-")[1] === "RETURN";
 
@@ -81,14 +83,18 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
     }
   }, [orderObject, orderActive]);
 
-  const onChangeQuantity = async (productKey, newValue) => {
+  const onChangeQuantity = async (productKey, newValue, product?: any) => {
     const orderObjectClone = cloneDeep(orderObject);
+
+    const res = await getProductDiscountList({ productUnitId: product?.id, branchId: branchId, quantity: newValue })
+    let itemDiscountProduct = res?.data?.data?.items
 
     orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map(
       (product: ISaleProductLocal) => {
         if (product.productKey === productKey) {
           return {
             ...product,
+            itemDiscountProduct,
             quantity: newValue,
           };
         }
@@ -306,7 +312,7 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
       title: 'SỐ LƯỢNG',
       dataIndex: 'quantity',
       key: 'quantity',
-      render: (quantity, { productKey, batches, isDiscount }) => (
+      render: (quantity, record) => (
         <CustomInput
           wrapClassName="!w-[110px]"
           className="!h-6 !w-[80px] text-center"
@@ -314,43 +320,94 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
           hasPlus={true}
           value={isNaN(quantity) ? 0 : quantity}
           type="number"
-          disabled={(isSaleReturn && batches?.length > 0) || isDiscount ? true : false}
+          disabled={(isSaleReturn && record?.batches?.length > 0) || record?.isDiscount ? true : false}
           onChange={(value) => {
-            if (isDiscount) return
-            if (isSaleReturn && batches?.length > 0) {
-              setProductKeyAddBatch(productKey);
+            if (record?.isDiscount) return
+            if (isSaleReturn && record?.batches?.length > 0) {
+              setProductKeyAddBatch(record?.productKey);
               setOpenListBatchModal(true);
               return;
             }
-            setProductDiscount([])
-            onChangeQuantity(productKey, value)
+
+            // remove productDiscount if this product is in productDiscount
+            const productDiscountClone = cloneDeep(productDiscount)
+            productDiscountClone.forEach((item, index) => {
+              if (item.productUnitId === record?.productUnitId) {
+                // remove this item from productDiscount
+                productDiscountClone.splice(index, 1)
+              }
+            })
+            setProductDiscount(productDiscountClone)
+            const orderObjectClone = cloneDeep(orderObject);
+            orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
+            setOrderObject(orderObjectClone);
+
+            // setProductDiscount([])
+            onChangeQuantity(record?.productKey, value, record)
           }}
           onMinus={async (value) => {
-            if (isDiscount) return
-            if (isSaleReturn && batches?.length > 0) {
-              setProductKeyAddBatch(productKey);
+            if (record?.isDiscount) return
+            if (isSaleReturn && record?.batches?.length > 0) {
+              setProductKeyAddBatch(record?.productKey);
               setOpenListBatchModal(true);
               return;
             }
-            await onExpandMoreBatches(productKey, value);
+
+            // remove productDiscount if this product is in productDiscount
+            const productDiscountClone = cloneDeep(productDiscount)
+            productDiscountClone.forEach((item, index) => {
+              if (item.productUnitId === record?.productUnitId) {
+                // remove this item from productDiscount
+                productDiscountClone.splice(index, 1)
+              }
+            })
+            setProductDiscount(productDiscountClone)
+            const orderObjectClone = cloneDeep(orderObject);
+            orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
+            setOrderObject(orderObjectClone);
+            await onExpandMoreBatches(record?.productKey, value);
           }}
           onPlus={async (value) => {
-            if (isDiscount) return
-            if (isSaleReturn && batches?.length > 0) {
-              setProductKeyAddBatch(productKey);
+            if (record?.isDiscount) return
+            if (isSaleReturn && record?.batches?.length > 0) {
+              setProductKeyAddBatch(record?.productKey);
               setOpenListBatchModal(true);
               return;
             }
-            await onExpandMoreBatches(productKey, value);
+            // remove productDiscount if this product is in productDiscount
+            const productDiscountClone = cloneDeep(productDiscount)
+            productDiscountClone.forEach((item, index) => {
+              if (item.productUnitId === record?.productUnitId) {
+                // remove this item from productDiscount
+                productDiscountClone.splice(index, 1)
+              }
+            })
+            setProductDiscount(productDiscountClone)
+            const orderObjectClone = cloneDeep(orderObject);
+            orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
+            setOrderObject(orderObjectClone);
+            await onExpandMoreBatches(record?.productKey, value);
           }}
           onBlur={(e) => {
-            if (isDiscount) return
-            if (isSaleReturn && batches?.length > 0) {
-              setProductKeyAddBatch(productKey);
+            if (record?.isDiscount) return
+            if (isSaleReturn && record?.batches?.length > 0) {
+              setProductKeyAddBatch(record?.productKey);
               setOpenListBatchModal(true);
               return;
             }
-            onExpandMoreBatches(productKey, Number(e.target.value))
+            // remove productDiscount if this product is in productDiscount
+            const productDiscountClone = cloneDeep(productDiscount)
+            productDiscountClone.forEach((item, index) => {
+              if (item.productUnitId === record?.productUnitId) {
+                // remove this item from productDiscount
+                productDiscountClone.splice(index, 1)
+              }
+            })
+            setProductDiscount(productDiscountClone)
+            const orderObjectClone = cloneDeep(orderObject);
+            orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
+            setOrderObject(orderObjectClone);
+            onExpandMoreBatches(record?.productKey, Number(e.target.value))
           }
           }
         />
@@ -398,13 +455,16 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
       title: 'ĐƠN GIÁ',
       dataIndex: 'price',
       key: 'price',
-      render: (_, { productUnit }) => formatMoney(productUnit.price),
+      render: (_, { productUnit }) => <span>
+        {formatMoney(productUnit.price)}
+        {productUnit?.oldPrice && <span className='text-[#828487] line-through ml-2'>{"("}Giá cũ: {formatMoney(productUnit.oldPrice)}{")"}</span>}
+      </span>,
     },
     {
       title: 'KM',
       dataIndex: 'price',
       key: 'price',
-      render: (_, { price, discountValue, discountType, isDiscount }) => isDiscount && (
+      render: (_, { price, discountValue, discountType, isDiscount }) => discountValue > 0 && (
         <div className='flex flex-col'>
           <span className='text-[#ef4444]'>
             {formatNumber(discountValue)}
@@ -419,17 +479,14 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
       title: 'THÀNH TIỀN',
       dataIndex: 'totalPrice',
       key: 'totalPrice',
-      render: (totalPrice, { quantity, productUnit, isDiscount, discountType, price, discountValue }) =>
+      render: (totalPrice, { quantity, productUnit, isDiscount, discountType, price, discountValue, isBuyByNumber }) =>
         orderDetail ? formatMoney(Number(productUnit.returnPrice) * quantity) : isDiscount ? (
           <div className='flex flex-col'>
-            {discountType === "percent" ? `${Number(price - discountValue)}%` : formatMoney(Number(price - discountValue))}
+            {discountType === "percent" ? `${Number(price - discountValue)}%` : formatMoney(Number((price - discountValue) * quantity))}
           </div>
-        ) : formatMoney(productUnit.price * quantity),
+        ) : isBuyByNumber ? formatMoney((productUnit?.price - discountValue) * quantity) : formatMoney(productUnit.price * quantity),
     },
   ];
-
-  console.log("orderObject", orderObject[orderActive])
-  console.log("productDiscount", productDiscount)
 
   const handleRemoveBatch = (productKey: string, batchId: number) => {
     const orderObjectClone = cloneDeep(orderObject);

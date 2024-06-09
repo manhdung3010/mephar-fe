@@ -335,7 +335,7 @@ const AddDiscount = () => {
                   productUnitId: item.condition.productUnitId
                 },
                 apply: {
-                  changeType: "TYPE_PRICE",
+                  changeType: childItem.apply.changeType,
                   fixedPrice: childItem.apply.fixedPrice,
                 }
               }
