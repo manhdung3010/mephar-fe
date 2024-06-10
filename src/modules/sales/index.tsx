@@ -282,7 +282,7 @@ const Index = () => {
       }
     }
     handleGetProductDiscount()
-  }, [orderDiscount, orderActive, discountList]);
+  }, [orderDiscount]);
 
   // product discount
   useEffect(() => {

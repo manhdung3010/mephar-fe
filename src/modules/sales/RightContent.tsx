@@ -108,13 +108,13 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
       );
 
       const discountVal = (product?.discountType === "amount" ? product?.discountValue : (unit?.price * product?.discountValue) / 100) || 0;
-      if (product?.buyNumberType === 2) {
-        price += (Number(product?.productUnit?.price ?? 0) - discountVal) * product.quantity;
-
+      if (product?.buyNumberType === 1) {
+        price += (Number(product?.productUnit?.price ?? 0)) * product.quantity;
       }
       else {
-        price += (Number(product?.productUnit?.price ?? 0) * product.quantity);
+        price += (Number(product?.productUnit?.price ?? 0) - discountVal) * product.quantity;
       }
+
       oldTotal += (Number(product?.productUnit?.price ?? 0)) * product.quantity;
     });
     if (orderDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
@@ -204,7 +204,7 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
     }
 
     return totalPrice - discount;
-  }, [totalPrice, getValues('discount'), getValues('discountType'), getValues('customerId'), orderObject, orderActive, orderDiscount]);
+  }, [totalPrice, getValues('discount'), getValues('discountType'), getValues('customerId')]);
 
   // caculate return price
   const returnPrice = useMemo(() => {
