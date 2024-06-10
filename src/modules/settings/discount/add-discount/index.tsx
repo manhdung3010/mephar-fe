@@ -353,7 +353,8 @@ const AddDiscount = () => {
         }
         else {
           const discountData: any = getValues();
-          const items = discountData.items.map((item: any) => {
+          const itemsDiscount: any = getValues("items");
+          const items = itemsDiscount.map((item: any) => {
             return {
               ...item,
               apply: {
@@ -383,8 +384,6 @@ const AddDiscount = () => {
         },
       }
     );
-
-
 
   const onSubmit = () => {
     mutateCreateDiscount()

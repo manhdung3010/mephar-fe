@@ -89,7 +89,8 @@ export const BillGiftProduct = ({
         },
         apply: {
           discountValue: 1,
-          type: getValues("type")
+          type: getValues("type"),
+          isGift: true
         }
       }
     ]);
@@ -109,13 +110,12 @@ export const BillGiftProduct = ({
       apply: {
         discountValue: row.discountValue,
         discountType: row.discountType,
-        type: row?.type
+        type: row?.type,
+        isGift: true
       }
     }));
     setValue('items', newRowFormat);
   };
-
-  console.log("values", getValues("items"));
 
   const handleChangeRow = (index, key, value) => {
     const newRowFormat = getValues("items").map((row, rowIndex) => {
@@ -135,12 +135,14 @@ export const BillGiftProduct = ({
             ...row.apply,
             type: getValues("type"),
             discountValue: 1,
-            [key]: value
+            [key]: value,
+            isGift: true
           }
         }
       }
       return row;
     });
+
     setValue('items', newRowFormat, { shouldValidate: true });
 
     // update value items when change
