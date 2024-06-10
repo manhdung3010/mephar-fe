@@ -116,9 +116,9 @@ const Index = () => {
       () => getSampleMedicines({ ...formFilter, branchId, status: 1 }),
       { enabled: !!isSearchSampleMedicine }
     );
+  // caculate total price
   const totalPrice = useMemo(() => {
     let price = 0;
-
     orderObject[orderActive]?.forEach((product: ISaleProductLocal) => {
       const unit = product.product.productUnit?.find(
         (unit) => unit.id === product.productUnitId
@@ -137,15 +137,17 @@ const Index = () => {
     return {
       products,
       totalPrice: totalPrice,
-      customerId: getValues('customerId'),
+      ...(getValues('customerId') && {
+        customerId: getValues('customerId'),
+      }),
       branchId: branchId,
     }
   }
   const data: any = getDiscountPostData()
-  const { data: discountList, isLoading } = useQuery(['ORDER_DISCOUNT_LIST'], () =>
+  const { data: discountList, isLoading } = useQuery(['ORDER_DISCOUNT_LIST', orderObject[orderActive]], () =>
     getOrderDiscountList(data),
     {
-      enabled: !!getValues('customerId') && totalPrice > 0,
+      enabled: totalPrice > 0,
     }
   );
   const [searchKeyword, setSearchKeyword] = useState('');
@@ -238,17 +240,8 @@ const Index = () => {
           const list = item?.items[0]?.apply?.productUnitId
           if (list?.length > 0) {
             for (const l of list) {
-              let product = {}
               const productsScan = getSaleProducts({ ...formFilter, keyword: "", branchId, productUnit: l }).then((res) => {
                 if (res?.data?.items?.length > 0) {
-                  product = {
-                    ...res?.data?.items[0],
-                    quantity: item.items[0].apply.maxQuantity,
-                    isDiscount: true,
-                    discountType: item?.items[0]?.apply?.discountType,
-                    discountValue: item?.items[0]?.apply?.discountValue,
-                    isGift: item?.items[0]?.apply?.isGift,
-                  }
                   let discountValue = item?.items[0]?.apply?.discountValue;
                   let discountType = item?.items[0]?.apply?.discountType;
                   if (item?.items[0]?.apply?.isGift) {
@@ -277,26 +270,6 @@ const Index = () => {
                 }
               }
               )
-
-              // }
-              // product = {
-              //   ...productsScan?.data?.items[0],
-              //   quantity: item.items.apply.maxQuantity,
-              //   isDiscount: true,
-              //   discountType: item?.items?.apply?.discountType,
-              //   discountValue: item?.items?.apply?.discountValue,
-              //   isGift: item?.items?.apply?.isGift,
-              // }
-              // if (productsScan) {
-              //   onSelectedProduct(JSON.stringify({
-              //     ...productsScan?.data?.items[0],
-              //     quantity: item.items.apply.maxQuantity,
-              //     isDiscount: true,
-              //     discountType: item?.items?.apply?.discountType,
-              //     discountValue: item?.items?.apply?.discountValue,
-              //     isGift: item?.items?.apply?.isGift,
-              //   }));
-              // }
             }
           }
           else {
@@ -361,10 +334,13 @@ const Index = () => {
               const orderObjectClone = cloneDeep(orderObject);
               orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map(
                 (product: ISaleProductLocal) => {
-                  if (product.productUnitId === item?.items[0]?.condition?.productUnitId[0] && !product.isDiscount) {
+                  if (product.productUnitId === item?.items[0]?.condition?.productUnitId[0]) {
                     return {
                       ...product,
+                      isDiscount: true,
+                      itemPrice: fixedPrice,
                       productUnit: { ...product.productUnit, oldPrice: product.productUnit.price, price: fixedPrice },
+                      buyNumberType: 1,
                     };
                   }
                   return product;
@@ -377,12 +353,17 @@ const Index = () => {
               const orderObjectClone = cloneDeep(orderObject);
               orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map(
                 (product: ISaleProductLocal) => {
-                  if (product.productUnitId === item?.items[0]?.condition?.productUnitId[0] && !product.isDiscount) {
+                  if (product.productUnitId === item?.items[0]?.condition?.productUnitId[0]) {
                     return {
                       ...product,
                       discountValue: fixedPrice,
+                      isDiscount: true,
                       discountType: "amount",
-                      isBuyByNumber: true
+                      itemPrice: product.productUnit.oldPrice ? product.productUnit.oldPrice - fixedPrice : product.productUnit.price - fixedPrice,
+                      ...(product.productUnit?.oldPrice && {
+                        productUnit: { ...product.productUnit, price: product.productUnit.oldPrice }
+                      }),
+                      buyNumberType: 2,
                     };
                   }
                   return product;

@@ -167,6 +167,8 @@ export interface ISaleProductLocal extends Omit<ISaleProduct, "batches"> {
   product: any;
   inventory?: number;
   isBuyByNumber?: boolean;
+  buyNumberType?: number;
+  itemPrice?: number;
   batches: {
     batchId: number;
     productUnitId: number;

@@ -155,7 +155,7 @@ export function ProductDiscountModal({
               productUnitId: selectedDiscount?.items[0]?.condition?.productUnitId[0]
             }
             // set selectedDiscountProduct to productDiscount, check if it's already exist in productDiscount then replace it
-            const index = productDiscount.findIndex((item) => item.discountKey === selectedDiscountProduct.discountKey);
+            const index = productDiscount.findIndex((item) => item.productUnitId === selectedDiscountProduct.productUnitId);
             if (index !== -1) {
               setProductDiscount([...productDiscount.slice(0, index), selectedDiscountProduct, ...productDiscount.slice(index + 1)]);
             } else {

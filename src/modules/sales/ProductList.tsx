@@ -14,7 +14,7 @@ import InputError from '@/components/InputError';
 import { formatMoney, formatNumber, roundNumber } from '@/helpers';
 import { branchState, discountTypeState, orderActiveState, orderDiscountSelected, orderState, productDiscountSelected } from '@/recoil/state';
 
-import { Tooltip } from 'antd';
+import { Tooltip, message } from 'antd';
 import { ListBatchModal } from './ListBatchModal';
 import { ProductDiscountModal } from './ProductDiscountModal';
 import type { IBatch, IProductUnit, ISaleProductLocal } from './interface';
@@ -177,9 +177,9 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
         <div className='w-10 flex-shrink-0'>
           <Image
             src={RemoveIcon}
-            className={isDiscount ? 'cursor-not-allowed' : 'cursor-pointer'}
+            className={'cursor-pointer'}
             onClick={() => {
-              if (isDiscount) return
+              // if (isDiscount) return
               const orderObjectClone = cloneDeep(orderObject);
               const productsClone = orderObjectClone[orderActive] || [];
               orderObjectClone[orderActive] = productsClone.filter(
@@ -213,11 +213,16 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
               isDiscount && <span className="text-red-500 px-2  bg-[#fde6f8] rounded">KM</span>
             }
             {
-              !isDiscount && itemDiscountProduct?.length > 0 && (
+              itemDiscountProduct?.length > 0 && (
                 <Tooltip title="KM hàng hóa" className='cursor-pointer'>
                   <Image src={DiscountIcon} onClick={() => {
-                    setOpenProductDiscountList(!openProductDiscountList)
-                    setItemDiscount(itemDiscountProduct)
+                    if (orderDiscount?.length > 0) {
+                      message.error("Bạn đã chọn khuyến mại hóa đơn. Mỗi hóa đơn chỉ được chọn 1 loại khuyến mại")
+                    }
+                    else {
+                      setOpenProductDiscountList(!openProductDiscountList)
+                      setItemDiscount(itemDiscountProduct)
+                    }
                   }} alt='discount-icon' />
                 </Tooltip>
               )
@@ -320,9 +325,9 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
           hasPlus={true}
           value={isNaN(quantity) ? 0 : quantity}
           type="number"
-          disabled={(isSaleReturn && record?.batches?.length > 0) || record?.isDiscount ? true : false}
+          disabled={(isSaleReturn && record?.batches?.length > 0) || record?.isDiscount && !record?.buyNumberType ? true : false}
           onChange={(value) => {
-            if (record?.isDiscount) return
+            if (record?.isDiscount && !record?.buyNumberType) return
             if (isSaleReturn && record?.batches?.length > 0) {
               setProductKeyAddBatch(record?.productKey);
               setOpenListBatchModal(true);
@@ -346,7 +351,7 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
             onChangeQuantity(record?.productKey, value, record)
           }}
           onMinus={async (value) => {
-            if (record?.isDiscount) return
+            if (record?.isDiscount && !record?.buyNumberType) return
             if (isSaleReturn && record?.batches?.length > 0) {
               setProductKeyAddBatch(record?.productKey);
               setOpenListBatchModal(true);
@@ -368,7 +373,7 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
             await onExpandMoreBatches(record?.productKey, value);
           }}
           onPlus={async (value) => {
-            if (record?.isDiscount) return
+            if (record?.isDiscount && !record?.buyNumberType) return
             if (isSaleReturn && record?.batches?.length > 0) {
               setProductKeyAddBatch(record?.productKey);
               setOpenListBatchModal(true);
@@ -389,7 +394,7 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
             await onExpandMoreBatches(record?.productKey, value);
           }}
           onBlur={(e) => {
-            if (record?.isDiscount) return
+            if (record?.isDiscount && !record?.buyNumberType) return
             if (isSaleReturn && record?.batches?.length > 0) {
               setProductKeyAddBatch(record?.productKey);
               setOpenListBatchModal(true);
@@ -455,16 +460,16 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
       title: 'ĐƠN GIÁ',
       dataIndex: 'price',
       key: 'price',
-      render: (_, { productUnit }) => <span>
+      render: (_, { productUnit, buyNumberType }) => <span>
         {formatMoney(productUnit.price)}
-        {productUnit?.oldPrice && <span className='text-[#828487] line-through ml-2'>{"("}Giá cũ: {formatMoney(productUnit.oldPrice)}{")"}</span>}
+        {productUnit?.oldPrice && buyNumberType === 1 && <span className='text-[#828487] line-through ml-2'>{"("}Giá cũ: {formatMoney(productUnit.oldPrice)}{")"}</span>}
       </span>,
     },
     {
       title: 'KM',
       dataIndex: 'price',
       key: 'price',
-      render: (_, { price, discountValue, discountType, isDiscount }) => discountValue > 0 && (
+      render: (_, { price, discountValue, discountType, isDiscount, buyNumberType }) => discountValue > 0 && buyNumberType !== 1 && (
         <div className='flex flex-col'>
           <span className='text-[#ef4444]'>
             {formatNumber(discountValue)}
@@ -479,12 +484,12 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
       title: 'THÀNH TIỀN',
       dataIndex: 'totalPrice',
       key: 'totalPrice',
-      render: (totalPrice, { quantity, productUnit, isDiscount, discountType, price, discountValue, isBuyByNumber }) =>
-        orderDetail ? formatMoney(Number(productUnit.returnPrice) * quantity) : isDiscount ? (
+      render: (totalPrice, { quantity, productUnit, isDiscount, discountType, price, discountValue, isBuyByNumber, buyNumberType }) =>
+        orderDetail ? formatMoney(Number(productUnit.returnPrice) * quantity) : isDiscount && !buyNumberType ? (
           <div className='flex flex-col'>
             {discountType === "percent" ? `${Number(price - discountValue)}%` : formatMoney(Number((price - discountValue) * quantity))}
           </div>
-        ) : isBuyByNumber ? formatMoney((productUnit?.price - discountValue) * quantity) : formatMoney(productUnit.price * quantity),
+        ) : buyNumberType === 1 ? formatMoney(productUnit.price * quantity) : buyNumberType === 2 ? formatMoney((productUnit?.price - discountValue) * quantity) : formatMoney(productUnit.price * quantity),
     },
   ];
 

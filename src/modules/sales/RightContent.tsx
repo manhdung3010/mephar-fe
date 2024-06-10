@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Tooltip, message } from 'antd';
 import cx from 'classnames';
-import { cloneDeep, debounce, get } from 'lodash';
+import { cloneDeep, debounce, get, set } from 'lodash';
 import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -98,6 +98,7 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
     }
   }, [orderActive]);
 
+  // caculate total price
   const totalPrice = useMemo(() => {
     let price = 0;
     let discount = 0;
@@ -107,8 +108,14 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
       );
 
       const discountVal = (product?.discountType === "amount" ? product?.discountValue : (unit?.price * product?.discountValue) / 100) || 0;
-      price += (Number(unit?.price ?? 0) - discountVal) * product.quantity;
-      oldTotal += (Number(unit?.price ?? 0)) * product.quantity;
+      if (product?.buyNumberType === 2) {
+        price += (Number(product?.productUnit?.price ?? 0) - discountVal) * product.quantity;
+
+      }
+      else {
+        price += (Number(product?.productUnit?.price ?? 0) * product.quantity);
+      }
+      oldTotal += (Number(product?.productUnit?.price ?? 0)) * product.quantity;
     });
     if (orderDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
       orderDiscount?.forEach((item) => {
@@ -125,11 +132,12 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
     }
     let oldTotal = price;
     price = price;
-    oldTotal = oldTotal - price - discount;
+    oldTotal = oldTotal - (price - discount);
     setOldTotal(oldTotal);
     return price;
   }, [orderObject, orderActive, orderDiscount]);
 
+  // caculate discount
   const discount = useMemo(() => {
     if (getValues('discount')) {
       const discountValue = Number(getValues('discount')).toLocaleString(
@@ -165,6 +173,7 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
     }
   }, [getValues('customerId')])
 
+  // caculate customer must pay
   const customerMustPay = useMemo(() => {
     let discount = 0;
     if (orderDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
@@ -195,8 +204,9 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
     }
 
     return totalPrice - discount;
-  }, [totalPrice, getValues('discount'), getValues('discountType'), getValues('customerId')]);
+  }, [totalPrice, getValues('discount'), getValues('discountType'), getValues('customerId'), orderObject, orderActive, orderDiscount]);
 
+  // caculate return price
   const returnPrice = useMemo(() => {
     if (getValues('cashOfCustomer')) {
       return Number(getValues('cashOfCustomer')) - customerMustPay;
@@ -205,6 +215,7 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
     return 0;
   }, [customerMustPay, getValues('cashOfCustomer')]);
 
+  // set cash of customer when customer must pay change
   useEffect(() => {
     if ((customerMustPay > 0 && orderObject[orderActive]?.length > 0)) {
       setValue('cashOfCustomer', customerMustPay, { shouldValidate: true });
@@ -214,6 +225,7 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
     }
   }, [customerMustPay, orderObject[orderActive]])
 
+  // create order
   const { mutate: mutateCreateOrder, isLoading: isLoadingCreateOrder } =
     useMutation(
       () => {
@@ -246,6 +258,9 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
                 quantity: batch.quantity,
               })),
               isDiscount: product?.isDiscount || false,
+              ...(product?.itemPrice > 0 && {
+                itemPrice: product?.itemPrice,
+              })
             })
           );
           return createOrder({
@@ -284,6 +299,8 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
           orderClone[orderActive] = [];
           setOrderObject(orderClone);
           setOrderDiscount([]);
+          setProductDiscount([]);
+          setDiscountType("");
           setIsOpenOrderSuccessModal(true);
           reset();
           setValue('userId', profile.id, { shouldValidate: true });
@@ -297,20 +314,6 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
   const onSubmit = () => {
     mutateCreateOrder();
   };
-
-  const getDiscountPostData = () => {
-    const products = orderObject[orderActive]?.map((product: ISaleProductLocal) => ({
-      productUnitId: product.productUnitId,
-      quantity: product.quantity,
-    }));
-    return {
-      products,
-      totalPrice: totalPrice,
-      customerId: getValues('customerId'),
-      branchId: branchId,
-    }
-  }
-
   return (
     <RightContentStyled className="flex w-[360px] min-w-[360px] flex-col">
       <div className="px-6 pt-5 ">
@@ -401,9 +404,12 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
                   )
                 </span>
                 {
-                  getValues('customerId') && orderObject[orderActive]?.length > 0 && (
+                  orderObject[orderActive]?.length > 0 && (
                     <Tooltip title="KM hóa đơn" className='cursor-pointer'>
-                      <Image src={DiscountIcon} onClick={() => setIsOpenDiscountModal(!isOpenDiscountModal)} alt='discount-icon' />
+                      <Image src={DiscountIcon} onClick={() => {
+                        if (productDiscount?.length > 0) return message.error("Bạn đã chọn khuyến mại hàng hóa. Mỗi hóa đơn chỉ đươc áp dụng 1 loại khuyến mại");
+                        return setIsOpenDiscountModal(!isOpenDiscountModal)
+                      }} alt='discount-icon' />
                     </Tooltip>
                   )
                 }
@@ -601,8 +607,11 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
                 productType: product.product.type,
                 quantity: product.quantity,
                 isDiscount: product.isDiscount,
-                ...(product.isDiscount && {
+                ...(product.isDiscount && !product?.buyNumberType && {
                   itemPrice: Number(product.price - discountVal),
+                }),
+                ...(product.isDiscount && product?.buyNumberType && {
+                  itemPrice: Number(product.itemPrice),
                 }),
                 isBatchExpireControl: product.product.isBatchExpireControl,
                 batches: product.batches
