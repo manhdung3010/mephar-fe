@@ -377,14 +377,17 @@ export function Info({ record }: { record: IOrder }) {
             </CustomButton>
           )
         }
-
-        <CustomButton
-          type="success"
-          prefixIcon={<Image src={PlusIconWhite} alt="" />}
-          onClick={() => router.push(`/sales?id=${record.id}`)}
-        >
-          Trả hàng
-        </CustomButton>
+        {
+          record?.canReturn && (
+            <CustomButton
+              type="success"
+              prefixIcon={<Image src={PlusIconWhite} alt="" />}
+              onClick={() => router.push(`/sales?id=${record.id}`)}
+            >
+              Trả hàng
+            </CustomButton>
+          )
+        }
       </div>
 
       <div ref={invoiceComponentRef} className={styles.invoicePrint}>

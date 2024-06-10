@@ -36,6 +36,7 @@ function InvoiceModal({
     dateRange: { startDate: undefined, endDate: undefined },
     status: undefined,
     branchId,
+    canReturn: true,
   });
 
   const { data: orders, isLoading } = useQuery(

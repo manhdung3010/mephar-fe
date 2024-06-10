@@ -28,8 +28,22 @@ export function ProductDiscountModal({
   const [discountType, setDiscountType] = useRecoilState(discountTypeState);
   useEffect(() => {
     if (discountList) {
+
+      // show old selected discount from productDiscount list, if same productUnitId then set isSelected to true
       const listBatchClone = cloneDeep(discountList);
-      setListDiscount(listBatchClone);
+      const productDiscountClone = cloneDeep(productDiscount);
+      const selectedDiscount = listBatchClone.map((batch) => {
+        const index = productDiscountClone.findIndex((item) => item.productUnitId === batch.items[0]?.condition?.productUnitId[0]);
+        if (index !== -1) {
+          return {
+            ...batch,
+            isSelected: true,
+          };
+        }
+        return batch;
+      });
+      setListDiscount(selectedDiscount);
+
     }
   }, [discountList]);
 

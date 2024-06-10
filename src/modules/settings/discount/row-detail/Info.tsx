@@ -3,7 +3,7 @@ import Image from 'next/image';
 
 import DeleteIcon from '@/assets/deleteRed.svg';
 import { CustomButton } from '@/components/CustomButton';
-import { formatDateTime, hasPermission } from '@/helpers';
+import { formatDate, formatDateTime, hasPermission } from '@/helpers';
 import cx from 'classnames';
 import { EDiscountStatus, EDiscountStatusLabel } from '@/enums';
 import { useRecoilValue } from 'recoil';
@@ -31,7 +31,7 @@ export function Info({ record }: { record: any }) {
         <div className="grid grid-cols-3 gap-5">
           <div className="col-span-1 text-gray-main">Thời gian:</div>
           <div className="text-black-main">
-            {formatDateTime(record?.discountTime?.dateFrom) + " - " + formatDateTime(record?.discountTime?.dateTo)}
+            {formatDate(record?.discountTime[0]?.dateFrom) + " - " + formatDate(record?.discountTime[0]?.dateTo)}
           </div>
         </div>
 

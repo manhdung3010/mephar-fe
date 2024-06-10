@@ -14,9 +14,12 @@ import { hasPermission } from '@/helpers';
 import { profileState } from '@/recoil/state';
 
 import { RoleModel } from './role/role.enum';
+import { useState } from 'react';
+import PointModal from './point-modal';
 
 export function Settings() {
   const router = useRouter();
+  const [openPointModal, setOpenPointModal] = useState(false);
 
   const profile = useRecoilValue(profileState);
 
@@ -105,7 +108,7 @@ export function Settings() {
         {hasPermission(profile?.role?.permissions, RoleModel.point_setting) && (
           <div
             className="flex cursor-pointer gap-4 rounded bg-[#F2F9FF] p-5"
-            onClick={() => router.push('/settings/collect-point')}
+            onClick={() => setOpenPointModal(true)}
           >
             <Image src={StarIcon} />
             <div>
@@ -121,21 +124,21 @@ export function Settings() {
           profile?.role?.permissions,
           RoleModel.connect_system
         ) && (
-          <div
-            className="flex cursor-pointer gap-4 rounded bg-[#F2F9FF] p-5"
-            onClick={() => router.push('/settings/connect-system')}
-          >
-            <Image src={MedicineIcon} />
-            <div>
-              <div className=" mb-1 font-semibold">
-                Liên thông hệ thống dược
-              </div>
-              <div className="text-[#666] ">
-                Kết nối cơ sở GPP và liên thông dữ liệu
+            <div
+              className="flex cursor-pointer gap-4 rounded bg-[#F2F9FF] p-5"
+              onClick={() => router.push('/settings/connect-system')}
+            >
+              <Image src={MedicineIcon} />
+              <div>
+                <div className=" mb-1 font-semibold">
+                  Liên thông hệ thống dược
+                </div>
+                <div className="text-[#666] ">
+                  Kết nối cơ sở GPP và liên thông dữ liệu
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
         {hasPermission(profile?.role?.permissions, RoleModel.delivery_fee) && (
           <div
@@ -156,20 +159,25 @@ export function Settings() {
           profile?.role?.permissions,
           RoleModel.connect_delivery
         ) && (
-          <div
-            className="flex cursor-pointer gap-4 rounded bg-[#F2F9FF] p-5"
-            onClick={() => router.push('/settings/connect-delivery')}
-          >
-            <Image src={DeliveryIcon} />
-            <div>
-              <div className=" mb-1 font-semibold">Kết nối vận chuyển</div>
-              <div className="text-[#666] ">
-                Quản lý các phương thức vận chuyển đơn hàng
+            <div
+              className="flex cursor-pointer gap-4 rounded bg-[#F2F9FF] p-5"
+              onClick={() => router.push('/settings/connect-delivery')}
+            >
+              <Image src={DeliveryIcon} />
+              <div>
+                <div className=" mb-1 font-semibold">Kết nối vận chuyển</div>
+                <div className="text-[#666] ">
+                  Quản lý các phương thức vận chuyển đơn hàng
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
       </div>
+
+      <PointModal
+        isOpen={openPointModal}
+        onCancel={() => setOpenPointModal(false)}
+      />
     </div>
   );
 }

@@ -204,7 +204,7 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
     }
 
     return totalPrice - discount;
-  }, [totalPrice, getValues('discount'), getValues('discountType'), getValues('customerId')]);
+  }, [totalPrice, getValues('discount'), getValues('discountType'), getValues('customerId'), orderDiscount]);
 
   // caculate return price
   const returnPrice = useMemo(() => {
