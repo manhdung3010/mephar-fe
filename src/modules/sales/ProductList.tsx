@@ -177,7 +177,7 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
       title: '',
       dataIndex: 'action',
       key: 'action',
-      render: (_, { id, isDiscount }) => (
+      render: (_, { id, isDiscount, productUnitId }) => (
         <div className='w-10 flex-shrink-0'>
           <Image
             src={RemoveIcon}
@@ -187,7 +187,10 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
               const orderObjectClone = cloneDeep(orderObject);
               const productsClone = orderObjectClone[orderActive] || [];
               orderObjectClone[orderActive] = productsClone.filter(
-                (product) => product.id !== id
+                (product) => {
+                  if (isDiscount) return product.id !== id
+                  return product.productUnitId !== productUnitId
+                }
               );
               setOrderDiscount([])
               setProductDiscount([])
@@ -538,6 +541,8 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
     );
     setOrderObject(orderObjectClone);
   };
+
+  console.log("orderObject[orderActive]", orderObject[orderActive])
 
   return (
     <ProductTableStyled className="p-4">

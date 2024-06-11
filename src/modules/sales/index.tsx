@@ -260,7 +260,7 @@ const Index = () => {
                   if (res) {
                     onSelectedProduct(JSON.stringify({
                       ...res?.data?.items[0],
-                      quantity: item.items[0].apply.maxQuantity,
+                      maxQuantity: item.items[0].apply.maxQuantity,
                       isDiscount: true,
                       discountType: discountType,
                       discountValue: discountValue,
@@ -317,7 +317,7 @@ const Index = () => {
 
                   return onSelectedProduct(JSON.stringify({
                     ...res?.data?.items[0],
-                    quantity: item.items[0].apply.maxQuantity,
+                    maxQuantity: item.items[0].apply.maxQuantity,
                     isDiscount: true,
                     discountType: discountType,
                     discountValue: discountValue,
@@ -439,7 +439,7 @@ const Index = () => {
             ...product,
             inventory: product.quantity,
             productKey,
-            quantity: 1,
+            quantity: product?.isDiscount ? product?.maxQuantity : 1,
             productUnitId: product.id,
             itemDiscountProduct: itemDiscountProduct,
             originProductUnitId: product.id,

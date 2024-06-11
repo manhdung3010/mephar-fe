@@ -1,5 +1,6 @@
 import { CustomButton } from '@/components/CustomButton'
 import { CustomCheckbox } from '@/components/CustomCheckbox'
+import { CustomInput } from '@/components/CustomInput'
 import { CustomModal } from '@/components/CustomModal'
 import { CustomRadio } from '@/components/CustomRadio'
 import React from 'react'
@@ -10,7 +11,7 @@ function PointModal({ isOpen, onCancel }) {
       isOpen={isOpen}
       onCancel={onCancel}
       title="Thiết lập tích điểm"
-      width={660}
+      width={730}
       onSubmit={onCancel}
       customFooter={true}
       forceRender={true}
@@ -29,23 +30,35 @@ function PointModal({ isOpen, onCancel }) {
           />
         </div>
       </div>
-      <div className='grid grid-cols-6'>
-        <div className='col-span-2'>
-          <div>
+      <div className='grid grid-cols-1 gap-3'>
+        <div className='grid grid-cols-5'>
+          <div className='col-span-2'>
             Tỉ lệ quy đổi điểm thưởng
           </div>
-          <div>
+          <div className='flex items-center gap-2 col-span-3'>
+            <CustomInput onChange={(value) => { }} />
+            <span>VNĐ</span>
+            = 1 điểm thưởng
+          </div>
+        </div>
+        <div className='grid grid-cols-5 items-center'>
+          <div className='col-span-2'>
             <CustomCheckbox /> Cho phép thanh toán bằng điểm
           </div>
-          <div>
-            Thanh toán bằng điểm sau
+          <div className='flex items-center gap-2 col-span-3'>
+            <CustomInput onChange={(value) => { }} />
+            <span className='flex-shrink-0'>điểm =</span> <CustomInput onChange={(value) => { }} /> VNĐ
           </div>
         </div>
-        <div className='col-span-4'>
-
+        <div className='grid grid-cols-5 items-center'>
+          <div className='col-span-2'>
+            Cho phép thanh toán bằng điểm
+          </div>
+          <div className='flex items-center gap-2 col-span-3'>
+            <CustomInput onChange={(value) => { }} /> lần mua
+          </div>
         </div>
       </div>
-
       <div className="mt-5 flex justify-end gap-x-4">
         <CustomButton
           onClick={onCancel}

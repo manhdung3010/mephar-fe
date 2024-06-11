@@ -6,13 +6,14 @@ import CustomTable from '@/components/CustomTable';
 import { formatMoney, formatNumber } from '@/helpers';
 
 import { branchState, discountTypeState, orderDiscountSelected, productDiscountSelected } from '@/recoil/state';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, set } from 'lodash';
 import { useEffect, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { EDiscountBillMethodLabel, EDiscountGoodsMethodLabel } from '../settings/discount/add-discount/Info';
 import { useQuery } from '@tanstack/react-query';
 import { ISaleProduct } from './interface';
 import { getSaleProducts } from '@/api/product.service';
+import SelectProductDiscount from './SelectProductDiscount';
 
 export function ProductDiscountModal({
   isOpen,
@@ -30,6 +31,8 @@ export function ProductDiscountModal({
   const [orderDiscount, setOrderDiscount] = useRecoilState(orderDiscountSelected);
   const [productDiscount, setProductDiscount] = useRecoilState(productDiscountSelected);
   const [discountType, setDiscountType] = useRecoilState(discountTypeState);
+  const [isOpenSelectProduct, setIsOpenSelectProduct] = useState(false);
+  const [productDiscountList, setProductDiscountList] = useState([]);
   const { data: products, isLoading: isLoadingProduct, isSuccess } = useQuery<{
     data?: { items: ISaleProduct[] };
   }>(
@@ -85,26 +88,47 @@ export function ProductDiscountModal({
       key: 'items',
       render: (items, { type }) => (
         <div>
-          {
+          {/* {
             type === "product_price" && (
               <div>
                 Mua {formatNumber(items[0]?.condition?.product?.from)} x {findProduct(items[0]?.condition?.productUnitId)} được giảm {" "}
                 <span className='text-[#d64457]'>{formatNumber(items[0]?.apply?.discountValue)}{items[0]?.apply?.discountType === "amount" ? "đ" : "%"}</span> {items[0]?.apply?.maxQuantity} x {findProduct(items[0]?.apply?.productUnitId)}
               </div>
             )
+          } */}
+          {
+            type === "product_price" && (
+              <CustomButton type='danger' onClick={() => {
+                setIsOpenSelectProduct(true)
+                const listP = items[0]?.apply?.productUnitId.map((item) => {
+                  return products?.data?.items?.find((product) => product.id === item);
+                }).map((i, index) => {
+                  return {
+                    ...i,
+                    key: i.id,
+                  }
+                });
+                setProductDiscountList(listP)
+              }}>Chọn quà khuyến mại</CustomButton>
+            )
           }
           {
+            type === "gift" && (
+              <CustomButton type='danger'>Chọn quà tặng</CustomButton>
+            )
+          }
+          {/* {
             type === "gift" && (
               <div>
                 Mua {formatNumber(items[0]?.condition?.product?.from)} x {findProduct(items[0]?.condition?.productUnitId)} được tặng {" "}
                 {items[0]?.apply?.maxQuantity} x {findProduct(items[0]?.apply?.productUnitId)}
               </div>
             )
-          }
+          } */}
           {
             type === "loyalty" && (
               <div>
-                Mua {formatNumber(items[0]?.condition?.product?.from)} x {findProduct(items[0]?.condition?.productUnitId)} được tặng {" "}
+                Mua {formatNumber(items[0]?.condition?.product?.from)} được tặng {" "}
                 <span className='text-[#d64457]'>
                   {
                     " " + formatNumber(items[0]?.apply?.pointValue)
@@ -117,23 +141,27 @@ export function ProductDiscountModal({
             )
           }
           {
-            type === "price_by_buy_number" && items[0]?.apply?.changeType === "type_price" ? (
+            type === "price_by_buy_number" && (
               <div>
-                Mua {formatNumber(items[0]?.condition?.product?.from)} x {findProduct(items[0]?.condition?.productUnitId)} với giá {" "}
-                <span className='text-[#d64457]'>
-                  {
-                    formatMoney(items[0]?.apply?.fixedPrice)
-                  }
-                </span>
-              </div>
-            ) : (
-              <div>
-                Mua {formatNumber(items[0]?.condition?.product?.from)} x {findProduct(items[0]?.condition?.productUnitId)} được giảm giá {" "}
-                <span className='text-[#d64457]'>
-                  {
-                    formatMoney(items[0]?.apply?.fixedPrice)
-                  }
-                </span>
+                {items[0]?.apply?.changeType === "type_price" ? (
+                  <div>
+                    Mua {formatNumber(items[0]?.condition?.product?.from)} với giá {" "}
+                    <span className='text-[#d64457]'>
+                      {
+                        formatMoney(items[0]?.apply?.fixedPrice)
+                      }
+                    </span>
+                  </div>
+                ) : (
+                  <div>
+                    Mua {formatNumber(items[0]?.condition?.product?.from)} được giảm giá {" "}
+                    <span className='text-[#d64457]'>
+                      {
+                        formatMoney(items[0]?.apply?.fixedPrice)
+                      }
+                    </span>
+                  </div>
+                )}
               </div>
             )
           }
@@ -231,25 +259,14 @@ export function ProductDiscountModal({
 
             setDiscountType("product")
             onSave(selectedDiscountProduct);
-
-
-            // setProductDiscount({
-            //   ...selectedDiscount,
-            //   discountKey: selectedDiscount?.id + "-" + selectedDiscount?.items[0]?.condition?.productUnitId[0],
-            // });
-            // setDiscountType("product")
-            // onSave({
-            //   ...selectedDiscount,
-            //   discountKey: selectedDiscount?.id + "-" + selectedDiscount?.items[0]?.condition?.productUnitId[0],
-            // });
           }}
           className="h-[46px] min-w-[150px] py-2 px-4"
-        // type={isSaleReturn && batchErr.length > 0 ? 'disable' : 'danger'}
-        // disabled={isSaleReturn && batchErr.length > 0 ? true : false}
         >
           Áp dụng
         </CustomButton>
       </div>
+
+      <SelectProductDiscount isOpen={isOpenSelectProduct} onCancel={() => setIsOpenSelectProduct(false)} products={productDiscountList} />
     </CustomModal>
   );
 }

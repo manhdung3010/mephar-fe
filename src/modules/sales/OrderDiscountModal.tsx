@@ -86,7 +86,7 @@ export function OrderDiscountModal({
         <div>
           {type === "order_price" && (
             <div>
-              Hóa đơn từ <span className='text-[#d64457]'>{formatMoney(items[0]?.condition?.order?.from)}</span>, giảm giá
+              Từ <span className='text-[#d64457]'>{formatMoney(items[0]?.condition?.order?.from)}</span> giảm giá
               <span className='text-[#d64457]'>
                 {
                   " " + formatNumber(items[0]?.apply?.discountValue)
@@ -112,7 +112,7 @@ export function OrderDiscountModal({
               </div>
             )
           }
-          {
+          {/* {
             type === "gift" && (
               <div className='flex flex-col'>
                 {
@@ -124,8 +124,8 @@ export function OrderDiscountModal({
                 }
               </div>
             )
-          }
-          {
+          } */}
+          {/* {
             type === "product_price" && (
               <div className='flex flex-col'>
                 {
@@ -137,7 +137,7 @@ export function OrderDiscountModal({
                 }
               </div>
             )
-          }
+          } */}
         </div>
       ),
     },
