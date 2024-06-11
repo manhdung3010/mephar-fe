@@ -49,6 +49,7 @@ export interface ISaleProduct {
   productUnitId: number;
   quantity: number;
   expiryDate: string;
+  isDiscount?: boolean;
   batch: {
     id: number;
     name: string;

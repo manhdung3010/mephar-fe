@@ -3,13 +3,16 @@ import type { ColumnsType } from 'antd/es/table';
 import { CustomButton } from '@/components/CustomButton';
 import { CustomModal } from '@/components/CustomModal';
 import CustomTable from '@/components/CustomTable';
-import { formatNumber } from '@/helpers';
+import { formatMoney, formatNumber } from '@/helpers';
 
-import { discountTypeState, orderDiscountSelected, productDiscountSelected } from '@/recoil/state';
+import { branchState, discountTypeState, orderDiscountSelected, productDiscountSelected } from '@/recoil/state';
 import { cloneDeep } from 'lodash';
 import { useEffect, useState } from 'react';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import { EDiscountBillMethodLabel, EDiscountGoodsMethodLabel } from '../settings/discount/add-discount/Info';
+import { useQuery } from '@tanstack/react-query';
+import { ISaleProduct } from './interface';
+import { getSaleProducts } from '@/api/product.service';
 
 export function ProductDiscountModal({
   isOpen,
@@ -22,10 +25,24 @@ export function ProductDiscountModal({
   onSave: (value) => void;
   discountList?: any
 }) {
+  const branchId = useRecoilValue(branchState);
   const [listDiscount, setListDiscount] = useState<any[]>([]);
   const [orderDiscount, setOrderDiscount] = useRecoilState(orderDiscountSelected);
   const [productDiscount, setProductDiscount] = useRecoilState(productDiscountSelected);
   const [discountType, setDiscountType] = useRecoilState(discountTypeState);
+  const { data: products, isLoading: isLoadingProduct, isSuccess } = useQuery<{
+    data?: { items: ISaleProduct[] };
+  }>(
+    [
+      'LIST_SALE_PRODUCT',
+      1,
+      9999,
+      "",
+      branchId,
+    ],
+    () => getSaleProducts({ page: 1, limit: 9999, keyword: "", branchId }),
+    { enabled: discountList?.data?.data?.items?.length > 0 }
+  );
   useEffect(() => {
     if (discountList) {
 
@@ -68,31 +85,55 @@ export function ProductDiscountModal({
       key: 'items',
       render: (items, { type }) => (
         <div>
-          {type === "order_price" && (
-            <div>
-              Giảm giá
-              <span className='text-[#d64457]'>
-                {
-                  " " + formatNumber(items?.apply?.discountValue)
-                }
-                <span>
-                  {(items?.apply?.discountType === "amount" ? "đ" : "%")}
-                </span>
-              </span>
-            </div>
-          )}
+          {
+            type === "product_price" && (
+              <div>
+                Mua {formatNumber(items[0]?.condition?.product?.from)} x {findProduct(items[0]?.condition?.productUnitId)} được giảm {" "}
+                <span className='text-[#d64457]'>{formatNumber(items[0]?.apply?.discountValue)}{items[0]?.apply?.discountType === "amount" ? "đ" : "%"}</span> {items[0]?.apply?.maxQuantity} x {findProduct(items[0]?.apply?.productUnitId)}
+              </div>
+            )
+          }
+          {
+            type === "gift" && (
+              <div>
+                Mua {formatNumber(items[0]?.condition?.product?.from)} x {findProduct(items[0]?.condition?.productUnitId)} được tặng {" "}
+                {items[0]?.apply?.maxQuantity} x {findProduct(items[0]?.apply?.productUnitId)}
+              </div>
+            )
+          }
           {
             type === "loyalty" && (
               <div>
-                Tặng
+                Mua {formatNumber(items[0]?.condition?.product?.from)} x {findProduct(items[0]?.condition?.productUnitId)} được tặng {" "}
                 <span className='text-[#d64457]'>
                   {
-                    " " + formatNumber(items?.apply?.pointValue)
+                    " " + formatNumber(items[0]?.apply?.pointValue)
                   }
                 </span>
                 {
-                  (items?.apply?.pointType === "amount" ? "" : "%") + " điểm"
+                  (items[0]?.apply?.pointType === "amount" ? "" : "%") + " điểm"
                 }
+              </div>
+            )
+          }
+          {
+            type === "price_by_buy_number" && items[0]?.apply?.changeType === "type_price" ? (
+              <div>
+                Mua {formatNumber(items[0]?.condition?.product?.from)} x {findProduct(items[0]?.condition?.productUnitId)} với giá {" "}
+                <span className='text-[#d64457]'>
+                  {
+                    formatMoney(items[0]?.apply?.fixedPrice)
+                  }
+                </span>
+              </div>
+            ) : (
+              <div>
+                Mua {formatNumber(items[0]?.condition?.product?.from)} x {findProduct(items[0]?.condition?.productUnitId)} được giảm giá {" "}
+                <span className='text-[#d64457]'>
+                  {
+                    formatMoney(items[0]?.apply?.fixedPrice)
+                  }
+                </span>
               </div>
             )
           }
@@ -100,6 +141,18 @@ export function ProductDiscountModal({
       ),
     },
   ];
+
+  const findProduct = (productUnitId: any) => {
+    return productUnitId.map((item) => {
+      return products?.data?.items?.find((product) => product.id === item);
+    }).map((i, index) => {
+      return (
+        <span className='text-[#d64457]'>
+          {i?.product?.name}{"("}{i?.productUnit?.unitName}{")"}{index < productUnitId.length - 1 ? ", " : ""}
+        </span>
+      )
+    });
+  }
 
   useEffect(() => {
     const selectedDiscount = listDiscount.filter((batch) => batch.isSelected);

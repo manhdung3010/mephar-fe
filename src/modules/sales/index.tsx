@@ -410,7 +410,7 @@ const Index = () => {
 
     if (
       orderObjectClone[orderActive]?.find(
-        (item) => item.productKey === productKey
+        (item) => item.productKey === productKey && !product?.isDiscount
       )
     ) {
       orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map(
