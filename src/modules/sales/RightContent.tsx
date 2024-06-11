@@ -423,7 +423,7 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
                     if (item.type === "order_price") {
                       return (
                         <div key={item.id} className="text-[#828487] text-base">
-                          <span className="text-red-500 px-2  bg-[#fde6f8] rounded">KM</span> {formatNumber(item?.items[0]?.apply?.discountValue)}{item?.items?.apply?.discountType === "percent" ? "%" : "đ"}
+                          <span className="text-red-500 px-2  bg-[#fde6f8] rounded">KM</span> {formatNumber(item?.items[0]?.apply?.discountValue)}{item?.items[0]?.apply?.discountType === "percent" ? "%" : "đ"}
                         </div>
                       )
                     }

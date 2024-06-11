@@ -3,13 +3,16 @@ import type { ColumnsType } from 'antd/es/table';
 import { CustomButton } from '@/components/CustomButton';
 import { CustomModal } from '@/components/CustomModal';
 import CustomTable from '@/components/CustomTable';
-import { formatNumber } from '@/helpers';
+import { formatMoney, formatNumber } from '@/helpers';
 
-import { discountTypeState, orderDiscountSelected } from '@/recoil/state';
+import { branchState, discountTypeState, orderDiscountSelected } from '@/recoil/state';
 import { cloneDeep } from 'lodash';
 import { useEffect, useState } from 'react';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import { EDiscountBillMethodLabel, EDiscountGoodsMethodLabel } from '../settings/discount/add-discount/Info';
+import { ISaleProduct } from './interface';
+import { useQuery } from '@tanstack/react-query';
+import { getSaleProducts } from '@/api/product.service';
 
 export function OrderDiscountModal({
   isOpen,
@@ -25,12 +28,40 @@ export function OrderDiscountModal({
   const [listDiscount, setListDiscount] = useState<any[]>([]);
   const [orderDiscount, setOrderDiscount] = useRecoilState(orderDiscountSelected);
   const [discountType, setDiscountType] = useRecoilState(discountTypeState);
+
+  const branchId = useRecoilValue(branchState);
+  const { data: products, isLoading: isLoadingProduct, isSuccess } = useQuery<{
+    data?: { items: ISaleProduct[] };
+  }>(
+    [
+      'LIST_SALE_PRODUCT',
+      1,
+      9999,
+      "",
+      branchId,
+    ],
+    () => getSaleProducts({ page: 1, limit: 9999, keyword: "", branchId }),
+    { enabled: discountList?.data?.data?.items?.length > 0 }
+  );
+
   useEffect(() => {
     if (discountList?.data?.data?.items) {
       const listBatchClone = cloneDeep(discountList?.data?.data?.items);
       setListDiscount(listBatchClone);
     }
   }, [discountList?.data?.data?.items]);
+
+  const findProduct = (productUnitId: any) => {
+    return productUnitId.map((item) => {
+      return products?.data?.items?.find((product) => product.id === item);
+    }).map((i, index) => {
+      return (
+        <span>
+          {i?.product?.name}{"("}{i?.productUnit?.unitName}{")"}{index < productUnitId.length - 1 ? ", " : ""}
+        </span>
+      )
+    });
+  }
 
   const columns: ColumnsType<any> = [
     {
@@ -55,7 +86,7 @@ export function OrderDiscountModal({
         <div>
           {type === "order_price" && (
             <div>
-              Giảm giá
+              Hóa đơn từ <span className='text-[#d64457]'>{formatMoney(items[0]?.condition?.order?.from)}</span>, giảm giá
               <span className='text-[#d64457]'>
                 {
                   " " + formatNumber(items[0]?.apply?.discountValue)
@@ -77,6 +108,32 @@ export function OrderDiscountModal({
                 </span>
                 {
                   (items[0]?.apply?.pointType === "amount" ? "" : "%") + " điểm"
+                }
+              </div>
+            )
+          }
+          {
+            type === "gift" && (
+              <div className='flex flex-col'>
+                {
+                  items.map((item, index) => (
+                    <div key={index}>
+                      Hóa đơn từ <span className='text-[#d64457]'>{formatMoney(item?.condition?.order?.from)}</span> được tặng {formatNumber(item?.apply?.maxQuantity)} sản phẩm <span className='text-[#d64457]'>{findProduct(item?.apply?.productUnitId)}</span>
+                    </div>
+                  ))
+                }
+              </div>
+            )
+          }
+          {
+            type === "product_price" && (
+              <div className='flex flex-col'>
+                {
+                  items.map((item, index) => (
+                    <div key={index}>
+                      Hóa đơn từ <span className='text-[#d64457]'>{formatMoney(item?.condition?.order?.from)}</span>, sản phẩm <span className='text-[#d64457]'>{findProduct(item?.apply?.productUnitId)}</span> được giảm giá <span className='text-[#d64457]'>{formatNumber(item?.apply?.discountValue)}{item?.apply?.discountType === "amount" ? "đ" : "%"}</span>
+                    </div>
+                  ))
                 }
               </div>
             )

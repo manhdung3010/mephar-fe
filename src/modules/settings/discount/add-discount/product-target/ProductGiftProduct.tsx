@@ -149,6 +149,8 @@ export const ProductGiftProduct = ({
     });
     setValue('items', newRowFormat, { shouldValidate: true });
   }
+
+  console.log("items", getValues("items"));
   return (
     <>
       <div className="my-5 flex flex-col gap-2">

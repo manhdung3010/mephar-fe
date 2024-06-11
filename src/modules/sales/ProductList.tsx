@@ -105,14 +105,18 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
 
     setOrderObject(orderObjectClone);
   };
-  const onExpandMoreBatches = async (productKey, quantity: number) => {
+  const onExpandMoreBatches = async (productKey, quantity: number, product?: any) => {
     const orderObjectClone = cloneDeep(orderObject);
+
+    const res = await getProductDiscountList({ productUnitId: product?.id, branchId: branchId, quantity: quantity })
+    let itemDiscountProduct = res?.data?.data?.items
 
     orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map(
       (product: ISaleProductLocal) => {
         if (product.productKey === productKey) {
           return {
             ...product,
+            itemDiscountProduct,
             quantity,
           };
         }
@@ -347,7 +351,6 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
             orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
             setOrderObject(orderObjectClone);
 
-            // setProductDiscount([])
             onChangeQuantity(record?.productKey, value, record)
           }}
           onMinus={async (value) => {
@@ -370,7 +373,7 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
             const orderObjectClone = cloneDeep(orderObject);
             orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
             setOrderObject(orderObjectClone);
-            await onExpandMoreBatches(record?.productKey, value);
+            await onExpandMoreBatches(record?.productKey, value, record);
           }}
           onPlus={async (value) => {
             if (record?.isDiscount && !record?.buyNumberType) return
@@ -391,7 +394,7 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
             const orderObjectClone = cloneDeep(orderObject);
             orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
             setOrderObject(orderObjectClone);
-            await onExpandMoreBatches(record?.productKey, value);
+            await onExpandMoreBatches(record?.productKey, value, record);
           }}
           onBlur={(e) => {
             if (record?.isDiscount && !record?.buyNumberType) return
@@ -412,7 +415,7 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
             const orderObjectClone = cloneDeep(orderObject);
             orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
             setOrderObject(orderObjectClone);
-            onExpandMoreBatches(record?.productKey, Number(e.target.value))
+            onExpandMoreBatches(record?.productKey, Number(e.target.value), record)
           }
           }
         />
@@ -487,7 +490,7 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
       render: (totalPrice, { quantity, productUnit, isDiscount, discountType, price, discountValue, isBuyByNumber, buyNumberType }) =>
         orderDetail ? formatMoney(Number(productUnit.returnPrice) * quantity) : isDiscount && !buyNumberType ? (
           <div className='flex flex-col'>
-            {discountType === "percent" ? `${Number(price - discountValue)}%` : formatMoney(Number((price - discountValue) * quantity))}
+            {discountType === "percent" ? `${formatMoney(Number(price - (discountValue * price / 100)) * quantity)}` : formatMoney(Number((price - discountValue) * quantity))}
           </div>
         ) : buyNumberType === 1 ? formatMoney(productUnit.price * quantity) : buyNumberType === 2 ? formatMoney((productUnit?.price - discountValue) * quantity) : formatMoney(productUnit.price * quantity),
     },

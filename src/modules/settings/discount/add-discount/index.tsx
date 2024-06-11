@@ -204,13 +204,13 @@ const AddDiscount = () => {
               order: {
                 from: 1
               },
-              productUnitId: item.productDiscount?.map((product: any) => product.productUnitId),
+              productUnitId: item.productDiscount?.filter((product: any) => product?.isCondition)?.map((i) => i.productUnitId),
             },
             apply: {
               discountValue: 1,
               discountType: item.discountType?.toUpperCase(),
               maxQuantity: item.maxQuantity,
-              productUnitId: item.productDiscount?.map((product: any) => product.productUnitId),
+              productUnitId: item.productDiscount?.filter((product: any) => !product.isCondition)?.map((i) => i.productUnitId),
               isGift: item.isGift,
             }
           }
@@ -395,7 +395,7 @@ const AddDiscount = () => {
     <>
       <div className="mt-6 flex items-center justify-between bg-white p-5">
         <div className="text-2xl font-medium uppercase">
-          THÊM MỚI KHUYẾN MẠI
+          {id && !copy ? "CẬP NHÂT" : "THÊM MỚI"} KHUYẾN MẠI
         </div>
         <div className="flex gap-4">
           <CustomButton outline={true} onClick={() => router.push("/settings/discount")}>Hủy bỏ</CustomButton>
