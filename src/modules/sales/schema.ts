@@ -65,6 +65,7 @@ export const schema = yup.object().shape({
   totalPrice: yup.number().required("Đây là trường bắt buộc!"),
   discount: yup.number(),
   discountType: yup.number(),
+  paymentPoint: yup.number(),
   cashOfCustomer: yup
     .string()
     .test("isRequire", "Đây là trường bắt buộc!", (value, context) => {

@@ -7,12 +7,16 @@ import { cloneDeep } from 'lodash';
 import React, { useEffect, useState } from 'react'
 import { render } from 'react-dom';
 
-function SelectProductDiscount({ isOpen, onCancel, products }) {
+function SelectProductDiscount({ isOpen, onCancel, onSave, products }) {
   const [listProduct, setListProduct] = useState<any[]>([]);
 
   useEffect(() => {
     if (products) {
       const listBatchClone = cloneDeep(products);
+      listBatchClone.forEach((product) => {
+        product.isSelected = false;
+        product.discountQuantity = 0;
+      });
       setListProduct(listBatchClone);
     }
   }, [products])
@@ -28,10 +32,18 @@ function SelectProductDiscount({ isOpen, onCancel, products }) {
     },
     {
       title: 'Số lượng',
-      dataIndex: 'quantity',
-      key: 'quantity',
-      render: (price) => (
-        <CustomInput onChange={() => { }} />
+      dataIndex: 'discountQuantity',
+      key: 'discountQuantity',
+      render: (discountQuantity) => (
+        <CustomInput onChange={(value) => {
+          // change quantity
+          const listBatchClone = cloneDeep(listProduct);
+          const batchIndex = listBatchClone.findIndex((batch) => batch.isSelected);
+          listBatchClone[batchIndex].discountQuantity = +value;
+          setListProduct(listBatchClone);
+        }}
+          value={discountQuantity}
+        />
       ),
     },
     {
@@ -42,7 +54,6 @@ function SelectProductDiscount({ isOpen, onCancel, products }) {
     },
   ];
 
-  console.log("products", products)
   return (
     <CustomModal
       isOpen={isOpen}
@@ -98,6 +109,11 @@ function SelectProductDiscount({ isOpen, onCancel, products }) {
         </CustomButton>
         <CustomButton
           onClick={() => {
+            const selectedProducts = listProduct.filter(
+              (product) => product.isSelected
+            );
+
+            onSave(selectedProducts);
           }}
           className="h-[46px] min-w-[150px] py-2 px-4"
         >

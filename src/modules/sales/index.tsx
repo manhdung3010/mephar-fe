@@ -65,6 +65,7 @@ const Index = () => {
     mode: 'onChange',
     defaultValues: {
       paymentType: EPaymentMethod.CASH,
+      paymentPoint: 0,
     },
   });
   const {

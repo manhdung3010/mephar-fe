@@ -53,7 +53,8 @@ export function ProductDiscountModal({
       const listBatchClone = cloneDeep(discountList);
       const productDiscountClone = cloneDeep(productDiscount);
       const selectedDiscount = listBatchClone.map((batch) => {
-        const index = productDiscountClone.findIndex((item) => item.productUnitId === batch.items[0]?.condition?.productUnitId[0]);
+        const index = productDiscountClone.findIndex((item) => item.code === batch.code);
+        // const index = listBatchClone.findIndex((item) => item.productUnitId === batch.productUnitId);
         if (index !== -1) {
           return {
             ...batch,
@@ -188,6 +189,8 @@ export function ProductDiscountModal({
     setDiscountType("product")
   }, [])
 
+  console.log("productDiscount", productDiscount)
+
   return (
     <CustomModal
       isOpen={isOpen}
@@ -261,12 +264,45 @@ export function ProductDiscountModal({
             onSave(selectedDiscountProduct);
           }}
           className="h-[46px] min-w-[150px] py-2 px-4"
+          disabled={!listDiscount.some((batch) => batch.isSelected)}
         >
           Áp dụng
         </CustomButton>
       </div>
 
-      <SelectProductDiscount isOpen={isOpenSelectProduct} onCancel={() => setIsOpenSelectProduct(false)} products={productDiscountList} />
+      <SelectProductDiscount
+        isOpen={isOpenSelectProduct}
+        onCancel={() => setIsOpenSelectProduct(false)}
+        products={productDiscountList}
+        onSave={(selectedProducts) => {
+          // update selectedProducts to productDiscount list
+          const selectedDiscount = listDiscount.find((batch) => batch.isSelected);
+
+          // set selected products to selectedDiscount
+          selectedDiscount.items[0].apply.productUnitId = selectedProducts.map((product) => {
+            return {
+              id: product.id,
+              discountQuantity: product?.discountQuantity
+            }
+          });
+
+          const selectedDiscountProduct = {
+            ...selectedDiscount,
+            discountKey: selectedDiscount?.id + "-" + selectedDiscount?.items[0]?.condition?.productUnitId[0],
+            productUnitId: selectedDiscount?.items[0]?.condition?.productUnitId[0]
+          }
+          // set selectedDiscountProduct to productDiscount, check if it's already exist in productDiscount then replace it
+          const index = productDiscount.findIndex((item) => item.productUnitId === selectedDiscountProduct.productUnitId);
+          if (index !== -1) {
+            setProductDiscount([...productDiscount.slice(0, index), selectedDiscountProduct, ...productDiscount.slice(index + 1)]);
+          } else {
+            setProductDiscount([...productDiscount, selectedDiscountProduct]);
+          }
+
+          setDiscountType("product")
+          onSave(selectedDiscountProduct);
+        }}
+      />
     </CustomModal>
   );
 }

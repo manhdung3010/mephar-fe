@@ -49,6 +49,8 @@ import { ScanQrModal } from './ScanQrModal';
 import { RightContentStyled } from './styled';
 import { RoleAction, RoleModel } from '../settings/role/role.enum';
 import { OrderDiscountModal } from './OrderDiscountModal';
+import { CustomSwitch } from '@/components/CustomSwitch';
+import { getPointStatus } from '@/api/point.service';
 
 export function RightContent({ useForm, discountList }: { useForm: any, discountList: any }) {
   const queryClient = useQueryClient();
@@ -74,6 +76,7 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
   const [searchCustomerText, setSearchCustomerText] = useState('');
   const [saleInvoice, setSaleInvoice] = useState();
   const [oldTotal, setOldTotal] = useState(0);
+  const [checkPoint, setCheckPoint] = useState(false);
 
   const { data: employees } = useQuery(
     ['EMPLOYEE_LIST', searchEmployeeText],
@@ -82,6 +85,11 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
   const { data: customers } = useQuery(
     ['CUSTOMER_LIST', searchCustomerText],
     () => getCustomer({ page: 1, limit: 99, keyword: searchCustomerText })
+  );
+
+  const { data: pointStatus, isLoading: isLoadingPointDetail } = useQuery(
+    ['POINT_STATUS'],
+    () => getPointStatus(),
   );
 
   useEffect(() => {
@@ -192,20 +200,19 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
     if (getValues('discount')) {
       if (getValues('discountType') === EDiscountType.MONEY) {
         return totalPrice > Number(getValues('discount'))
-          ? Math.round(totalPrice - discount - Number(getValues('discount')))
+          ? Math.round(totalPrice - discount - Number(getValues('discount')) - (getValues('paymentPoint') * pointStatus?.data?.convertMoneyPayment))
           : 0;
       }
 
       if (getValues('discountType') === EDiscountType.PERCENT) {
         const discountValue =
           (totalPrice * Number(getValues('discount'))) / 100;
-        return totalPrice > discountValue ? Math.round(totalPrice - discount - discountValue) : 0;
+        return totalPrice > discountValue ? Math.round(totalPrice - discount - discountValue - (getValues('paymentPoint') * pointStatus?.data?.convertMoneyPayment)) : 0;
       }
     }
 
-    return totalPrice - discount;
-  }, [totalPrice, getValues('discount'), getValues('discountType'), getValues('customerId'), orderDiscount]);
-
+    return totalPrice - discount - (getValues('paymentPoint') * pointStatus?.data?.convertMoneyPayment);
+  }, [totalPrice, getValues('discount'), getValues('discountType'), getValues('customerId'), orderDiscount, getValues('paymentPoint')]);
   // caculate return price
   const returnPrice = useMemo(() => {
     if (getValues('cashOfCustomer')) {
@@ -292,6 +299,7 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
       {
         onSuccess: async (res) => {
           await queryClient.invalidateQueries(['LIST_SALE_PRODUCT']);
+          await queryClient.invalidateQueries(['CUSTOMER_LIST']);
           if (res.data) {
             setSaleInvoice(res.data);
           }
@@ -463,6 +471,53 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
                 {formatMoney(customerMustPay)}
               </div>
             </div>
+            {
+              getValues('customerId') && customers?.data?.items?.find((item) => item.id === getValues('customerId') && item.isPointPayment) && (
+                <div className="mb-5 flex justify-between">
+
+                  <div className="text-lg leading-normal text-[#828487] flex items-center gap-2">
+                    Điểm
+                    <div className='text-lg leading-normal text-red-main flex items-center gap-2'>
+                      {
+                        formatNumber(customers?.data?.items?.find(
+                          (item) => item.id === getValues('customerId')
+                        )?.point)
+                      }
+                      <CustomSwitch
+                        size='small'
+                        checked={checkPoint}
+                        onChange={(e) => {
+                          if (e) {
+                            setValue('paymentPoint', customers?.data?.items?.find(
+                              (item) => item.id === getValues('customerId')
+                            )?.point, { shouldValidate: true });
+                            setCheckPoint(true);
+                          }
+                          else {
+                            setValue('paymentPoint', 0, { shouldValidate: true });
+                            setCheckPoint(false);
+                          }
+                        }} />
+                    </div>
+                  </div>
+                  <div className="w-[120px]">
+                    <CustomInput
+                      bordered={false}
+                      className="h-6 pr-0 text-end text-lg"
+                      disabled={!checkPoint}
+                      onChange={(value) => {
+                        setValue('paymentPoint', value, {
+                          shouldValidate: true,
+                        });
+                      }}
+                      type="number"
+                      hideArrow={true}
+                      value={getValues('paymentPoint')}
+                    />
+                  </div>
+                </div>
+              )
+            }
 
             <div className="mb-3 ">
               <div className="flex justify-between">
