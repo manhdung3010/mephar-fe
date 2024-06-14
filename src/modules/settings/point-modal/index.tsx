@@ -95,7 +95,9 @@ function PointModal({ isOpen, onCancel, getValues, setValue, handleSubmit, error
         </div>
       </div>
       {
-        !isLoadingPointDetail && (
+        isLoadingPointDetail ? <div className='grid place-items-center h-[300px]'>
+          <Spin size='default' />
+        </div> : (
           <div>
             <div className='grid grid-cols-1 gap-2 mt-4'>
               <div className='grid grid-cols-5'>

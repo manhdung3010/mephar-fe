@@ -12,12 +12,14 @@ function SelectProductDiscount({ isOpen, onCancel, onSave, products }) {
 
   useEffect(() => {
     if (products) {
-      const listBatchClone = cloneDeep(products);
-      listBatchClone.forEach((product) => {
-        product.isSelected = false;
-        product.discountQuantity = 0;
+      const newProducts = products.map((product) => {
+        return {
+          ...product,
+          isSelected: false,
+          discountQuantity: 0,
+        };
       });
-      setListProduct(listBatchClone);
+      setListProduct(newProducts);
     }
   }, [products])
 
@@ -64,6 +66,7 @@ function SelectProductDiscount({ isOpen, onCancel, onSave, products }) {
       customFooter={true}
       forceRender={true}
     >
+      <h4 className='text-base mb-3'>Tổng số lượng: <span className='text-red-main'>{listProduct[0]?.maxQuantity}</span></h4>
       <CustomTable
         dataSource={listProduct.map((batch: any) => ({
           ...batch,

@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Tooltip, message } from 'antd';
 import cx from 'classnames';
-import { cloneDeep, debounce, get, set } from 'lodash';
+import { cloneDeep, debounce } from 'lodash';
 import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -13,7 +13,7 @@ import CustomerIcon from '@/assets/customerIcon.svg';
 import DolarIcon from '@/assets/dolarIcon.svg';
 import EditIcon from '@/assets/editIcon.svg';
 import EmployeeIcon from '@/assets/employeeIcon.svg';
-import DiscountIcon from '@/assets/gift.svg'
+import DiscountIcon from '@/assets/gift.svg';
 import Bank from '@/assets/images/bank.png';
 import Cash from '@/assets/images/cash.png';
 import Debt from '@/assets/images/debt.png';
@@ -40,17 +40,17 @@ import {
   profileState,
 } from '@/recoil/state';
 
+import { getPointStatus } from '@/api/point.service';
+import { CustomSwitch } from '@/components/CustomSwitch';
+import { RoleAction, RoleModel } from '../settings/role/role.enum';
 import { CreateCustomerModal } from './CreateCustomerModal';
 import { CreateDiscountModal } from './CreateDiscountModal';
 import { CreatePrescriptionModal } from './CreatePrescriptionModal';
-import type { ISaleProductLocal } from './interface';
+import { OrderDiscountModal } from './OrderDiscountModal';
 import { OrderSuccessModal } from './OrderSuccessModal';
 import { ScanQrModal } from './ScanQrModal';
+import type { ISaleProductLocal } from './interface';
 import { RightContentStyled } from './styled';
-import { RoleAction, RoleModel } from '../settings/role/role.enum';
-import { OrderDiscountModal } from './OrderDiscountModal';
-import { CustomSwitch } from '@/components/CustomSwitch';
-import { getPointStatus } from '@/api/point.service';
 
 export function RightContent({ useForm, discountList }: { useForm: any, discountList: any }) {
   const queryClient = useQueryClient();
@@ -184,34 +184,68 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
   // caculate customer must pay
   const customerMustPay = useMemo(() => {
     let discount = 0;
-    if (orderDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
-      orderDiscount?.forEach((item) => {
-        if (item.type === "order_price") {
-          if (item?.items[0]?.apply?.discountType === "percent") {
-            discount += (totalPrice * item?.items[0]?.apply?.discountValue) / 100;
-          }
-          else {
-            discount += item?.items[0]?.apply?.discountValue;
-          }
+    const convertMoneyPayment = pointStatus?.data?.convertMoneyPayment;
 
+    if (convertMoneyPayment && getValues('paymentPoint') > 0) {
+      if (orderDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
+        orderDiscount?.forEach((item) => {
+          if (item.type === "order_price") {
+            if (item?.items[0]?.apply?.discountType === "percent") {
+              discount += (totalPrice * item?.items[0]?.apply?.discountValue) / 100;
+            }
+            else {
+              discount += item?.items[0]?.apply?.discountValue;
+            }
+
+          }
+        })
+      }
+      if (getValues('discount')) {
+        if (getValues('discountType') === EDiscountType.MONEY) {
+          return totalPrice > Number(getValues('discount'))
+            ? Math.round(totalPrice - discount - Number(getValues('discount')) - (getValues('paymentPoint') * pointStatus?.data?.convertMoneyPayment))
+            : 0;
         }
-      })
-    }
-    if (getValues('discount')) {
-      if (getValues('discountType') === EDiscountType.MONEY) {
-        return totalPrice > Number(getValues('discount'))
-          ? Math.round(totalPrice - discount - Number(getValues('discount')) - (getValues('paymentPoint') * pointStatus?.data?.convertMoneyPayment))
-          : 0;
+
+        if (getValues('discountType') === EDiscountType.PERCENT) {
+          const discountValue =
+            (totalPrice * Number(getValues('discount'))) / 100;
+          return totalPrice > discountValue ? Math.round(totalPrice - discount - discountValue - (getValues('paymentPoint') * pointStatus?.data?.convertMoneyPayment)) : 0;
+        }
       }
 
-      if (getValues('discountType') === EDiscountType.PERCENT) {
-        const discountValue =
-          (totalPrice * Number(getValues('discount'))) / 100;
-        return totalPrice > discountValue ? Math.round(totalPrice - discount - discountValue - (getValues('paymentPoint') * pointStatus?.data?.convertMoneyPayment)) : 0;
-      }
+      return totalPrice - discount - (getValues('paymentPoint') * pointStatus?.data?.convertMoneyPayment);
     }
+    else {
+      if (orderDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
+        orderDiscount?.forEach((item) => {
+          if (item.type === "order_price") {
+            if (item?.items[0]?.apply?.discountType === "percent") {
+              discount += (totalPrice * item?.items[0]?.apply?.discountValue) / 100;
+            }
+            else {
+              discount += item?.items[0]?.apply?.discountValue;
+            }
 
-    return totalPrice - discount - (getValues('paymentPoint') * pointStatus?.data?.convertMoneyPayment);
+          }
+        })
+      }
+      if (getValues('discount')) {
+        if (getValues('discountType') === EDiscountType.MONEY) {
+          return totalPrice > Number(getValues('discount'))
+            ? Math.round(totalPrice - discount - Number(getValues('discount')))
+            : 0;
+        }
+
+        if (getValues('discountType') === EDiscountType.PERCENT) {
+          const discountValue =
+            (totalPrice * Number(getValues('discount'))) / 100;
+          return totalPrice > discountValue ? Math.round(totalPrice - discount - discountValue) : 0;
+        }
+      }
+
+      return totalPrice - discount;
+    }
   }, [totalPrice, getValues('discount'), getValues('discountType'), getValues('customerId'), orderDiscount, getValues('paymentPoint')]);
   // caculate return price
   const returnPrice = useMemo(() => {

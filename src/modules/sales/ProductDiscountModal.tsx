@@ -106,6 +106,7 @@ export function ProductDiscountModal({
                 }).map((i, index) => {
                   return {
                     ...i,
+                    maxQuantity: items[0]?.apply?.maxQuantity,
                     key: i.id,
                   }
                 });
@@ -170,6 +171,8 @@ export function ProductDiscountModal({
       ),
     },
   ];
+
+  console.log("productDiscount", productDiscount)
 
   const findProduct = (productUnitId: any) => {
     return productUnitId.map((item) => {
@@ -273,7 +276,10 @@ export function ProductDiscountModal({
       <SelectProductDiscount
         isOpen={isOpenSelectProduct}
         onCancel={() => setIsOpenSelectProduct(false)}
-        products={productDiscountList}
+        products={productDiscountList.map((item) => {
+          // check if product is already items[0]?.apply?.productUnitId then set selected to true
+          return item
+        })}
         onSave={(selectedProducts) => {
           // update selectedProducts to productDiscount list
           const selectedDiscount = listDiscount.find((batch) => batch.isSelected);
@@ -282,7 +288,8 @@ export function ProductDiscountModal({
           selectedDiscount.items[0].apply.productUnitId = selectedProducts.map((product) => {
             return {
               id: product.id,
-              discountQuantity: product?.discountQuantity
+              discountQuantity: product?.discountQuantity,
+              isSelected: product?.isSelected,
             }
           });
 
