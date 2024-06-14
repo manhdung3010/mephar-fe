@@ -2,7 +2,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useQuery } from '@tanstack/react-query';
 import { Popover } from 'antd';
 import cx from 'classnames';
-import { cloneDeep, debounce } from 'lodash';
+import { cloneDeep, debounce, orderBy } from 'lodash';
 import Image from 'next/image';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -16,7 +16,7 @@ import PlusIcon from '@/assets/plusIcon.svg';
 import SearchIcon from '@/assets/searchIcon.svg';
 import { CustomAutocomplete } from '@/components/CustomAutocomplete';
 import { EPaymentMethod } from '@/enums';
-import { formatMoney, formatNumber, getImage, randomString } from '@/helpers';
+import { formatMoney, formatNumber, getImage, randomString, roundNumber } from '@/helpers';
 import { branchState, orderActiveState, orderDiscountSelected, orderState, productDiscountSelected } from '@/recoil/state';
 
 import { getOrderDetail } from '@/api/order.service';
@@ -401,6 +401,69 @@ const Index = () => {
 
   }, [orderDiscount])
 
+  const onExpandMoreBatches = async (productKey, quantity: number, product?: any) => {
+    const orderObjectClone = cloneDeep(orderObject);
+
+    const res = await getProductDiscountList({ productUnitId: product?.id, branchId: branchId, quantity: quantity })
+    let itemDiscountProduct = res?.data?.data?.items
+
+    orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map(
+      (product: ISaleProductLocal) => {
+        if (product.productKey === productKey) {
+          return {
+            ...product,
+            itemDiscountProduct,
+            quantity,
+          };
+        }
+
+        return product;
+      }
+    );
+
+    orderObjectClone[orderActive] = orderObjectClone[orderActive].map(
+      (product: ISaleProductLocal) => {
+        if (product.productKey === productKey) {
+          let sumQuantity = 0;
+
+          let batches = cloneDeep(product.batches);
+          batches = orderBy(batches, ['isSelected'], ['desc']);
+
+          batches = batches.map((batch) => {
+            const remainQuantity =
+              roundNumber(quantity) - roundNumber(sumQuantity);
+
+            if (remainQuantity && batch.inventory) {
+              const tempQuantity =
+                batch.inventory <= remainQuantity
+                  ? batch.inventory
+                  : roundNumber(remainQuantity);
+
+              sumQuantity += tempQuantity;
+
+              return {
+                ...batch,
+                quantity: tempQuantity,
+                isSelected: true,
+              };
+            }
+
+            return { ...batch, quantity: 0, isSelected: false };
+          });
+
+          return {
+            ...product,
+            batches,
+          };
+        }
+
+        return product;
+      }
+    );
+
+    setOrderObject(orderObjectClone);
+  };
+
 
   // select product
   const onSelectedProduct = (value) => {
@@ -415,15 +478,28 @@ const Index = () => {
       )
     ) {
       orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map(
-        (product: ISaleProductLocal) => {
-          if (product.productKey === productKey && !product.isDiscount) {
+        (p: ISaleProductLocal) => {
+          if (p.productKey === productKey && !product.isDiscount) {
             return {
-              ...product,
-              quantity: product.quantity + 1,
+              ...p,
+              quantity: p.quantity + 1,
+              // update batches
+              batches: p.batches.map((batch) => {
+                const inventory =
+                  (batch.quantity / product.productUnit.exchangeValue)
+                const newBatch = {
+                  ...batch,
+                  // inventory,
+                  // originalInventory: batch.quantity,
+                  quantity: batch.isSelected ? batch.quantity + 1 : batch.quantity,
+                };
+
+                return newBatch;
+              }),
             };
           }
 
-          return product;
+          return p;
         }
       );
       setOrderObject((pre) => ({ ...pre, ...orderObjectClone }));

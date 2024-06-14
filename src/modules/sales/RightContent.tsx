@@ -128,7 +128,7 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
     if (orderDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
       orderDiscount?.forEach((item) => {
         if (item.type === "order_price") {
-          if (item?.items?.apply?.discountType === "percent") {
+          if (item?.items[0]?.apply?.discountType === "percent") {
             discount += (price * item?.items[0]?.apply?.discountValue) / 100;
           }
           else {

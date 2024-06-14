@@ -33,19 +33,19 @@ export function ProductDiscountModal({
   const [discountType, setDiscountType] = useRecoilState(discountTypeState);
   const [isOpenSelectProduct, setIsOpenSelectProduct] = useState(false);
   const [productDiscountList, setProductDiscountList] = useState([]);
-  const { data: products, isLoading: isLoadingProduct, isSuccess } = useQuery<{
-    data?: { items: ISaleProduct[] };
-  }>(
-    [
-      'LIST_SALE_PRODUCT',
-      1,
-      9999,
-      "",
-      branchId,
-    ],
-    () => getSaleProducts({ page: 1, limit: 9999, keyword: "", branchId }),
-    { enabled: discountList?.data?.data?.items?.length > 0 }
-  );
+  // const { data: products, isLoading: isLoadingProduct, isSuccess } = useQuery<{
+  //   data?: { items: ISaleProduct[] };
+  // }>(
+  //   [
+  //     'LIST_SALE_PRODUCT',
+  //     1,
+  //     9999,
+  //     "",
+  //     branchId,
+  //   ],
+  //   () => getSaleProducts({ page: 1, limit: 9999, keyword: "", branchId }),
+  //   { enabled: discountList?.data?.data?.items?.length > 0 }
+  // );
   useEffect(() => {
     if (discountList) {
 
@@ -101,16 +101,16 @@ export function ProductDiscountModal({
             type === "product_price" && (
               <CustomButton type='danger' onClick={() => {
                 setIsOpenSelectProduct(true)
-                const listP = items[0]?.apply?.productUnitId.map((item) => {
-                  return products?.data?.items?.find((product) => product.id === item);
-                }).map((i, index) => {
-                  return {
-                    ...i,
-                    maxQuantity: items[0]?.apply?.maxQuantity,
-                    key: i.id,
-                  }
-                });
-                setProductDiscountList(listP)
+                // const listP = items[0]?.apply?.productUnitId.map((item) => {
+                //   return products?.data?.items?.find((product) => product.id === item);
+                // }).map((i, index) => {
+                //   return {
+                //     ...i,
+                //     maxQuantity: items[0]?.apply?.maxQuantity,
+                //     key: i.id,
+                //   }
+                // });
+                // setProductDiscountList(listP)
               }}>Chọn quà khuyến mại</CustomButton>
             )
           }
@@ -173,18 +173,6 @@ export function ProductDiscountModal({
   ];
 
   console.log("productDiscount", productDiscount)
-
-  const findProduct = (productUnitId: any) => {
-    return productUnitId.map((item) => {
-      return products?.data?.items?.find((product) => product.id === item);
-    }).map((i, index) => {
-      return (
-        <span className='text-[#d64457]'>
-          {i?.product?.name}{"("}{i?.productUnit?.unitName}{")"}{index < productUnitId.length - 1 ? ", " : ""}
-        </span>
-      )
-    });
-  }
 
   useEffect(() => {
     const selectedDiscount = listDiscount.filter((batch) => batch.isSelected);
