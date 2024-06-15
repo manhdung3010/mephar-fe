@@ -26,6 +26,7 @@ import Label from '../../../../components/CustomLabel';
 import { AddDosageModal } from '../components/AddDosageModal';
 import { AddGroupProductModal } from '../components/AddGroupProduct';
 import { AddPositionModal } from '../components/AddPositionModal';
+import { getPointStatus } from '@/api/point.service';
 
 export enum EExpireDateType {
   STRING = 1,
@@ -66,8 +67,7 @@ const Info = ({ useForm, setSelectedMedicineCategory, selectedMedicineCategory, 
   const [groupProductKeyword, setGroupProductKeyword] = useState(groupProductName);
   const [dosageKeyword, setDosageKeyword] = useState(dosageName);
   const [positionKeyword, setPositionKeyword] = useState(positionName);
-
-  console.log("isCopy", isCopy);
+  const [isPoint, setIsPoint] = useState(false);
 
   useEffect(() => {
     setGroupProductKeyword(groupProductName);
@@ -80,6 +80,17 @@ const Info = ({ useForm, setSelectedMedicineCategory, selectedMedicineCategory, 
   useEffect(() => {
     setPositionKeyword(positionName);
   }, [positionName]);
+
+  const { data: pointStatus, isLoading: isLoadingPointDetail } = useQuery(
+    ['POINT_STATUS'],
+    () => getPointStatus(),
+  );
+
+  useEffect(() => {
+    if (pointStatus?.data?.type === "product") {
+      setIsPoint(true);
+    }
+  }, [pointStatus?.data?.type]);
 
   const { data: dosages } = useQuery(['DOSAGE', dosageKeyword], () =>
     getDosage({ page: 1, limit: 20, keyword: dosageKeyword })
@@ -139,8 +150,6 @@ const Info = ({ useForm, setSelectedMedicineCategory, selectedMedicineCategory, 
   //     setMainPrice(getValues('price'));
   //   }
   // }, [getValues('price')])
-
-
   return (
     <div className="mt-5">
       <div className="grid grid-cols-2 gap-x-[42px] gap-y-5">
@@ -393,10 +402,8 @@ const Info = ({ useForm, setSelectedMedicineCategory, selectedMedicineCategory, 
           />
           <InputError error={errors?.weight?.message} />
         </div>
-
         <div>
           <Label infoText="" label="Cảnh báo hết hạn" required />
-
           <CustomInput
             placeholder="Thời điểm cảnh báo hết hạn"
             wrapClassName="grow"
@@ -412,6 +419,25 @@ const Info = ({ useForm, setSelectedMedicineCategory, selectedMedicineCategory, 
           />
           <InputError error={errors?.expiryPeriod?.message} />
         </div>
+        {
+          isPoint && (
+            <div>
+              <Label infoText="" label="Điểm" />
+              <CustomInput
+                placeholder="Nhập điểm"
+                wrapClassName="grow"
+                className="h-11"
+                onChange={(e) =>
+                  setValue('point', e, {
+                    shouldValidate: true,
+                  })
+                }
+                value={getValues('point')}
+                type="number"
+              />
+            </div>
+          )
+        }
       </div>
 
       <div>
@@ -440,6 +466,20 @@ const Info = ({ useForm, setSelectedMedicineCategory, selectedMedicineCategory, 
             <div>Bán trực tiếp</div>
             <Image src={InfoIcon} alt="" />
           </div>
+          {
+            pointStatus?.data?.type === "product" && (
+              <div className="absolute bottom-6 left-[calc((100%-42px)/2+12px)] flex gap-2">
+                <CustomCheckbox
+                  onChange={(e) =>
+                    setIsPoint(e.target.checked)
+                  }
+                  checked={isPoint}
+                />
+                <div>Tích điểm</div>
+                <Image src={InfoIcon} alt="" />
+              </div>
+            )
+          }
         </div>
         <InputError error={errors?.baseUnit?.message} />
       </div>

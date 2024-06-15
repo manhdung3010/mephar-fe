@@ -24,6 +24,7 @@ export const schema = yup.object().shape({
   maxInventory: yup.string(),
   description: yup.string(),
   note: yup.string(),
+  point: yup.number(),
   // isLoyaltyPoint: yup.boolean().required("Đây là trường bắt buộc!"),
   type: yup.number().required('Đây là trường bắt buộc!'),
   status: yup.number().required('Đây là trường bắt buộc!'),

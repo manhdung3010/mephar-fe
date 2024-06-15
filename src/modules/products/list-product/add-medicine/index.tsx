@@ -132,6 +132,7 @@ const AddMedicine = ({
             setValue(key, productDetail.data[key], {
               shouldValidate: true,
             });
+            setValue('point', productDetail.data?.productUnit[0]?.point, { shouldValidate: true })
           }
         }
       });
@@ -150,8 +151,10 @@ const AddMedicine = ({
   const { mutate: mutateCreateMedicine, isLoading: isLoadingCreateMedicine } =
     useMutation(
       () => {
-        const payload = {
-          ...getValues(),
+        const payload: any = {
+          ...Object.fromEntries(
+            Object.entries(getValues()).filter(([key]) => key !== 'point')
+          ),
           branchId,
           drugCode: selectedMedicineCategory ? JSON.parse(selectedMedicineCategory)?.code : productDetail?.data?.drugCode,
           productUnits: [
@@ -164,7 +167,7 @@ const AddMedicine = ({
               code: '',
               price: getValues('price'),
               barCode: '',
-              point: '',
+              point: getValues('point'),
               exchangeValue: 1,
               isDirectSale: getValues('isDirectSale'),
               isBaseUnit: true,

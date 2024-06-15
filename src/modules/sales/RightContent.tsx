@@ -506,7 +506,7 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
               </div>
             </div>
             {
-              getValues('customerId') && customers?.data?.items?.find((item) => item.id === getValues('customerId') && item.isPointPayment) && (
+              pointStatus?.data?.isPointPayment && getValues('customerId') && customers?.data?.items?.find((item) => item.id === getValues('customerId') && item.isPointPayment) && (
                 <div className="mb-5 flex justify-between">
 
                   <div className="text-lg leading-normal text-[#828487] flex items-center gap-2">
@@ -521,10 +521,15 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
                         size='small'
                         checked={checkPoint}
                         onChange={(e) => {
+                          const customerPoint = customers?.data?.items?.find(
+                            (item) => item.id === getValues('customerId')
+                          )?.point;
+                          if (customerPoint < pointStatus?.data?.convertPoint) {
+                            message.error("Khách hàng không đủ điểm để thanh toán. Điểm thanh toán tối thiểu là " + pointStatus?.data?.convertPoint + " điểm");
+                            return;
+                          }
                           if (e) {
-                            setValue('paymentPoint', customers?.data?.items?.find(
-                              (item) => item.id === getValues('customerId')
-                            )?.point, { shouldValidate: true });
+                            setValue('paymentPoint', customerPoint, { shouldValidate: true });
                             setCheckPoint(true);
                           }
                           else {
