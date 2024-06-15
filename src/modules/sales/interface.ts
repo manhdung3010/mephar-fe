@@ -50,6 +50,7 @@ export interface ISaleProduct {
   quantity: number;
   expiryDate: string;
   isDiscount?: boolean;
+  discountQuantity?: number;
   maxQuantity?: number; // số lượng hàng KM
   batch: {
     id: number;

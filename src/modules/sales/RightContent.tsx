@@ -51,6 +51,7 @@ import { OrderSuccessModal } from './OrderSuccessModal';
 import { ScanQrModal } from './ScanQrModal';
 import type { ISaleProductLocal } from './interface';
 import { RightContentStyled } from './styled';
+import { getDiscountConfig } from '@/api/discount.service';
 
 export function RightContent({ useForm, discountList }: { useForm: any, discountList: any }) {
   const queryClient = useQueryClient();
@@ -90,6 +91,11 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
   const { data: pointStatus, isLoading: isLoadingPointDetail } = useQuery(
     ['POINT_STATUS'],
     () => getPointStatus(),
+  );
+
+  const { data: discountConfigDetail, isLoading } = useQuery(
+    ['DISCOUNT_CONFIG'],
+    () => getDiscountConfig()
   );
 
   useEffect(() => {
@@ -185,6 +191,7 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
   const customerMustPay = useMemo(() => {
     let discount = 0;
     const convertMoneyPayment = pointStatus?.data?.convertMoneyPayment;
+    const convertPoint = pointStatus?.data?.convertPoint;
 
     if (convertMoneyPayment && getValues('paymentPoint') > 0) {
       if (orderDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
@@ -203,18 +210,18 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
       if (getValues('discount')) {
         if (getValues('discountType') === EDiscountType.MONEY) {
           return totalPrice > Number(getValues('discount'))
-            ? Math.round(totalPrice - discount - Number(getValues('discount')) - (getValues('paymentPoint') * pointStatus?.data?.convertMoneyPayment))
+            ? Math.round(totalPrice - discount - Number(getValues('discount')) - (pointStatus?.data?.convertMoneyPayment / convertPoint * getValues('paymentPoint')))
             : 0;
         }
 
         if (getValues('discountType') === EDiscountType.PERCENT) {
           const discountValue =
             (totalPrice * Number(getValues('discount'))) / 100;
-          return totalPrice > discountValue ? Math.round(totalPrice - discount - discountValue - (getValues('paymentPoint') * pointStatus?.data?.convertMoneyPayment)) : 0;
+          return totalPrice > discountValue ? Math.round(totalPrice - discount - discountValue - (pointStatus?.data?.convertMoneyPayment / convertPoint * getValues('paymentPoint'))) : 0;
         }
       }
 
-      return totalPrice - discount - (getValues('paymentPoint') * pointStatus?.data?.convertMoneyPayment);
+      return totalPrice - discount - (pointStatus?.data?.convertMoneyPayment / convertPoint * getValues('paymentPoint'));
     }
     else {
       if (orderDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
@@ -270,6 +277,30 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
   const { mutate: mutateCreateOrder, isLoading: isLoadingCreateOrder } =
     useMutation(
       () => {
+        if (orderDiscount?.length > 0 && productDiscount?.length > 0 && discountConfigDetail?.data?.data?.isMergeDiscount) {
+          const formatProducts = getValues('products')?.map(
+            ({ isBatchExpireControl, ...product }) => ({
+              ...product,
+              batches: product.batches?.map((batch) => ({
+                id: batch.id,
+                quantity: batch.quantity,
+              })),
+              isDiscount: product?.isDiscount || false,
+              ...(product?.itemPrice > 0 && {
+                itemPrice: product?.itemPrice,
+              })
+            })
+          );
+          return createOrder({
+            ...getValues(),
+            discountOrder: oldTotal,
+            listDiscountId: [...orderDiscount?.map((item) => item.id), ...productDiscount?.map((item) => item.id)],
+            ...(getValues('customerId') === -1 && { customerId: null }),
+            products: formatProducts,
+            branchId,
+          });
+        }
+
         if (discountType === "order" && orderDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
           const formatProducts = getValues('products')?.map(
             ({ isBatchExpireControl, ...product }) => ({
@@ -449,7 +480,7 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
                   orderObject[orderActive]?.length > 0 && (
                     <Tooltip title="KM hóa đơn" className='cursor-pointer'>
                       <Image src={DiscountIcon} onClick={() => {
-                        if (productDiscount?.length > 0) return message.error("Bạn đã chọn khuyến mại hàng hóa. Mỗi hóa đơn chỉ đươc áp dụng 1 loại khuyến mại");
+                        if (productDiscount?.length > 0 && !discountConfigDetail?.data?.data?.isMergeDiscount) return message.error("Bạn đã chọn khuyến mại hàng hóa. Mỗi hóa đơn chỉ đươc áp dụng 1 loại khuyến mại");
                         return setIsOpenDiscountModal(!isOpenDiscountModal)
                       }} alt='discount-icon' />
                     </Tooltip>

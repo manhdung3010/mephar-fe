@@ -12,6 +12,7 @@ import { useRecoilState, useRecoilValue } from 'recoil';
 import { ISaleProduct } from './interface';
 import { getSaleProducts } from '@/api/product.service';
 import { ProductList } from './ProductList';
+import { message } from 'antd';
 
 function SelectProductDiscount({ isOpen, onCancel, onSave, products, discountId }) {
   const [listProduct, setListProduct] = useState<any[]>([]);
@@ -34,7 +35,7 @@ function SelectProductDiscount({ isOpen, onCancel, onSave, products, discountId 
   );
 
   useEffect(() => {
-    if (products) {
+    if (products && discountId && isOpen && productsList?.data?.items) {
       // const newProducts = products.map((product) => {
       //   return {
       //     ...product,
@@ -43,30 +44,28 @@ function SelectProductDiscount({ isOpen, onCancel, onSave, products, discountId 
       //   };
       // });
       // setListProduct(newProducts);
-
       // get product discount
 
-      // const productUnits = products.find((p) => p.id === discountId)?.items[0]?.apply?.productUnitId;
-      // const maxQuantity = products.find((p) => p.id === discountId)?.items[0]?.apply?.maxQuantity;
-      // const a = productUnits?.map((item) => {
-      //   const product1 = productsList?.data?.items?.find((product) => product.id === item || product.id === item?.id);
-      //   return {
-      //     ...product1,
-      //     isSelected: false,
-      //   };
-      // }).map((i, index) => {
-      //   return {
-      //     ...i,
-      //     maxQuantity: maxQuantity,
-      //     // isSelected: isSe,
-      //     key: i.id,
-      //   }
-      // });
-      // console.log("a", a)
+      const productUnits = products.find((p) => p.id === discountId)?.items[0]?.apply?.productUnitId;
+      const maxQuantity = products.find((p) => p.id === discountId)?.items[0]?.apply?.maxQuantity;
+      const a = productUnits?.map((item) => {
+        const product1 = productsList?.data?.items?.find((product) => product.id === item || product.id === item?.id);
+        return {
+          ...product1,
+          discountQuantity: 0,
+        };
+      }).map((i, index) => {
+        return {
+          ...i,
+          maxQuantity: maxQuantity,
+          // isSelected: false,
+          key: i.id,
+        }
+      });
 
-      // setListProduct(a);
+      setListProduct(a);
     }
-  }, [products, isOpen, productsList]);
+  }, [products, isOpen, productsList, discountId]);
 
   // console.log("productDiscount", productDiscount)
 
@@ -83,15 +82,16 @@ function SelectProductDiscount({ isOpen, onCancel, onSave, products, discountId 
       title: 'Số lượng',
       dataIndex: 'discountQuantity',
       key: 'discountQuantity',
-      render: (discountQuantity) => (
+      render: (discountQuantity, { id }) => (
         <CustomInput onChange={(value) => {
-          // change quantity
-          const listBatchClone = cloneDeep(listProduct);
-          const batchIndex = listBatchClone.findIndex((batch) => batch.isSelected);
-          listBatchClone[batchIndex].discountQuantity = +value;
-          setListProduct(listBatchClone);
+          // update quantity of product
+          const listProductClone = cloneDeep(listProduct);
+          const product = listProductClone.find((product) => product.id === id);
+          product.discountQuantity = value;
+          setListProduct(listProductClone);
         }}
           value={discountQuantity}
+          type='number'
         />
       ),
     },
@@ -163,7 +163,17 @@ function SelectProductDiscount({ isOpen, onCancel, onSave, products, discountId 
               (product) => product.isSelected
             );
 
+
+            // check total quantity of productUnitId 
+            const totalQuantity = selectedProducts.reduce((acc, product) => {
+              return acc + product.discountQuantity;
+            }, 0);
+            if (totalQuantity > listProduct[0]?.maxQuantity) {
+              message.error('Tổng số lượng không được lớn hơn ' + listProduct[0]?.maxQuantity);
+              return;
+            }
             onSave(selectedProducts);
+            onCancel();
           }}
           className="h-[46px] min-w-[150px] py-2 px-4"
         >

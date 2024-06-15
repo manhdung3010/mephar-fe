@@ -55,7 +55,7 @@ function PointModal({ isOpen, onCancel, getValues, setValue, handleSubmit, error
   const { mutate: mutateCreatePoint, isLoading: isLoadingPoint } =
     useMutation(
       () => {
-        return createPoint({ ...getValues(), status: 'active' });
+        return createPoint({ ...getValues(), ...(getValues('groupCustomers')?.length > 0 ? { isAllCustomer: false } : { isAllCustomer: true }), status: 'active' });
       },
       {
         onSuccess: () => {
@@ -183,33 +183,33 @@ function PointModal({ isOpen, onCancel, getValues, setValue, handleSubmit, error
                 <CustomCheckbox
                   className='mr-1'
                   onChange={(e) =>
-                    setValue('isDiscountProduct', e.target.checked, {
+                    setValue('isDiscountProduct', !e.target.checked, {
                       shouldValidate: true,
                     })
                   }
-                  checked={getValues('isDiscountProduct')}
+                  checked={getValues('isDiscountProduct') ? false : true}
                 /> Không tích điểm cho sản phẩm giảm giá
               </div>
               <div>
                 <CustomCheckbox
                   className='mr-1'
                   onChange={(e) =>
-                    setValue('isDiscountOrder', e.target.checked, {
+                    setValue('isDiscountOrder', !e.target.checked, {
                       shouldValidate: true,
                     })
                   }
-                  checked={getValues('isDiscountOrder')}
+                  checked={getValues('isDiscountOrder') ? false : true}
                 /> Không tích điểm cho hóa đơn giảm giá
               </div>
               <div>
                 <CustomCheckbox
                   className='mr-1'
                   onChange={(e) =>
-                    setValue('isPointBuy', e.target.checked, {
+                    setValue('isPointBuy', !e.target.checked, {
                       shouldValidate: true,
                     })
                   }
-                  checked={getValues('isPointBuy')}
+                  checked={getValues('isPointBuy') ? false : true}
                 /> Không tích điểm cho hóa đơn thanh toán bằng điểm thưởng
               </div>
             </div>

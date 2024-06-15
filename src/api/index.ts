@@ -49,6 +49,7 @@ axiosClient.interceptors.response.use(
         "order",
         "discount/order",
         "discount/product",
+        "discount/config",
       ];
 
       if (!excludeUrl.includes(response.config?.url as string)) {

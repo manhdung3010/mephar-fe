@@ -1,19 +1,44 @@
-import { Select, Tag } from 'antd';
+import { Select, Tag, message } from 'antd';
 import Image from 'next/image';
 
 import ArrowDownGray from '@/assets/arrowDownGray.svg';
 import SearchIcon from '@/assets/searchIcon.svg';
 import { CustomInput } from '@/components/CustomInput';
 import { useState } from 'react';
+import { CustomSwitch } from '@/components/CustomSwitch';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { getDiscountConfig, updateDiscountConfig } from '@/api/discount.service';
 
 
 const Search = ({ onChange }: { onChange: (value) => void }) => {
+  const queryClient = useQueryClient();
 
   const [formFilter, setFormFilter] = useState({
     keyword: '',
     status: null,
     effective: null,
+    isMergeDiscount: false
   });
+
+  const { data: discountConfigDetail, isLoading } = useQuery(
+    ['DISCOUNT_CONFIG', formFilter.isMergeDiscount],
+    () => getDiscountConfig()
+  );
+  const { mutate: mutateUpdateDiscountConfig, isLoading: isLoadingConfig } =
+    useMutation(
+      () => {
+        return updateDiscountConfig({ isMergeDiscount: !discountConfigDetail?.data?.data?.isMergeDiscount });
+      },
+      {
+        onSuccess: async () => {
+          message.success("Cập nhật trạng thái thành công");
+          await queryClient.invalidateQueries(["DISCOUNT_CONFIG"]);
+        },
+        onError: (err: any) => {
+          message.error(err?.message);
+        },
+      }
+    );
 
   const handleChangeFormFilter = (key, value) => {
     setFormFilter({ ...formFilter, [key]: value });
@@ -104,6 +129,12 @@ const Search = ({ onChange }: { onChange: (value) => void }) => {
             <span className='ml-1 font-semibold'>{formFilter?.effective === 2 ? "Còn hiệu lực" : "Hết hiệu lực"}</span>
           </Tag>
         }
+      </div>
+      <div className='flex justify-end items-center gap-2 pr-5 pb-4'>
+        <CustomSwitch checked={discountConfigDetail?.data?.data?.isMergeDiscount} onChange={(e) => {
+          mutateUpdateDiscountConfig();
+        }} size='small' />
+        <span className='font-medium'>Gộp các chương trình khuyến mãi</span>
       </div>
     </div>
   );

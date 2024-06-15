@@ -170,7 +170,7 @@ export function OrderDiscountModal({
         scroll={{ x: 600 }}
         // loading={isLoading}
         rowSelection={{
-          type: 'checkbox',
+          type: 'radio',
           selectedRowKeys: [
             ...listDiscount
               .filter((batch) => batch.isSelected)

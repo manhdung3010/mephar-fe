@@ -19,7 +19,8 @@ import { ListBatchModal } from './ListBatchModal';
 import { ProductDiscountModal } from './ProductDiscountModal';
 import type { IBatch, IProductUnit, ISaleProductLocal } from './interface';
 import { ProductTableStyled } from './styled';
-import { getProductDiscountList } from '@/api/discount.service';
+import { getDiscountConfig, getProductDiscountList } from '@/api/discount.service';
+import { useQuery } from '@tanstack/react-query';
 
 export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: any, orderDetail: any, listDiscount: any }) {
   const { errors, setError } = useForm;
@@ -44,6 +45,11 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
   const branchId = useRecoilValue(branchState);
 
   const isSaleReturn = orderActive.split("-")[1] === "RETURN";
+
+  const { data: discountConfigDetail, isLoading } = useQuery(
+    ['DISCOUNT_CONFIG'],
+    () => getDiscountConfig()
+  );
 
   useEffect(() => {
     if (orderObject[orderActive]) {
@@ -223,7 +229,7 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
               itemDiscountProduct?.length > 0 && (
                 <Tooltip title="KM hàng hóa" className='cursor-pointer'>
                   <Image src={DiscountIcon} onClick={() => {
-                    if (orderDiscount?.length > 0) {
+                    if (orderDiscount?.length > 0 && !discountConfigDetail?.data?.data?.isMergeDiscount) {
                       message.error("Bạn đã chọn khuyến mại hóa đơn. Mỗi hóa đơn chỉ được chọn 1 loại khuyến mại")
                     }
                     else {

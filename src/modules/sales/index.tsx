@@ -285,6 +285,9 @@ const Index = () => {
     handleGetProductDiscount()
   }, [orderDiscount]);
 
+  console.log("productDiscount", productDiscount)
+  console.log("orderDiscount", orderDiscount)
+
   // product discount
   useEffect(() => {
     function handleGetProductDiscount() {
@@ -297,8 +300,7 @@ const Index = () => {
           let changeType = item?.items[0]?.apply?.changeType;
           if (list?.length > 0) {
             for (const l of list) {
-              let product = {}
-              const productsScan = getSaleProducts({ ...formFilter, keyword: "", branchId, productUnit: l }).then((res) => {
+              getSaleProducts({ ...formFilter, keyword: "", branchId, productUnit: l?.id ?? l }).then((res) => {
                 if (res?.data?.items?.length > 0) {
                   let discountValue = item?.items[0]?.apply?.discountValue;
                   let discountType = item?.items[0]?.apply?.discountType;
@@ -318,7 +320,7 @@ const Index = () => {
 
                   return onSelectedProduct(JSON.stringify({
                     ...res?.data?.items[0],
-                    maxQuantity: item.items[0].apply.maxQuantity,
+                    discountQuantity: l.discountQuantity || 1,
                     isDiscount: true,
                     discountType: discountType,
                     discountValue: discountValue,
@@ -516,7 +518,7 @@ const Index = () => {
             ...product,
             inventory: product.quantity,
             productKey,
-            quantity: product?.isDiscount ? product?.maxQuantity : 1,
+            quantity: product?.isDiscount ? product?.discountQuantity : 1,
             productUnitId: product.id,
             itemDiscountProduct: itemDiscountProduct,
             originProductUnitId: product.id,

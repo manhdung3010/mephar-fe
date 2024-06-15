@@ -31,3 +31,9 @@ export function getOrderDiscountList(payload) {
 export function getProductDiscountList(payload) {
   return axiosClient.post("discount/product", payload);
 }
+export function getDiscountConfig() {
+  return axiosClient.get("discount/config/detail");
+}
+export function updateDiscountConfig(payload) {
+  return axiosClient.post("discount/config", payload);
+}
