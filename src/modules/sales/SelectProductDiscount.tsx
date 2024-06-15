@@ -46,25 +46,25 @@ function SelectProductDiscount({ isOpen, onCancel, onSave, products, discountId 
 
       // get product discount
 
-      const productUnits = products.find((p) => p.id === discountId)?.items[0]?.apply?.productUnitId;
-      const maxQuantity = products.find((p) => p.id === discountId)?.items[0]?.apply?.maxQuantity;
-      const a = productUnits?.map((item) => {
-        const product1 = productsList?.data?.items?.find((product) => product.id === item || product.id === item?.id);
-        return {
-          ...product1,
-          isSelected: false,
-        };
-      }).map((i, index) => {
-        return {
-          ...i,
-          maxQuantity: maxQuantity,
-          // isSelected: isSe,
-          key: i.id,
-        }
-      });
-      console.log("a", a)
+      // const productUnits = products.find((p) => p.id === discountId)?.items[0]?.apply?.productUnitId;
+      // const maxQuantity = products.find((p) => p.id === discountId)?.items[0]?.apply?.maxQuantity;
+      // const a = productUnits?.map((item) => {
+      //   const product1 = productsList?.data?.items?.find((product) => product.id === item || product.id === item?.id);
+      //   return {
+      //     ...product1,
+      //     isSelected: false,
+      //   };
+      // }).map((i, index) => {
+      //   return {
+      //     ...i,
+      //     maxQuantity: maxQuantity,
+      //     // isSelected: isSe,
+      //     key: i.id,
+      //   }
+      // });
+      // console.log("a", a)
 
-      setListProduct(a);
+      // setListProduct(a);
     }
   }, [products, isOpen, productsList]);
 
