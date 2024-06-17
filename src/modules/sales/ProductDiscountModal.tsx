@@ -284,6 +284,8 @@ export function ProductDiscountModal({
             setProductDiscount([...productDiscount, selectedDiscountProduct]);
           }
 
+          // check product before save
+
           setDiscountType("product")
           onSave(selectedDiscountProduct);
         }}

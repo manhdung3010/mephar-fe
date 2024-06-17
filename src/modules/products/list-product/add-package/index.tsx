@@ -122,7 +122,7 @@ const AddPackage = ({
   const { mutate: mutateCreatePackage, isLoading: isLoadingCreatePackage } =
     useMutation(
       () => {
-        const payload = {
+        const payload: any = {
           ...getValues(),
           branchId,
           productUnits: [
@@ -134,7 +134,7 @@ const AddPackage = ({
               code: '',
               price: getValues('price'),
               barCode: '',
-              point: '',
+              point: getValues('point'),
               exchangeValue: 1,
               isDirectSale: getValues('isDirectSale'),
               isBaseUnit: true,
@@ -142,6 +142,7 @@ const AddPackage = ({
           ],
         };
         delete payload.isDirectSale;
+        delete payload.point;
 
         return product && !isCopy
           ? updateProduct(product?.data?.id, payload)
