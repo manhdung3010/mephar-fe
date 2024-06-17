@@ -743,7 +743,7 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
           const orderObjectClone = cloneDeep(orderObject);
           orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map(
             (product: ISaleProductLocal) => {
-              if (product.productUnitId === selectedDiscount[0]?.items[0]?.condition?.productUnitId[0]) {
+              if (selectedDiscount[0]?.items[0]?.condition?.productUnitId.includes(product.productUnitId)) {
                 return {
                   ...product,
                   discountSelected: selectedDiscount

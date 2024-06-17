@@ -261,29 +261,30 @@ export function ProductDiscountModal({
         onSave={(selectedProducts) => {
           // update selectedProducts to productDiscount list
           const selectedDiscount = listDiscount.find((batch) => batch.isSelected);
-
           // // set selected products to selectedDiscount
           selectedDiscount.items[0].apply.productUnitId = selectedProducts.map((product) => {
-            return {
-              id: product.id,
-              discountQuantity: product?.discountQuantity,
-              isSelected: product?.isSelected,
+            if (selectedDiscount.code === product.code) {
+              return {
+                id: product.id,
+                discountQuantity: product?.discountQuantity,
+                isSelected: product?.isSelected,
+              }
             }
+            return null
           });
-
           const selectedDiscountProduct = {
             ...selectedDiscount,
             discountKey: selectedDiscount?.id + "-" + selectedDiscount?.items[0]?.condition?.productUnitId[0],
-            productUnitId: selectedDiscount?.items[0]?.condition?.productUnitId[0]
+            productUnitId: selectedDiscount?.items[0]?.condition?.productUnitId[0],
+            code: selectedDiscount?.code
           }
           // set selectedDiscountProduct to productDiscount, check if it's already exist in productDiscount then replace it
-          const index = productDiscount.findIndex((item) => item.productUnitId === selectedDiscountProduct.productUnitId);
+          const index = productDiscount.findIndex((item) => item.code === selectedDiscountProduct.code);
           if (index !== -1) {
             setProductDiscount([...productDiscount.slice(0, index), selectedDiscountProduct, ...productDiscount.slice(index + 1)]);
           } else {
             setProductDiscount([...productDiscount, selectedDiscountProduct]);
           }
-
           // check product before save
 
           setDiscountType("product")

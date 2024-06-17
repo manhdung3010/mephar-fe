@@ -48,6 +48,7 @@ export function Settings() {
   useEffect(() => {
     if (pointStatus) {
       setValue("status", pointStatus?.data?.status, { shouldValidate: true });
+      setValue("type", pointStatus?.data?.type, { shouldValidate: true });
     }
   }, [pointStatus]);
 

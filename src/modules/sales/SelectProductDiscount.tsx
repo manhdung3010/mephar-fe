@@ -46,8 +46,11 @@ function SelectProductDiscount({ isOpen, onCancel, onSave, products, discountId 
       // setListProduct(newProducts);
       // get product discount
 
-      const productUnits = products.find((p) => p.id === discountId)?.items[0]?.apply?.productUnitId;
-      const maxQuantity = products.find((p) => p.id === discountId)?.items[0]?.apply?.maxQuantity;
+      const findProduct = products.find((p) => p.id === discountId);
+
+      const productUnits = findProduct?.items[0]?.apply?.productUnitId;
+      const maxQuantity = findProduct?.items[0]?.apply?.maxQuantity;
+      const discountCode = findProduct?.code;
       const a = productUnits?.map((item) => {
         const product1 = productsList?.data?.items?.find((product) => product.id === item || product.id === item?.id);
         return {
@@ -58,6 +61,7 @@ function SelectProductDiscount({ isOpen, onCancel, onSave, products, discountId 
         return {
           ...i,
           maxQuantity: maxQuantity,
+          code: discountCode,
           // isSelected: false,
           key: i.id,
         }
@@ -162,8 +166,6 @@ function SelectProductDiscount({ isOpen, onCancel, onSave, products, discountId 
             const selectedProducts = listProduct.filter(
               (product) => product.isSelected
             );
-
-
             // check total quantity of productUnitId 
             const totalQuantity = selectedProducts.reduce((acc, product) => {
               return acc + product.discountQuantity;

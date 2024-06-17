@@ -6,43 +6,44 @@ import { CustomInput } from '@/components/CustomInput'
 import { CustomModal } from '@/components/CustomModal'
 import { CustomRadio } from '@/components/CustomRadio'
 import InputError from '@/components/InputError'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Select, Spin } from 'antd'
 import { useEffect, useState } from 'react'
 
 function PointModal({ isOpen, onCancel, getValues, setValue, handleSubmit, errors, reset }: any) {
   const [customerType, setCustomerType] = useState(1)
-  const [pointType, setPointType] = useState('order')
+  const queryClient = useQueryClient();
+  // const [pointType, setPointType] = useState('order')
 
   const { data: pointDetail, isLoading: isLoadingPointDetail } = useQuery(
-    ['POINT_DETAIL', pointType],
-    () => getPointDetail(pointType),
+    ['POINT_DETAIL', getValues('type')],
+    () => getPointDetail(getValues('type')),
     {
-      enabled: !!isOpen,
+      enabled: !!getValues('type'),
     }
   );
 
   useEffect(() => {
-    if (pointDetail) {
+    if (pointDetail?.data) {
       const pData = pointDetail.data
-      setValue("type", pData.type)
-      setValue("isConvertDefault", pData.isConvertDefault)
-      setValue("convertMoneyBuy", pData.convertMoneyBuy)
-      setValue("isPointPayment", pData.isPointPayment)
-      setValue("convertMoneyPayment", pData.convertMoneyPayment)
-      setValue("convertPoint", pData.convertPoint)
-      setValue("afterByTime", pData.afterByTime)
-      setValue("isDiscountProduct", pData.isDiscountProduct)
-      setValue("isDiscountOrder", pData.isDiscountOrder)
-      setValue("isPointBuy", pData.isPointBuy)
-      setValue("isAllCustomer", pData.isAllCustomer)
-      setValue("groupCustomers", pData.listGroupCustomer)
-      setValue("status", pData.status)
+      setValue("type", pData.type, { shouldValidate: true })
+      setValue("isConvertDefault", pData.isConvertDefault, { shouldValidate: true })
+      setValue("convertMoneyBuy", pData.convertMoneyBuy, { shouldValidate: true })
+      setValue("isPointPayment", pData.isPointPayment, { shouldValidate: true })
+      setValue("convertMoneyPayment", pData.convertMoneyPayment, { shouldValidate: true })
+      setValue("convertPoint", pData.convertPoint, { shouldValidate: true })
+      setValue("afterByTime", pData.afterByTime, { shouldValidate: true })
+      setValue("isDiscountProduct", pData.isDiscountProduct, { shouldValidate: true })
+      setValue("isDiscountOrder", pData.isDiscountOrder, { shouldValidate: true })
+      setValue("isPointBuy", pData.isPointBuy, { shouldValidate: true })
+      setValue("isAllCustomer", pData.isAllCustomer, { shouldValidate: true })
+      setValue("groupCustomers", pData.listGroupCustomer, { shouldValidate: true })
+      setValue("status", pData.status, { shouldValidate: true })
       if (pData.listGroupCustomer.length > 0) {
         setCustomerType(2)
       }
     }
-  }, [pointDetail])
+  }, [pointDetail?.data, getValues('type')])
 
   const { data: customers, isLoading } = useQuery(
     ['CUSTOMER_GROUP_DISCOUNT', 1, 999],
@@ -58,7 +59,8 @@ function PointModal({ isOpen, onCancel, getValues, setValue, handleSubmit, error
         return createPoint({ ...getValues(), ...(getValues('groupCustomers')?.length > 0 ? { isAllCustomer: false } : { isAllCustomer: true }), status: 'active' });
       },
       {
-        onSuccess: () => {
+        onSuccess: async () => {
+          await queryClient.invalidateQueries(['POINT_DETAIL']);
           setValue('status', 'active', { shouldValidate: true });
           reset();
           onCancel();
@@ -87,10 +89,9 @@ function PointModal({ isOpen, onCancel, getValues, setValue, handleSubmit, error
               { value: "product", label: "Hàng hóa" },
             ]}
             onChange={(value) => {
-              setPointType(value);
               setValue("type", value, { shouldValidate: true });
             }}
-            value={pointType}
+            value={getValues("type")}
           />
         </div>
       </div>
@@ -102,7 +103,7 @@ function PointModal({ isOpen, onCancel, getValues, setValue, handleSubmit, error
             <div className='grid grid-cols-1 gap-2 mt-4'>
               <div className='grid grid-cols-5'>
                 {
-                  pointType === 'order' ? (
+                  getValues('type') === 'order' ? (
                     <div className='col-span-2'>
                       Tỉ lệ quy đổi điểm thưởng
                     </div>
@@ -110,7 +111,7 @@ function PointModal({ isOpen, onCancel, getValues, setValue, handleSubmit, error
                     <div className='col-span-2'>
                       <CustomCheckbox
                         className='mr-1'
-                        value={getValues("isConvertDefault")}
+                        checked={getValues("isConvertDefault")}
                         onChange={(e) =>
                           setValue('isConvertDefault', e.target.checked, {
                             shouldValidate: true,
@@ -142,7 +143,7 @@ function PointModal({ isOpen, onCancel, getValues, setValue, handleSubmit, error
                 <div className='col-span-2'>
                   <CustomCheckbox
                     className='mr-1'
-                    value={getValues("isPointPayment")}
+                    checked={getValues("isPointPayment")}
                     onChange={(e) =>
                       setValue('isPointPayment', e.target.checked, {
                         shouldValidate: true,
