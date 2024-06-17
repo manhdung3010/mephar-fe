@@ -16,10 +16,10 @@ function PointModal({ isOpen, onCancel, getValues, setValue, handleSubmit, error
   // const [pointType, setPointType] = useState('order')
 
   const { data: pointDetail, isLoading: isLoadingPointDetail } = useQuery(
-    ['POINT_DETAIL', getValues('type')],
+    ['POINT_DETAIL', isOpen, getValues('type')],
     () => getPointDetail(getValues('type')),
     {
-      enabled: !!getValues('type'),
+      enabled: !!isOpen || !!getValues('type'),
     }
   );
 

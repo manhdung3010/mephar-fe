@@ -46,9 +46,13 @@ export function Settings() {
   );
 
   useEffect(() => {
-    if (pointStatus) {
+    if (pointStatus?.data?.status === "active") {
       setValue("status", pointStatus?.data?.status, { shouldValidate: true });
       setValue("type", pointStatus?.data?.type, { shouldValidate: true });
+    }
+    else {
+      setValue("status", "inactive", { shouldValidate: true });
+      setValue("type", "order", { shouldValidate: true });
     }
   }, [pointStatus]);
 
