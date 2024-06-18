@@ -14,6 +14,7 @@ export interface IImportProduct {
   isBaseUnit: boolean;
   quantity: number;
   point: number;
+  realQuantity?: number; // check inventory
   product: {
     id: number;
     name: string;
@@ -128,6 +129,7 @@ export interface IImportProductLocal extends IImportProduct {
   totalQuantity?: any;
   productUnitId?: number; // client
   productUnit?: any;
+  newInventory?: number; // client
   batches: {
     id: number;
     name: string;
