@@ -754,6 +754,7 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
           )
           setOrderObject(orderObjectClone)
           setOpenProductDiscountList(false)
+
         }}
         discountList={itemDiscount}
       />
