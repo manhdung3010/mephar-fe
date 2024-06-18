@@ -39,7 +39,7 @@ function PointModal({ isOpen, onCancel, getValues, setValue, handleSubmit, error
       setValue("isAllCustomer", pData.isAllCustomer, { shouldValidate: true })
       setValue("groupCustomers", pData.listGroupCustomer, { shouldValidate: true })
       setValue("status", pData.status, { shouldValidate: true })
-      if (pData.listGroupCustomer.length > 0) {
+      if (pData?.listGroupCustomer?.length > 0) {
         setCustomerType(2)
       }
     }

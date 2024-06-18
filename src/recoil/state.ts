@@ -67,6 +67,11 @@ export const productImportState = atom<IImportProductLocal[]>({
   default: [],
   effects: [localStorageEffect("PRODUCT_IMPORT_STATE")],
 });
+export const checkInventoryState = atom<IImportProductLocal[]>({
+  key: "CHECK_INVENTORY_STATE",
+  default: [],
+  effects: [localStorageEffect("CHECK_INVENTORY_STATE")],
+});
 
 export const productReturnState = atom<IImportProductLocal[]>({
   key: "PRODUCT_RETURN_STATE",
