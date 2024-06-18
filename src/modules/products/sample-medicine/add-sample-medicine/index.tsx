@@ -109,7 +109,7 @@ const AddSampleMedicine = ({
       const products = sampleMedicineDetail?.data?.products.map((product) => ({
         ...product.product,
         productUnitIdSelected: product.productUnitId,
-        price: product.productUnit.price,
+        price: product.productUnit?.price,
         quantity: product.quantity,
         dosage: product.dosage,
       }));
@@ -172,7 +172,7 @@ const AddSampleMedicine = ({
       render: (_, { productUnit, id, productUnitIdSelected }) => (
         <CustomUnitSelect
           options={(() => {
-            return productUnit.map((unit) => ({
+            return productUnit?.map((unit) => ({
               value: unit.id,
               label: unit.unitName,
             }));
@@ -230,6 +230,7 @@ const AddSampleMedicine = ({
       dataIndex: 'price',
       key: 'price',
       render: (value, { id }) => <CustomInput
+        disabled
         value={value}
         className="h-11 w-[200px]"
         onChange={(value) => onChangeValueProduct(id, 'price', value)}

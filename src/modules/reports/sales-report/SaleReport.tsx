@@ -24,7 +24,6 @@ import {
   Title,
   Tooltip,
 } from 'chart.js';
-// import { options } from '@/modules/home/RevenueChart';
 
 
 ChartJS.register(
@@ -220,8 +219,8 @@ export function SaleReport() {
           <Table.Summary.Row className='bg-[#e6fff6] font-semibold text-base'>
             <Table.Summary.Cell index={0}>{null}</Table.Summary.Cell>
             <Table.Summary.Cell index={0}>{null}</Table.Summary.Cell>
-            <Table.Summary.Cell index={1}>{formatMoney(saleReport?.data?.summary?.totalPrice)}</Table.Summary.Cell> {/* Empty cell */}
-            <Table.Summary.Cell index={2}>{formatMoney(saleReport?.data?.summary?.totalDiscount)}</Table.Summary.Cell>
+            <Table.Summary.Cell index={1}>{formatMoney(saleReport?.data?.summary?.totalRevenue)}</Table.Summary.Cell> {/* Empty cell */}
+            <Table.Summary.Cell index={2}>{formatMoney(saleReport?.data?.summary?.saleReturn)}</Table.Summary.Cell>
             <Table.Summary.Cell index={3}>{formatMoney(saleReport?.data?.summary?.realRevenue)}</Table.Summary.Cell>
           </Table.Summary.Row>
         )
@@ -242,9 +241,9 @@ export function SaleReport() {
           <Table.Summary.Row className='bg-[#e6fff6] font-semibold text-base'>
             <Table.Summary.Cell index={0}>{null}</Table.Summary.Cell>
             <Table.Summary.Cell index={1}>{null}</Table.Summary.Cell>
-            <Table.Summary.Cell index={2}>{formatMoney(saleReport?.data?.summary?.totalPrice)}</Table.Summary.Cell> {/* Empty cell */}
+            <Table.Summary.Cell index={2}>{formatNumber(saleReport?.data?.summary?.totalOrder)}</Table.Summary.Cell> {/* Empty cell */}
             <Table.Summary.Cell index={3}>{formatMoney(saleReport?.data?.summary?.totalDiscount)}</Table.Summary.Cell>
-            <Table.Summary.Cell index={4}>{formatMoney(saleReport?.data?.summary?.totalRevenue)}</Table.Summary.Cell>
+            <Table.Summary.Cell index={4}>{formatMoney(saleReport?.data?.summary?.totalPrice)}</Table.Summary.Cell>
           </Table.Summary.Row>
         )
       case ESaleReportConcerns.EMPLOYEE:
@@ -363,7 +362,6 @@ export function SaleReport() {
                         discountColumns : formFilter.concern === ESaleReportConcerns.EMPLOYEE ?
                           employeeColumns : columns}
                     loading={isLoading}
-                    // expandable={expandableProps}
                     expandable={{
                       // eslint-disable-next-line @typescript-eslint/no-shadow
                       expandedRowRender: (record) => {
@@ -404,8 +402,5 @@ export function SaleReport() {
         </div>
       </div>
     </div>
-    // <div className='my-5'>
-    //   Đang cập nhật...
-    // </div>
   );
 }

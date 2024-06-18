@@ -14,16 +14,18 @@ import { CustomButton } from "@/components/CustomButton";
 import CustomPagination from "@/components/CustomPagination";
 import CustomTable from "@/components/CustomTable";
 import { EImportProductStatus, EImportProductStatusLabel } from "@/enums";
-import { formatDateTime, formatMoney } from "@/helpers";
-import { branchState } from "@/recoil/state";
+import { formatDateTime, formatMoney, hasPermission } from "@/helpers";
+import { branchState, profileState } from "@/recoil/state";
 import type { IRecord } from "./interface";
 import ProductDetail from "./row-detail";
 import Search from "./Search";
 import useExportToExcel from "@/hooks/useExportExcel";
+import { RoleAction, RoleModel } from "@/modules/settings/role/role.enum";
 
 export function ImportProduct() {
   const router = useRouter();
   const branchId = useRecoilValue(branchState);
+  const profile = useRecoilValue(profileState);
 
   const [formFilter, setFormFilter] = useState({
     page: 1,
@@ -148,13 +150,17 @@ export function ImportProduct() {
       <div className="my-3 flex justify-end gap-4">
         {isHeaderVisible && <Header />}
 
-        <CustomButton
-          onClick={() => router.push("/products/import/coupon")}
-          type="success"
-          prefixIcon={<Image src={ImportIcon} />}
-        >
-          Nhập hàng
-        </CustomButton>
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.import_product, RoleAction.create) && (
+            <CustomButton
+              onClick={() => router.push("/products/import/coupon")}
+              type="success"
+              prefixIcon={<Image src={ImportIcon} />}
+            >
+              Nhập hàng
+            </CustomButton>
+          )
+        }
 
         <CustomButton
           prefixIcon={<Image src={ExportIcon} />}

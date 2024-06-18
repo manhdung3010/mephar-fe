@@ -23,14 +23,18 @@ export const warehouseStatus = {
   INBOUND_RETURN: 3,
   MOVE: 4,
   ADJUSTMENT: 5,
+  MOVE_RECEIVE: 6,
+  SALE_RETURN: 7,
 };
 
 const warehouseStatusLable = {
   [warehouseStatus.INBOUND]: 'Nhập hàng',
   [warehouseStatus.ORDER]: 'Đặt hàng',
-  [warehouseStatus.INBOUND_RETURN]: 'Trả hàng',
+  [warehouseStatus.INBOUND_RETURN]: 'Trả hàng nhập',
   [warehouseStatus.MOVE]: 'Chuyển hàng',
   [warehouseStatus.ADJUSTMENT]: 'Kiểm kho',
+  [warehouseStatus.MOVE_RECEIVE]: 'Nhận hàng',
+  [warehouseStatus.SALE_RETURN]: 'Trả hàng bán',
 }
 
 const WareHouseCard = ({ productId, branchId }) => {

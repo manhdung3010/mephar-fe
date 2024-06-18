@@ -38,7 +38,7 @@ const RowDetail = ({ record }: { record: any }) => {
         <div className="h-[1px] w-full bg-[#D64457]" />
       </div>
       {select === 0 && <Info record={record} />}
-      {select === 1 && <DiscountInfo />}
+      {select === 1 && <DiscountInfo record={record} />}
     </div>
   );
 };

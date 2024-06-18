@@ -1,7 +1,7 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useQuery } from '@tanstack/react-query';
 import type { ColumnsType } from 'antd/es/table';
-import { cloneDeep, debounce } from 'lodash';
+import { cloneDeep, debounce, divide, orderBy } from 'lodash';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -15,7 +15,7 @@ import { CustomInput } from '@/components/CustomInput';
 import CustomTable from '@/components/CustomTable';
 import { CustomUnitSelect } from '@/components/CustomUnitSelect';
 import InputError from '@/components/InputError';
-import { formatMoney, getImage } from '@/helpers';
+import { formatMoney, getImage, hasPermission, roundNumber } from '@/helpers';
 import type {
   IImportProduct,
   IImportProductLocal,
@@ -29,6 +29,9 @@ import type { IBatch } from '../interface';
 import { ListBatchModal } from './ListBatchModal';
 import { RightContent } from './RightContent';
 import { schema } from './schema';
+import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
+import { message } from 'antd';
+import useBarcodeScanner from '@/hooks/useBarcodeScanner';
 
 export default function ReturnCoupon() {
   const profile = useRecoilValue(profileState);
@@ -63,28 +66,42 @@ export default function ReturnCoupon() {
     }
   );
 
-
   useEffect(() => {
     if (importProductDetail) {
+      let cloneImportProducts = cloneDeep(returnProducts);
       importProductDetail?.data?.products?.forEach((product) => {
-        const newProduct = {
-          ...product,
-          // productId: product.productId,
-          productUnit: [product.productBatchHistories[0].productUnit],
-        }
         const localProduct: IImportProductLocal = {
-          ...newProduct,
-          productKey: `${product.product.id || product.productId}-${product.id}`,
-          inventory: product.quantity,
+          ...product,
+          productUnit: product?.productUnit,
+          productKey: `${product.productId || product.productId}-${product.id}`,
+          primePrice: +product.price,
           productId: product.productId,
-          quantity: 1,
-          price: product.productBatchHistories[0].importPrice,
+          quantity: product.quantity,
+          price: +product.price,
           discountValue: 0,
-          batches: id ? product.productBatchHistories : [],
+          batches: product.batches?.map((batch) => {
+            const inventory =
+              (batch.batch.quantity / product.productUnit.exchangeValue)
+
+            const newBatch = {
+              ...batch,
+              inventory,
+              productUnit: product?.productUnit,
+              productKey: `${product.productId || product.productId}-${product.id}`,
+              productId: product.productId,
+              id: batch.batch.id,
+              batchId: batch.batch.id,
+              expiryDate: batch.batch.expiryDate,
+              name: batch.batch.name,
+              originalInventory: batch.batch.quantity,
+              saleQuantity: batch.quantity,
+              quantity: batch.quantity,
+              isSelected: true,
+            };
+
+            return newBatch;
+          }),
         };
-
-        let cloneImportProducts = cloneDeep(returnProducts);
-
         if (
           returnProducts.find(
             (p) => p.productKey === localProduct.productKey
@@ -104,8 +121,8 @@ export default function ReturnCoupon() {
           cloneImportProducts.push(localProduct);
         }
 
-        setReturnProducts(cloneImportProducts);
       });
+      setReturnProducts(cloneImportProducts);
       setValue('supplierId', importProductDetail?.data?.inbound.supplierId, { shouldValidate: true });
     }
   }, [importProductDetail])
@@ -132,18 +149,7 @@ export default function ReturnCoupon() {
     isSale: true,
   });
 
-  // const { data: products } = useQuery<{ data: { items: IImportProduct[] } }>(
-  //   [
-  //     'LIST_IMPORT_PRODUCT',
-  //     formFilter.page,
-  //     formFilter.limit,
-  //     formFilter.keyword,
-  //     branchId,
-  //   ],
-  //   () => getInboundProducts({ ...formFilter, branchId })
-  // );
-
-  const { data: products, isLoading: isLoadingProduct } = useQuery<{
+  const { data: products, isLoading: isLoadingProduct, isSuccess } = useQuery<{
     data?: { items: IImportProduct[] };
   }>(
     [
@@ -162,7 +168,16 @@ export default function ReturnCoupon() {
   >({});
 
   useEffect(() => {
-    if (returnProducts.length) {
+    if (profile?.role?.permissions) {
+      if (!hasPermission(profile?.role?.permissions, RoleModel.return_product, RoleAction.create)) {
+        message.error('Bạn không có quyền truy cập vào trang này');
+        router.push('/products/list');
+      }
+    }
+  }, [profile?.role?.permissions]);
+
+  useEffect(() => {
+    if (returnProducts.length > 0) {
       const expandedRowKeysClone = { ...expandedRowKeys };
       returnProducts.forEach((_, index) => {
         expandedRowKeysClone[index] = true;
@@ -199,6 +214,86 @@ export default function ReturnCoupon() {
 
     setReturnProducts(productImportClone);
   };
+
+  const onExpandMoreBatches = async (productKey, quantity: number) => {
+    let orderObjectClone = cloneDeep(returnProducts);
+
+    orderObjectClone = orderObjectClone?.map(
+      (product: any) => {
+        if (product.productKey === productKey) {
+          return {
+            ...product,
+            quantity,
+          };
+        }
+
+        return product;
+      }
+    );
+
+    orderObjectClone = orderObjectClone.map(
+      (product: any) => {
+        if (product.productKey === productKey) {
+          let sumQuantity = 0;
+
+          let batches = cloneDeep(product.batches);
+          batches = orderBy(batches, ['isSelected'], ['desc']);
+
+          batches = batches.map((batch) => {
+            const remainQuantity =
+              roundNumber(quantity) - roundNumber(sumQuantity);
+
+            if (remainQuantity && batch.inventory) {
+              const tempQuantity =
+                batch.inventory <= remainQuantity
+                  ? batch.inventory
+                  : roundNumber(remainQuantity);
+
+              sumQuantity += tempQuantity;
+
+              return {
+                ...batch,
+                quantity: tempQuantity,
+                isSelected: true,
+              };
+            }
+
+            return { ...batch, quantity: 0, isSelected: false };
+          });
+
+          return {
+            ...product,
+            batches,
+          };
+        }
+
+        return product;
+      }
+    );
+
+    setReturnProducts(orderObjectClone);
+  };
+
+  const { scannedData, isScanned } = useBarcodeScanner();
+
+  // barcode scanner
+  useEffect(() => {
+    const getData = async () => {
+      if (scannedData) {
+        const productsScan = await getSaleProducts({ ...formFilter, keyword: scannedData, branchId })
+        let product;
+        if ((productsScan?.data?.items?.length ?? 0) > 0 && isSuccess) {
+          product = productsScan?.data?.items?.find((item) => item.barCode === scannedData);
+        }
+
+        if (product) {
+          handleSelectProduct(JSON.stringify(product));
+          return;
+        }
+      }
+    }
+    getData();
+  }, [scannedData]);
 
   const columns: ColumnsType<IImportProductLocal> = [
     {
@@ -262,7 +357,7 @@ export default function ReturnCoupon() {
       key: 'units',
       render: (_, record: any) => {
         if (id) {
-          return record.productUnit.find((item, index) => index === 0)?.unitName
+          return record.productUnit?.unitName
         }
         return <CustomUnitSelect
           options={(() => {
@@ -282,7 +377,7 @@ export default function ReturnCoupon() {
 
             returnProductsClone = returnProductsClone.map((product) => {
               if (product.productKey === record?.productKey) {
-                const productUnit = product.product.productUnit.find(
+                const productUnit: any = product.product.productUnit.find(
                   (unit) => unit.id === value
                 );
 
@@ -290,6 +385,8 @@ export default function ReturnCoupon() {
                   ...product,
                   productKey: `${product.product.id}-${value}`,
                   ...productUnit,
+                  primePrice: product.product.primePrice * productUnit.exchangeValue,
+                  price: product.product.primePrice * productUnit.exchangeValue,
                   batches: product.batches?.map((batch) => ({
                     ...batch,
                     inventory:
@@ -323,11 +420,13 @@ export default function ReturnCoupon() {
             onChange={(value) =>
               onChangeValueProduct(record?.productKey, 'quantity', value)
             }
-            onMinus={(value) =>
-              onChangeValueProduct(record?.productKey, 'quantity', value)
+            onMinus={async (value) =>
+              // onChangeValueProduct(record?.productKey, 'quantity', value)
+              await onExpandMoreBatches(record?.productKey, value)
             }
-            onPlus={(value) =>
-              onChangeValueProduct(record?.productKey, 'quantity', value)
+            onPlus={async (value) =>
+              // onChangeValueProduct(record?.productKey, 'quantity', value)
+              await onExpandMoreBatches(record?.productKey, value)
             }
           />
           {/* {
@@ -339,43 +438,19 @@ export default function ReturnCoupon() {
       ),
     },
     {
-      title: id ? "Giá nhập" : 'Đơn giá',
+      title: "Giá nhập",
       dataIndex: 'primePrice',
       key: 'primePrice',
-      render: (_, record: any) => id ? <CustomInput
+      render: (primePrice, record: any) => <CustomInput
         type="number"
         bordered={false}
-        onChange={(value) => onChangeValueProduct(record?.productKey, 'price', value)}
+        onChange={(value) => { }}
         wrapClassName="w-[100px]"
-        defaultValue={record?.productBatchHistories.find((item, index) => index === 0)?.importPrice}
+        defaultValue={primePrice}
         disabled
-      /> : (
-        <CustomInput
-          type="number"
-          bordered={false}
-          onChange={(value) => onChangeValueProduct(record?.productKey, 'price', value)}
-          wrapClassName="w-[100px]"
-          defaultValue={record?.price}
-        />
-      ),
+      />,
     },
-    (id ? {} : {
-      title: 'Giảm giá',
-      dataIndex: 'discountValue',
-      key: 'discountValue',
-      render: (value, { productKey }) => (
-        <CustomInput
-          type="number"
-          bordered={false}
-          onChange={(value) =>
-            onChangeValueProduct(productKey, 'discountValue', value)
-          }
-          wrapClassName="w-[100px]"
-          defaultValue={value}
-        />
-      ),
-    }),
-    (id ? {
+    {
       title: "Giá trả lại",
       dataIndex: 'price',
       key: 'price',
@@ -384,18 +459,15 @@ export default function ReturnCoupon() {
         bordered={false}
         onChange={(value) => onChangeValueProduct(record?.productKey, 'price', value)}
         wrapClassName="w-[100px]"
-        defaultValue={price}
+        defaultValue={id ? price : record?.primePrice}
       />
-    } : {}),
+    },
     {
       title: 'Thành tiền',
       dataIndex: 'totalPrice',
       key: 'totalPrice',
-      render: (_, { quantity, discountValue, price }) => {
-        if (id) {
-          return formatMoney(quantity * price)
-        }
-        return formatMoney(quantity * price - discountValue)
+      render: (_, { quantity, discountValue, price, primePrice }) => {
+        return formatMoney(quantity * price)
       },
     },
   ];
@@ -422,6 +494,16 @@ export default function ReturnCoupon() {
       }
       return product;
     });
+    // caculate total quantity
+    products = products.map((product) => {
+      return {
+        ...product,
+        quantity: product.batches?.reduce(
+          (acc, obj: any) => acc + (obj.isSelected ? obj.quantity : 0),
+          0
+        ),
+      };
+    });
     setReturnProducts(products);
   };
 
@@ -433,6 +515,61 @@ export default function ReturnCoupon() {
     // );
     return product.product.isBatchExpireControl;
   };
+
+  const handleSelectProduct = (value) => {
+    const product: IImportProduct = JSON.parse(value);
+    let isSelectedUnit = true;
+    const localProduct: IImportProductLocal = {
+      ...product,
+      productKey: `${product.product.id}-${product.id}`,
+      price: id ? product.productBatchHistories[0].importPrice : product.product.primePrice * product.productUnit.exchangeValue,
+      inventory: product.quantity,
+      quantity: 1,
+      discountValue: 0,
+      primePrice: product.product.primePrice * product.productUnit.exchangeValue,
+      batches: product.batches?.map((batch) => {
+        const inventory =
+          (batch.quantity / product.productUnit.exchangeValue)
+
+        const newBatch = {
+          ...batch,
+          inventory,
+          originalInventory: batch.quantity,
+          quantity: 0,
+          isSelected: inventory >= 1 ? isSelectedUnit : false,
+        };
+
+        if (inventory >= 1 && isSelectedUnit) {
+          isSelectedUnit = false;
+          newBatch.quantity = 1;
+        }
+        return newBatch;
+      }),
+      productBatchHistories: product?.productBatchHistories,
+    };
+
+    let cloneImportProducts = cloneDeep(returnProducts);
+
+    if (
+      returnProducts.find(
+        (p) => p.productKey === localProduct.productKey
+      )
+    ) {
+      cloneImportProducts = cloneImportProducts.map((product) => {
+        if (product.productKey === localProduct.productKey) {
+          return {
+            ...product,
+            quantity: product.quantity + 1,
+          };
+        }
+
+        return product;
+      });
+    } else {
+      cloneImportProducts.push(localProduct);
+    }
+    setReturnProducts(cloneImportProducts);
+  }
 
   return (
     <div className="-mx-8 flex">
@@ -447,58 +584,7 @@ export default function ReturnCoupon() {
               wrapClassName="w-full !rounded bg-white"
               listHeight={512}
               disabled={id ? true : false}
-              onSelect={(value) => {
-                const product: IImportProduct = JSON.parse(value);
-                let isSelectedUnit = true;
-                const localProduct: IImportProductLocal = {
-                  ...product,
-                  productKey: `${product.product.id}-${product.id}`,
-                  inventory: product.quantity,
-                  quantity: 1,
-                  discountValue: 0,
-                  batches: product.batches?.map((batch) => {
-                    const inventory =
-                      (batch.quantity / product.productUnit.exchangeValue)
-
-                    const newBatch = {
-                      ...batch,
-                      inventory,
-                      originalInventory: batch.quantity,
-                      quantity: 0,
-                      isSelected: inventory >= 1 ? isSelectedUnit : false,
-                    };
-
-                    if (inventory >= 1 && isSelectedUnit) {
-                      isSelectedUnit = false;
-                      newBatch.quantity = 1;
-                    }
-                    return newBatch;
-                  }),
-                  productBatchHistories: product?.productBatchHistories,
-                };
-
-                let cloneImportProducts = cloneDeep(returnProducts);
-
-                if (
-                  returnProducts.find(
-                    (p) => p.productKey === localProduct.productKey
-                  )
-                ) {
-                  cloneImportProducts = cloneImportProducts.map((product) => {
-                    if (product.productKey === localProduct.productKey) {
-                      return {
-                        ...product,
-                        quantity: product.quantity + 1,
-                      };
-                    }
-
-                    return product;
-                  });
-                } else {
-                  cloneImportProducts.push(localProduct);
-                }
-                setReturnProducts(cloneImportProducts);
-              }}
+              onSelect={(value) => handleSelectProduct(value)}
               showSearch={true}
               onSearch={debounce((value) => {
                 setFormFilter((preValue) => ({
@@ -560,9 +646,9 @@ export default function ReturnCoupon() {
               pagination={false}
               expandable={{
                 defaultExpandAllRows: true,
-                expandedRowRender: (record: IImportProductLocal) => (
-                  <>
-                    {checkDisplayListBatch(record) && (
+                expandedRowRender: (record: IImportProductLocal) => {
+                  if (importProductDetail && record?.batches?.length > 0) {
+                    return (
                       <div className="bg-[#FFF3E6] px-6 py-2 ">
                         <div className="flex items-center gap-x-3">
                           <div
@@ -574,14 +660,13 @@ export default function ReturnCoupon() {
                           >
                             Chọn lô
                           </div>
-
-                          {record.batches?.map((batch: any) => batch.isSelected && (
+                          {record.batches?.map((batch: any) => batch?.isSelected && (
                             <div
                               key={batch.id}
                               className="flex items-center rounded bg-red-main py-1 px-2 text-white"
                             >
                               <span className="mr-2">
-                                {batch.name || batch.batch.name} - {batch.expiryDate} - SL:{' '}
+                                {batch?.name || batch?.batch?.name} - {batch.batch.expiryDate} - SL:{' '}
                                 {batch.quantity}
                               </span>{' '}
                               <Image
@@ -606,9 +691,58 @@ export default function ReturnCoupon() {
                           }
                         />
                       </div>
-                    )}
-                  </>
-                ),
+                    )
+                  }
+                  return (
+                    <>
+                      {checkDisplayListBatch(record) && (
+                        <div className="bg-[#FFF3E6] px-6 py-2 ">
+                          <div className="flex items-center gap-x-3">
+                            <div
+                              className="ml-1 cursor-pointer font-medium text-[#0070F4]"
+                              onClick={() => {
+                                setProductKeyAddBatch(record.productKey);
+                                setOpenListBatchModal(true);
+                              }}
+                            >
+                              Chọn lô
+                            </div>
+
+                            {record.batches?.map((batch: any) => batch.isSelected && (
+                              <div
+                                key={batch.id}
+                                className="flex items-center rounded bg-red-main py-1 px-2 text-white"
+                              >
+                                <span className="mr-2">
+                                  {batch?.name || batch?.batch?.name} - {batch.expiryDate} - SL:{' '}
+                                  {batch.quantity}
+                                </span>{' '}
+                                <Image
+                                  className=" cursor-pointer"
+                                  src={CloseIcon}
+                                  onClick={() => {
+                                    handleRemoveBatch(
+                                      record.productKey,
+                                      batch.id
+                                    );
+                                  }}
+                                  alt=""
+                                />
+                              </div>
+                            ))}
+                          </div>
+                          <InputError
+                            error={
+                              errors?.products &&
+                              errors?.products[Number(record.key) - 1]?.batches
+                                ?.message
+                            }
+                          />
+                        </div>
+                      )}
+                    </>
+                  )
+                },
                 expandIcon: () => <></>,
                 expandedRowKeys: Object.keys(expandedRowKeys).map(
                   (key) => +key + 1

@@ -2,6 +2,7 @@ import type { EProductStatus, EProductType } from "@/enums";
 
 export interface IBatch {
   productId: number;
+  id: number;
   productKey: string;
   batchId: number;
   productUnitId: number;
@@ -10,6 +11,7 @@ export interface IBatch {
   originalInventory: number;
   isSelected: boolean;
   expiryDate: string;
+  saleQuantity?: number;
   batch: { id: number; name: string };
   productUnit: {
     id: number;
@@ -17,6 +19,7 @@ export interface IBatch {
     exchangeValue: number;
     price: number;
     isBaseUnit: boolean;
+    returnPrice?: number;
   };
 }
 
@@ -31,18 +34,24 @@ export interface IProductUnit {
   isDirectSale: boolean;
   isBaseUnit: boolean;
   point: number;
+  returnPrice?: number;
+  oldPrice?: number;
 }
 
 export interface ISaleProduct {
   id: number;
   storeId: number;
   code: string;
+  barCode: string;
   branchId: number;
   productId: number;
   batchId: number;
   productUnitId: number;
   quantity: number;
   expiryDate: string;
+  isDiscount?: boolean;
+  discountQuantity?: number;
+  maxQuantity?: number; // số lượng hàng KM
   batch: {
     id: number;
     name: string;
@@ -160,6 +169,9 @@ export interface ISaleProductLocal extends Omit<ISaleProduct, "batches"> {
   originProductUnitId: number;
   product: any;
   inventory?: number;
+  isBuyByNumber?: boolean;
+  buyNumberType?: number;
+  itemPrice?: number;
   batches: {
     batchId: number;
     productUnitId: number;
@@ -177,6 +189,11 @@ export interface ISaleProductLocal extends Omit<ISaleProduct, "batches"> {
       isBaseUnit: boolean;
     };
   }[];
+  isDiscount?: boolean;
+  price?: any;
+  discountValue?: any;
+  discountType?: string;
+  itemDiscountProduct?: any;
 }
 
 export interface ISampleMedicine {

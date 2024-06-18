@@ -8,6 +8,12 @@ import { useRouter } from 'next/router';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { schema } from './schema';
+import { useEffect } from 'react';
+import { useRecoilValue } from 'recoil';
+import { profileState } from '@/recoil/state';
+import { hasPermission } from '@/helpers';
+import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
+import { message } from 'antd';
 
 const AddCombo = ({
   productId,
@@ -36,6 +42,17 @@ const AddCombo = ({
       // expiryPeriod: 180,
     },
   });
+
+  const profile = useRecoilValue(profileState);
+
+  useEffect(() => {
+    if (profile?.role?.permissions) {
+      if (!hasPermission(profile?.role?.permissions, RoleModel.list_product, RoleAction.create)) {
+        message.error('Bạn không có quyền truy cập vào trang này');
+        router.push('/products/list');
+      }
+    }
+  }, [profile?.role?.permissions]);
 
   const onSubmit = (data) => {
     console.log("submit combo")

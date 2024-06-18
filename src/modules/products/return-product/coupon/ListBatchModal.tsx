@@ -14,6 +14,7 @@ import { formatNumber } from '@/helpers';
 import { branchState, productReturnState } from '@/recoil/state';
 
 import type { IBatch } from '../interface';
+import { message } from 'antd';
 
 export function ListBatchModal({
   isOpen,
@@ -90,8 +91,9 @@ export function ListBatchModal({
   const columns = [
     {
       title: 'STT',
-      dataIndex: 'key',
-      key: 'key',
+      dataIndex: 'no',
+      key: 'no',
+      render: (value) => formatNumber(value),
     },
     {
       title: 'Tên',
@@ -108,26 +110,29 @@ export function ListBatchModal({
       title: 'Số lượng',
       dataIndex: 'quantity',
       key: 'quantity',
-      render: (quantity, { id }) => (
-        <CustomInput
-          bordered={false}
-          onChange={(value) => {
-            let batchesClone = cloneDeep(listBatchSelected);
-            batchesClone = batchesClone.map((batch) => {
-              if (batch.id === id) {
-                return { ...batch, quantity: value, };
-              }
+      render: (quantity, { id, saleQuantity }) => (
+        <div className='flex items-center gap-2'>
+          <CustomInput
+            bordered={false}
+            onChange={(value) => {
+              let batchesClone = cloneDeep(listBatchSelected);
+              batchesClone = batchesClone.map((batch) => {
+                if (batch.id === id) {
+                  return { ...batch, quantity: value, };
+                }
 
-              return batch;
-            });
+                return batch;
+              });
 
-            setListBatchSelected(batchesClone);
-          }}
-          wrapClassName="w-[100px]"
-          type="number"
-          defaultValue={quantity}
-          value={quantity}
-        />
+              setListBatchSelected(batchesClone);
+            }}
+            wrapClassName="w-[100px]"
+            type="number"
+            defaultValue={quantity}
+            value={quantity}
+          />
+          <span>/ {formatNumber(saleQuantity)}</span>
+        </div>
       ),
     },
     {
@@ -155,6 +160,23 @@ export function ListBatchModal({
       ),
     },
   ];
+
+  const checkBatchQuantity = () => {
+    // eslint-disable-next-line no-restricted-syntax
+    console.log("listBatchSelected", listBatchSelected)
+    for (const batch of listBatchSelected) {
+      if (batch.isSelected && batch.quantity === 0) {
+        message.error('Số lượng sản phẩm chọn phải lớn hơn hoặc bằng 1');
+        return false;
+      }
+
+      if (batch.isSelected && batch.quantity > (batch.saleQuantity ?? 0)) {
+        message.error('Số lượng sản phẩm chọn phải nhỏ hơn hoặc bằng số lượng đã nhập');
+        return false
+      }
+    }
+    return true;
+  };
 
   return (
     <CustomModal
@@ -220,6 +242,7 @@ export function ListBatchModal({
         dataSource={listBatchSelected?.map((item, index) => ({
           ...item,
           key: item.batchId || item.id,
+          no: index + 1,
         }))}
         columns={columns}
         scroll={{ x: 600 }}
@@ -260,8 +283,10 @@ export function ListBatchModal({
         </CustomButton> */}
         <CustomButton
           onClick={() => {
-            onSave(listBatchSelected);
-            onCancel();
+            if (checkBatchQuantity()) {
+              onSave(listBatchSelected);
+              onCancel();
+            }
           }}
           className="h-[46px] min-w-[150px] py-2 px-4"
         >

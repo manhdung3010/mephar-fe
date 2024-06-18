@@ -8,12 +8,14 @@ export interface IOrder {
   quantity: number;
   cashOfCustomer: number;
   earnMoney: number;
+  creator?: any;
   customer: { fullName: string };
   delivery: string;
   status: EOrderStatus;
   createdAt: string;
   note: string;
   totalPrice: number;
+  canReturn?: boolean;
   products: {
     productId: number;
     price: number;

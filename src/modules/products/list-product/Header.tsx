@@ -9,9 +9,14 @@ import DocumentUpload from '@/assets/documentUpload.svg';
 import PlusIconWhite from '@/assets/PlusIconWhite.svg';
 import { CustomButton } from '@/components/CustomButton';
 import useExportToExcel from '@/hooks/useExportExcel';
+import { useRecoilValue } from 'recoil';
+import { profileState } from '@/recoil/state';
+import { hasPermission } from '@/helpers';
+import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
 
 const AddNew = () => {
   const router = useRouter();
+  const profile = useRecoilValue(profileState);
 
   const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     console.log('click left button', e);
@@ -46,15 +51,19 @@ const AddNew = () => {
 
   return (
     <Dropdown menu={menuProps} trigger={['click']}>
-      <CustomButton onClick={handleButtonClick} type="danger" className="p-0">
-        <div className="flex items-center justify-center border-r border-[#EE6274] py-[8px] px-4">
-          <Image src={PlusIconWhite} alt="" />
-          <span className="pl-[6px]">Thêm mới</span>
-        </div>
-        <div className="flex items-center px-[10px] py-2">
-          <Image src={ArrowDown} alt="" />
-        </div>
-      </CustomButton>
+      {
+        hasPermission(profile?.role?.permissions, RoleModel.list_product, RoleAction.create) ? (
+          <CustomButton onClick={handleButtonClick} type="danger" className="p-0">
+            <div className="flex items-center justify-center border-r border-[#EE6274] py-[8px] px-4">
+              <Image src={PlusIconWhite} alt="" />
+              <span className="pl-[6px]">Thêm mới</span>
+            </div>
+            <div className="flex items-center px-[10px] py-2">
+              <Image src={ArrowDown} alt="" />
+            </div>
+          </CustomButton>
+        ) : <div></div>
+      }
     </Dropdown>
   );
 };

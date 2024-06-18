@@ -14,14 +14,16 @@ export function CustomDatePicker({
   format,
   value,
   bordered = true,
+  showTime = false,
 }: {
   className?: string;
   suffixIcon?: ReactNode;
   placeholder?: string;
   onChange?: (value) => void;
-  format?: string;
+  format?: any;
   value?: string;
   bordered?: boolean;
+  showTime?: boolean;
 }) {
   return (
     <DatePicker
@@ -36,8 +38,9 @@ export function CustomDatePicker({
       )}
       suffixIcon={suffixIcon || <Image src={DateIcon} alt="" />}
       placeholder={placeholder}
-      format={format || 'DD-MM-YYYY'}
+      format={format || { format: showTime ? 'DD/MM/YYYY hh:mm:ss' : 'DD/MM/YYYY', type: 'mask' }}
       defaultValue={value ? dayjs(value) : undefined}
+      showTime={showTime}
     />
   );
 }

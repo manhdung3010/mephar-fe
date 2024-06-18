@@ -1,12 +1,11 @@
+import PlusIconWhite from '@/assets/PlusIconWhite.svg';
 import { useQuery } from "@tanstack/react-query";
 import type { ColumnsType } from "antd/es/table";
 import cx from "classnames";
-import { debounce } from "lodash";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useRecoilValue } from "recoil";
-import PlusIconWhite from '@/assets/PlusIconWhite.svg';
 
 import { getOrder } from "@/api/order.service";
 import ExportIcon from "@/assets/exportIcon.svg";
@@ -14,16 +13,18 @@ import { CustomButton } from "@/components/CustomButton";
 import CustomPagination from "@/components/CustomPagination";
 import CustomTable from "@/components/CustomTable";
 import { EOrderStatus, EOrderStatusLabel } from "@/enums";
-import { formatMoney, formatNumber } from "@/helpers";
-import { branchState } from "@/recoil/state";
+import { formatMoney, hasPermission } from "@/helpers";
+import { branchState, profileState } from "@/recoil/state";
 
 
-import BillDetail from "./row-detail";
-import Search from "./Search";
+import { RoleAction, RoleModel } from "@/modules/settings/role/role.enum";
 import { IOrder } from "../order/type";
+import Search from "./Search";
+import BillDetail from "./row-detail";
 
 export function BillTransaction() {
   const branchId = useRecoilValue(branchState);
+  const profile = useRecoilValue(profileState);
 
   const router = useRouter();
 
@@ -80,8 +81,9 @@ export function BillTransaction() {
     },
     {
       title: "Mã trả hàng",
-      dataIndex: "returnId",
-      key: "returnId",
+      dataIndex: "saleReturn",
+      key: "saleReturn",
+      render: (value) => value ? value[0]?.code : '',
     },
     {
       title: "Khách hàng",
@@ -93,13 +95,25 @@ export function BillTransaction() {
       title: "Tổng tiền hàng",
       dataIndex: "totalPrice",
       key: "totalPrice",
-      render: (value) => formatMoney(value),
+      render: (_, record) => {
+        let total = 0;
+        record.products?.forEach((item) => {
+          total += item.price;
+        });
+        return formatMoney(total);
+      },
     },
     {
       title: "Giảm giá",
       dataIndex: "discount",
       key: "discount",
       render: (_, { discount, discountType }) => discountType === 1 ? `${discount}%` : formatMoney(discount),
+    },
+    {
+      title: "Tổng tiền sau giảm giá",
+      dataIndex: "totalPrice",
+      key: "totalPrice",
+      render: (value) => formatMoney(value),
     },
     {
       title: "Khách đã trả",
@@ -129,14 +143,17 @@ export function BillTransaction() {
   return (
     <div>
       <div className="my-3 flex justify-end gap-4">
-        <CustomButton
-          onClick={() => router.push("/sales/")}
-          type="success"
-          prefixIcon={<Image src={PlusIconWhite} />}
-        >
-          Thêm hóa đơn
-        </CustomButton>
-
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.sale, RoleAction.read) && (
+            <CustomButton
+              onClick={() => router.push("/sales/")}
+              type="success"
+              prefixIcon={<Image src={PlusIconWhite} />}
+            >
+              Thêm hóa đơn
+            </CustomButton>
+          )
+        }
         <CustomButton prefixIcon={<Image src={ExportIcon} />}>
           Xuất file
         </CustomButton>

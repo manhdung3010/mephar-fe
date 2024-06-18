@@ -12,9 +12,9 @@ import { getInboundProducts, getSaleProducts } from '@/api/product.service';
 import { CustomAutocomplete } from '@/components/CustomAutocomplete';
 import InputError from '@/components/InputError';
 import { EProductType } from '@/enums';
-import { formatMoney, formatNumber, getImage } from '@/helpers';
+import { formatMoney, formatNumber, getImage, hasPermission } from '@/helpers';
 import { IImportProduct, IImportProductLocal } from '@/modules/products/import-product/coupon/interface';
-import { branchState, productMoveState } from '@/recoil/state';
+import { branchState, productMoveState, profileState } from '@/recoil/state';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useQuery } from '@tanstack/react-query';
 import { cloneDeep, debounce } from 'lodash';
@@ -27,6 +27,8 @@ import { getMoveDetail } from '@/api/move';
 import { useRouter } from 'next/router';
 import { ListBatchModal } from './ListBatchModal';
 import { ISaleProduct } from '@/modules/sales/interface';
+import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
+import { message } from 'antd';
 
 interface IRecord {
   key: number;
@@ -77,17 +79,15 @@ export function DeliveryCoupon() {
       fromBranchId: branchId,
     },
   });
-
-  // const { data: products } = useQuery<{ data: { items: IImportProduct[] } }>(
-  //   [
-  //     "LIST_IMPORT_PRODUCT",
-  //     formFilter.page,
-  //     formFilter.limit,
-  //     formFilter.keyword,
-  //     branchId,
-  //   ],
-  //   () => getInboundProducts({ ...formFilter, branchId })
-  // );
+  const profile = useRecoilValue(profileState);
+  useEffect(() => {
+    if (profile?.role?.permissions) {
+      if (!hasPermission(profile?.role?.permissions, RoleModel.delivery, RoleAction.create)) {
+        message.error('Bạn không có quyền truy cập vào trang này');
+        router.push('/transactions/delivery');
+      }
+    }
+  }, [profile?.role?.permissions]);
   const { data: products, isLoading: isLoadingProduct } = useQuery<{
     data?: { items: ISaleProduct[] };
   }>(
@@ -276,6 +276,7 @@ export function DeliveryCoupon() {
                   ...product,
                   code: productUnit?.code || '', // Assign an empty string if productUnit.code is undefined
                   productKey: `${product.product.id}-${value}`,
+                  primePrice: product.product.primePrice * productUnit.exchangeValue,
                   ...productUnit,
                   productUnitId: value,
                   newInventory: Math.floor(product.product.quantity / productUnit.exchangeValue),
@@ -338,12 +339,17 @@ export function DeliveryCoupon() {
         />
       ),
     },
-    {
+    ...(moveDetail ? [{
       title: 'Giá chuyển',
       dataIndex: 'price',
       key: 'price',
       render: (price, { productKey }) => <CustomInput className="!w-[110px]" type='number' onChange={(value) => onChangeValueProduct(productKey, "price", value)} value={price} defaultValue={price} />,
-    },
+    }] : [{
+      title: 'Giá chuyển',
+      dataIndex: 'primePrice',
+      key: 'primePrice',
+      render: (price, { productKey }) => <CustomInput className="!w-[110px]" type='number' onChange={(value) => onChangeValueProduct(productKey, "primePrice", value)} value={price} defaultValue={price} />,
+    }]),
   ];
 
   const checkDisplayListBatch = (product: IImportProductLocal) => {
@@ -386,6 +392,7 @@ export function DeliveryCoupon() {
 
                 const localProduct: IImportProductLocal = {
                   ...product,
+                  primePrice: product.product.primePrice * product.productUnit.exchangeValue,
                   productKey: `${product.product.id}-${product.id}`,
                   inventory: product.quantity,
                   productUnitId: product.product.productUnit.find((item) => item.unitName === product.unitName)?.id,

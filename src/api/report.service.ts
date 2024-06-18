@@ -23,3 +23,11 @@ export function getSaleReport(params: {
 }) {
   return axiosClient.get("report/sales-report", { params });
 }
+export function getProductReport(params: {
+  from: string;
+  to: string;
+  concern?: string;
+  branchId?: number;
+}) {
+  return axiosClient.get("report/products-report", { params });
+}

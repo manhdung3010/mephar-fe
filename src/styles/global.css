@@ -99,3 +99,7 @@ a {
 .search-product {
   width: 1000px !important;
 }
+
+.ant-btn-primary {
+  background-color: #1a73e8;
+}

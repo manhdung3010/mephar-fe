@@ -5,38 +5,51 @@ import { useEffect, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
 import CloseIcon from '@/assets/closeWhiteIcon.svg';
+import DiscountIcon from '@/assets/gift.svg';
 import RemoveIcon from '@/assets/removeIcon.svg';
 import { CustomInput } from '@/components/CustomInput';
 import CustomTable from '@/components/CustomTable';
 import { CustomUnitSelect } from '@/components/CustomUnitSelect';
 import InputError from '@/components/InputError';
-import { EProductType } from '@/enums';
 import { formatMoney, formatNumber, roundNumber } from '@/helpers';
-import { orderActiveState, orderState } from '@/recoil/state';
+import { branchState, discountTypeState, orderActiveState, orderDiscountSelected, orderState, productDiscountSelected } from '@/recoil/state';
 
-import type { IBatch, IProductUnit, ISaleProductLocal } from './interface';
+import { Tooltip, message } from 'antd';
 import { ListBatchModal } from './ListBatchModal';
+import { ProductDiscountModal } from './ProductDiscountModal';
+import type { IBatch, IProductUnit, ISaleProductLocal } from './interface';
 import { ProductTableStyled } from './styled';
+import { getDiscountConfig, getProductDiscountList } from '@/api/discount.service';
+import { useQuery } from '@tanstack/react-query';
 
-export function ProductList({ useForm }: { useForm: any }) {
+export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: any, orderDetail: any, listDiscount: any }) {
   const { errors, setError } = useForm;
 
   const [orderObject, setOrderObject] = useRecoilState(orderState);
   const orderActive = useRecoilValue(orderActiveState);
+  const [orderDiscount, setOrderDiscount] = useRecoilState(orderDiscountSelected);
+  const [productDiscount, setProductDiscount] = useRecoilState(productDiscountSelected);
+  const [discountType, setDiscountType] = useRecoilState(discountTypeState);
 
   const [expandedRowKeys, setExpandedRowKeys] = useState<
     Record<string, boolean>
   >({});
   const [openListBatchModal, setOpenListBatchModal] = useState(false);
+  const [openProductDiscountList, setOpenProductDiscountList] = useState(false);
+  const [itemDiscount, setItemDiscount] = useState();
   const [productKeyAddBatch, setProductKeyAddBatch] = useState<string>();
 
   const checkDisplayListBatch = (product: ISaleProductLocal) => {
-    return (
-      product.product.type === EProductType.MEDICINE ||
-      (product.product.type === EProductType.PACKAGE &&
-        product.product.isBatchExpireControl)
-    );
+    return product.product.isBatchExpireControl
   };
+  const branchId = useRecoilValue(branchState);
+
+  const isSaleReturn = orderActive.split("-")[1] === "RETURN";
+
+  const { data: discountConfigDetail, isLoading } = useQuery(
+    ['DISCOUNT_CONFIG'],
+    () => getDiscountConfig()
+  );
 
   useEffect(() => {
     if (orderObject[orderActive]) {
@@ -63,15 +76,31 @@ export function ProductList({ useForm }: { useForm: any }) {
       setExpandedRowKeys(expandedRowKeysClone);
     }
   }, [orderObject, orderActive]);
+  useEffect(() => {
+    if (orderObject[orderActive]?.length > 0 && isSaleReturn) {
+      const expandedRowKeysClone = { ...expandedRowKeys };
+      orderObject[orderActive].forEach((product, index) => {
+        if (isSaleReturn && product.batches.length > 0) {
+          expandedRowKeysClone[index] = true;
+        }
+      });
 
-  const onChangeQuantity = async (productKey, newValue) => {
+      setExpandedRowKeys(expandedRowKeysClone);
+    }
+  }, [orderObject, orderActive]);
+
+  const onChangeQuantity = async (productKey, newValue, product?: any) => {
     const orderObjectClone = cloneDeep(orderObject);
+
+    const res = await getProductDiscountList({ productUnitId: product?.id, branchId: branchId, quantity: newValue })
+    let itemDiscountProduct = res?.data?.data?.items
 
     orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map(
       (product: ISaleProductLocal) => {
         if (product.productKey === productKey) {
           return {
             ...product,
+            itemDiscountProduct,
             quantity: newValue,
           };
         }
@@ -82,14 +111,18 @@ export function ProductList({ useForm }: { useForm: any }) {
 
     setOrderObject(orderObjectClone);
   };
-  const onExpandMoreBatches = async (productKey, quantity: number) => {
+  const onExpandMoreBatches = async (productKey, quantity: number, product?: any) => {
     const orderObjectClone = cloneDeep(orderObject);
+
+    const res = await getProductDiscountList({ productUnitId: product?.id, branchId: branchId, quantity: quantity })
+    let itemDiscountProduct = res?.data?.data?.items
 
     orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map(
       (product: ISaleProductLocal) => {
         if (product.productKey === productKey) {
           return {
             ...product,
+            itemDiscountProduct,
             quantity,
           };
         }
@@ -150,18 +183,24 @@ export function ProductList({ useForm }: { useForm: any }) {
       title: '',
       dataIndex: 'action',
       key: 'action',
-      render: (_, { id }) => (
+      render: (_, { id, isDiscount, productUnitId }) => (
         <div className='w-10 flex-shrink-0'>
           <Image
             src={RemoveIcon}
-            className=" cursor-pointer"
+            className={'cursor-pointer'}
             onClick={() => {
+              // if (isDiscount) return
               const orderObjectClone = cloneDeep(orderObject);
               const productsClone = orderObjectClone[orderActive] || [];
               orderObjectClone[orderActive] = productsClone.filter(
-                (product) => product.id !== id
+                (product) => {
+                  if (isDiscount) return product.id !== id
+                  return product.productUnitId !== productUnitId
+                }
               );
-
+              setOrderDiscount([])
+              setProductDiscount([])
+              setDiscountType("order")
               setOrderObject(orderObjectClone);
             }}
             alt=""
@@ -179,9 +218,29 @@ export function ProductList({ useForm }: { useForm: any }) {
       title: 'TÊN SẢN PHẨM',
       dataIndex: 'name',
       key: 'name',
-      render: (_, { product, batches }) => (
+      render: (_, { product, batches, isDiscount, itemDiscountProduct }) => (
         <div>
-          <div className=" font-medium">{product.name}</div>
+          <div className=" font-medium flex gap-2 items-center">
+            {product.name}
+            {
+              isDiscount && <span className="text-red-500 px-2  bg-[#fde6f8] rounded">KM</span>
+            }
+            {
+              itemDiscountProduct?.length > 0 && (
+                <Tooltip title="KM hàng hóa" className='cursor-pointer'>
+                  <Image src={DiscountIcon} onClick={() => {
+                    if (orderDiscount?.length > 0 && !discountConfigDetail?.data?.data?.isMergeDiscount) {
+                      message.error("Bạn đã chọn khuyến mại hóa đơn. Mỗi hóa đơn chỉ được chọn 1 loại khuyến mại")
+                    }
+                    else {
+                      setOpenProductDiscountList(!openProductDiscountList)
+                      setItemDiscount(itemDiscountProduct)
+                    }
+                  }} alt='discount-icon' />
+                </Tooltip>
+              )
+            }
+          </div>
           {/* <div className="cursor-pointer font-medium text-[#0070F4]">
             {batches?.length ? 'Lô sản xuất' : ''}
           </div> */}
@@ -200,12 +259,12 @@ export function ProductList({ useForm }: { useForm: any }) {
       title: 'ĐƠN VỊ',
       dataIndex: 'units',
       key: 'units',
-      render: (_, { productKey, product, productUnitId, productUnit }) => (
+      render: (_, { productKey, product, productUnitId, productUnit, isDiscount }) => (
         <CustomUnitSelect
           options={(() => {
             const productUnitKeysSelected = orderObject[orderActive]?.map(
               (product: ISaleProductLocal) =>
-                Number(product.productKey.split('-')[1])
+                Number(product.productKey?.split('-')[1])
             );
 
             return product?.productUnit?.map((unit) => ({
@@ -219,6 +278,7 @@ export function ProductList({ useForm }: { useForm: any }) {
             }));
           })()}
           value={productUnitId}
+          disabled={isSaleReturn || isDiscount ? true : false}
           onChange={(value) => {
             const orderObjectClone = cloneDeep(orderObject);
 
@@ -255,53 +315,193 @@ export function ProductList({ useForm }: { useForm: any }) {
         />
       ),
     },
-    {
-      title: 'Tồn kho',
-      dataIndex: 'newInventory',
-      key: 'newInventory',
-      render: (value, record) => <div>
-        {value ? formatNumber(Math.floor(value)) : formatNumber(record.inventory)}
+    ...(
+      isSaleReturn ? [] : [{
+        title: 'TỒN KHO',
+        dataIndex: 'newInventory',
+        key: 'newInventory',
+        render: (value, record) => <div>
+          {value ? formatNumber(Math.floor(value)) : formatNumber(record.inventory)}
 
-      </div>
-    },
+        </div>
+      },]
+    ),
     {
       title: 'SỐ LƯỢNG',
       dataIndex: 'quantity',
       key: 'quantity',
-      render: (quantity, { productKey }) => (
+      render: (quantity, record) => (
         <CustomInput
           wrapClassName="!w-[110px]"
           className="!h-6 !w-[80px] text-center"
           hasMinus={true}
           hasPlus={true}
-          defaultValue={quantity}
-          value={quantity}
+          value={isNaN(quantity) ? 0 : quantity}
           type="number"
-          onChange={(value) => onChangeQuantity(productKey, value)}
+          disabled={(isSaleReturn && record?.batches?.length > 0) || record?.isDiscount && !record?.buyNumberType ? true : false}
+          onChange={(value) => {
+            if (record?.isDiscount && !record?.buyNumberType) return
+            if (isSaleReturn && record?.batches?.length > 0) {
+              setProductKeyAddBatch(record?.productKey);
+              setOpenListBatchModal(true);
+              return;
+            }
+
+            // remove productDiscount if this product is in productDiscount
+            const productDiscountClone = cloneDeep(productDiscount)
+            productDiscountClone.forEach((item, index) => {
+              if (item.productUnitId === record?.productUnitId) {
+                // remove this item from productDiscount
+                productDiscountClone.splice(index, 1)
+              }
+            })
+            setProductDiscount(productDiscountClone)
+            const orderObjectClone = cloneDeep(orderObject);
+            orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
+            setOrderObject(orderObjectClone);
+
+            onChangeQuantity(record?.productKey, value, record)
+          }}
           onMinus={async (value) => {
-            await onExpandMoreBatches(productKey, value);
+            if (record?.isDiscount && !record?.buyNumberType) return
+            if (isSaleReturn && record?.batches?.length > 0) {
+              setProductKeyAddBatch(record?.productKey);
+              setOpenListBatchModal(true);
+              return;
+            }
+
+            // remove productDiscount if this product is in productDiscount
+            const productDiscountClone = cloneDeep(productDiscount)
+            productDiscountClone.forEach((item, index) => {
+              if (item.productUnitId === record?.productUnitId) {
+                // remove this item from productDiscount
+                productDiscountClone.splice(index, 1)
+              }
+            })
+            setProductDiscount(productDiscountClone)
+            const orderObjectClone = cloneDeep(orderObject);
+            orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
+            setOrderObject(orderObjectClone);
+            await onExpandMoreBatches(record?.productKey, value, record);
           }}
           onPlus={async (value) => {
-            await onExpandMoreBatches(productKey, value);
+            if (record?.isDiscount && !record?.buyNumberType) return
+            if (isSaleReturn && record?.batches?.length > 0) {
+              setProductKeyAddBatch(record?.productKey);
+              setOpenListBatchModal(true);
+              return;
+            }
+            // remove productDiscount if this product is in productDiscount
+            const productDiscountClone = cloneDeep(productDiscount)
+            productDiscountClone.forEach((item, index) => {
+              if (item.productUnitId === record?.productUnitId) {
+                // remove this item from productDiscount
+                productDiscountClone.splice(index, 1)
+              }
+            })
+            setProductDiscount(productDiscountClone)
+            const orderObjectClone = cloneDeep(orderObject);
+            orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
+            setOrderObject(orderObjectClone);
+            await onExpandMoreBatches(record?.productKey, value, record);
           }}
-          onBlur={(e) =>
-            onExpandMoreBatches(productKey, Number(e.target.value))
+          onBlur={(e) => {
+            if (record?.isDiscount && !record?.buyNumberType) return
+            if (isSaleReturn && record?.batches?.length > 0) {
+              setProductKeyAddBatch(record?.productKey);
+              setOpenListBatchModal(true);
+              return;
+            }
+            // remove productDiscount if this product is in productDiscount
+            const productDiscountClone = cloneDeep(productDiscount)
+            productDiscountClone.forEach((item, index) => {
+              if (item.productUnitId === record?.productUnitId) {
+                // remove this item from productDiscount
+                productDiscountClone.splice(index, 1)
+              }
+            })
+            setProductDiscount(productDiscountClone)
+            const orderObjectClone = cloneDeep(orderObject);
+            orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
+            setOrderObject(orderObjectClone);
+            onExpandMoreBatches(record?.productKey, Number(e.target.value), record)
+          }
           }
         />
       ),
     },
+    ...(isSaleReturn ? [
+      {
+        title: 'GIÁ TRẢ',
+        dataIndex: 'price',
+        key: 'price',
+        render: (_, { productUnit, productKey }) => (
+          // input return price
+          <CustomInput
+            wrapClassName="!w-[110px]"
+            className="!h-6 !w-[80px] text-center"
+            hasMinus={false}
+            hasPlus={false}
+            value={productUnit.returnPrice}
+            type="number"
+            onChange={(value) => {
+              const orderObjectClone = cloneDeep(orderObject);
+
+              orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map(
+                (product: ISaleProductLocal) => {
+                  if (product.productKey === productKey) {
+                    return {
+                      ...product,
+                      productUnit: {
+                        ...product.productUnit,
+                        returnPrice: value,
+                      },
+                    };
+                  }
+
+                  return product;
+                }
+              );
+
+              setOrderObject(orderObjectClone);
+            }} />
+        ),
+      },
+    ] : []),
     {
       title: 'ĐƠN GIÁ',
       dataIndex: 'price',
       key: 'price',
-      render: (_, { productUnit }) => formatMoney(productUnit.price),
+      render: (_, { productUnit, buyNumberType }) => <span>
+        {formatMoney(productUnit.price)}
+        {productUnit?.oldPrice && buyNumberType === 1 && <span className='text-[#828487] line-through ml-2'>{"("}Giá cũ: {formatMoney(productUnit.oldPrice)}{")"}</span>}
+      </span>,
+    },
+    {
+      title: 'KM',
+      dataIndex: 'price',
+      key: 'price',
+      render: (_, { price, discountValue, discountType, isDiscount, buyNumberType }) => discountValue > 0 && buyNumberType !== 1 && (
+        <div className='flex flex-col'>
+          <span className='text-[#ef4444]'>
+            {formatNumber(discountValue)}
+            {
+              discountType === "amount" ? "đ" : "%"
+            }
+          </span>
+        </div>
+      ),
     },
     {
       title: 'THÀNH TIỀN',
       dataIndex: 'totalPrice',
       key: 'totalPrice',
-      render: (_, { quantity, productUnit }) =>
-        formatMoney(quantity * productUnit.price),
+      render: (totalPrice, { quantity, productUnit, isDiscount, discountType, price, discountValue, isBuyByNumber, buyNumberType }) =>
+        orderDetail ? formatMoney(Number(productUnit.returnPrice) * quantity) : isDiscount && !buyNumberType ? (
+          <div className='flex flex-col'>
+            {discountType === "percent" ? `${formatMoney(Number(price - (discountValue * price / 100)) * quantity)}` : formatMoney(Number((price - discountValue) * quantity))}
+          </div>
+        ) : buyNumberType === 1 ? formatMoney(productUnit.price * quantity) : buyNumberType === 2 ? formatMoney((productUnit?.price - discountValue) * quantity) : formatMoney(productUnit.price * quantity),
     },
   ];
 
@@ -329,8 +529,26 @@ export function ProductList({ useForm }: { useForm: any }) {
         return product;
       }
     );
+    // caculate quantity
+    orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map(
+      (product: ISaleProductLocal) => {
+        if (product.productKey === productKey) {
+          return {
+            ...product,
+            quantity: product.batches.reduce(
+              (acc, obj) => acc + (obj.isSelected ? obj.quantity : 0),
+              0
+            ),
+          };
+        }
+
+        return product;
+      }
+    );
     setOrderObject(orderObjectClone);
   };
+
+  console.log("orderObject[orderActive]", orderObject[orderActive])
 
   return (
     <ProductTableStyled className="p-4">
@@ -344,8 +562,50 @@ export function ProductList({ useForm }: { useForm: any }) {
         scroll={{ x: 900 }}
         expandable={{
           defaultExpandAllRows: true,
-          // eslint-disable-next-line @typescript-eslint/no-shadow
-          expandedRowRender: (record: ISaleProductLocal) => (
+          expandedRowRender: (record: ISaleProductLocal) => isSaleReturn && record?.batches?.length > 0 ? (
+            <div>
+              <div className="bg-[#FFF3E6] px-6 py-2 ">
+                <div className="hidden-scrollbar overflow-x-auto overflow-y-hidden">
+                  <div className="flex items-center gap-x-3">
+                    <div
+                      className="min-w-fit cursor-pointer pl-1 font-medium text-[#0070F4]"
+                      onClick={() => {
+                        setProductKeyAddBatch(record.productKey);
+                        setOpenListBatchModal(true);
+                      }}
+                    >
+                      Chọn lô
+                    </div>
+                    {record?.batches?.map(
+                      (batch: any) =>
+                        batch && batch.isSelected && (
+                          <div
+                            key={batch.batchId}
+                            className="flex min-w-fit items-center rounded bg-red-main py-1 px-2 text-white"
+                          >
+                            <span className="mr-2">
+                              {batch.batch?.name} - {batch?.batch?.expiryDate} - SL:{' '}
+                              {batch.quantity}
+                            </span>
+                            <Image
+                              className=" cursor-pointer"
+                              src={CloseIcon}
+                              onClick={() => {
+                                handleRemoveBatch(
+                                  record.productKey,
+                                  batch.batchId
+                                );
+                              }}
+                              alt=""
+                            />
+                          </div>
+                        )
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
             <>
               {checkDisplayListBatch(record) && (
                 <div className="bg-[#FFF3E6] px-6 py-2 ">
@@ -406,6 +666,45 @@ export function ProductList({ useForm }: { useForm: any }) {
           expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key + 1),
         }}
       />
+      {
+        discountType === "order" && orderObject[orderActive]?.length > 0 && orderDiscount?.length > 0 && (
+          <div className='bg-[#fbecee] rounded-lg shadow-sm p-5 mt-5'>
+            <h3 className='text-lg font-medium mb-2'>Khuyến mại hóa đơn</h3>
+            <div className='grid grid-cols-1 gap-2'>
+              {
+                orderDiscount?.map((item, index) => (
+                  <div key={index} className='flex items-center gap-x-2'>
+                    <div className='text-base text-[#d64457]'>{item?.name}:</div>
+                    {
+                      item?.type === "product_price" && (
+                        <div className='text-base'>
+                          Giảm giá hàng {formatNumber(item?.items[0]?.apply?.discountValue)} {item?.items[0]?.apply?.discountType === "percent" ? "%" : "đ"}
+                        </div>
+                      )
+                    }
+                    {
+                      item?.type === "order_price" && (
+                        <div className='text-base'>Giảm giá hóa đơn {formatNumber(item?.items[0]?.apply?.discountValue)} {item?.items[0]?.apply?.discountType === "percent" ? "%" : "đ"}</div>
+                      )
+                    }
+
+                    {
+                      item?.type === "gift" && (
+                        <div className='text-base'>Tặng hàng</div>
+                      )
+                    }
+                    {
+                      item?.type === "loyalty" && (
+                        <div className='text-base'>Tặng điểm: {formatNumber(item?.items[0]?.apply?.pointValue)}{item?.items[0]?.apply?.discountType === "percent" ? "% điểm" : "điểm"} trên tổng hóa đơn</div>
+                      )
+                    }
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+        )
+      }
 
       <ListBatchModal
         key={openListBatchModal ? 1 : 0}
@@ -435,6 +734,28 @@ export function ProductList({ useForm }: { useForm: any }) {
           setOrderObject(orderObjectClone);
           setError('products', { message: undefined });
         }}
+      />
+      <ProductDiscountModal
+        isOpen={openProductDiscountList}
+        onCancel={() => setOpenProductDiscountList(false)}
+        onSave={(selectedDiscount) => {
+          // set selected discount to setValue products
+          const orderObjectClone = cloneDeep(orderObject);
+          orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map(
+            (product: ISaleProductLocal) => {
+              if (selectedDiscount[0]?.items[0]?.condition?.productUnitId.includes(product.productUnitId)) {
+                return {
+                  ...product,
+                  discountSelected: selectedDiscount
+                }
+              }
+              return product
+            }
+          )
+          setOrderObject(orderObjectClone)
+          setOpenProductDiscountList(false)
+        }}
+        discountList={itemDiscount}
       />
     </ProductTableStyled>
   );

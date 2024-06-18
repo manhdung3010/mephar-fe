@@ -16,12 +16,32 @@ import {
   productImportState,
 } from '@/recoil/state';
 
+import { useEffect, useState } from 'react';
+import CustomerModal from './customer-modal';
+import Invoice from './invoice';
+import InvoiceModal from './return-product/InvoiceModal';
 import { LeftMenuStyled } from './styled';
+import ReportModal from './report';
+import { useRouter } from 'next/router';
 
 export function LeftMenu() {
+  const router = useRouter();
+  const { isReturn } = router.query;
+
   const resetOrderObject = useResetRecoilState(orderState);
   const resetOrderActive = useResetRecoilState(orderActiveState);
   const resetProductsImport = useResetRecoilState(productImportState);
+
+  const [openInvoiceModal, setOpenInvoiceModal] = useState(false);
+  const [openCustomer, setOpenCustomer] = useState(false);
+  const [openInvoice, setOpenInvoice] = useState(false);
+  const [openReport, setOpenReport] = useState(false);
+
+  useEffect(() => {
+    if (isReturn) {
+      setOpenInvoiceModal(true)
+    }
+  }, [isReturn])
 
   const clearCache = () => {
     resetOrderObject();
@@ -52,35 +72,35 @@ export function LeftMenu() {
           </div>
         </div>
 
-        <div className="mb-3 flex h-[99px] flex-col items-center justify-center rounded-lg bg-[#FBECEE] py-3 px-2">
+        <div onClick={() => setOpenCustomer(true)} className="mb-3 flex h-[99px] flex-col items-center justify-center rounded-lg bg-[#FBECEE] py-3 px-2 cursor-pointer">
           <Image src={User} />
           <div className=" mt-2 text-center font-medium leading-tight text-red-main">
             Thông tin khách hàng
           </div>
         </div>
 
-        <div className="mb-3 flex h-[99px] flex-col items-center justify-center rounded-lg bg-[#FBECEE] py-3 px-2">
+        <div onClick={() => setOpenInvoiceModal(true)} className="mb-3 flex h-[99px] flex-col items-center justify-center rounded-lg bg-[#FBECEE] py-3 px-2 cursor-pointer">
           <Image src={ReturnOrder} />
           <div className=" mt-2 text-center font-medium leading-tight text-red-main">
             Đổi trả đơn hàng
           </div>
         </div>
 
-        <div className="mb-3 flex h-[99px] flex-col items-center justify-center rounded-lg bg-[#FBECEE] py-3 px-2">
+        <div onClick={() => setOpenReport(true)} className="mb-3 flex h-[99px] flex-col items-center justify-center rounded-lg bg-[#FBECEE] py-3 px-2 cursor-pointer">
           <Image src={PayLoan} />
           <div className=" mt-2 text-center font-medium leading-tight text-red-main">
             Khách trả nợ
           </div>
         </div>
 
-        <div className="mb-3 flex h-[99px] flex-col items-center justify-center rounded-lg bg-[#FBECEE] py-3 px-2">
+        <div onClick={() => setOpenInvoice(true)} className="mb-3 flex h-[99px] flex-col items-center justify-center rounded-lg bg-[#FBECEE] py-3 px-2 cursor-pointer">
           <Image src={ListOrder} />
           <div className=" mt-2 text-center font-medium leading-tight text-red-main">
             Danh sách đơn hàng
           </div>
         </div>
 
-        <div className="mb-3 flex h-[99px] flex-col items-center justify-center rounded-lg bg-[#FBECEE] py-3 px-2">
+        <div onClick={() => setOpenReport(true)} className="mb-3 flex h-[99px] flex-col items-center justify-center rounded-lg bg-[#FBECEE] py-3 px-2 cursor-pointer">
           <Image src={Document} />
           <div className=" mt-2 text-center font-medium leading-tight text-red-main">
             Xem báo cáo
@@ -97,6 +117,23 @@ export function LeftMenu() {
           </div>
         </div>
       </div>
+
+      <InvoiceModal
+        isOpen={!!openInvoiceModal}
+        onCancel={() => setOpenInvoiceModal(false)}
+      />
+      <Invoice
+        isOpen={!!openInvoice}
+        onCancel={() => setOpenInvoice(false)}
+      />
+      <CustomerModal
+        isOpen={!!openCustomer}
+        onCancel={() => setOpenCustomer(false)}
+      />
+      <ReportModal
+        isOpen={!!openReport}
+        onCancel={() => setOpenReport(false)}
+      />
     </LeftMenuStyled>
   );
 }

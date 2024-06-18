@@ -19,7 +19,7 @@ import { CustomSelect } from '@/components/CustomSelect';
 import { CustomUpload } from '@/components/CustomUpload';
 import InputError from '@/components/InputError';
 import { ECustomerStatus, ECustomerType, EGender } from '@/enums';
-import { formatDate } from '@/helpers';
+import { formatDate, hasPermission } from '@/helpers';
 import PlusIcon from '@/assets/plusIcon.svg';
 
 import { useAddress } from '@/hooks/useAddress';
@@ -29,9 +29,11 @@ import { fa } from '@faker-js/faker';
 import { AddGroupCustomerModal } from '../partners/group-customer/AddGroupCustomerModal';
 import {
   branchState,
+  profileState,
 } from '@/recoil/state';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import { getBranch } from '@/api/branch.service';
+import { RoleAction, RoleModel } from '../settings/role/role.enum';
 
 export function CreateCustomerModal({
   isOpen,
@@ -43,6 +45,7 @@ export function CreateCustomerModal({
   onSave: ({ customerId, CustomerName }) => void;
 }) {
   const queryClient = useQueryClient();
+  const profile = useRecoilValue(profileState);
 
   const [branchId, setBranch] = useRecoilState(branchState);
 
@@ -373,14 +376,20 @@ export function CreateCustomerModal({
                   setGroupCustomerKeyword(value);
                 }, 300)}
                 suffixIcon={
-                  <Image
-                    src={PlusIcon}
-                    onClick={(e) => {
-                      setGroupCustomer(true);
-                      e.stopPropagation();
-                    }}
-                    alt=""
-                  />
+                  <>
+                    {
+                      hasPermission(profile?.role?.permissions, RoleModel.group_customer, RoleAction.create) && (
+                        <Image
+                          src={PlusIcon}
+                          onClick={(e) => {
+                            setGroupCustomer(true);
+                            e.stopPropagation();
+                          }}
+                          alt=""
+                        />
+                      )
+                    }
+                  </>
                 }
                 value={getValues('groupCustomerId')}
                 className="border-underline"

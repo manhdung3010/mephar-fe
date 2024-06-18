@@ -1,26 +1,34 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ColumnsType } from 'antd/es/table';
 import cx from 'classnames';
 import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { getReturnProductDetail } from '@/api/return-product.service';
+import { deleteReturnProduct, getReturnProductDetail } from '@/api/return-product.service';
 import CloseIcon from '@/assets/closeIcon.svg';
-import OpenOrderIcon from '@/assets/openOrder.svg';
 import PrintOrderIcon from '@/assets/printOrder.svg';
 import { CustomButton } from '@/components/CustomButton';
 import CustomTable from '@/components/CustomTable';
 import { EReturnProductStatus, EReturnProductStatusLabel } from '@/enums';
-import { formatMoney, formatNumber } from '@/helpers';
+import { formatMoney, formatNumber, hasPermission } from '@/helpers';
 
+import { message } from 'antd';
+import { useReactToPrint } from 'react-to-print';
 import type { IProduct, IRecord } from '../interface';
+import CancleReturnProduct from './CancleReturnProduct';
 import InvoicePrint from './InvoicePrint';
 import styles from "./invoice.module.css";
-import { useReactToPrint } from 'react-to-print';
+import { useRecoilValue } from 'recoil';
+import { profileState } from '@/recoil/state';
+import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
 
 export function Info({ record }: { record: IRecord }) {
 
+  const queryClient = useQueryClient();
+  const profile = useRecoilValue(profileState);
+
   const invoiceComponentRef = useRef<HTMLDivElement>(null);
+  const [openCancelPrintProduct, setOpenCancelPrintProduct] = useState(false);
 
   const { data: returnProductDetail, isLoading } = useQuery<{
     data: { purchaseReturn: IRecord; products: any };
@@ -46,6 +54,12 @@ export function Info({ record }: { record: IRecord }) {
       dataIndex: 'name',
       key: 'name',
       render: (_, { product }) => product.name,
+    },
+    {
+      title: 'Đơn vị tính',
+      dataIndex: 'productUnit',
+      key: 'productUnit',
+      render: (productUnit) => productUnit.unitName,
     },
     {
       title: 'Số lượng',
@@ -83,6 +97,19 @@ export function Info({ record }: { record: IRecord }) {
       setExpandedRowKeys(expandedRowKeysClone);
     }
   }, [returnProductDetail]);
+
+  const { mutate: mutateCancelImportProduct, isLoading: isLoadingDeleteProduct } =
+    useMutation(() => deleteReturnProduct(Number(record.id)), {
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(['LIST_RETURN_PRODUCT']);
+        setOpenCancelPrintProduct(false);
+      },
+      onError: (err: any) => {
+        message.error(err?.message);
+      },
+    });
+
+  const onSubmit = () => { mutateCancelImportProduct() };
 
   const totalQuantity = useMemo(() => {
     let total = 0;
@@ -185,7 +212,7 @@ export function Info({ record }: { record: IRecord }) {
               {record.product?.isBatchExpireControl && (
                 <div className="bg-[#FFF3E6] px-6 py-2 ">
                   <div className="flex items-center gap-x-3">
-                    {record?.productBatchHistories?.map(
+                    {record?.batches?.map(
                       ({ batch, quantity }) => (
                         <>
                           {batch && (
@@ -270,13 +297,26 @@ export function Info({ record }: { record: IRecord }) {
         >
           In phiếu
         </CustomButton>
-        <CustomButton
-          outline={true}
-          prefixIcon={<Image src={CloseIcon} alt="" />}
-        >
-          Hủy bỏ
-        </CustomButton>
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.return_product, RoleAction.delete) && (
+            <CustomButton
+              outline={true}
+              prefixIcon={<Image src={CloseIcon} alt="" />}
+              onClick={() => setOpenCancelPrintProduct(true)}
+            >
+              Hủy bỏ
+            </CustomButton>
+          )
+        }
+
       </div>
+
+      <CancleReturnProduct
+        isOpen={openCancelPrintProduct}
+        onCancel={() => setOpenCancelPrintProduct(false)}
+        onSubmit={onSubmit}
+        isLoading={isLoadingDeleteProduct}
+      />
 
       <div ref={invoiceComponentRef} className={`${styles.invoicePrint} invoice-print`}>
         <InvoicePrint data={returnProductDetail?.data} columns={columns} totalQuantity={totalQuantity} />

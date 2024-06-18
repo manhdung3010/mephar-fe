@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { message } from 'antd';
+import { Tooltip, message } from 'antd';
 import cx from 'classnames';
-import { cloneDeep, debounce, set } from 'lodash';
+import { cloneDeep, debounce } from 'lodash';
 import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -13,6 +13,7 @@ import CustomerIcon from '@/assets/customerIcon.svg';
 import DolarIcon from '@/assets/dolarIcon.svg';
 import EditIcon from '@/assets/editIcon.svg';
 import EmployeeIcon from '@/assets/employeeIcon.svg';
+import DiscountIcon from '@/assets/gift.svg';
 import Bank from '@/assets/images/bank.png';
 import Cash from '@/assets/images/cash.png';
 import Debt from '@/assets/images/debt.png';
@@ -28,43 +29,55 @@ import {
   EPaymentMethod,
   getEnumKeyByValue,
 } from '@/enums';
-import { formatMoney } from '@/helpers';
+import { formatMoney, formatNumber, hasPermission } from '@/helpers';
 import {
   branchState,
+  discountTypeState,
   orderActiveState,
+  orderDiscountSelected,
   orderState,
+  productDiscountSelected,
   profileState,
 } from '@/recoil/state';
 
+import { getPointStatus } from '@/api/point.service';
+import { CustomSwitch } from '@/components/CustomSwitch';
+import { RoleAction, RoleModel } from '../settings/role/role.enum';
 import { CreateCustomerModal } from './CreateCustomerModal';
 import { CreateDiscountModal } from './CreateDiscountModal';
 import { CreatePrescriptionModal } from './CreatePrescriptionModal';
-import type { ISaleProductLocal } from './interface';
+import { OrderDiscountModal } from './OrderDiscountModal';
 import { OrderSuccessModal } from './OrderSuccessModal';
 import { ScanQrModal } from './ScanQrModal';
+import type { ISaleProductLocal } from './interface';
 import { RightContentStyled } from './styled';
+import { getDiscountConfig } from '@/api/discount.service';
 
-export function RightContent({ useForm }: { useForm: any }) {
+export function RightContent({ useForm, discountList }: { useForm: any, discountList: any }) {
   const queryClient = useQueryClient();
 
   const { getValues, setValue, handleSubmit, errors, reset } = useForm;
 
   const [orderObject, setOrderObject] = useRecoilState(orderState);
   const [orderActive, setOrderActive] = useRecoilState(orderActiveState);
+  const [orderDiscount, setOrderDiscount] = useRecoilState(orderDiscountSelected);
+  const [productDiscount, setProductDiscount] = useRecoilState(productDiscountSelected);
+  const [discountType, setDiscountType] = useRecoilState(discountTypeState);
 
   const branchId = useRecoilValue(branchState);
   const profile = useRecoilValue(profileState);
 
   const [isOpenScanQrModal, setIsOpenScanQrModal] = useState(false);
   const [isOpenOrderSuccessModal, setIsOpenOrderSuccessModal] = useState(false);
-
   const [isOpenPrescriptionModal, setIsOpenPrescriptionModal] = useState(false);
   const [isOpenAddCustomerModal, setIsOpenAddCustomerModal] = useState(false);
   const [isOpenAddDiscountModal, setIsOpenAddDiscountModal] = useState(false);
-
+  const [isOpenDiscountModal, setIsOpenDiscountModal] = useState(false);
   const [searchEmployeeText, setSearchEmployeeText] = useState('');
   const [searchCustomerText, setSearchCustomerText] = useState('');
   const [saleInvoice, setSaleInvoice] = useState();
+  const [oldTotal, setOldTotal] = useState(0);
+  const [checkPoint, setCheckPoint] = useState(false);
 
   const { data: employees } = useQuery(
     ['EMPLOYEE_LIST', searchEmployeeText],
@@ -72,7 +85,17 @@ export function RightContent({ useForm }: { useForm: any }) {
   );
   const { data: customers } = useQuery(
     ['CUSTOMER_LIST', searchCustomerText],
-    () => getCustomer({ page: 1, limit: 20, keyword: searchCustomerText })
+    () => getCustomer({ page: 1, limit: 99, keyword: searchCustomerText })
+  );
+
+  const { data: pointStatus, isLoading: isLoadingPointDetail } = useQuery(
+    ['POINT_STATUS'],
+    () => getPointStatus(),
+  );
+
+  const { data: discountConfigDetail, isLoading } = useQuery(
+    ['DISCOUNT_CONFIG'],
+    () => getDiscountConfig()
   );
 
   useEffect(() => {
@@ -89,20 +112,46 @@ export function RightContent({ useForm }: { useForm: any }) {
     }
   }, [orderActive]);
 
+  // caculate total price
   const totalPrice = useMemo(() => {
     let price = 0;
-
+    let discount = 0;
     orderObject[orderActive]?.forEach((product: ISaleProductLocal) => {
       const unit = product.product.productUnit?.find(
         (unit) => unit.id === product.productUnitId
       );
 
-      price += Number(unit?.price ?? 0) * product.quantity;
+      const discountVal = (product?.discountType === "amount" ? product?.discountValue : (unit?.price * product?.discountValue) / 100) || 0;
+      if (product?.buyNumberType === 1) {
+        price += (Number(product?.productUnit?.price ?? 0)) * product.quantity;
+      }
+      else {
+        price += (Number(product?.productUnit?.price ?? 0) - discountVal) * product.quantity;
+      }
+
+      oldTotal += (Number(product?.productUnit?.price ?? 0)) * product.quantity;
     });
+    if (orderDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
+      orderDiscount?.forEach((item) => {
+        if (item.type === "order_price") {
+          if (item?.items[0]?.apply?.discountType === "percent") {
+            discount += (price * item?.items[0]?.apply?.discountValue) / 100;
+          }
+          else {
+            discount += item?.items[0]?.apply?.discountValue;
+          }
 
+        }
+      })
+    }
+    let oldTotal = price;
+    price = price;
+    oldTotal = oldTotal - (price - discount);
+    setOldTotal(oldTotal);
     return price;
-  }, [orderObject, orderActive]);
+  }, [orderObject, orderActive, orderDiscount]);
 
+  // caculate discount
   const discount = useMemo(() => {
     if (getValues('discount')) {
       const discountValue = Number(getValues('discount')).toLocaleString(
@@ -138,24 +187,74 @@ export function RightContent({ useForm }: { useForm: any }) {
     }
   }, [getValues('customerId')])
 
+  // caculate customer must pay
   const customerMustPay = useMemo(() => {
-    if (getValues('discount')) {
-      if (getValues('discountType') === EDiscountType.MONEY) {
-        return totalPrice > Number(getValues('discount'))
-          ? Math.round(totalPrice - Number(getValues('discount')))
-          : 0;
+    let discount = 0;
+    const convertMoneyPayment = pointStatus?.data?.convertMoneyPayment;
+    const convertPoint = pointStatus?.data?.convertPoint;
+
+    if (convertMoneyPayment && getValues('paymentPoint') > 0) {
+      if (orderDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
+        orderDiscount?.forEach((item) => {
+          if (item.type === "order_price") {
+            if (item?.items[0]?.apply?.discountType === "percent") {
+              discount += (totalPrice * item?.items[0]?.apply?.discountValue) / 100;
+            }
+            else {
+              discount += item?.items[0]?.apply?.discountValue;
+            }
+
+          }
+        })
+      }
+      if (getValues('discount')) {
+        if (getValues('discountType') === EDiscountType.MONEY) {
+          return totalPrice > Number(getValues('discount'))
+            ? Math.round(totalPrice - discount - Number(getValues('discount')) - (pointStatus?.data?.convertMoneyPayment / convertPoint * getValues('paymentPoint')))
+            : 0;
+        }
+
+        if (getValues('discountType') === EDiscountType.PERCENT) {
+          const discountValue =
+            (totalPrice * Number(getValues('discount'))) / 100;
+          return totalPrice > discountValue ? Math.round(totalPrice - discount - discountValue - (pointStatus?.data?.convertMoneyPayment / convertPoint * getValues('paymentPoint'))) : 0;
+        }
       }
 
-      if (getValues('discountType') === EDiscountType.PERCENT) {
-        const discountValue =
-          (totalPrice * Number(getValues('discount'))) / 100;
-        return totalPrice > discountValue ? Math.round(totalPrice - discountValue) : 0;
-      }
+      return totalPrice - discount - (pointStatus?.data?.convertMoneyPayment / convertPoint * getValues('paymentPoint'));
     }
+    else {
+      if (orderDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
+        orderDiscount?.forEach((item) => {
+          if (item.type === "order_price") {
+            if (item?.items[0]?.apply?.discountType === "percent") {
+              discount += (totalPrice * item?.items[0]?.apply?.discountValue) / 100;
+            }
+            else {
+              discount += item?.items[0]?.apply?.discountValue;
+            }
 
-    return totalPrice;
-  }, [totalPrice, getValues('discount'), getValues('discountType')]);
+          }
+        })
+      }
+      if (getValues('discount')) {
+        if (getValues('discountType') === EDiscountType.MONEY) {
+          return totalPrice > Number(getValues('discount'))
+            ? Math.round(totalPrice - discount - Number(getValues('discount')))
+            : 0;
+        }
 
+        if (getValues('discountType') === EDiscountType.PERCENT) {
+          const discountValue =
+            (totalPrice * Number(getValues('discount'))) / 100;
+          return totalPrice > discountValue ? Math.round(totalPrice - discount - discountValue) : 0;
+        }
+      }
+
+      return totalPrice - discount;
+    }
+  }, [totalPrice, getValues('discount'), getValues('discountType'), getValues('customerId'), orderDiscount, getValues('paymentPoint')]);
+  // caculate return price
   const returnPrice = useMemo(() => {
     if (getValues('cashOfCustomer')) {
       return Number(getValues('cashOfCustomer')) - customerMustPay;
@@ -164,9 +263,87 @@ export function RightContent({ useForm }: { useForm: any }) {
     return 0;
   }, [customerMustPay, getValues('cashOfCustomer')]);
 
+  // set cash of customer when customer must pay change
+  useEffect(() => {
+    if ((customerMustPay > 0 && orderObject[orderActive]?.length > 0)) {
+      setValue('cashOfCustomer', customerMustPay, { shouldValidate: true });
+    }
+    else {
+      setValue('cashOfCustomer', 0, { shouldValidate: true });
+    }
+  }, [customerMustPay, orderObject[orderActive]])
+
+  // create order
   const { mutate: mutateCreateOrder, isLoading: isLoadingCreateOrder } =
     useMutation(
       () => {
+        if (orderDiscount?.length > 0 && productDiscount?.length > 0 && discountConfigDetail?.data?.data?.isMergeDiscount) {
+          const formatProducts = getValues('products')?.map(
+            ({ isBatchExpireControl, ...product }) => ({
+              ...product,
+              batches: product.batches?.map((batch) => ({
+                id: batch.id,
+                quantity: batch.quantity,
+              })),
+              isDiscount: product?.isDiscount || false,
+              ...(product?.itemPrice > 0 && {
+                itemPrice: product?.itemPrice,
+              })
+            })
+          );
+          return createOrder({
+            ...getValues(),
+            discountOrder: oldTotal,
+            listDiscountId: [...orderDiscount?.map((item) => item.id), ...productDiscount?.map((item) => item.id)],
+            ...(getValues('customerId') === -1 && { customerId: null }),
+            products: formatProducts,
+            branchId,
+          });
+        }
+
+        if (discountType === "order" && orderDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
+          const formatProducts = getValues('products')?.map(
+            ({ isBatchExpireControl, ...product }) => ({
+              ...product,
+              batches: product.batches?.map((batch) => ({
+                id: batch.id,
+                quantity: batch.quantity,
+              })),
+              isDiscount: product?.isDiscount || false,
+            })
+          );
+          return createOrder({
+            ...getValues(),
+            discountOrder: oldTotal,
+            listDiscountId: orderDiscount?.map((item) => item.id),
+            ...(getValues('customerId') === -1 && { customerId: null }),
+            products: formatProducts,
+            branchId,
+          });
+        }
+        if (discountType === "product" && productDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
+          const formatProducts = getValues('products')?.map(
+            ({ isBatchExpireControl, ...product }) => ({
+              ...product,
+              batches: product.batches?.map((batch) => ({
+                id: batch.id,
+                quantity: batch.quantity,
+              })),
+              isDiscount: product?.isDiscount || false,
+              ...(product?.itemPrice > 0 && {
+                itemPrice: product?.itemPrice,
+              })
+            })
+          );
+          return createOrder({
+            ...getValues(),
+            discountOrder: oldTotal,
+            listDiscountId: productDiscount?.map((item) => item.id),
+            ...(getValues('customerId') === -1 && { customerId: null }),
+            products: formatProducts,
+            branchId,
+          });
+        }
         const formatProducts = getValues('products')?.map(
           ({ isBatchExpireControl, ...product }) => ({
             ...product,
@@ -187,22 +364,17 @@ export function RightContent({ useForm }: { useForm: any }) {
       {
         onSuccess: async (res) => {
           await queryClient.invalidateQueries(['LIST_SALE_PRODUCT']);
+          await queryClient.invalidateQueries(['CUSTOMER_LIST']);
           if (res.data) {
             setSaleInvoice(res.data);
           }
-
           const orderClone = cloneDeep(orderObject);
-
           orderClone[orderActive] = [];
-
           setOrderObject(orderClone);
-
-          // if (getValues('paymentType') === EPaymentMethod.BANKING) {
-          //   setIsOpenScanQrModal(true);
-          // } else {
-          // }
+          setOrderDiscount([]);
+          setProductDiscount([]);
+          setDiscountType("");
           setIsOpenOrderSuccessModal(true);
-
           reset();
           setValue('userId', profile.id, { shouldValidate: true });
         },
@@ -215,11 +387,6 @@ export function RightContent({ useForm }: { useForm: any }) {
   const onSubmit = () => {
     mutateCreateOrder();
   };
-
-  // useEffect(() => {
-  //   setValue("customerId", -1, { shouldValidate: true })
-  // }, [])
-
   return (
     <RightContentStyled className="flex w-[360px] min-w-[360px] flex-col">
       <div className="px-6 pt-5 ">
@@ -262,14 +429,20 @@ export function RightContent({ useForm }: { useForm: any }) {
           className="h-[44px]"
           placeholder="Thêm khách vào đơn F4"
           suffixIcon={
-            <Image
-              src={PlusIcon}
-              onClick={(e) => {
-                setIsOpenAddCustomerModal(true);
-                e.stopPropagation();
-              }}
-              alt=""
-            />
+            <>
+              {
+                hasPermission(profile?.role?.permissions, RoleModel.customer, RoleAction.create) && (
+                  <Image
+                    src={PlusIcon}
+                    onClick={(e) => {
+                      setIsOpenAddCustomerModal(true);
+                      e.stopPropagation();
+                    }}
+                    alt=""
+                  />
+                )
+              }
+            </>
           }
           prefixIcon={<Image src={CustomerIcon} alt="" />}
         />
@@ -291,20 +464,45 @@ export function RightContent({ useForm }: { useForm: any }) {
       </div>
 
       <div className="my-6 h-[1px] w-full bg-[#E4E4E4]"></div>
-
       <div className="flex grow flex-col px-6">
         <div className="grow">
           <div className="mb-5 border-b-2 border-dashed border-[#E4E4E4]">
-            <div className="mb-3 flex justify-between">
-              <div className="text-lg leading-normal text-[#828487]">
-                Tổng tiền (
-                <span className="text-lg">
-                  {orderObject[orderActive]?.length ?? 0} sp
+            <div className="mb-3 flex justify-between items-start">
+              <div className="text-lg leading-normal text-[#828487] flex items-center gap-2">
+                <span className='text-lg'>
+                  Tổng tiền (
+                  <span className="text-lg">
+                    {orderObject[orderActive]?.length ?? 0} sp
+                  </span>
+                  )
                 </span>
-                )
+                {
+                  orderObject[orderActive]?.length > 0 && (
+                    <Tooltip title="KM hóa đơn" className='cursor-pointer'>
+                      <Image src={DiscountIcon} onClick={() => {
+                        if (productDiscount?.length > 0 && !discountConfigDetail?.data?.data?.isMergeDiscount) return message.error("Bạn đã chọn khuyến mại hàng hóa. Mỗi hóa đơn chỉ đươc áp dụng 1 loại khuyến mại");
+                        return setIsOpenDiscountModal(!isOpenDiscountModal)
+                      }} alt='discount-icon' />
+                    </Tooltip>
+                  )
+                }
               </div>
-              <div className="text-lg leading-normal text-[#19191C]">
-                {formatMoney(totalPrice)}
+              <div className="text-lg leading-normal text-[#19191C] flex flex-col items-end">
+                <div className='text-lg'>
+                  {formatMoney(totalPrice)}
+                </div>
+                {
+                  orderDiscount?.map((item) => {
+                    if (item.type === "order_price") {
+                      return (
+                        <div key={item.id} className="text-[#828487] text-base">
+                          <span className="text-red-500 px-2  bg-[#fde6f8] rounded">KM</span> {formatNumber(item?.items[0]?.apply?.discountValue)}{item?.items[0]?.apply?.discountType === "percent" ? "%" : "đ"}
+                        </div>
+                      )
+                    }
+                    return null;
+                  })
+                }
               </div>
             </div>
 
@@ -338,6 +536,58 @@ export function RightContent({ useForm }: { useForm: any }) {
                 {formatMoney(customerMustPay)}
               </div>
             </div>
+            {
+              pointStatus?.data?.isPointPayment && getValues('customerId') && customers?.data?.items?.find((item) => item.id === getValues('customerId') && item.isPointPayment) && (
+                <div className="mb-5 flex justify-between">
+
+                  <div className="text-lg leading-normal text-[#828487] flex items-center gap-2">
+                    Điểm
+                    <div className='text-lg leading-normal text-red-main flex items-center gap-2'>
+                      {
+                        formatNumber(customers?.data?.items?.find(
+                          (item) => item.id === getValues('customerId')
+                        )?.point)
+                      }
+                      <CustomSwitch
+                        size='small'
+                        checked={checkPoint}
+                        onChange={(e) => {
+                          const customerPoint = customers?.data?.items?.find(
+                            (item) => item.id === getValues('customerId')
+                          )?.point;
+                          if (customerPoint < pointStatus?.data?.convertPoint) {
+                            message.error("Khách hàng không đủ điểm để thanh toán. Điểm thanh toán tối thiểu là " + pointStatus?.data?.convertPoint + " điểm");
+                            return;
+                          }
+                          if (e) {
+                            setValue('paymentPoint', customerPoint, { shouldValidate: true });
+                            setCheckPoint(true);
+                          }
+                          else {
+                            setValue('paymentPoint', 0, { shouldValidate: true });
+                            setCheckPoint(false);
+                          }
+                        }} />
+                    </div>
+                  </div>
+                  <div className="w-[120px]">
+                    <CustomInput
+                      bordered={false}
+                      className="h-6 pr-0 text-end text-lg"
+                      disabled={!checkPoint}
+                      onChange={(value) => {
+                        setValue('paymentPoint', value, {
+                          shouldValidate: true,
+                        });
+                      }}
+                      type="number"
+                      hideArrow={true}
+                      value={getValues('paymentPoint')}
+                    />
+                  </div>
+                </div>
+              )
+            }
 
             <div className="mb-3 ">
               <div className="flex justify-between">
@@ -464,25 +714,40 @@ export function RightContent({ useForm }: { useForm: any }) {
 
         <CustomButton
           onClick={() => {
+            if (!getValues('customerId') && getValues('paymentType') === EPaymentMethod.DEBT) {
+              message.error("Vui lòng chọn khách hàng trước khi thanh toán nợ");
+              return;
+            }
             const products: ISaleProductLocal[] = orderObject[orderActive];
+            const formatProducts = products.map((product) => {
+              const unit = product.product.productUnit?.find(
+                (unit) => unit.id === product.productUnitId
+              );
 
-            console.log("products: ", products)
-
-            const formatProducts = products.map((product) => ({
-              productId: product.productId,
-              productUnitId: product.productUnitId,
-              originProductUnitId: product.originProductUnitId,
-              productType: product.product.type,
-              quantity: product.quantity,
-              isBatchExpireControl: product.product.isBatchExpireControl,
-              batches: product.batches
-                .filter((batch) => batch.isSelected)
-                .map((batch: any) => ({
-                  id: batch.id,
-                  quantity: batch.quantity,
-                  inventory: batch.inventory,
-                })),
-            }));
+              const discountVal = (product?.discountType === "amount" ? product?.discountValue : (unit?.price * product?.discountValue) / 100) || 0;
+              return {
+                productId: product.productId,
+                productUnitId: product.productUnitId,
+                originProductUnitId: product.originProductUnitId,
+                productType: product.product.type,
+                quantity: product.quantity,
+                isDiscount: product.isDiscount,
+                ...(product.isDiscount && !product?.buyNumberType && {
+                  itemPrice: Number(product.price - discountVal),
+                }),
+                ...(product.isDiscount && product?.buyNumberType && {
+                  itemPrice: Number(product.itemPrice),
+                }),
+                isBatchExpireControl: product.product.isBatchExpireControl,
+                batches: product.batches
+                  .filter((batch) => batch.isSelected)
+                  .map((batch: any) => ({
+                    id: batch.id,
+                    quantity: batch.quantity,
+                    inventory: batch.inventory,
+                  })),
+              }
+            });
 
             setValue('products', formatProducts, { shouldValidate: true });
             setValue('totalPrice', customerMustPay, { shouldValidate: true });
@@ -536,6 +801,15 @@ export function RightContent({ useForm }: { useForm: any }) {
           setIsOpenOrderSuccessModal(false);
         }}
         saleInvoice={saleInvoice}
+      />
+
+      <OrderDiscountModal
+        isOpen={isOpenDiscountModal}
+        onCancel={() => setIsOpenDiscountModal(false)}
+        onSave={() => {
+          setIsOpenDiscountModal(false);
+        }}
+        discountList={discountList}
       />
     </RightContentStyled>
   );

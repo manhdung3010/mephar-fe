@@ -17,11 +17,12 @@ import ReturnDetail from './row-detail';
 import Search from './Search';
 import CustomPagination from '@/components/CustomPagination';
 import { useRecoilValue } from 'recoil';
-import { branchState } from '@/recoil/state';
+import { branchState, profileState } from '@/recoil/state';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getMove } from '@/api/move';
-import { formatDateTime } from '@/helpers';
+import { formatDateTime, hasPermission } from '@/helpers';
 import { debounce, set } from 'lodash';
+import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
 
 interface IRecord {
   key: number;
@@ -47,6 +48,7 @@ export function DeliveryTransaction() {
   const queryClient = useQueryClient();
   const router = useRouter();
   const branchId = useRecoilValue(branchState);
+  const profile = useRecoilValue(profileState);
 
   const [deletedId, setDeletedId] = useState<number>();
   const [formFilter, setFormFilter] = useState({
@@ -156,13 +158,18 @@ export function DeliveryTransaction() {
   return (
     <div>
       <div className="my-3 flex justify-end gap-4">
-        <CustomButton
-          onClick={() => router.push('/transactions/delivery/coupon')}
-          type="success"
-          prefixIcon={<Image src={PlusIcon} />}
-        >
-          Chuyển hàng
-        </CustomButton>
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.delivery, RoleAction.create) && (
+            <CustomButton
+              onClick={() => router.push('/transactions/delivery/coupon')}
+              type="success"
+              prefixIcon={<Image src={PlusIcon} />}
+            >
+              Chuyển hàng
+            </CustomButton>
+          )
+        }
+
 
         <CustomButton prefixIcon={<Image src={ExportIcon} />}>
           Xuất file

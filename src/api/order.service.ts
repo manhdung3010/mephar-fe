@@ -11,6 +11,21 @@ export function getOrder(params: {
 }) {
   return axiosClient.get("order", { params });
 }
+
+export function getSaleReturn(params: {
+  page: number;
+  limit: number;
+  keyword?: string;
+  branchId: number;
+  storeId?: number;
+  from?: string;
+  to?: string;
+  status?: EOrderStatus;
+  creatorId?: number;
+  customerId?: number;
+}) {
+  return axiosClient.get("sale-return", { params });
+}
 export function getOrderHistory(
   params: {
     page: number;
@@ -31,6 +46,9 @@ export function getOrderDetail(id: number) {
 
 export function createOrder(payload) {
   return axiosClient.post(`order`, payload);
+}
+export function createOrderReturn(payload) {
+  return axiosClient.post(`sale-return`, payload);
 }
 export function createOrderDebt(payload, id: number) {
   return axiosClient.post(`order/${id}/payment`, payload);

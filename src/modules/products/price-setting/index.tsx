@@ -10,12 +10,13 @@ import SearchIcon from "@/assets/searchIcon.svg";
 import { CustomInput } from "@/components/CustomInput";
 import CustomPagination from "@/components/CustomPagination";
 import CustomTable from "@/components/CustomTable";
-import { formatMoney } from "@/helpers";
+import { formatMoney, hasPermission } from "@/helpers";
 
 import { EditPriceModal } from "./EditPriceModal";
 import { useRecoilValue } from "recoil";
-import { branchState } from "@/recoil/state";
+import { branchState, profileState } from "@/recoil/state";
 import Search from "./Search";
+import { RoleAction, RoleModel } from "@/modules/settings/role/role.enum";
 
 interface IRecord {
   key: number;
@@ -45,6 +46,7 @@ export function PriceSetting() {
   });
 
   const branchId = useRecoilValue(branchState);
+  const profile = useRecoilValue(profileState);
 
   const [selectedBatchId, setSelectedBatchId] = useState<number>();
   const [filteredData, setFilteredData] = useState<IRecord[]>([]);
@@ -125,7 +127,7 @@ export function PriceSetting() {
       render: (value, { id }) => (
         <CustomInput
           bordered={false}
-          suffixIcon={<Image src={EditIcon} className="cursor-pointer" onClick={() => setSelectedBatchId(id)} />}
+          suffixIcon={hasPermission(profile?.role?.permissions, RoleModel.price_setting, RoleAction.update) ? <Image src={EditIcon} className="cursor-pointer" onClick={() => setSelectedBatchId(id)} /> : null}
           className="w-[120px]"
           onChange={() => { }}
           type="number"

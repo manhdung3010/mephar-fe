@@ -11,16 +11,18 @@ import PlusIcon from '@/assets/plusWhiteIcon.svg';
 import { CustomButton } from '@/components/CustomButton';
 import CustomPagination from '@/components/CustomPagination';
 import CustomTable from '@/components/CustomTable';
-import { branchState } from '@/recoil/state';
+import { branchState, profileState } from '@/recoil/state';
 
 import type { IRecord } from './interface';
 import ProductDetail from './row-detail';
 import Search from './Search';
-import { formatDateTime } from '@/helpers';
+import { formatDateTime, hasPermission } from '@/helpers';
+import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
 
 export function ReturnProduct() {
   const router = useRouter();
   const branchId = useRecoilValue(branchState);
+  const profile = useRecoilValue(profileState);
 
   const [formFilter, setFormFilter] = useState({
     page: 1,
@@ -31,7 +33,7 @@ export function ReturnProduct() {
   });
 
   const { data: returnProducts, isLoading } = useQuery(
-    ['LIST_IMPORT_PRODUCT', JSON.stringify(formFilter), branchId],
+    ['LIST_RETURN_PRODUCT', JSON.stringify(formFilter), branchId],
     () => getReturnProduct({ ...formFilter, branchId })
   );
 
@@ -113,13 +115,18 @@ export function ReturnProduct() {
   return (
     <div>
       <div className="my-3 flex justify-end gap-4">
-        <CustomButton
-          onClick={() => router.push('/products/return/coupon')}
-          type="success"
-          prefixIcon={<Image src={PlusIcon} />}
-        >
-          Trả hàng nhập
-        </CustomButton>
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.return_product, RoleAction.create) && (
+            <CustomButton
+              onClick={() => router.push('/products/return/coupon')}
+              type="success"
+              prefixIcon={<Image src={PlusIcon} />}
+            >
+              Trả hàng nhập
+            </CustomButton>
+          )
+        }
+
 
         <CustomButton prefixIcon={<Image src={ExportIcon} />}>
           Xuất file

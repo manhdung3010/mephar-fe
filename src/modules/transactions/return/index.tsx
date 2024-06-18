@@ -9,45 +9,59 @@ import ImportIcon from '@/assets/importIcon.svg';
 import { CustomButton } from '@/components/CustomButton';
 import CustomTable from '@/components/CustomTable';
 import {
+  EReturnProductStatus,
+  EReturnProductStatusLabel,
   EReturnTransactionStatus,
   EReturnTransactionStatusLabel,
 } from '@/enums';
 
 import ReturnDetail from './row-detail';
 import Search from './Search';
+import { useQuery } from '@tanstack/react-query';
+import { useRecoilValue } from 'recoil';
+import { branchState } from '@/recoil/state';
+import { getSaleReturn } from '@/api/order.service';
+import { formatDateTime, formatMoney } from '@/helpers';
+import CustomPagination from '@/components/CustomPagination';
 
 interface IRecord {
   key: number;
   id: string;
   seller: string;
+  creator: {
+    fullName: string;
+  }
   date: string;
   customer: string;
   needReturnAmount: number;
   returnedAmount: number;
-  status: EReturnTransactionStatus;
+  status: EReturnProductStatus;
 }
 
 export function ReturnTransaction() {
   const router = useRouter();
+  const branchId = useRecoilValue(branchState);
 
   const [expandedRowKeys, setExpandedRowKeys] = useState<
     Record<string, boolean>
   >({});
 
-  const record = {
-    key: 1,
-    id: 'PN231017090542',
-    seller: 'dungtest',
-    date: '17/10/2023 09:05:14',
-    customer: 'Khách lẻ',
-    needReturnAmount: 70000,
-    returnedAmount: 70000,
-    status: EReturnTransactionStatus.comleted,
-  };
+  const [formFilter, setFormFilter] = useState({
+    page: 1,
+    limit: 20,
+    keyword: '',
+    from: undefined,
+    to: undefined,
+    userId: undefined,
+    storeId: undefined,
+    status: undefined,
+    customerId: undefined,
+  });
 
-  const dataSource: IRecord[] = Array(8)
-    .fill(0)
-    .map((_, index) => ({ ...record, key: index + 1 }));
+  const { data: saleReturn, isLoading } = useQuery(
+    ['SALE_RETURN', formFilter, branchId],
+    () => getSaleReturn({ ...formFilter, branchId })
+  );
 
   const columns: ColumnsType<IRecord> = [
     {
@@ -57,8 +71,8 @@ export function ReturnTransaction() {
     },
     {
       title: 'Mã hóa đơn',
-      dataIndex: 'id',
-      key: 'id',
+      dataIndex: 'code',
+      key: 'code',
       render: (value, _, index) => (
         <span
           className="cursor-pointer text-[#0070F4]"
@@ -81,26 +95,35 @@ export function ReturnTransaction() {
       title: 'Người bán',
       dataIndex: 'seller',
       key: 'seller',
+      render: (_, { creator }) => (
+        <span>{creator.fullName}</span>
+      ),
     },
     {
       title: 'Thời gian',
-      dataIndex: 'date',
-      key: 'date',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      render: (createdAt) => formatDateTime(createdAt)
     },
     {
       title: 'Khách hàng',
       dataIndex: 'customer',
       key: 'customer',
+      render: (customer) => (
+        <span>{customer.fullName}</span>
+      ),
     },
     {
       title: 'Cần trả khách',
-      dataIndex: 'needReturnAmount',
-      key: 'needReturnAmount',
+      dataIndex: 'totalPrice',
+      key: 'totalPrice',
+      render: (totalPrice) => formatMoney(totalPrice)
     },
     {
       title: 'Đã trả khách',
-      dataIndex: 'returnedAmount',
-      key: 'returnedAmount',
+      dataIndex: 'paid',
+      key: 'paid',
+      render: (paid) => formatMoney(paid)
     },
 
     {
@@ -110,66 +133,74 @@ export function ReturnTransaction() {
       render: (_, { status }) => (
         <div
           className={cx(
-            status === EReturnTransactionStatus.comleted
+            status === EReturnProductStatus.SUCCEED
               ? 'text-[#00B63E] border border-[#00B63E] bg-[#DEFCEC]'
               : 'text-[#6D6D6D] border border-[#6D6D6D] bg-[#F0F1F1]',
             'px-2 py-1 rounded-2xl w-max'
           )}
         >
-          {EReturnTransactionStatusLabel[status]}
+          {EReturnProductStatusLabel[status]}
         </div>
       ),
     },
   ];
   return (
-    // <div>
-    //   <div className="my-3 flex justify-end gap-4">
-    //     <CustomButton
-    //       // onClick={() => router.push("/products/import/coupon")}
-    //       type="success"
-    //       prefixIcon={<Image src={ImportIcon} />}
-    //     >
-    //       Thêm phiếu trả hàng
-    //     </CustomButton>
+    <div>
+      <div className="my-3 flex justify-end gap-4">
+        <CustomButton
+          onClick={() => router.push("/sales?isReturn=true")}
+          type="success"
+          prefixIcon={<Image src={ImportIcon} />}
+        >
+          Thêm phiếu trả hàng
+        </CustomButton>
 
-    //     <CustomButton prefixIcon={<Image src={ExportIcon} />}>
-    //       Xuất file
-    //     </CustomButton>
-    //   </div>
+        <CustomButton prefixIcon={<Image src={ExportIcon} />}>
+          Xuất file
+        </CustomButton>
+      </div>
 
-    //   <Search />
+      <Search setFormFilter={setFormFilter} formFilter={formFilter} />
 
-    //   <CustomTable
-    //     rowSelection={{
-    //       type: 'checkbox',
-    //     }}
-    //     dataSource={dataSource}
-    //     columns={columns}
-    //     onRow={(record, rowIndex) => {
-    //       return {
-    //         onClick: event => {
-    //           // Toggle expandedRowKeys state here
-    //           if (expandedRowKeys[record.key]) {
-    //             const { [record.key]: value, ...remainingKeys } = expandedRowKeys;
-    //             setExpandedRowKeys(remainingKeys);
-    //           } else {
-    //             setExpandedRowKeys({ ...expandedRowKeys, [record.key]: true });
-    //           }
-    //         }
-    //       };
-    //     }}
-    //     expandable={{
-    //       // eslint-disable-next-line @typescript-eslint/no-shadow
-    //       expandedRowRender: (record: IRecord) => (
-    //         <ReturnDetail record={record} />
-    //       ),
-    //       expandIcon: () => <></>,
-    //       expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key),
-    //     }}
-    //   />
-    // </div>
-    <div className='my-5'>
-      Đang cập nhật...
+      <CustomTable
+        rowSelection={{
+          type: 'checkbox',
+        }}
+        dataSource={saleReturn?.data?.items?.map((item, index) => ({
+          ...item,
+          key: index + 1,
+        }))}
+        columns={columns}
+        loading={isLoading}
+        onRow={(record, rowIndex) => {
+          return {
+            onClick: event => {
+              // Toggle expandedRowKeys state here
+              if (expandedRowKeys[record.key]) {
+                const { [record.key]: value, ...remainingKeys } = expandedRowKeys;
+                setExpandedRowKeys(remainingKeys);
+              } else {
+                setExpandedRowKeys({ ...expandedRowKeys, [record.key]: true });
+              }
+            }
+          };
+        }}
+        expandable={{
+          // eslint-disable-next-line @typescript-eslint/no-shadow
+          expandedRowRender: (record: IRecord) => (
+            <ReturnDetail record={record} />
+          ),
+          expandIcon: () => <></>,
+          expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key),
+        }}
+      />
+      <CustomPagination
+        page={formFilter.page}
+        pageSize={formFilter.limit}
+        setPage={(value) => setFormFilter({ ...formFilter, page: value })}
+        setPerPage={(value) => setFormFilter({ ...formFilter, limit: value })}
+        total={saleReturn?.data?.totalItem}
+      />
     </div>
   );
 }

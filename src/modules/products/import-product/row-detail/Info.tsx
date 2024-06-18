@@ -13,7 +13,7 @@ import PrintOrderIcon from "@/assets/printOrder.svg";
 import { CustomButton } from "@/components/CustomButton";
 import CustomTable from "@/components/CustomTable";
 import { EImportProductStatus, EImportProductStatusLabel } from "@/enums";
-import { formatMoney, formatNumber } from "@/helpers";
+import { formatMoney, formatNumber, hasPermission } from "@/helpers";
 import PrintBarcodeModal from "../../list-product/row-detail/PrintBarcodeModal";
 
 import type { IProduct, IRecord } from '../interface';
@@ -22,12 +22,18 @@ import { useRouter } from 'next/router';
 import InvoicePrint from './InvoicePrint';
 import { useReactToPrint } from 'react-to-print';
 import styles from "./invoice.module.css"
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { productReturnState, profileState } from '@/recoil/state';
+import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
 
 export function Info({ record }: { record: IRecord }) {
   const [openPrintBarcodeModal, setOpenPrintBarcodeModal] = useState(false);
   const [openCancelPrintProduct, setOpenCancelPrintProduct] = useState(false);
   const router = useRouter();
   const queryClient = useQueryClient();
+  const profile = useRecoilValue(profileState);
+  const [returnProducts, setReturnProducts] =
+    useRecoilState(productReturnState);
 
   const { data: importProductDetail, isLoading } = useQuery<{
     data: { inbound: IRecord; products: any };
@@ -43,7 +49,7 @@ export function Info({ record }: { record: IRecord }) {
   const { mutate: mutateCancelImportProduct, isLoading: isLoadingDeleteProduct } =
     useMutation(() => deleteImportProduct(Number(record.id)), {
       onSuccess: async () => {
-        await queryClient.invalidateQueries(['LIST_PRODUCT']);
+        await queryClient.invalidateQueries(['LIST_IMPORT_PRODUCT']);
         setOpenCancelPrintProduct(false);
       },
       onError: (err: any) => {
@@ -74,17 +80,17 @@ export function Info({ record }: { record: IRecord }) {
     },
     {
       title: "Đơn vị",
-      dataIndex: "productBatchHistories",
-      key: "productBatchHistories",
-      render: (productBatchs) => productBatchs[0]?.productUnit?.unitName,
+      dataIndex: "productUnit",
+      key: "productUnit",
+      render: (productUnit) => productUnit?.unitName,
     },
     {
       title: "Số lượng",
-      dataIndex: "totalQuantity",
-      key: "totalQuantity",
-      render: (_, { productBatchHistories }) =>
+      dataIndex: "quantity",
+      key: "quantity",
+      render: (quantity) =>
         formatNumber(
-          productBatchHistories.reduce((acc, obj) => acc + obj.quantity, 0)
+          quantity
         ),
     },
     // {
@@ -96,22 +102,22 @@ export function Info({ record }: { record: IRecord }) {
       title: "Giảm giá",
       dataIndex: "discount",
       key: "discount",
-      render: (_, { productBatchHistories }) =>
-        formatMoney(productBatchHistories[0]?.discount),
+      render: (discount) =>
+        formatMoney(discount),
     },
     {
       title: "Giá nhập",
-      dataIndex: "importPrice",
-      key: "importPrice",
-      render: (_, { productBatchHistories }) =>
-        formatMoney(productBatchHistories[0]?.importPrice),
+      dataIndex: "price",
+      key: "price",
+      render: (price) =>
+        formatMoney(+price),
     },
     {
       title: "Thành tiền",
       dataIndex: "totalPrice",
       key: "totalPrice",
-      render: (_, { productBatchHistories }) =>
-        formatMoney(productBatchHistories[0]?.totalPrice),
+      render: (_, record: any) =>
+        formatMoney(record.price * record.quantity - record.discount),
     },
   ];
 
@@ -131,9 +137,7 @@ export function Info({ record }: { record: IRecord }) {
 
     if (importProductDetail) {
       importProductDetail.data.products.forEach((product) => {
-        product.productBatchHistories.forEach((batch) => {
-          total += batch.quantity;
-        });
+        total += product.quantity;
       });
     }
 
@@ -145,6 +149,11 @@ export function Info({ record }: { record: IRecord }) {
   const handlePrintInvoice = useReactToPrint({
     content: () => invoiceComponentRef.current,
   });
+
+  const handleRouterReturn = () => {
+    setReturnProducts([])
+    router.push(`/products/return/coupon/?id=${record.id}`)
+  }
 
   return (
     <div className="gap-12 ">
@@ -228,7 +237,7 @@ export function Info({ record }: { record: IRecord }) {
               {record.product?.isBatchExpireControl && (
                 <div className="bg-[#FFF3E6] px-6 py-2 ">
                   <div className="flex items-center gap-x-3">
-                    {record?.productBatchHistories?.map(
+                    {record?.batches?.map(
                       ({ batch, quantity }) => (
                         <>
                           {batch && (
@@ -323,20 +332,29 @@ export function Info({ record }: { record: IRecord }) {
           In phiếu
         </CustomButton>
 
-        <CustomButton
-          outline={true}
-          prefixIcon={<Image src={CloseIcon} alt="" />}
-          onClick={() => setOpenCancelPrintProduct(true)}
-        >
-          Hủy bỏ
-        </CustomButton>
-        <CustomButton
-          type="success"
-          prefixIcon={<Image src={PlusIcon} alt="" />}
-          onClick={() => router.push(`/products/return/coupon/?id=${record.id}`)}
-        >
-          Trả hàng nhập
-        </CustomButton>
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.import_product, RoleAction.delete) && (
+            <CustomButton
+              outline={true}
+              prefixIcon={<Image src={CloseIcon} alt="" />}
+              onClick={() => setOpenCancelPrintProduct(true)}
+            >
+              Hủy bỏ
+            </CustomButton>
+          )
+        }
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.return_product, RoleAction.create) && (
+            <CustomButton
+              type="success"
+              prefixIcon={<Image src={PlusIcon} alt="" />}
+              onClick={handleRouterReturn}
+            >
+              Trả hàng nhập
+            </CustomButton>
+          )
+        }
+
       </div>
 
       <CancelProductModal

@@ -81,5 +81,20 @@ export const productMoveState = atom<IImportProductLocal[]>({
 export const productReveiveState = atom<IImportProductLocal[]>({
   key: "PRODUCT_RECEIVE_STATE",
   default: [],
-  effects: [localStorageEffect("PRODUCT_MOVE_STATE")],
+  effects: [localStorageEffect("PRODUCT_RECEIVE_STATE")],
+});
+export const orderDiscountSelected = atom<any[]>({
+  key: "ORDER_DISCOUNT_SELECTED",
+  default: [],
+  effects: [localStorageEffect("ORDER_DISCOUNT_SELECTED")],
+});
+export const productDiscountSelected = atom<any[]>({
+  key: "PRODUCT_DISCOUNT_SELECTED",
+  default: [],
+  effects: [localStorageEffect("PRODUCT_DISCOUNT_SELECTED")],
+});
+export const discountTypeState = atom<string>({
+  key: "DISCOUNT_TYPE_STATE",
+  default: "",
+  effects: [localStorageEffect("DISCOUNT_TYPE_STATE")],
 });

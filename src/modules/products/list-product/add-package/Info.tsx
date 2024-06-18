@@ -29,6 +29,7 @@ import { AddPositionModal } from '../components/AddPositionModal';
 import { CustomAutocomplete } from '@/components/CustomAutocomplete';
 import { getMedicineCategory } from '@/api/medicine-category.service';
 import { LoadingIcon } from '@/components/LoadingIcon';
+import { getPointStatus } from '@/api/point.service';
 
 const Info = ({
   useForm,
@@ -42,6 +43,7 @@ const Info = ({
 
 }: any) => {
   const { getValues, setValue, errors } = useForm;
+  const [isPoint, setIsPoint] = useState(false);
 
   const [listUnit, setListUnit] = useState<any>(
     defaultUnit(getValues('productUnits'))
@@ -90,6 +92,17 @@ const Info = ({
   const { data: countries } = useQuery(['COUNTRIES', countryKeyword], () =>
     getCountries({ page: 1, limit: 20, keyword: countryKeyword })
   );
+
+  const { data: pointStatus, isLoading: isLoadingPointDetail } = useQuery(
+    ['POINT_STATUS'],
+    () => getPointStatus(),
+  );
+
+  useEffect(() => {
+    if (pointStatus?.data?.type === "product") {
+      setIsPoint(true);
+    }
+  }, [pointStatus?.data?.type]);
 
   const getCategoryKeyword = useCallback(
     debounce((keyword) => {
@@ -409,6 +422,25 @@ const Info = ({
             <InputError error={errors?.expiryPeriod?.message} />
           </div>
         )}
+        {
+          isPoint && (
+            <div>
+              <Label infoText="" label="Điểm" />
+              <CustomInput
+                placeholder="Nhập điểm"
+                wrapClassName="grow"
+                className="h-11"
+                onChange={(e) =>
+                  setValue('point', e, {
+                    shouldValidate: true,
+                  })
+                }
+                value={getValues('point')}
+                type="number"
+              />
+            </div>
+          )
+        }
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-x-[42px]">
@@ -437,17 +469,20 @@ const Info = ({
             <div>Lô, hạn sử dụng</div>
             <Image src={InfoIcon} alt="" />
           </div>
-          <div className="mt-2 flex gap-x-2">
-            <CustomCheckbox
-              onChange={(e) =>
-                setValue('isLoyaltyPoint', e.target.checked, {
-                  shouldValidate: true,
-                })
-              }
-              checked={getValues('isLoyaltyPoint')}
-            />
-            <div>Tích điểm</div>
-          </div>
+          {
+            pointStatus?.data?.type === "product" && (
+              <div className="mt-2 flex gap-x-2">
+                <CustomCheckbox
+                  onChange={(e) =>
+                    setIsPoint(e.target.checked)
+                  }
+                  checked={isPoint}
+                />
+                <div>Tích điểm</div>
+                <Image src={InfoIcon} alt="" />
+              </div>
+            )
+          }
           <div className="mt-2 flex gap-x-2">
             <CustomCheckbox
               onChange={(e) =>

@@ -9,6 +9,12 @@ import { BestSellerProductChart } from './BestSellerProductChart';
 import { RevenueChart } from './RevenueChart';
 import { useRecoilValue } from 'recoil';
 import { branchState } from '@/recoil/state';
+import { useQuery } from '@tanstack/react-query';
+import { getSaleReport } from '@/api/report.service';
+import dayjs from 'dayjs';
+import { useState } from 'react';
+import { getOrder } from '@/api/order.service';
+import { formatMoney, formatNumber } from '@/helpers';
 
 export enum FilterDateType {
   CURRENT_MONTH = 1,
@@ -21,8 +27,24 @@ export enum ProductViewType {
 }
 
 export function Home() {
-
   const branchId = useRecoilValue(branchState);
+
+  const [formFilter, setFormFilter] = useState({
+    page: 1,
+    limit: 20,
+    keyword: '',
+    dateRange: JSON.stringify({
+      startDate: dayjs().format('YYYY-MM-DD'),
+      endDate: dayjs().format('YYYY-MM-DD'),
+    }),
+    status: undefined,
+    branchId,
+  });
+
+  const { data: orders, isLoading } = useQuery(
+    ['ORDER_LIST', JSON.stringify(formFilter), branchId],
+    () => getOrder({ ...formFilter, branchId })
+  );
 
   return (
     <div className="grid grid-cols-4 gap-x-6 py-6">
@@ -39,8 +61,8 @@ export function Home() {
               </div>
 
               <div>
-                <div className=" text-xs">0 Hóa đơn</div>
-                <div className="text-[22px] text-[#56BD79]">0</div>
+                <div className=" text-xs">{formatNumber(orders?.data?.totalItem)} Hóa đơn</div>
+                <div className="text-[22px] text-[#56BD79]">{formatMoney(+orders?.data?.totalPrice)}</div>
                 <div className="text-xs text-[#525D6A]">Doanh thu</div>
               </div>
             </div>

@@ -43,8 +43,9 @@ const History = ({ record }: any) => {
     },
     {
       title: 'Người tạo',
-      dataIndex: 'createdBy',
-      key: 'createdBy',
+      dataIndex: 'fullnameCreator',
+      key: 'fullnameCreator',
+      render: (value) => value?.fullName,
     },
     {
       title: 'Giá trị phiếu',

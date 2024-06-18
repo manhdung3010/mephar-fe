@@ -6,7 +6,6 @@ import Image from 'next/image';
 import { useState } from 'react';
 
 import { getEmployee } from '@/api/employee.service';
-import { getProvider } from '@/api/provider.service';
 import ArrowDownGray from '@/assets/arrowDownGray.svg';
 import DateIcon from '@/assets/dateIcon.svg';
 import SearchIcon from '@/assets/searchIcon.svg';
@@ -48,7 +47,7 @@ const Search = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void,
             placeholder={['Từ ngày', 'Đến ngày']}
             suffixIcon={<Image src={DateIcon} />}
             className="grow"
-            format="DD/MM/YYYY"
+            format={{ format: 'DD/MM/YYYY', type: 'mask' }}
             onChange={(value) => {
               if (value) {
                 setFormFilter((preValue) => ({

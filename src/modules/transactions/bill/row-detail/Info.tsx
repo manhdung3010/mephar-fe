@@ -1,26 +1,28 @@
 import { Input } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import Image from 'next/image';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { message } from 'antd';
 import CloseIcon from '@/assets/closeIcon.svg';
 import PrintOrderIcon from '@/assets/printOrder.svg';
-import SaveIcon from '@/assets/saveIcon.svg';
 import { CustomButton } from '@/components/CustomButton';
 import CustomTable from '@/components/CustomTable';
 import { EGenderLabel, EOrderStatusLabel } from '@/enums';
-import { formatMoney, formatNumber } from '@/helpers';
+import { formatDate, formatMoney, formatNumber, hasPermission } from '@/helpers';
+import { message } from 'antd';
 
-import { useReactToPrint } from 'react-to-print';
-import SaleInvoicePrint from '@/modules/sales/SaleInvoicePrint';
-import styles from "./invoicePrint.module.css";
-import CancelBillModal from './CancelBillModal';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteOrder } from '@/api/order.service';
-import { IOrder } from '../../order/type';
 import PlusIconWhite from '@/assets/PlusIconWhite.svg';
+import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
+import { profileState } from '@/recoil/state';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useReactToPrint } from 'react-to-print';
+import { useRecoilValue } from 'recoil';
+import { IOrder } from '../../order/type';
+import CancelBillModal from './CancelBillModal';
 import InvoicePrint from './InvoicePrint';
+import styles from "./invoicePrint.module.css";
+import { useRouter } from 'next/router';
 
 const { TextArea } = Input;
 
@@ -33,6 +35,8 @@ interface IRecord {
   price: number;
   totalPrice: number;
   refund: number;
+  unitName: string;
+  batches?: any[];
 }
 
 export function Info({ record }: { record: IOrder }) {
@@ -40,13 +44,15 @@ export function Info({ record }: { record: IOrder }) {
     Record<string, boolean>
   >({});
   const [openCancelBill, setOpenCancelBill] = useState(false)
+  const profile = useRecoilValue(profileState);
 
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const { mutate: mutateCancelImportProduct, isLoading: isLoadingDeleteProduct } =
     useMutation(() => deleteOrder(Number(record.id)), {
       onSuccess: async () => {
-        await queryClient.invalidateQueries(['ORDERS_PRODUCT']);
+        await queryClient.invalidateQueries(['ORDER_LIST']);
         setOpenCancelBill(false);
       },
       onError: (err: any) => {
@@ -58,6 +64,17 @@ export function Info({ record }: { record: IOrder }) {
 
   const invoiceComponentRef = useRef(null);
 
+  useEffect(() => {
+    if (record?.products?.length) {
+      const expandedRowKeysClone = { ...expandedRowKeys };
+      record?.products?.forEach((_, index) => {
+        expandedRowKeysClone[index] = true;
+      });
+
+      setExpandedRowKeys(expandedRowKeysClone);
+    }
+  }, [record?.products]);
+
   const columns: ColumnsType<IRecord> = [
     {
       title: 'Mã hàng',
@@ -67,14 +84,14 @@ export function Info({ record }: { record: IOrder }) {
         <span
           className="cursor-pointer text-[#0070F4]"
           onClick={() => {
-            const currentState = expandedRowKeys[`${index}`];
-            const temp = { ...expandedRowKeys };
-            if (currentState) {
-              delete temp[`${index}`];
-            } else {
-              temp[`${index}`] = true;
-            }
-            setExpandedRowKeys({ ...temp });
+            // const currentState = expandedRowKeys[`${index}`];
+            // const temp = { ...expandedRowKeys };
+            // if (currentState) {
+            //   delete temp[`${index}`];
+            // } else {
+            //   temp[`${index}`] = true;
+            // }
+            // setExpandedRowKeys({ ...temp });
           }}
         >
           {value}
@@ -85,6 +102,11 @@ export function Info({ record }: { record: IOrder }) {
       title: 'Tên hàng',
       dataIndex: 'name',
       key: 'name',
+    },
+    {
+      title: 'Đơn vị',
+      dataIndex: 'unitName',
+      key: 'unitName',
     },
     {
       title: 'Số lượng',
@@ -120,6 +142,7 @@ export function Info({ record }: { record: IOrder }) {
     });
     return formatMoney(total);
   }
+
 
   return (
     <div className="gap-12 ">
@@ -164,7 +187,7 @@ export function Info({ record }: { record: IOrder }) {
 
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Người tạo:</div>
-            <div className="text-black-main">{record?.user?.fullName}</div>
+            <div className="text-black-main">{profile?.fullName}</div>
           </div>
 
           <div className="grid grid-cols-2 gap-5">
@@ -274,12 +297,15 @@ export function Info({ record }: { record: IOrder }) {
       )}
 
       <CustomTable
-        dataSource={record.products?.map((item) => ({
+        dataSource={record.products?.map((item, index) => ({
+          ...item,
           code: item.product.code,
           name: item.product.name,
           quantity: item.quantity,
           discount: item.discount,
           price: item.price,
+          unitName: item.productUnit?.unitName,
+          key: index,
         }))}
         columns={columns}
         pagination={false}
@@ -287,19 +313,21 @@ export function Info({ record }: { record: IOrder }) {
         expandable={{
           defaultExpandAllRows: true,
           // eslint-disable-next-line @typescript-eslint/no-shadow
-          expandedRowRender: (record: IRecord) => (
-            <div className="flex items-center bg-[#FFF3E6] px-6 py-2">
-              <div className="mr-3 cursor-pointer font-medium text-[#0070F4]">
-                Chọn lô
-              </div>
-              <div className="flex items-center rounded bg-red-main py-1 px-2 text-white">
-                <span className="mr-2">Pherelive SL1 - 26/07/2023</span>{' '}
-                <Image className=" cursor-pointer" src={CloseIcon} />
-              </div>
+          expandedRowRender: (record: IRecord) => record?.batches && record?.batches?.length > 0 && (
+            <div className="flex items-center bg-[#FFF3E6] px-6 py-2 gap-2">
+              {
+                record?.batches?.map((b, index) => (
+                  <div className="flex items-center rounded bg-red-main py-1 px-2 text-white">
+                    <span className="mr-2">{b.batch?.name} - {formatDate(b?.batch?.expiryDate)} - SL: {formatNumber(b?.quantity)} </span>
+                  </div>
+                ))
+              }
             </div>
           ),
           expandIcon: () => <></>,
-          expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key),
+          expandedRowKeys: Object.keys(expandedRowKeys).map(
+            (key) => +key
+          ),
         }}
       />
 
@@ -338,19 +366,28 @@ export function Info({ record }: { record: IOrder }) {
         >
           In phiếu
         </CustomButton>
-        <CustomButton
-          outline={true}
-          prefixIcon={<Image src={CloseIcon} alt="" />}
-          onClick={() => setOpenCancelBill(true)}
-        >
-          Hủy bỏ
-        </CustomButton>
-        {/* <CustomButton
-          type="success"
-          prefixIcon={<Image src={PlusIconWhite} alt="" />}
-        >
-          Trả hàng
-        </CustomButton> */}
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.bill, RoleAction.delete) && (
+            <CustomButton
+              outline={true}
+              prefixIcon={<Image src={CloseIcon} alt="" />}
+              onClick={() => setOpenCancelBill(true)}
+            >
+              Hủy bỏ
+            </CustomButton>
+          )
+        }
+        {
+          record?.canReturn && (
+            <CustomButton
+              type="success"
+              prefixIcon={<Image src={PlusIconWhite} alt="" />}
+              onClick={() => router.push(`/sales?id=${record.id}`)}
+            >
+              Trả hàng
+            </CustomButton>
+          )
+        }
       </div>
 
       <div ref={invoiceComponentRef} className={styles.invoicePrint}>

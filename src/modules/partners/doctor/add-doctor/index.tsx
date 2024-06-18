@@ -26,13 +26,16 @@ import { CustomSelect } from "@/components/CustomSelect";
 import { CustomUpload } from "@/components/CustomUpload";
 import InputError from "@/components/InputError";
 import { EDoctorStatus, EGender } from "@/enums";
-import { getImage } from "@/helpers";
+import { getImage, hasPermission } from "@/helpers";
 import { useAddress } from "@/hooks/useAddress";
 
 import { AddLevelModal } from "./AddLevelModal";
 import { AddMajorModal } from "./AddMajorModal";
 import { AddWorkPlaceModal } from "./AddWorkPlaceModal";
 import { schema } from "./schema";
+import { useRecoilValue } from "recoil";
+import { profileState } from "@/recoil/state";
+import { RoleAction, RoleModel } from "@/modules/settings/role/role.enum";
 
 export function AddDoctor({ doctorId }: { doctorId?: string }) {
   const queryClient = useQueryClient();
@@ -104,6 +107,16 @@ export function AddDoctor({ doctorId }: { doctorId?: string }) {
   const onSubmit = () => {
     mutateCreateDoctor();
   };
+
+  const profile = useRecoilValue(profileState);
+  useEffect(() => {
+    if (profile?.role?.permissions) {
+      if (!hasPermission(profile?.role?.permissions, RoleModel.doctor, RoleAction.create)) {
+        message.error('Bạn không có quyền truy cập vào trang này');
+        router.push('/partners/doctor');
+      }
+    }
+  }, [profile?.role?.permissions]);
 
   useEffect(() => {
     if (doctorDetail?.data) {

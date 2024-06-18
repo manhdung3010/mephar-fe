@@ -27,13 +27,14 @@ const Search = () => {
             placeholder="Tìm kiếm theo mã kiểm kho"
             prefixIcon={<Image src={SearchIcon} alt="" />}
             className=""
-            onChange={() => {}}
+            onChange={() => { }}
           />
         </div>
 
         <div className="flex rounded-l-[3px] border border-[#D3D5D7]">
           <RangePicker
             bordered={false}
+            format={{ format: 'DD/MM/YYYY', type: 'mask' }}
             placeholder={['Từ ngày', 'Đến ngày']}
             suffixIcon={<Image src={DateIcon} />}
           />

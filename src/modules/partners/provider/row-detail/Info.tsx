@@ -11,12 +11,17 @@ import { CustomButton } from '@/components/CustomButton';
 import DeleteModal from '@/components/CustomModal/ModalDeleteItem';
 
 import type { IRecord } from '..';
+import { hasPermission } from '@/helpers';
+import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
+import { useRecoilValue } from 'recoil';
+import { profileState } from '@/recoil/state';
 
 const { TextArea } = Input;
 
 export function Info({ record }: { record: IRecord }) {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const profile = useRecoilValue(profileState);
 
   const [deletedId, setDeletedId] = useState<number>();
 
@@ -110,24 +115,32 @@ export function Info({ record }: { record: IRecord }) {
       </div>
 
       <div className="flex justify-end gap-4">
-        <CustomButton
-          type="danger"
-          outline={true}
-          prefixIcon={<Image src={DeleteIcon} alt="" />}
-          onClick={() => setDeletedId(record.id)}
-        >
-          Xóa
-        </CustomButton>
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.provider, RoleAction.delete) && (
+            <CustomButton
+              type="danger"
+              outline={true}
+              prefixIcon={<Image src={DeleteIcon} alt="" />}
+              onClick={() => setDeletedId(record.id)}
+            >
+              Xóa
+            </CustomButton>
+          )
+        }
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.provider, RoleAction.update) && (
+            <CustomButton
+              type="success"
+              prefixIcon={<Image src={EditIcon} alt="" />}
+              onClick={() =>
+                router.push(`/partners/provider/add-provider?id=${record.id}`)
+              }
+            >
+              Cập nhật
+            </CustomButton>
+          )
+        }
 
-        <CustomButton
-          type="success"
-          prefixIcon={<Image src={EditIcon} alt="" />}
-          onClick={() =>
-            router.push(`/partners/provider/add-provider?id=${record.id}`)
-          }
-        >
-          Cập nhật
-        </CustomButton>
       </div>
 
       <DeleteModal

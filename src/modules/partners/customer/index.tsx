@@ -18,13 +18,15 @@ import DeleteModal from '@/components/CustomModal/ModalDeleteItem';
 import CustomPagination from '@/components/CustomPagination';
 import CustomTable from '@/components/CustomTable';
 import { ECustomerStatus, ECustomerStatusLabel } from '@/enums';
-import { formatMoney } from '@/helpers';
+import { formatMoney, hasPermission } from '@/helpers';
 
 import RowDetail from './row-detail';
 import Search from './Search';
 import type { ICustomer } from './type';
 import { useRecoilValue } from 'recoil';
-import { branchState } from '@/recoil/state';
+import { branchState, profileState } from '@/recoil/state';
+import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
+import Filter from './Filter';
 
 interface IRecord {
   key: number;
@@ -44,15 +46,32 @@ export function Customer() {
   const queryClient = useQueryClient();
   const router = useRouter();
   const branchId = useRecoilValue(branchState);
+  const profile = useRecoilValue(profileState);
 
   const [deletedId, setDeletedId] = useState<number>();
   const [formFilter, setFormFilter] = useState({
     page: 1,
     limit: 20,
     keyword: '',
+    pointStart: null,
+    pointEnd: null,
+    createdBy: null,
+    createdAt: null,
+    [`birthdayRange[birthdayStart]`]: null,
+    [`birthdayRange[birthdayEnd]`]: null,
+    groupCustomerId: null,
+    gender: null,
+    status: "active",
+    [`totalDebtRange[totalDebtStart]`]: null,
+    [`totalDebtRange[totalDebtEnd]`]: null,
+    [`totalOrderPayRange[totalOrderPayStart]`]: null,
+    [`totalOrderPayRange[totalOrderPayEnd]`]: null,
+    [`pointRange[pointStart]`]: null,
+    [`pointRange[pointEnd]`]: null,
+    branchId: null,
   });
   const { data: customers, isLoading } = useQuery(
-    ['CUSTOMER_LIST', formFilter.page, formFilter.limit, formFilter.keyword],
+    ['CUSTOMER_LIST', formFilter],
     () => getCustomer(formFilter)
   );
 
@@ -103,13 +122,13 @@ export function Customer() {
       title: 'Nợ hiện tại',
       dataIndex: 'totalDebt',
       key: 'totalDebt',
-      render: (value) => formatMoney(value),
+      render: (value) => formatMoney(+value),
     },
     {
       title: 'Tổng bán',
       dataIndex: 'totalOrderPay',
       key: 'totalOrderPay',
-      render: (value) => formatMoney(value),
+      render: (value) => formatMoney(+value),
     },
     // {
     //   title: 'Điểm hiện tại',
@@ -152,17 +171,27 @@ export function Customer() {
       key: 'action',
       render: (_, { id }) => (
         <div className="flex gap-3">
-          <div className=" cursor-pointer" onClick={() => setDeletedId(id)}>
-            <Image src={DeleteIcon} />
-          </div>
-          <div
-            className=" cursor-pointer"
-            onClick={() =>
-              router.push(`/partners/customer/add-customer?id=${id}`)
-            }
-          >
-            <Image src={EditIcon} />
-          </div>
+          {
+            hasPermission(profile?.role?.permissions, RoleModel.customer, RoleAction.delete) && (
+              <div className=" cursor-pointer" onClick={() => setDeletedId(id)}>
+                <Image src={DeleteIcon} />
+              </div>
+            )
+          }
+
+          {
+            hasPermission(profile?.role?.permissions, RoleModel.customer, RoleAction.update) && (
+              <div
+                className=" cursor-pointer"
+                onClick={() =>
+                  router.push(`/partners/customer/add-customer?id=${id}`)
+                }
+              >
+                <Image src={EditIcon} />
+              </div>
+            )
+          }
+
         </div>
       ),
     },
@@ -184,7 +213,7 @@ export function Customer() {
   };
 
   return (
-    <div className="mb-2">
+    <div className="mb-2 ">
       <div className="my-3 flex items-center justify-end gap-4">
         <div className="flex items-center gap-2">
           <Image src={ExportIcon} /> Xuất file
@@ -196,69 +225,76 @@ export function Customer() {
           <Image src={ImportIcon} /> Nhập file
         </div>
 
-        <CustomButton
-          prefixIcon={<Image src={PlusIcon} />}
-          onClick={() => router.push('/partners/customer/add-customer')}
-        >
-          Thêm khách hàng
-        </CustomButton>
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.customer, RoleAction.create) && (
+            <CustomButton
+              prefixIcon={<Image src={PlusIcon} />}
+              onClick={() => router.push('/partners/customer/add-customer')}
+            >
+              Thêm khách hàng
+            </CustomButton>
+          )
+        }
+
       </div>
 
-      <Search
-        onChange={debounce((value) => {
-          setFormFilter((preValue) => ({
-            ...preValue,
-            keyword: value,
-          }));
-        }, 300)}
-      />
+      <div className='grid grid-cols-12'>
+        <div className='2xl:col-span-2 col-span-3'>
+          <Filter setFormFilter={setFormFilter} formFilter={formFilter} />
+        </div>
+        <div className='2xl:col-span-10 col-span-9'>
+          <div className='sticky top-0 rounded-lg overflow-hidden'>
+            <Search setFormFilter={setFormFilter} formFilter={formFilter} />
 
-      <CustomTable
-        rowSelection={{
-          type: 'checkbox',
-        }}
-        dataSource={customers?.data?.items?.map((item, index) => ({
-          ...item,
-          key: index + 1,
-        }))}
-        columns={columns}
-        loading={isLoading}
-        onRow={(record, rowIndex) => {
-          return {
-            onClick: event => {
-              // Check if the click came from the action column
-              if ((event.target as Element).closest('.ant-table-cell:last-child')) {
-                return;
-              }
+            <CustomTable
+              rowSelection={{
+                type: 'checkbox',
+              }}
+              dataSource={customers?.data?.items?.map((item, index) => ({
+                ...item,
+                key: index + 1,
+              }))}
+              columns={columns}
+              loading={isLoading}
+              onRow={(record, rowIndex) => {
+                return {
+                  onClick: event => {
+                    // Check if the click came from the action column
+                    if ((event.target as Element).closest('.ant-table-cell:last-child')) {
+                      return;
+                    }
 
-              // Toggle expandedRowKeys state here
-              if (expandedRowKeys[record.key - 1]) {
-                const { [record.key - 1]: value, ...remainingKeys } = expandedRowKeys;
-                setExpandedRowKeys(remainingKeys);
-              } else {
-                setExpandedRowKeys({ ...expandedRowKeys, [record.key - 1]: true });
-              }
-            }
-          };
-        }}
-        expandable={{
-          // eslint-disable-next-line @typescript-eslint/no-shadow
-          expandedRowRender: (record: ICustomer) => (
-            <RowDetail record={record} branchId={branchId} />
-          ),
-          expandIcon: () => <></>,
-          expandedRowKeys: Object.keys(expandedRowKeys).map(
-            (key) => Number(key) + 1
-          ),
-        }}
-      />
-      <CustomPagination
-        page={formFilter.page}
-        pageSize={formFilter.limit}
-        setPage={(value) => setFormFilter({ ...formFilter, page: value })}
-        setPerPage={(value) => setFormFilter({ ...formFilter, limit: value })}
-        total={customers?.data?.totalItem}
-      />
+                    // Toggle expandedRowKeys state here
+                    if (expandedRowKeys[record.key - 1]) {
+                      const { [record.key - 1]: value, ...remainingKeys } = expandedRowKeys;
+                      setExpandedRowKeys(remainingKeys);
+                    } else {
+                      setExpandedRowKeys({ ...expandedRowKeys, [record.key - 1]: true });
+                    }
+                  }
+                };
+              }}
+              expandable={{
+                // eslint-disable-next-line @typescript-eslint/no-shadow
+                expandedRowRender: (record: ICustomer) => (
+                  <RowDetail record={record} branchId={branchId} />
+                ),
+                expandIcon: () => <></>,
+                expandedRowKeys: Object.keys(expandedRowKeys).map(
+                  (key) => Number(key) + 1
+                ),
+              }}
+            />
+            <CustomPagination
+              page={formFilter.page}
+              pageSize={formFilter.limit}
+              setPage={(value) => setFormFilter({ ...formFilter, page: value })}
+              setPerPage={(value) => setFormFilter({ ...formFilter, limit: value })}
+              total={customers?.data?.totalItem}
+            />
+          </div>
+        </div>
+      </div>
 
       <DeleteModal
         isOpen={!!deletedId}

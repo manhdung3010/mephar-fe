@@ -3,31 +3,35 @@ import Image from 'next/image';
 
 import DeleteIcon from '@/assets/deleteRed.svg';
 import { CustomButton } from '@/components/CustomButton';
-import { formatDateTime } from '@/helpers';
+import { formatDate, formatDateTime, hasPermission } from '@/helpers';
 import cx from 'classnames';
 import { EDiscountStatus, EDiscountStatusLabel } from '@/enums';
-
-const { TextArea } = Input;
+import { useRecoilValue } from 'recoil';
+import { profileState } from '@/recoil/state';
+import { RoleAction, RoleModel } from '../../role/role.enum';
+import CopyBlueIcon from '@/assets/copyBlue.svg';
+import { useRouter } from 'next/router';
 
 export function Info({ record }: { record: any }) {
-  console.log(record, 'record')
+  const router = useRouter();
+  const profile = useRecoilValue(profileState);
   return (
     <div className="gap-12 ">
       <div className="mb-4 grid grid-cols-2 gap-5">
         <div className="grid grid-cols-3 gap-5">
           <div className="col-span-1 text-gray-main">Mã chương trình:</div>
-          <div className="text-black-main">{record?.id}</div>
+          <div className="text-black-main">{record?.code}</div>
         </div>
 
         <div className="grid grid-cols-3 gap-5">
           <div className="col-span-1 text-gray-main">Tên chương trình:</div>
-          <div className="text-black-main">{record?.title}</div>
+          <div className="text-black-main">{record?.name}</div>
         </div>
 
         <div className="grid grid-cols-3 gap-5">
           <div className="col-span-1 text-gray-main">Thời gian:</div>
           <div className="text-black-main">
-            {formatDateTime(record?.startTime) + " - " + formatDateTime(record?.endTime)}
+            {formatDate(record?.discountTime[0]?.dateFrom) + " - " + formatDate(record?.discountTime[0]?.dateTo)}
           </div>
         </div>
 
@@ -47,42 +51,59 @@ export function Info({ record }: { record: any }) {
 
         <div className="grid grid-cols-3 gap-5">
           <div className="col-span-1 text-gray-main">Theo tháng:</div>
-          <div className="text-black-main">4</div>
+          <div className="text-black-main">{record?.discountTime[0].byMonth?.split("//").filter(element => element !== "").join()}</div>
         </div>
 
         <div className="grid grid-cols-3 gap-5">
           <div className="col-span-1 text-gray-main">Ghi chú:</div>
-          <div className="text-black-main">{record?.description}</div>
+          <div className="text-black-main">{record?.note}</div>
         </div>
 
         <div className="grid grid-cols-3 gap-5">
           <div className="col-span-1 text-gray-main">Theo ngày:</div>
-          <div className="text-black-main">2</div>
+          <div className="text-black-main">{record?.discountTime[0].byDay?.split("//").filter(element => element !== "").join()}</div>
         </div>
 
         <div className="grid grid-cols-3 gap-5"></div>
 
         <div className="grid grid-cols-3 gap-5">
           <div className="col-span-1 text-gray-main">Theo thứ:</div>
-          <div className="text-black-main">Chủ nhật, Thứ 4</div>
+          <div className="text-black-main">{record?.discountTime[0].byWeekDay?.split("//").filter(element => element !== "").join()}</div>
         </div>
 
         <div className="grid grid-cols-3 gap-5"></div>
 
         <div className="grid grid-cols-3 gap-5">
           <div className="col-span-1 text-gray-main">Theo giờ:</div>
-          <div className="text-black-main">4</div>
+          <div className="text-black-main">{record?.discountTime[0].byHour?.split("//").filter(element => element !== "").join()}</div>
         </div>
       </div>
 
-      <div className="flex justify-end">
-        <CustomButton
-          type="danger"
-          outline={true}
-          prefixIcon={<Image src={DeleteIcon} alt="" />}
-        >
-          Xóa
-        </CustomButton>
+      <div className="flex justify-end gap-2">
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.discount, RoleAction.create) && (
+            <CustomButton
+              type="primary"
+              outline={true}
+              prefixIcon={<Image src={CopyBlueIcon} alt="" />}
+              onClick={() => router.push(`/settings/discount/add-discount?id=${record?.id}&copy=true`)}
+            >
+              Sao chép
+            </CustomButton>
+          )
+        }
+        {
+
+          hasPermission(profile?.role?.permissions, RoleModel.discount, RoleAction.delete) && (
+            <CustomButton
+              type="danger"
+              outline={true}
+              prefixIcon={<Image src={DeleteIcon} alt="" />}
+            >
+              Xóa
+            </CustomButton>
+          )
+        }
       </div>
     </div>
   );

@@ -8,65 +8,114 @@ import Label from '@/components/CustomLabel';
 import { CustomRadio } from '@/components/CustomRadio';
 import { CustomSelect } from '@/components/CustomSelect';
 
-import { BillDiscount } from './BillDiscount';
-import { BillDiscountGiveGoods } from './BillDiscountGiveGoods';
-import { GoodsDiscount } from './GoodsDiscount';
-import { GoodsDiscountGiveGoods } from './GoodsDiscountGiveGoods';
+import InputError from '@/components/InputError';
+import { BillDiscount } from './bill-target/BillDiscount';
+import { BillDiscountProduct } from './bill-target/BillDiscountProduct';
+import { BillGiftPoint } from './bill-target/BillGiftPoint';
+import { BillGiftProduct } from './bill-target/BillGiftProduct';
+import { ProductDiscountProduct } from './product-target/ProductDiscountProduct';
+import { ProductGiftProduct } from './product-target/ProductGiftProduct';
+import { ProductGiftPoint } from './product-target/ProductGiftPoint';
+import { ProductQuantity } from './product-target/ProductQuantity';
 
 export enum EDiscountType {
-  BILL = 'BILL',
-  GOODS = 'GOODS',
+  ORDER = 'ORDER',
+  PRODUCT = 'PRODUCT',
 }
 
 export enum EDiscountTypeLabel {
-  BILL = 'Hóa đơn',
-  GOODS = 'Hàng hóa',
+  ORDER = 'Hóa đơn',
+  PRODUCT = 'Hàng hóa',
 }
 
 export enum EDiscountBillMethod {
-  GIVE_GOODS = 'GIVE_GOODS',
-  DISCOUNT_BILL = 'DISCOUNT_BILL',
+  ORDER_PRICE = 'ORDER_PRICE',
+  PRODUCT_PRICE = 'PRODUCT_PRICE',
+  GIFT = 'GIFT',
+  LOYALTY = 'LOYALTY',
 }
 
 export enum EDiscountBillMethodLabel {
-  GIVE_GOODS = 'Tặng hàng',
-  DISCOUNT_BILL = 'Giảm giá hóa đơn',
+  GIFT = 'Tặng hàng',
+  ORDER_PRICE = 'Giảm giá hóa đơn',
+  PRODUCT_PRICE = 'Giảm giá hàng',
+  LOYALTY = 'Tặng điểm',
 }
 
 export enum EDiscountGoodsMethod {
-  DISCOUNT_GOODS = 'DISCOUNT_GOODS',
-  GIVE_GOODS = 'GIVE_GOODS',
+  PRODUCT_PRICE = 'PRODUCT_PRICE',
+  GIFT = 'GIFT',
+  LOYALTY = 'LOYALTY',
+  PRICE_BY_BUY_NUMBER = 'PRICE_BY_BUY_NUMBER'
 }
 
 export enum EDiscountGoodsMethodLabel {
-  DISCOUNT_GOODS = 'Mua hàng giảm giá hàng',
-  GIVE_GOODS = 'Mua hàng tặng hàng',
+  PRODUCT_PRICE = 'Mua hàng giảm giá hàng',
+  GIFT = 'Mua hàng tặng hàng',
+  LOYALTY = 'Mua hàng tặng điểm',
+  PRICE_BY_BUY_NUMBER = 'Giảm giá theo số lượng mua'
 }
 
 export enum EDiscountUnit {
-  MONEY = 'MONEY',
+  MONEY = 'AMOUNT',
   PERCENT = 'PERCENT',
 }
 
-const Info = () => {
-  const [discountType, setDiscountType] = useState(EDiscountType.BILL);
-  const [discountUnit, setDiscountUnit] = useState(EDiscountUnit.MONEY);
+export const orderOptionData = [
+  {
+    value: EDiscountBillMethod.ORDER_PRICE,
+    label: EDiscountBillMethodLabel.ORDER_PRICE,
+  },
+  {
+    value: EDiscountBillMethod.PRODUCT_PRICE,
+    label: EDiscountBillMethodLabel.PRODUCT_PRICE,
+  },
+  {
+    value: EDiscountBillMethod.GIFT,
+    label: EDiscountBillMethodLabel.GIFT,
+  },
+  {
+    value: EDiscountBillMethod.LOYALTY,
+    label: EDiscountBillMethodLabel.LOYALTY,
+  }
+]
 
-  const [discountMethod, setDiscountMethod] = useState<
-    EDiscountBillMethod | EDiscountGoodsMethod
-  >(EDiscountBillMethod.DISCOUNT_BILL);
+export const productOptionData = [
+  {
+    value: EDiscountGoodsMethod.PRODUCT_PRICE,
+    label: EDiscountGoodsMethodLabel.PRODUCT_PRICE,
+  },
+  {
+    value: EDiscountGoodsMethod.GIFT,
+    label: EDiscountGoodsMethodLabel.GIFT,
+  },
+  {
+    value: EDiscountGoodsMethod.LOYALTY,
+    label: EDiscountGoodsMethodLabel.LOYALTY,
+  },
+  {
+    value: EDiscountGoodsMethod.PRICE_BY_BUY_NUMBER,
+    label: EDiscountGoodsMethodLabel.PRICE_BY_BUY_NUMBER,
+  }
+]
+
+const Info = ({ setValue, getValues, errors }: any) => {
   return (
     <div className="mt-5">
       <h2 className="mb-4 text-xl font-medium text-[#999]">THÔNG TIN</h2>
 
       <div className="mb-5 grid grid-cols-2 gap-x-[42px] gap-y-5">
         <div>
-          <Label infoText="" label="Mã chương trình" required />
+          <Label infoText="" label="Mã chương trình" />
           <CustomInput
             placeholder="Mã tự động"
             className="h-11"
-            onChange={() => {}}
+            onChange={(value) =>
+              setValue("code", value, { shouldValidate: true })
+            }
+            value={getValues("code")}
           />
+          <InputError error={errors.code?.message} />
         </div>
 
         <div>
@@ -74,9 +123,11 @@ const Info = () => {
           <div className="h-11 rounded-md border border-[#d9d9d9] px-4 py-[2px]">
             <CustomRadio
               options={[
-                { value: 0, label: 'Kích hoạt' },
-                { value: 1, label: 'Chưa áp dụng' },
+                { value: "active", label: 'Kích hoạt' },
+                { value: "inactive", label: 'Chưa áp dụng' },
               ]}
+              onChange={(value) => setValue("status", value, { shouldValidate: true })}
+              value={getValues("status")}
             />
           </div>
         </div>
@@ -86,8 +137,12 @@ const Info = () => {
           <CustomInput
             placeholder="Tên chương trình khuyến mại"
             className="h-11"
-            onChange={() => {}}
+            onChange={(value) =>
+              setValue("name", value, { shouldValidate: true })
+            }
+            value={getValues("name")}
           />
+          <InputError error={errors.name?.message} />
         </div>
 
         <div>
@@ -95,7 +150,10 @@ const Info = () => {
           <CustomInput
             placeholder="Ghi chú"
             className="h-11"
-            onChange={() => {}}
+            onChange={(value) =>
+              setValue("note", value, { shouldValidate: true })
+            }
+            value={getValues("note")}
           />
         </div>
       </div>
@@ -108,7 +166,7 @@ const Info = () => {
         className="grid grid-cols-2 gap-x-[42px] gap-y-5"
         style={{
           gridTemplateColumns:
-            discountType === EDiscountType.BILL
+            getValues('target') === EDiscountType.ORDER
               ? 'repeat(2, minmax(0, 1fr))'
               : 'repeat(3, minmax(0, 1fr))',
         }}
@@ -116,76 +174,158 @@ const Info = () => {
         <div>
           <Label infoText="" label="Khuyến mại theo" />
           <CustomSelect
-            onChange={(value) => setDiscountType(value)}
+            onChange={(value) => {
+              setValue("target", value, { shouldValidate: true })
+              value === "PRODUCT" && setValue("type", "PRODUCT_PRICE")
+            }}
             className="h-11 !rounded"
             options={Object.values(EDiscountType).map((value) => ({
               value,
               label: EDiscountTypeLabel[value],
             }))}
-            value={discountType}
+            value={getValues("target")}
           />
         </div>
 
         <div>
           <Label infoText="" label="Hình thức" />
           <CustomSelect
-            onChange={(value) => setDiscountMethod(value)}
+            onChange={(value) => {
+              setValue("type", value, { shouldValidate: true })
+              const newItems = [
+                {
+                  condition: {
+                    order: {
+                      from: 1,
+                    },
+                    product: {
+                      type: value
+                    }
+                  },
+                  apply: {
+                    discountValue: 0,
+                    discountType: "AMOUNT",
+                    pointType: "AMOUNT",
+                    maxQuantity: 1,
+                    isGift: false,
+                    pointValue: 0,
+                    type: value
+                  },
+
+                  ...(value === EDiscountGoodsMethod.PRICE_BY_BUY_NUMBER && {
+                    childItems: [
+                      {
+                        condition: {
+                          product: {
+                            from: 1
+                          },
+                          productUnitId: []
+                        },
+                        apply: {
+                          changeType: "TYPE_PRICE",
+                          fixedPrice: 0,
+                        }
+                      }
+                    ]
+                  })
+                }
+              ]
+              setValue("items", newItems, { shouldValidate: true })
+            }}
             options={
-              discountType === EDiscountType.BILL
+              getValues('target') === EDiscountType.ORDER
                 ? Object.values(EDiscountBillMethod).map((value) => ({
-                    value,
-                    label: EDiscountBillMethodLabel[value],
-                  }))
+                  value,
+                  label: EDiscountBillMethodLabel[value],
+                }))
                 : Object.values(EDiscountGoodsMethod).map((value) => ({
-                    value,
-                    label: EDiscountGoodsMethodLabel[value],
-                  }))
+                  value,
+                  label: EDiscountGoodsMethodLabel[value],
+                }))
             }
-            value={discountMethod}
+            value={getValues("type")}
             className="h-11 !rounded"
           />
         </div>
 
-        {discountType === EDiscountType.GOODS && (
+        {getValues('target') === EDiscountType.PRODUCT && (
           <div className="flex items-end gap-2">
-            <Checkbox />
+            <Checkbox checked={getValues("isMultiple")} onChange={(e) => setValue("isMultiple", e.target.checked, { shouldValidate: true })} />
             <div>Không nhân theo số lượng mua</div>
             <Image src={InfoIcon} alt="" />
           </div>
         )}
       </div>
 
-      {discountType === EDiscountType.BILL &&
-        discountMethod === EDiscountBillMethod.DISCOUNT_BILL && (
+      {/* Bill */}
+      {getValues('target') === EDiscountType.ORDER &&
+        getValues('type') === EDiscountBillMethod.ORDER_PRICE && (
           <BillDiscount
-            discountUnit={discountUnit}
-            setDiscountUnit={setDiscountUnit}
+            setValue={setValue}
+            getValues={getValues}
+            errors={errors}
           />
         )}
 
-      {discountType === EDiscountType.BILL &&
-        discountMethod === EDiscountBillMethod.GIVE_GOODS && (
-          <BillDiscountGiveGoods
-            discountUnit={discountUnit}
-            setDiscountUnit={setDiscountUnit}
+      {getValues('target') === EDiscountType.ORDER &&
+        getValues('type') === EDiscountBillMethod.PRODUCT_PRICE && (
+          <BillDiscountProduct
+            setValue={setValue}
+            getValues={getValues}
+            errors={errors}
+          />
+        )}
+      {getValues('target') === EDiscountType.ORDER &&
+        getValues('type') === EDiscountBillMethod.GIFT && (
+          <BillGiftProduct
+            setValue={setValue}
+            getValues={getValues}
+            errors={errors}
+          />
+        )}
+      {getValues('target') === EDiscountType.ORDER &&
+        getValues('type') === EDiscountBillMethod.LOYALTY && (
+          <BillGiftPoint
+            setValue={setValue}
+            getValues={getValues}
+            errors={errors}
           />
         )}
 
-      {discountType === EDiscountType.GOODS &&
-        discountMethod === EDiscountGoodsMethod.DISCOUNT_GOODS && (
-          <GoodsDiscount
-            discountUnit={discountUnit}
-            setDiscountUnit={setDiscountUnit}
+      {/* Product */}
+      {getValues('target') === EDiscountType.PRODUCT &&
+        getValues('type') === EDiscountGoodsMethod.PRODUCT_PRICE && (
+          <ProductDiscountProduct
+            setValue={setValue}
+            getValues={getValues}
+            errors={errors}
+          />
+        )}
+      {getValues('target') === EDiscountType.PRODUCT &&
+        getValues('type') === EDiscountGoodsMethod.GIFT && (
+          <ProductGiftProduct
+            setValue={setValue}
+            getValues={getValues}
+            errors={errors}
+          />
+        )}
+      {getValues('target') === EDiscountType.PRODUCT &&
+        getValues('type') === EDiscountGoodsMethod.LOYALTY && (
+          <ProductGiftPoint
+            setValue={setValue}
+            getValues={getValues}
+            errors={errors}
+          />
+        )}
+      {getValues('target') === EDiscountType.PRODUCT &&
+        getValues('type') === EDiscountGoodsMethod.PRICE_BY_BUY_NUMBER && (
+          <ProductQuantity
+            setValue={setValue}
+            getValues={getValues}
+            errors={errors}
           />
         )}
 
-      {discountType === EDiscountType.GOODS &&
-        discountMethod === EDiscountGoodsMethod.GIVE_GOODS && (
-          <GoodsDiscountGiveGoods
-            discountUnit={discountUnit}
-            setDiscountUnit={setDiscountUnit}
-          />
-        )}
     </div>
   );
 };

@@ -97,11 +97,6 @@ export function Debt({ record, branchId }: { record: any, branchId: number }) {
       ),
     },
   ];
-
-  const onSubmit = (values: any) => {
-    console.log(values);
-  };
-
   return (
     <div className="gap-12 ">
       <CustomTable
@@ -111,16 +106,6 @@ export function Debt({ record, branchId }: { record: any, branchId: number }) {
         className="mb-4"
         loading={isLoading}
       />
-
-      {/* <div className="flex justify-end gap-4">
-        <CustomButton
-          type="success"
-          prefixIcon={<Image src={DollarIcon} alt="" />}
-          onClick={() => setIsOpen(true)}
-        >
-          Thanh toán
-        </CustomButton>
-      </div> */}
 
       <PaymentModal isOpen={isOpen} onCancel={() => setIsOpen(!isOpen)} record={paymentRecord} />
     </div>

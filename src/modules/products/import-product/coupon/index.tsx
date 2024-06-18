@@ -17,7 +17,7 @@ import CustomTable from "@/components/CustomTable";
 import { CustomUnitSelect } from "@/components/CustomUnitSelect";
 import InputError from "@/components/InputError";
 import { EProductType } from "@/enums";
-import { formatMoney, getImage } from "@/helpers";
+import { formatMoney, getImage, hasPermission } from "@/helpers";
 import type {
   IImportProduct,
   IImportProductLocal,
@@ -31,6 +31,9 @@ import { schema } from './schema';
 import { CustomAutocomplete } from '@/components/CustomAutocomplete';
 import { useRouter } from "next/router";
 import { getImportProductDetail } from "@/api/import-product.service";
+import { RoleAction, RoleModel } from "@/modules/settings/role/role.enum";
+import { message } from "antd";
+import useBarcodeScanner from "@/hooks/useBarcodeScanner";
 
 export default function ImportCoupon() {
   const profile = useRecoilValue(profileState);
@@ -72,6 +75,15 @@ export default function ImportCoupon() {
   }, [profile]);
 
   useEffect(() => {
+    if (profile?.role?.permissions) {
+      if (!hasPermission(profile?.role?.permissions, RoleModel.import_product, RoleAction.create)) {
+        message.error('Bạn không có quyền truy cập vào trang này');
+        router.push('/products/list');
+      }
+    }
+  }, [profile?.role?.permissions]);
+
+  useEffect(() => {
     if (branchId) {
       setValue("branchId", branchId);
     }
@@ -85,7 +97,7 @@ export default function ImportCoupon() {
     keyword: "",
   });
 
-  const { data: products } = useQuery<{ data: { items: IImportProduct[] } }>(
+  const { data: products, isSuccess } = useQuery<{ data: { items: IImportProduct[] } }>(
     [
       "LIST_IMPORT_PRODUCT",
       formFilter.page,
@@ -215,7 +227,6 @@ export default function ImportCoupon() {
           value={id}
           onChange={(value) => {
             let importProductsClone = cloneDeep(importProducts);
-
             importProductsClone = importProductsClone.map((product) => {
               if (product.productKey === productKey) {
                 const productUnit = product.product.productUnit.find(
@@ -225,6 +236,8 @@ export default function ImportCoupon() {
                 return {
                   ...product,
                   code: productUnit?.code || '', // Assign an empty string if productUnit.code is undefined
+                  price: product.product.primePrice * Number(productUnit?.exchangeValue),
+                  primePrice: product.product.primePrice * Number(productUnit?.exchangeValue),
                   productKey: `${product.product.id}-${value}`,
                   ...productUnit,
                   batches: product.batches?.map((batch) => ({
@@ -234,10 +247,9 @@ export default function ImportCoupon() {
                   })),
                 };
               }
-
               return product;
             });
-
+            console.log("importProductsClone", importProductsClone)
             setImportProducts(importProductsClone);
           }}
         />
@@ -272,13 +284,13 @@ export default function ImportCoupon() {
       title: "Đơn giá",
       dataIndex: "primePrice",
       key: "primePrice",
-      render: (_, { productKey, price }) => (
+      render: (value, { productKey, price, product }) => (
         <CustomInput
           type="number"
           bordered={false}
-          onChange={(value) => onChangeValueProduct(productKey, "price", value)}
+          onChange={(value) => onChangeValueProduct(productKey, "primePrice", value)}
           wrapClassName="w-[100px]"
-          defaultValue={price}
+          value={value}
         />
       ),
     },
@@ -302,8 +314,8 @@ export default function ImportCoupon() {
       title: "Thành tiền",
       dataIndex: "totalPrice",
       key: "totalPrice",
-      render: (_, { quantity, discountValue, price }) =>
-        formatMoney(quantity * price - discountValue),
+      render: (_, { quantity, discountValue, product, primePrice }) =>
+        formatMoney(quantity * Number(primePrice) - discountValue),
     },
   ];
 
@@ -330,6 +342,65 @@ export default function ImportCoupon() {
     );
   };
 
+  const handleSelectProduct = (value) => {
+    const product: IImportProduct = JSON.parse(value);
+
+    const localProduct: IImportProductLocal = {
+      ...product,
+      productKey: `${product.product.id}-${product.id}`,
+      price: product.product.primePrice * Number(product.product.productUnit?.find((unit) => unit.id === product.id)?.exchangeValue),
+      primePrice: product.product.primePrice * Number(product.product.productUnit?.find((unit) => unit.id === product.id)?.exchangeValue),
+      inventory: product.quantity,
+      quantity: 1,
+      discountValue: 0,
+      batches: [],
+    };
+
+    let cloneImportProducts = cloneDeep(importProducts);
+
+    if (
+      importProducts.find(
+        (p) => p.productKey === localProduct.productKey
+      )
+    ) {
+      cloneImportProducts = cloneImportProducts.map((product) => {
+        if (product.productKey === localProduct.productKey) {
+          return {
+            ...product,
+            quantity: product.quantity + 1,
+          };
+        }
+
+        return product;
+      });
+    } else {
+      cloneImportProducts.push(localProduct);
+    }
+
+    setImportProducts(cloneImportProducts);
+  }
+
+  const { scannedData, isScanned } = useBarcodeScanner();
+
+  // barcode scanner
+  useEffect(() => {
+    const getData = async () => {
+      if (scannedData) {
+        const productsScan = await getInboundProducts({ ...formFilter, keyword: scannedData, branchId })
+        let product;
+        if ((productsScan?.data?.items?.length ?? 0) > 0 && isSuccess) {
+          product = productsScan?.data?.items?.find((item) => item.barCode === scannedData);
+        }
+
+        if (product) {
+          handleSelectProduct(JSON.stringify(product));
+          return;
+        }
+      }
+    }
+    getData();
+  }, [scannedData]);
+
   return (
     <div className="-mx-8 flex">
       <div className="grow overflow-x-auto">
@@ -340,41 +411,7 @@ export default function ImportCoupon() {
               prefixIcon={<Image src={SearchIcon} alt="" />}
               placeholder="Tìm kiếm theo mã nhập hàng"
               wrapClassName="w-full !rounded bg-white"
-              onSelect={(value) => {
-                const product: IImportProduct = JSON.parse(value);
-
-                const localProduct: IImportProductLocal = {
-                  ...product,
-                  productKey: `${product.product.id}-${product.id}`,
-                  inventory: product.quantity,
-                  quantity: 1,
-                  discountValue: 0,
-                  batches: [],
-                };
-
-                let cloneImportProducts = cloneDeep(importProducts);
-
-                if (
-                  importProducts.find(
-                    (p) => p.productKey === localProduct.productKey
-                  )
-                ) {
-                  cloneImportProducts = cloneImportProducts.map((product) => {
-                    if (product.productKey === localProduct.productKey) {
-                      return {
-                        ...product,
-                        quantity: product.quantity + 1,
-                      };
-                    }
-
-                    return product;
-                  });
-                } else {
-                  cloneImportProducts.push(localProduct);
-                }
-
-                setImportProducts(cloneImportProducts);
-              }}
+              onSelect={(value) => handleSelectProduct(value)}
               showSearch={true}
               listHeight={512}
               onSearch={debounce((value) => {

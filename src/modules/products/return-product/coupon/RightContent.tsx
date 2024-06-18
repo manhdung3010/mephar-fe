@@ -47,24 +47,26 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
   );
 
   const totalPrice = useMemo(() => {
-    let price = 0;
+    let priceTotal = 0;
 
-    if (productsReturn?.length) {
+    if (productsReturn?.length > 0) {
       productsReturn.forEach(
-        ({ price: unitPrice, quantity, discountValue }) => {
-          price += unitPrice * quantity - discountValue;
+        ({ product, quantity, discountValue, productUnit, price }) => {
+          priceTotal += price * quantity;
         }
       );
+      setValue('paid', priceTotal, { shouldValidate: true });
+    }
+    else {
+      setValue('paid', 0, { shouldValidate: true });
     }
 
-    return price;
+    return priceTotal;
   }, [productsReturn]);
 
   const totalPriceAfterDiscount = useMemo(() => {
     const price = Number(totalPrice) - Number(getValues('discount') ?? 0);
-
     setValue('totalPrice', price, { shouldValidate: true });
-
     return price;
   }, [totalPrice, getValues('discount')]);
 
@@ -84,7 +86,6 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
       const products = getValues('products').map(
         ({ isBatchExpireControl, ...product }) => product
       );
-
       return createReturnProduct({ ...getValues(), products });
     },
     {
@@ -104,16 +105,16 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
 
   const changePayload = (status: EImportProductStatus) => {
     const products = cloneDeep(productsReturn).map(
-      ({ id, price, product, quantity, discountValue, batches, productBatchHistories }) => ({
-        productId: product.id || productBatchHistories[0].productId,
+      ({ id, price, product, quantity, discountValue, productUnitId, batches, productId }: any) => ({
+        productId: product.id || productId,
         importPrice: price,
         totalQuantity: quantity,
         totalPrice: price * quantity - discountValue,
         discount: discountValue,
-        productUnitId: importId ? productBatchHistories[0].productUnitId : id,
+        productUnitId: importId ? productUnitId : id,
         isBatchExpireControl: product.isBatchExpireControl,
         ...(!product.isBatchExpireControl ? null : {
-          batches: importId ? [{ ...productBatchHistories[0]?.batch, quantity }] : batches?.map(({ id, quantity, expiryDate }) => ({
+          batches: importId ? batches?.map((batch: any) => ({ id: batch.batch?.id, quantity, expiryDate: batch?.expiryDate })) : batches?.map(({ id, quantity, expiryDate }) => ({
             id,
             quantity,
             expiryDate,
@@ -192,7 +193,6 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
       </div>
 
       <div className="my-6 h-[1px] w-full bg-[#E4E4E4]"></div>
-
       <div className="flex grow flex-col px-6">
         <div className="grow">
           <div className="mb-5 border-b-2 border-dashed border-[#E4E4E4]">
@@ -224,7 +224,6 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
                 {formatMoney(totalPrice)}
               </div>
             </div>
-
             {
               !importId && <div className="mb-5 flex justify-between">
                 <div className=" leading-normal text-[#828487]">Giảm giá</div>
@@ -241,7 +240,6 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
                 </div>
               </div>
             }
-
             <div className="mb-5 flex justify-between">
               <div className="text-lg leading-normal text-[#000000]">
                 NCC CẦN TRẢ
@@ -252,7 +250,6 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
                 )}
               </div>
             </div>
-
             <div className="mb-5 ">
               <div className="flex justify-between">
                 <div className=" leading-normal text-[#828487]">
@@ -270,10 +267,8 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
                   />
                 </div>
               </div>
-
               <InputError error={errors.paid?.message} />
             </div>
-
             <div className="mb-5 flex justify-between">
               <div className=" leading-normal text-[#828487] ">
                 Tính vào công nợ
@@ -284,7 +279,6 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
             </div>
           </div>
         </div>
-
         <div className="-mx-3">
           <CustomInput
             bordered={false}

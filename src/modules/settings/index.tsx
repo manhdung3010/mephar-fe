@@ -14,11 +14,47 @@ import { hasPermission } from '@/helpers';
 import { profileState } from '@/recoil/state';
 
 import { RoleModel } from './role/role.enum';
+import { useEffect, useState } from 'react';
+import PointModal from './point-modal';
+import { Switch } from 'antd';
+import { CustomSwitch } from '@/components/CustomSwitch';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { schema } from './point-modal/schema';
+import { getPointStatus, updatePointStatus } from '@/api/point.service';
+import { useQuery } from '@tanstack/react-query';
 
 export function Settings() {
   const router = useRouter();
-
+  const [openPointModal, setOpenPointModal] = useState(false);
   const profile = useRecoilValue(profileState);
+
+  const {
+    getValues,
+    setValue,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(schema),
+    mode: "onChange",
+  });
+
+  const { data: pointStatus, isLoading: isLoadingPointDetail } = useQuery(
+    ['POINT_STATUS', openPointModal],
+    () => getPointStatus(),
+  );
+
+  useEffect(() => {
+    if (pointStatus?.data?.status === "active") {
+      setValue("status", pointStatus?.data?.status, { shouldValidate: true });
+      setValue("type", pointStatus?.data?.type, { shouldValidate: true });
+    }
+    else {
+      setValue("status", "inactive", { shouldValidate: true });
+      setValue("type", "order", { shouldValidate: true });
+    }
+  }, [pointStatus]);
 
   return (
     <div className="mt-6 bg-white p-5">
@@ -104,15 +140,37 @@ export function Settings() {
 
         {hasPermission(profile?.role?.permissions, RoleModel.point_setting) && (
           <div
-            className="flex cursor-pointer gap-4 rounded bg-[#F2F9FF] p-5"
-            onClick={() => router.push('/settings/collect-point')}
+            className="flex items-center justify-between gap-4 rounded bg-[#F2F9FF] p-5"
           >
-            <Image src={StarIcon} />
-            <div>
-              <div className=" mb-1 font-semibold">Thiết lập điểm</div>
-              <div className="text-[#666] ">
-                Thiết lập tích điểm khi mua hàng
+            <div
+              className='flex items-center gap-4 cursor-pointer'
+              onClick={() => setOpenPointModal(true)}>
+              <Image src={StarIcon} />
+              <div>
+                <div className=" mb-1 font-semibold">Thiết lập điểm</div>
+                <div className="text-[#666] ">
+                  Thiết lập tích điểm khi mua hàng
+                </div>
               </div>
+            </div>
+            <div>
+              <CustomSwitch
+                checked={getValues("status") === "active"}
+                onChange={() => {
+                  if (getValues("status") === "inactive") {
+                    setOpenPointModal(true)
+                  }
+                  else {
+                    updatePointStatus().then(() => {
+                      setValue("status", getValues("status") === "active" ? "inactive" : "active", { shouldValidate: true })
+                    })
+                      .catch(() => {
+                        console.log("error")
+                      }
+                      )
+                  }
+                }}
+              />
             </div>
           </div>
         )}
@@ -121,21 +179,21 @@ export function Settings() {
           profile?.role?.permissions,
           RoleModel.connect_system
         ) && (
-          <div
-            className="flex cursor-pointer gap-4 rounded bg-[#F2F9FF] p-5"
-            onClick={() => router.push('/settings/connect-system')}
-          >
-            <Image src={MedicineIcon} />
-            <div>
-              <div className=" mb-1 font-semibold">
-                Liên thông hệ thống dược
-              </div>
-              <div className="text-[#666] ">
-                Kết nối cơ sở GPP và liên thông dữ liệu
+            <div
+              className="flex cursor-pointer gap-4 rounded bg-[#F2F9FF] p-5"
+              onClick={() => router.push('/settings/connect-system')}
+            >
+              <Image src={MedicineIcon} />
+              <div>
+                <div className=" mb-1 font-semibold">
+                  Liên thông hệ thống dược
+                </div>
+                <div className="text-[#666] ">
+                  Kết nối cơ sở GPP và liên thông dữ liệu
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
         {hasPermission(profile?.role?.permissions, RoleModel.delivery_fee) && (
           <div
@@ -156,20 +214,30 @@ export function Settings() {
           profile?.role?.permissions,
           RoleModel.connect_delivery
         ) && (
-          <div
-            className="flex cursor-pointer gap-4 rounded bg-[#F2F9FF] p-5"
-            onClick={() => router.push('/settings/connect-delivery')}
-          >
-            <Image src={DeliveryIcon} />
-            <div>
-              <div className=" mb-1 font-semibold">Kết nối vận chuyển</div>
-              <div className="text-[#666] ">
-                Quản lý các phương thức vận chuyển đơn hàng
+            <div
+              className="flex cursor-pointer gap-4 rounded bg-[#F2F9FF] p-5"
+              onClick={() => router.push('/settings/connect-delivery')}
+            >
+              <Image src={DeliveryIcon} />
+              <div>
+                <div className=" mb-1 font-semibold">Kết nối vận chuyển</div>
+                <div className="text-[#666] ">
+                  Quản lý các phương thức vận chuyển đơn hàng
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
       </div>
+
+      <PointModal
+        isOpen={openPointModal}
+        onCancel={() => setOpenPointModal(false)}
+        getValues={getValues}
+        setValue={setValue}
+        handleSubmit={handleSubmit}
+        errors={errors}
+        reset={reset}
+      />
     </div>
   );
 }

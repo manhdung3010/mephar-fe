@@ -1,9 +1,7 @@
 import CustomTable from '@/components/CustomTable'
-import { formatDateTime, formatMoney, formatNumber } from '@/helpers'
-import React from 'react'
+import { formatDateTime } from '@/helpers'
 
 function DeliveryInvoice({ data, columns }: any) {
-
   return (
     <div >
       <div className='flex items-center flex-col'>
@@ -34,7 +32,7 @@ function DeliveryInvoice({ data, columns }: any) {
         <span className=''>Ghi chú chi nhánh chuyển:</span> {data?.note}
       </p>
       <p className=' pt-5'>
-        <span>Ghi chú chi nhánh nhận:</span> {data?.note}
+        <span>Ghi chú chi nhánh nhận:</span> {data?.receiveNote}
       </p>
       <div className='flex justify-evenly mt-20'>
         <div className='text-center'>

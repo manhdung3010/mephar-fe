@@ -13,12 +13,14 @@ import {
 } from '@/api/product.service';
 import { CustomButton } from '@/components/CustomButton';
 import { EProductStatus, EProductType } from '@/enums';
-import { branchState } from '@/recoil/state';
+import { branchState, profileState } from '@/recoil/state';
 
 import Tab from '../../../../components/CustomTab';
 import Detail from './Detail';
 import Info from './Info';
 import { schema } from './schema';
+import { hasPermission } from '@/helpers';
+import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
 
 const AddPackage = ({
   productId,
@@ -30,6 +32,7 @@ const AddPackage = ({
   const queryClient = useQueryClient();
   const router = useRouter();
   const branchId = useRecoilValue(branchState);
+  const profile = useRecoilValue(profileState);
   const [selectedMedicineCategory, setSelectedMedicineCategory] =
     useState<any>();
 
@@ -57,6 +60,15 @@ const AddPackage = ({
       expiryPeriod: 180,
     },
   });
+
+  useEffect(() => {
+    if (profile?.role?.permissions) {
+      if (!hasPermission(profile?.role?.permissions, RoleModel.list_product, RoleAction.create)) {
+        message.error('Bạn không có quyền truy cập vào trang này');
+        router.push('/products/list');
+      }
+    }
+  }, [profile?.role?.permissions]);
 
 
   useEffect(() => {
@@ -110,7 +122,7 @@ const AddPackage = ({
   const { mutate: mutateCreatePackage, isLoading: isLoadingCreatePackage } =
     useMutation(
       () => {
-        const payload = {
+        const payload: any = {
           ...getValues(),
           branchId,
           productUnits: [
@@ -122,7 +134,7 @@ const AddPackage = ({
               code: '',
               price: getValues('price'),
               barCode: '',
-              point: '',
+              point: getValues('point'),
               exchangeValue: 1,
               isDirectSale: getValues('isDirectSale'),
               isBaseUnit: true,
@@ -130,6 +142,7 @@ const AddPackage = ({
           ],
         };
         delete payload.isDirectSale;
+        delete payload.point;
 
         return product && !isCopy
           ? updateProduct(product?.data?.id, payload)
