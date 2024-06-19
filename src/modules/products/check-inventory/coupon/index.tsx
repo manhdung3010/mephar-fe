@@ -1,6 +1,6 @@
 import type { ColumnsType } from 'antd/es/table';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import CloseIcon from '@/assets/closeWhiteIcon.svg';
 import RemoveIcon from '@/assets/removeIcon.svg';
@@ -12,14 +12,15 @@ import { CustomUnitSelect } from '@/components/CustomUnitSelect';
 import { RightContent } from './RightContent';
 import { CustomAutocomplete } from '@/components/CustomAutocomplete';
 import { cloneDeep, debounce } from 'lodash';
-import { getImage } from '@/helpers';
+import { formatNumber, getImage } from '@/helpers';
 import { useQuery } from '@tanstack/react-query';
-import { getInboundProducts } from '@/api/product.service';
+import { getInboundProducts, getSaleProducts } from '@/api/product.service';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { branchState, checkInventoryState, productImportState } from '@/recoil/state';
 import { IImportProduct, IImportProductLocal } from '../../import-product/coupon/interface';
 import { importProductStatus } from '../../import-product/interface';
 import { EProductType } from '@/enums';
+import { render } from 'react-dom';
 
 interface IRecord {
   key: number;
@@ -45,6 +46,7 @@ export function CheckInventoryCoupon() {
   const [formFilter, setFormFilter] = useState({
     page: 1,
     limit: 20,
+    isSale: true,
     keyword: "",
   });
 
@@ -56,10 +58,48 @@ export function CheckInventoryCoupon() {
       formFilter.keyword,
       branchId,
     ],
-    () => getInboundProducts({ ...formFilter, branchId })
+    () => getSaleProducts({ ...formFilter, branchId }),
   );
 
-  const columns: ColumnsType<IRecord> = [
+  useEffect(() => {
+    if (importProducts.length) {
+      const expandedRowKeysClone = { ...expandedRowKeys };
+      importProducts.forEach((_, index) => {
+        expandedRowKeysClone[index] = true;
+      });
+
+      setExpandedRowKeys(expandedRowKeysClone);
+    }
+  }, [importProducts.length]);
+
+  const onChangeValueProduct = (productKey, field, newValue) => {
+    let productImportClone = cloneDeep(importProducts);
+
+    productImportClone = productImportClone.map((product) => {
+      if (product.productKey === productKey) {
+        if (field === "realQuantity" && product.batches?.length === 1) {
+          return {
+            ...product,
+            realQuantity: newValue,
+            inventoryCheckingBatch: product.batches?.map((batch) => ({
+              ...batch,
+              realQuantity: newValue,
+            })),
+          };
+        }
+        return {
+          ...product,
+          [field]: newValue,
+        };
+      }
+
+      return product;
+    });
+
+    setImportProducts(productImportClone);
+  };
+
+  const columns: any = [
     {
       title: '',
       dataIndex: 'action',
@@ -68,7 +108,14 @@ export function CheckInventoryCoupon() {
         <Image
           src={RemoveIcon}
           className=" cursor-pointer"
-          onClick={() => console.log(id)}
+          onClick={() => {
+            const productImportClone = cloneDeep(importProducts);
+            const index = productImportClone.findIndex(
+              (product) => product.id === id
+            );
+            productImportClone.splice(index, 1);
+            setImportProducts(productImportClone);
+          }}
         />
       ),
     },
@@ -106,25 +153,82 @@ export function CheckInventoryCoupon() {
       render: (product) => product.name,
     },
     {
-      title: 'ĐVT',
-      dataIndex: 'units',
-      key: 'units',
-      render: (_, { units }) => <CustomUnitSelect />,
+      title: "ĐVT",
+      dataIndex: "units",
+      key: "units",
+      render: (_, { productKey, product, id, exchangeValue }) => (
+        <CustomUnitSelect
+          options={(() => {
+            const productUnitKeysSelected = importProducts.map((product) =>
+              Number(product.productKey.split("-")[1])
+            );
+
+            return product.productUnit.map((unit) => ({
+              value: unit.id,
+              label: unit.unitName,
+              disabled: productUnitKeysSelected.includes(unit.id),
+            }));
+          })()}
+          value={id}
+          onChange={(value) => {
+            let importProductsClone = cloneDeep(importProducts);
+            importProductsClone = importProductsClone.map((p) => {
+              if (p.productKey === productKey) {
+                const productUnit = p.product.productUnit.find(
+                  (unit) => unit.id === value
+                );
+
+                return {
+                  ...p,
+                  code: productUnit?.code || '', // Assign an empty string if productUnit.code is undefined
+                  price: p.product.primePrice * Number(productUnit?.exchangeValue),
+                  primePrice: p.product.primePrice * Number(productUnit?.exchangeValue),
+                  productKey: `${p.product.id}-${value}`,
+                  ...productUnit,
+                  batches: p.batches?.map((batch) => ({
+                    ...batch,
+                    inventory:
+                      batch.originalInventory / productUnit!.exchangeValue,
+                  })),
+                  newInventory: Math.floor(product.quantity / productUnit!.exchangeValue),
+                };
+              }
+              return p;
+            });
+            console.log("importProductsClone", importProductsClone)
+            setImportProducts(importProductsClone);
+          }}
+        />
+      ),
     },
     {
       title: 'Tồn kho',
-      dataIndex: 'inventoryQuantity',
-      key: 'inventoryQuantity',
+      dataIndex: 'newInventory',
+      key: 'newInventory',
+      render: (value) => formatNumber(value),
     },
     {
       title: 'Thực tế',
       dataIndex: 'realQuantity',
       key: 'realQuantity',
-      render: () => (
+      render: (realQuantity, { productKey }) => (
         <CustomInput
-          className="w-[70px]"
-          bordered={false}
-          onChange={() => { }}
+          wrapClassName="!w-[110px]"
+          className="!h-6 !w-[80px] text-center"
+          hasMinus={true}
+          hasPlus={true}
+          defaultValue={realQuantity}
+          value={realQuantity}
+          type="number"
+          onChange={(value) =>
+            onChangeValueProduct(productKey, "realQuantity", value)
+          }
+          onMinus={(value) =>
+            onChangeValueProduct(productKey, "realQuantity", value)
+          }
+          onPlus={(value) =>
+            onChangeValueProduct(productKey, "realQuantity", value)
+          }
         />
       ),
     },
@@ -132,27 +236,32 @@ export function CheckInventoryCoupon() {
       title: 'SL lệch',
       dataIndex: 'diffQuantity',
       key: 'diffQuantity',
+      render: (_, { realQuantity, newInventory }) => formatNumber(Math.floor(realQuantity - newInventory)),
     },
     {
       title: 'Giá trị lệch',
       dataIndex: 'diffAmount',
       key: 'diffAmount',
+      render: (_, { realQuantity, newInventory, price }) => formatNumber(Math.floor((realQuantity - newInventory) * price)),
     },
   ];
+
+  console.log("importProducts", importProducts)
 
   const handleSelectProduct = (value) => {
     const product: IImportProduct = JSON.parse(value);
     console.log("product", product)
 
-    const localProduct: IImportProductLocal = {
+    const localProduct: any = {
       ...product,
       productKey: `${product.product.id}-${product.id}`,
-      price: product.product.primePrice * Number(product.product.productUnit?.find((unit) => unit.id === product.id)?.exchangeValue),
+      price: product.product.price * product.exchangeValue,
       primePrice: product.product.primePrice * Number(product.product.productUnit?.find((unit) => unit.id === product.id)?.exchangeValue),
       inventory: product.quantity,
-      quantity: 1,
+      newInventory: Math.floor(product.quantity / product.exchangeValue),
+      realQuantity: 1,
       discountValue: 0,
-      batches: [],
+      batches: product?.batches
     };
 
     let cloneImportProducts = cloneDeep(importProducts);
@@ -162,11 +271,21 @@ export function CheckInventoryCoupon() {
         (p) => p.productKey === localProduct.productKey
       )
     ) {
-      cloneImportProducts = cloneImportProducts.map((product) => {
+      cloneImportProducts = cloneImportProducts.map((product: any) => {
         if (product.productKey === localProduct.productKey) {
           return {
             ...product,
-            quantity: product.quantity + 1,
+            realQuantity: product.realQuantity + 1,
+            batches: product.batches.map((batch) => {
+              const newBatch = {
+                ...batch,
+                // inventory,
+                // originalInventory: batch.quantity,
+                realQuantity: batch.isSelected ? batch.realQuantity + 1 : batch.realQuantity,
+              };
+
+              return newBatch;
+            }),
           };
         }
 
