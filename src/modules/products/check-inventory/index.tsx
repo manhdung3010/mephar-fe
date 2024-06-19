@@ -1,7 +1,7 @@
 import type { ColumnsType } from 'antd/es/table';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import ExportIcon from '@/assets/exportIcon.svg';
 import PlusIcon from '@/assets/plusWhiteIcon.svg';
@@ -10,6 +10,11 @@ import CustomTable from '@/components/CustomTable';
 
 import ProductDetail from './row-detail';
 import Search from './Search';
+import { useQuery } from '@tanstack/react-query';
+import { getInventoryChecking } from '@/api/check-inventory';
+import { useRecoilValue } from 'recoil';
+import { branchState } from '@/recoil/state';
+import { formatMoney, formatNumber } from '@/helpers';
 
 interface IRecord {
   key: number;
@@ -25,28 +30,53 @@ interface IRecord {
 
 export function CheckInventory() {
   const router = useRouter();
+  const [inventoryList, setInventoryList] = useState<any[]>([]);
 
   const [expandedRowKeys, setExpandedRowKeys] = useState<
     Record<string, boolean>
   >({});
+  const branchId = useRecoilValue(branchState);
 
-  const record = {
-    key: 1,
-    id: 'PN231017090542',
-    date: '17/10/2023 09:05:14',
-    balanceDate: '17/10/2023 09:05:14',
-    actualAmount: 5,
-    diffTotal: 1,
-    diffGreat: 1,
-    diffLess: 0,
-    note: '',
-  };
+  const [inventoryFormFilter, setInventoryFormFilter] = useState({
+    page: 1,
+    limit: 20,
+    keyword: "",
+    branchId,
+  });
 
-  const dataSource: IRecord[] = Array(8)
-    .fill(0)
-    .map((_, index) => ({ ...record, key: index }));
+  const { data: inventoryCheckingList, isLoading } = useQuery(
+    ["INVENTORY_CHECKING", inventoryFormFilter.page, inventoryFormFilter.limit, inventoryFormFilter.keyword, inventoryFormFilter.branchId],
+    () => getInventoryChecking(inventoryFormFilter),
+  );
 
-  const columns: ColumnsType<IRecord> = [
+  useEffect(() => {
+    if (inventoryCheckingList) {
+      const newInventoryList = inventoryCheckingList?.data?.items?.map(
+        (item, index) => {
+          const totalRealQuantity = item?.inventoryCheckingProduct.reduce(
+            (acc, curr) => acc + curr.realQuantity,
+            0
+          )
+          const newProduct = item?.inventoryCheckingProduct.map((product, index) => ({
+            ...product,
+            totalPrice: product.realQuantity * product.productUnit?.price,
+          }));
+          const totalVal = newProduct.reduce((acc, curr) => acc + curr.totalPrice, 0);
+          return {
+            ...item,
+            totalRealQuantity: totalRealQuantity,
+            inventoryCheckingProduct: newProduct,
+            totalVal: totalVal,
+            key: index + 1,
+          }
+        }
+      );
+      console.log("newInventoryList", newInventoryList)
+      setInventoryList(newInventoryList);
+    }
+  }, [inventoryCheckingList]);
+
+  const columns: any = [
     {
       title: 'STT',
       dataIndex: 'key',
@@ -54,21 +84,21 @@ export function CheckInventory() {
     },
     {
       title: 'Mã kiểm kho',
-      dataIndex: 'id',
-      key: 'id',
+      dataIndex: 'code',
+      key: 'code',
       render: (value, _, index) => (
         <span
           className="cursor-pointer text-[#0070F4]"
-          onClick={() => {
-            const currentState = expandedRowKeys[`${index}`];
-            const temp = { ...expandedRowKeys };
-            if (currentState) {
-              delete temp[`${index}`];
-            } else {
-              temp[`${index}`] = true;
-            }
-            setExpandedRowKeys({ ...temp });
-          }}
+        // onClick={() => {
+        //   const currentState = expandedRowKeys[`${index}`];
+        //   const temp = { ...expandedRowKeys };
+        //   if (currentState) {
+        //     delete temp[`${index}`];
+        //   } else {
+        //     temp[`${index}`] = true;
+        //   }
+        //   setExpandedRowKeys({ ...temp });
+        // }}
         >
           {value}
         </span>
@@ -85,9 +115,16 @@ export function CheckInventory() {
       key: 'balanceDate',
     },
     {
+      title: 'SL thực tế',
+      dataIndex: 'totalRealQuantity',
+      key: 'totalRealQuantity',
+      render: (value) => <span>{formatNumber(value)}</span>,
+    },
+    {
       title: 'Tổng thực tế',
-      dataIndex: 'actualAmount',
-      key: 'actualAmount',
+      dataIndex: 'totalVal',
+      key: 'totalVal',
+      render: (value) => <span>{formatMoney(value)}</span>,
     },
     {
       title: 'Tổng chênh lệch',
@@ -129,7 +166,7 @@ export function CheckInventory() {
         rowSelection={{
           type: 'checkbox',
         }}
-        dataSource={dataSource}
+        dataSource={inventoryList}
         columns={columns}
         onRow={(record, rowIndex) => {
           return {
