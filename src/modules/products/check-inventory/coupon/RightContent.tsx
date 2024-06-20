@@ -156,8 +156,10 @@ export function RightContent({ getValues, setValue, errors, handleSubmit, reset 
         <CustomButton onClick={() => {
           const formatProducts = importProducts.map((item: any) => ({
             productUnitId: item.id,
-            realQuantity: item.realQuantity,
-            isBatchExpireControl: item.product?.isBatchExpireControl,
+            ...(item?.batches?.length <= 0 && {
+              realQuantity: item.realQuantity,
+            }),
+            // isBatchExpireControl: item.product?.isBatchExpireControl,
             ...(item?.batches?.length > 0 && {
               inventoryCheckingBatch: item.batches.filter((b) => b.isSelected).map((batch) => {
                 return {

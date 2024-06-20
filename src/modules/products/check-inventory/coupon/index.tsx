@@ -24,6 +24,8 @@ import { IImportProduct, IImportProductLocal } from '../../import-product/coupon
 import { ListBatchModal } from './ListBatchModal';
 import { RightContent } from './RightContent';
 import { schema } from './schema';
+import { useRouter } from 'next/router';
+import { getInventoryDetail } from '@/api/check-inventory';
 
 export function CheckInventoryCoupon() {
   const {
@@ -48,6 +50,9 @@ export function CheckInventoryCoupon() {
   const [openListBatchModal, setOpenListBatchModal] = useState(false);
   const [productKeyAddBatch, setProductKeyAddBatch] = useState<string>();
 
+  const router = useRouter();
+  const { id } = router.query;
+
   const [formFilter, setFormFilter] = useState({
     page: 1,
     limit: 20,
@@ -65,6 +70,37 @@ export function CheckInventoryCoupon() {
     ],
     () => getSaleProducts({ ...formFilter, branchId }),
   );
+  const { data: details } = useQuery<{ data: any }>(
+    [
+      "INVENTORY_DETAIL",
+      id,
+      branchId
+    ],
+    () => getInventoryDetail(Number(id), branchId),
+    {
+      enabled: !!id,
+    }
+  );
+
+  useEffect(() => {
+    setImportProducts([]);
+    if (details?.data?.inventoryCheckingProduct?.length > 0 && importProducts.length === 0) {
+      // find product same in products and add to importProducts
+      details?.data?.inventoryCheckingProduct.forEach((p, index) => {
+        const productCode = p.productUnit?.product?.code;
+        console.log("index", index)
+        getSaleProducts({ page: 1, limit: 1, keyword: productCode, branchId }).then((res) => {
+          if (res.data?.items[0]) {
+            handleSelectProduct(JSON.stringify(res.data.items[0]));
+          }
+        })
+        // select product
+        // handleSelectProduct(JSON.stringify(product));
+      })
+
+      setValue('userCreateId', details?.data?.userCreate?.id, { shouldValidate: true });
+    }
+  }, [details?.data?.inventoryCheckingProduct]);
 
   useEffect(() => {
     if (importProducts.length) {
@@ -255,8 +291,6 @@ export function CheckInventoryCoupon() {
 
   const handleSelectProduct = (value) => {
     const product: IImportProduct = JSON.parse(value);
-    console.log("product", product)
-
     let isSelectedUnit = true;
 
     const localProduct: any = {
@@ -265,7 +299,7 @@ export function CheckInventoryCoupon() {
       price: product.product.price * product.exchangeValue,
       primePrice: product.product.primePrice * Number(product.product.productUnit?.find((unit) => unit.id === product.id)?.exchangeValue),
       inventory: product.quantity,
-      newInventory: Math.floor(product.quantity / product.exchangeValue),
+      newInventory: Math.floor((product.product.quantity ?? 0) / product.exchangeValue),
       realQuantity: 1,
       discountValue: 0,
       batches: product.batches?.map((batch) => {
@@ -315,11 +349,13 @@ export function CheckInventoryCoupon() {
 
         return product;
       });
+      setImportProducts(cloneImportProducts);
     } else {
-      cloneImportProducts.push(localProduct);
+      // cloneImportProducts.push(localProduct);
+      setImportProducts((prev) => [...prev, localProduct]);
     }
 
-    setImportProducts(cloneImportProducts);
+    // setImportProducts((prev) => [...cloneImportProducts]);
   }
 
   const checkDisplayListBatch = (product: IImportProductLocal) => {

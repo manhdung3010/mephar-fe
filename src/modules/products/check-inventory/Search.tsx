@@ -62,15 +62,14 @@ const Search = () => {
             ]}
           />
         </div>
-
-        <CustomButton
+        {/* <CustomButton
           type="original"
           outline={true}
           className="h-auto w-[130px] rounded-[3px]"
           suffixIcon={<Image src={FilterIcon} />}
         >
           Lưu bộ lọc
-        </CustomButton>
+        </CustomButton> */}
       </div>
     </div>
   );

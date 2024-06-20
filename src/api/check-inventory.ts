@@ -9,13 +9,13 @@ export function getInventoryChecking(params?: {
   return axiosClient.get("inventory-checking", { params });
 }
 
-// export function getBranchDetail(id: number) {
-//   return axiosClient.get(`branch/${id}`);
-// }
+export function getInventoryDetail(id: number, branchId: number) {
+  return axiosClient.get(`inventory-checking/${id}?branchId=${branchId}`);
+}
 
-// export function updateBranch(id: number, payload) {
-//   return axiosClient.patch(`branch/${id}`, payload);
-// }
+export function deleteInventoryChecking(id: number, branchId: number) {
+  return axiosClient.delete(`inventory-checking/${id}?branchId=${branchId}`);
+}
 
 export function createCheckInventory(payload) {
   return axiosClient.post(`inventory-checking`, payload);

@@ -13,8 +13,10 @@ import Search from './Search';
 import { useQuery } from '@tanstack/react-query';
 import { getInventoryChecking } from '@/api/check-inventory';
 import { useRecoilValue } from 'recoil';
-import { branchState } from '@/recoil/state';
-import { formatMoney, formatNumber } from '@/helpers';
+import { branchState, profileState } from '@/recoil/state';
+import { formatDateTime, formatMoney, formatNumber, hasPermission } from '@/helpers';
+import CustomPagination from '@/components/CustomPagination';
+import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
 
 interface IRecord {
   key: number;
@@ -30,6 +32,7 @@ interface IRecord {
 
 export function CheckInventory() {
   const router = useRouter();
+  const profile = useRecoilValue(profileState);
   const [inventoryList, setInventoryList] = useState<any[]>([]);
 
   const [expandedRowKeys, setExpandedRowKeys] = useState<
@@ -57,6 +60,20 @@ export function CheckInventory() {
             (acc, curr) => acc + curr.realQuantity,
             0
           )
+          let increaseTotal = 0;
+          let decreaseTotal = 0;
+          let increaseVal = 0;
+          let decreaseVal = 0;
+          item?.inventoryCheckingProduct.forEach((product) => {
+            if (product.difference > 0) {
+              increaseTotal += product.difference;
+              increaseVal += product.difference * product.productUnit?.price;
+            }
+            else {
+              decreaseTotal += product.difference;
+              decreaseVal += product.difference * product.productUnit?.price;
+            }
+          });
           const newProduct = item?.inventoryCheckingProduct.map((product, index) => ({
             ...product,
             totalPrice: product.realQuantity * product.productUnit?.price,
@@ -64,14 +81,17 @@ export function CheckInventory() {
           const totalVal = newProduct.reduce((acc, curr) => acc + curr.totalPrice, 0);
           return {
             ...item,
-            totalRealQuantity: totalRealQuantity,
+            totalRealQuantity,
             inventoryCheckingProduct: newProduct,
-            totalVal: totalVal,
+            totalVal,
+            totalIncrease: increaseTotal,
+            increaseVal,
+            decreaseVal,
+            totalDecrease: decreaseTotal,
             key: index + 1,
           }
         }
       );
-      console.log("newInventoryList", newInventoryList)
       setInventoryList(newInventoryList);
     }
   }, [inventoryCheckingList]);
@@ -89,16 +109,6 @@ export function CheckInventory() {
       render: (value, _, index) => (
         <span
           className="cursor-pointer text-[#0070F4]"
-        // onClick={() => {
-        //   const currentState = expandedRowKeys[`${index}`];
-        //   const temp = { ...expandedRowKeys };
-        //   if (currentState) {
-        //     delete temp[`${index}`];
-        //   } else {
-        //     temp[`${index}`] = true;
-        //   }
-        //   setExpandedRowKeys({ ...temp });
-        // }}
         >
           {value}
         </span>
@@ -106,13 +116,15 @@ export function CheckInventory() {
     },
     {
       title: 'Thời gian',
-      dataIndex: 'date',
-      key: 'date',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      render: (value) => <span>{formatDateTime(value)}</span>,
     },
     {
       title: 'Ngày cân bằng',
-      dataIndex: 'balanceDate',
-      key: 'balanceDate',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      render: (value) => <span>{formatDateTime(value)}</span>,
     },
     {
       title: 'SL thực tế',
@@ -130,16 +142,17 @@ export function CheckInventory() {
       title: 'Tổng chênh lệch',
       dataIndex: 'diffTotal',
       key: 'diffTotal',
+      render: (value, record) => <span>{formatNumber(record?.totalIncrease + record?.totalDecrease)}</span>,
     },
     {
       title: 'SL lệch tăng',
-      dataIndex: 'diffGreat',
-      key: 'diffGreat',
+      dataIndex: 'totalIncrease',
+      key: 'totalIncrease',
     },
     {
       title: 'SL lệch giảm',
-      dataIndex: 'diffLess',
-      key: 'diffLess',
+      dataIndex: 'totalDecrease',
+      key: 'totalDecrease',
     },
     {
       title: 'Ghi chú',
@@ -150,13 +163,18 @@ export function CheckInventory() {
   return (
     <div>
       <div className="my-3 flex justify-end gap-4">
-        <CustomButton
-          onClick={() => router.push('/products/check-inventory/coupon')}
-          type="success"
-          prefixIcon={<Image src={PlusIcon} />}
-        >
-          Kiểm kho
-        </CustomButton>
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.check_inventory, RoleAction.create) && (
+            <CustomButton
+              onClick={() => router.push('/products/check-inventory/coupon')}
+              type="success"
+              prefixIcon={<Image src={PlusIcon} />}
+            >
+              Kiểm kho
+            </CustomButton>
+          )
+        }
+
         <CustomButton prefixIcon={<Image src={ExportIcon} />}>
           Xuất file
         </CustomButton>
@@ -189,6 +207,15 @@ export function CheckInventory() {
           expandIcon: () => <></>,
           expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key),
         }}
+        loading={isLoading}
+      />
+
+      <CustomPagination
+        page={inventoryFormFilter.page}
+        pageSize={inventoryFormFilter.limit}
+        setPage={(value) => setInventoryFormFilter({ ...inventoryFormFilter, page: value })}
+        setPerPage={(value) => setInventoryFormFilter({ ...inventoryFormFilter, limit: value })}
+        total={inventoryCheckingList?.data?.totalItem}
       />
     </div>
   );
