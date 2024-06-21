@@ -17,6 +17,7 @@ import { branchState, profileState } from '@/recoil/state';
 import { formatDateTime, formatMoney, formatNumber, hasPermission } from '@/helpers';
 import CustomPagination from '@/components/CustomPagination';
 import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
+import { debounce } from 'lodash';
 
 interface IRecord {
   key: number;
@@ -44,11 +45,14 @@ export function CheckInventory() {
     page: 1,
     limit: 20,
     keyword: "",
+    'createdAt[start]': undefined,
+    'createdAt[end]': undefined,
+    userCreateId: undefined,
     branchId,
   });
 
   const { data: inventoryCheckingList, isLoading } = useQuery(
-    ["INVENTORY_CHECKING", inventoryFormFilter.page, inventoryFormFilter.limit, inventoryFormFilter.keyword, inventoryFormFilter.branchId],
+    ["INVENTORY_CHECKING", inventoryFormFilter],
     () => getInventoryChecking(inventoryFormFilter),
   );
 
@@ -179,7 +183,18 @@ export function CheckInventory() {
           Xuất file
         </CustomButton>
       </div>
-      <Search />
+      <Search
+        onChange={debounce((value) => {
+          console.log("value", value)
+          setInventoryFormFilter((preValue) => ({
+            ...preValue,
+            keyword: value?.keyword,
+            'createdAt[start]': value?.createdAt1,
+            'createdAt[end]': value?.createdAt2,
+            userCreateId: value?.userCreateId,
+          }));
+        }, 300)}
+      />
       <CustomTable
         rowSelection={{
           type: 'checkbox',
