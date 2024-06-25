@@ -5,6 +5,9 @@ import Image from 'next/image';
 import PlusIcon from '@/assets/PlusIconWhite.svg';
 import { CustomButton } from '@/components/CustomButton';
 import CustomTable from '@/components/CustomTable';
+import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { getNoteList } from '@/api/customer.service';
 
 const { TextArea } = Input;
 
@@ -16,16 +19,13 @@ interface IRecord {
 }
 
 export function Note({ record }: { record: any }) {
-  const data = {
-    key: 1,
-    note: '002014',
-    createdBy: 'Bán hàng',
-    createdAt: '12/10/2023 11:34',
-  };
-
-  const dataSource: IRecord[] = Array(1)
-    .fill(0)
-    .map((_, index) => ({ ...data, key: index }));
+  const { data: notes, isLoading } = useQuery(
+    ['POINT_HISTORY', record?.id],
+    () => getNoteList(record?.id),
+    {
+      enabled: !!record?.id,
+    }
+  );
 
   const columns: ColumnsType<IRecord> = [
     {
@@ -48,7 +48,7 @@ export function Note({ record }: { record: any }) {
   return (
     <div className="gap-12 ">
       <CustomTable
-        dataSource={dataSource}
+        dataSource={notes?.data?.items}
         columns={columns}
         pagination={false}
         className="mb-4"
