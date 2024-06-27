@@ -13,6 +13,12 @@ import CustomTable from '@/components/CustomTable';
 import { AddCashbookModal } from './AddCashbookModal';
 import RowDetail from './row-detail';
 import Search from './Search';
+import { useQuery } from '@tanstack/react-query';
+import { getTransaction } from '@/api/cashbook.service';
+import { formatDateTime, formatMoney } from '@/helpers';
+import { useRecoilValue } from 'recoil';
+import { branchState } from '@/recoil/state';
+import CustomPagination from '@/components/CustomPagination';
 
 interface IRecord {
   key: number;
@@ -25,44 +31,34 @@ interface IRecord {
 
 export function Cashbook() {
   const router = useRouter();
+  const branchId = useRecoilValue(branchState);
 
   const [openAddCashbookModal, setOpenAddCashbookModal] = useState(false);
+  const [cashbookType, setCashbookType] = useState<string>('');
 
   const [expandedRowKeys, setExpandedRowKeys] = useState<
     Record<string, boolean>
   >({});
 
-  const record = {
-    key: 1,
-    id: 'TTHD231030154943',
-    date: '30-10-2023 15:49',
-    type: 'Thu tiền từ khách hàng',
-    receiveUser: 'Dungtest',
-    value: 100000,
-  };
+  const [formFilter, setFormFilter] = useState({
+    page: 1,
+    limit: 20,
+    keyword: '',
+    branchId
+  });
 
-  const dataSource: IRecord[] = Array(8)
-    .fill(0)
-    .map((_, index) => ({ ...record, key: index }));
-
-  const columns: ColumnsType<IRecord> = [
+  const { data: transactions, isLoading } = useQuery(
+    ['TRANSACTION', JSON.stringify(formFilter)],
+    () => getTransaction(formFilter),
+  );
+  const columns: any = [
     {
       title: 'Mã phiếu',
-      dataIndex: 'id',
-      key: 'id',
+      dataIndex: 'code',
+      key: 'code',
       render: (value, _, index) => (
         <span
           className="cursor-pointer text-[#0070F4]"
-          onClick={() => {
-            const currentState = expandedRowKeys[`${index}`];
-            const temp = { ...expandedRowKeys };
-            if (currentState) {
-              delete temp[`${index}`];
-            } else {
-              temp[`${index}`] = true;
-            }
-            setExpandedRowKeys({ ...temp });
-          }}
         >
           {value}
         </span>
@@ -70,23 +66,27 @@ export function Cashbook() {
     },
     {
       title: 'Thời gian',
-      dataIndex: 'date',
-      key: 'date',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      render: (value) => formatDateTime(value),
     },
     {
       title: 'Loại thu phí',
-      dataIndex: 'type',
-      key: 'type',
+      dataIndex: 'typeTransaction',
+      key: 'typeTransaction',
+      render: (value) => value?.name,
     },
     {
       title: 'Người nộp/nhận',
-      dataIndex: 'receiveUser',
-      key: 'receiveUser',
+      dataIndex: 'targetCustomer',
+      key: 'targetCustomer',
+      render: (value, record) => record?.targetCustomer?.fullName || record?.targetSupplier?.name || record?.targetOther?.name || record?.targetUser?.name,
     },
     {
       title: 'Giá trị',
       dataIndex: 'value',
       key: 'value',
+      render: (value) => formatMoney(value),
     },
   ];
   return (
@@ -144,7 +144,10 @@ export function Cashbook() {
           type="success"
           prefixIcon={<Image src={ReceiptIcon} />}
           wrapClassName="mx-2"
-          onClick={() => setOpenAddCashbookModal(true)}
+          onClick={() => {
+            setOpenAddCashbookModal(true)
+            setCashbookType('income')
+          }}
         >
           Lập phiếu thu
         </CustomButton>
@@ -152,6 +155,10 @@ export function Cashbook() {
           type="success"
           prefixIcon={<Image src={PaymentIcon} />}
           wrapClassName="mx-2"
+          onClick={() => {
+            setOpenAddCashbookModal(true)
+            setCashbookType('expenses')
+          }}
         >
           Lập phiếu chi
         </CustomButton>
@@ -169,8 +176,25 @@ export function Cashbook() {
         rowSelection={{
           type: 'checkbox',
         }}
-        dataSource={dataSource}
+        dataSource={transactions?.data?.items.map((item, index) => ({
+          ...item,
+          key: index,
+        }))
+        }
         columns={columns}
+        onRow={(record, rowIndex) => {
+          return {
+            onClick: event => {
+              // Toggle expandedRowKeys state here
+              if (expandedRowKeys[record.key]) {
+                const { [record.key]: value, ...remainingKeys } = expandedRowKeys;
+                setExpandedRowKeys(remainingKeys);
+              } else {
+                setExpandedRowKeys({ ...expandedRowKeys, [record.key]: true });
+              }
+            }
+          };
+        }}
         expandable={{
           // eslint-disable-next-line @typescript-eslint/no-shadow
           expandedRowRender: (record: IRecord) => <RowDetail record={record} />,
@@ -179,9 +203,18 @@ export function Cashbook() {
         }}
       />
 
+      <CustomPagination
+        page={formFilter.page}
+        pageSize={formFilter.limit}
+        setPage={(value) => setFormFilter({ ...formFilter, page: value })}
+        setPerPage={(value) => setFormFilter({ ...formFilter, limit: value })}
+        total={transactions?.data?.totalItem}
+      />
+
       <AddCashbookModal
         isOpen={openAddCashbookModal}
         onCancel={() => setOpenAddCashbookModal(false)}
+        type={cashbookType}
       />
     </div>
   );
