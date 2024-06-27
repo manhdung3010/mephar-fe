@@ -16,11 +16,13 @@ export function AddCollectType({
   onCancel,
   setGroupProductKeyword,
   setProductValue,
+  type
 }: {
   isOpen: boolean;
   onCancel: () => void;
   setGroupProductKeyword: (value) => void;
   setProductValue: any;
+  type: string
 }) {
   const queryClient = useQueryClient();
 
@@ -43,7 +45,7 @@ export function AddCollectType({
   const {
     mutate: mutateCreateGroupProduct,
     isLoading: isLoadingCreateGroupProduct,
-  } = useMutation(() => createTypeTransaction({ ...getValues(), ballotType: "income" }), {
+  } = useMutation(() => createTypeTransaction({ ...getValues(), ballotType: type }), {
     onSuccess: async (res) => {
       setProductValue('typeId', res.data.id);
       reset();

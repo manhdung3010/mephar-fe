@@ -33,7 +33,22 @@ export function createOtherUser(payload) {
 export function createTransaction(payload) {
   return axiosClient.post(`transaction`, payload);
 }
-
-// export function deleteBranch(id: number) {
-//   return axiosClient.delete(`branch/${id}`);
-// }
+export function getTransaction(params?: {
+  page: number;
+  limit: number;
+  keyword?: string;
+  ballotType?: string;
+}) {
+  return axiosClient.get(`transaction`, { params });
+}
+export function getTransactionTotal(
+  params?: {
+    ballotType?: string;
+  },
+  type?: string
+) {
+  return axiosClient.get(`transaction/total/${type}`, { params });
+}
+export function getTransactionDetail(id?: string) {
+  return axiosClient.get(`transaction/${id}`);
+}

@@ -14,7 +14,7 @@ export function getCustomerDebt(
     limit: number;
     keyword?: string;
   },
-  id: number
+  id: any
 ) {
   return axiosClient.get(`customer/${id}/total-debt`, { params });
 }
