@@ -15,10 +15,12 @@ import RowDetail from './row-detail';
 import Search from './Search';
 import { useQuery } from '@tanstack/react-query';
 import { getTransaction } from '@/api/cashbook.service';
-import { formatDateTime, formatMoney } from '@/helpers';
+import { formatDateTime, formatMoney, hasPermission } from '@/helpers';
 import { useRecoilValue } from 'recoil';
-import { branchState } from '@/recoil/state';
+import { branchState, profileState } from '@/recoil/state';
 import CustomPagination from '@/components/CustomPagination';
+import { RoleAction, RoleModel } from '../settings/role/role.enum';
+import dayjs from 'dayjs';
 
 interface IRecord {
   key: number;
@@ -30,8 +32,8 @@ interface IRecord {
 }
 
 export function Cashbook() {
-  const router = useRouter();
   const branchId = useRecoilValue(branchState);
+  const profile = useRecoilValue(profileState);
 
   const [openAddCashbookModal, setOpenAddCashbookModal] = useState(false);
   const [cashbookType, setCashbookType] = useState<string>('');
@@ -44,6 +46,11 @@ export function Cashbook() {
     page: 1,
     limit: 20,
     keyword: '',
+    'paymentDate[start]': dayjs().startOf('month').format('YYYY-MM-DD'),
+    'paymentDate[end]': undefined,
+    ballotType: undefined,
+    typeId: undefined,
+    userId: undefined,
     branchId
   });
 
@@ -86,7 +93,9 @@ export function Cashbook() {
       title: 'Giá trị',
       dataIndex: 'value',
       key: 'value',
-      render: (value) => formatMoney(value),
+      render: (value, record) => <span>
+        {record?.ballotType === 'income' ? '' : '-'}{formatMoney(value)}
+      </span>,
     },
   ];
   return (
@@ -98,7 +107,7 @@ export function Cashbook() {
           </div>
           <div>
             <div className="text-xs text-[#15171A]">Quỹ đầu kỳ</div>
-            <div className="text-[22px] text-[#0070F4]">0</div>
+            <div className="text-[22px] text-[#0070F4]">{formatMoney(transactions?.data?.totalBefore)}</div>
           </div>
         </div>
 
@@ -110,7 +119,7 @@ export function Cashbook() {
           </div>
           <div>
             <div className="text-xs text-[#15171A]">Tổng thu</div>
-            <div className="text-[22px] text-[#00B63E]">0</div>
+            <div className="text-[22px] text-[#00B63E]">{formatMoney(transactions?.data?.totalIncome)}</div>
           </div>
         </div>
 
@@ -122,7 +131,7 @@ export function Cashbook() {
           </div>
           <div>
             <div className="text-xs text-[#15171A]">Tổng chi</div>
-            <div className="text-[22px] text-[#F32B2B]">0</div>
+            <div className="text-[22px] text-[#F32B2B]">{formatMoney(transactions?.data?.totalExpenses)}</div>
           </div>
         </div>
 
@@ -134,44 +143,46 @@ export function Cashbook() {
           </div>
           <div>
             <div className="text-xs text-[#15171A]">Tồn quỹ</div>
-            <div className="text-[22px] text-[#FF8800]">0</div>
+            <div className="text-[22px] text-[#FF8800]">{formatMoney(transactions?.data?.totalIncome - transactions?.data?.totalExpenses)}</div>
           </div>
         </div>
       </div>
 
-      <div className="mb-3 flex justify-end">
-        <CustomButton
-          type="success"
-          prefixIcon={<Image src={ReceiptIcon} />}
-          wrapClassName="mx-2"
-          onClick={() => {
-            setOpenAddCashbookModal(true)
-            setCashbookType('income')
-          }}
-        >
-          Lập phiếu thu
-        </CustomButton>
-        <CustomButton
-          type="success"
-          prefixIcon={<Image src={PaymentIcon} />}
-          wrapClassName="mx-2"
-          onClick={() => {
-            setOpenAddCashbookModal(true)
-            setCashbookType('expenses')
-          }}
-        >
-          Lập phiếu chi
-        </CustomButton>
-        <CustomButton
-          prefixIcon={<Image src={ExportIcon} />}
-          wrapClassName="mx-2"
-        >
-          Xuất file
-        </CustomButton>
-      </div>
-
-      <Search />
-
+      {
+        hasPermission(profile?.role?.permissions, RoleModel.cashbook, RoleAction.create) && (
+          <div className="mb-3 flex justify-end">
+            <CustomButton
+              type="success"
+              prefixIcon={<Image src={ReceiptIcon} />}
+              wrapClassName="mx-2"
+              onClick={() => {
+                setOpenAddCashbookModal(true)
+                setCashbookType('income')
+              }}
+            >
+              Lập phiếu thu
+            </CustomButton>
+            <CustomButton
+              type="success"
+              prefixIcon={<Image src={PaymentIcon} />}
+              wrapClassName="mx-2"
+              onClick={() => {
+                setOpenAddCashbookModal(true)
+                setCashbookType('expenses')
+              }}
+            >
+              Lập phiếu chi
+            </CustomButton>
+            <CustomButton
+              prefixIcon={<Image src={ExportIcon} />}
+              wrapClassName="mx-2"
+            >
+              Xuất file
+            </CustomButton>
+          </div>
+        )
+      }
+      <Search setFormFilter={setFormFilter} formFilter={formFilter} />
       <CustomTable
         rowSelection={{
           type: 'checkbox',

@@ -6,17 +6,29 @@ import PrintIcon from '@/assets/printOrder.svg';
 import { CustomButton } from '@/components/CustomButton';
 import { formatDateTime, formatMoney } from '@/helpers';
 import { AddCashbookModal } from '../AddCashbookModal';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { useReactToPrint } from 'react-to-print';
+import InvoicePrint from './InvoicePrint';
+import styles from './invoicePrint.module.css';
 
 const { TextArea } = Input;
 
 export function Info({ record }: { record: any }) {
+  const invoiceComponentRef = useRef(null);
   const [openAddCashbookModal, setOpenAddCashbookModal] = useState(false);
   const [transactionId, setTransactionId] = useState('');
   const [transactionType, setTransactionType] = useState('');
+
+  const handlePrintInvoice = useReactToPrint({
+    content: () => invoiceComponentRef.current,
+  });
+  console.log('record', record)
   return (
     <div className="gap-12 ">
       <div className="mb-5 flex gap-5">
+        <div ref={invoiceComponentRef} className={styles.invoicePrint}>
+          <InvoicePrint saleInvoice={record} />
+        </div>
         <div className="mb-4 grid w-2/3 grid-cols-2 gap-5">
           <div className="grid grid-cols-3 gap-5">
             <div className="col-span-1 text-gray-main">Mã phiếu:</div>
@@ -95,6 +107,7 @@ export function Info({ record }: { record: any }) {
           type="primary"
           outline={true}
           prefixIcon={<Image src={PrintIcon} alt="" />}
+          onClick={handlePrintInvoice}
         >
           In sổ
         </CustomButton>
@@ -102,7 +115,10 @@ export function Info({ record }: { record: any }) {
 
       <AddCashbookModal
         isOpen={openAddCashbookModal}
-        onCancel={() => setOpenAddCashbookModal(false)}
+        onCancel={() => {
+          setOpenAddCashbookModal(false);
+          setTransactionId('');
+        }}
         type={transactionType}
         id={transactionId}
       />

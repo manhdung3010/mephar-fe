@@ -9,7 +9,7 @@ import { CustomButton } from '@/components/CustomButton';
 import { CustomInput } from '@/components/CustomInput';
 import { CustomSelect } from '@/components/CustomSelect';
 import CustomTable from '@/components/CustomTable';
-import { formatMoney, formatNumber, hasPermission } from '@/helpers';
+import { formatDateTime, formatMoney, formatNumber, hasPermission } from '@/helpers';
 import { useRef, useState } from 'react';
 import DeleteModal from './DeleteModal';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -32,7 +32,8 @@ interface IRecord {
   diffQuantity: number;
   diffAmount: number;
   productUnit?: any;
-  difference: number
+  difference: number;
+  realQuantity: number;
 }
 
 export function Info({ record }: { record: any }) {
@@ -63,6 +64,9 @@ export function Info({ record }: { record: any }) {
       title: 'Tồn kho',
       dataIndex: 'inventoryQuantity',
       key: 'inventoryQuantity',
+      render: (_, record) => <span>
+        {formatNumber(record?.realQuantity + record?.difference)}
+      </span>
     },
     {
       title: 'Thực tế',
@@ -120,13 +124,13 @@ export function Info({ record }: { record: any }) {
 
         <div className="grid grid-cols-2 gap-5">
           <div className="text-gray-main">Thời gian:</div>
-          <div className="text-black-main">17/10/2023 09:05:14</div>
+          <div className="text-black-main">{formatDateTime(record?.createdAt)}</div>
         </div>
 
         <div className="grid grid-cols-2 gap-5">
           <div className="text-gray-main">
-            <Image src={EditIcon} />
-            <span className="ml-2">Ghi chú:</span>
+            {/* <Image src={EditIcon} /> */}
+            <span className="">Ghi chú:</span>
           </div>
           <div className="w-3/4">
             {/* <CustomInput bordered={false} onChange={() => {}} /> */}

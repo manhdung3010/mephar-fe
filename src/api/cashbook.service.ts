@@ -33,6 +33,12 @@ export function createOtherUser(payload) {
 export function createTransaction(payload) {
   return axiosClient.post(`transaction`, payload);
 }
+export function updateTransaction(id, payload) {
+  return axiosClient.patch(`transaction/${id}`, payload);
+}
+export function deleteTransaction(id) {
+  return axiosClient.delete(`transaction/${id}`);
+}
 export function getTransaction(params?: {
   page: number;
   limit: number;

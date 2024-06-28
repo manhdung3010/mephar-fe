@@ -1,36 +1,38 @@
 import { Checkbox, Select, Spin, message } from 'antd';
 import Image from 'next/image';
 
+import { createTransaction, deleteTransaction, getTransactionDetail, getTypeTransaction, getUserTransaction, updateTransaction } from '@/api/cashbook.service';
+import { getCustomer, getCustomerDebt } from '@/api/customer.service';
+import { getEmployee } from '@/api/employee.service';
+import { getProvider } from '@/api/provider.service';
+import ArrowDownIcon from '@/assets/arrowDownGray.svg';
+import DeleteIcon from '@/assets/deleteRed.svg';
+import EditIcon from '@/assets/editGreenIcon.svg';
+import PlusCircleIcon from '@/assets/plus-circle.svg';
 import ReceiptIcon from '@/assets/receiptIcon.svg';
 import { CustomButton } from '@/components/CustomButton';
 import { CustomDatePicker } from '@/components/CustomDatePicker';
-import { CustomInput, CustomTextarea } from '@/components/CustomInput';
+import { CustomInput } from '@/components/CustomInput';
 import Label from '@/components/CustomLabel';
 import { CustomModal } from '@/components/CustomModal';
+import DeleteModal from '@/components/CustomModal/ModalDeleteItem';
 import { CustomSelect } from '@/components/CustomSelect';
-import ArrowDownIcon from '@/assets/arrowDownGray.svg';
-import PlusCircleIcon from '@/assets/plus-circle.svg';
-import { AddCollectType } from './AddCollectTypeModal';
+import CustomTable from '@/components/CustomTable';
+import InputError from '@/components/InputError';
+import { formatDateTime, formatMoney, hasPermission } from '@/helpers';
+import { branchState, profileState } from '@/recoil/state';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import dayjs from 'dayjs';
+import { debounce } from 'lodash';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { schema } from './schema';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createTransaction, getTransactionDetail, getTypeTransaction, getUserTransaction } from '@/api/cashbook.service';
-import { debounce } from 'lodash';
-import { getCustomer, getCustomerDebt } from '@/api/customer.service';
-import { getProvider } from '@/api/provider.service';
-import { getEmployee } from '@/api/employee.service';
-import { AddOtherUserModal } from './AddOtherUserModal';
-import dayjs from 'dayjs';
-import InputError from '@/components/InputError';
-import CustomTable from '@/components/CustomTable';
-import { render } from 'react-dom';
-import { formatDateTime, formatMoney } from '@/helpers';
 import { useRecoilValue } from 'recoil';
-import { branchState } from '@/recoil/state';
-import DeleteIcon from '@/assets/deleteRed.svg';
-import EditIcon from '@/assets/editGreenIcon.svg';
+import { RoleAction, RoleModel } from '../settings/role/role.enum';
+import { AddCollectType } from './AddCollectTypeModal';
+import { AddOtherUserModal } from './AddOtherUserModal';
+import ConfirmDebtModal from './ConfirmDebtModal';
+import { schema } from './schema';
 const { Option } = Select;
 
 export function AddCashbookModal({
@@ -61,7 +63,8 @@ export function AddCashbookModal({
     defaultValues: {
       target: 'other',
       paymentDate: dayjs().format('YYYY-MM-DD hh:mm:ss'),
-      isPaymentOrder: false
+      isPaymentOrder: false,
+      isDebt: false
     }
   });
   const queryClient = useQueryClient();
@@ -72,20 +75,33 @@ export function AddCashbookModal({
     keyword: '',
   });
   const [orderList, setOrderList] = useState([]);
+  const [confirmDebt, setConfirmDebt] = useState(false);
+  const [isOpenDelete, setIsOpenDelete] = useState(false);
+  const profile = useRecoilValue(profileState);
+
   const { data: groupProduct } = useQuery(['TYPE_TRANSACTION', type], () =>
     getTypeTransaction(type)
   );
   const { data: customers, isLoading } = useQuery(
     ['CUSTOMER_LIST', formFilter],
-    () => getCustomer(formFilter)
+    () => getCustomer(formFilter),
+    {
+      enabled: !!isOpen
+    }
   );
   const { data: providers, isLoading: isLoadingProvider } = useQuery(
     ['PROVIDER_LIST', formFilter.page, formFilter.limit, formFilter.keyword],
-    () => getProvider(formFilter)
+    () => getProvider(formFilter),
+    {
+      enabled: !!isOpen
+    }
   );
   const { data: employees, isLoading: isLoadingEmployees } = useQuery(
     ['SETTING_EMPLOYEE', formFilter.page, formFilter.limit, formFilter.keyword],
-    () => getEmployee(formFilter)
+    () => getEmployee(formFilter),
+    {
+      enabled: !!isOpen
+    }
   );
   const { data: otherUsers, isLoading: isLoadingOtherUsers } = useQuery(
     ['OTHER_USER'],
@@ -123,7 +139,7 @@ export function AddCashbookModal({
         amount: 0
       })))
     }
-  }, [customerDebt?.data, getValues('target'), getValues('targetId')])
+  }, [customerDebt?.data])
 
   const { mutate: mutateCreateCustomer, isLoading: isLoadingCreateCustomer } =
     useMutation(
@@ -162,10 +178,54 @@ export function AddCashbookModal({
         },
       }
     );
+  const { mutate: mutateUpdateTransaction, isLoading: isLoadingUpdate } =
+    useMutation(
+      () => {
+        let payload: any = {
+          typeId: getValues('typeId'),
+          value: getValues('value'),
+          paymentDate: getValues('paymentDate'),
+          note: getValues('note'),
+        }
+        if (!getValues('isPaymentOrder')) {
+          delete payload.orderPayment;
+        }
+        return updateTransaction(id, payload)
+      },
+      {
+        onSuccess: async () => {
+          await queryClient.invalidateQueries(["TRANSACTION"]);
+          reset();
+          onCancel();
+        },
+        onError: (err: any) => {
+          message.error(err?.message);
+        },
+      }
+    );
+  const { mutate: mutateDeleteTransaction, isLoading: isLoadingDelete } =
+    useMutation(
+      () => {
+        return deleteTransaction(id)
+      },
+      {
+        onSuccess: async () => {
+          await queryClient.invalidateQueries(["TRANSACTION"]);
+          reset();
+          onCancel();
+        },
+        onError: (err: any) => {
+          message.error(err?.message);
+        },
+      }
+    );
 
   const onSubmit = () => {
     mutateCreateCustomer()
   };
+  const handleDelete = () => {
+    mutateDeleteTransaction()
+  }
   const columns: any = [
     {
       title: 'Mã hóa đơn',
@@ -276,6 +336,15 @@ export function AddCashbookModal({
   useEffect(() => {
     if (transactionDetail?.data) {
       const data = transactionDetail?.data;
+      const newOrderList = data?.listOrder?.map((item, index) => {
+        const order = customerDebt?.data?.find((i) => i.orderId === item.orderId)
+        return {
+          ...order,
+          amount: +item.amount,
+          key: index
+        }
+      })
+      setOrderList(newOrderList)
       setValue('code', data.code, { shouldValidate: true })
       setValue('target', data.target, { shouldValidate: true })
       setValue('targetId', data.targetId, { shouldValidate: true })
@@ -285,18 +354,12 @@ export function AddCashbookModal({
       setValue('paymentDate', data.paymentDate, { shouldValidate: true })
       setValue('note', data.note, { shouldValidate: true })
       setValue('isPaymentOrder', data.isPaymentOrder, { shouldValidate: true })
-      setOrderList(data.listOrder.map((item, index) => {
-        const order = customerDebt?.data?.find((i) => i.orderId === item.orderId)
-        return {
-          ...order,
-          amount: +item.amount,
-          key: index
-        }
-      }))
     }
-  }, [transactionDetail?.data])
+  }, [transactionDetail?.data, customerDebt?.data])
 
-  console.log("values: ", getValues())
+  const onUpdate = () => {
+    mutateUpdateTransaction()
+  }
 
   return (
     <CustomModal
@@ -404,6 +467,7 @@ export function AddCashbookModal({
                 onChange={(value) => {
                   setValue('targetId', value, { shouldValidate: true })
                 }}
+                disabled={id && transactionDetail?.data?.targetId}
                 // loading={isLoadingProduct ?? isLoadingGroup}
                 value={getValues('targetId')}
                 notFoundContent={isLoading || isLoadingProvider || isLoadingEmployees ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
@@ -449,7 +513,7 @@ export function AddCashbookModal({
               value: item.id,
               label: item.name,
             }))}
-            disabled={id && transactionDetail?.data?.typeId}
+            disabled={id && transactionDetail?.data?.typeId && transactionDetail?.data?.isPaymentOrder}
             showSearch={true}
             className="suffix-icon h-11 !rounded"
             placeholder={type === 'income' ? 'Chọn loại thu' : 'Chọn loại chi'}
@@ -471,7 +535,7 @@ export function AddCashbookModal({
           <Label infoText="" label="Giá trị" required />
           <CustomInput
             placeholder="Nhập giá trị "
-            disabled={id && transactionDetail?.data?.value}
+            disabled={id && transactionDetail?.data?.value && transactionDetail?.data?.isPaymentOrder}
             className="h-11"
             value={getValues('value')}
             type='number'
@@ -493,6 +557,7 @@ export function AddCashbookModal({
             }))
             }
             className="h-11 !rounded"
+            disabled={id && transactionDetail?.data?.userId}
             placeholder="Chọn nhân viên"
             value={getValues('userId')}
           />
@@ -502,7 +567,10 @@ export function AddCashbookModal({
         {
           getValues('target') === 'customer' && getValues('targetId') !== undefined && (
             <div className="mb-5 flex items-end">
-              <Checkbox className="mr-3" disabled={id && transactionDetail?.data?.isPaymentOrder} checked={getValues('isPaymentOrder')} onChange={(e) => setValue('isPaymentOrder', e.target.checked, { shouldValidate: true })} />
+              <Checkbox className="mr-3" disabled={id && transactionDetail?.data?.isPaymentOrder} checked={getValues('isPaymentOrder')} onChange={(e) => {
+                setValue('isPaymentOrder', e.target.checked, { shouldValidate: true })
+                setValue('isDebt', e.target.checked, { shouldValidate: true })
+              }} />
               Thanh toán hóa đơn nợ
             </div>
           )
@@ -546,17 +614,21 @@ export function AddCashbookModal({
       <div className="flex justify-end">
         {
           id && transactionDetail?.data ? <div className='flex'>
-            <CustomButton
-              type="success"
-              prefixIcon={<Image src={EditIcon} alt="" />}
-              outline={true}
-              wrapClassName="mx-2"
-              onClick={handleSubmit(onSubmit)}
-              loading={isLoadingCreateCustomer}
-              disabled={isLoadingCreateCustomer}
-            >
-              Cập nhật
-            </CustomButton>
+            {
+              hasPermission(profile?.role?.permissions, RoleModel.cashbook, RoleAction.update) && (
+                <CustomButton
+                  type="success"
+                  prefixIcon={<Image src={EditIcon} alt="" />}
+                  outline={true}
+                  wrapClassName="mx-2"
+                  onClick={onUpdate}
+                  loading={isLoadingUpdate}
+                  disabled={isLoadingUpdate}
+                >
+                  Cập nhật
+                </CustomButton>
+              )
+            }
             <CustomButton
               type="danger"
               outline={true}
@@ -565,22 +637,36 @@ export function AddCashbookModal({
             >
               Đóng
             </CustomButton>
-            <CustomButton
-              type="danger"
-              prefixIcon={<Image src={DeleteIcon} alt="" />}
-              wrapClassName="mx-2"
-              outline={true}
-            // onClick={handleSubmit(onSubmit)}
-            // loading={isLoadingCreateCustomer}
-            // disabled={isLoadingCreateCustomer}
-            >
-              Hủy
-            </CustomButton>
+            {
+              hasPermission(profile?.role?.permissions, RoleModel.cashbook, RoleAction.delete) && (
+                <CustomButton
+                  type="danger"
+                  prefixIcon={<Image src={DeleteIcon} alt="" />}
+                  wrapClassName="mx-2"
+                  outline={true}
+                  onClick={() => {
+                    setIsOpenDelete(true)
+                  }}
+                // loading={isLoadingCreateCustomer}
+                // disabled={isLoadingCreateCustomer}
+                >
+                  Hủy
+                </CustomButton>
+              )
+            }
+
           </div> : (
             <CustomButton
               type="success"
               prefixIcon={<Image src={ReceiptIcon} alt="" />}
-              onClick={handleSubmit(onSubmit)}
+              onClick={() => {
+                if (type === 'income') {
+                  setConfirmDebt(true)
+                }
+                else {
+                  handleSubmit(onSubmit)()
+                }
+              }}
               loading={isLoadingCreateCustomer}
               disabled={isLoadingCreateCustomer}
             >
@@ -602,6 +688,27 @@ export function AddCashbookModal({
         onCancel={() => setIsOpenAddOtherUser(false)}
         setGroupProductKeyword={setGroupProductKeyword}
         setProductValue={setValue}
+      />
+      <ConfirmDebtModal
+        isOpen={confirmDebt}
+        onCancel={() => setConfirmDebt(false)}
+        onSuccess={() => {
+          setValue('isDebt', true, { shouldValidate: true })
+          handleSubmit(onSubmit)()
+          setConfirmDebt(false)
+        }}
+        content=""
+      // isLoading={isLoadingDeleteCustomer}
+      />
+      <DeleteModal
+        isOpen={isOpenDelete}
+        onCancel={() => setIsOpenDelete(false)}
+        onSuccess={() => {
+          handleDelete()
+          setIsOpenDelete(false)
+        }}
+        content={type === 'income' ? 'phiếu thu' : 'phiếu chi'}
+        isLoading={isLoadingDelete}
       />
     </CustomModal>
   );
