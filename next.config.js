@@ -9,7 +9,7 @@ module.exports = withBundleAnalyzer({
     ignoreDuringBuilds: true,
   },
   images: {
-    domains: ['45.32.106.84', '157.10.44.228', 'mephar.acdtech.asia', '*.acdtech.asia'],
+    domains: ['45.32.106.84', '157.10.44.228', 'mephar.acdtech.asia', '*.acdtech.asia', 'api.mephar.com'],
   },
   poweredByHeader: false,
   trailingSlash: true,
