@@ -14,7 +14,8 @@ import { getSaleReport } from '@/api/report.service';
 import dayjs from 'dayjs';
 import { useState } from 'react';
 import { getOrder } from '@/api/order.service';
-import { formatMoney, formatNumber } from '@/helpers';
+import { formatMoney, formatNumber, timeAgo } from '@/helpers';
+import { getUserLog } from '@/api/user';
 
 export enum FilterDateType {
   CURRENT_MONTH = 1,
@@ -41,10 +42,29 @@ export function Home() {
     branchId,
   });
 
+  const [userFilter, setUserFilter] = useState({
+    page: 1,
+    limit: 20,
+    branchId,
+  });
+
   const { data: orders, isLoading } = useQuery(
     ['ORDER_LIST', JSON.stringify(formFilter), branchId],
     () => getOrder({ ...formFilter, branchId })
   );
+  const { data: userLog, isLoading: isLoadingUserLog } = useQuery(
+    ['USER_LOG', JSON.stringify(userFilter), branchId],
+    () => getUserLog({ ...userFilter, branchId })
+  );
+
+  const type = {
+    order: 'bán hàng',
+    sale_return: 'trả hàng',
+    inbound: 'nhập hàng',
+    purchase_return: 'trả hàng nhập',
+    inventory_checking: 'kiểm kho',
+    move: 'chuyển hàng',
+  }
 
   return (
     <div className="grid grid-cols-4 gap-x-6 py-6">
@@ -109,8 +129,8 @@ export function Home() {
         </div>
 
         <div className="px-5 pt-5">
-          {Array.from(Array(20).keys()).map((value) => (
-            <div className="flex h-fit gap-x-5" key={value}>
+          {userLog?.data?.items.map((value) => (
+            <div className="flex h-fit gap-x-5" key={value?.id}>
               <div className="flex flex-col items-center">
                 <Avatar style={{ background: '#4285F4' }} size={32}>
                   A
@@ -122,14 +142,14 @@ export function Home() {
 
               <div className="mb-5">
                 <div>
-                  <span className="text-[#0070F4]">Huỳnh.N- Admin</span>
+                  <span className="text-[#0070F4]">{value?.createdBy?.fullName}</span>
                   <span className="mx-2">vừa</span>
-                  <span className="text-[#0070F4]">nhập hàng</span>
+                  <span className="text-[#0070F4]">{type[value?.type]}</span>
                 </div>
                 <div>
-                  với giá trị <span className="font-bold">0</span>
+                  với giá trị <span className="font-bold">{formatMoney(value?.amount)}</span>
                 </div>
-                <div className="italic text-[#525D6A]">8 phút trước</div>
+                <div className="italic text-[#525D6A]">{timeAgo(value?.updatedAt)}</div>
               </div>
             </div>
           ))}

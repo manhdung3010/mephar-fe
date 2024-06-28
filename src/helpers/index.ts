@@ -268,3 +268,31 @@ export const to_vietnamese = (number) => {
   // Trả về kết quả kèm xóa những ký tự thừa
   return rsString.replace(/[0-9]/g, "").replace(/ /g, " ").replace(/ $/, "");
 };
+export const timeAgo = (dateString: string): string => {
+  const now = new Date();
+  const past = new Date(dateString.replace(" ", "T")); // Chuyển đổi định dạng thành ISO 8601
+  const seconds = Math.floor((now.getTime() - past.getTime()) / 1000);
+
+  let interval = Math.floor(seconds / 31536000);
+
+  if (interval >= 1) {
+    return interval + " năm trước";
+  }
+  interval = Math.floor(seconds / 2592000);
+  if (interval >= 1) {
+    return interval + " tháng trước";
+  }
+  interval = Math.floor(seconds / 86400);
+  if (interval >= 1) {
+    return interval + " ngày trước";
+  }
+  interval = Math.floor(seconds / 3600);
+  if (interval >= 1) {
+    return interval + " tiếng trước";
+  }
+  interval = Math.floor(seconds / 60);
+  if (interval >= 1) {
+    return interval + " phút trước";
+  }
+  return Math.floor(seconds) + " giây trước";
+};
