@@ -269,7 +269,7 @@ export function Customer() {
                       const { [record.key - 1]: value, ...remainingKeys } = expandedRowKeys;
                       setExpandedRowKeys(remainingKeys);
                     } else {
-                      setExpandedRowKeys({ ...expandedRowKeys, [record.key - 1]: true });
+                      setExpandedRowKeys({ [record.key - 1]: true });
                     }
                   }
                 };

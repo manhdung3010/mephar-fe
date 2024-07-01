@@ -84,7 +84,16 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
   } = useMutation(
     () => {
       const products = getValues('products').map(
-        ({ isBatchExpireControl, ...product }) => product
+        ({ isBatchExpireControl, ...product }) => {
+          return {
+            ...product,
+            batches: product.batches
+              .map((batch: any) => ({
+                id: batch?.batch?.id || batch.id,
+                quantity: batch?.quantity,
+              })),
+          }
+        }
       );
       return createReturnProduct({ ...getValues(), products });
     },
@@ -114,7 +123,7 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
         productUnitId: importId ? productUnitId : id,
         isBatchExpireControl: product.isBatchExpireControl,
         ...(!product.isBatchExpireControl ? null : {
-          batches: importId ? batches?.map((batch: any) => ({ id: batch.batch?.id, quantity, expiryDate: batch?.expiryDate })) : batches?.map(({ id, quantity, expiryDate }) => ({
+          batches: importId ? batches?.map((batch: any) => ({ id: batch.batch?.id, quantity: batch.quantity, expiryDate: batch?.expiryDate })) : batches?.map(({ id, quantity, expiryDate }) => ({
             id,
             quantity,
             expiryDate,
@@ -131,8 +140,6 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
   const onSubmit = () => {
     mutateCreateProductReturn();
   };
-
-  console.log("errors", errors)
 
   return (
     <div className="flex h-[calc(100vh-52px)] w-[360px] min-w-[360px] flex-col border-l border-[#E4E4E4] bg-white">

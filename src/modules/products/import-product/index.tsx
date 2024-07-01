@@ -193,7 +193,6 @@ export function ImportProduct() {
                 setExpandedRowKeys(remainingKeys);
               } else {
                 setExpandedRowKeys({
-                  ...expandedRowKeys,
                   [record.key - 1]: true,
                 });
               }

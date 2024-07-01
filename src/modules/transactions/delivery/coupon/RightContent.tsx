@@ -45,6 +45,7 @@ export function RightContent({ useForm, branchId, moveId, moveDetail }: { useFor
           {
             ...product,
             price: product.primePrice,
+            productUnitId: product.id,
             batches: product.batches?.filter((item) => item.isSelected)?.map((batch) => (
               {
                 id: batch.id,

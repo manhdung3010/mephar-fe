@@ -304,7 +304,6 @@ export function OrderTransaction() {
                 setExpandedRowKeys(remainingKeys);
               } else {
                 setExpandedRowKeys({
-                  ...expandedRowKeys,
                   [record.key - 1]: true,
                 });
               }
