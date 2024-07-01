@@ -1,4 +1,3 @@
-import type { ColumnsType } from 'antd/es/table';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
@@ -9,31 +8,39 @@ import { CustomInput } from '@/components/CustomInput';
 import CustomTable from '@/components/CustomTable';
 import { CustomUnitSelect } from '@/components/CustomUnitSelect';
 
-import { RightContent } from './RightContent';
+import { getSaleProducts } from '@/api/product.service';
 import { CustomAutocomplete } from '@/components/CustomAutocomplete';
-import { cloneDeep, debounce } from 'lodash';
-import { formatNumber, getImage } from '@/helpers';
-import { useQuery } from '@tanstack/react-query';
-import { getInboundProducts, getSaleProducts } from '@/api/product.service';
-import { useRecoilState, useRecoilValue } from 'recoil';
-import { branchState, checkInventoryState, productImportState } from '@/recoil/state';
-import { IImportProduct, IImportProductLocal } from '../../import-product/coupon/interface';
-import { importProductStatus } from '../../import-product/interface';
+import InputError from '@/components/InputError';
 import { EProductType } from '@/enums';
-import { render } from 'react-dom';
-
-interface IRecord {
-  key: number;
-  id: string;
-  name: string;
-  units: { name: string }[];
-  inventoryQuantity: number;
-  actualQuantity: number;
-  diffQuantity: number;
-  diffAmount: number;
-}
+import { formatNumber, getImage } from '@/helpers';
+import { IBatch } from '@/modules/sales/interface';
+import { branchState, checkInventoryState } from '@/recoil/state';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { useQuery } from '@tanstack/react-query';
+import { cloneDeep, debounce } from 'lodash';
+import { useForm } from 'react-hook-form';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { IImportProduct, IImportProductLocal } from '../../import-product/coupon/interface';
+import { ListBatchModal } from './ListBatchModal';
+import { RightContent } from './RightContent';
+import { schema } from './schema';
+import { useRouter } from 'next/router';
+import { getInventoryDetail } from '@/api/check-inventory';
 
 export function CheckInventoryCoupon() {
+  const {
+    getValues,
+    setValue,
+    handleSubmit,
+    formState: { errors },
+    setError,
+    reset,
+  } = useForm({
+    resolver: yupResolver(schema),
+    mode: 'onChange',
+    defaultValues: {
+    },
+  });
   const [expandedRowKeys, setExpandedRowKeys] = useState<
     Record<string, boolean>
   >({});
@@ -42,6 +49,9 @@ export function CheckInventoryCoupon() {
     useRecoilState(checkInventoryState);
   const [openListBatchModal, setOpenListBatchModal] = useState(false);
   const [productKeyAddBatch, setProductKeyAddBatch] = useState<string>();
+
+  const router = useRouter();
+  const { id } = router.query;
 
   const [formFilter, setFormFilter] = useState({
     page: 1,
@@ -60,6 +70,37 @@ export function CheckInventoryCoupon() {
     ],
     () => getSaleProducts({ ...formFilter, branchId }),
   );
+  const { data: details } = useQuery<{ data: any }>(
+    [
+      "INVENTORY_DETAIL",
+      id,
+      branchId
+    ],
+    () => getInventoryDetail(Number(id), branchId),
+    {
+      enabled: !!id,
+    }
+  );
+
+  useEffect(() => {
+    setImportProducts([]);
+    if (details?.data?.inventoryCheckingProduct?.length > 0 && importProducts.length === 0) {
+      // find product same in products and add to importProducts
+      details?.data?.inventoryCheckingProduct.forEach((p, index) => {
+        const productCode = p.productUnit?.product?.code;
+        console.log("index", index)
+        getSaleProducts({ page: 1, limit: 1, keyword: productCode, branchId }).then((res) => {
+          if (res.data?.items[0]) {
+            handleSelectProduct(JSON.stringify(res.data.items[0]));
+          }
+        })
+        // select product
+        // handleSelectProduct(JSON.stringify(product));
+      })
+
+      setValue('userCreateId', details?.data?.userCreate?.id, { shouldValidate: true });
+    }
+  }, [details?.data?.inventoryCheckingProduct]);
 
   useEffect(() => {
     if (importProducts.length) {
@@ -81,9 +122,9 @@ export function CheckInventoryCoupon() {
           return {
             ...product,
             realQuantity: newValue,
-            inventoryCheckingBatch: product.batches?.map((batch) => ({
+            batches: product.batches?.map((batch) => ({
               ...batch,
-              realQuantity: newValue,
+              quantity: newValue,
             })),
           };
         }
@@ -250,7 +291,7 @@ export function CheckInventoryCoupon() {
 
   const handleSelectProduct = (value) => {
     const product: IImportProduct = JSON.parse(value);
-    console.log("product", product)
+    let isSelectedUnit = true;
 
     const localProduct: any = {
       ...product,
@@ -258,10 +299,27 @@ export function CheckInventoryCoupon() {
       price: product.product.price * product.exchangeValue,
       primePrice: product.product.primePrice * Number(product.product.productUnit?.find((unit) => unit.id === product.id)?.exchangeValue),
       inventory: product.quantity,
-      newInventory: Math.floor(product.quantity / product.exchangeValue),
+      newInventory: Math.floor((product.product.quantity ?? 0) / product.exchangeValue),
       realQuantity: 1,
       discountValue: 0,
-      batches: product?.batches
+      batches: product.batches?.map((batch) => {
+        const inventory =
+          (batch.quantity / product.productUnit.exchangeValue)
+
+        const newBatch = {
+          ...batch,
+          inventory,
+          originalInventory: batch.quantity,
+          quantity: 0,
+          isSelected: inventory >= 1 ? isSelectedUnit : false,
+        };
+
+        if (inventory >= 1 && isSelectedUnit) {
+          isSelectedUnit = false;
+          newBatch.quantity = 1;
+        }
+        return newBatch;
+      }),
     };
 
     let cloneImportProducts = cloneDeep(importProducts);
@@ -281,7 +339,7 @@ export function CheckInventoryCoupon() {
                 ...batch,
                 // inventory,
                 // originalInventory: batch.quantity,
-                realQuantity: batch.isSelected ? batch.realQuantity + 1 : batch.realQuantity,
+                quantity: batch.isSelected ? batch.quantity + 1 : batch.quantity,
               };
 
               return newBatch;
@@ -291,11 +349,13 @@ export function CheckInventoryCoupon() {
 
         return product;
       });
+      setImportProducts(cloneImportProducts);
     } else {
-      cloneImportProducts.push(localProduct);
+      // cloneImportProducts.push(localProduct);
+      setImportProducts((prev) => [...prev, localProduct]);
     }
 
-    setImportProducts(cloneImportProducts);
+    // setImportProducts((prev) => [...cloneImportProducts]);
   }
 
   const checkDisplayListBatch = (product: IImportProductLocal) => {
@@ -307,18 +367,59 @@ export function CheckInventoryCoupon() {
   };
 
   const handleRemoveBatch = (productKey: string, batchId: number) => {
-    let products = cloneDeep(importProducts);
+    // let products = cloneDeep(importProducts);
 
-    products = products.map((product) => {
-      if (product.productKey === productKey) {
-        return {
-          ...product,
-          batches: product.batches?.filter((batch) => batch.id !== batchId),
-        };
+    // products = products.map((product) => {
+    //   if (product.productKey === productKey) {
+    //     return {
+    //       ...product,
+    //       batches: product.batches?.filter((batch) => batch.id !== batchId),
+    //     };
+    //   }
+    //   return product;
+    // });
+    // setImportProducts(products);
+
+    let productClone = cloneDeep(importProducts);
+
+    productClone = productClone?.map(
+      (product: any) => {
+        if (product.productKey === productKey) {
+          return {
+            ...product,
+            batches: product.batches?.map((batch) => {
+              if (batch.batchId === batchId) {
+                return {
+                  ...batch,
+                  quantity: 0,
+                  isSelected: false,
+                };
+              }
+
+              return batch;
+            }),
+          };
+        }
+        return product;
       }
-      return product;
-    });
-    setImportProducts(products);
+    );
+    // caculate quantity
+    productClone = productClone?.map(
+      (product: any) => {
+        if (product.productKey === productKey) {
+          return {
+            ...product,
+            realQuantity: product.batches.reduce(
+              (acc, obj) => acc + (obj.isSelected ? obj.quantity : 0),
+              0
+            ),
+          };
+        }
+
+        return product;
+      }
+    );
+    setImportProducts(productClone);
   };
 
   return (
@@ -401,7 +502,7 @@ export function CheckInventoryCoupon() {
                             Chọn lô
                           </div>
 
-                          {record.batches?.map((batch) => (
+                          {record.batches?.map((batch: any) => batch.isSelected && (
                             <div
                               key={batch.id}
                               className="flex items-center rounded bg-red-main py-1 px-2 text-white"
@@ -424,13 +525,13 @@ export function CheckInventoryCoupon() {
                             </div>
                           ))}
                         </div>
-                        {/* <InputError
+                        <InputError
                           error={
                             errors?.products &&
-                            errors?.products[Number(record.key) - 1]?.batches
+                            errors?.products[Number(record.key) - 1]?.inventoryCheckingBatch
                               ?.message
                           }
-                        /> */}
+                        />
                       </div>
                     )}
                   </>
@@ -445,7 +546,34 @@ export function CheckInventoryCoupon() {
         </div>
       </div>
 
-      <RightContent />
+      <RightContent setValue={setValue} getValues={getValues} errors={errors} handleSubmit={handleSubmit} reset={reset} />
+
+      <ListBatchModal
+        key={openListBatchModal ? 1 : 0}
+        isOpen={!!openListBatchModal}
+        onCancel={() => setOpenListBatchModal(false)}
+        productKeyAddBatch={productKeyAddBatch}
+        onSave={(listBatch: IBatch[]) => {
+          let importProductsClone: any = cloneDeep(importProducts);
+          importProductsClone = importProductsClone.map((product) => {
+            if (product.productKey === productKeyAddBatch) {
+              return {
+                ...product,
+                realQuantity: listBatch.reduce(
+                  (acc, obj) => acc + obj.quantity,
+                  0
+                ),
+                batches: listBatch,
+              };
+            }
+
+            return product;
+          });
+
+          setImportProducts(importProductsClone);
+          // setError("products", { message: undefined });
+        }}
+      />
     </div>
   );
 }

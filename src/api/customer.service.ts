@@ -14,7 +14,7 @@ export function getCustomerDebt(
     limit: number;
     keyword?: string;
   },
-  id: number
+  id: any
 ) {
   return axiosClient.get(`customer/${id}/total-debt`, { params });
 }
@@ -37,4 +37,18 @@ export function createCustomer(payload) {
 
 export function deleteCustomer(id: number) {
   return axiosClient.delete(`customer/${id}`);
+}
+
+export function getPointHistory(
+  id: number,
+  params: { page: number; limit: number; branchId: number }
+) {
+  return axiosClient.get(`customer/${id}/history-point`, { params });
+}
+
+export function updateCustomerPoint(id, payload) {
+  return axiosClient.patch(`point/${id}`, payload);
+}
+export function getNoteList(id: number) {
+  return axiosClient.get(`customer-note/${id}`);
 }

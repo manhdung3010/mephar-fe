@@ -27,7 +27,7 @@ export const warehouseStatus = {
   SALE_RETURN: 7,
 };
 
-const warehouseStatusLable = {
+export const warehouseStatusLable = {
   [warehouseStatus.INBOUND]: 'Nhập hàng',
   [warehouseStatus.ORDER]: 'Đặt hàng',
   [warehouseStatus.INBOUND_RETURN]: 'Trả hàng nhập',

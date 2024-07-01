@@ -52,6 +52,7 @@ export interface IImportProduct {
     isLoyaltyPoint: boolean;
     status: EProductStatus;
     createdAt: string;
+    quantity?: any;
     image?: {
       id: number;
       path: string;
