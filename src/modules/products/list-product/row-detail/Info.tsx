@@ -132,10 +132,10 @@ const Info = ({ record, onChangeUnit }: { record: IProduct, onChangeUnit: any })
             <div className="text-gray-main">Mã vạch:</div>
             <div className="text-black-main">{record.barCode}</div>
           </div>
-          <div className="grid grid-cols-2 gap-5">
+          {/* <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Mã thuốc:</div>
             <div className="text-black-main">{record?.drugCode}</div>
-          </div>
+          </div> */}
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Nhóm hàng: </div>
             <div className="text-black-main">{record.groupProduct?.name}</div>
@@ -166,10 +166,10 @@ const Info = ({ record, onChangeUnit }: { record: IProduct, onChangeUnit: any })
             <div className="text-gray-main">Trọng lượng:</div>
             <div className="text-black-main">{record.weight}</div>
           </div>
-          <div className="grid grid-cols-2 gap-5">
+          {/* <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Đường dùng:</div>
             <div className="text-black-main">{record.productDosage?.name}</div>
-          </div>
+          </div> */}
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Vị trí:</div>
             <div className="text-black-main">
@@ -182,14 +182,14 @@ const Info = ({ record, onChangeUnit }: { record: IProduct, onChangeUnit: any })
               {record.warningExpiryDate || record.warningExpiryText}
             </div>
           </div> */}
-          <div className="grid grid-cols-2 gap-5">
+          {/* <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Số đăng ký:</div>
             <div className="text-black-main">{record.registerNumber}</div>
           </div>
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Hoạt chất:</div>
             <div className="text-black-main">{record.activeElement}</div>
-          </div>
+          </div> */}
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Hàm lượng:</div>
             <div className="text-black-main">{record.content}</div>

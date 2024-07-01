@@ -23,10 +23,27 @@ import InvoiceModal from './return-product/InvoiceModal';
 import { LeftMenuStyled } from './styled';
 import ReportModal from './report';
 import { useRouter } from 'next/router';
+import PointModal from '../settings/point-modal';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { schema } from '../settings/point-modal/schema';
 
 export function LeftMenu() {
   const router = useRouter();
   const { isReturn } = router.query;
+
+  const [openPointModal, setOpenPointModal] = useState(false);
+
+  const {
+    getValues,
+    setValue,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(schema),
+    mode: "onChange",
+  });
 
   const resetOrderObject = useResetRecoilState(orderState);
   const resetOrderActive = useResetRecoilState(orderActiveState);
@@ -58,14 +75,14 @@ export function LeftMenu() {
           </div>
         </div>
 
-        <div className="mb-3 flex h-[99px] flex-col items-center justify-center rounded-lg bg-[#FBECEE] py-3 px-2">
+        {/* <div className="mb-3 flex h-[99px] flex-col items-center justify-center rounded-lg bg-[#FBECEE] py-3 px-2">
           <Image src={Gift} />
           <div className=" mt-2 text-center font-medium leading-tight text-red-main">
             Đổi quà
           </div>
-        </div>
+        </div> */}
 
-        <div className="mb-3 flex h-[99px] flex-col items-center justify-center rounded-lg bg-[#FBECEE] py-3 px-2">
+        <div onClick={() => setOpenPointModal(true)} className="mb-3 flex h-[99px] flex-col items-center justify-center rounded-lg bg-[#FBECEE] py-3 px-2 cursor-pointer">
           <Image src={CollectPoint} />
           <div className=" mt-2 text-center font-medium leading-tight text-red-main">
             Tích điểm
@@ -133,6 +150,15 @@ export function LeftMenu() {
       <ReportModal
         isOpen={!!openReport}
         onCancel={() => setOpenReport(false)}
+      />
+      <PointModal
+        isOpen={openPointModal}
+        onCancel={() => setOpenPointModal(false)}
+        getValues={getValues}
+        setValue={setValue}
+        handleSubmit={handleSubmit}
+        errors={errors}
+        reset={reset}
       />
     </LeftMenuStyled>
   );
