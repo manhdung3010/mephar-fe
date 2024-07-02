@@ -137,11 +137,12 @@ export function PointHistory({ record, branchId }: { record: any, branchId: numb
 
 const UpdatePointModal = ({ isOpen, onCancle, customerId, currentPoint }: { isOpen: boolean, onCancle: any, customerId: number, currentPoint: number }) => {
   const [pointValue, setPointValue] = useState(0)
+  const [noteValue, setNoteValue] = useState('')
   const queryClient = useQueryClient();
   const { mutate: mutateUpdateCustomerPoint, isLoading } =
     useMutation(
       () => {
-        return updateCustomerPoint(customerId, { point: pointValue });
+        return updateCustomerPoint(customerId, { point: pointValue, note: noteValue });
       },
       {
         onSuccess: async () => {
@@ -182,6 +183,12 @@ const UpdatePointModal = ({ isOpen, onCancle, customerId, currentPoint }: { isOp
               <span className='w-[150px] font-medium'>Điểm mới</span>
               <span className='flex-1'>
                 <CustomInput className='h-11' placeholder='Nhập điểm mới' onChange={(value) => setPointValue(value)} type='number' />
+              </span>
+            </div>
+            <div className='flex items-center'>
+              <span className='w-[150px] font-medium'>Ghi chú</span>
+              <span className='flex-1'>
+                <CustomInput className='h-11' placeholder='Nhập ghi chú' onChange={(value) => setNoteValue(value)} />
               </span>
             </div>
           </div>
