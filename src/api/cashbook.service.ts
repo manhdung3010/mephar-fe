@@ -44,6 +44,7 @@ export function getTransaction(params?: {
   limit: number;
   keyword?: string;
   ballotType?: string;
+  branchId?: number;
 }) {
   return axiosClient.get(`transaction`, { params });
 }

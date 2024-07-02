@@ -137,7 +137,7 @@ const Search = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void,
                 label: 'Phiếu thu',
               },
               {
-                value: 'expense',
+                value: 'expenses',
                 label: 'Phiếu chi',
               }
             ]}
@@ -148,7 +148,7 @@ const Search = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void,
       <div className='flex items-center gap-4 p-4'>
         {
           Object.keys(formFilter).map((key, index) => {
-            if (formFilter[key] && key !== "page" && key !== "limit" && key !== "keyword" && key !== "branchId") {
+            if (formFilter[key] && key !== "page" && key !== "limit" && key !== "keyword" && key !== "code" && key !== "branchId") {
               if ((key === "paymentDate[start]" || key === 'paymentDate[end]') && formFilter[key] !== null) {
                 // render date range to Tag
                 return
