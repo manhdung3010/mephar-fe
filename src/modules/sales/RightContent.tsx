@@ -450,7 +450,7 @@ export function RightContent({ useForm, discountList }: { useForm: any, discount
         {
           getValues('customerId') && (
             <div className='flex gap-2 mt-3'>
-              <span className='bg-[#F7DADD] text-red-main px-2 font-medium rounded-sm'>Nợ: {formatMoney(customers?.data?.items?.find((item) => item?.id === getValues('customerId'))?.debt)}</span>
+              <span className='bg-[#F7DADD] text-red-main px-2 font-medium rounded-sm'>Nợ: {formatMoney(+customers?.data?.items?.find((item) => item?.id === getValues('customerId'))?.totalDebt)}</span>
               <span className='bg-[#e6f8ec] text-[#00B63E] px-2 font-medium rounded-sm'>Điểm: {formatNumber(customers?.data?.items?.find((item) => item?.id === getValues('customerId'))?.point)}</span>
             </div>
           )
