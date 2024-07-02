@@ -20,7 +20,7 @@ interface IRecord {
   status: EProductStatus;
 }
 
-const Inventory = ({ productId, branchId }: { productId: number, branchId: number }) => {
+const Inventory = ({ productId, branchId, record }: { productId: number, branchId: number, record: any }) => {
 
   const { data: productInventory, isLoading } = useQuery(
     [
@@ -28,6 +28,8 @@ const Inventory = ({ productId, branchId }: { productId: number, branchId: numbe
     ],
     () => getProductInventory(productId)
   );
+
+  console.log('record', record)
 
   const columns: ColumnsType<IRecord> = [
     {

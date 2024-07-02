@@ -387,17 +387,18 @@ export function DeliveryCoupon() {
               wrapClassName="w-full !rounded bg-white"
               disabled={moveDetail ? true : false}
               onSelect={(value) => {
-                const product: any = JSON.parse(value);
+                const product: IImportProduct = JSON.parse(value);
                 let isSelectedUnit = true;
 
-                const localProduct: IImportProductLocal = {
+                const localProduct: any = {
                   ...product,
-                  primePrice: product.product.primePrice * product.productUnit.exchangeValue,
                   productKey: `${product.product.id}-${product.id}`,
+                  price: product.product.price * product.exchangeValue,
+                  primePrice: product.product.primePrice * Number(product.product.productUnit?.find((unit) => unit.id === product.id)?.exchangeValue),
                   inventory: product.quantity,
-                  productUnitId: product.product.productUnit.find((item) => item.unitName === product.unitName)?.id,
-                  newInventory: product.quantity,
+                  newInventory: Math.floor((product.product.quantity ?? 0) / product.exchangeValue),
                   quantity: 1,
+                  discountValue: 0,
                   batches: product.batches?.map((batch) => {
                     const inventory =
                       (batch.quantity / product.productUnit.exchangeValue)
@@ -425,21 +426,31 @@ export function DeliveryCoupon() {
                     (p) => p.productKey === localProduct.productKey
                   )
                 ) {
-                  cloneImportProducts = cloneImportProducts.map((product) => {
+                  cloneImportProducts = cloneImportProducts.map((product: any) => {
                     if (product.productKey === localProduct.productKey) {
                       return {
                         ...product,
-                        quantity: product.quantity + 1,
+                        realQuantity: product.realQuantity + 1,
+                        batches: product.batches.map((batch) => {
+                          const newBatch = {
+                            ...batch,
+                            // inventory,
+                            // originalInventory: batch.quantity,
+                            quantity: batch.isSelected ? batch.quantity + 1 : batch.quantity,
+                          };
+
+                          return newBatch;
+                        }),
                       };
                     }
 
                     return product;
                   });
+                  setImportProducts(cloneImportProducts);
                 } else {
-                  cloneImportProducts.push(localProduct);
+                  // cloneImportProducts.push(localProduct);
+                  setImportProducts((prev) => [...prev, localProduct]);
                 }
-
-                setImportProducts(cloneImportProducts);
               }}
               showSearch={true}
               listHeight={512}

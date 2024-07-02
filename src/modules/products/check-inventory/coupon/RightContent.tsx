@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import CopyIcon from '@/assets/copyIcon.svg';
 import EditIcon from '@/assets/editIcon.svg';
@@ -12,7 +12,7 @@ import { getEmployee } from '@/api/employee.service';
 import { debounce } from 'lodash';
 import EmployeeIcon from '@/assets/employeeIcon.svg';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { branchState, checkInventoryState } from '@/recoil/state';
+import { branchState, checkInventoryState, profileState } from '@/recoil/state';
 import { formatNumber } from '@/helpers';
 import { message } from 'antd';
 import { createCheckInventory } from '@/api/check-inventory';
@@ -22,6 +22,7 @@ import InputError from '@/components/InputError';
 export function RightContent({ getValues, setValue, errors, handleSubmit, reset }: any) {
   const router = useRouter();
   const branchId = useRecoilValue(branchState);
+  const profile = useRecoilValue(profileState);
   const [importProducts, setImportProducts] =
     useRecoilState(checkInventoryState);
   const [searchEmployeeText, setSearchEmployeeText] = useState('');
@@ -38,6 +39,12 @@ export function RightContent({ getValues, setValue, errors, handleSubmit, reset 
     });
     return total;
   }, [importProducts]);
+
+  useEffect(() => {
+    if (profile) {
+      setValue('userCreateId', profile.id);
+    }
+  }, [profile]);
 
   const { mutate: mutateCreateOrder, isLoading: isLoadingCreateOrder } =
     useMutation(

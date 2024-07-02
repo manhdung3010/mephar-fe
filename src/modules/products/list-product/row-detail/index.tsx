@@ -38,7 +38,7 @@ const ProductDetail = ({ record, onChangeUnit, branchId }: { record: IProduct, o
       </div>
       {select === 0 && <Info record={record} onChangeUnit={onChangeUnit} />}
       {select === 1 && <WareHouseCard productId={record?.id} branchId={branchId} />}
-      {select === 2 && <Inventory productId={record?.id} branchId={branchId} />}
+      {select === 2 && <Inventory productId={record?.id} record={record} branchId={branchId} />}
       {select === 3 && record?.isBatchExpireControl && <ProductExpire productId={record?.id} branchId={branchId} productUnit={record?.productUnit} />}
     </div>
   );

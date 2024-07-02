@@ -1,23 +1,18 @@
-import { useQuery } from '@tanstack/react-query';
-import { cloneDeep, debounce } from 'lodash';
-import Image from 'next/image';
-import { useEffect, useMemo, useState } from 'react';
-import { useRecoilValue } from 'recoil';
+import { message } from 'antd';
+import type { ColumnsType } from 'antd/es/table';
+import { cloneDeep, set } from 'lodash';
+import { useEffect, useState } from 'react';
+import { useRecoilState, useRecoilValue } from 'recoil';
 
-import { getBatch } from '@/api/batch.service';
-import DeleteIcon from '@/assets/deleteRed.svg';
 import { CustomButton } from '@/components/CustomButton';
 import { CustomInput } from '@/components/CustomInput';
-import Label from '@/components/CustomLabel';
 import { CustomModal } from '@/components/CustomModal';
-import { CustomSelect } from '@/components/CustomSelect';
 import CustomTable from '@/components/CustomTable';
 import { formatNumber } from '@/helpers';
-import { branchState, productImportState, productMoveState } from '@/recoil/state';
-import { IBatch } from '@/modules/products/import-product/interface';
+import { checkInventoryState, orderActiveState, orderState, productMoveState } from '@/recoil/state';
+import { IBatch } from '@/modules/sales/interface';
 
-// import type { IBatch } from '../interface';
-// import { AddBatchModal } from './AddBatchModal';
+// import type { IBatch, ISaleProductLocal } from './interface';
 
 export function ListBatchModal({
   isOpen,
@@ -30,73 +25,38 @@ export function ListBatchModal({
   productKeyAddBatch?: string;
   onSave: (value) => void;
 }) {
-  const importProducts = useRecoilValue(productMoveState);
-  const branchId = useRecoilValue(branchState);
 
-  const [listBatchSelected, setListBatchSelected] = useState<IBatch[]>([]);
+  const [importProducts, setImportProducts] =
+    useRecoilState(productMoveState);
+
+  const [batchErr, setBatchErr] = useState<any[]>([]);
+
+  const [listBatch, setListBatch] = useState<IBatch[]>([]);
 
   useEffect(() => {
-    if (productKeyAddBatch) {
-      const product = importProducts?.find(
-        (product) => product.productKey === productKeyAddBatch
-      );
-
-      // console.log('product', product)
-
-      if (product?.batches) {
-        const newBatches = product.batches.map((batch) => ({
-          ...batch,
-          inventory: batch.inventory,
-          newInventory: Math.floor(batch.originalInventory / product.productUnit.exchangeValue)
-        }));
-
-        setListBatchSelected(newBatches);
+    importProducts?.forEach((product: any) => {
+      if (product.productKey === productKeyAddBatch) {
+        setListBatch(
+          product.batches?.map((batch) => ({
+            ...batch,
+            batchId: batch.id,
+            productKey: product.productKey,
+            productId: product.productId,
+            newInventory: Math.floor(batch.originalInventory / product.productUnit.exchangeValue),
+          }))
+        );
       }
-    }
+    });
   }, [productKeyAddBatch]);
 
-  const [formFilter, setFormFilter] = useState({
-    page: 1,
-    limit: 99,
-    keyword: '',
-  });
+  console.log('importProducts', importProducts)
 
-  const { productId, exchangeValue } = useMemo(() => {
-    const result = productKeyAddBatch?.split('-') ?? [];
-
-    const exchangeValue =
-      importProducts?.find(
-        (product) => product.productKey === productKeyAddBatch
-      )?.exchangeValue ?? 1;
-
-    return {
-      productId: Number(result[0]),
-      unitId: Number(result[1]),
-      exchangeValue,
-    };
-  }, [productKeyAddBatch]);
-
-  const { data: batches, isLoading } = useQuery(
-    ['LIST_BATCH', formFilter.page, formFilter.limit, formFilter.keyword],
-    () =>
-      getBatch({
-        ...formFilter,
-        productId,
-        branchId,
-      }),
-    { enabled: isOpen }
-  );
-
-  const columns = [
-    {
-      title: 'STT',
-      dataIndex: 'key',
-      key: 'key',
-    },
+  const columns: ColumnsType<IBatch> = [
     {
       title: 'Tên',
       dataIndex: 'name',
       key: 'name',
+      // render: (_, { batch }) => batch.name,
     },
     {
       title: 'Hạn sử dụng',
@@ -107,52 +67,66 @@ export function ListBatchModal({
       title: 'Số lượng',
       dataIndex: 'quantity',
       key: 'quantity',
-      render: (quantity, { id }) => (
-        <CustomInput
-          bordered={false}
-          onChange={(value) => {
-            let batchesClone = cloneDeep(listBatchSelected);
-            batchesClone = batchesClone.map((batch) => {
-              if (batch.id === id) {
-                return { ...batch, quantity: value };
-              }
+      render: (quantity, { batchId, saleQuantity }) => (
+        <div className='flex items-center gap-2'>
+          <CustomInput
+            bordered={false}
+            onChange={(value) => {
+              let batchesClone = cloneDeep(listBatch);
+              batchesClone = batchesClone.map((batch: any) => {
+                if (batch.batchId === batchId) {
+                  // if (value > batch.saleQuantity) {
+                  //   message.error('Số lượng sản phẩm chọn phải nhỏ hơn hoặc bằng số lượng bán');
+                  //   // set error with key and value to batchErr, filter duplicate key
+                  //   setBatchErr([...batchErr, { [batchId]: true }]);
 
-              return batch;
-            });
+                  //   return { ...batch, quantity: saleQuantity };
+                  // }
+                  // set error with key and value to batchErr, filter duplicate key
+                  setBatchErr(batchErr.filter((item) => item[batchId] !== true));
+                  return { ...batch, quantity: value };
+                }
 
-            setListBatchSelected(batchesClone);
-          }}
-          wrapClassName="w-[100px]"
-          type="number"
-          defaultValue={quantity}
-        />
-      ),
-    },
-    {
-      title: 'Tồn',
-      dataIndex: 'inventory',
-      key: 'inventory',
-      render: (value) => formatNumber(Math.floor(value || 0)),
-    },
-    {
-      title: '',
-      dataIndex: 'action',
-      key: 'action',
-      render: (_, { id }) => (
-        <div
-          className=" cursor-pointer"
-          onClick={() => {
-            const records = listBatchSelected.filter(
-              (batch) => batch.id !== id
-            );
-            setListBatchSelected(records);
-          }}
-        >
-          <Image src={DeleteIcon} alt="" />
+                return batch;
+              });
+
+              setListBatch(batchesClone);
+            }}
+            value={listBatch.find((batch) => batch.batchId === batchId)?.quantity || 0}
+            wrapClassName="w-[100px]"
+            type="number"
+            defaultValue={quantity}
+          />
         </div>
       ),
     },
+    {
+      title: 'Số lượng tồn',
+      dataIndex: 'newInventory',
+      key: 'newInventory',
+      render: (value) => formatNumber(Math.floor(value || 0)),
+    },
   ];
+
+  const checkBatchQuantity = () => {
+    // eslint-disable-next-line no-restricted-syntax
+    for (const batch of listBatch) {
+      if (batch.isSelected && batch.quantity === 0) {
+        message.error('Số lượng sản phẩm chọn phải lớn hơn hoặc bằng 1');
+        return false;
+      }
+
+      if (batch.isSelected && batch.quantity > batch.inventory) {
+        message.error(
+          'Số lượng sản phẩm chọn phải nhỏ hơn hoặc bằng số lượng tồn'
+        );
+        return false;
+      }
+    }
+    return true;
+  };
+
+  console.log('listBatch', listBatch)
 
   return (
     <CustomModal
@@ -161,85 +135,63 @@ export function ListBatchModal({
       title="Lô sản phẩm"
       width={650}
       onSubmit={onCancel}
-      isLoading={isLoading}
       customFooter={true}
       forceRender={true}
     >
       <div className="my-5 h-[1px] w-full bg-[#C7C9D9]" />
 
-      <div className="mb-4">
-        <Label label="Lô sản phẩm" hasInfoIcon={false} />
-        <CustomSelect
-          onChange={(value) => {
-            const record = JSON.parse(value);
-
-            if (!listBatchSelected?.find((batch) => batch.id === record.id)) {
-              const quantity = importProducts?.find(
-                (product) => product.productKey === productKeyAddBatch
-              )?.quantity;
-
-              if (listBatchSelected.length === 0) {
-                setListBatchSelected((preValue) => [
-                  ...preValue,
-                  {
-                    ...record,
-                    originalInventory: record.inventory,
-                    inventory: record.inventory / exchangeValue,
-                    quantity,
-                  },
-                ]);
-                return;
-              }
-
-              setListBatchSelected((preValue) => [
-                ...preValue,
-                {
-                  ...record,
-                  originalInventory: record.inventory,
-                  inventory: record.inventory / exchangeValue,
-                  quantity: 1,
-                },
-              ]);
-            }
-          }}
-          options={batches?.data?.items?.map((item) => ({
-            value: JSON.stringify(item),
-            label: item.name,
-          }))}
-          showSearch={true}
-          onSearch={debounce((value) => {
-            setFormFilter((pre) => ({ ...pre, keyword: value }));
-          }, 300)}
-          className="h-11 !rounded"
-          placeholder="Chọn lô"
-          value={null}
-        />
-      </div>
       <CustomTable
-        dataSource={listBatchSelected?.map((item, index) => ({
-          ...item,
-          key: index + 1,
+        dataSource={listBatch.map((batch: any) => ({
+          ...batch,
+          key: batch.batchId || batch.id,
         }))}
         columns={columns}
         scroll={{ x: 600 }}
+        rowSelection={{
+          type: 'checkbox',
+          selectedRowKeys: [
+            ...listBatch
+              .filter((batch) => batch.isSelected)
+              .map((batch: any) => batch.batchId || batch.id),
+          ],
+          onChange(selectedRowKeys) {
+            let listBatchClone = cloneDeep(listBatch);
+
+            listBatchClone = listBatchClone.map((batch: any) => {
+              if (selectedRowKeys.includes(batch.batchId || batch.id)) {
+                return {
+                  ...batch,
+                  quantity: batch.quantity || 1,
+                  isSelected: true,
+                };
+              }
+
+              return { ...batch, isSelected: false, quantity: 0 };
+            });
+
+            setListBatch(listBatchClone);
+          },
+        }}
       />
 
       <div className="mt-5 flex justify-end gap-x-4">
         <CustomButton
-          onClick={() => {
-            onCancel();
-          }}
-          className="h-[46px] min-w-[150px] py-2 px-4"
+          onClick={onCancel}
           outline={true}
+          className="h-[46px] min-w-[150px] py-2 px-4"
         >
           Đóng
         </CustomButton>
         <CustomButton
           onClick={() => {
-            onSave(listBatchSelected);
-            onCancel();
+            if (checkBatchQuantity()) {
+              onSave(listBatch);
+              onCancel();
+            }
           }}
           className="h-[46px] min-w-[150px] py-2 px-4"
+        // type={isSaleReturn && batchErr.length > 0 ? 'disable' : 'danger'}
+        // disabled={isSaleReturn && batchErr.length > 0 ? true : false}
         >
           Lưu
         </CustomButton>

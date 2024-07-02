@@ -72,6 +72,7 @@ export default function ReturnCoupon() {
       importProductDetail?.data?.products?.forEach((product) => {
         const localProduct: IImportProductLocal = {
           ...product,
+          code: product.product.code,
           productUnit: product?.productUnit,
           productKey: `${product.productId || product.productId}-${product.id}`,
           primePrice: +product.price,
@@ -120,7 +121,6 @@ export default function ReturnCoupon() {
         } else {
           cloneImportProducts.push(localProduct);
         }
-
       });
       setReturnProducts(cloneImportProducts);
       setValue('supplierId', importProductDetail?.data?.inbound.supplierId, { shouldValidate: true });
@@ -327,7 +327,7 @@ export default function ReturnCoupon() {
       title: 'Mã hàng',
       dataIndex: 'code',
       key: 'code',
-      render: (_, { product }, index) => (
+      render: (value) => (
         <span
           className="cursor-pointer text-[#0070F4]"
         // onClick={() => {
@@ -341,7 +341,7 @@ export default function ReturnCoupon() {
         //   setExpandedRowKeys({ ...temp });
         // }}
         >
-          {product.code}
+          {value}
         </span>
       ),
     },
@@ -380,13 +380,13 @@ export default function ReturnCoupon() {
                 const productUnit: any = product.product.productUnit.find(
                   (unit) => unit.id === value
                 );
-
                 return {
                   ...product,
                   productKey: `${product.product.id}-${value}`,
                   ...productUnit,
                   primePrice: product.product.primePrice * productUnit.exchangeValue,
                   price: product.product.primePrice * productUnit.exchangeValue,
+                  code: productUnit.code,
                   batches: product.batches?.map((batch) => ({
                     ...batch,
                     inventory:
@@ -471,6 +471,8 @@ export default function ReturnCoupon() {
       },
     },
   ];
+
+  console.log('returnProducts', returnProducts)
 
   const handleRemoveBatch = (productKey: string, batchId: number) => {
     let products = cloneDeep(returnProducts);

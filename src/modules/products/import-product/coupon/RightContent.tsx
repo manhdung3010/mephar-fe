@@ -55,14 +55,14 @@ export function RightContent({ useForm }: { useForm: any }) {
           price += Number(primePrice) * quantity - discountValue;
         }
       );
-      setValue('paid', price, { shouldValidate: true });
+      setValue('paid', price - (getValues('discount') ?? 0), { shouldValidate: true });
     }
     else {
       setValue('paid', 0, { shouldValidate: true });
     }
 
     return price;
-  }, [productsImport]);
+  }, [productsImport, getValues('discount')]);
 
   const totalPriceAfterDiscount = useMemo(() => {
     const price = Number(totalPrice) - Number(getValues('discount') ?? 0);

@@ -283,7 +283,7 @@ export function CheckInventoryCoupon() {
       title: 'Giá trị lệch',
       dataIndex: 'diffAmount',
       key: 'diffAmount',
-      render: (_, { realQuantity, newInventory, price }) => formatNumber(Math.floor((realQuantity - newInventory) * price)),
+      render: (_, { realQuantity, newInventory, primePrice }) => formatNumber(Math.floor((realQuantity - newInventory) * primePrice)),
     },
   ];
 

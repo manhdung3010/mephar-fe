@@ -231,11 +231,11 @@ export function AddCashbookModal({
       title: 'Mã hóa đơn',
       dataIndex: 'code',
       key: 'code',
-      render: (value, _, index) => (
+      render: (value, record, index) => (
         <span
           className="cursor-pointer text-[#0070F4]"
         >
-          {value}
+          {record?.order?.code}
         </span>
       ),
     },

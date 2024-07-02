@@ -52,3 +52,7 @@ export function updateCustomerPoint(id, payload) {
 export function getNoteList(id: number) {
   return axiosClient.get(`customer-note/${id}`);
 }
+
+export function createCustomerNote(payload) {
+  return axiosClient.post(`customer-note`, payload);
+}

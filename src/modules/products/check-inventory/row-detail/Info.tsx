@@ -65,7 +65,7 @@ export function Info({ record }: { record: any }) {
       dataIndex: 'inventoryQuantity',
       key: 'inventoryQuantity',
       render: (_, record) => <span>
-        {formatNumber(record?.realQuantity + record?.difference)}
+        {formatNumber(record?.difference >= 0 ? (record?.realQuantity - record?.difference) : (Math.abs(record?.difference) + record?.realQuantity))}
       </span>
     },
     {

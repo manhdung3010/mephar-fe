@@ -210,7 +210,7 @@ export function DeliveryTransaction() {
                 const { [record.key]: value, ...remainingKeys } = expandedRowKeys;
                 setExpandedRowKeys(remainingKeys);
               } else {
-                setExpandedRowKeys({ ...expandedRowKeys, [record.key]: true });
+                setExpandedRowKeys({ [record.key]: true });
               }
             }
           };
