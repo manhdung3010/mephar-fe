@@ -34,8 +34,6 @@ export function ProductDiscountModal({
   const [isOpenSelectProduct, setIsOpenSelectProduct] = useState(false);
   const [productDiscountList, setProductDiscountList] = useState([]);
   const [discountId, setDiscountId] = useState();
-
-  console.log("discountList", discountList)
   // const { data: products, isLoading: isLoadingProduct, isSuccess } = useQuery<{
   //   data?: { items: ISaleProduct[] };
   // }>(

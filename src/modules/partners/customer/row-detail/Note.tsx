@@ -39,6 +39,7 @@ export function Note({ record }: { record: any }) {
       title: 'Ghi chú',
       dataIndex: 'note',
       key: 'note',
+      render: (value) => value,
     },
     {
       title: 'Người thêm',

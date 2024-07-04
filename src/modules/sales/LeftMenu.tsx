@@ -27,6 +27,7 @@ import PointModal from '../settings/point-modal';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { schema } from '../settings/point-modal/schema';
+import DiscountModal from './discount-modal';
 
 export function LeftMenu() {
   const router = useRouter();
@@ -53,6 +54,7 @@ export function LeftMenu() {
   const [openCustomer, setOpenCustomer] = useState(false);
   const [openInvoice, setOpenInvoice] = useState(false);
   const [openReport, setOpenReport] = useState(false);
+  const [openDiscount, setOpenDiscount] = useState(false);
 
   useEffect(() => {
     if (isReturn) {
@@ -68,7 +70,7 @@ export function LeftMenu() {
   return (
     <LeftMenuStyled className="h-[calc(100vh-78px)] w-[125px] min-w-[125px] overflow-y-auto py-5 px-4">
       <div>
-        <div className="mb-3 flex h-[99px] flex-col items-center justify-center rounded-lg bg-[#FBECEE] py-3 px-2">
+        <div onClick={() => setOpenDiscount(true)} className="mb-3 flex h-[99px] flex-col items-center justify-center rounded-lg bg-[#FBECEE] py-3 px-2 cursor-pointer">
           <Image src={Promotion} />
           <div className=" mt-2 text-center font-medium leading-tight text-red-main">
             Khuyến mại
@@ -150,6 +152,10 @@ export function LeftMenu() {
       <ReportModal
         isOpen={!!openReport}
         onCancel={() => setOpenReport(false)}
+      />
+      <DiscountModal
+        isOpen={!!openDiscount}
+        onCancel={() => setOpenDiscount(false)}
       />
       <PointModal
         isOpen={openPointModal}
