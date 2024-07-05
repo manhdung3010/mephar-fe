@@ -24,7 +24,7 @@ const Inventory = ({ productId, branchId, record }: { productId: number, branchI
 
   const { data: productInventory, isLoading } = useQuery(
     [
-      'PRODUCT_INVENTORY', record?.id, branchId
+      'PRODUCT_INVENTORY', productId, branchId
     ],
     () => getProductInventory(productId, { branchId }),
     {

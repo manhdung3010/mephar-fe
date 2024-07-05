@@ -87,11 +87,11 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
         ({ isBatchExpireControl, ...product }) => {
           return {
             ...product,
-            batches: product.batches
+            batches: product?.batches?.length > 0 ? product.batches
               .map((batch: any) => ({
                 id: batch?.batch?.id || batch.id,
                 quantity: batch?.quantity,
-              })),
+              })) : [],
           }
         }
       );
@@ -112,6 +112,7 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
     }
   );
 
+  console.log('errors', errors);
   const changePayload = (status: EImportProductStatus) => {
     const products = cloneDeep(productsReturn).map(
       ({ id, price, product, quantity, discountValue, productUnitId, batches, productId }: any) => ({
@@ -238,8 +239,10 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
                   <CustomInput
                     bordered={false}
                     className="h-6 pr-0 text-end "
-                    onChange={(value) =>
-                      setValue('discount', value, { shouldValidate: true })
+                    onChange={(value) => {
+                      setValue('discount', value, { shouldValidate: true });
+                      setValue('paid', (totalPrice - (+getValues('discount') ?? 0)), { shouldValidate: true });
+                    }
                     }
                     type="number"
                     value={getValues('discount')}

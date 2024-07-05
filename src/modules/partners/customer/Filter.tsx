@@ -273,6 +273,7 @@ const Filter = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void,
               </div>
               <div className='flex items-center'>
                 <span className='w-8'>Tới:</span> <CustomInput
+                  type='number'
                   className='border-underline w-full'
                   placeholder='Giá trị'
                   onChange={(value) => {

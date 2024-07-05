@@ -82,6 +82,8 @@ export function CheckInventoryCoupon() {
     }
   );
 
+  console.log('importProducts', importProducts);
+
   useEffect(() => {
     setImportProducts([]);
     if (details?.data?.inventoryCheckingProduct?.length > 0 && importProducts.length === 0) {
@@ -252,7 +254,7 @@ export function CheckInventoryCoupon() {
       title: 'Thực tế',
       dataIndex: 'realQuantity',
       key: 'realQuantity',
-      render: (realQuantity, { productKey }) => (
+      render: (realQuantity, { productKey, product }) => (
         <CustomInput
           wrapClassName="!w-[110px]"
           className="!h-6 !w-[80px] text-center"
@@ -261,15 +263,18 @@ export function CheckInventoryCoupon() {
           defaultValue={realQuantity}
           value={realQuantity}
           type="number"
+          disabled={product?.isBatchExpireControl ? true : false}
           onChange={(value) =>
             onChangeValueProduct(productKey, "realQuantity", value)
           }
-          onMinus={(value) =>
+          onMinus={(value) => {
+            if (product?.isBatchExpireControl) return;
             onChangeValueProduct(productKey, "realQuantity", value)
-          }
-          onPlus={(value) =>
+          }}
+          onPlus={(value) => {
+            if (product?.isBatchExpireControl) return;
             onChangeValueProduct(productKey, "realQuantity", value)
-          }
+          }}
         />
       ),
     },

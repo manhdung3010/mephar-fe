@@ -61,6 +61,14 @@ export function Info({ record }: { record: any }) {
       </span>
     },
     {
+      title: 'ĐVT',
+      dataIndex: 'name',
+      key: 'name',
+      render: (_, { productUnit }) => <span>
+        {productUnit?.unitName}
+      </span>
+    },
+    {
       title: 'Tồn kho',
       dataIndex: 'inventoryQuantity',
       key: 'inventoryQuantity',

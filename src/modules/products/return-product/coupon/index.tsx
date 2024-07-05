@@ -416,18 +416,21 @@ export default function ReturnCoupon() {
             hasPlus={true}
             defaultValue={quantity}
             value={quantity}
+            disabled={(id && record?.product?.isBatchExpireControl) ? true : false}
             type="number"
             onChange={(value) =>
               onChangeValueProduct(record?.productKey, 'quantity', value)
             }
-            onMinus={async (value) =>
+            onMinus={async (value) => {
+              if (id && record?.product?.isBatchExpireControl) return;
               // onChangeValueProduct(record?.productKey, 'quantity', value)
               await onExpandMoreBatches(record?.productKey, value)
-            }
-            onPlus={async (value) =>
+            }}
+            onPlus={async (value) => {
+              if (id && record?.product?.isBatchExpireControl) return;
               // onChangeValueProduct(record?.productKey, 'quantity', value)
               await onExpandMoreBatches(record?.productKey, value)
-            }
+            }}
           />
           {/* {
             id && <div>

@@ -66,11 +66,11 @@ export function Info({ record }: { record: any }) {
           </div>
           <div className="grid grid-cols-3 gap-5">
             <div className="col-span-1 text-gray-main">Người nộp:</div>
-            <div className="text-black-main">{record?.targetCustomer?.fullName}</div>
+            <div className="text-black-main">{record?.targetCustomer?.fullName || record?.targetBranch?.name || record?.targetOther?.name || record?.targetSupplier?.name}</div>
           </div>
           <div className="grid grid-cols-3 gap-5">
             <div className="col-span-1 text-gray-main">Số điện thoại:</div>
-            <div className="text-black-main">{record?.targetCustomer?.phone}</div>
+            <div className="text-black-main">{record?.targetCustomer?.phone || record?.targetBranch?.phone || record?.targetOther?.phone || record?.targetSupplier?.phone}</div>
           </div>
 
           <div className="grid grid-cols-3 gap-5">

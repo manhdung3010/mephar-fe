@@ -12,8 +12,8 @@ import { branchState } from '@/recoil/state';
 import { useQuery } from '@tanstack/react-query';
 import { getSaleReport } from '@/api/report.service';
 import dayjs from 'dayjs';
-import { useState } from 'react';
-import { getOrder } from '@/api/order.service';
+import { useEffect, useState } from 'react';
+import { getOrder, getSaleReturn } from '@/api/order.service';
 import { formatMoney, formatNumber, timeAgo } from '@/helpers';
 import { getUserLog } from '@/api/user';
 
@@ -29,6 +29,7 @@ export enum ProductViewType {
 
 export function Home() {
   const branchId = useRecoilValue(branchState);
+  const [totalReturn, setTotalReturn] = useState(0);
 
   const [formFilter, setFormFilter] = useState({
     page: 1,
@@ -47,10 +48,21 @@ export function Home() {
     limit: 20,
     branchId,
   });
+  const [saleReturnFilter, setSaleReturnFilter] = useState({
+    page: 1,
+    limit: 9999,
+    from: dayjs().startOf('month'),
+    to: dayjs().endOf('month'),
+    branchId,
+  });
 
   const { data: orders, isLoading } = useQuery(
     ['ORDER_LIST', JSON.stringify(formFilter), branchId],
     () => getOrder({ ...formFilter, branchId })
+  );
+  const { data: saleReturn, isLoading: isLoadingSaleReturn } = useQuery(
+    ['SALE_RETURN_LIST', JSON.stringify(saleReturnFilter), branchId],
+    () => getSaleReturn({ ...formFilter, branchId })
   );
   const { data: userLog, isLoading: isLoadingUserLog } = useQuery(
     ['USER_LOG', JSON.stringify(userFilter), branchId],
@@ -65,6 +77,13 @@ export function Home() {
     inventory_checking: 'kiểm kho',
     move: 'chuyển hàng',
   }
+
+  useEffect(() => {
+    if (saleReturn?.data?.items) {
+      const total = saleReturn?.data?.items.reduce((acc, item) => acc + item?.totalPrice, 0);
+      setTotalReturn(total)
+    }
+  }, [saleReturn?.data?.items])
 
   return (
     <div className="grid grid-cols-4 gap-x-6 py-6">
@@ -93,8 +112,8 @@ export function Home() {
               </div>
 
               <div>
-                <div className=" text-xs">0 Hóa đơn</div>
-                <div className="text-[22px] text-[#FF8800]">0</div>
+                <div className=" text-xs">{formatNumber(saleReturn?.data?.totalItem)} Hóa đơn</div>
+                <div className="text-[22px] text-[#FF8800]">{formatMoney(totalReturn)}</div>
                 <div className="text-xs text-[#525D6A]">Trả hàng</div>
               </div>
             </div>
