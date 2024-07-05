@@ -713,7 +713,6 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
         productKeyAddBatch={productKeyAddBatch}
         onSave={(listBatch: IBatch[]) => {
           const orderObjectClone = cloneDeep(orderObject);
-
           orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map(
             (product: ISaleProductLocal) => {
               if (product.productKey === productKeyAddBatch) {
@@ -754,7 +753,6 @@ export function ProductList({ useForm, orderDetail, listDiscount }: { useForm: a
           )
           setOrderObject(orderObjectClone)
           setOpenProductDiscountList(false)
-
         }}
         discountList={itemDiscount}
       />
