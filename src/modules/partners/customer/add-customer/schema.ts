@@ -22,4 +22,6 @@ export const schema = yup.object().shape({
   groupCustomerId: yup.number(),
   note: yup.string(),
   avatarId: yup.number(),
+  lng: yup.string(),
+  lat: yup.string(),
 });

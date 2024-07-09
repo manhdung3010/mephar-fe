@@ -49,7 +49,7 @@ export function Info({ record }: { record: any }) {
       dataIndex: 'productUnit',
       key: 'productUnit',
       render: (productUnit) => (
-        <span className="cursor-pointer text-[#0070F4]">{productUnit?.product?.code}</span>
+        <span className="cursor-pointer text-[#0070F4]">{productUnit?.code}</span>
       ),
     },
     {

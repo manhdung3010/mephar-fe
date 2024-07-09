@@ -1,66 +1,83 @@
-import React, { Component } from "react";
-// import "../assets/style.css";
+import React, {
+  useEffect,
+  useRef,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
+import NowIcon from '../../assets/nowIcon.png';
 
-class CustomMap extends Component {
-  map = null;
-  loadMap() {
-    this.map = new vietmapgl.Map({
+const CustomMap = forwardRef((props, ref) => {
+  const mapRef = useRef(null);
+
+  const loadMap = () => {
+    mapRef.current = new vietmapgl.Map({
       container: "map",
       style:
-        "https://maps.vietmap.vn/mt/tm/style.json?apikey=53e31413d7968153044cd0a760cb2a6550590d1fa5213645", // stylesheet location
-      center: [106.68189581514225, 10.764994908339784], // starting position [lng, lat]
+        "https://maps.vietmap.vn/mt/tm/style.json?apikey=53e31413d7968153044cd0a760cb2a6550590d1fa5213645",
+      center: [105.8542, 21.0285],
       zoom: 14,
-      pitch: 100, // starting zoom
+      pitch: 100,
     });
-  }
-  customMarker() {
-    // Tạo một phần tử HTML để làm marker tùy chỉnh
-    const customMarker = document.createElement('div');
-    customMarker.style.width = '30px';
-    customMarker.style.height = '30px';
-    customMarker.style.backgroundColor = 'red';
-    customMarker.style.backgroundSize = 'cover';
-    customMarker.style.borderRadius = '50%';
-    customMarker.style.boxShadow = '0 0 5px rgba(0, 0, 0, 0.5)';
+  };
 
+  const customMarker = () => {
+    const customMarker = document.createElement("div");
+    customMarker.style.width = "30px";
+    customMarker.style.height = "30px";
+    customMarker.style.backgroundImage = `url("https://res.cloudinary.com/dvrqupkgg/image/upload/v1720519213/nowIcon_vk8zqy.png")`;
+    customMarker.style.backgroundSize = "cover";
     return customMarker;
-  }
+  };
 
-  customPopup() {
-    const startPopupContent = document.createElement('div');
+  const customPopup = (customerInfo) => {
+    console.log('customerInfo', customerInfo)
+    const startPopupContent = document.createElement("div");
     startPopupContent.innerHTML = `
       <h3>Điểm bắt đầu</h3>
       <p>Đây là điểm bắt đầu của chuyến đi.</p>
     `;
     return startPopupContent;
-  }
+  };
 
-  addMarker() {
-    //add marker to map
-    new vietmapgl.Marker(this.customMarker())
-      .setLngLat([106.68189581514225, 10.764994908339784])
-      .addTo(this.map);
+  useImperativeHandle(ref, () => ({
+    addMarker(coordinates, customerInfo, customerPoint) {
+      if (customerInfo && customerPoint) {
+        createMarker(customerPoint, customPopup(customerInfo));
+      }
+      else {
+        new vietmapgl.Marker(customMarker())
+          .setLngLat(coordinates)
+          .addTo(mapRef.current);
 
-    // Các điểm bắt đầu và kết thúc
-    const start = [106.6297, 10.8231];
-    const end = [106.7000, 10.7629];
+        // Scroll to the new marker
+        mapRef.current.flyTo({
+          center: coordinates,
+          zoom: 14,
+          speed: 1.2,
+        });
+      }
+    },
+  }));
 
-    // Tạo marker với sự kiện click để hiển thị popup thông tin
-    const createMarker = (coordinates, popupHTML) => {
-      const popup = new vietmapgl.Popup({ offset: 25 }).setDOMContent(popupHTML);
-      new vietmapgl.Marker()
-        .setLngLat(coordinates)
-        .setPopup(popup) // Gắn popup vào marker
-        .addTo(this.map);
-    };
+  const createMarker = (coordinates, popupHTML) => {
+    const popup = new vietmapgl.Popup({ offset: 25 }).setDOMContent(
+      popupHTML
+    );
+    new vietmapgl.Marker()
+      .setLngLat(coordinates)
+      .setPopup(popup)
+      .addTo(mapRef.current);
+    // Scroll to the new marker
+    mapRef.current.flyTo({
+      center: coordinates,
+      zoom: 14,
+      speed: 1.2,
+    });
+  };
 
-    createMarker(start, this.customPopup());
-    createMarker(end, this.customPopup());
-  }
-  addGeojsonLine() {
-    var app = this;
-    this.map.on("load", function () {
-      app.map.addSource("route", {
+  const addGeojsonLine = () => {
+    mapRef.current.on("load", () => {
+      mapRef.current.addSource("route", {
         type: "geojson",
         data: {
           type: "Feature",
@@ -77,7 +94,7 @@ class CustomMap extends Component {
           },
         },
       });
-      // app.map.addLayer({
+      // mapRef.current.addLayer({
       //   id: "route",
       //   type: "line",
       //   source: "route",
@@ -91,15 +108,14 @@ class CustomMap extends Component {
       //   },
       // });
     });
-  }
-  componentDidMount() {
-    this.loadMap();
-    this.addGeojsonLine();
-    this.addMarker();
-  }
-  render() {
-    return <div id="map" className='w-full h-full'></div>;
-  }
-}
+  };
+
+  useEffect(() => {
+    loadMap();
+    addGeojsonLine();
+  }, []);
+
+  return <div id="map" className="w-full h-full"></div>;
+});
 
 export default CustomMap;
