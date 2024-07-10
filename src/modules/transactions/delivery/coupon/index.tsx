@@ -508,7 +508,7 @@ export function DeliveryCoupon() {
                 defaultExpandAllRows: true,
                 expandedRowRender: (record: any) => (
                   <>
-                    {moveDetail ? record?.toBatches.map((batch) => (
+                    {moveDetail ? record?.toBatches?.map((batch) => (
                       <div className="bg-[#FFF3E6] px-6 py-2 ">
                         <div className="flex items-center gap-x-3">
                           <div

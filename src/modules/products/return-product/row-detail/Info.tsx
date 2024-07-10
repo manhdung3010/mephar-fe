@@ -59,7 +59,7 @@ export function Info({ record }: { record: IRecord }) {
       title: 'Đơn vị tính',
       dataIndex: 'productUnit',
       key: 'productUnit',
-      render: (productUnit) => productUnit.unitName,
+      render: (productUnit) => productUnit?.unitName,
     },
     {
       title: 'Số lượng',
