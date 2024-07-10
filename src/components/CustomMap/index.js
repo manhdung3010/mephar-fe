@@ -4,10 +4,12 @@ import React, {
   forwardRef,
   useImperativeHandle,
 } from "react";
-import NowIcon from '../../assets/nowIcon.png';
 
 const CustomMap = forwardRef((props, ref) => {
+  const { isMapFull } = props;
   const mapRef = useRef(null);
+  const fromMarkerRef = useRef('');
+  const markersRef = useRef([]);
 
   const loadMap = () => {
     mapRef.current = new vietmapgl.Map({
@@ -29,25 +31,55 @@ const CustomMap = forwardRef((props, ref) => {
     return customMarker;
   };
 
+  const customCustomerMarker = (customerIndex) => {
+    const customMarker = document.createElement("div");
+    customMarker.className = "customer-marker";
+    customMarker.style.width = "30px";
+    customMarker.style.height = "30px";
+    customMarker.style.backgroundColor = "#007bff"; // Blue color
+    customMarker.style.borderRadius = "50% 50% 50% 0";
+    customMarker.style.transform = "rotate(-45deg)";
+    customMarker.style.display = "flex";
+    customMarker.style.justifyContent = "center";
+    customMarker.style.alignItems = "center";
+    customMarker.style.color = "#fff"; // White text color
+    customMarker.style.fontSize = "18px"; // Adjust the font size
+    customMarker.style.fontWeight = "bold";
+    customMarker.style.lineHeight = "40px"; // Center text vertically
+    customMarker.textContent = customerIndex; // Set the number inside the marker
+    customMarker.style.borderRadius = "50%"; // Circular shape
+    customMarker.style.border = "1px solid white";
+    customMarker.style.boxShadow = "0 0 5px rgba(0,0,0,0.5)";
+
+    return customMarker;
+  };
+
   const customPopup = (customerInfo) => {
-    console.log('customerInfo', customerInfo)
     const startPopupContent = document.createElement("div");
     startPopupContent.innerHTML = `
-      <h3>Điểm bắt đầu</h3>
-      <p>Đây là điểm bắt đầu của chuyến đi.</p>
+      <div class=" flex flex-col gap-1">
+        <h3><span class='text-red-main'>${customerInfo?.code}</span> - <span class='font-medium'>${customerInfo?.fullName}</span></h3>
+      <p class="flex items-center gap-1 text-[#455468]"><img src='https://res.cloudinary.com/dvrqupkgg/image/upload/v1720587657/phoneIcon_q0kwgi.svg' /> ${customerInfo?.phone}</p>
+      <p class="flex items-center gap-1 text-[#455468]"><img src="https://res.cloudinary.com/dvrqupkgg/image/upload/v1720587358/markPng_bv3kg1.png" /> ${customerInfo?.address?.split(",")[0] || ''}</p>
+      </div>
     `;
     return startPopupContent;
   };
 
   useImperativeHandle(ref, () => ({
-    addMarker(coordinates, customerInfo, customerPoint) {
-      if (customerInfo && customerPoint) {
-        createMarker(customerPoint, customPopup(customerInfo));
+    addMarker(coordinates, customerInfo, customerIndex) {
+      if (customerInfo) {
+        createMarker(coordinates, customPopup(customerInfo), customerIndex);
       }
       else {
-        new vietmapgl.Marker(customMarker())
+        const marker = new vietmapgl.Marker(customMarker())
           .setLngLat(coordinates)
           .addTo(mapRef.current);
+        // clear old marker if exists
+        if (fromMarkerRef.current) {
+          fromMarkerRef.current.remove();
+        }
+        fromMarkerRef.current = marker;
 
         // Scroll to the new marker
         mapRef.current.flyTo({
@@ -57,21 +89,47 @@ const CustomMap = forwardRef((props, ref) => {
         });
       }
     },
+    deleteMarker(coordinates) {
+      const markerIndex = markersRef.current.findIndex(({ coordinates: markerCoordinates }) => {
+        return markerCoordinates[0] === coordinates[0] && markerCoordinates[1] === coordinates[1];
+      });
+
+      if (markerIndex !== -1) {
+        markersRef.current[markerIndex].marker.remove();
+        markersRef.current.splice(markerIndex, 1);
+        updateCustomerIndices();
+      }
+    },
   }));
 
-  const createMarker = (coordinates, popupHTML) => {
-    const popup = new vietmapgl.Popup({ offset: 25 }).setDOMContent(
-      popupHTML
-    );
-    new vietmapgl.Marker()
+  const createMarker = (coordinates, popupHTML, customerIndex) => {
+    const popup = new vietmapgl.Popup({ offset: 25 }).setDOMContent(popupHTML);
+    const marker = new vietmapgl.Marker(customCustomerMarker(customerIndex))
       .setLngLat(coordinates)
       .setPopup(popup)
       .addTo(mapRef.current);
+    // check if customerIndex already exists then update it, otherwise add new marker
+    const existingMarkerIndex = markersRef.current.findIndex(({ index }) => index === customerIndex);
+    if (existingMarkerIndex !== -1) {
+      markersRef.current[existingMarkerIndex].marker.remove();
+      markersRef.current[existingMarkerIndex] = { marker, coordinates, index: customerIndex };
+    }
+    else {
+      markersRef.current.push({ marker, coordinates, index: customerIndex });
+    }
+    updateCustomerIndices();
     // Scroll to the new marker
     mapRef.current.flyTo({
       center: coordinates,
       zoom: 14,
       speed: 1.2,
+    });
+  };
+
+  const updateCustomerIndices = () => {
+    markersRef.current.forEach(({ marker }, index) => {
+      const element = marker.getElement();
+      element.textContent = index + 1;
     });
   };
 
@@ -114,6 +172,12 @@ const CustomMap = forwardRef((props, ref) => {
     loadMap();
     addGeojsonLine();
   }, []);
+
+  useEffect(() => {
+    if (mapRef.current) {
+      mapRef.current.resize();
+    }
+  }, [isMapFull]);
 
   return <div id="map" className="w-full h-full"></div>;
 });

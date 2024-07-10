@@ -15,6 +15,7 @@ function ScheduleList() {
     page: 1,
     limit: 10,
     keyword: '',
+    // status: ''
   });
 
   const { data: trips, isLoading } = useQuery(
@@ -50,7 +51,7 @@ function ScheduleList() {
           </div>
           <div className="h-[1px] w-full bg-[#D64457]" />
         </div>
-        {select === 0 && <All />}
+        {select === 0 && <All trips={trips} />}
       </div>
     </div>
 

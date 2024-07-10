@@ -35,7 +35,7 @@ function CreateSchedule() {
   const router = useRouter();
   const [customerKeyword, setCustomerKeyword] = useState("");
   const [placeKeyword, setPlaceKeyword] = useState("");
-  const [isMapFull, setIsMapFull] = useState(true);
+  const [isMapFull, setIsMapFull] = useState(false);
 
   const [refId, setRefId] = useState('');
 
@@ -99,6 +99,7 @@ function CreateSchedule() {
       {
         onSuccess: async () => {
           await queryClient.invalidateQueries(["TRIPS"]);
+          router.push("/customer-care/list-schedule");
           reset();
         },
         onError: (err: any) => {
@@ -112,11 +113,18 @@ function CreateSchedule() {
   }
 
   const mapRef = useRef<any>(null);
+  const markersRef = useRef<any>([]);
 
-  const handleAddMarker = (lng, lat) => {
+  const handleAddMarker = (lng, lat, customerInfo?: any, customerIndex?: number) => {
     const coordinates = [lng, lat];
     if (mapRef.current) {
-      mapRef.current.addMarker(coordinates, null, null);
+      mapRef.current.addMarker(coordinates, customerInfo ? customerInfo : null, customerIndex ? customerIndex : null);
+    }
+  };
+  const handleDeleteMarker = (lng, lat) => {
+    const coordinates = [lng, lat];
+    if (mapRef.current) {
+      mapRef.current.deleteMarker(coordinates)
     }
   };
 
@@ -226,6 +234,11 @@ function CreateSchedule() {
                                     const listCustomer = getValues('listCustomer');
                                     listCustomer[index] = value;
                                     setValue('listCustomer', listCustomer, { shouldValidate: true });
+
+                                    const customer = customers?.data?.items?.find((item) => item?.id === value);
+                                    if (customer) {
+                                      handleAddMarker(customer?.lng, customer?.lat, customer, index + 1)
+                                    }
                                   }}
                                   onSearch={debounce((value) => {
                                     setCustomerKeyword(value);
@@ -281,6 +294,10 @@ function CreateSchedule() {
                                 const listCustomer = getValues('listCustomer')
                                 listCustomer.splice(index, 1)
                                 setValue('listCustomer', listCustomer, { shouldValidate: true })
+                                const customer = customers?.data?.items?.find((item) => item?.id === row);
+                                if (customer) {
+                                  handleDeleteMarker(customer?.lng, customer?.lat)
+                                }
                               }} alt='icon' className='cursor-pointer' />
                             </div>
                           ))
@@ -305,7 +322,7 @@ function CreateSchedule() {
               )
             }
             <div className={`${isMapFull ? 'col-span-12' : 'col-span-7'} h-[700px] w-full relative`}>
-              <CustomMap ref={mapRef} />
+              <CustomMap ref={mapRef} isMapFull={isMapFull} />
               <div className='absolute left-0 top-1/2 -translate-y-1/2 bg-white py-7 px-4 rounded-r-lg rounded-br-lg cursor-pointer transition-all duration-300 hover:bg-[#F5F5F5] z-10'
                 onClick={() => {
                   // change width full

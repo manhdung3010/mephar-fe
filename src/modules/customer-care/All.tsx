@@ -6,7 +6,7 @@ import Image from 'next/image';
 import TripCard from './TripCard';
 
 
-function All() {
+function All({ trips }) {
   return (
     <div>
       <CustomInput
