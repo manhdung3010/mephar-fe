@@ -10,7 +10,7 @@ import {
   Tooltip,
 } from 'chart.js';
 import Image from 'next/image';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Bar } from 'react-chartjs-2';
 
 import { getRevenueReport, getSaleReport } from '@/api/report.service';
@@ -74,7 +74,21 @@ export function RevenueChart({ branchId }: { branchId: number }) {
     to: dayjs().format("YYYY-MM-DD"),
   });
 
-  const { data: saleReport, isLoading } = useQuery(
+  const [branchIdReady, setBranchIdReady] = useState(false);
+
+
+  useEffect(() => {
+    if (branchId) {
+      setFormFilter((prev) => ({
+        ...prev,
+        branchId: branchId,
+      }));
+      setBranchIdReady(true);
+    }
+  }, [branchId]);
+  
+
+  const { data: saleReport, isLoading: isSaleReportLoading } = useQuery(
     [
       'SALE_REPORT',
       formFilter.from,
@@ -82,8 +96,12 @@ export function RevenueChart({ branchId }: { branchId: number }) {
       formFilter.concern,
       formFilter.branchId,
     ],
-    () => getSaleReport({ from: formFilter.from, to: formFilter.to, branchId: formFilter.branchId, concern: formFilter.concern })
+    () => getSaleReport({ from: formFilter.from, to: formFilter.to, branchId: formFilter.branchId, concern: formFilter.concern }),
+    {
+      enabled: branchIdReady,
+    }
   );
+
 
   const { data } = useQuery(
     ['REVENUE_CHART', revenueFilter.viewType, revenueFilter.dateRange, branchId],

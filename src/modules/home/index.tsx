@@ -1,21 +1,21 @@
-import { Avatar } from 'antd';
-import Image from 'next/image';
+import { Avatar } from "antd";
+import Image from "next/image";
 
-import ArrowDownIcon from '@/assets/arrow-down.svg';
-import DollarIcon from '@/assets/dolarIcon.svg';
-import DoubleBackIcon from '@/assets/doubleBackIcon.svg';
+import ArrowDownIcon from "@/assets/arrow-down.svg";
+import DollarIcon from "@/assets/dolarIcon.svg";
+import DoubleBackIcon from "@/assets/doubleBackIcon.svg";
 
-import { BestSellerProductChart } from './BestSellerProductChart';
-import { RevenueChart } from './RevenueChart';
-import { useRecoilValue } from 'recoil';
-import { branchState } from '@/recoil/state';
-import { useQuery } from '@tanstack/react-query';
-import { getSaleReport } from '@/api/report.service';
-import dayjs from 'dayjs';
-import { useEffect, useState } from 'react';
-import { getOrder, getSaleReturn } from '@/api/order.service';
-import { formatMoney, formatNumber, timeAgo } from '@/helpers';
-import { getUserLog } from '@/api/user';
+import { BestSellerProductChart } from "./BestSellerProductChart";
+import { RevenueChart } from "./RevenueChart";
+import { useRecoilValue } from "recoil";
+import { branchState } from "@/recoil/state";
+import { useQuery } from "@tanstack/react-query";
+import { getSaleReport } from "@/api/report.service";
+import dayjs from "dayjs";
+import { useEffect, useState } from "react";
+import { getOrder, getSaleReturn } from "@/api/order.service";
+import { formatMoney, formatNumber, timeAgo } from "@/helpers";
+import { getUserLog } from "@/api/user";
 
 export enum FilterDateType {
   CURRENT_MONTH = 1,
@@ -23,8 +23,8 @@ export enum FilterDateType {
 }
 
 export enum ProductViewType {
-  Date = 'date',
-  Day = 'day',
+  Date = "date",
+  Day = "day",
 }
 
 export function Home() {
@@ -34,10 +34,10 @@ export function Home() {
   const [formFilter, setFormFilter] = useState({
     page: 1,
     limit: 20,
-    keyword: '',
+    keyword: "",
     dateRange: JSON.stringify({
-      startDate: dayjs().format('YYYY-MM-DD'),
-      endDate: dayjs().format('YYYY-MM-DD'),
+      startDate: dayjs().format("YYYY-MM-DD"),
+      endDate: dayjs().format("YYYY-MM-DD"),
     }),
     status: undefined,
     branchId,
@@ -51,39 +51,42 @@ export function Home() {
   const [saleReturnFilter, setSaleReturnFilter] = useState({
     page: 1,
     limit: 9999,
-    from: dayjs().startOf('month'),
-    to: dayjs().endOf('month'),
+    from: dayjs().startOf("month"),
+    to: dayjs().endOf("month"),
     branchId,
   });
 
   const { data: orders, isLoading } = useQuery(
-    ['ORDER_LIST', JSON.stringify(formFilter), branchId],
+    ["ORDER_LIST", JSON.stringify(formFilter), branchId],
     () => getOrder({ ...formFilter, branchId })
   );
   const { data: saleReturn, isLoading: isLoadingSaleReturn } = useQuery(
-    ['SALE_RETURN_LIST', JSON.stringify(saleReturnFilter), branchId],
+    ["SALE_RETURN_LIST", JSON.stringify(saleReturnFilter), branchId],
     () => getSaleReturn({ ...formFilter, branchId })
   );
   const { data: userLog, isLoading: isLoadingUserLog } = useQuery(
-    ['USER_LOG', JSON.stringify(userFilter), branchId],
+    ["USER_LOG", JSON.stringify(userFilter), branchId],
     () => getUserLog({ ...userFilter, branchId })
   );
 
   const type = {
-    order: 'bán hàng',
-    sale_return: 'trả hàng',
-    inbound: 'nhập hàng',
-    purchase_return: 'trả hàng nhập',
-    inventory_checking: 'kiểm kho',
-    move: 'chuyển hàng',
-  }
+    order: "bán hàng",
+    sale_return: "trả hàng",
+    inbound: "nhập hàng",
+    purchase_return: "trả hàng nhập",
+    inventory_checking: "kiểm kho",
+    move: "chuyển hàng",
+  };
 
   useEffect(() => {
     if (saleReturn?.data?.items) {
-      const total = saleReturn?.data?.items.reduce((acc, item) => acc + item?.totalPrice, 0);
-      setTotalReturn(total)
+      const total = saleReturn?.data?.items.reduce(
+        (acc, item) => acc + item?.totalPrice,
+        0
+      );
+      setTotalReturn(total);
     }
-  }, [saleReturn?.data?.items])
+  }, [saleReturn?.data?.items]);
 
   return (
     <div className="grid grid-cols-4 gap-x-6 py-6">
@@ -100,27 +103,35 @@ export function Home() {
               </div>
 
               <div>
-                <div className=" text-xs">{formatNumber(orders?.data?.totalItem)} Hóa đơn</div>
-                <div className="text-[22px] text-[#56BD79]">{formatMoney(+orders?.data?.totalPrice)}</div>
+                <div className=" text-xs">
+                  {formatNumber(orders?.data?.totalItem)} Hóa đơn
+                </div>
+                <div className="text-[22px] text-[#56BD79]">
+                  {formatMoney(+orders?.data?.totalPrice)}
+                </div>
                 <div className="text-xs text-[#525D6A]">Doanh thu</div>
               </div>
             </div>
 
             <div className="flex border-x border-[#E1E3E6] px-6">
               <div className="mt-4 mr-4 flex h-[30px] w-[30px] items-center justify-center rounded-full bg-[#FF8800]">
-                <Image src={ArrowDownIcon} alt="" />
+                <Image src={DoubleBackIcon} alt="" />
               </div>
 
               <div>
-                <div className=" text-xs">{formatNumber(saleReturn?.data?.totalItem)} Hóa đơn</div>
-                <div className="text-[22px] text-[#FF8800]">{formatMoney(totalReturn)}</div>
+                <div className=" text-xs">
+                  {formatNumber(saleReturn?.data?.totalItem)} Hóa đơn
+                </div>
+                <div className="text-[22px] text-[#FF8800]">
+                  {formatMoney(totalReturn)}
+                </div>
                 <div className="text-xs text-[#525D6A]">Trả hàng</div>
               </div>
             </div>
 
             <div className="flex">
               <div className="mt-4 mr-4 flex h-[30px] w-[30px] items-center justify-center rounded-full bg-[#ED232F]">
-                <Image src={DoubleBackIcon} alt="" />
+                <Image src={ArrowDownIcon} alt="" />
               </div>
 
               <div>
@@ -151,7 +162,7 @@ export function Home() {
           {userLog?.data?.items.map((value) => (
             <div className="flex h-fit gap-x-5" key={value?.id}>
               <div className="flex flex-col items-center">
-                <Avatar style={{ background: '#4285F4' }} size={32}>
+                <Avatar style={{ background: "#4285F4" }} size={32}>
                   {value?.createdBy?.fullName[0]}
                 </Avatar>
                 {value !== 19 && (
@@ -161,19 +172,24 @@ export function Home() {
 
               <div className="mb-5">
                 <div>
-                  <span className="text-[#0070F4]">{value?.createdBy?.fullName}</span>
+                  <span className="text-[#0070F4]">
+                    {value?.createdBy?.fullName}
+                  </span>
                   <span className="mx-2">vừa</span>
                   <span className="text-[#0070F4]">{type[value?.type]}</span>
                 </div>
-                {
-                  value?.type !== 'inventory_checking' && (
-                    <div>
-                      với giá trị <span className="font-bold">{formatMoney(value?.amount)}</span>
-                    </div>
-                  )
-                }
+                {value?.type !== "inventory_checking" && (
+                  <div>
+                    với giá trị{" "}
+                    <span className="font-bold">
+                      {formatMoney(value?.amount)}
+                    </span>
+                  </div>
+                )}
 
-                <div className="italic text-[#525D6A]">{timeAgo(value?.updatedAt)}</div>
+                <div className="italic text-[#525D6A]">
+                  {timeAgo(value?.updatedAt)}
+                </div>
               </div>
             </div>
           ))}

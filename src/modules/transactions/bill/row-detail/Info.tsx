@@ -64,6 +64,9 @@ export function Info({ record }: { record: IOrder }) {
 
   const invoiceComponentRef = useRef(null);
 
+  console.log(record);
+  
+
   useEffect(() => {
     if (record?.products?.length) {
       const expandedRowKeysClone = { ...expandedRowKeys };

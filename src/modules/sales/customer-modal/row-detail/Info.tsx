@@ -1,23 +1,23 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Input, message } from 'antd';
-import Image from 'next/image';
-import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Input, message } from "antd";
+import Image from "next/image";
+import { useRouter } from "next/router";
+import { useState } from "react";
 
-import { deleteCustomer, updateCustomer } from '@/api/customer.service';
-import DeleteIcon from '@/assets/deleteRed.svg';
-import EditIcon from '@/assets/editWhite.svg';
-import LockIcon from '@/assets/lockGray.svg';
-import { CustomButton } from '@/components/CustomButton';
-import DeleteModal from '@/components/CustomModal/ModalDeleteItem';
+import { deleteCustomer, updateCustomer, updateStatusCustomer } from "@/api/customer.service";
+import DeleteIcon from "@/assets/deleteRed.svg";
+import EditIcon from "@/assets/editWhite.svg";
+import LockIcon from "@/assets/lockGray.svg";
+import { CustomButton } from "@/components/CustomButton";
+import DeleteModal from "@/components/CustomModal/ModalDeleteItem";
 
-import { ECustomerStatus, ECustomerStatusLabel } from '@/enums';
+import { ECustomerStatus, ECustomerStatusLabel } from "@/enums";
 // import type { ICustomer } from '../type';
-import { hasPermission } from '@/helpers';
-import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
-import { useRecoilValue } from 'recoil';
-import { profileState } from '@/recoil/state';
-import { ICustomer } from '@/modules/partners/customer/type';
+import { hasPermission } from "@/helpers";
+import { RoleAction, RoleModel } from "@/modules/settings/role/role.enum";
+import { useRecoilValue } from "recoil";
+import { profileState } from "@/recoil/state";
+import { ICustomer } from "@/modules/partners/customer/type";
 
 const { TextArea } = Input;
 
@@ -33,7 +33,7 @@ export function Info({ record }: { record: ICustomer }) {
   const { mutate: mutateDeleteCustomer, isLoading: isLoadingDeleteCustomer } =
     useMutation(() => deleteCustomer(Number(deletedId)), {
       onSuccess: async () => {
-        await queryClient.invalidateQueries(['CUSTOMER_LIST']);
+        await queryClient.invalidateQueries(["CUSTOMER_LIST"]);
         setDeletedId(undefined);
       },
       onError: (err: any) => {
@@ -41,14 +41,19 @@ export function Info({ record }: { record: ICustomer }) {
       },
     });
   const { mutate: mutateUpdateCustomer, isLoading: isLoadingUpdateCustomer } =
-    useMutation((data: { id: number, status: ECustomerStatus }) => updateCustomer(Number(data.id), { status: data?.status }), {
-      onSuccess: async () => {
-        await queryClient.invalidateQueries(['CUSTOMER_LIST']);
-      },
-      onError: (err: any) => {
-        message.error(err?.message);
-      },
-    });
+    useMutation(
+      (data: { id: number; status: ECustomerStatus }) =>
+        updateStatusCustomer(Number(data.id), { status: data?.status }),
+
+      {
+        onSuccess: async () => {
+          await queryClient.invalidateQueries(["CUSTOMER_LIST"]);
+        },
+        onError: (err: any) => {
+          message.error(err?.message);
+        },
+      }
+    );
 
   const onSubmit = () => {
     mutateDeleteCustomer();
@@ -56,7 +61,7 @@ export function Info({ record }: { record: ICustomer }) {
 
   const handleUpdateStatus = (id: number, status: ECustomerStatus) => {
     mutateUpdateCustomer({ id, status });
-  }
+  };
 
   return (
     <div className="gap-12 ">
@@ -119,7 +124,9 @@ export function Info({ record }: { record: ICustomer }) {
 
           <div className="grid grid-cols-3 gap-5">
             <div className="col-span-1 text-gray-main">Người tạo:</div>
-            <div className="text-black-main">{record?.created_by?.username}</div>
+            <div className="text-black-main">
+              {record?.created_by?.username}
+            </div>
           </div>
 
           <div className="grid grid-cols-3 gap-5"></div>
@@ -131,49 +138,68 @@ export function Info({ record }: { record: ICustomer }) {
         </div>
 
         <div className="grow">
-          <TextArea rows={8} placeholder="Ghi chú:" value={record?.note} disabled />
+          <TextArea
+            rows={8}
+            placeholder="Ghi chú:"
+            value={record?.note}
+            disabled
+          />
         </div>
       </div>
 
       <div className="flex justify-end gap-4">
-        {
-          hasPermission(profile?.role?.permissions, RoleModel.customer, RoleAction.update) && (
-            <CustomButton
-              type={`disable`}
-              outline={true}
-              prefixIcon={<Image src={LockIcon} alt="" />}
-              onClick={() => handleUpdateStatus(record.id as any, String(record?.status) === "active" ? ECustomerStatus.inactive : ECustomerStatus.active)}
-            >
-              {String(record?.status) === "active" ? ECustomerStatusLabel.inactive : ECustomerStatusLabel.active}
-            </CustomButton>
-          )
-        }
-        {
-          hasPermission(profile?.role?.permissions, RoleModel.customer, RoleAction.delete) && (
-            <CustomButton
-              type="danger"
-              outline={true}
-              prefixIcon={<Image src={DeleteIcon} alt="" />}
-              onClick={() => setDeletedId(record.id)}
-            >
-              Xóa
-            </CustomButton>
-          )
-        }
-        {
-          hasPermission(profile?.role?.permissions, RoleModel.customer, RoleAction.update) && (
-            <CustomButton
-              type="success"
-              prefixIcon={<Image src={EditIcon} alt="" />}
-              onClick={() =>
-                router.push(`/partners/customer/add-customer?id=${record.id}`)
-              }
-            >
-              Cập nhật
-            </CustomButton>
-          )
-        }
-
+        {hasPermission(
+          profile?.role?.permissions,
+          RoleModel.customer,
+          RoleAction.update
+        ) && (
+          <CustomButton
+            type={`disable`}
+            outline={true}
+            prefixIcon={<Image src={LockIcon} alt="" />}
+            onClick={() =>
+              handleUpdateStatus(
+                record.id as any,
+                String(record?.status) === "active"
+                  ? ECustomerStatus.inactive
+                  : ECustomerStatus.active
+              )
+            }
+          >
+            {String(record?.status) === "active"
+              ? ECustomerStatusLabel.inactive
+              : ECustomerStatusLabel.active}
+          </CustomButton>
+        )}
+        {hasPermission(
+          profile?.role?.permissions,
+          RoleModel.customer,
+          RoleAction.delete
+        ) && (
+          <CustomButton
+            type="danger"
+            outline={true}
+            prefixIcon={<Image src={DeleteIcon} alt="" />}
+            onClick={() => setDeletedId(record.id)}
+          >
+            Xóa
+          </CustomButton>
+        )}
+        {hasPermission(
+          profile?.role?.permissions,
+          RoleModel.customer,
+          RoleAction.update
+        ) && (
+          <CustomButton
+            type="success"
+            prefixIcon={<Image src={EditIcon} alt="" />}
+            onClick={() =>
+              router.push(`/partners/customer/add-customer?id=${record.id}`)
+            }
+          >
+            Cập nhật
+          </CustomButton>
+        )}
       </div>
 
       <DeleteModal
