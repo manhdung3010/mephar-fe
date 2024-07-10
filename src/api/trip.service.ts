@@ -10,6 +10,9 @@ export function getAllTrip(params: {
 }) {
   return axiosClient.get(`trip`, { params });
 }
+export function getTripDetail(id: any) {
+  return axiosClient.get(`trip/${id}`);
+}
 export function searchPlace(params: { keyword: string }) {
   return axiosClient.get(`trip/search/ref`, { params });
 }

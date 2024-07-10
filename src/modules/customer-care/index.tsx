@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import All from './All';
 import { CustomButton } from '@/components/CustomButton';
 import Image from 'next/image';
@@ -15,8 +15,15 @@ function ScheduleList() {
     page: 1,
     limit: 10,
     keyword: '',
-    // status: ''
+    status: '',
   });
+
+  useEffect(() => {
+    setFormFilter((preValue) => ({
+      ...preValue,
+      status: menu[select] === 'Tất cả' ? '' : menu[select] === 'Đang tiến hành' ? 'pending' : 'done',
+    }));
+  }, [select]);
 
   const { data: trips, isLoading } = useQuery(
     ["TRIPS", JSON.stringify(formFilter)],
@@ -51,7 +58,9 @@ function ScheduleList() {
           </div>
           <div className="h-[1px] w-full bg-[#D64457]" />
         </div>
-        {select === 0 && <All trips={trips} />}
+        {select === 0 && <All trips={trips} formFilter={formFilter} setFormFilter={setFormFilter} isLoading={isLoading} />}
+        {select === 1 && <All trips={trips} formFilter={formFilter} setFormFilter={setFormFilter} isLoading={isLoading} />}
+        {select === 2 && <All trips={trips} formFilter={formFilter} setFormFilter={setFormFilter} isLoading={isLoading} />}
       </div>
     </div>
 
