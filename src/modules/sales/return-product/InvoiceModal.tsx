@@ -54,7 +54,11 @@ function InvoiceModal({
   const onSelectInvoice = (record) => {
     router.push(`/sales?id=${record.id}`);
     onCancel();
+    
   }
+
+  console.log(orders);
+  
 
   const columns: ColumnsType<IOrder> = [
     {
