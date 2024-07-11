@@ -8,6 +8,9 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateCustomerStatus } from '@/api/trip.service';
 import { message } from 'antd';
+import { ECustomerStatus } from '../enum';
+import ConfirmUpdateLocationModal from './ConfirmUpdateLocation';
+import { boolean } from 'yup';
 
 const UpdateStatusModal = ({
   isOpen,
@@ -25,16 +28,21 @@ const UpdateStatusModal = ({
   tripCustomerId: any;
 }) => {
   const queryClient = useQueryClient();
-  const [customerStatus, setCustomerStatus] = useState<string>('');
+  const [openLocationModal, setOpenLocationModal] = useState<boolean>(false);
+  const [isNewLocation, setIsNewLocation] = useState<boolean>(false);
 
   const { mutate: mutateUpdateCustomerStatus, isLoading: isLoadingStatus } =
     useMutation(
       (status: string) => {
-        return updateCustomerStatus(tripCustomerId, status, { isUpdateAddress: true });
+        const payload = {
+          isUpdateAddress: status === ECustomerStatus.SKIP ? false : status === ECustomerStatus.WAITED ? isNewLocation : true,
+        }
+        return updateCustomerStatus(tripCustomerId, status, payload);
       },
       {
         onSuccess: async () => {
           await queryClient.invalidateQueries(["TRIP_DETAIL"]);
+
           onCancel();
         },
         onError: (err: any) => {
@@ -42,7 +50,8 @@ const UpdateStatusModal = ({
         },
       }
     );
-  const onSubmit = (status: string) => {
+  const onSubmit = (status: string, isNewLocation?: any) => {
+    setIsNewLocation(isNewLocation);
     mutateUpdateCustomerStatus(status);
   }
 
@@ -75,7 +84,7 @@ const UpdateStatusModal = ({
           <CustomButton
             outline={true}
             className="!h-11 w-full"
-            onClick={() => onSubmit('waited')}
+            onClick={() => setOpenLocationModal(true)}
             type='primary'
           >
             Gặp sau
@@ -90,6 +99,20 @@ const UpdateStatusModal = ({
           </CustomButton>
         </div>
       </div>
+
+      <ConfirmUpdateLocationModal
+        isOpen={openLocationModal}
+        onCancel={() => setOpenLocationModal(false)}
+        onDenied={() => {
+          onSubmit('waited', false);
+          setOpenLocationModal(false);
+        }}
+        onSuccess={() => {
+          onSubmit('waited', true)
+          setOpenLocationModal(false);
+        }}
+        isLoading={isLoadingStatus}
+      />
     </CustomModal>
   );
 };

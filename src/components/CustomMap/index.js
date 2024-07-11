@@ -6,10 +6,24 @@ import React, {
 } from "react";
 
 const CustomMap = forwardRef((props, ref) => {
-  const { isMapFull } = props;
+  const { isMapFull, tripCustomer } = props;
   const mapRef = useRef(null);
   const fromMarkerRef = useRef('');
   const markersRef = useRef([]);
+
+  useEffect(() => {
+    loadMap();
+    addGeojsonLine();
+  }, [tripCustomer]);
+
+  useEffect(() => {
+    if (tripCustomer?.length > 0) {
+      tripCustomer.forEach((customer, index) => {
+        const coordinates = [+customer?.lng, +customer?.lat];
+        createMarker(coordinates, customPopup(customer), customer?.stt, customer?.status);
+      });
+    }
+  }, [tripCustomer]);
 
   const loadMap = () => {
     mapRef.current = new vietmapgl.Map({
@@ -31,12 +45,17 @@ const CustomMap = forwardRef((props, ref) => {
     return customMarker;
   };
 
-  const customCustomerMarker = (customerIndex) => {
+  const customCustomerMarker = (customerIndex, customerStatus) => {
     const customMarker = document.createElement("div");
     customMarker.className = "customer-marker";
     customMarker.style.width = "30px";
     customMarker.style.height = "30px";
-    customMarker.style.backgroundColor = "#007bff"; // Blue color
+    if (customerStatus === 'visited') {
+      customMarker.style.backgroundColor = "#11A75C"; // Green color
+    }
+    else {
+      customMarker.style.backgroundColor = "#007bff"; // Blue color
+    }
     customMarker.style.borderRadius = "50% 50% 50% 0";
     customMarker.style.transform = "rotate(-45deg)";
     customMarker.style.display = "flex";
@@ -55,14 +74,16 @@ const CustomMap = forwardRef((props, ref) => {
   };
 
   const customPopup = (customerInfo) => {
+    const customerInfoNew = customerInfo?.customer || customerInfo;
     const startPopupContent = document.createElement("div");
     startPopupContent.innerHTML = `
       <div class=" flex flex-col gap-1">
-        <h3><span class='text-red-main'>${customerInfo?.code}</span> - <span class='font-medium'>${customerInfo?.fullName}</span></h3>
-      <p class="flex items-center gap-1 text-[#455468]"><img src='https://res.cloudinary.com/dvrqupkgg/image/upload/v1720587657/phoneIcon_q0kwgi.svg' /> ${customerInfo?.phone}</p>
-      <p class="flex items-center gap-1 text-[#455468]"><img src="https://res.cloudinary.com/dvrqupkgg/image/upload/v1720587358/markPng_bv3kg1.png" /> ${customerInfo?.address?.split(",")[0] || ''}</p>
-      </div>
-    `;
+        <h3><span class='text-red-main'>${customerInfoNew?.code}</span> - <span class='font-medium'>${customerInfoNew?.fullName}</span></h3>
+      <p class="flex items-center gap-1 text-[#455468]"><img src='https://res.cloudinary.com/dvrqupkgg/image/upload/v1720587657/phoneIcon_q0kwgi.svg' /> ${customerInfoNew?.phone}</p>
+      <p class="flex items-center gap-1 text-[#455468]"><img src="https://res.cloudinary.com/dvrqupkgg/image/upload/v1720587358/markPng_bv3kg1.png" /> ${customerInfoNew?.address?.split(",")[0] || customerInfo?.address?.split(",")[0] || ''
+      }</p>
+      </div >
+  `;
     return startPopupContent;
   };
 
@@ -102,9 +123,9 @@ const CustomMap = forwardRef((props, ref) => {
     },
   }));
 
-  const createMarker = (coordinates, popupHTML, customerIndex) => {
+  const createMarker = (coordinates, popupHTML, customerIndex, customerStatus) => {
     const popup = new vietmapgl.Popup({ offset: 25 }).setDOMContent(popupHTML);
-    const marker = new vietmapgl.Marker(customCustomerMarker(customerIndex))
+    const marker = new vietmapgl.Marker(customCustomerMarker(customerIndex, customerStatus))
       .setLngLat(coordinates)
       .setPopup(popup)
       .addTo(mapRef.current);
@@ -168,10 +189,6 @@ const CustomMap = forwardRef((props, ref) => {
     });
   };
 
-  useEffect(() => {
-    loadMap();
-    addGeojsonLine();
-  }, []);
 
   useEffect(() => {
     if (mapRef.current) {
