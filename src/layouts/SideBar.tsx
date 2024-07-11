@@ -10,6 +10,7 @@ import HomeIcon from '@/assets/homeIcon1.svg';
 import MarketIcon from '@/assets/marketIcon.svg';
 import MedicineIcon from '@/assets/medicine.svg';
 import PartnerIcon from '@/assets/partner.svg';
+import CSIcon from '@/assets/csIcon.svg';
 import ProductIcon from '@/assets/productIcon.svg';
 import ReportIcon from '@/assets/reportIcon.svg';
 import SellIcon from '@/assets/sellIcon.svg';
@@ -82,6 +83,10 @@ export const partnerGroup = {
   PARTNERS_GROUP_PROVIDER: '/partners/group-provider',
   PARTNERS_DOCTOR_LIST: '/partners/doctor',
 };
+export const customerCare = {
+  CUSTOMER_CARE_CREATE: '/customer-care/create-schedule',
+  CUSTOMER_CARE_LIST: '/customer-care/list-schedule',
+};
 
 export const reportGroup = {
   REPORTS_CUSTOMER: '/reports/customer-report',
@@ -124,6 +129,9 @@ const keyMenu = {
 
   PARTNER: '/partners',
   ...partnerGroup,
+
+  CUSTOMER_CARE: '/customer-care',
+  ...customerCare,
 
   CASHBOOK: '/cashbooks',
 
@@ -215,6 +223,12 @@ const items = (permissions: { model: string; action: string }[]) => [
     getItem('Nhóm nhà cung cấp', keyMenu.PARTNERS_GROUP_PROVIDER),
     hasPermission(permissions, RoleModel.doctor, RoleAction.read) &&
     getItem('Bác sĩ', keyMenu.PARTNERS_DOCTOR_LIST),
+  ]),
+  getItem('Chăm sóc khách hàng', keyMenu.CUSTOMER_CARE, <Image src={CSIcon} />, [
+    hasPermission(permissions, RoleModel.customer_care, RoleAction.create) &&
+    getItem('Tạo lịch trình tiếp thị', keyMenu.CUSTOMER_CARE_CREATE),
+    hasPermission(permissions, RoleModel.customer_care, RoleAction.read) &&
+    getItem('Danh sách lịch trình', keyMenu.CUSTOMER_CARE_LIST),
   ]),
 
   hasPermission(permissions, RoleModel.cashbook, RoleAction.read) &&

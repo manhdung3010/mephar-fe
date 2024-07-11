@@ -40,6 +40,12 @@ const Info = ({ record, onChangeUnit }: { record: IProduct, onChangeUnit: any })
   const [openDeleteProductModal, setOpenDeleteProductModal] = useState(false);
   const [openUpdateProductStatusModal, setOpenUpdateProductStatusModal] =
     useState(false);
+  const [showFullDescription, setShowFullDescription] = useState(false);
+
+
+  const toggleDescription = () => {
+    setShowFullDescription(!showFullDescription);
+  };
 
   const { mutate: mutateDeleteProduct, isLoading: isLoadingDeleteProduct } =
     useMutation(() => deleteProduct(Number(record.id)), {
@@ -210,7 +216,18 @@ const Info = ({ record, onChangeUnit }: { record: IProduct, onChangeUnit: any })
           </div>
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Mô tả:</div>
-            <div className="text-black-main">{record.description}</div>
+            <div className="text-black-main">
+              <div className={showFullDescription ? '' : 'line-clamp-5'}>
+                {record?.description}
+              </div>
+              {
+                record?.description?.length > 240 && (
+                  <button onClick={toggleDescription} className="text-blue-500">
+                    {showFullDescription ? 'Thu gọn' : 'Xem thêm'}
+                  </button>
+                )
+              }
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Danh sách đơn vị:</div>

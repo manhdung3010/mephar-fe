@@ -60,7 +60,7 @@ export function PointHistory({ record, branchId }: { record: any, branchId: numb
       title: 'Mã phiếu',
       dataIndex: 'code',
       key: 'code',
-      render: (value, record) => <span className="text-[#0070F4]">{record?.order?.code}</span>,
+      render: (value, record) => <span className="text-[#0070F4]">{record?.order?.code || value}</span>,
     },
     {
       title: 'Thời gian',

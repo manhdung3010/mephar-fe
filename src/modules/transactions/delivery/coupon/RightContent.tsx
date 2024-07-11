@@ -1,59 +1,66 @@
-import Image from 'next/image';
-import { useEffect, useMemo, useState } from 'react';
+import Image from "next/image";
+import { useEffect, useMemo, useState } from "react";
 
-import { getBranch } from '@/api/branch.service';
-import { getEmployee } from '@/api/employee.service';
-import { createMoveProduct, createReceiveMoveProduct } from '@/api/move';
-import EditIcon from '@/assets/editIcon.svg';
-import EmployeeIcon from '@/assets/employeeIcon.svg';
-import { CustomButton } from '@/components/CustomButton';
-import { CustomInput } from '@/components/CustomInput';
-import { CustomSelect } from '@/components/CustomSelect';
-import InputError from '@/components/InputError';
-import { formatDate, formatDateTime, formatNumber } from '@/helpers';
-import { productMoveState, profileState } from '@/recoil/state';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { message } from 'antd';
-import { cloneDeep, debounce } from 'lodash';
-import { useRecoilState, useRecoilValue } from 'recoil';
-import { useRouter } from 'next/router';
+import { getBranch } from "@/api/branch.service";
+import { getEmployee } from "@/api/employee.service";
+import { createMoveProduct, createReceiveMoveProduct } from "@/api/move";
+import EditIcon from "@/assets/editIcon.svg";
+import EmployeeIcon from "@/assets/employeeIcon.svg";
+import { CustomButton } from "@/components/CustomButton";
+import { CustomInput } from "@/components/CustomInput";
+import { CustomSelect } from "@/components/CustomSelect";
+import InputError from "@/components/InputError";
+import { formatDate, formatDateTime, formatNumber } from "@/helpers";
+import { productMoveState, profileState } from "@/recoil/state";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { message } from "antd";
+import { cloneDeep, debounce } from "lodash";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { useRouter } from "next/router";
 
-export function RightContent({ useForm, branchId, moveId, moveDetail }: { useForm: any, branchId: number, moveId: any, moveDetail: any }) {
-  const [searchEmployeeText, setSearchEmployeeText] = useState('');
-  const router = useRouter()
+export function RightContent({
+  useForm,
+  branchId,
+  moveId,
+  moveDetail,
+}: {
+  useForm: any;
+  branchId: number;
+  moveId: any;
+  moveDetail: any;
+}) {
+  const [searchEmployeeText, setSearchEmployeeText] = useState("");
+  const router = useRouter();
 
   const { getValues, setValue, handleSubmit, errors, reset } = useForm;
 
-  const [productsImport, setProductsImport] =
-    useRecoilState(productMoveState);
+  const [productsImport, setProductsImport] = useRecoilState(productMoveState);
   const profile = useRecoilValue(profileState);
 
   const { data: employees } = useQuery(
-    ['EMPLOYEE_LIST', searchEmployeeText],
+    ["EMPLOYEE_LIST", searchEmployeeText],
     () => getEmployee({ page: 1, limit: 20, keyword: searchEmployeeText })
   );
 
-  const { data: branches } = useQuery(['SETTING_BRANCH'], () => getBranch());
+  const { data: branches } = useQuery(["SETTING_BRANCH"], () => getBranch());
 
   const {
     mutate: mutateCreateProductImport,
     isLoading: isLoadingCreateProductImport,
   } = useMutation(
     () => {
-      const products = getValues('products').map(
-        ({ isBatchExpireControl, ...product }) => (
-          {
-            ...product,
-            price: product.primePrice,
-            productUnitId: product.id,
-            batches: product.batches?.filter((item) => item.isSelected)?.map((batch) => (
-              {
-                id: batch.id,
-                quantity: batch.quantity,
-              }
-            )),
-          }
-        )
+      const products = getValues("products").map(
+        ({ isBatchExpireControl, ...product }) => ({
+          ...product,
+          price: product.primePrice,
+          productUnitId: product.id,
+          batches: product.batches
+            ?.filter((item) => item.isSelected)
+            ?.map((batch) => ({
+              id: batch.id,
+              quantity: batch.quantity,
+            })),
+        })
       );
 
       return createMoveProduct({ ...getValues(), products, totalItem });
@@ -63,7 +70,7 @@ export function RightContent({ useForm, branchId, moveId, moveDetail }: { useFor
         reset();
         setProductsImport([]);
         // await queryClient.invalidateQueries(['LIST_IMPORT_PRODUCT']);
-        router.push('/transactions/delivery');
+        router.push("/transactions/delivery");
       },
       onError: (err: any) => {
         message.error(err?.message);
@@ -75,7 +82,7 @@ export function RightContent({ useForm, branchId, moveId, moveDetail }: { useFor
     isLoading: isLoadingReceiveProductImport,
   } = useMutation(
     () => {
-      const products = getValues('items').map(
+      const products = getValues("items").map(
         ({ isBatchExpireControl, ...product }) => product
       );
 
@@ -88,7 +95,7 @@ export function RightContent({ useForm, branchId, moveId, moveDetail }: { useFor
         // setValue('userId', userId, { shouldValidate: true });
         setProductsImport([]);
         // await queryClient.invalidateQueries(['LIST_IMPORT_PRODUCT']);
-        router.push('/transactions/delivery');
+        router.push("/transactions/delivery");
       },
       onError: (err: any) => {
         message.error(err?.message);
@@ -98,9 +105,11 @@ export function RightContent({ useForm, branchId, moveId, moveDetail }: { useFor
 
   useEffect(() => {
     if (profile) {
-      moveId ? setValue('receivedBy', profile.id) : setValue('movedBy', profile.id);
+      moveId
+        ? setValue("receivedBy", profile.id)
+        : setValue("movedBy", profile.id);
     }
-  }, [profile])
+  }, [profile]);
 
   const totalPrice = useMemo(() => {
     let price = 0;
@@ -119,11 +128,9 @@ export function RightContent({ useForm, branchId, moveId, moveDetail }: { useFor
     let quantity = 0;
 
     if (productsImport?.length) {
-      productsImport.forEach(
-        ({ quantity: itemQuantity }) => {
-          quantity += itemQuantity
-        }
-      );
+      productsImport.forEach(({ quantity: itemQuantity }) => {
+        quantity += itemQuantity;
+      });
     }
 
     return quantity;
@@ -132,11 +139,9 @@ export function RightContent({ useForm, branchId, moveId, moveDetail }: { useFor
     let quantity = 0;
 
     if (productsImport?.length) {
-      productsImport.forEach(
-        ({ totalQuantity }) => {
-          quantity += totalQuantity
-        }
-      );
+      productsImport.forEach(({ totalQuantity }) => {
+        quantity += totalQuantity;
+      });
     }
 
     return quantity;
@@ -144,7 +149,17 @@ export function RightContent({ useForm, branchId, moveId, moveDetail }: { useFor
 
   const changePayload = () => {
     const products = cloneDeep(productsImport).map(
-      ({ id, price, product, quantity, batches, toBatches, productUnitId, primePrice }: any) => ({
+      ({
+        id,
+        price,
+        product,
+        quantity,
+        batches,
+        toBatches,
+        fromBatches,
+        productUnitId,
+        primePrice,
+      }: any) => ({
         productId: product.id,
         price: price,
         primePrice: primePrice,
@@ -152,43 +167,42 @@ export function RightContent({ useForm, branchId, moveId, moveDetail }: { useFor
         id: id,
         isBatchExpireControl: product.isBatchExpireControl,
         ...(moveId ? {} : { productUnitId: productUnitId }),
-        batches: moveId ? toBatches?.map((item) => (
-          {
-            id: item.batch.id,
-            quantity: item.batch.quantity,
-            expiryDate: item.batch.expiryDate,
-            isSelected: item.isSelected,
-          }
-        )) : batches?.map(({ id, quantity, expiryDate, isSelected }) => ({
-          id,
-          quantity,
-          expiryDate,
-          isSelected
-        })),
+        batches: moveId
+          ? fromBatches?.map((item) => ({
+              id: item.id,
+              quantity: item.quantity,
+              expiryDate: item.batch.expiryDate,
+              isSelected: item.isSelected,
+            }))
+          : batches?.map(({ id, quantity, expiryDate, isSelected }) => ({
+              id,
+              quantity,
+              expiryDate,
+              isSelected,
+            })),
       })
     );
-    moveId ? setValue('items', products) : setValue('products', products);
+    moveId ? setValue("items", products) : setValue("products", products);
   };
 
   const onSubmit = () => {
     if (moveId) {
-      let errorTxt
+      let errorTxt;
       productsImport.forEach((item) => {
         if (item.quantity > item.totalQuantity) {
           errorTxt = "Số lượng nhận không được lớn hơn số lượng chuyển";
           return;
         }
-      })
+      });
       if (errorTxt) {
         message.error(errorTxt);
         return;
       }
       return mutateReceiveProductImport();
-    }
-    else {
+    } else {
       mutateCreateProductImport();
     }
-  }
+  };
 
   return (
     <div className="flex h-[calc(100vh-52px)] w-[360px] min-w-[360px] flex-col border-l border-[#E4E4E4] bg-white">
@@ -199,12 +213,14 @@ export function RightContent({ useForm, branchId, moveId, moveDetail }: { useFor
             label: item.fullName,
           }))}
           showSearch={true}
-          value={moveId ? getValues('receivedBy') : getValues('movedBy')}
+          value={moveId ? getValues("receivedBy") : getValues("movedBy")}
           onSearch={debounce((value) => {
             setSearchEmployeeText(value);
           }, 300)}
           onChange={(value) => {
-            moveId ? setValue('receivedBy', value, { shouldValidate: true }) : setValue('movedBy', value, { shouldValidate: true });
+            moveId
+              ? setValue("receivedBy", value, { shouldValidate: true })
+              : setValue("movedBy", value, { shouldValidate: true });
           }}
           wrapClassName=""
           className="h-[44px]"
@@ -219,8 +235,8 @@ export function RightContent({ useForm, branchId, moveId, moveDetail }: { useFor
       <div className="flex grow flex-col px-6">
         <div className="grow">
           <div className="mb-5 border-b-2 border-dashed border-[#E4E4E4]">
-            {
-              !moveId && <div className="mb-5 grid grid-cols-2">
+            {!moveId && (
+              <div className="mb-5 grid grid-cols-2">
                 <div className=" leading-normal text-[#828487]">
                   Mã chuyển hàng
                 </div>
@@ -228,87 +244,103 @@ export function RightContent({ useForm, branchId, moveId, moveDetail }: { useFor
                   bordered={false}
                   placeholder="Mã phiếu tự động"
                   className="h-6 pr-0 text-end"
-                  value={getValues('code')}
+                  value={getValues("code")}
                   onChange={(value) => {
-                    setValue('code', value, { shouldValidate: true });
+                    setValue("code", value, { shouldValidate: true });
                   }}
                 />
               </div>
-            }
-            {
-              moveId && <div className="mb-5 flex justify-between">
-                <div className=" leading-normal text-[#828487]">Mã chuyển hàng</div>
-                <div className=" leading-normal text-[#19191C]">{moveDetail?.code}</div>
+            )}
+            {moveId && (
+              <div className="mb-5 flex justify-between">
+                <div className=" leading-normal text-[#828487]">
+                  Mã chuyển hàng
+                </div>
+                <div className=" leading-normal text-[#19191C]">
+                  {moveDetail?.code}
+                </div>
               </div>
-            }
+            )}
 
             <div className="mb-5 flex justify-between">
               <div className=" leading-normal text-[#828487]">Trạng thái</div>
-              <div className=" leading-normal text-[#19191C]">{moveId ? "Nhận hàng" : "Phiếu tạm"}</div>
+              <div className=" leading-normal text-[#19191C]">
+                {moveId ? "Nhận hàng" : "Phiếu tạm"}
+              </div>
             </div>
-            {
-              moveId && (
-                <>
-                  <div className="mb-5 flex justify-between">
-                    <div className=" leading-normal text-[#828487]">Chi nhánh gửi</div>
-                    <div className=" leading-normal text-[#19191C]">{moveDetail?.fromBranch?.name}</div>
+            {moveId && (
+              <>
+                <div className="mb-5 flex justify-between">
+                  <div className=" leading-normal text-[#828487]">
+                    Chi nhánh gửi
                   </div>
-                  <div className="mb-5 flex justify-between">
-                    <div className=" leading-normal text-[#828487]">Ngày chuyển</div>
-                    <div className=" leading-normal text-[#19191C]">{formatDate(moveDetail?.movedAt)}</div>
+                  <div className=" leading-normal text-[#19191C]">
+                    {moveDetail?.fromBranch?.name}
                   </div>
-                </>
-              )
-            }
+                </div>
+                <div className="mb-5 flex justify-between">
+                  <div className=" leading-normal text-[#828487]">
+                    Ngày chuyển
+                  </div>
+                  <div className=" leading-normal text-[#19191C]">
+                    {formatDate(moveDetail?.movedAt)}
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
           <div className="mb-5">
-            {
-              moveId && <div className="mb-5 flex justify-between">
+            {moveId && (
+              <div className="mb-5 flex justify-between">
                 <div className=" leading-normal text-[#828487]">
                   Tổng số lượng chuyển
                 </div>
-                <div className=" leading-normal text-[#19191C]">{formatNumber(totalItemMove)}</div>
+                <div className=" leading-normal text-[#19191C]">
+                  {formatNumber(totalItemMove)}
+                </div>
               </div>
-            }
+            )}
             <div className="mb-5 flex justify-between">
               <div className=" leading-normal text-[#828487]">
                 Tổng số lượng {moveId ? "nhận" : ""}
               </div>
-              <div className=" leading-normal text-[#19191C]">{formatNumber(totalItem)}</div>
+              <div className=" leading-normal text-[#19191C]">
+                {formatNumber(totalItem)}
+              </div>
             </div>
 
-            {
-              !moveId && (
-                <div className="mb-5 flex flex-col">
-                  <div className='flex items-center'>
-                    <div className=" leading-normal text-[#828487] flex-shrink-0 w-28">
-                      Tới chi nhánh
-                    </div>
-                    <CustomSelect
-                      options={branches?.data?.items?.filter((br) => br.id !== branchId).map((item) => ({
+            {!moveId && (
+              <div className="mb-5 flex flex-col">
+                <div className="flex items-center">
+                  <div className=" leading-normal text-[#828487] flex-shrink-0 w-28">
+                    Tới chi nhánh
+                  </div>
+                  <CustomSelect
+                    options={branches?.data?.items
+                      ?.filter((br) => br.id !== branchId)
+                      .map((item) => ({
                         value: item.id,
                         label: item.name,
                       }))}
-                      showSearch={true}
-                      value={getValues('toBranchId')}
-                      onSearch={debounce((value) => {
-                        setSearchEmployeeText(value);
-                      }, 300)}
-                      onChange={(value) => {
-                        setValue('toBranchId', value, { shouldValidate: true });
-                      }}
-                      wrapClassName=""
-                      className="border-underline"
-                      placeholder="Chọn chi nhánh"
-                    />
-                  </div>
-                  <div className='ml-auto'>
-                    <InputError error={errors.toBranchId?.message} />
-                  </div>
+                    showSearch={true}
+                    value={getValues("toBranchId")}
+                    onSearch={debounce((value) => {
+                      setSearchEmployeeText(value);
+                    }, 300)}
+                    onChange={(value) => {
+                      setValue("toBranchId", value, { shouldValidate: true });
+                    }}
+                    wrapClassName=""
+                    className="border-underline"
+                    placeholder="Chọn chi nhánh"
+                  />
                 </div>
-              )
-            }
+                <div className="ml-auto">
+                  <InputError error={errors.toBranchId?.message} />
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -318,9 +350,9 @@ export function RightContent({ useForm, branchId, moveId, moveDetail }: { useFor
             prefixIcon={<Image src={EditIcon} />}
             placeholder="Thêm ghi chú"
             className="text-sm"
-            value={getValues('note')}
+            value={getValues("note")}
             onChange={(value) => {
-              setValue('note', value, { shouldValidate: true });
+              setValue("note", value, { shouldValidate: true });
             }}
           />
         </div>
@@ -332,12 +364,19 @@ export function RightContent({ useForm, branchId, moveId, moveDetail }: { useFor
         {/* <CustomButton className="!h-12 text-lg font-semibold">
           Lưu tạm
         </CustomButton> */}
-        <CustomButton className="!h-12 text-lg font-semibold" type="success" onClick={() => {
-          changePayload();
-          handleSubmit(onSubmit)();
-        }}
-          loading={isLoadingCreateProductImport || isLoadingReceiveProductImport}
-          disabled={isLoadingCreateProductImport || isLoadingReceiveProductImport}
+        <CustomButton
+          className="!h-12 text-lg font-semibold"
+          type="success"
+          onClick={() => {
+            changePayload();
+            handleSubmit(onSubmit)();
+          }}
+          loading={
+            isLoadingCreateProductImport || isLoadingReceiveProductImport
+          }
+          disabled={
+            isLoadingCreateProductImport || isLoadingReceiveProductImport
+          }
         >
           Hoàn thành
         </CustomButton>

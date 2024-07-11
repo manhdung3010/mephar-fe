@@ -103,6 +103,8 @@ const Index = () => {
     { enabled: !isSearchSampleMedicine }
   );
 
+  
+
   const { data: sampleMedicines, isLoading: isLoadingSampleMedicines } =
     useQuery<{
       data?: { items: ISampleMedicine[] };

@@ -51,12 +51,11 @@ export function Cashbook() {
     ballotType: undefined,
     typeId: undefined,
     userId: undefined,
-    branchId
   });
 
   const { data: transactions, isLoading } = useQuery(
-    ['TRANSACTION', JSON.stringify(formFilter)],
-    () => getTransaction(formFilter),
+    ['TRANSACTION', JSON.stringify(formFilter), branchId],
+    () => getTransaction({ ...formFilter, branchId }),
   );
   const columns: any = [
     {

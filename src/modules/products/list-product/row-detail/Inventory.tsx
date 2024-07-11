@@ -24,12 +24,13 @@ const Inventory = ({ productId, branchId, record }: { productId: number, branchI
 
   const { data: productInventory, isLoading } = useQuery(
     [
-      'PRODUCT_INVENTORY'
+      'PRODUCT_INVENTORY', productId, branchId
     ],
-    () => getProductInventory(productId)
+    () => getProductInventory(productId, { branchId }),
+    {
+      enabled: !!productId,
+    }
   );
-
-  console.log('record', record)
 
   const columns: ColumnsType<IRecord> = [
     {
@@ -56,23 +57,23 @@ const Inventory = ({ productId, branchId, record }: { productId: number, branchI
       key: 'planSoldOff',
       render: (order) => formatNumber(order),
     },
-    {
-      title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
-      render: (_, { status }) => (
-        <div
-          className={cx(
-            status === EProductStatus.active
-              ? 'text-[#00B63E] border border-[#00B63E] bg-[#DEFCEC]'
-              : 'text-[#6D6D6D] border border-[#6D6D6D] bg-[#F0F1F1]',
-            'px-2 py-1 rounded-2xl w-max'
-          )}
-        >
-          {EProductStatusLabel[status]}
-        </div>
-      ),
-    },
+    // {
+    //   title: 'Trạng thái',
+    //   dataIndex: 'status',
+    //   key: 'status',
+    //   render: (_, { status }) => (
+    //     <div
+    //       className={cx(
+    //         status === EProductStatus.active
+    //           ? 'text-[#00B63E] border border-[#00B63E] bg-[#DEFCEC]'
+    //           : 'text-[#6D6D6D] border border-[#6D6D6D] bg-[#F0F1F1]',
+    //         'px-2 py-1 rounded-2xl w-max'
+    //       )}
+    //     >
+    //       {EProductStatusLabel[status]}
+    //     </div>
+    //   ),
+    // },
   ];
 
   return <CustomTable dataSource={productInventory?.data} columns={columns} loading={isLoading} />;

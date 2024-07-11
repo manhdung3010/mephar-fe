@@ -426,9 +426,9 @@ export default function ImportCoupon() {
                 label: (
                   <div className="flex items-center gap-x-4 p-2">
                     <div className=" flex h-12 w-[68px] items-center rounded border border-gray-300 p-[2px]">
-                      {item.product.image?.path && (
+                      {item?.product?.image?.path && (
                         <Image
-                          src={getImage(item.product.image?.path)}
+                          src={getImage(item?.product?.image?.path)}
                           height={40}
                           width={68}
                           alt=""

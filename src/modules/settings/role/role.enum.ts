@@ -26,6 +26,8 @@ export enum RoleModel {
   group_provider = "group_provider",
   doctor = "doctor",
 
+  customer_care = "customer",
+
   cashbook = "cashbook",
 
   customer_report = "customer_report",

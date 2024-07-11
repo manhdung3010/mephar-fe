@@ -1,6 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { message } from "antd";
+import { message, Select, Spin } from "antd";
 import { debounce } from "lodash";
 import Image from "next/image";
 import { useRouter } from "next/router";
@@ -29,16 +29,20 @@ import InputError from "@/components/InputError";
 import { ECustomerStatus, ECustomerType, EGender } from "@/enums";
 import { formatDate, hasPermission } from "@/helpers";
 import { useAddress } from "@/hooks/useAddress";
-
+import MarkIcon from '@/assets/markIcon.svg';
 import { AddGroupCustomerModal } from "../../group-customer/AddGroupCustomerModal";
 import { schema } from "./schema";
 import { useRecoilValue } from "recoil";
 import { profileState } from "@/recoil/state";
 import { RoleAction, RoleModel } from "@/modules/settings/role/role.enum";
+import { getLatLng, searchPlace } from "@/api/trip.service";
+const { Option } = Select;
 
 export function AddCustomer({ customerId }: { customerId?: string }) {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const [placeKeyword, setPlaceKeyword] = useState("");
+  const [refId, setRefId] = useState('');
 
   const {
     getValues,
@@ -60,6 +64,32 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
     () => getCustomerDetail(Number(customerId)),
     { enabled: !!customerId }
   );
+
+  const { data: places, isLoading: isLoadingPlace } = useQuery(
+    ["SEARCH_PLACE", placeKeyword],
+    () =>
+      searchPlace({ keyword: placeKeyword }),
+    {
+      enabled: placeKeyword.length > 0
+    }
+  );
+
+  const { data: latLng, isLoading: isLoadingLatLng } = useQuery(
+    ["SEARCH_LATLNG", refId],
+    () =>
+      getLatLng({ refId: refId }),
+    {
+      enabled: refId.length > 0
+    }
+  );
+
+  useEffect(() => {
+    if (latLng) {
+      setValue("lng", String(latLng?.data?.lng), { shouldValidate: true });
+      setValue("lat", String(latLng?.data?.lat), { shouldValidate: true });
+      setValue("address", latLng?.data?.display, { shouldValidate: true })
+    }
+  }, [latLng]);
 
   const { provinces, districts, wards } = useAddress(
     getValues("provinceId"),
@@ -307,14 +337,41 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
 
             <div>
               <Label infoText="" label="Địa chỉ" />
-              <CustomInput
+              {/* <CustomInput
                 placeholder="Nhập địa chỉ"
                 className="h-11"
                 onChange={(e) =>
                   setValue("address", e, { shouldValidate: true })
                 }
                 value={getValues("address")}
-              />
+              /> */}
+              <Select
+                placeholder="Tìm kiếm địa chỉ"
+                className="h-11 !rounded w-full"
+                onChange={(value) => {
+                  setRefId(value);
+                }}
+                onSearch={debounce((value) => {
+                  setPlaceKeyword(value);
+                }, 300)}
+                showSearch={true}
+                notFoundContent={isLoadingPlace ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
+                filterOption={(input, option: any) => {
+                  const textContent = option.children.props.children[1].props.children;
+                  return textContent.toLowerCase().includes(input.toLowerCase());
+                }}
+              >
+                {places?.data?.map((item) => (
+                  <Option key={item.ref_id} value={item.ref_id}>
+                    <div className='flex items-center gap-1 py-2'>
+                      <Image src={MarkIcon} />
+                      <span className='display'>
+                        {item?.display}
+                      </span>
+                    </div>
+                  </Option>
+                ))}
+              </Select>
               <InputError error={errors.address?.message} />
             </div>
 
@@ -370,6 +427,24 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
                 showSearch={true}
               />
               <InputError error={errors.wardId?.message} />
+            </div>
+            <div>
+              <Label infoText="" label="Kinh độ" />
+              <CustomInput
+                placeholder="Kinh độ"
+                className="h-11"
+                onChange={(e) => setValue("lng", e, { shouldValidate: true })}
+                value={getValues("lng")}
+              />
+            </div>
+            <div>
+              <Label infoText="" label="Vĩ độ" />
+              <CustomInput
+                placeholder="Vĩ độ"
+                className="h-11"
+                onChange={(e) => setValue("lat", e, { shouldValidate: true })}
+                value={getValues("lat")}
+              />
             </div>
 
             <div>

@@ -1,30 +1,36 @@
 /* eslint-disable unused-imports/no-unused-vars */
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { message } from 'antd';
-import { cloneDeep, debounce } from 'lodash';
-import Image from 'next/image';
-import { useMemo, useState } from 'react';
-import { useRecoilState } from 'recoil';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { message } from "antd";
+import { cloneDeep, debounce } from "lodash";
+import Image from "next/image";
+import { useMemo, useState } from "react";
+import { useRecoilState } from "recoil";
 
-import { getEmployee } from '@/api/employee.service';
-import { getProvider } from '@/api/provider.service';
-import { createReturnProduct } from '@/api/return-product.service';
-import EditIcon from '@/assets/editIcon.svg';
-import EmployeeIcon from '@/assets/employeeIcon.svg';
-import PlusIcon from '@/assets/plusIcon.svg';
-import ProviderIcon from '@/assets/providerIcon.svg';
-import { CustomButton } from '@/components/CustomButton';
-import { CustomInput } from '@/components/CustomInput';
-import { CustomSelect } from '@/components/CustomSelect';
-import InputError from '@/components/InputError';
-import { EImportProductStatus } from '@/enums';
-import { formatMoney } from '@/helpers';
-import { productReturnState } from '@/recoil/state';
+import { getEmployee } from "@/api/employee.service";
+import { getProvider } from "@/api/provider.service";
+import { createReturnProduct } from "@/api/return-product.service";
+import EditIcon from "@/assets/editIcon.svg";
+import EmployeeIcon from "@/assets/employeeIcon.svg";
+import PlusIcon from "@/assets/plusIcon.svg";
+import ProviderIcon from "@/assets/providerIcon.svg";
+import { CustomButton } from "@/components/CustomButton";
+import { CustomInput } from "@/components/CustomInput";
+import { CustomSelect } from "@/components/CustomSelect";
+import InputError from "@/components/InputError";
+import { EImportProductStatus } from "@/enums";
+import { formatMoney } from "@/helpers";
+import { productReturnState } from "@/recoil/state";
 
-import { AddProviderModal } from './AddProviderModal';
-import { useRouter } from 'next/router';
+import { AddProviderModal } from "./AddProviderModal";
+import { useRouter } from "next/router";
 
-export function RightContent({ useForm, importId }: { useForm: any, importId: string }) {
+export function RightContent({
+  useForm,
+  importId,
+}: {
+  useForm: any;
+  importId: string;
+}) {
   const queryClient = useQueryClient();
   const router = useRouter();
 
@@ -34,15 +40,15 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
 
   const [isOpenAddProviderModal, setIsOpenAddProviderModal] = useState(false);
 
-  const [searchEmployeeText, setSearchEmployeeText] = useState('');
-  const [searchProviderText, setSearchProviderText] = useState('');
+  const [searchEmployeeText, setSearchEmployeeText] = useState("");
+  const [searchProviderText, setSearchProviderText] = useState("");
 
   const { data: employees } = useQuery(
-    ['EMPLOYEE_LIST', searchEmployeeText],
+    ["EMPLOYEE_LIST", searchEmployeeText],
     () => getEmployee({ page: 1, limit: 20, keyword: searchEmployeeText })
   );
   const { data: providers } = useQuery(
-    ['PROVIDER_LIST', searchProviderText],
+    ["PROVIDER_LIST", searchProviderText],
     () => getProvider({ page: 1, limit: 20, keyword: searchProviderText })
   );
 
@@ -55,66 +61,77 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
           priceTotal += price * quantity;
         }
       );
-      setValue('paid', priceTotal, { shouldValidate: true });
-    }
-    else {
-      setValue('paid', 0, { shouldValidate: true });
+      setValue("paid", priceTotal, { shouldValidate: true });
+    } else {
+      setValue("paid", 0, { shouldValidate: true });
     }
 
     return priceTotal;
   }, [productsReturn]);
 
   const totalPriceAfterDiscount = useMemo(() => {
-    const price = Number(totalPrice) - Number(getValues('discount') ?? 0);
-    setValue('totalPrice', price, { shouldValidate: true });
+    const price = Number(totalPrice) - Number(getValues("discount") ?? 0);
+    setValue("totalPrice", price, { shouldValidate: true });
     return price;
-  }, [totalPrice, getValues('discount')]);
+  }, [totalPrice, getValues("discount")]);
 
   const debtPrice = useMemo(() => {
     return (
       Number(totalPrice) -
-      Number(getValues('discount') ?? 0) -
-      Number(getValues('paid') ?? 0)
+      Number(getValues("discount") ?? 0) -
+      Number(getValues("paid") ?? 0)
     );
-  }, [getValues('discount'), getValues('paid'), totalPrice]);
+  }, [getValues("discount"), getValues("paid"), totalPrice]);
 
   const {
     mutate: mutateCreateProductReturn,
     isLoading: isLoadingCreateProductReturn,
   } = useMutation(
     () => {
-      const products = getValues('products').map(
+      const products = getValues("products").map(
         ({ isBatchExpireControl, ...product }) => {
           return {
             ...product,
-            batches: product.batches
-              .map((batch: any) => ({
-                id: batch?.batch?.id || batch.id,
-                quantity: batch?.quantity,
-              })),
-          }
+            batches:
+              product?.batches?.length > 0
+                ? product.batches.map((batch: any) => ({
+                    id: batch?.batch?.id || batch.id,
+                    quantity: batch?.quantity,
+                  }))
+                : [],
+          };
         }
       );
       return createReturnProduct({ ...getValues(), products });
     },
     {
       onSuccess: async () => {
-        const userId = getValues('userId');
+        const userId = getValues("userId");
         reset();
-        setValue('userId', userId, { shouldValidate: true });
+        setValue("userId", userId, { shouldValidate: true });
         setProductsReturn([]);
-        await queryClient.invalidateQueries(['LIST_IMPORT_PRODUCT']);
-        router.push('/products/return/coupon');
+        await queryClient.invalidateQueries(["LIST_IMPORT_PRODUCT"]);
+        router.push("/products/return/coupon");
       },
       onError: (err: any) => {
-        message.error("Tạo phiếu trả hàng thất bại!");
+        message.error(err?.message);
       },
     }
   );
 
+  console.log("errors", errors);
   const changePayload = (status: EImportProductStatus) => {
     const products = cloneDeep(productsReturn).map(
-      ({ id, price, product, quantity, discountValue, productUnitId, batches, productId }: any) => ({
+      ({
+        id,
+        price,
+        product,
+        quantity,
+        discountValue,
+        productUnitId,
+        batches,
+        productId,
+      }: any) => ({
         productId: product.id || productId,
         importPrice: price,
         totalQuantity: quantity,
@@ -122,19 +139,27 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
         discount: discountValue,
         productUnitId: importId ? productUnitId : id,
         isBatchExpireControl: product.isBatchExpireControl,
-        ...(!product.isBatchExpireControl ? null : {
-          batches: importId ? batches?.map((batch: any) => ({ id: batch.batch?.id, quantity: batch.quantity, expiryDate: batch?.expiryDate })) : batches?.map(({ id, quantity, expiryDate }) => ({
-            id,
-            quantity,
-            expiryDate,
-          }))
-        }),
+        ...(!product.isBatchExpireControl
+          ? null
+          : {
+              batches: importId
+                ? batches?.map((batch: any) => ({
+                    id: batch.batch?.id,
+                    quantity: batch.quantity,
+                    expiryDate: batch?.expiryDate,
+                  }))
+                : batches?.map(({ id, quantity, expiryDate }) => ({
+                    id,
+                    quantity,
+                    expiryDate,
+                  })),
+            }),
       })
     );
-    setValue('products', products);
-    setValue('totalPrice', totalPriceAfterDiscount);
-    setValue('debt', debtPrice);
-    setValue('status', status);
+    setValue("products", products);
+    setValue("totalPrice", totalPriceAfterDiscount);
+    setValue("debt", debtPrice);
+    setValue("status", status);
   };
 
   const onSubmit = () => {
@@ -151,12 +176,12 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
               label: item.fullName,
             }))}
             showSearch={true}
-            value={getValues('userId')}
+            value={getValues("userId")}
             onSearch={debounce((value) => {
               setSearchEmployeeText(value);
             }, 300)}
             onChange={(value) => {
-              setValue('userId', value, { shouldValidate: true });
+              setValue("userId", value, { shouldValidate: true });
             }}
             wrapClassName=""
             className="h-[44px]"
@@ -173,26 +198,28 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
               label: item.name,
             }))}
             showSearch={true}
-            value={getValues('supplierId')}
+            value={getValues("supplierId")}
             onSearch={debounce((value) => {
               setSearchProviderText(value);
             }, 300)}
             onChange={(value) => {
-              setValue('supplierId', value, { shouldValidate: true });
+              setValue("supplierId", value, { shouldValidate: true });
             }}
             className="h-[44px]"
             placeholder="Tìm nhà cung cấp"
             prefixIcon={<Image src={ProviderIcon} alt="" />}
             disabled={importId ? true : false}
             suffixIcon={
-              importId ? null : <Image
-                src={PlusIcon}
-                onClick={(e) => {
-                  setIsOpenAddProviderModal(true);
-                  e.stopPropagation();
-                }}
-                alt=""
-              />
+              importId ? null : (
+                <Image
+                  src={PlusIcon}
+                  onClick={(e) => {
+                    setIsOpenAddProviderModal(true);
+                    e.stopPropagation();
+                  }}
+                  alt=""
+                />
+              )
             }
           />
           <InputError error={errors.supplierId?.message} />
@@ -211,8 +238,8 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
                 bordered={false}
                 placeholder="Mã phiếu tự động"
                 className="h-6 pr-0 text-end"
-                onChange={(value) => setValue('code', value)}
-                value={getValues('code')}
+                onChange={(value) => setValue("code", value)}
+                value={getValues("code")}
               />
             </div>
 
@@ -231,29 +258,34 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
                 {formatMoney(totalPrice)}
               </div>
             </div>
-            {
-              !importId && <div className="mb-5 flex justify-between">
+            {!importId && (
+              <div className="mb-5 flex justify-between">
                 <div className=" leading-normal text-[#828487]">Giảm giá</div>
                 <div className="w-[90px]">
                   <CustomInput
                     bordered={false}
                     className="h-6 pr-0 text-end "
-                    onChange={(value) =>
-                      setValue('discount', value, { shouldValidate: true })
-                    }
+                    onChange={(value) => {
+                      setValue("discount", value, { shouldValidate: true });
+                      setValue(
+                        "paid",
+                        totalPrice - (+getValues("discount") ?? 0),
+                        { shouldValidate: true }
+                      );
+                    }}
                     type="number"
-                    value={getValues('discount')}
+                    value={getValues("discount")}
                   />
                 </div>
               </div>
-            }
+            )}
             <div className="mb-5 flex justify-between">
               <div className="text-lg leading-normal text-[#000000]">
                 NCC CẦN TRẢ
               </div>
               <div className="text-lg leading-normal text-red-main">
                 {formatMoney(
-                  Number(totalPrice) - Number(getValues('discount') ?? 0)
+                  Number(totalPrice) - Number(getValues("discount") ?? 0)
                 )}
               </div>
             </div>
@@ -267,10 +299,10 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
                     bordered={false}
                     className="h-6 pr-0 text-end "
                     onChange={(value) =>
-                      setValue('paid', value, { shouldValidate: true })
+                      setValue("paid", value, { shouldValidate: true })
                     }
                     type="number"
-                    value={getValues('paid')}
+                    value={getValues("paid")}
                   />
                 </div>
               </div>
@@ -292,8 +324,8 @@ export function RightContent({ useForm, importId }: { useForm: any, importId: st
             prefixIcon={<Image src={EditIcon} alt="" />}
             placeholder="Thêm ghi chú"
             className="text-sm"
-            onChange={(value) => setValue('description', value)}
-            value={getValues('description')}
+            onChange={(value) => setValue("description", value)}
+            value={getValues("description")}
           />
         </div>
       </div>

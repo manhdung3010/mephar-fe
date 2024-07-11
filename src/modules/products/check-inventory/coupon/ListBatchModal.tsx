@@ -113,13 +113,6 @@ export function ListBatchModal({
         message.error('Số lượng sản phẩm chọn phải lớn hơn hoặc bằng 1');
         return false;
       }
-
-      if (batch.isSelected && batch.quantity > batch.inventory) {
-        message.error(
-          'Số lượng sản phẩm chọn phải nhỏ hơn hoặc bằng số lượng tồn'
-        );
-        return false;
-      }
     }
     return true;
   };
