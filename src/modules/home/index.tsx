@@ -129,7 +129,7 @@ export function Home() {
               </div>
             </div>
 
-            <div className="flex">
+            {/* <div className="flex">
               <div className="mt-4 mr-4 flex h-[30px] w-[30px] items-center justify-center rounded-full bg-[#ED232F]">
                 <Image src={ArrowDownIcon} alt="" />
               </div>
@@ -140,7 +140,7 @@ export function Home() {
                   So với cùng kỳ tháng trước
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
 
