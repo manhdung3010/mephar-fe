@@ -1,28 +1,36 @@
-import { Input } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
-import Image from 'next/image';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Input } from "antd";
+import type { ColumnsType } from "antd/es/table";
+import Image from "next/image";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-import CloseIcon from '@/assets/closeIcon.svg';
-import PrintOrderIcon from '@/assets/printOrder.svg';
-import { CustomButton } from '@/components/CustomButton';
-import CustomTable from '@/components/CustomTable';
-import { EGenderLabel, EOrderStatusLabel } from '@/enums';
-import { formatDate, formatMoney, formatNumber, hasPermission } from '@/helpers';
-import { message } from 'antd';
+import CloseIcon from "@/assets/closeIcon.svg";
+import DiscountIcon from "@/assets/gift.svg";
 
-import { deleteOrder } from '@/api/order.service';
-import PlusIconWhite from '@/assets/PlusIconWhite.svg';
-import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
-import { profileState } from '@/recoil/state';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useReactToPrint } from 'react-to-print';
-import { useRecoilValue } from 'recoil';
-import { IOrder } from '../../order/type';
-import CancelBillModal from './CancelBillModal';
-import InvoicePrint from './InvoicePrint';
+import PrintOrderIcon from "@/assets/printOrder.svg";
+import { CustomButton } from "@/components/CustomButton";
+import CustomTable from "@/components/CustomTable";
+import { EGenderLabel, EOrderStatusLabel } from "@/enums";
+import {
+  formatDate,
+  formatMoney,
+  formatNumber,
+  hasPermission,
+} from "@/helpers";
+import { message } from "antd";
+
+import { deleteOrder } from "@/api/order.service";
+import PlusIconWhite from "@/assets/PlusIconWhite.svg";
+import { RoleAction, RoleModel } from "@/modules/settings/role/role.enum";
+import { profileState } from "@/recoil/state";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useReactToPrint } from "react-to-print";
+import { useRecoilValue } from "recoil";
+import { IOrder } from "../../order/type";
+import CancelBillModal from "./CancelBillModal";
+import InvoicePrint from "./InvoicePrint";
 import styles from "./invoicePrint.module.css";
-import { useRouter } from 'next/router';
+import { useRouter } from "next/router";
+import { getDiscountByIdOrder } from "@/api/discount.service";
 
 const { TextArea } = Input;
 
@@ -43,29 +51,38 @@ export function Info({ record }: { record: IOrder }) {
   const [expandedRowKeys, setExpandedRowKeys] = useState<
     Record<string, boolean>
   >({});
-  const [openCancelBill, setOpenCancelBill] = useState(false)
+  const [openCancelBill, setOpenCancelBill] = useState(false);
   const profile = useRecoilValue(profileState);
 
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  const { mutate: mutateCancelImportProduct, isLoading: isLoadingDeleteProduct } =
-    useMutation(() => deleteOrder(Number(record.id)), {
-      onSuccess: async () => {
-        await queryClient.invalidateQueries(['ORDER_LIST']);
-        setOpenCancelBill(false);
-      },
-      onError: (err: any) => {
-        message.error(err?.message);
-      },
-    });
+  const { data: discountDetail } = useQuery(
+    ["DISCOUNT_ORDER_DETAIL", record?.id],
+    () => getDiscountByIdOrder(Number(record?.id)),
+    { enabled: !!record?.id }
+  );
 
-  const onSubmit = () => { mutateCancelImportProduct() };
+  console.log(discountDetail);
+
+  const {
+    mutate: mutateCancelImportProduct,
+    isLoading: isLoadingDeleteProduct,
+  } = useMutation(() => deleteOrder(Number(record.id)), {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries(["ORDER_LIST"]);
+      setOpenCancelBill(false);
+    },
+    onError: (err: any) => {
+      message.error(err?.message);
+    },
+  });
+
+  const onSubmit = () => {
+    mutateCancelImportProduct();
+  };
 
   const invoiceComponentRef = useRef(null);
-
-  console.log(record);
-  
 
   useEffect(() => {
     if (record?.products?.length) {
@@ -80,9 +97,9 @@ export function Info({ record }: { record: IOrder }) {
 
   const columns: ColumnsType<IRecord> = [
     {
-      title: 'Mã hàng',
-      dataIndex: 'code',
-      key: 'code',
+      title: "Mã hàng",
+      dataIndex: "code",
+      key: "code",
       render: (value, _, index) => (
         <span
           className="cursor-pointer text-[#0070F4]"
@@ -102,30 +119,30 @@ export function Info({ record }: { record: IOrder }) {
       ),
     },
     {
-      title: 'Tên hàng',
-      dataIndex: 'name',
-      key: 'name',
+      title: "Tên hàng",
+      dataIndex: "name",
+      key: "name",
     },
     {
-      title: 'Đơn vị',
-      dataIndex: 'unitName',
-      key: 'unitName',
+      title: "Đơn vị",
+      dataIndex: "unitName",
+      key: "unitName",
     },
     {
-      title: 'Số lượng',
-      dataIndex: 'quantity',
-      key: 'quantity',
+      title: "Số lượng",
+      dataIndex: "quantity",
+      key: "quantity",
     },
     {
-      title: 'Đơn giá',
-      dataIndex: 'price',
-      key: 'price',
+      title: "Đơn giá",
+      dataIndex: "price",
+      key: "price",
       render: (value, { quantity }) => formatMoney(+value / quantity),
     },
     {
-      title: 'Thành tiền',
-      dataIndex: 'totalPrice',
-      key: 'totalPrice',
+      title: "Thành tiền",
+      dataIndex: "totalPrice",
+      key: "totalPrice",
       render: (_, { quantity, price }) => formatMoney(price),
     },
   ];
@@ -144,8 +161,7 @@ export function Info({ record }: { record: IOrder }) {
       total += item.price;
     });
     return formatMoney(total);
-  }
-
+  };
 
   return (
     <div className="gap-12 ">
@@ -316,47 +332,71 @@ export function Info({ record }: { record: IOrder }) {
         expandable={{
           defaultExpandAllRows: true,
           // eslint-disable-next-line @typescript-eslint/no-shadow
-          expandedRowRender: (record: IRecord) => record?.batches && record?.batches?.length > 0 && (
-            <div className="flex items-center bg-[#FFF3E6] px-6 py-2 gap-2">
-              {
-                record?.batches?.map((b, index) => (
+          expandedRowRender: (record: IRecord) =>
+            record?.batches &&
+            record?.batches?.length > 0 && (
+              <div className="flex items-center bg-[#FFF3E6] px-6 py-2 gap-2">
+                {record?.batches?.map((b, index) => (
                   <div className="flex items-center rounded bg-red-main py-1 px-2 text-white">
-                    <span className="mr-2">{b.batch?.name} - {formatDate(b?.batch?.expiryDate)} - SL: {formatNumber(b?.quantity)} </span>
+                    <span className="mr-2">
+                      {b.batch?.name} - {formatDate(b?.batch?.expiryDate)} - SL:{" "}
+                      {formatNumber(b?.quantity)}{" "}
+                    </span>
                   </div>
-                ))
-              }
-            </div>
-          ),
+                ))}
+              </div>
+            ),
           expandIcon: () => <></>,
-          expandedRowKeys: Object.keys(expandedRowKeys).map(
-            (key) => +key
-          ),
+          expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key),
         }}
       />
 
-      <div className="ml-auto mb-5 w-[300px]">
-        <div className=" mb-3 grid grid-cols-2">
-          <div className="text-gray-main">Tổng số lượng:</div>
-          <div className="text-black-main">{formatNumber(totalNumber)}</div>
-        </div>
-        <div className=" mb-3 grid grid-cols-2">
-          <div className="text-gray-main">Tổng tiền hàng:</div>
-          <div className="text-black-main">{getDiscount(record)}</div>
-        </div>
+      <div className="flex">
+        {discountDetail?.data.length > 0 && (
+          <div>
+            <div className="border-dashed border-[1px] p-3">
+              <div className="flex gap-2 items-center mb-1.5">
+                <Image src={DiscountIcon} alt="discount-icon" />
+                <span> Khuyến mại</span>
+              </div>
+              {discountDetail?.data?.map((item, index) => (
+                <div key={index}>- {item.discount.name}</div>
+              ))}
+            </div>
+          </div>
+        )}
+        <div className="ml-auto mb-5 w-[300px]">
+          <div className=" mb-3 grid grid-cols-2">
+            <div className="text-gray-main">Tổng số lượng:</div>
+            <div className="text-black-main">{formatNumber(totalNumber)}</div>
+          </div>
+          <div className=" mb-3 grid grid-cols-2">
+            <div className="text-gray-main">Tổng tiền hàng:</div>
+            <div className="text-black-main">{getDiscount(record)}</div>
+          </div>
 
-        <div className=" mb-3 grid grid-cols-2">
-          <div className="text-gray-main">Giảm giá hóa đơn:</div>
-          <div className="text-black-main">{record?.discountType === 1 ? record?.discount + "%" : formatMoney(record?.discount)}</div>
-        </div>
+          <div className=" mb-3 grid grid-cols-2">
+            <div className="text-gray-main">Giảm giá hóa đơn:</div>
+            <div className="text-black-main">
+              {record?.discountType === 1
+                ? record?.discount + "%"
+                : formatMoney(record?.discount)}
+            </div>
+          </div>
 
-        <div className=" mb-3 grid grid-cols-2">
-          <div className="text-gray-main">Khách cần trả:</div>
-          <div className="text-black-main">{formatMoney(record?.totalPrice)}</div>
-        </div>
+          <div className=" mb-3 grid grid-cols-2">
+            <div className="text-gray-main">Khách cần trả:</div>
+            <div className="text-black-main">
+              {formatMoney(record?.totalPrice)}
+            </div>
+          </div>
 
-        <div className=" mb-3 grid grid-cols-2">
-          <div className="text-gray-main">Khách đã trả:</div>
-          <div className="text-black-main">{formatMoney(record?.cashOfCustomer)}</div>
+          <div className=" mb-3 grid grid-cols-2">
+            <div className="text-gray-main">Khách đã trả:</div>
+            <div className="text-black-main">
+              {formatMoney(record?.cashOfCustomer)}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -369,28 +409,28 @@ export function Info({ record }: { record: IOrder }) {
         >
           In phiếu
         </CustomButton>
-        {
-          hasPermission(profile?.role?.permissions, RoleModel.bill, RoleAction.delete) && (
-            <CustomButton
-              outline={true}
-              prefixIcon={<Image src={CloseIcon} alt="" />}
-              onClick={() => setOpenCancelBill(true)}
-            >
-              Hủy bỏ
-            </CustomButton>
-          )
-        }
-        {
-          record?.canReturn && (
-            <CustomButton
-              type="success"
-              prefixIcon={<Image src={PlusIconWhite} alt="" />}
-              onClick={() => router.push(`/sales?id=${record.id}`)}
-            >
-              Trả hàng
-            </CustomButton>
-          )
-        }
+        {hasPermission(
+          profile?.role?.permissions,
+          RoleModel.bill,
+          RoleAction.delete
+        ) && (
+          <CustomButton
+            outline={true}
+            prefixIcon={<Image src={CloseIcon} alt="" />}
+            onClick={() => setOpenCancelBill(true)}
+          >
+            Hủy bỏ
+          </CustomButton>
+        )}
+        {record?.canReturn && (
+          <CustomButton
+            type="success"
+            prefixIcon={<Image src={PlusIconWhite} alt="" />}
+            onClick={() => router.push(`/sales?id=${record.id}`)}
+          >
+            Trả hàng
+          </CustomButton>
+        )}
       </div>
 
       <div ref={invoiceComponentRef} className={styles.invoicePrint}>

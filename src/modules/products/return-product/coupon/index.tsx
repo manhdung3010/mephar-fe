@@ -1,37 +1,37 @@
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useQuery } from '@tanstack/react-query';
-import type { ColumnsType } from 'antd/es/table';
-import { cloneDeep, debounce, divide, orderBy } from 'lodash';
-import Image from 'next/image';
-import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useQuery } from "@tanstack/react-query";
+import type { ColumnsType } from "antd/es/table";
+import { cloneDeep, debounce, divide, orderBy } from "lodash";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useRecoilState, useRecoilValue } from "recoil";
 
-import { getSaleProducts } from '@/api/product.service';
-import CloseIcon from '@/assets/closeWhiteIcon.svg';
-import RemoveIcon from '@/assets/removeIcon.svg';
-import SearchIcon from '@/assets/searchIcon.svg';
-import { CustomInput } from '@/components/CustomInput';
-import CustomTable from '@/components/CustomTable';
-import { CustomUnitSelect } from '@/components/CustomUnitSelect';
-import InputError from '@/components/InputError';
-import { formatMoney, getImage, hasPermission, roundNumber } from '@/helpers';
+import { getSaleProducts } from "@/api/product.service";
+import CloseIcon from "@/assets/closeWhiteIcon.svg";
+import RemoveIcon from "@/assets/removeIcon.svg";
+import SearchIcon from "@/assets/searchIcon.svg";
+import { CustomInput } from "@/components/CustomInput";
+import CustomTable from "@/components/CustomTable";
+import { CustomUnitSelect } from "@/components/CustomUnitSelect";
+import InputError from "@/components/InputError";
+import { formatMoney, getImage, hasPermission, roundNumber } from "@/helpers";
 import type {
   IImportProduct,
   IImportProductLocal,
-} from '@/modules/products/import-product/coupon/interface';
-import { branchState, productReturnState, profileState } from '@/recoil/state';
+} from "@/modules/products/import-product/coupon/interface";
+import { branchState, productReturnState, profileState } from "@/recoil/state";
 
-import { getImportProductDetail } from '@/api/import-product.service';
-import { CustomAutocomplete } from '@/components/CustomAutocomplete';
-import { useRouter } from 'next/router';
-import type { IBatch } from '../interface';
-import { ListBatchModal } from './ListBatchModal';
-import { RightContent } from './RightContent';
-import { schema } from './schema';
-import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
-import { message } from 'antd';
-import useBarcodeScanner from '@/hooks/useBarcodeScanner';
+import { getImportProductDetail } from "@/api/import-product.service";
+import { CustomAutocomplete } from "@/components/CustomAutocomplete";
+import { useRouter } from "next/router";
+import type { IBatch } from "../interface";
+import { ListBatchModal } from "./ListBatchModal";
+import { RightContent } from "./RightContent";
+import { schema } from "./schema";
+import { RoleAction, RoleModel } from "@/modules/settings/role/role.enum";
+import { message } from "antd";
+import useBarcodeScanner from "@/hooks/useBarcodeScanner";
 
 export default function ReturnCoupon() {
   const profile = useRecoilValue(profileState);
@@ -52,7 +52,7 @@ export default function ReturnCoupon() {
     formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
-    mode: 'onChange',
+    mode: "onChange",
     defaultValues: {
       branchId,
     },
@@ -60,7 +60,7 @@ export default function ReturnCoupon() {
 
   const { data: importProductDetail, isLoading } = useQuery(
     ["IMPORT_PRODUCT_DETAIL", id],
-    () => id ? getImportProductDetail(Number(id)) : Promise.resolve(null),
+    () => (id ? getImportProductDetail(Number(id)) : Promise.resolve(null)),
     {
       enabled: !!id, // Only run the query if `id` is truthy
     }
@@ -82,13 +82,15 @@ export default function ReturnCoupon() {
           discountValue: 0,
           batches: product.batches?.map((batch) => {
             const inventory =
-              (batch.batch.quantity / product.productUnit.exchangeValue)
+              batch.batch.quantity / product.productUnit.exchangeValue;
 
             const newBatch = {
               ...batch,
               inventory,
               productUnit: product?.productUnit,
-              productKey: `${product.productId || product.productId}-${product.id}`,
+              productKey: `${product.productId || product.productId}-${
+                product.id
+              }`,
               productId: product.productId,
               id: batch.batch.id,
               batchId: batch.batch.id,
@@ -104,9 +106,7 @@ export default function ReturnCoupon() {
           }),
         };
         if (
-          returnProducts.find(
-            (p) => p.productKey === localProduct.productKey
-          )
+          returnProducts.find((p) => p.productKey === localProduct.productKey)
         ) {
           cloneImportProducts = cloneImportProducts.map((product) => {
             if (product.productKey === localProduct.productKey) {
@@ -123,19 +123,21 @@ export default function ReturnCoupon() {
         }
       });
       setReturnProducts(cloneImportProducts);
-      setValue('supplierId', importProductDetail?.data?.inbound.supplierId, { shouldValidate: true });
+      setValue("supplierId", importProductDetail?.data?.inbound.supplierId, {
+        shouldValidate: true,
+      });
     }
-  }, [importProductDetail])
+  }, [importProductDetail]);
 
   useEffect(() => {
     if (profile) {
-      setValue('userId', profile.id);
+      setValue("userId", profile.id);
     }
   }, [profile]);
 
   useEffect(() => {
     if (branchId) {
-      setValue('branchId', branchId);
+      setValue("branchId", branchId);
     }
   }, [branchId]);
 
@@ -145,22 +147,26 @@ export default function ReturnCoupon() {
   const [formFilter, setFormFilter] = useState({
     page: 1,
     limit: 20,
-    keyword: '',
+    keyword: "",
     isSale: true,
   });
 
-  const { data: products, isLoading: isLoadingProduct, isSuccess } = useQuery<{
+  const {
+    data: products,
+    isLoading: isLoadingProduct,
+    isSuccess,
+  } = useQuery<{
     data?: { items: IImportProduct[] };
   }>(
     [
-      'LIST_IMPORT_PRODUCT',
+      "LIST_IMPORT_PRODUCT",
       formFilter.page,
       formFilter.limit,
       formFilter.keyword,
       formFilter.isSale,
       branchId,
     ],
-    () => getSaleProducts({ ...formFilter, branchId }),
+    () => getSaleProducts({ ...formFilter, branchId })
   );
 
   const [expandedRowKeys, setExpandedRowKeys] = useState<
@@ -169,9 +175,15 @@ export default function ReturnCoupon() {
 
   useEffect(() => {
     if (profile?.role?.permissions) {
-      if (!hasPermission(profile?.role?.permissions, RoleModel.return_product, RoleAction.create)) {
-        message.error('Bạn không có quyền truy cập vào trang này');
-        router.push('/products/list');
+      if (
+        !hasPermission(
+          profile?.role?.permissions,
+          RoleModel.return_product,
+          RoleAction.create
+        )
+      ) {
+        message.error("Bạn không có quyền truy cập vào trang này");
+        router.push("/products/list");
       }
     }
   }, [profile?.role?.permissions]);
@@ -192,7 +204,7 @@ export default function ReturnCoupon() {
 
     productImportClone = productImportClone.map((product: any) => {
       if (product.productKey === productKey) {
-        if (field === 'quantity' && product.batches?.length === 1) {
+        if (field === "quantity" && product.batches?.length === 1) {
           return {
             ...product,
             quantity: newValue,
@@ -218,58 +230,54 @@ export default function ReturnCoupon() {
   const onExpandMoreBatches = async (productKey, quantity: number) => {
     let orderObjectClone = cloneDeep(returnProducts);
 
-    orderObjectClone = orderObjectClone?.map(
-      (product: any) => {
-        if (product.productKey === productKey) {
-          return {
-            ...product,
-            quantity,
-          };
-        }
-
-        return product;
+    orderObjectClone = orderObjectClone?.map((product: any) => {
+      if (product.productKey === productKey) {
+        return {
+          ...product,
+          quantity,
+        };
       }
-    );
 
-    orderObjectClone = orderObjectClone.map(
-      (product: any) => {
-        if (product.productKey === productKey) {
-          let sumQuantity = 0;
+      return product;
+    });
 
-          let batches = cloneDeep(product.batches);
-          batches = orderBy(batches, ['isSelected'], ['desc']);
+    orderObjectClone = orderObjectClone.map((product: any) => {
+      if (product.productKey === productKey) {
+        let sumQuantity = 0;
 
-          batches = batches.map((batch) => {
-            const remainQuantity =
-              roundNumber(quantity) - roundNumber(sumQuantity);
+        let batches = cloneDeep(product.batches);
+        batches = orderBy(batches, ["isSelected"], ["desc"]);
 
-            if (remainQuantity && batch.inventory) {
-              const tempQuantity =
-                batch.inventory <= remainQuantity
-                  ? batch.inventory
-                  : roundNumber(remainQuantity);
+        batches = batches.map((batch) => {
+          const remainQuantity =
+            roundNumber(quantity) - roundNumber(sumQuantity);
 
-              sumQuantity += tempQuantity;
+          if (remainQuantity && batch.inventory) {
+            const tempQuantity =
+              batch.inventory <= remainQuantity
+                ? batch.inventory
+                : roundNumber(remainQuantity);
 
-              return {
-                ...batch,
-                quantity: tempQuantity,
-                isSelected: true,
-              };
-            }
+            sumQuantity += tempQuantity;
 
-            return { ...batch, quantity: 0, isSelected: false };
-          });
+            return {
+              ...batch,
+              quantity: tempQuantity,
+              isSelected: true,
+            };
+          }
 
-          return {
-            ...product,
-            batches,
-          };
-        }
+          return { ...batch, quantity: 0, isSelected: false };
+        });
 
-        return product;
+        return {
+          ...product,
+          batches,
+        };
       }
-    );
+
+      return product;
+    });
 
     setReturnProducts(orderObjectClone);
   };
@@ -280,10 +288,16 @@ export default function ReturnCoupon() {
   useEffect(() => {
     const getData = async () => {
       if (scannedData) {
-        const productsScan = await getSaleProducts({ ...formFilter, keyword: scannedData, branchId })
+        const productsScan = await getSaleProducts({
+          ...formFilter,
+          keyword: scannedData,
+          branchId,
+        });
         let product;
         if ((productsScan?.data?.items?.length ?? 0) > 0 && isSuccess) {
-          product = productsScan?.data?.items?.find((item) => item.barCode === scannedData);
+          product = productsScan?.data?.items?.find(
+            (item) => item.barCode === scannedData
+          );
         }
 
         if (product) {
@@ -291,17 +305,17 @@ export default function ReturnCoupon() {
           return;
         }
       }
-    }
+    };
     getData();
   }, [scannedData]);
 
   const columns: ColumnsType<IImportProductLocal> = [
     {
-      title: '',
-      dataIndex: 'action',
-      key: 'action',
+      title: "",
+      dataIndex: "action",
+      key: "action",
       render: (_, { id }) => (
-        <div className='w-5 flex-shrink-0'>
+        <div className="w-5 flex-shrink-0">
           <Image
             src={RemoveIcon}
             className=" cursor-pointer"
@@ -319,96 +333,100 @@ export default function ReturnCoupon() {
       ),
     },
     {
-      title: 'STT',
-      dataIndex: 'key',
-      key: 'key',
+      title: "STT",
+      dataIndex: "key",
+      key: "key",
     },
     {
-      title: 'Mã hàng',
-      dataIndex: 'code',
-      key: 'code',
+      title: "Mã hàng",
+      dataIndex: "code",
+      key: "code",
       render: (value) => (
         <span
           className="cursor-pointer text-[#0070F4]"
-        // onClick={() => {
-        //   const currentState = expandedRowKeys[`${index}`];
-        //   const temp = { ...expandedRowKeys };
-        //   if (currentState) {
-        //     delete temp[`${index}`];
-        //   } else {
-        //     temp[`${index}`] = true;
-        //   }
-        //   setExpandedRowKeys({ ...temp });
-        // }}
+          // onClick={() => {
+          //   const currentState = expandedRowKeys[`${index}`];
+          //   const temp = { ...expandedRowKeys };
+          //   if (currentState) {
+          //     delete temp[`${index}`];
+          //   } else {
+          //     temp[`${index}`] = true;
+          //   }
+          //   setExpandedRowKeys({ ...temp });
+          // }}
         >
           {value}
         </span>
       ),
     },
     {
-      title: 'Tên hàng',
-      dataIndex: 'name',
-      key: 'name',
+      title: "Tên hàng",
+      dataIndex: "name",
+      key: "name",
       render: (_, { product }) => product.name,
     },
     {
-      title: 'ĐVT',
-      dataIndex: 'units',
-      key: 'units',
+      title: "ĐVT",
+      dataIndex: "units",
+      key: "units",
       render: (_, record: any) => {
         if (id) {
-          return record.productUnit?.unitName
+          return record.productUnit?.unitName;
         }
-        return <CustomUnitSelect
-          options={(() => {
-            const productUnitKeysSelected = returnProducts.map((product) =>
-              Number(product.productKey.split('-')[1])
-            );
+        return (
+          <CustomUnitSelect
+            options={(() => {
+              const productUnitKeysSelected = returnProducts.map((product) =>
+                Number(product.productKey.split("-")[1])
+              );
 
-            return record?.product.productUnit?.map((unit) => ({
-              value: unit.id,
-              label: unit.unitName,
-              disabled: productUnitKeysSelected.includes(unit.id),
-            }));
-          })()}
-          value={record?.id}
-          onChange={(value) => {
-            let returnProductsClone = cloneDeep(returnProducts);
+              return record?.product.productUnit?.map((unit) => ({
+                value: unit.id,
+                label: unit.unitName,
+                disabled: productUnitKeysSelected.includes(unit.id),
+              }));
+            })()}
+            value={record?.id}
+            onChange={(value) => {
+              let returnProductsClone = cloneDeep(returnProducts);
 
-            returnProductsClone = returnProductsClone.map((product) => {
-              if (product.productKey === record?.productKey) {
-                const productUnit: any = product.product.productUnit.find(
-                  (unit) => unit.id === value
-                );
-                return {
-                  ...product,
-                  productKey: `${product.product.id}-${value}`,
-                  ...productUnit,
-                  primePrice: product.product.primePrice * productUnit.exchangeValue,
-                  price: product.product.primePrice * productUnit.exchangeValue,
-                  code: productUnit.code,
-                  batches: product.batches?.map((batch) => ({
-                    ...batch,
-                    inventory:
-                      batch.originalInventory / productUnit!.exchangeValue,
-                  })),
-                };
-              }
+              returnProductsClone = returnProductsClone.map((product) => {
+                if (product.productKey === record?.productKey) {
+                  const productUnit: any = product.product.productUnit.find(
+                    (unit) => unit.id === value
+                  );
+                  return {
+                    ...product,
+                    productKey: `${product.product.id}-${value}`,
+                    ...productUnit,
+                    primePrice:
+                      product.product.primePrice * productUnit.exchangeValue,
+                    price:
+                      product.product.primePrice * productUnit.exchangeValue,
+                    code: productUnit.code,
+                    batches: product.batches?.map((batch) => ({
+                      ...batch,
+                      inventory:
+                        batch.originalInventory / productUnit!.exchangeValue,
+                    })),
+                  };
+                }
 
-              return product;
-            });
+                return product;
+              });
 
-            setReturnProducts(returnProductsClone);
-          }}
-        />
+              setReturnProducts(returnProductsClone);
+            }}
+          />
+        );
       },
     },
     {
-      title: 'Số lượng',
-      dataIndex: 'quantity',
-      key: 'quantity',
+      title: "Số lượng",
+      dataIndex: "quantity",
+      key: "quantity",
       render: (quantity, record: any) => (
-        <div className='flex items-center gap-2'>
+        <div className="flex items-center gap-2">
           <CustomInput
             wrapClassName="!w-[110px]"
             className="!h-6 !w-[80px] text-center"
@@ -416,20 +434,20 @@ export default function ReturnCoupon() {
             hasPlus={true}
             defaultValue={quantity}
             value={quantity}
-            disabled={(id && record?.product?.isBatchExpireControl) ? true : false}
+            // disabled={(id && record?.product?.isBatchExpireControl) ? true : false}
             type="number"
             onChange={(value) =>
-              onChangeValueProduct(record?.productKey, 'quantity', value)
+              onChangeValueProduct(record?.productKey, "quantity", value)
             }
             onMinus={async (value) => {
-              if (id && record?.product?.isBatchExpireControl) return;
+              // if (id && record?.product?.isBatchExpireControl) return;
               // onChangeValueProduct(record?.productKey, 'quantity', value)
-              await onExpandMoreBatches(record?.productKey, value)
+              await onExpandMoreBatches(record?.productKey, value);
             }}
             onPlus={async (value) => {
-              if (id && record?.product?.isBatchExpireControl) return;
+              // if (id && record?.product?.isBatchExpireControl) return;
               // onChangeValueProduct(record?.productKey, 'quantity', value)
-              await onExpandMoreBatches(record?.productKey, value)
+              await onExpandMoreBatches(record?.productKey, value);
             }}
           />
           {/* {
@@ -442,40 +460,46 @@ export default function ReturnCoupon() {
     },
     {
       title: "Giá nhập",
-      dataIndex: 'primePrice',
-      key: 'primePrice',
-      render: (primePrice, record: any) => <CustomInput
-        type="number"
-        bordered={false}
-        onChange={(value) => { }}
-        wrapClassName="w-[100px]"
-        defaultValue={primePrice}
-        disabled
-      />,
+      dataIndex: "primePrice",
+      key: "primePrice",
+      render: (primePrice, record: any) => (
+        <CustomInput
+          type="number"
+          bordered={false}
+          onChange={(value) => {}}
+          wrapClassName="w-[100px]"
+          defaultValue={primePrice}
+          disabled
+        />
+      ),
     },
     {
       title: "Giá trả lại",
-      dataIndex: 'price',
-      key: 'price',
-      render: (price, record: any) => <CustomInput
-        type="number"
-        bordered={false}
-        onChange={(value) => onChangeValueProduct(record?.productKey, 'price', value)}
-        wrapClassName="w-[100px]"
-        defaultValue={id ? price : record?.primePrice}
-      />
+      dataIndex: "price",
+      key: "price",
+      render: (price, record: any) => (
+        <CustomInput
+          type="number"
+          bordered={false}
+          onChange={(value) =>
+            onChangeValueProduct(record?.productKey, "price", value)
+          }
+          wrapClassName="w-[100px]"
+          defaultValue={id ? price : record?.primePrice}
+        />
+      ),
     },
     {
-      title: 'Thành tiền',
-      dataIndex: 'totalPrice',
-      key: 'totalPrice',
+      title: "Thành tiền",
+      dataIndex: "totalPrice",
+      key: "totalPrice",
       render: (_, { quantity, discountValue, price, primePrice }) => {
-        return formatMoney(quantity * price)
+        return formatMoney(quantity * price);
       },
     },
   ];
 
-  console.log('returnProducts', returnProducts)
+  console.log("returnProducts", returnProducts);
 
   const handleRemoveBatch = (productKey: string, batchId: number) => {
     let products = cloneDeep(returnProducts);
@@ -527,14 +551,16 @@ export default function ReturnCoupon() {
     const localProduct: IImportProductLocal = {
       ...product,
       productKey: `${product.product.id}-${product.id}`,
-      price: id ? product.productBatchHistories[0].importPrice : product.product.primePrice * product.productUnit.exchangeValue,
+      price: id
+        ? product.productBatchHistories[0].importPrice
+        : product.product.primePrice * product.productUnit.exchangeValue,
       inventory: product.quantity,
       quantity: 1,
       discountValue: 0,
-      primePrice: product.product.primePrice * product.productUnit.exchangeValue,
+      primePrice:
+        product.product.primePrice * product.productUnit.exchangeValue,
       batches: product.batches?.map((batch) => {
-        const inventory =
-          (batch.quantity / product.productUnit.exchangeValue)
+        const inventory = batch.quantity / product.productUnit.exchangeValue;
 
         const newBatch = {
           ...batch,
@@ -555,11 +581,7 @@ export default function ReturnCoupon() {
 
     let cloneImportProducts = cloneDeep(returnProducts);
 
-    if (
-      returnProducts.find(
-        (p) => p.productKey === localProduct.productKey
-      )
-    ) {
+    if (returnProducts.find((p) => p.productKey === localProduct.productKey)) {
       cloneImportProducts = cloneImportProducts.map((product) => {
         if (product.productKey === localProduct.productKey) {
           return {
@@ -574,14 +596,13 @@ export default function ReturnCoupon() {
       cloneImportProducts.push(localProduct);
     }
     setReturnProducts(cloneImportProducts);
-  }
+  };
 
   return (
     <div className="-mx-8 flex">
       <div className="grow overflow-x-auto">
         <div className="hidden-scrollbar overflow-x-auto overflow-y-hidden">
           <div className="flex h-[72px] w-full  min-w-[800px] items-center bg-red-main px-6 py-3">
-
             <CustomAutocomplete
               className="!h-[48px] w-full !rounded text-base"
               prefixIcon={<Image src={SearchIcon} alt="" />}
@@ -616,20 +637,18 @@ export default function ReturnCoupon() {
 
                     <div>
                       <div className="flex gap-x-3">
-                        <div className='flex gap-x-1'>
+                        <div className="flex gap-x-1">
                           <div>{item.code}</div> {" - "}
                           <div>{item.product.name}</div>
                         </div>
                         <div className="rounded bg-red-main px-2 py-[2px] text-white">
                           {item.unitName}
                         </div>
-                        {
-                          item.quantity <= 0 && (
-                            <div className="rounded text-red-main  py-[2px] italic">
-                              Hết hàng
-                            </div>
-                          )
-                        }
+                        {item.quantity <= 0 && (
+                          <div className="rounded text-red-main  py-[2px] italic">
+                            Hết hàng
+                          </div>
+                        )}
                       </div>
                       <div>Số lượng - {item.quantity}</div>
                     </div>
@@ -665,28 +684,32 @@ export default function ReturnCoupon() {
                           >
                             Chọn lô
                           </div>
-                          {record.batches?.map((batch: any) => batch?.isSelected && (
-                            <div
-                              key={batch.id}
-                              className="flex items-center rounded bg-red-main py-1 px-2 text-white"
-                            >
-                              <span className="mr-2">
-                                {batch?.name || batch?.batch?.name} - {batch.batch.expiryDate} - SL:{' '}
-                                {batch.quantity}
-                              </span>{' '}
-                              <Image
-                                className=" cursor-pointer"
-                                src={CloseIcon}
-                                onClick={() => {
-                                  handleRemoveBatch(
-                                    record.productKey,
-                                    batch.id
-                                  );
-                                }}
-                                alt=""
-                              />
-                            </div>
-                          ))}
+                          {record.batches?.map(
+                            (batch: any) =>
+                              batch?.isSelected && (
+                                <div
+                                  key={batch.id}
+                                  className="flex items-center rounded bg-red-main py-1 px-2 text-white"
+                                >
+                                  <span className="mr-2">
+                                    {batch?.name || batch?.batch?.name} -{" "}
+                                    {batch.batch.expiryDate} - SL:{" "}
+                                    {batch.quantity}
+                                  </span>{" "}
+                                  <Image
+                                    className=" cursor-pointer"
+                                    src={CloseIcon}
+                                    onClick={() => {
+                                      handleRemoveBatch(
+                                        record.productKey,
+                                        batch.id
+                                      );
+                                    }}
+                                    alt=""
+                                  />
+                                </div>
+                              )
+                          )}
                         </div>
                         <InputError
                           error={
@@ -696,7 +719,7 @@ export default function ReturnCoupon() {
                           }
                         />
                       </div>
-                    )
+                    );
                   }
                   return (
                     <>
@@ -713,28 +736,31 @@ export default function ReturnCoupon() {
                               Chọn lô
                             </div>
 
-                            {record.batches?.map((batch: any) => batch.isSelected && (
-                              <div
-                                key={batch.id}
-                                className="flex items-center rounded bg-red-main py-1 px-2 text-white"
-                              >
-                                <span className="mr-2">
-                                  {batch?.name || batch?.batch?.name} - {batch.expiryDate} - SL:{' '}
-                                  {batch.quantity}
-                                </span>{' '}
-                                <Image
-                                  className=" cursor-pointer"
-                                  src={CloseIcon}
-                                  onClick={() => {
-                                    handleRemoveBatch(
-                                      record.productKey,
-                                      batch.id
-                                    );
-                                  }}
-                                  alt=""
-                                />
-                              </div>
-                            ))}
+                            {record.batches?.map(
+                              (batch: any) =>
+                                batch.isSelected && (
+                                  <div
+                                    key={batch.id}
+                                    className="flex items-center rounded bg-red-main py-1 px-2 text-white"
+                                  >
+                                    <span className="mr-2">
+                                      {batch?.name || batch?.batch?.name} -{" "}
+                                      {batch.expiryDate} - SL: {batch.quantity}
+                                    </span>{" "}
+                                    <Image
+                                      className=" cursor-pointer"
+                                      src={CloseIcon}
+                                      onClick={() => {
+                                        handleRemoveBatch(
+                                          record.productKey,
+                                          batch.id
+                                        );
+                                      }}
+                                      alt=""
+                                    />
+                                  </div>
+                                )
+                            )}
                           </div>
                           <InputError
                             error={
@@ -746,7 +772,7 @@ export default function ReturnCoupon() {
                         </div>
                       )}
                     </>
-                  )
+                  );
                 },
                 expandIcon: () => <></>,
                 expandedRowKeys: Object.keys(expandedRowKeys).map(
@@ -779,7 +805,7 @@ export default function ReturnCoupon() {
                 });
 
                 setReturnProducts(returnProductsClone);
-                setError('products', { message: undefined });
+                setError("products", { message: undefined });
               }}
             />
           </div>

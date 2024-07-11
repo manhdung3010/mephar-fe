@@ -198,6 +198,9 @@ export function RightContent({
         message.error(errorTxt);
         return;
       }
+
+      console.log(getValues());
+
       return mutateReceiveProductImport();
     } else {
       mutateCreateProductImport();

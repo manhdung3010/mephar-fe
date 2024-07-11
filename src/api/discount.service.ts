@@ -25,6 +25,11 @@ export function deleteDiscount(id: number) {
 export function getDiscountDetail(id: number) {
   return axiosClient.get(`discount/${id}`);
 }
+
+export function getDiscountByIdOrder(id: number) {
+  return axiosClient.get(`order/${id}/get-discount`);
+}
+
 export function getOrderDiscountList(payload) {
   return axiosClient.post("discount/order", payload);
 }
