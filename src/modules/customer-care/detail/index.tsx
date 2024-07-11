@@ -119,7 +119,7 @@ function TripDetail() {
                           Vị trí xuất phát
                           <div className="flex items-center space-x-1 mt-1">
                             <Image src={MarkIcon} alt="" />
-                            <span>16 Hoàng Đạo Thúy</span>
+                            <span>{tripDetail?.data?.startAddress}</span>
                           </div>
                         </div>
                       </div>

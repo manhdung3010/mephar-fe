@@ -48,27 +48,22 @@ const CustomMap = forwardRef((props, ref) => {
   const customCustomerMarker = (customerIndex, customerStatus) => {
     const customMarker = document.createElement("div");
     customMarker.className = "customer-marker";
-    customMarker.style.width = "30px";
-    customMarker.style.height = "30px";
+    customMarker.style.width = "45px";
+    customMarker.style.height = "56px";
     if (customerStatus === 'visited') {
-      customMarker.style.backgroundColor = "#11A75C"; // Green color
+      customMarker.style.backgroundImage = 'url("https://res.cloudinary.com/dvrqupkgg/image/upload/v1720695045/markBgSuccessIcon_kf8zj7.svg")'; // Green color
     }
     else {
-      customMarker.style.backgroundColor = "#007bff"; // Blue color
+      customMarker.style.backgroundImage = 'url("https://res.cloudinary.com/dvrqupkgg/image/upload/v1720693956/markBgIcon_ummkoy.svg")';
+      customMarker.textContent = customerIndex; // Set the number inside the marker
     }
-    customMarker.style.borderRadius = "50% 50% 50% 0";
-    customMarker.style.transform = "rotate(-45deg)";
+    customMarker.style.backgroundSize = "cover"; // White border
     customMarker.style.display = "flex";
     customMarker.style.justifyContent = "center";
     customMarker.style.alignItems = "center";
     customMarker.style.color = "#fff"; // White text color
     customMarker.style.fontSize = "18px"; // Adjust the font size
     customMarker.style.fontWeight = "bold";
-    customMarker.style.lineHeight = "40px"; // Center text vertically
-    customMarker.textContent = customerIndex; // Set the number inside the marker
-    customMarker.style.borderRadius = "50%"; // Circular shape
-    customMarker.style.border = "1px solid white";
-    customMarker.style.boxShadow = "0 0 5px rgba(0,0,0,0.5)";
 
     return customMarker;
   };
