@@ -19,3 +19,13 @@ export function searchPlace(params: { keyword: string }) {
 export function getLatLng(params: { refId: string }) {
   return axiosClient.get(`trip/search/place`, { params });
 }
+export function updateCustomerStatus(
+  customerId: string,
+  status: string,
+  payload: any
+) {
+  return axiosClient.patch(
+    `trip/changeStatus/${customerId}/${status}`,
+    payload
+  );
+}

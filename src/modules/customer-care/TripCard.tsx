@@ -9,6 +9,7 @@ import { formatDateTime, formatNumber } from '@/helpers';
 import Link from 'next/link';
 
 function TripCard({ data }: any) {
+  const newData = data?.nextCustomer || data?.tripCustomer[0]
   return (
     <Link href={`/customer-care/list-schedule/${data?.id}`}>
       <div className="w-full mx-auto bg-white shadow-md rounded-lg overflow-hidden relative cursor-pointer">
@@ -32,23 +33,30 @@ function TripCard({ data }: any) {
           Điểm đến tiếp theo
         </div>
         <div className="m-4 flex items-center space-x-4 border-[1px] border-[#D3D5D7] p-3 rounded">
-          <div className="relative">
-            <Image src={MarkBgIcon} alt="" />
-            <span className='absolute top-2 left-1/2 -translate-x-1/2 text-[18px] font-semibold text-white'>{data?.nextCustomer?.stt}</span>
-          </div>
+          {
+            data?.status === 'done'
+              ? <div className="relative">
+                <Image src={MarkSuccess} alt="" />
+                {/* <span className='absolute top-2 left-1/2 -translate-x-1/2 text-[18px] font-semibold text-white'>{newData?.stt}</span> */}
+              </div>
+              : <div className="relative">
+                <Image src={MarkBgIcon} alt="" />
+                <span className='absolute top-2 left-1/2 -translate-x-1/2 text-[18px] font-semibold text-white'>{newData?.stt}</span>
+              </div>
+          }
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <div className="font-semibold text-lg "><span className='text-red-main'>{data?.nextCustomer?.customer?.code}</span> - <span className='text-[#404040]'>{data?.nextCustomer?.customer?.fullName}</span></div>
-              <span className={`${data?.nextCustomer?.customer?.status === 'active' ? 'bg-[#e5f8ec] text-[#00B63E] border-[1px] border-[#00B63E]' : data?.nextCustomer?.customer?.status === 'inactive' ? 'bg-[#feeaea] text-[#F32B2B] border-[1px] border-[#F32B2B]' : 'bg-[#f0e5fa] text-[#6600CC] border-[1px] border-[#6600CC]'}  rounded-full px-2 py-1 text-xs`}>{data?.nextCustomer?.customer?.status === 'active' ? "Hoạt động" : data?.nextCustomer?.customer?.status === 'inactive' ? "Ngưng hoạt động" : "Tiềm năng"}</span>
+              <div className="font-semibold text-lg "><span className='text-red-main'>{newData?.customer?.code}</span> - <span className='text-[#404040]'>{newData?.customer?.fullName}</span></div>
+              <span className={`${newData?.customer?.status === 'active' ? 'bg-[#e5f8ec] text-[#00B63E] border-[1px] border-[#00B63E]' : newData?.customer?.status === 'inactive' ? 'bg-[#feeaea] text-[#F32B2B] border-[1px] border-[#F32B2B]' : 'bg-[#f0e5fa] text-[#6600CC] border-[1px] border-[#6600CC]'}  rounded-full px-2 py-1 text-xs`}>{newData?.customer?.status === 'active' ? "Hoạt động" : newData?.customer?.status === 'inactive' ? "Ngưng hoạt động" : "Tiềm năng"}</span>
             </div>
             <div className="text-gray-600 mt-2">
               <div className="flex items-center space-x-1">
                 <Image src={PhoneIcon} alt="" />
-                <span>{data?.nextCustomer?.customer?.phone}</span>
+                <span>{newData?.customer?.phone}</span>
               </div>
               <div className="flex items-center space-x-1 mt-1">
                 <Image src={MarkIcon} alt="" />
-                <span>{data?.nextCustomer?.address}</span>
+                <span>{newData?.address}</span>
               </div>
             </div>
           </div>
