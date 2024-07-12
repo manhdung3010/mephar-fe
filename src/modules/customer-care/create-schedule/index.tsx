@@ -4,7 +4,7 @@ import { CustomInput } from '@/components/CustomInput'
 import Label from '@/components/CustomLabel'
 import { useRouter } from 'next/router'
 import LocationIcon from "@/assets/location.svg";
-import LineIcon from "@/assets/lineDotIcon.svg";
+import LineIcon from "@/assets/LineDotLargeIcon.svg";
 import ArrowLeftIcon from "@/assets/arrowLeftIcon2.svg";
 import React, { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
@@ -36,6 +36,8 @@ function CreateSchedule() {
   const [customerKeyword, setCustomerKeyword] = useState("");
   const [placeKeyword, setPlaceKeyword] = useState("");
   const [isMapFull, setIsMapFull] = useState(false);
+
+  const [customerAddress, setCustomerAddress] = useState('');
 
   const [refId, setRefId] = useState('');
 
@@ -121,6 +123,12 @@ function CreateSchedule() {
       mapRef.current.addMarker(coordinates, customerInfo ? customerInfo : null, customerIndex ? customerIndex : null);
     }
   };
+  const handleUpdateMarker = (lng, lat, customerInfo?: any, customerIndex?: number) => {
+    const coordinates = [lng, lat];
+    if (mapRef.current) {
+      mapRef.current.updateMarker(coordinates, customerInfo ? customerInfo : null, customerIndex ? customerIndex : null);
+    }
+  };
   const handleDeleteMarker = (lng, lat) => {
     const coordinates = [lng, lat];
     if (mapRef.current) {
@@ -194,7 +202,7 @@ function CreateSchedule() {
                               setPlaceKeyword(value);
                             }, 300)}
                             showSearch={true}
-                            notFoundContent={isLoading ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
+                            notFoundContent={isLoadingPlace ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
                             filterOption={(input, option: any) => {
                               const textContent = option.children.props.children[1].props.children;
                               return textContent.toLowerCase().includes(input.toLowerCase());
@@ -226,75 +234,111 @@ function CreateSchedule() {
                                 </div>
                               </div>
                               <div className='w-full'>
-                                <Select
-                                  placeholder="Chọn khách hàng"
-                                  className="h-11 !rounded w-full"
-                                  // optionFilterProp="children"
-                                  onChange={(value) => {
-                                    const listCustomer = getValues('listCustomer');
-                                    listCustomer[index] = value;
-                                    setValue('listCustomer', listCustomer, { shouldValidate: true });
+                                <div className='flex flex-col gap-1'>
+                                  <Select
+                                    placeholder="Chọn khách hàng"
+                                    className="h-11 !rounded w-full"
+                                    onChange={(value) => {
+                                      const customer = customers?.data?.items?.find((item) => item?.id === value);
+                                      const listCustomer = getValues('listCustomer');
+                                      listCustomer[index] = { id: value, address: customer?.address, lat: customer?.lat, lng: customer?.lng };
+                                      setValue('listCustomer', listCustomer, { shouldValidate: true });
+                                      setCustomerAddress(customer?.address)
+                                      if (customer) {
+                                        handleAddMarker(customer?.lng, customer?.lat, customer, index + 1)
+                                      }
+                                    }}
+                                    onSearch={debounce((value) => {
+                                      setCustomerKeyword(value);
+                                    }, 300)}
+                                    showSearch={true}
+                                    notFoundContent={isLoading ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
+                                    value={customers?.data?.items?.find((item) => item?.id === row?.id)?.fullName || undefined}
+                                    filterOption={(input, option) => {
+                                      const divChildren = option?.props?.children.props.children;
+                                      const fullNameDiv = divChildren[0]?.props?.children[1]
 
-                                    const customer = customers?.data?.items?.find((item) => item?.id === value);
-                                    if (customer) {
-                                      handleAddMarker(customer?.lng, customer?.lat, customer, index + 1)
+                                      const textContent = fullNameDiv ? fullNameDiv.props.children.toString().toLowerCase() : '';
+                                      return textContent.includes(input.toLowerCase());
+                                    }}
+                                  >
+                                    {
+                                      customers?.data?.items?.map((item) => (
+                                        <Option key={item.id} value={item.id}>
+                                          <div className='flex flex-col gap-1 border-b-[1px] border-b-[#E9EFF6]'>
+                                            <div className='pt-1'>
+                                              <span className='text-red-main'>{item.code} - </span>
+                                              <span className='fullName'>
+                                                {item.fullName}
+                                              </span>
+                                              <span
+                                                className={cx(
+                                                  {
+                                                    'text-[#00B63E] border border-[#00B63E] bg-[#DEFCEC]':
+                                                      item?.status === ECustomerStatus.active,
+                                                    'text-[#666666] border border-[#666666] bg-[#F5F5F5]':
+                                                      item?.status === ECustomerStatus.inactive,
+                                                  },
+                                                  'px-2 py-1 rounded-2xl w-max ml-2'
+                                                )}
+                                              >
+                                                {ECustomerStatusLabel[item?.status]}
+                                              </span>
+                                            </div>
+                                            <div className='flex items-center gap-1'>
+                                              <Image src={PhoneIcon} /> <span>{item?.phone}</span>
+                                            </div>
+                                            <div className='flex items-center gap-1 pb-1'>
+                                              <Image src={MarkIcon} /> <span>{item?.address}</span>
+                                            </div>
+                                          </div>
+                                        </Option>
+                                      ))
                                     }
-                                  }}
-                                  onSearch={debounce((value) => {
-                                    setCustomerKeyword(value);
-                                  }, 300)}
-                                  showSearch={true}
-                                  notFoundContent={isLoading ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
-                                  value={customers?.data?.items?.find((item) => item?.id === row)?.fullName || undefined}
-                                  filterOption={(input, option) => {
-                                    const divChildren = option?.props?.children.props.children;
-                                    const fullNameDiv = divChildren[0]?.props?.children[1]
-
-                                    const textContent = fullNameDiv ? fullNameDiv.props.children.toString().toLowerCase() : '';
-                                    return textContent.includes(input.toLowerCase());
-                                  }}
-                                >
-                                  {
-                                    customers?.data?.items?.map((item) => (
-                                      <Option key={item.id} value={item.id}>
-                                        <div className='flex flex-col gap-1 border-b-[1px] border-b-[#E9EFF6]'>
-                                          <div className='pt-1'>
-                                            <span className='text-red-main'>{item.code} - </span>
-                                            <span className='fullName'>
-                                              {item.fullName}
-                                            </span>
-                                            <span
-                                              className={cx(
-                                                {
-                                                  'text-[#00B63E] border border-[#00B63E] bg-[#DEFCEC]':
-                                                    item?.status === ECustomerStatus.active,
-                                                  'text-[#666666] border border-[#666666] bg-[#F5F5F5]':
-                                                    item?.status === ECustomerStatus.inactive,
-                                                },
-                                                'px-2 py-1 rounded-2xl w-max ml-2'
-                                              )}
-                                            >
-                                              {ECustomerStatusLabel[item?.status]}
-                                            </span>
-                                          </div>
-                                          <div className='flex items-center gap-1'>
-                                            <Image src={PhoneIcon} /> <span>{item?.phone}</span>
-                                          </div>
-                                          <div className='flex items-center gap-1 pb-1'>
-                                            <Image src={MarkIcon} /> <span>{item?.address}</span>
-                                          </div>
+                                  </Select>
+                                  <Select
+                                    placeholder="Địa chỉ khách hàng"
+                                    className="h-11 !rounded w-full"
+                                    onChange={async (value) => {
+                                      // setRefId(value);
+                                      const res = await getLatLng({ refId: value });
+                                      if (res?.data) {
+                                        const listCustomer = getValues('listCustomer');
+                                        listCustomer[index] = { ...listCustomer[index], address: res?.data?.name, lat: res?.data?.lat, lng: res?.data?.lng };
+                                        setValue('listCustomer', listCustomer, { shouldValidate: true });
+                                        handleUpdateMarker(res?.data?.lng, res?.data?.lat, null, index + 1)
+                                      }
+                                    }}
+                                    onSearch={debounce((value) => {
+                                      setPlaceKeyword(value);
+                                    }, 300)}
+                                    showSearch={true}
+                                    notFoundContent={isLoadingPlace ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
+                                    filterOption={(input, option: any) => {
+                                      const textContent = option.children.props.children[1].props.children;
+                                      return textContent.toLowerCase().includes(input.toLowerCase());
+                                    }}
+                                    value={row?.address}
+                                  >
+                                    {places?.data?.map((item) => (
+                                      <Option key={item.ref_id} value={item.ref_id}>
+                                        <div className='flex items-center gap-1 py-2'>
+                                          <Image src={MarkIcon} />
+                                          <span className='display'>
+                                            {item?.display}
+                                          </span>
                                         </div>
                                       </Option>
-                                    ))
-                                  }
-                                </Select>
+                                    ))}
+                                  </Select>
+                                </div>
                                 <InputError error={errors.listCustomer?.[index]?.message} />
                               </div>
                               <Image src={DeleteIcon} onClick={() => {
                                 const listCustomer = getValues('listCustomer')
                                 listCustomer.splice(index, 1)
                                 setValue('listCustomer', listCustomer, { shouldValidate: true })
-                                const customer = customers?.data?.items?.find((item) => item?.id === row);
+                                const customer = customers?.data?.items?.find((item) => item?.id === row?.id);
                                 if (customer) {
                                   handleDeleteMarker(customer?.lng, customer?.lat)
                                 }
@@ -308,7 +352,7 @@ function CreateSchedule() {
                       <CustomButton
                         // disabled={isLoadingCreateCustomer}
                         onClick={() => {
-                          setValue('listCustomer', [...getValues('listCustomer'), null], { shouldValidate: true })
+                          setValue('listCustomer', [...getValues('listCustomer'), {}], { shouldValidate: true })
                         }}
                         className=''
                         outline={true}

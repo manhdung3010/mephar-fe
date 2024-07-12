@@ -6,7 +6,7 @@ import React, {
 } from "react";
 
 const CustomMap = forwardRef((props, ref) => {
-  const { isMapFull, tripCustomer } = props;
+  const { isMapFull, tripCustomer, nowLocation, radiusCircle } = props;
   const mapRef = useRef(null);
   const fromMarkerRef = useRef('');
   const markersRef = useRef([]);
@@ -17,13 +17,16 @@ const CustomMap = forwardRef((props, ref) => {
   }, [tripCustomer]);
 
   useEffect(() => {
+    if (nowLocation?.length > 0) {
+      addStartMarker(nowLocation);
+    }
     if (tripCustomer?.length > 0) {
       tripCustomer.forEach((customer, index) => {
         const coordinates = [+customer?.lng, +customer?.lat];
-        createMarker(coordinates, customPopup(customer), customer?.stt, customer?.status);
+        createMarker(coordinates, customPopup(customer), customer?.stt || index + 1, customer?.status);
       });
     }
-  }, [tripCustomer]);
+  }, [tripCustomer, nowLocation]);
 
   const loadMap = () => {
     mapRef.current = new vietmapgl.Map({
@@ -32,7 +35,15 @@ const CustomMap = forwardRef((props, ref) => {
         "https://maps.vietmap.vn/mt/tm/style.json?apikey=53e31413d7968153044cd0a760cb2a6550590d1fa5213645",
       center: [105.8542, 21.0285],
       zoom: 14,
-      pitch: 100,
+      pitch: 0, // Set pitch to 0 for flat display
+      bearing: 0, // Set bearing to 0 for no rotation
+    });
+
+    mapRef.current.on('load', () => {
+      // Map is fully loaded
+      if (fromMarkerRef.current) {
+        addCircle(fromMarkerRef.current.getLngLat(), radiusCircle);
+      }
     });
   };
 
@@ -73,37 +84,108 @@ const CustomMap = forwardRef((props, ref) => {
     const customerInfoNew = customerInfo?.customer || customerInfo;
     const startPopupContent = document.createElement("div");
     startPopupContent.innerHTML = `
-      <div class=" flex flex-col gap-1">
+      <div class="flex flex-col gap-1">
         <h3><span class='text-red-main'>${customerInfoNew?.code}</span> - <span class='font-medium'>${customerInfoNew?.fullName}</span></h3>
-      <p class="flex items-center gap-1 text-[#455468]"><img src='https://res.cloudinary.com/dvrqupkgg/image/upload/v1720587657/phoneIcon_q0kwgi.svg' /> ${customerInfoNew?.phone}</p>
-      <p class="flex items-center gap-1 text-[#455468]"><img src="https://res.cloudinary.com/dvrqupkgg/image/upload/v1720587358/markPng_bv3kg1.png" /> ${customerInfoNew?.address?.split(",")[0] || customerInfo?.address?.split(",")[0] || ''
+        <p class="flex items-center gap-1 text-[#455468]"><img src='https://res.cloudinary.com/dvrqupkgg/image/upload/v1720587657/phoneIcon_q0kwgi.svg' /> ${customerInfoNew?.phone}</p>
+        <p class="flex items-center gap-1 text-[#455468]"><img src="https://res.cloudinary.com/dvrqupkgg/image/upload/v1720587358/markPng_bv3kg1.png" /> ${customerInfoNew?.address?.split(",")[0] || customerInfo?.address?.split(",")[0] || ''
       }</p>
-      </div >
-  `;
+      </div>
+    `;
     return startPopupContent;
+  };
+
+  const addStartMarker = (coordinates) => {
+    const marker = new vietmapgl.Marker(customMarker())
+      .setLngLat(coordinates)
+      .addTo(mapRef.current);
+    // clear old marker if exists
+    if (fromMarkerRef.current) {
+      fromMarkerRef.current.remove();
+    }
+    fromMarkerRef.current = marker;
+
+    // Add circle with a specific radius (e.g., 500 meters)
+    if (mapRef.current.isStyleLoaded()) {
+      addCircle(coordinates, radiusCircle);
+    } else {
+      mapRef.current.on('load', () => {
+        addCircle(coordinates, radiusCircle);
+      });
+    }
+
+    // Scroll to the new marker
+    mapRef.current.flyTo({
+      center: coordinates,
+      zoom: 14,
+      speed: 1.2,
+    });
+  };
+
+  const addCircle = (center, radius) => {
+    if (mapRef.current.getSource('circle')) {
+      mapRef.current.removeLayer('circle-layer');
+      mapRef.current.removeSource('circle');
+    }
+    mapRef.current.addSource('circle', {
+      type: 'geojson',
+      data: {
+        type: 'Feature',
+        geometry: {
+          type: 'Polygon',
+          coordinates: [createGeoJSONCircle(center, radius)]
+        }
+      }
+    });
+
+    mapRef.current.addLayer({
+      id: 'circle-layer',
+      type: 'fill',
+      source: 'circle',
+      paint: {
+        'fill-color': '#EA352B',
+        'fill-opacity': 0.1,
+      }
+    });
+  };
+
+  const createGeoJSONCircle = (center, radiusInMeters, points = 64) => {
+    const coords = {
+      latitude: center[1],
+      longitude: center[0]
+    };
+
+    const km = radiusInMeters / 1000;
+
+    const ret = [];
+    const distanceX = km / (111.32 * Math.cos(coords.latitude * Math.PI / 180));
+    const distanceY = km / 110.574;
+
+    let theta, x, y;
+    for (let i = 0; i < points; i++) {
+      theta = (i / points) * (2 * Math.PI);
+      x = distanceX * Math.cos(theta);
+      y = distanceY * Math.sin(theta);
+
+      ret.push([coords.longitude + x, coords.latitude + y]);
+    }
+    ret.push(ret[0]);
+
+    return ret;
   };
 
   useImperativeHandle(ref, () => ({
     addMarker(coordinates, customerInfo, customerIndex) {
       if (customerInfo) {
         createMarker(coordinates, customPopup(customerInfo), customerIndex);
+      } else {
+        addStartMarker(coordinates);
       }
-      else {
-        const marker = new vietmapgl.Marker(customMarker())
-          .setLngLat(coordinates)
-          .addTo(mapRef.current);
-        // clear old marker if exists
-        if (fromMarkerRef.current) {
-          fromMarkerRef.current.remove();
-        }
-        fromMarkerRef.current = marker;
-
-        // Scroll to the new marker
-        mapRef.current.flyTo({
-          center: coordinates,
-          zoom: 14,
-          speed: 1.2,
-        });
+    },
+    updateMarker(coordinates, customerInfo, customerIndex) {
+      const existingMarkerIndex = markersRef.current.findIndex(({ index }) => index === customerIndex);
+      if (existingMarkerIndex !== -1) {
+        markersRef.current[existingMarkerIndex].marker.remove();
+        createMarker(coordinates, customPopup(customerInfo), customerIndex);
       }
     },
     deleteMarker(coordinates) {
@@ -130,8 +212,7 @@ const CustomMap = forwardRef((props, ref) => {
     if (existingMarkerIndex !== -1) {
       markersRef.current[existingMarkerIndex].marker.remove();
       markersRef.current[existingMarkerIndex] = { marker, coordinates, index: customerIndex };
-    }
-    else {
+    } else {
       markersRef.current.push({ marker, coordinates, index: customerIndex });
     }
     updateCustomerIndices();
@@ -184,7 +265,6 @@ const CustomMap = forwardRef((props, ref) => {
       // });
     });
   };
-
 
   useEffect(() => {
     if (mapRef.current) {

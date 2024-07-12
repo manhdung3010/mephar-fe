@@ -38,6 +38,8 @@ function Check() {
     },
   });
 
+  const [customerList, setCustomerList] = useState([])
+
   const { data: places, isLoading: isLoadingPlace } = useQuery(
     ["SEARCH_PLACE", placeKeyword],
     () =>
@@ -63,9 +65,9 @@ function Check() {
       },
       {
         onSuccess: async (res) => {
-          // await queryClient.invalidateQueries(["TRIPS"]);
-
+          setCustomerList(res?.data);
           setSearchResult(res?.data);
+          handleAddMarker(latLng?.data?.lng, latLng?.data?.lat);
         },
         onError: (err: any) => {
           message.error(err?.message);
@@ -77,19 +79,21 @@ function Check() {
     if (latLng) {
       setValue('lat', latLng?.data?.lat, { shouldValidate: true });
       setValue('lng', latLng?.data?.lng, { shouldValidate: true });
-
-      handleAddMarker(latLng?.data?.lng, latLng?.data?.lat)
     }
   }, [latLng])
 
   const handleAddMarker = (lng, lat, customerInfo?: any, customerIndex?: number) => {
     const coordinates = [lng, lat];
     if (mapRef.current) {
-      mapRef.current.addMarker(coordinates, customerInfo ? customerInfo : null, customerIndex ? customerIndex : null);
+      mapRef.current.addMarker(coordinates);
     }
   };
 
   const onSubmit = () => {
+    if (!getValues('lat') || !getValues('lng')) {
+      message.error('Vui lòng chọn vị trí muốn check!');
+      return
+    }
     mutateGetGeo();
   };
 
@@ -105,7 +109,7 @@ function Check() {
                     <div>
                       <Label infoText="" label="Vị trí muốn check" required />
                       <Select
-                        placeholder="Chọn vị trí xuất phát"
+                        placeholder="Vị trí check điểm bán"
                         className="h-11 !rounded w-full"
                         onChange={(value) => {
                           setRefId(value);
@@ -203,8 +207,8 @@ function Check() {
                 </div>
               )
             }
-            <div className={`${isMapFull ? 'col-span-12' : 'col-span-8'} h-[700px] w-full relative`}>
-              <CustomMap ref={mapRef} isMapFull={isMapFull} />
+            <div className={`${isMapFull ? 'col-span-12' : 'col-span-8'} h-full-screen w-full relative`}>
+              <CustomMap ref={mapRef} isMapFull={isMapFull} tripCustomer={customerList} nowLocation={latLng?.data ? [latLng?.data?.lng, latLng?.data?.lat] : []} radiusCircle={getValues('radius')} />
               <div className='absolute left-0 top-1/2 -translate-y-1/2 bg-white py-7 px-4 rounded-r-lg rounded-br-lg cursor-pointer transition-all duration-300 hover:bg-[#F5F5F5] z-10'
                 onClick={() => {
                   // change width full
