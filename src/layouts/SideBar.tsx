@@ -171,19 +171,19 @@ const items = (permissions: { model: string; action: string }[]) => [
     getItem('Thiết lập giá', keyMenu.PRODUCT_PRICE),
   ]),
 
-  hasMultiplePermission(permissions, [
-    RoleModel.market_common,
-    RoleModel.market_store,
-    RoleModel.market_setting,
-  ]) &&
-  getItem('Chợ', keyMenu.MARKET, <Image src={MarketIcon} />, [
-    hasPermission(permissions, RoleModel.market_common) &&
-    getItem('Chợ', keyMenu.MARKET_COMMON),
-    hasPermission(permissions, RoleModel.market_store) &&
-    getItem('Chợ đại lý', keyMenu.MARKET_STORE),
-    hasPermission(permissions, RoleModel.market_setting) &&
-    getItem('Cấu hình sản phẩm', keyMenu.MARKET_SETTING),
-  ]),
+  // hasMultiplePermission(permissions, [
+  //   RoleModel.market_common,
+  //   RoleModel.market_store,
+  //   RoleModel.market_setting,
+  // ]) &&
+  // getItem('Chợ', keyMenu.MARKET, <Image src={MarketIcon} />, [
+  //   hasPermission(permissions, RoleModel.market_common) &&
+  //   getItem('Chợ', keyMenu.MARKET_COMMON),
+  //   hasPermission(permissions, RoleModel.market_store) &&
+  //   getItem('Chợ đại lý', keyMenu.MARKET_STORE),
+  //   hasPermission(permissions, RoleModel.market_setting) &&
+  //   getItem('Cấu hình sản phẩm', keyMenu.MARKET_SETTING),
+  // ]),
 
   hasPermission(permissions, RoleModel.medicine_category, RoleAction.read) &&
   getItem('Danh mục thuốc', keyMenu.MEDICINE, <Image src={MedicineIcon} />),
