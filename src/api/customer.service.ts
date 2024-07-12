@@ -8,6 +8,7 @@ export function getCustomer(params: {
 }) {
   return axiosClient.get("customer", { params });
 }
+
 export function getCustomerDebt(
   params: {
     page: number;

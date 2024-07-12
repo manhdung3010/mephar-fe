@@ -1,11 +1,11 @@
-import type { ColumnsType } from 'antd/es/table';
+import type { ColumnsType } from "antd/es/table";
 
-import { getProductExpired } from '@/api/product.service';
-import { CustomUnitSelect } from '@/components/CustomUnitSelect';
-import { formatDate, formatNumber } from '@/helpers';
-import { useQuery } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
-import CustomTable from '../../../../components/CustomTable';
+import { getProductExpired } from "@/api/product.service";
+import { CustomUnitSelect } from "@/components/CustomUnitSelect";
+import { formatDate, formatNumber } from "@/helpers";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import CustomTable from "../../../../components/CustomTable";
 
 interface IRecord {
   key: number;
@@ -15,16 +15,19 @@ interface IRecord {
   lastInputPrice: number;
 }
 
-const ProductExpire = ({ productId, branchId, productUnit }: { productId: number, branchId: number, productUnit: any[] }) => {
+const ProductExpire = ({
+  productId,
+  branchId,
+  productUnit,
+}: {
+  productId: number;
+  branchId: number;
+  productUnit: any[];
+}) => {
   const { data: productExpired, isLoading } = useQuery(
-    [
-      'PRODUCT_EXPIRED',
-      productId,
-      1,
-      50,
-      branchId
-    ],
-    () => getProductExpired({ productId: productId, page: 1, limit: 50, branchId })
+    ["PRODUCT_EXPIRED", productId, 1, 50, branchId],
+    () =>
+      getProductExpired({ productId: productId, page: 1, limit: 50, branchId })
   );
 
   const [data, setData] = useState<any[]>([]);
@@ -42,54 +45,64 @@ const ProductExpire = ({ productId, branchId, productUnit }: { productId: number
       });
       setData(newData);
     }
-  }, [productExpired?.data?.items])
-
+  }, [productExpired?.data?.items]);
 
   const handleOnChange = (value, recordId) => {
     const newData = data.map((item) => {
       // change quantity to new unit
-      if (item.productUnit.find((unit) => unit.id === value) && item.id === recordId) {
-        const newQuantity = item.quantity / item.productUnit.find((unit) => unit.id === value).exchangeValue;
+      if (
+        item.productUnit.find((unit) => unit.id === value) &&
+        item.id === recordId
+      ) {
+        const newQuantity =
+          item.quantity /
+          item.productUnit.find((unit) => unit.id === value).exchangeValue;
         return {
           ...item,
           unitId: value,
           inventory: Math.floor(newQuantity),
-        }
+        };
       }
       return item;
-    })
+    });
     // console.log("newData", newData)
-    setData(newData)
-  }
+    setData(newData);
+  };
 
   const columns: ColumnsType<IRecord> = [
     {
-      title: 'Lô/hạn sử dụng',
-      dataIndex: 'name',
-      key: 'name',
+      title: "Lô/hạn sử dụng",
+      dataIndex: "name",
+      key: "name",
     },
     {
-      title: 'Ngày hết hạn',
-      dataIndex: 'expiryDate',
-      key: 'expiryDate',
+      title: "Ngày hết hạn",
+      dataIndex: "expiryDate",
+      key: "expiryDate",
       render: (expiryDate) => formatDate(expiryDate),
     },
     {
-      title: 'Số lượng',
-      dataIndex: 'inventory',
-      key: 'inventory',
+      title: "Số lượng",
+      dataIndex: "inventory",
+      key: "inventory",
       render: (quantity) => formatNumber(quantity),
     },
     {
-      title: 'Đơn vị',
-      dataIndex: 'productUnit',
-      key: 'productUnit',
-      render: (productUnit, record: any) => <CustomUnitSelect value={record?.unitId} onChange={(value) => handleOnChange(value, record?.id)} options={productUnit.map((unit) => {
-        return {
-          label: unit.unitName,
-          value: unit.id,
-        }
-      })} />,
+      title: "Đơn vị",
+      dataIndex: "productUnit",
+      key: "productUnit",
+      render: (productUnit, record: any) => (
+        <CustomUnitSelect
+          value={record?.unitId}
+          onChange={(value) => handleOnChange(value, record?.id)}
+          options={productUnit.map((unit) => {
+            return {
+              label: unit.unitName,
+              value: unit.id,
+            };
+          })}
+        />
+      ),
     },
     // {
     //   title: 'Giá nhập gần nhất',
@@ -98,7 +111,9 @@ const ProductExpire = ({ productId, branchId, productUnit }: { productId: number
     // },
   ];
 
-  return <CustomTable dataSource={data} columns={columns} loading={isLoading} />;
+  return (
+    <CustomTable dataSource={data} columns={columns} loading={isLoading} />
+  );
 };
 
 export default ProductExpire;
