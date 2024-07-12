@@ -57,12 +57,13 @@ const CustomMap = forwardRef((props, ref) => {
       customMarker.style.backgroundImage = 'url("https://res.cloudinary.com/dvrqupkgg/image/upload/v1720693956/markBgIcon_ummkoy.svg")';
       customMarker.textContent = customerIndex; // Set the number inside the marker
     }
+    customMarker.style.lineHeight = "56px";
     customMarker.style.backgroundSize = "cover"; // White border
     customMarker.style.display = "flex";
     customMarker.style.justifyContent = "center";
     customMarker.style.alignItems = "center";
     customMarker.style.color = "#fff"; // White text color
-    customMarker.style.fontSize = "18px"; // Adjust the font size
+    customMarker.style.fontSize = "22px"; // Adjust the font size
     customMarker.style.fontWeight = "bold";
 
     return customMarker;

@@ -50,6 +50,7 @@ axiosClient.interceptors.response.use(
         "discount/order",
         "discount/product",
         "discount/config",
+        "trip/geofencing?page=1&limit=999",
       ];
 
       if (!excludeUrl.includes(response.config?.url as string)) {

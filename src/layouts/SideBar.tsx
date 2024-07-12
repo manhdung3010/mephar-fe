@@ -84,7 +84,7 @@ export const partnerGroup = {
   PARTNERS_DOCTOR_LIST: '/partners/doctor',
 };
 export const customerCare = {
-  CUSTOMER_CARE_CREATE: '/customer-care/create-schedule',
+  CUSTOMER_CARE_CHECK: '/customer-care/check',
   CUSTOMER_CARE_LIST: '/customer-care/list-schedule',
 };
 
@@ -225,8 +225,8 @@ const items = (permissions: { model: string; action: string }[]) => [
     getItem('Bác sĩ', keyMenu.PARTNERS_DOCTOR_LIST),
   ]),
   getItem('Chăm sóc khách hàng', keyMenu.CUSTOMER_CARE, <Image src={CSIcon} />, [
-    hasPermission(permissions, RoleModel.customer_care, RoleAction.create) &&
-    getItem('Tạo lịch trình tiếp thị', keyMenu.CUSTOMER_CARE_CREATE),
+    hasPermission(permissions, RoleModel.customer_care, RoleAction.read) &&
+    getItem('Check điểm bán', keyMenu.CUSTOMER_CARE_CHECK),
     hasPermission(permissions, RoleModel.customer_care, RoleAction.read) &&
     getItem('Danh sách lịch trình', keyMenu.CUSTOMER_CARE_LIST),
   ]),
