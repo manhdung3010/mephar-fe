@@ -1,37 +1,43 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { message } from 'antd';
-import Image from 'next/image';
-import { useRouter } from 'next/router';
-import { useState } from 'react';
-import Barcode from 'react-jsbarcode';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { message } from "antd";
+import Image from "next/image";
+import { useRouter } from "next/router";
+import { useState } from "react";
+import Barcode from "react-jsbarcode";
 
-import { deleteProduct, updateProductStatus } from '@/api/product.service';
-import BarcodeBlueIcon from '@/assets/barcodeBlue.svg';
-import CopyBlueIcon from '@/assets/copyBlue.svg';
-import DeleteRedIcon from '@/assets/deleteRed.svg';
-import EditWhiteIcon from '@/assets/editWhite.svg';
-import LockGrayIcon from '@/assets/lockGray.svg';
-import MarketBlueIcon from '@/assets/marketBlue.svg';
-import { CustomButton } from '@/components/CustomButton';
-import UpdateStatusModal from '@/components/CustomModal/ModalUpdateStatusItem';
-import { CustomUnitSelect } from '@/components/CustomUnitSelect';
+import { deleteProduct, updateProductStatus } from "@/api/product.service";
+import BarcodeBlueIcon from "@/assets/barcodeBlue.svg";
+import CopyBlueIcon from "@/assets/copyBlue.svg";
+import DeleteRedIcon from "@/assets/deleteRed.svg";
+import EditWhiteIcon from "@/assets/editWhite.svg";
+import LockGrayIcon from "@/assets/lockGray.svg";
+import MarketBlueIcon from "@/assets/marketBlue.svg";
+import { CustomButton } from "@/components/CustomButton";
+import UpdateStatusModal from "@/components/CustomModal/ModalUpdateStatusItem";
+import { CustomUnitSelect } from "@/components/CustomUnitSelect";
 import {
   EProductStatus,
   EProductStatusLabel,
   EProductType,
   getEnumKeyByValue,
-} from '@/enums';
-import { formatMoney, getImage, hasPermission } from '@/helpers';
+} from "@/enums";
+import { formatMoney, getImage, hasPermission } from "@/helpers";
 
-import type { IProduct } from '../types';
-import DeleteProductModal from './DeleteProduct';
-import PrintBarcodeModal from './PrintBarcodeModal';
-import ListUnit from '../ListUnit';
-import { useRecoilValue } from 'recoil';
-import { profileState } from '@/recoil/state';
-import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
+import type { IProduct } from "../types";
+import DeleteProductModal from "./DeleteProduct";
+import PrintBarcodeModal from "./PrintBarcodeModal";
+import ListUnit from "../ListUnit";
+import { useRecoilValue } from "recoil";
+import { profileState } from "@/recoil/state";
+import { RoleAction, RoleModel } from "@/modules/settings/role/role.enum";
 
-const Info = ({ record, onChangeUnit }: { record: IProduct, onChangeUnit: any }) => {
+const Info = ({
+  record,
+  onChangeUnit,
+}: {
+  record: IProduct;
+  onChangeUnit: any;
+}) => {
   const queryClient = useQueryClient();
   const router = useRouter();
   const profile = useRecoilValue(profileState);
@@ -42,7 +48,6 @@ const Info = ({ record, onChangeUnit }: { record: IProduct, onChangeUnit: any })
     useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
 
-
   const toggleDescription = () => {
     setShowFullDescription(!showFullDescription);
   };
@@ -50,7 +55,7 @@ const Info = ({ record, onChangeUnit }: { record: IProduct, onChangeUnit: any })
   const { mutate: mutateDeleteProduct, isLoading: isLoadingDeleteProduct } =
     useMutation(() => deleteProduct(Number(record.id)), {
       onSuccess: async () => {
-        await queryClient.invalidateQueries(['LIST_PRODUCT']);
+        await queryClient.invalidateQueries(["LIST_PRODUCT"]);
         setOpenDeleteProductModal(false);
       },
       onError: (err: any) => {
@@ -70,7 +75,7 @@ const Info = ({ record, onChangeUnit }: { record: IProduct, onChangeUnit: any })
       updateProductStatus(Number(record.id), payload),
     {
       onSuccess: async () => {
-        await queryClient.invalidateQueries(['LIST_PRODUCT']);
+        await queryClient.invalidateQueries(["LIST_PRODUCT"]);
         setOpenUpdateProductStatusModal(false);
       },
       onError: (err: any) => {
@@ -105,38 +110,38 @@ const Info = ({ record, onChangeUnit }: { record: IProduct, onChangeUnit: any })
 
   const handlePrintBarcode = () => {
     setOpenPrintBarcodeModal(true);
-  }
+  };
 
   return (
     <>
       <div className="bg-[#F5F5F5] p-4 text-lg font-medium text-[#0070F4]">
-        {record.name}
+        {record?.name}
       </div>
       <div className="flex gap-12">
         <div className="flex flex-col gap-5 p-5">
-          {record.image?.path ? (
+          {record?.image?.path ? (
             <Image
               width={235}
               height={235}
-              src={getImage(record.image?.path)}
+              src={getImage(record?.image?.path)}
               alt=""
               objectFit="contain"
             />
           ) : (
             <div className="h-[235px] w-[235px]" />
           )}
-          {record.barCode && (
-            <Barcode className=" mx-auto h-[110px]" value={record.barCode} />
+          {record?.barCode && (
+            <Barcode className=" mx-auto h-[110px]" value={record?.barCode} />
           )}
         </div>
         <div className="grid flex-1 grid-cols-2 gap-4">
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Mã hàng:</div>
-            <div className="text-black-main">{record.code}</div>
+            <div className="text-black-main">{record?.code}</div>
           </div>
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Mã vạch:</div>
-            <div className="text-black-main">{record.barCode}</div>
+            <div className="text-black-main">{record?.barCode}</div>
           </div>
           {/* <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Mã thuốc:</div>
@@ -144,89 +149,95 @@ const Info = ({ record, onChangeUnit }: { record: IProduct, onChangeUnit: any })
           </div> */}
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Nhóm hàng: </div>
-            <div className="text-black-main">{record.groupProduct?.name}</div>
+            <div className="text-black-main">{record?.groupProduct?.name}</div>
           </div>
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Loại hàng:</div>
-            <div className="text-black-main">{record?.type === 1 ? "Thuốc" : record?.type === 2 ? "Hàng hóa" : "Combo - đóng gói"}</div>
+            <div className="text-black-main">
+              {record?.type === 1
+                ? "Thuốc"
+                : record?.type === 2
+                ? "Hàng hóa"
+                : "Combo - đóng gói"}
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Tên hàng:</div>
-            <div className="text-black-main">{record.name}</div>
+            <div className="text-black-main">{record?.name}</div>
           </div>
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Tên viết tắt:</div>
-            <div className="text-black-main">{record.shortName}</div>
+            <div className="text-black-main">{record?.shortName}</div>
           </div>
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Giá bán:</div>
-            <div className="text-black-main">{formatMoney(record.price)}</div>
+            <div className="text-black-main">{formatMoney(record?.price)}</div>
           </div>
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Giá vốn:</div>
             <div className="text-black-main">
-              {formatMoney(record.primePrice)}
+              {formatMoney(record?.primePrice)}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Trọng lượng:</div>
-            <div className="text-black-main">{record.weight}</div>
+            <div className="text-black-main">{record?.weight}</div>
           </div>
           {/* <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Đường dùng:</div>
-            <div className="text-black-main">{record.productDosage?.name}</div>
+            <div className="text-black-main">{record?.productDosage?.name}</div>
           </div> */}
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Vị trí:</div>
             <div className="text-black-main">
-              {record.productPosition?.name}
+              {record?.productPosition?.name}
             </div>
           </div>
           {/* <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Cảnh báo hết hạn:</div>
             <div className="text-black-main">
-              {record.warningExpiryDate || record.warningExpiryText}
+              {record?.warningExpiryDate || record?.warningExpiryText}
             </div>
           </div> */}
           {/* <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Số đăng ký:</div>
-            <div className="text-black-main">{record.registerNumber}</div>
+            <div className="text-black-main">{record?.registerNumber}</div>
           </div>
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Hoạt chất:</div>
-            <div className="text-black-main">{record.activeElement}</div>
+            <div className="text-black-main">{record?.activeElement}</div>
           </div> */}
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Hàm lượng:</div>
-            <div className="text-black-main">{record.content}</div>
+            <div className="text-black-main">{record?.content}</div>
           </div>
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Hãng sản xuất:</div>
             <div className="text-black-main">
-              {record.productManufacture?.name}
+              {record?.productManufacture?.name}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Nước sản xuất:</div>
-            <div className="text-black-main">{record.country?.name}</div>
+            <div className="text-black-main">{record?.country?.name}</div>
           </div>
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Quy cách đóng gói:</div>
-            <div className="text-black-main">{record.packingSpecification}</div>
+            <div className="text-black-main">
+              {record?.packingSpecification}
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Mô tả:</div>
             <div className="text-black-main">
-              <div className={showFullDescription ? '' : 'line-clamp-5'}>
+              <div className={showFullDescription ? "" : "line-clamp-5"}>
                 {record?.description}
               </div>
-              {
-                record?.description?.length > 240 && (
-                  <button onClick={toggleDescription} className="text-blue-500">
-                    {showFullDescription ? 'Thu gọn' : 'Xem thêm'}
-                  </button>
-                )
-              }
+              {record?.description?.length > 240 && (
+                <button onClick={toggleDescription} className="text-blue-500">
+                  {showFullDescription ? "Thu gọn" : "Xem thêm"}
+                </button>
+              )}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-5">
@@ -242,20 +253,26 @@ const Info = ({ record, onChangeUnit }: { record: IProduct, onChangeUnit: any })
                   record?.productUnit[0]?.id
                 }
               /> */}
-              <ListUnit data={record?.productUnit} onChangeUnit={onChangeUnit} record={record} isDetailOpen={true} />
+              <ListUnit
+                data={record?.productUnit}
+                onChangeUnit={onChangeUnit}
+                record={record}
+                isDetailOpen={true}
+              />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Trạng thái:</div>
             <div
-              className={`${record.status === EProductStatus.active
-                ? 'text-[#00B63E]'
-                : 'text-gray-main'
-                }`}
+              className={`${
+                record?.status === EProductStatus.active
+                  ? "text-[#00B63E]"
+                  : "text-gray-main"
+              }`}
             >
               {
                 EProductStatusLabel[
-                getEnumKeyByValue(EProductStatus, record.status)
+                  getEnumKeyByValue(EProductStatus, record?.status)
                 ]
               }
             </div>
@@ -263,29 +280,31 @@ const Info = ({ record, onChangeUnit }: { record: IProduct, onChangeUnit: any })
         </div>
       </div>
       <div className="flex justify-end gap-4">
-        {
-          hasPermission(profile?.role?.permissions, RoleModel.list_product, RoleAction.update) && (
-            <CustomButton
-              type={
-                record.status === EProductStatus.inactive ? 'success' : 'disable'
-              }
-              outline={true}
-              prefixIcon={
-                record.status === EProductStatus.inactive ? (
-                  <div></div>
-                ) : (
-                  <Image src={LockGrayIcon} alt="" />
-                )
-              }
-              onClick={() => setOpenUpdateProductStatusModal(true)}
-              disabled={isLoadingUpdateStatusProduct}
-            >
-              {record.status === EProductStatus.inactive
-                ? 'Mở bán'
-                : 'Ngưng kinh doanh'}
-            </CustomButton>
-          )
-        }
+        {hasPermission(
+          profile?.role?.permissions,
+          RoleModel.list_product,
+          RoleAction.update
+        ) && (
+          <CustomButton
+            type={
+              record?.status === EProductStatus.inactive ? "success" : "disable"
+            }
+            outline={true}
+            prefixIcon={
+              record?.status === EProductStatus.inactive ? (
+                <div></div>
+              ) : (
+                <Image src={LockGrayIcon} alt="" />
+              )
+            }
+            onClick={() => setOpenUpdateProductStatusModal(true)}
+            disabled={isLoadingUpdateStatusProduct}
+          >
+            {record?.status === EProductStatus.inactive
+              ? "Mở bán"
+              : "Ngưng kinh doanh"}
+          </CustomButton>
+        )}
         <CustomButton
           type="primary"
           outline={true}
@@ -301,47 +320,53 @@ const Info = ({ record, onChangeUnit }: { record: IProduct, onChangeUnit: any })
         >
           In mã vạch
         </CustomButton>
-        {
-          hasPermission(profile?.role?.permissions, RoleModel.list_product, RoleAction.create) && (
-            <CustomButton
-              type="primary"
-              outline={true}
-              prefixIcon={<Image src={CopyBlueIcon} alt="" />}
-              onClick={redirectCopy}
-            >
-              Sao chép
-            </CustomButton>
-          )
-        }
+        {hasPermission(
+          profile?.role?.permissions,
+          RoleModel.list_product,
+          RoleAction.create
+        ) && (
+          <CustomButton
+            type="primary"
+            outline={true}
+            prefixIcon={<Image src={CopyBlueIcon} alt="" />}
+            onClick={redirectCopy}
+          >
+            Sao chép
+          </CustomButton>
+        )}
 
-        {
-          hasPermission(profile?.role?.permissions, RoleModel.list_product, RoleAction.delete) && (
-            <CustomButton
-              outline={true}
-              onClick={() => setOpenDeleteProductModal(true)}
-              prefixIcon={<Image src={DeleteRedIcon} alt="" />}
-            >
-              Xoá
-            </CustomButton>
-          )
-        }
-        {
-          hasPermission(profile?.role?.permissions, RoleModel.list_product, RoleAction.update) && (
-            <CustomButton
-              type="success"
-              prefixIcon={<Image src={EditWhiteIcon} alt="" />}
-              onClick={redirectUpdate}
-            >
-              Cập nhật
-            </CustomButton>
-          )
-        }
+        {hasPermission(
+          profile?.role?.permissions,
+          RoleModel.list_product,
+          RoleAction.delete
+        ) && (
+          <CustomButton
+            outline={true}
+            onClick={() => setOpenDeleteProductModal(true)}
+            prefixIcon={<Image src={DeleteRedIcon} alt="" />}
+          >
+            Xoá
+          </CustomButton>
+        )}
+        {hasPermission(
+          profile?.role?.permissions,
+          RoleModel.list_product,
+          RoleAction.update
+        ) && (
+          <CustomButton
+            type="success"
+            prefixIcon={<Image src={EditWhiteIcon} alt="" />}
+            onClick={redirectUpdate}
+          >
+            Cập nhật
+          </CustomButton>
+        )}
       </div>
 
       <PrintBarcodeModal
         isOpen={openPrintBarcodeModal}
         onCancel={() => setOpenPrintBarcodeModal(false)}
-        barCode={record.barCode}
+        barCode={record?.barCode}
       />
 
       <DeleteProductModal
@@ -356,7 +381,7 @@ const Info = ({ record, onChangeUnit }: { record: IProduct, onChangeUnit: any })
         onCancel={() => setOpenUpdateProductStatusModal(false)}
         onSuccess={() =>
           onSubmitUpdateStatus(
-            record.status === EProductStatus.active
+            record?.status === EProductStatus.active
               ? EProductStatus.inactive
               : EProductStatus.active
           )

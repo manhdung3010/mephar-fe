@@ -1,18 +1,18 @@
-import { Input, message } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
-import Image from 'next/image';
+import { Input, message } from "antd";
+import type { ColumnsType } from "antd/es/table";
+import Image from "next/image";
 
-import PlusIcon from '@/assets/PlusIconWhite.svg';
-import { CustomButton } from '@/components/CustomButton';
-import CustomTable from '@/components/CustomTable';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
-import { createCustomerNote, getNoteList } from '@/api/customer.service';
-import { CustomModal } from '@/components/CustomModal';
-import { CustomTextarea } from '@/components/CustomInput';
-import { useRecoilValue } from 'recoil';
-import { profileState } from '@/recoil/state';
-import { formatDateTime } from '@/helpers';
+import PlusIcon from "@/assets/PlusIconWhite.svg";
+import { CustomButton } from "@/components/CustomButton";
+import CustomTable from "@/components/CustomTable";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { createCustomerNote, getNoteList } from "@/api/customer.service";
+import { CustomModal } from "@/components/CustomModal";
+import { CustomTextarea } from "@/components/CustomInput";
+import { useRecoilValue } from "recoil";
+import { profileState } from "@/recoil/state";
+import { formatDateTime } from "@/helpers";
 
 const { TextArea } = Input;
 
@@ -21,13 +21,14 @@ interface IRecord {
   note: string;
   createdBy: string;
   createdAt: string;
-  userCreate: any
+  userCreate: any;
 }
 
 export function Note({ record }: { record: any }) {
-  const [isOpenNoteModal, setIsOpenNoteModal] = useState(false)
+  const [expanded, setExpanded] = useState(false);
+  const [isOpenNoteModal, setIsOpenNoteModal] = useState(false);
   const { data: notes, isLoading } = useQuery(
-    ['NOTE_LIST', record?.id],
+    ["NOTE_LIST", record?.id],
     () => getNoteList(record?.id),
     {
       enabled: !!record?.id,
@@ -36,21 +37,37 @@ export function Note({ record }: { record: any }) {
 
   const columns: ColumnsType<IRecord> = [
     {
-      title: 'Ghi chú',
-      dataIndex: 'note',
-      key: 'note',
-      render: (value) => value,
+      title: "Ghi chú",
+      dataIndex: "note",
+      key: "note",
+      render: (value: string, record: IRecord) => {
+        if (!expanded && record.note.length > 60) {
+          return (
+            <>
+              {value.slice(0, 60)}
+              <span
+                style={{ color: "blue", cursor: "pointer" }}
+                onClick={() => setExpanded(true)}
+              >
+                ... Xem thêm
+              </span>
+            </>
+          );
+        } else {
+          return value;
+        }
+      },
     },
     {
-      title: 'Người thêm',
-      dataIndex: 'userCreate',
-      key: 'userCreate',
-      render: (_, record) => record?.userCreate?.fullName
+      title: "Người thêm",
+      dataIndex: "userCreate",
+      key: "userCreate",
+      render: (_, record) => record?.userCreate?.fullName,
     },
     {
-      title: 'Thời gian',
-      dataIndex: 'createdTime',
-      key: 'createdTime',
+      title: "Thời gian",
+      dataIndex: "createdTime",
+      key: "createdTime",
       render: (value) => formatDateTime(value),
     },
   ];
@@ -63,7 +80,7 @@ export function Note({ record }: { record: any }) {
         pagination={false}
         className="mb-4"
         rowSelection={{
-          type: 'checkbox',
+          type: "checkbox",
         }}
       />
 
@@ -77,60 +94,79 @@ export function Note({ record }: { record: any }) {
         </CustomButton>
       </div>
 
-      <CreateCustomerNote isOpen={isOpenNoteModal} onCancle={() => setIsOpenNoteModal(false)} customerId={record?.id} />
+      <CreateCustomerNote
+        isOpen={isOpenNoteModal}
+        onCancle={() => setIsOpenNoteModal(false)}
+        customerId={record?.id}
+      />
     </div>
   );
 }
 
-const CreateCustomerNote = ({ isOpen, onCancle, customerId }: { isOpen: boolean, onCancle: any, customerId: number }) => {
-  const [noteValue, setNoteValue] = useState<string>('')
+const CreateCustomerNote = ({
+  isOpen,
+  onCancle,
+  customerId,
+}: {
+  isOpen: boolean;
+  onCancle: any;
+  customerId: number;
+}) => {
+  const [noteValue, setNoteValue] = useState<string>("");
   const queryClient = useQueryClient();
   const profile = useRecoilValue(profileState);
-  const { mutate: mutateCreateNote, isLoading } =
-    useMutation(
-      () => {
-        return createCustomerNote({ note: noteValue, customerId, userId: profile?.id });
+  const { mutate: mutateCreateNote, isLoading } = useMutation(
+    () => {
+      return createCustomerNote({
+        note: noteValue,
+        customerId,
+        userId: profile?.id,
+      });
+    },
+    {
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(["NOTE_LIST"]);
+        await queryClient.invalidateQueries(["CUSTOMER_LIST"]);
+        setNoteValue("");
+        onCancle();
       },
-      {
-        onSuccess: async () => {
-          await queryClient.invalidateQueries(['NOTE_LIST']);
-          await queryClient.invalidateQueries(['CUSTOMER_LIST']);
-          setNoteValue('')
-          onCancle();
-        },
-        onError: (err: any) => {
-          message.error(err?.message);
-        },
+      onError: (err: any) => {
+        message.error(err?.message);
       },
-    );
+    }
+  );
   const onSubmit = () => {
-    mutateCreateNote()
-  }
+    mutateCreateNote();
+  };
   return (
     <CustomModal
       isOpen={isOpen}
       onCancel={onCancle}
       onSubmit={onSubmit}
-      title={
-        <div className="text-xl">
-          Tạo ghi chú
-        </div>
-      }
+      title={<div className="text-xl">Tạo ghi chú</div>}
       width={650}
-    // isLoading={isLoadingCreateCustomer}
+      // isLoading={isLoadingCreateCustomer}
     >
-      <div className='mt-5'>
+      <div className="mt-5">
         <div>
-          <div className='mb-5 grid grid-cols-1 gap-2'>
-            <div className='flex'>
-              <span className='w-[100px] font-medium'>Ghi chú</span>
-              <span className='flex-1'>
-                <CustomTextarea className='h-11' rows={6} placeholder='Nhập ghi chú' value={noteValue} onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => setNoteValue(event.target.value)} />
+          <div className="mb-5 grid grid-cols-1 gap-2">
+            <div className="flex">
+              <span className="w-[100px] font-medium">Ghi chú</span>
+              <span className="flex-1">
+                <CustomTextarea
+                  className="h-11"
+                  rows={6}
+                  placeholder="Nhập ghi chú"
+                  value={noteValue}
+                  onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) =>
+                    setNoteValue(event.target.value)
+                  }
+                />
               </span>
             </div>
           </div>
         </div>
       </div>
     </CustomModal>
-  )
-}
+  );
+};

@@ -168,9 +168,9 @@ export function RightContent({
         isBatchExpireControl: product.isBatchExpireControl,
         ...(moveId ? {} : { productUnitId: productUnitId }),
         batches: moveId
-          ? fromBatches?.map((item) => ({
-              id: item.id,
-              quantity: item.quantity,
+          ? toBatches?.map((item, index) => ({
+              id: item.batch.id,
+              quantity: fromBatches[index].quantity,
               expiryDate: item.batch.expiryDate,
               isSelected: item.isSelected,
             }))
@@ -198,6 +198,8 @@ export function RightContent({
         message.error(errorTxt);
         return;
       }
+      console.log(getValues());
+
       return mutateReceiveProductImport();
     } else {
       mutateCreateProductImport();

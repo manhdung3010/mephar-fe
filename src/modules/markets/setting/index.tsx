@@ -1,17 +1,17 @@
-import type { ColumnsType } from 'antd/es/table';
-import cx from 'classnames';
-import Image from 'next/image';
-import { useRouter } from 'next/router';
-import { useState } from 'react';
+import type { ColumnsType } from "antd/es/table";
+import cx from "classnames";
+import Image from "next/image";
+import { useRouter } from "next/router";
+import { useState } from "react";
 
-import ExportIcon from '@/assets/exportIcon.svg';
-import PlusIcon from '@/assets/plusWhiteIcon.svg';
-import { CustomButton } from '@/components/CustomButton';
-import CustomTable from '@/components/CustomTable';
-import { EProductSettingStatus, EProductSettingStatusLabel } from '@/enums';
+import ExportIcon from "@/assets/exportIcon.svg";
+import PlusIcon from "@/assets/plusWhiteIcon.svg";
+import { CustomButton } from "@/components/CustomButton";
+import CustomTable from "@/components/CustomTable";
+import { EProductSettingStatus, EProductSettingStatusLabel } from "@/enums";
 
-import BillDetail from './row-detail';
-import Search from './Search';
+import BillDetail from "./row-detail";
+import Search from "./Search";
 
 interface IRecord {
   key: number;
@@ -34,14 +34,14 @@ export function MarketSetting() {
 
   const record = {
     key: 1,
-    name: 'Panactol',
-    groupProduct: 'Nhóm 1',
-    marketType: 'Loại chợ',
+    name: "Panactol",
+    groupProduct: "Nhóm 1",
+    marketType: "Loại chợ",
     inventoryQuantity: 100,
     soldQuantity: 50,
     status: EProductSettingStatus.SELLING,
-    createdAt: '09:10, 1212/2023',
-    updatedAt: '09:10, 1212/2023',
+    createdAt: "09:10, 1212/2023",
+    updatedAt: "09:10, 1212/2023",
   };
 
   const dataSource: IRecord[] = Array(8)
@@ -50,14 +50,14 @@ export function MarketSetting() {
 
   const columns: ColumnsType<IRecord> = [
     {
-      title: 'STT',
-      dataIndex: 'key',
-      key: 'key',
+      title: "STT",
+      dataIndex: "key",
+      key: "key",
     },
     {
-      title: 'Sản phẩm',
-      dataIndex: 'name',
-      key: 'name',
+      title: "Sản phẩm",
+      dataIndex: "name",
+      key: "name",
       render: (value, _, index) => (
         <span
           className="cursor-pointer text-[#0070F4]"
@@ -77,36 +77,36 @@ export function MarketSetting() {
       ),
     },
     {
-      title: 'Nhóm sản phẩm',
-      dataIndex: 'groupProduct',
-      key: 'groupProduct',
+      title: "Nhóm sản phẩm",
+      dataIndex: "groupProduct",
+      key: "groupProduct",
     },
     {
-      title: 'Loại chợ',
-      dataIndex: 'marketType',
-      key: 'marketType',
+      title: "Loại chợ",
+      dataIndex: "marketType",
+      key: "marketType",
     },
     {
-      title: 'SL tồn',
-      dataIndex: 'inventoryQuantity',
-      key: 'inventoryQuantity',
+      title: "SL tồn",
+      dataIndex: "inventoryQuantity",
+      key: "inventoryQuantity",
     },
     {
-      title: 'SL đã bán',
-      dataIndex: 'soldQuantity',
-      key: 'soldQuantity',
+      title: "SL đã bán",
+      dataIndex: "soldQuantity",
+      key: "soldQuantity",
     },
     {
-      title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
       render: (_, { status }) => (
         <div
           className={cx(
             status === EProductSettingStatus.SELLING
-              ? 'text-[#00B63E] border border-[#00B63E] bg-[#DEFCEC]'
-              : 'text-[#6D6D6D] border border-[#6D6D6D] bg-[#F0F1F1]',
-            'px-2 py-1 rounded-2xl w-max'
+              ? "text-[#00B63E] border border-[#00B63E] bg-[#DEFCEC]"
+              : "text-[#6D6D6D] border border-[#6D6D6D] bg-[#F0F1F1]",
+            "px-2 py-1 rounded-2xl w-max"
           )}
         >
           {EProductSettingStatusLabel[status]}
@@ -114,9 +114,9 @@ export function MarketSetting() {
       ),
     },
     {
-      title: 'Thời gian tạo',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
+      title: "Thời gian tạo",
+      dataIndex: "createdAt",
+      key: "createdAt",
       render: (value) => (
         <div>
           <div>{value}</div>
@@ -125,9 +125,9 @@ export function MarketSetting() {
       ),
     },
     {
-      title: 'Cập nhật cuối',
-      dataIndex: 'updatedAt',
-      key: 'updatedAt',
+      title: "Cập nhật cuối",
+      dataIndex: "updatedAt",
+      key: "updatedAt",
       render: (value) => (
         <div>
           <div>{value}</div>
@@ -170,8 +170,6 @@ export function MarketSetting() {
     //     }}
     //   />
     // </div>
-    <div className='py-5'>
-      Đang cập nhật...
-    </div>
+    <div className="py-5">Đang cập nhật...</div>
   );
 }
