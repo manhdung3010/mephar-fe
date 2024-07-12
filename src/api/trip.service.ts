@@ -29,3 +29,11 @@ export function updateCustomerStatus(
     payload
   );
 }
+
+// lấy bán kính tìm kiếm
+export function getGeo(page: number, limit: number, payload: any) {
+  return axiosClient.post(
+    `trip/geofencing?page=${page}&limit=${limit}`,
+    payload
+  );
+}

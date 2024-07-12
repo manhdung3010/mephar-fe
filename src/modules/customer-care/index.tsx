@@ -6,8 +6,10 @@ import Image from 'next/image';
 import PlusIcon from '@/assets/plusWhiteIcon.svg';
 import { useQuery } from '@tanstack/react-query';
 import { getAllTrip } from '@/api/trip.service';
+import { useRouter } from 'next/router';
 
 function ScheduleList() {
+  const router = useRouter();
   const [select, setSelect] = useState(0);
   const menu = ['Tất cả', 'Đang tiến hành', 'Đã hoàn thành'];
 
@@ -33,7 +35,7 @@ function ScheduleList() {
   return (
     <div>
       <div className='flex justify-end mt-3'>
-        <CustomButton type='danger' prefixIcon={<Image src={PlusIcon} />}>Thêm lịch trình tiếp thị</CustomButton>
+        <CustomButton onClick={() => router.push('/customer-care/create-schedule')} type='danger' prefixIcon={<Image src={PlusIcon} />}>Thêm lịch trình tiếp thị</CustomButton>
       </div>
       <div
         className="flex flex-col gap-5 bg-white px-4 pt-4 pb-5 mt-3"

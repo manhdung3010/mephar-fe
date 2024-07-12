@@ -296,3 +296,11 @@ export const timeAgo = (dateString: string): string => {
   }
   return Math.floor(seconds) + " giây trước";
 };
+
+export const formatDistance = (distance: number) => {
+  // Chuyển đổi khoảng cách từ mét sang kilômét và làm tròn đến 1 chữ số sau dấu phẩy
+  const kilometers = (distance / 1000).toFixed(1);
+
+  // Trả về chuỗi định dạng với đơn vị 'km'
+  return `${kilometers}km`;
+};

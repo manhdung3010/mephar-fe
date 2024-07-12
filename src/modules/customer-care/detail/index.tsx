@@ -46,13 +46,16 @@ function TripDetail() {
   };
 
   useEffect(() => {
-    if (tripDetail?.data?.tripCustomer) {
-      tripDetail?.data?.tripCustomer.map((item, index) => {
-        handleAddMarker(+item?.lng, +item?.lat, item, index + 1);
-      })
-    }
-    if (tripDetail?.data?.lng && tripDetail?.data?.lat) {
-      handleAddMarker(+tripDetail?.data?.lng, +tripDetail?.data?.lat);
+
+    // else {
+    // }
+    if (tripDetail?.data) {
+      if (tripDetail?.data?.customerCurrent) {
+        handleAddMarker(+tripDetail?.data?.customerCurrent?.lng, +tripDetail?.data?.customerCurrent?.lat);
+      }
+      else {
+        handleAddMarker(+tripDetail?.data?.lng, +tripDetail?.data?.lat);
+      }
     }
   }, [tripDetail])
   return (
@@ -116,7 +119,7 @@ function TripDetail() {
                           Vị trí xuất phát
                           <div className="flex items-center space-x-1 mt-1">
                             <Image src={MarkIcon} alt="" />
-                            <span>16 Hoàng Đạo Thúy</span>
+                            <span>{tripDetail?.data?.startAddress}</span>
                           </div>
                         </div>
                       </div>
@@ -183,7 +186,7 @@ function TripDetail() {
               )
             }
             <div className={`${isMapFull ? 'col-span-12' : 'col-span-7'} h-[700px] w-full relative`}>
-              <CustomMap ref={mapRef} isMapFull={isMapFull} />
+              <CustomMap ref={mapRef} isMapFull={isMapFull} tripCustomer={tripDetail?.data?.tripCustomer} />
               <div className='absolute left-0 top-1/2 -translate-y-1/2 bg-white py-7 px-4 rounded-r-lg rounded-br-lg cursor-pointer transition-all duration-300 hover:bg-[#F5F5F5] z-10'
                 onClick={() => {
                   // change width full

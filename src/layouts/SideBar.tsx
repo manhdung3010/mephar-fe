@@ -84,8 +84,8 @@ export const partnerGroup = {
   PARTNERS_DOCTOR_LIST: "/partners/doctor",
 };
 export const customerCare = {
-  CUSTOMER_CARE_CREATE: "/customer-care/create-schedule",
-  CUSTOMER_CARE_LIST: "/customer-care/list-schedule",
+  CUSTOMER_CARE_CHECK: '/customer-care/check',
+  CUSTOMER_CARE_LIST: '/customer-care/list-schedule',
 };
 
 export const reportGroup = {
@@ -212,29 +212,24 @@ const items = (permissions: { model: string; action: string }[]) => [
     RoleModel.group_provider,
     RoleModel.doctor,
   ]) &&
-    getItem("Đối tác", keyMenu.PARTNER, <Image src={PartnerIcon} />, [
-      hasPermission(permissions, RoleModel.customer, RoleAction.read) &&
-        getItem("Khách hàng", keyMenu.PARTNERS_CUSTOMER),
-      hasPermission(permissions, RoleModel.group_customer, RoleAction.read) &&
-        getItem("Nhóm khách hàng", keyMenu.PARTNERS_GROUP_CUSTOMER),
-      hasPermission(permissions, RoleModel.provider, RoleAction.read) &&
-        getItem("Nhà cung cấp", keyMenu.PARTNERS_PROVIDER),
-      hasPermission(permissions, RoleModel.group_provider, RoleAction.read) &&
-        getItem("Nhóm nhà cung cấp", keyMenu.PARTNERS_GROUP_PROVIDER),
-      hasPermission(permissions, RoleModel.doctor, RoleAction.read) &&
-        getItem("Bác sĩ", keyMenu.PARTNERS_DOCTOR_LIST),
-    ]),
-  getItem(
-    "Chăm sóc khách hàng",
-    keyMenu.CUSTOMER_CARE,
-    <Image src={CSIcon} />,
-    [
-      hasPermission(permissions, RoleModel.customer_care, RoleAction.create) &&
-        getItem("Tạo lịch trình tiếp thị", keyMenu.CUSTOMER_CARE_CREATE),
-      hasPermission(permissions, RoleModel.customer_care, RoleAction.read) &&
-        getItem("Danh sách lịch trình", keyMenu.CUSTOMER_CARE_LIST),
-    ]
-  ),
+  getItem('Đối tác', keyMenu.PARTNER, <Image src={PartnerIcon} />, [
+    hasPermission(permissions, RoleModel.customer, RoleAction.read) &&
+    getItem('Khách hàng', keyMenu.PARTNERS_CUSTOMER),
+    hasPermission(permissions, RoleModel.group_customer, RoleAction.read) &&
+    getItem('Nhóm khách hàng', keyMenu.PARTNERS_GROUP_CUSTOMER),
+    hasPermission(permissions, RoleModel.provider, RoleAction.read) &&
+    getItem('Nhà cung cấp', keyMenu.PARTNERS_PROVIDER),
+    hasPermission(permissions, RoleModel.group_provider, RoleAction.read) &&
+    getItem('Nhóm nhà cung cấp', keyMenu.PARTNERS_GROUP_PROVIDER),
+    hasPermission(permissions, RoleModel.doctor, RoleAction.read) &&
+    getItem('Bác sĩ', keyMenu.PARTNERS_DOCTOR_LIST),
+  ]),
+  getItem('Chăm sóc khách hàng', keyMenu.CUSTOMER_CARE, <Image src={CSIcon} />, [
+    hasPermission(permissions, RoleModel.customer_care, RoleAction.read) &&
+    getItem('Check điểm bán', keyMenu.CUSTOMER_CARE_CHECK),
+    hasPermission(permissions, RoleModel.customer_care, RoleAction.read) &&
+    getItem('Danh sách lịch trình', keyMenu.CUSTOMER_CARE_LIST),
+  ]),
 
   hasPermission(permissions, RoleModel.cashbook, RoleAction.read) &&
     getItem("Sổ quỹ", keyMenu.CASHBOOK, <Image src={CashbookIcon} />),
