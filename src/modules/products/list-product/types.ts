@@ -29,6 +29,7 @@ export interface IProduct {
   activeElement: string;
   productUnit: {
     id: number;
+    product: any;
     unitName: string;
     isBaseUnit: boolean;
     exchangeValue: string;

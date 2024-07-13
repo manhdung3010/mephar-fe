@@ -1,46 +1,57 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { message } from 'antd';
-import { cloneDeep, debounce } from 'lodash';
-import Image from 'next/image';
-import { useEffect, useMemo, useState } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { message } from "antd";
+import { cloneDeep, debounce } from "lodash";
+import Image from "next/image";
+import { useEffect, useMemo, useState } from "react";
+import { useRecoilState, useRecoilValue } from "recoil";
 
-import { getCustomer } from '@/api/customer.service';
-import { getEmployee } from '@/api/employee.service';
-import { createOrderReturn } from '@/api/order.service';
-import CustomerIcon from '@/assets/customerIcon.svg';
-import DolarIcon from '@/assets/dolarIcon.svg';
-import EditIcon from '@/assets/editIcon.svg';
-import EmployeeIcon from '@/assets/employeeIcon.svg';
-import { CustomButton } from '@/components/CustomButton';
-import { CustomInput } from '@/components/CustomInput';
-import { CustomSelect } from '@/components/CustomSelect';
-import InputError from '@/components/InputError';
-import {
-  EDiscountType,
-  EPaymentMethod
-} from '@/enums';
-import { formatMoney } from '@/helpers';
+import { getCustomer } from "@/api/customer.service";
+import { getEmployee } from "@/api/employee.service";
+import { createOrderReturn } from "@/api/order.service";
+import CustomerIcon from "@/assets/customerIcon.svg";
+import DolarIcon from "@/assets/dolarIcon.svg";
+import EditIcon from "@/assets/editIcon.svg";
+import EmployeeIcon from "@/assets/employeeIcon.svg";
+import { CustomButton } from "@/components/CustomButton";
+import { CustomInput } from "@/components/CustomInput";
+import { CustomSelect } from "@/components/CustomSelect";
+import InputError from "@/components/InputError";
+import { EDiscountType, EPaymentMethod } from "@/enums";
+import { formatMoney } from "@/helpers";
 import {
   branchState,
   orderActiveState,
   orderState,
   profileState,
-} from '@/recoil/state';
-import cx from 'classnames';
+} from "@/recoil/state";
+import cx from "classnames";
 
-import Bank from '@/assets/images/bank.png';
-import Cash from '@/assets/images/cash.png';
-import Debt from '@/assets/images/debt.png';
-import { CreateDiscountModal } from './CreateDiscountModal';
-import { OrderSuccessModal } from './OrderSuccessModal';
-import type { ISaleProductLocal } from './interface';
-import { RightContentStyled } from './styled';
+import Bank from "@/assets/images/bank.png";
+import Cash from "@/assets/images/cash.png";
+import Debt from "@/assets/images/debt.png";
+import { CreateDiscountModal } from "./CreateDiscountModal";
+import { OrderSuccessModal } from "./OrderSuccessModal";
+import type { ISaleProductLocal } from "./interface";
+import { RightContentStyled } from "./styled";
 
-export function RightContentReturn({ useForm, customerId, orderDetail }: { useForm: any, customerId: string, orderDetail: any }) {
+export function RightContentReturn({
+  useForm,
+  customerId,
+  orderDetail,
+}: {
+  useForm: any;
+  customerId: string;
+  orderDetail: any;
+}) {
   const queryClient = useQueryClient();
 
-  const { getValuesReturn, setValueReturn, handleSubmitReturn, errorsReturn, resetReturn } = useForm;
+  const {
+    getValuesReturn,
+    setValueReturn,
+    handleSubmitReturn,
+    errorsReturn,
+    resetReturn,
+  } = useForm;
 
   const [orderObject, setOrderObject] = useRecoilState(orderState);
   const [orderActive, setOrderActive] = useRecoilState(orderActiveState);
@@ -53,30 +64,30 @@ export function RightContentReturn({ useForm, customerId, orderDetail }: { useFo
   const [isOpenPrescriptionModal, setIsOpenPrescriptionModal] = useState(false);
   const [isOpenAddCustomerModal, setIsOpenAddCustomerModal] = useState(false);
   const [isOpenAddDiscountModal, setIsOpenAddDiscountModal] = useState(false);
-  const [searchEmployeeText, setSearchEmployeeText] = useState('');
-  const [searchCustomerText, setSearchCustomerText] = useState('');
+  const [searchEmployeeText, setSearchEmployeeText] = useState("");
+  const [searchCustomerText, setSearchCustomerText] = useState("");
   const [saleInvoice, setSaleInvoice] = useState();
 
   const { data: employees } = useQuery(
-    ['EMPLOYEE_LIST', searchEmployeeText],
+    ["EMPLOYEE_LIST", searchEmployeeText],
     () => getEmployee({ page: 1, limit: 20, keyword: searchEmployeeText })
   );
   const { data: customers } = useQuery(
-    ['CUSTOMER_LIST', searchCustomerText],
+    ["CUSTOMER_LIST", searchCustomerText],
     () => getCustomer({ page: 1, limit: 99, keyword: searchCustomerText })
   );
 
   useEffect(() => {
     if (profile) {
-      setValueReturn('userId', profile.id);
+      setValueReturn("userId", profile.id);
     }
   }, [profile]);
 
   useEffect(() => {
     if (customerId) {
-      setValueReturn('customerId', customerId, { shouldValidate: true });
+      setValueReturn("customerId", customerId, { shouldValidate: true });
     }
-  }, [customerId])
+  }, [customerId]);
 
   useEffect(() => {
     const orderKeys = Object.keys(orderObject);
@@ -85,7 +96,6 @@ export function RightContentReturn({ useForm, customerId, orderDetail }: { useFo
       setOrderActive(`${orderKeys[0]}`);
     }
   }, [orderActive]);
-
 
   const totalPrice = useMemo(() => {
     let price = 0;
@@ -119,12 +129,20 @@ export function RightContentReturn({ useForm, customerId, orderDetail }: { useFo
       price += Number(unit?.returnPrice ?? 0) * product.quantity;
     });
 
-    price = price - (getValuesReturn('discount') ?? 0) - (getValuesReturn('returnFee') ?? 0);
+    price =
+      price -
+      (getValuesReturn("discount") ?? 0) -
+      (getValuesReturn("returnFee") ?? 0);
 
-    setValueReturn('paid', price, { shouldValidate: true });
+    setValueReturn("paid", price, { shouldValidate: true });
 
     return price;
-  }, [orderObject, orderActive, getValuesReturn('discount'), getValuesReturn('returnFee')]);
+  }, [
+    orderObject,
+    orderActive,
+    getValuesReturn("discount"),
+    getValuesReturn("returnFee"),
+  ]);
 
   // useEffect(() => {
   //   // get discount from customer when customer change
@@ -146,37 +164,43 @@ export function RightContentReturn({ useForm, customerId, orderDetail }: { useFo
   // }, [getValuesReturn('customerId')])
 
   const customerMustPay = useMemo(() => {
-    if (getValuesReturn('discount')) {
-      if (getValuesReturn('discountType') === EDiscountType.MONEY) {
-        return totalPrice > Number(getValuesReturn('discount'))
-          ? Math.round(totalPrice - Number(getValuesReturn('discount')))
+    if (getValuesReturn("discount")) {
+      if (getValuesReturn("discountType") === EDiscountType.MONEY) {
+        return totalPrice > Number(getValuesReturn("discount"))
+          ? Math.round(totalPrice - Number(getValuesReturn("discount")))
           : 0;
       }
 
-      if (getValuesReturn('discountType') === EDiscountType.PERCENT) {
+      if (getValuesReturn("discountType") === EDiscountType.PERCENT) {
         const discountValue =
-          (totalPrice * Number(getValuesReturn('discount'))) / 100;
-        return totalPrice > discountValue ? Math.round(totalPrice - discountValue) : 0;
+          (totalPrice * Number(getValuesReturn("discount"))) / 100;
+        return totalPrice > discountValue
+          ? Math.round(totalPrice - discountValue)
+          : 0;
       }
     }
 
     return totalPrice;
-  }, [totalPrice, getValuesReturn('discount'), getValuesReturn('discountType')]);
+  }, [
+    totalPrice,
+    getValuesReturn("discount"),
+    getValuesReturn("discountType"),
+  ]);
 
   const returnPrice = useMemo(() => {
-    if (getValuesReturn('cashOfCustomer')) {
-      return Number(getValuesReturn('cashOfCustomer')) - customerMustPay;
+    if (getValuesReturn("cashOfCustomer")) {
+      return Number(getValuesReturn("cashOfCustomer")) - customerMustPay;
     }
 
     return 0;
-  }, [customerMustPay, getValuesReturn('cashOfCustomer')]);
+  }, [customerMustPay, getValuesReturn("cashOfCustomer")]);
 
-  console.log("products", getValuesReturn('products'))
+  console.log("products", getValuesReturn("products"));
 
   const { mutate: mutateCreateOrder, isLoading: isLoadingCreateOrder } =
     useMutation(
       () => {
-        const formatProducts = getValuesReturn('products')?.map(
+        const formatProducts = getValuesReturn("products")?.map(
           ({ isBatchExpireControl, ...product }) => ({
             ...product,
             batches: product.batches?.map((batch) => ({
@@ -188,7 +212,7 @@ export function RightContentReturn({ useForm, customerId, orderDetail }: { useFo
 
         return createOrderReturn({
           ...getValuesReturn(),
-          ...(getValuesReturn('customerId') === -1 && { customerId: null }),
+          ...(getValuesReturn("customerId") === -1 && { customerId: null }),
           products: formatProducts,
           orderId: orderDetail?.order?.id,
           branchId,
@@ -196,7 +220,7 @@ export function RightContentReturn({ useForm, customerId, orderDetail }: { useFo
       },
       {
         onSuccess: async (res) => {
-          await queryClient.invalidateQueries(['LIST_SALE_PRODUCT']);
+          await queryClient.invalidateQueries(["LIST_SALE_PRODUCT"]);
           if (res.data?.saleReturn) {
             setSaleInvoice(res.data?.saleReturn);
           }
@@ -212,7 +236,7 @@ export function RightContentReturn({ useForm, customerId, orderDetail }: { useFo
 
           setIsOpenOrderSuccessModal(true);
           resetReturn();
-          setValueReturn('userId', profile.id, { shouldValidate: true });
+          setValueReturn("userId", profile.id, { shouldValidate: true });
         },
         onError: (err: any) => {
           message.error(err?.message);
@@ -224,7 +248,6 @@ export function RightContentReturn({ useForm, customerId, orderDetail }: { useFo
     mutateCreateOrder();
   };
 
-
   return (
     <RightContentStyled className="flex w-[360px] min-w-[360px] flex-col">
       <div className="px-6 pt-5 ">
@@ -234,12 +257,12 @@ export function RightContentReturn({ useForm, customerId, orderDetail }: { useFo
             label: item.fullName,
           }))}
           showSearch={true}
-          value={getValuesReturn('userId')}
+          value={getValuesReturn("userId")}
           onSearch={debounce((value) => {
             setSearchEmployeeText(value);
           }, 300)}
           onChange={(value) => {
-            setValueReturn('userId', value, { shouldValidate: true });
+            setValueReturn("userId", value, { shouldValidate: true });
           }}
           wrapClassName=""
           className="h-[44px]"
@@ -253,15 +276,15 @@ export function RightContentReturn({ useForm, customerId, orderDetail }: { useFo
             ...(customers?.data?.items?.map((item) => ({
               value: item.id,
               label: item.fullName + " - " + item.phone,
-            })) || [])
+            })) || []),
           ]}
-          value={getValuesReturn('customerId')}
+          value={getValuesReturn("customerId")}
           onSearch={debounce((value) => {
             setSearchCustomerText(value);
           }, 300)}
           showSearch={true}
           onChange={(value) => {
-            setValueReturn('customerId', value, { shouldValidate: true });
+            setValueReturn("customerId", value, { shouldValidate: true });
           }}
           wrapClassName="mt-3"
           className="h-[44px]"
@@ -274,7 +297,7 @@ export function RightContentReturn({ useForm, customerId, orderDetail }: { useFo
 
       <div className="my-6 h-[1px] w-full bg-[#E4E4E4]"></div>
       <div className="flex grow flex-col px-6">
-        <div className='text-[#3E7BFA] text-xl mb-5'>Trả hàng</div>
+        <div className="text-[#3E7BFA] text-xl mb-5">Trả hàng</div>
         <div className="grow">
           <div className="mb-5 border-b-2 border-dashed border-[#E4E4E4]">
             <div className="mb-3 flex justify-between">
@@ -310,11 +333,11 @@ export function RightContentReturn({ useForm, customerId, orderDetail }: { useFo
                 <CustomInput
                   bordered={false}
                   className="h-6 pr-0 text-end text-lg"
-                  value={getValuesReturn('discount') ?? 0}
-                  type='number'
+                  value={getValuesReturn("discount") ?? 0}
+                  type="number"
                   onChange={(value) => {
                     // nothing
-                    setValueReturn('discount', value, { shouldValidate: true });
+                    setValueReturn("discount", value, { shouldValidate: true });
                   }}
                 />
               </div>
@@ -327,11 +350,13 @@ export function RightContentReturn({ useForm, customerId, orderDetail }: { useFo
                 <CustomInput
                   bordered={false}
                   className="h-6 pr-0 text-end text-lg"
-                  value={getValuesReturn('returnFee') ?? 0}
-                  type='number'
+                  value={getValuesReturn("returnFee") ?? 0}
+                  type="number"
                   onChange={(value) => {
                     // nothing
-                    setValueReturn('returnFee', value, { shouldValidate: true });
+                    setValueReturn("returnFee", value, {
+                      shouldValidate: true,
+                    });
                   }}
                 />
               </div>
@@ -348,26 +373,26 @@ export function RightContentReturn({ useForm, customerId, orderDetail }: { useFo
               </div>
             </div>
             <div className="flex flex-col mb-5">
-              <div className='flex justify-between'>
+              <div className="flex justify-between">
                 <div className="text-lg leading-normal text-[#828487]">
-                  Tiền trả khách <span className='text-red-500'>*</span>
+                  Tiền trả khách <span className="text-red-500">*</span>
                 </div>
                 <div className="w-[160px]">
                   <CustomInput
                     bordered={false}
                     className="h-6 pr-0 text-end text-lg"
                     onChange={(value) => {
-                      setValueReturn('paid', value, {
+                      setValueReturn("paid", value, {
                         shouldValidate: true,
                       });
                     }}
                     type="number"
                     hideArrow={true}
-                    value={getValuesReturn('paid')}
+                    value={getValuesReturn("paid")}
                   />
                 </div>
               </div>
-              <div className='text-right'>
+              <div className="text-right">
                 <InputError error={errorsReturn.paid?.message} />
               </div>
             </div>
@@ -377,21 +402,25 @@ export function RightContentReturn({ useForm, customerId, orderDetail }: { useFo
                   Phương thức thanh toán
                 </div>
                 <div className="text-lg leading-normal text-[#19191C]">
-                  {getValuesReturn('paymentType') === EPaymentMethod.CASH ? "Tiền mặt" : getValuesReturn('paymentType') === EPaymentMethod.BANKING ? "Chuyển khoản" : "Khách nợ"}
+                  {getValuesReturn("paymentType") === EPaymentMethod.CASH
+                    ? "Tiền mặt"
+                    : getValuesReturn("paymentType") === EPaymentMethod.BANKING
+                    ? "Chuyển khoản"
+                    : "Khách nợ"}
                 </div>
               </div>
 
               <div className="flex justify-between">
                 <div
-                  className={cx(' rounded-[18px] w-[96px] h-[99px]', {
-                    'border-2 border-red-main':
-                      getValuesReturn('paymentType') === EPaymentMethod.CASH,
+                  className={cx(" rounded-[18px] w-[96px] h-[99px]", {
+                    "border-2 border-red-main":
+                      getValuesReturn("paymentType") === EPaymentMethod.CASH,
                   })}
                 >
                   <Image
                     src={Cash}
                     onClick={() =>
-                      setValueReturn('paymentType', EPaymentMethod.CASH, {
+                      setValueReturn("paymentType", EPaymentMethod.CASH, {
                         shouldValidate: true,
                       })
                     }
@@ -401,15 +430,15 @@ export function RightContentReturn({ useForm, customerId, orderDetail }: { useFo
                 </div>
 
                 <div
-                  className={cx(' rounded-[18px] w-[96px] h-[99px]', {
-                    'border-2 border-red-main':
-                      getValuesReturn('paymentType') === EPaymentMethod.BANKING,
+                  className={cx(" rounded-[18px] w-[96px] h-[99px]", {
+                    "border-2 border-red-main":
+                      getValuesReturn("paymentType") === EPaymentMethod.BANKING,
                   })}
                 >
                   <Image
                     src={Bank}
                     onClick={() =>
-                      setValueReturn('paymentType', EPaymentMethod.BANKING, {
+                      setValueReturn("paymentType", EPaymentMethod.BANKING, {
                         shouldValidate: true,
                       })
                     }
@@ -419,15 +448,15 @@ export function RightContentReturn({ useForm, customerId, orderDetail }: { useFo
                 </div>
 
                 <div
-                  className={cx(' rounded-[18px] w-[96px] h-[99px]', {
-                    'border-2 border-red-main':
-                      getValuesReturn('paymentType') === EPaymentMethod.DEBT,
+                  className={cx(" rounded-[18px] w-[96px] h-[99px]", {
+                    "border-2 border-red-main":
+                      getValuesReturn("paymentType") === EPaymentMethod.DEBT,
                   })}
                 >
                   <Image
                     src={Debt}
                     onClick={() =>
-                      setValueReturn('paymentType', EPaymentMethod.DEBT, {
+                      setValueReturn("paymentType", EPaymentMethod.DEBT, {
                         shouldValidate: true,
                       })
                     }
@@ -447,9 +476,9 @@ export function RightContentReturn({ useForm, customerId, orderDetail }: { useFo
             placeholder="Thêm ghi chú"
             className="text-sm"
             onChange={(value) =>
-              setValueReturn('description', value, { shouldValidate: true })
+              setValueReturn("description", value, { shouldValidate: true })
             }
-            value={getValuesReturn('description')}
+            value={getValuesReturn("description")}
           />
         </div>
       </div>
@@ -473,13 +502,15 @@ export function RightContentReturn({ useForm, customerId, orderDetail }: { useFo
                 })),
             }));
 
-            setValueReturn('products', formatProducts, { shouldValidate: true });
+            setValueReturn("products", formatProducts, {
+              shouldValidate: true,
+            });
 
             handleSubmitReturn(onSubmit)();
           }}
           className="!h-11"
           disabled={isLoadingCreateOrder || !orderObject[orderActive]?.length}
-          type={!orderObject[orderActive]?.length ? 'disable' : 'danger'}
+          type={!orderObject[orderActive]?.length ? "disable" : "danger"}
           loading={isLoadingCreateOrder}
         >
           <Image src={DolarIcon} alt="" /> Trả hàng

@@ -10,6 +10,7 @@ import { Note } from './Note';
 import { ReceiveAddress } from './ReceiveAddress';
 import { ReturnHistory } from './ReturnHistory';
 import { PointHistory } from './PointHistory';
+import TripHistory from './TripHistory';
 
 const RowDetail = ({ record, branchId }: { record: ICustomer, branchId: number }) => {
   const [select, setSelect] = useState(0);
@@ -22,6 +23,7 @@ const RowDetail = ({ record, branchId }: { record: ICustomer, branchId: number }
     // 'Lịch sử trả hàng',
     'Lịch sử tích điểm',
     'Ghi chú',
+    'Lịch sử ghé thăm'
   ];
 
   return (
@@ -56,6 +58,7 @@ const RowDetail = ({ record, branchId }: { record: ICustomer, branchId: number }
       {/* {select === 4 && <ReturnHistory record={record} />} */}
       {/* {select === 5 && <CollectPointHistory record={record} />} */}
       {select === 4 && <Note record={record} />}
+      {select === 5 && <TripHistory id={record?.id} />}
     </div>
   );
 };

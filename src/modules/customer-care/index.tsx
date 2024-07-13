@@ -1,13 +1,15 @@
 import classNames from 'classnames';
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import All from './All';
 import { CustomButton } from '@/components/CustomButton';
 import Image from 'next/image';
 import PlusIcon from '@/assets/plusWhiteIcon.svg';
 import { useQuery } from '@tanstack/react-query';
 import { getAllTrip } from '@/api/trip.service';
+import { useRouter } from 'next/router';
 
 function ScheduleList() {
+  const router = useRouter();
   const [select, setSelect] = useState(0);
   const menu = ['Tất cả', 'Đang tiến hành', 'Đã hoàn thành'];
 
@@ -15,8 +17,15 @@ function ScheduleList() {
     page: 1,
     limit: 10,
     keyword: '',
-    // status: ''
+    status: '',
   });
+
+  useEffect(() => {
+    setFormFilter((preValue) => ({
+      ...preValue,
+      status: menu[select] === 'Tất cả' ? '' : menu[select] === 'Đang tiến hành' ? 'pending' : 'done',
+    }));
+  }, [select]);
 
   const { data: trips, isLoading } = useQuery(
     ["TRIPS", JSON.stringify(formFilter)],
@@ -26,7 +35,7 @@ function ScheduleList() {
   return (
     <div>
       <div className='flex justify-end mt-3'>
-        <CustomButton type='danger' prefixIcon={<Image src={PlusIcon} />}>Thêm lịch trình tiếp thị</CustomButton>
+        <CustomButton onClick={() => router.push('/customer-care/create-schedule')} type='danger' prefixIcon={<Image src={PlusIcon} />}>Thêm lịch trình tiếp thị</CustomButton>
       </div>
       <div
         className="flex flex-col gap-5 bg-white px-4 pt-4 pb-5 mt-3"
@@ -51,7 +60,9 @@ function ScheduleList() {
           </div>
           <div className="h-[1px] w-full bg-[#D64457]" />
         </div>
-        {select === 0 && <All trips={trips} />}
+        {select === 0 && <All trips={trips} formFilter={formFilter} setFormFilter={setFormFilter} isLoading={isLoading} />}
+        {select === 1 && <All trips={trips} formFilter={formFilter} setFormFilter={setFormFilter} isLoading={isLoading} />}
+        {select === 2 && <All trips={trips} formFilter={formFilter} setFormFilter={setFormFilter} isLoading={isLoading} />}
       </div>
     </div>
 

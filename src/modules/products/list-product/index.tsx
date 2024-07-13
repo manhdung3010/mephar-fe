@@ -1,21 +1,21 @@
-import { useQuery } from '@tanstack/react-query';
-import type { ColumnsType } from 'antd/es/table';
-import { debounce } from 'lodash';
-import { useEffect, useState } from 'react';
-import { useRecoilValue } from 'recoil';
+import { useQuery } from "@tanstack/react-query";
+import type { ColumnsType } from "antd/es/table";
+import { debounce } from "lodash";
+import { useEffect, useState } from "react";
+import { useRecoilValue } from "recoil";
 
-import { getProduct } from '@/api/product.service';
-import CustomPagination from '@/components/CustomPagination';
-import { EProductType, EProductTypeLabel, getEnumKeyByValue } from '@/enums';
-import { formatMoney, formatNumber } from '@/helpers';
-import { branchState } from '@/recoil/state';
+import { getProduct } from "@/api/product.service";
+import CustomPagination from "@/components/CustomPagination";
+import { EProductType, EProductTypeLabel, getEnumKeyByValue } from "@/enums";
+import { formatMoney, formatNumber } from "@/helpers";
+import { branchState } from "@/recoil/state";
 
-import CustomTable from '../../../components/CustomTable';
-import Header from './Header';
-import ListUnit from './ListUnit';
-import Search from './Search';
-import ProductDetail from './row-detail';
-import type { IProduct } from './types';
+import CustomTable from "../../../components/CustomTable";
+import Header from "./Header";
+import ListUnit from "./ListUnit";
+import Search from "./Search";
+import ProductDetail from "./row-detail";
+import type { IProduct } from "./types";
 
 const ProductList = () => {
   const branchId = useRecoilValue(branchState);
@@ -23,7 +23,7 @@ const ProductList = () => {
   const [formFilter, setFormFilter] = useState({
     page: 1,
     limit: 20,
-    keyword: '',
+    keyword: "",
     type: null,
     status: null,
     inventoryType: null,
@@ -34,7 +34,7 @@ const ProductList = () => {
 
   const { data: products, isLoading } = useQuery(
     [
-      'LIST_PRODUCT',
+      "LIST_PRODUCT",
       formFilter.page,
       formFilter.limit,
       formFilter.keyword,
@@ -51,28 +51,34 @@ const ProductList = () => {
   >({});
 
   useEffect(() => {
-    setSelectedList(products?.data?.items?.map((item) => (
-      {
-        ...item,
-        unitId: item?.productUnit?.find((unit) => unit.isBaseUnit)?.id,
-        unitQuantity: item?.inventory / item?.productUnit?.find((unit) => unit.isBaseUnit)?.exchangeValue,
-        tempPrimePrice: item?.primePrice * item?.productUnit?.find((unit) => unit.isBaseUnit)?.exchangeValue,
-      }))?.sort(function (a, b) {
-        return b.id - a.id;
-      }));
-  }, [formFilter, products?.data?.items])
+    setSelectedList(
+      products?.data?.items
+        ?.map((item) => ({
+          ...item,
+          unitId: item?.productUnit?.find((unit) => unit.isBaseUnit)?.id,
+          unitQuantity:
+            item?.inventory /
+            item?.productUnit?.find((unit) => unit.isBaseUnit)?.exchangeValue,
+          tempPrimePrice:
+            item?.primePrice *
+            item?.productUnit?.find((unit) => unit.isBaseUnit)?.exchangeValue,
+        }))
+        ?.sort(function (a, b) {
+          return b.id - a.id;
+        })
+    );
+  }, [formFilter, products?.data?.items]);
 
   const columns: ColumnsType<IProduct> = [
-
     {
-      title: 'Mã hàng',
-      dataIndex: 'code',
-      key: 'code',
+      title: "Mã hàng",
+      dataIndex: "code",
+      key: "code",
     },
     {
-      title: 'Tên hàng',
-      dataIndex: 'name',
-      key: 'name',
+      title: "Tên hàng",
+      dataIndex: "name",
+      key: "name",
       render: (value, _, index) => (
         <span
           className="cursor-pointer text-[#0070F4]"
@@ -92,47 +98,52 @@ const ProductList = () => {
       ),
     },
     {
-      title: 'Đơn vị',
-      dataIndex: 'productUnit',
-      key: 'productUnit',
-      className: 'unit-col',
+      title: "Đơn vị",
+      dataIndex: "productUnit",
+      key: "productUnit",
+      className: "unit-col",
       render: (data, record) => {
         return (
-          <ListUnit data={data} onChangeUnit={(value) => handleChangeUnitValue(value, record)} record={record} isDetailOpen={true} />
-        )
+          <ListUnit
+            data={data}
+            onChangeUnit={(value) => handleChangeUnitValue(value, record)}
+            record={record}
+            isDetailOpen={true}
+          />
+        );
       },
     },
     {
-      title: 'Nhóm hàng',
-      dataIndex: 'groupProduct',
-      key: 'groupProduct',
+      title: "Nhóm hàng",
+      dataIndex: "groupProduct",
+      key: "groupProduct",
       render: (data) => data?.name,
     },
     {
-      title: 'Tồn kho',
-      dataIndex: 'unitQuantity',
-      key: 'unitQuantity',
+      title: "Tồn kho",
+      dataIndex: "unitQuantity",
+      key: "unitQuantity",
       render: (data) => formatNumber(Math.floor(data)),
     },
     {
-      title: 'Loại hàng',
-      dataIndex: 'type',
-      key: 'type',
+      title: "Loại hàng",
+      dataIndex: "type",
+      key: "type",
       render: (value) =>
         EProductTypeLabel[getEnumKeyByValue(EProductType, value)],
     },
     {
-      title: 'Giá bán',
-      dataIndex: 'price',
-      key: 'price',
+      title: "Giá bán",
+      dataIndex: "price",
+      key: "price",
       render: (value, record) => {
-        return formatMoney(value)
+        return formatMoney(value);
       },
     },
     {
-      title: 'Giá vốn',
-      dataIndex: 'tempPrimePrice',
-      key: 'tempPrimePrice',
+      title: "Giá vốn",
+      dataIndex: "tempPrimePrice",
+      key: "tempPrimePrice",
       render: (value) => formatMoney(value),
     },
   ];
@@ -141,10 +152,23 @@ const ProductList = () => {
     setValueChange(value);
     const filter = selectedList.filter((item) => item?.id !== record.id);
     const newRecord = record?.productUnit?.find((unit) => unit.id === value);
-    setSelectedList([...filter, { ...record, price: newRecord?.price, code: newRecord?.code, barCode: newRecord.barCode, unitId: value, unitQuantity: Number(record?.inventory) / newRecord?.exchangeValue, tempPrimePrice: record?.primePrice * newRecord?.exchangeValue }]?.sort(function (a, b) {
-      return b.id - a.id;
-    }));
-  }
+    setSelectedList(
+      [
+        ...filter,
+        {
+          ...record,
+          price: newRecord?.price,
+          code: newRecord?.code,
+          barCode: newRecord.barCode,
+          unitId: value,
+          unitQuantity: Number(record?.inventory) / newRecord?.exchangeValue,
+          tempPrimePrice: record?.primePrice * newRecord?.exchangeValue,
+        },
+      ]?.sort(function (a, b) {
+        return b.id - a.id;
+      })
+    );
+  };
 
   return (
     <div>
@@ -162,7 +186,7 @@ const ProductList = () => {
       />
       <CustomTable
         rowSelection={{
-          type: 'checkbox',
+          type: "checkbox",
         }}
         dataSource={selectedList?.map((item, index) => ({
           ...item,
@@ -172,26 +196,40 @@ const ProductList = () => {
         loading={isLoading}
         onRow={(record, rowIndex) => {
           return {
-            onClick: event => {
+            onClick: (event) => {
               // Check if the click came from the action column
-              if ((event.target as Element).closest('.ant-table-cell.unit-col') || (event.target as Element).closest('.rc-virtual-list-holder-inner')) {
+              if (
+                (event.target as Element).closest(".ant-table-cell.unit-col") ||
+                (event.target as Element).closest(
+                  ".rc-virtual-list-holder-inner"
+                )
+              ) {
                 return;
               }
               // Toggle expandedRowKeys state here
               if (expandedRowKeys[record.key]) {
-                const { [record.key]: value, ...remainingKeys } = expandedRowKeys;
+                const { [record.key]: value, ...remainingKeys } =
+                  expandedRowKeys;
                 setExpandedRowKeys(remainingKeys);
               } else {
                 setExpandedRowKeys({ [record.key]: true });
               }
-            }
+            },
           };
         }}
         expandable={{
           // eslint-disable-next-line @typescript-eslint/no-shadow
-          expandedRowRender: (record: IProduct) => (
-            <ProductDetail record={record} onChangeUnit={(value) => handleChangeUnitValue(value, record)} branchId={branchId} />
-          ),
+          expandedRowRender: (record: IProduct) => {
+            console.log(123, record);
+
+            return (
+              <ProductDetail
+                record={record}
+                onChangeUnit={(value) => handleChangeUnitValue(value, record)}
+                branchId={branchId}
+              />
+            );
+          },
           expandIcon: () => <></>,
           expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key),
         }}

@@ -3,11 +3,13 @@ import axiosClient from "./index";
 export function getCustomer(params: {
   page: number;
   limit: number;
-  keyword?: string;
+  keyword?: any;
   isDefault?: boolean;
+  status?: string;
 }) {
   return axiosClient.get("customer", { params });
 }
+
 export function getCustomerDebt(
   params: {
     page: number;

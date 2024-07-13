@@ -554,20 +554,25 @@ export function DeliveryCoupon() {
               pagination={false}
               expandable={{
                 defaultExpandAllRows: true,
-                expandedRowRender: (record: any) => (
-                  <>
-                    {moveDetail
-                      ? record?.toBatches?.map((batch) => (
-                          <div className="bg-[#FFF3E6] px-6 py-2 ">
-                            <div className="flex items-center gap-x-3">
-                              <div
-                                key={batch.id}
-                                className="flex items-center rounded bg-red-main py-1 px-2 text-white"
-                              >
-                                <span className="mr-2">
-                                  {batch.batch.name} - {batch.batch.expiryDate}
-                                </span>{" "}
-                                {/* <Image
+                expandedRowRender: (record: any) => {
+                  console.log(4434, record);
+
+                  return (
+                    <>
+                      {moveDetail
+                        ? record?.toBatches?.map((batch, index) => (
+                            <div className="bg-[#FFF3E6] px-6 py-2 ">
+                              <div className="flex items-center gap-x-3">
+                                <div
+                                  key={batch.id}
+                                  className="flex items-center rounded bg-red-main py-1 px-2 text-white"
+                                >
+                                  <span className="mr-2">
+                                    {batch.batch.name} -{" "}
+                                    {batch.batch.expiryDate} - SL:{" "}
+                                    {record.fromBatches[index].quantity}
+                                  </span>{" "}
+                                  {/* <Image
                         className=" cursor-pointer"
                         src={CloseIcon}
                         onClick={() => {
@@ -578,60 +583,61 @@ export function DeliveryCoupon() {
                         }}
                         alt=""
                       /> */}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        ))
-                      : checkDisplayListBatch(record) && (
-                          <div className="bg-[#FFF3E6] px-6 py-2 ">
-                            <div className="flex items-center gap-x-3">
-                              <div
-                                className="ml-1 cursor-pointer font-medium text-[#0070F4]"
-                                onClick={() => {
-                                  setProductKeyAddBatch(record.productKey);
-                                  setOpenListBatchModal(true);
-                                }}
-                              >
-                                Chọn lô
-                              </div>
+                          ))
+                        : checkDisplayListBatch(record) && (
+                            <div className="bg-[#FFF3E6] px-6 py-2 ">
+                              <div className="flex items-center gap-x-3">
+                                <div
+                                  className="ml-1 cursor-pointer font-medium text-[#0070F4]"
+                                  onClick={() => {
+                                    setProductKeyAddBatch(record.productKey);
+                                    setOpenListBatchModal(true);
+                                  }}
+                                >
+                                  Chọn lô
+                                </div>
 
-                              {record.batches?.map(
-                                (batch) =>
-                                  batch.isSelected && (
-                                    <div
-                                      key={batch.id}
-                                      className="flex items-center rounded bg-red-main py-1 px-2 text-white"
-                                    >
-                                      <span className="mr-2">
-                                        {batch.name} - {batch.expiryDate} - SL:{" "}
-                                        {batch.quantity}
-                                      </span>{" "}
-                                      <Image
-                                        className=" cursor-pointer"
-                                        src={CloseIcon}
-                                        onClick={() => {
-                                          handleRemoveBatch(
-                                            record.productKey,
-                                            batch.id
-                                          );
-                                        }}
-                                        alt=""
-                                      />
-                                    </div>
-                                  )
-                              )}
+                                {record.batches?.map(
+                                  (batch) =>
+                                    batch.isSelected && (
+                                      <div
+                                        key={batch.id}
+                                        className="flex items-center rounded bg-red-main py-1 px-2 text-white"
+                                      >
+                                        <span className="mr-2">
+                                          {batch.name} - {batch.expiryDate} -
+                                          SL: {batch.quantity}
+                                        </span>{" "}
+                                        <Image
+                                          className=" cursor-pointer"
+                                          src={CloseIcon}
+                                          onClick={() => {
+                                            handleRemoveBatch(
+                                              record.productKey,
+                                              batch.id
+                                            );
+                                          }}
+                                          alt=""
+                                        />
+                                      </div>
+                                    )
+                                )}
+                              </div>
+                              <InputError
+                                error={
+                                  errors?.products &&
+                                  errors?.products[Number(record.key) - 1]
+                                    ?.batches?.message
+                                }
+                              />
                             </div>
-                            <InputError
-                              error={
-                                errors?.products &&
-                                errors?.products[Number(record.key) - 1]
-                                  ?.batches?.message
-                              }
-                            />
-                          </div>
-                        )}
-                  </>
-                ),
+                          )}
+                    </>
+                  );
+                },
                 expandIcon: () => <></>,
                 expandedRowKeys: Object.keys(expandedRowKeys).map(
                   (key) => +key + 1
