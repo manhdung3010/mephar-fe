@@ -328,26 +328,36 @@ export function DeliveryCoupon() {
       title: `SL ${moveDetail ? "nhận" : "chuyển"}`,
       dataIndex: "quantity",
       key: "quantity",
-      render: (quantity, { productKey }) => (
-        <CustomInput
-          wrapClassName="!w-[110px]"
-          className="!h-6 !w-[80px] text-center"
-          hasMinus={true}
-          hasPlus={true}
-          defaultValue={quantity}
-          value={quantity}
-          type="number"
-          onChange={(value) =>
-            onChangeValueProduct(productKey, "quantity", value)
-          }
-          onMinus={(value) =>
-            onChangeValueProduct(productKey, "quantity", value)
-          }
-          onPlus={(value) =>
-            onChangeValueProduct(productKey, "quantity", value)
-          }
-        />
-      ),
+      render: (quantity, totalQuantity, { productKey }) => {
+        return (
+          <CustomInput
+            wrapClassName="!w-[110px]"
+            className="!h-6 !w-[80px] text-center"
+            hasMinus={true}
+            hasPlus={true}
+            defaultValue={
+              quantity > totalQuantity.totalQuantity
+                ? totalQuantity.totalQuantity
+                : quantity
+            }
+            value={
+              quantity > totalQuantity.totalQuantity
+                ? totalQuantity.totalQuantity
+                : quantity
+            }
+            type="number"
+            onChange={(value) =>
+              onChangeValueProduct(productKey, "quantity", value)
+            }
+            onMinus={(value) =>
+              onChangeValueProduct(productKey, "quantity", value)
+            }
+            onPlus={(value) =>
+              onChangeValueProduct(productKey, "quantity", value)
+            }
+          />
+        );
+      },
     },
     ...(moveDetail
       ? [
@@ -555,8 +565,6 @@ export function DeliveryCoupon() {
               expandable={{
                 defaultExpandAllRows: true,
                 expandedRowRender: (record: any) => {
-                  console.log(4434, record);
-
                   return (
                     <>
                       {moveDetail

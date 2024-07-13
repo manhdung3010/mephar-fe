@@ -63,7 +63,7 @@ export function Info({ record }: { record: IOrder }) {
     { enabled: !!record?.id }
   );
 
-  console.log(discountDetail);
+  console.log(record);
 
   const {
     mutate: mutateCancelImportProduct,
@@ -140,10 +140,23 @@ export function Info({ record }: { record: IOrder }) {
       render: (value, { quantity }) => formatMoney(+value / quantity),
     },
     {
-      title: "Thành tiền",
+      title: "Giảm giá",
+      dataIndex: "discount",
+      key: "discount",
+      render: (_, { quantity, price, itemPrice }) =>
+        formatMoney(price - itemPrice),
+    },
+    {
+      title: "Giá bán",
       dataIndex: "totalPrice",
       key: "totalPrice",
       render: (_, { quantity, price }) => formatMoney(price),
+    },
+    {
+      title: "Thành tiền",
+      dataIndex: "totalPrice",
+      key: "totalPrice",
+      render: (_, { quantity, price, itemPrice }) => formatMoney(itemPrice),
     },
   ];
 
@@ -340,7 +353,7 @@ export function Info({ record }: { record: IOrder }) {
                   <div className="flex items-center rounded bg-red-main py-1 px-2 text-white">
                     <span className="mr-2">
                       {b.batch?.name} - {formatDate(b?.batch?.expiryDate)} - SL:{" "}
-                      {formatNumber(b?.quantity)}{" "}
+                      {formatNumber(b?.quantity)}
                     </span>
                   </div>
                 ))}

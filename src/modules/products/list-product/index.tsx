@@ -220,8 +220,6 @@ const ProductList = () => {
         expandable={{
           // eslint-disable-next-line @typescript-eslint/no-shadow
           expandedRowRender: (record: IProduct) => {
-            console.log(123, record);
-
             return (
               <ProductDetail
                 record={record}
