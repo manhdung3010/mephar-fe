@@ -5,6 +5,7 @@ export function getCustomer(params: {
   limit: number;
   keyword?: any;
   isDefault?: boolean;
+  status?: string;
 }) {
   return axiosClient.get("customer", { params });
 }
