@@ -43,3 +43,8 @@ export function getGeo(page: number, limit: number, payload: any) {
     payload
   );
 }
+
+// lịch sử ghé thăm của khách hàng
+export function getHistoryCustomer(id: string) {
+  return axiosClient.get(`customer/${id}/history-visited`);
+}
