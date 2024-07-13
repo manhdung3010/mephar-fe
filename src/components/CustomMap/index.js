@@ -39,6 +39,9 @@ const CustomMap = forwardRef((props, ref) => {
       bearing: 0, // Set bearing to 0 for no rotation
     });
 
+    // Add navigation control at the top-left position
+    mapRef.current.addControl(new vietmapgl.NavigationControl(), 'bottom-right');
+
     mapRef.current.on('load', () => {
       // Map is fully loaded
       if (fromMarkerRef.current) {
@@ -250,19 +253,6 @@ const CustomMap = forwardRef((props, ref) => {
           },
         },
       });
-      // mapRef.current.addLayer({
-      //   id: "route",
-      //   type: "line",
-      //   source: "route",
-      //   layout: {
-      //     "line-join": "round",
-      //     "line-cap": "round",
-      //   },
-      //   paint: {
-      //     "line-color": "red",
-      //     "line-width": 8,
-      //   },
-      // });
     });
   };
 

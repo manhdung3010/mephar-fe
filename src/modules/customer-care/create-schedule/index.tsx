@@ -356,7 +356,7 @@ function CreateSchedule() {
                                         <div className='flex items-center gap-1 py-2'>
                                           <Image src={MarkIcon} />
                                           <span className='display'>
-                                            {item?.name}
+                                            {item?.display}
                                           </span>
                                         </div>
                                       </Option>
