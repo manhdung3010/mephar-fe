@@ -25,7 +25,19 @@ interface IRecord {
 }
 
 export function Note({ record }: { record: any }) {
-  const [expanded, setExpanded] = useState(false);
+  const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set());
+
+  const toggleExpand = (key: string) => {
+    setExpandedKeys((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(key)) {
+        newSet.delete(key);
+      } else {
+        newSet.add(key);
+      }
+      return newSet;
+    });
+  };
   const [isOpenNoteModal, setIsOpenNoteModal] = useState(false);
   const { data: notes, isLoading } = useQuery(
     ["NOTE_LIST", record?.id],
@@ -41,15 +53,29 @@ export function Note({ record }: { record: any }) {
       dataIndex: "note",
       key: "note",
       render: (value: string, record: IRecord) => {
-        if (!expanded && record.note.length > 60) {
+        const isExpanded = expandedKeys.has(record.note);
+        if (!isExpanded && value.length > 60) {
           return (
             <>
               {value.slice(0, 60)}
               <span
                 style={{ color: "blue", cursor: "pointer" }}
-                onClick={() => setExpanded(true)}
+                onClick={() => toggleExpand(record.note)}
               >
                 ... Xem thêm
+              </span>
+            </>
+          );
+        } else if (isExpanded) {
+          return (
+            <>
+              {value}
+              <span
+                style={{ color: "blue", cursor: "pointer" }}
+                onClick={() => toggleExpand(record.note)}
+              >
+                {" "}
+                Thu gọn
               </span>
             </>
           );

@@ -1,20 +1,20 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { message } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
-import Image from 'next/image';
-import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { message } from "antd";
+import type { ColumnsType } from "antd/es/table";
+import Image from "next/image";
+import { useRouter } from "next/router";
+import { useState } from "react";
 
-import { deleteSampleMedicine } from '@/api/product.service';
-import DeleteRedIcon from '@/assets/deleteRed.svg';
-import EditWhiteIcon from '@/assets/editWhite.svg';
-import ExportFile from '@/assets/exportFileIcon.svg';
-import { CustomButton } from '@/components/CustomButton';
-import { CustomTextarea } from '@/components/CustomInput';
-import DeleteModal from '@/components/CustomModal/ModalDeleteItem';
-import CustomTable from '@/components/CustomTable';
-import { ECommonStatus, ECommonStatusLabel, getEnumKeyByValue } from '@/enums';
-import { formatMoney, formatNumber } from '@/helpers';
+import { deleteSampleMedicine } from "@/api/product.service";
+import DeleteRedIcon from "@/assets/deleteRed.svg";
+import EditWhiteIcon from "@/assets/editWhite.svg";
+import ExportFile from "@/assets/exportFileIcon.svg";
+import { CustomButton } from "@/components/CustomButton";
+import { CustomTextarea } from "@/components/CustomInput";
+import DeleteModal from "@/components/CustomModal/ModalDeleteItem";
+import CustomTable from "@/components/CustomTable";
+import { ECommonStatus, ECommonStatusLabel, getEnumKeyByValue } from "@/enums";
+import { formatMoney, formatNumber } from "@/helpers";
 
 const Info = ({ record }) => {
   const router = useRouter();
@@ -23,12 +23,14 @@ const Info = ({ record }) => {
 
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
 
+  console.log(record);
+
   const {
     mutate: mutateDeleteSampleMedicine,
     isLoading: isLoadingDeleteSampleMedicine,
   } = useMutation(() => deleteSampleMedicine(Number(record.id)), {
     onSuccess: async () => {
-      await queryClient.invalidateQueries(['LIST_SAMPLE_MEDICINE']);
+      await queryClient.invalidateQueries(["LIST_SAMPLE_MEDICINE"]);
       setOpenDeleteModal(false);
     },
     onError: (err: any) => {
@@ -42,50 +44,50 @@ const Info = ({ record }) => {
 
   const columns: ColumnsType<any> = [
     {
-      title: 'STT',
-      dataIndex: 'key',
-      key: 'key',
+      title: "STT",
+      dataIndex: "key",
+      key: "key",
       render: (_, __, index) => index + 1,
     },
     {
-      title: 'Mã hàng',
-      dataIndex: 'code',
-      key: 'code',
+      title: "Mã hàng",
+      dataIndex: "code",
+      key: "code",
       render: (_, { product }) => product?.code,
     },
     {
-      title: 'Tên hàng',
-      dataIndex: 'name',
-      key: 'name',
+      title: "Tên hàng",
+      dataIndex: "name",
+      key: "name",
       render: (_, { product }) => product?.name,
     },
     {
-      title: 'liều dùng',
-      dataIndex: 'dosage',
-      key: 'dosage',
+      title: "liều dùng",
+      dataIndex: "dosage",
+      key: "dosage",
     },
     {
-      title: 'Đơn vị',
-      dataIndex: 'units',
-      key: 'units',
+      title: "Đơn vị",
+      dataIndex: "units",
+      key: "units",
       render: (_, { productUnit }) => productUnit?.unitName,
     },
     {
-      title: 'Số lượng',
-      dataIndex: 'quantity',
-      key: 'quantity',
+      title: "Số lượng",
+      dataIndex: "quantity",
+      key: "quantity",
       render: (quantity) => formatNumber(quantity),
     },
     {
-      title: 'Giá bán',
-      dataIndex: 'price',
-      key: 'price',
+      title: "Giá bán",
+      dataIndex: "price",
+      key: "price",
       render: (_, { productUnit }) => formatMoney(productUnit?.price),
     },
     {
-      title: 'Thành tiền',
-      dataIndex: 'price',
-      key: 'price',
+      title: "Thành tiền",
+      dataIndex: "price",
+      key: "price",
       render: (_value, { productUnit, quantity }) =>
         formatMoney(productUnit?.price * quantity),
     },
@@ -116,14 +118,15 @@ const Info = ({ record }) => {
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Trạng thái:</div>
             <div
-              className={`${record.status === ECommonStatus.active
-                ? 'text-[#00B63E]'
-                : 'text-gray-main'
-                }`}
+              className={`${
+                record.status === ECommonStatus.active
+                  ? "text-[#00B63E]"
+                  : "text-gray-main"
+              }`}
             >
               {
                 ECommonStatusLabel[
-                getEnumKeyByValue(ECommonStatus, record.status)
+                  getEnumKeyByValue(ECommonStatus, record.status)
                 ]
               }
             </div>

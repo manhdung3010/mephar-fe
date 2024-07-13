@@ -1,37 +1,37 @@
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { message } from 'antd';
-import { debounce } from 'lodash';
-import Image from 'next/image';
-import { useRouter } from 'next/router';
-import { useEffect, useMemo, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { useRecoilValue } from 'recoil';
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { message } from "antd";
+import { debounce } from "lodash";
+import Image from "next/image";
+import { useRouter } from "next/router";
+import { useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useRecoilValue } from "recoil";
 
-import { getCountries } from '@/api/address.service';
+import { getCountries } from "@/api/address.service";
 import {
   createProduct,
   getManufacture,
   getProductDetail,
   updateProduct,
-} from '@/api/product.service';
-import ArrowDownIcon from '@/assets/arrowDownGray.svg';
-import PlusCircleIcon from '@/assets/plus-circle.svg';
-import { CustomButton } from '@/components/CustomButton';
-import { CustomInput } from '@/components/CustomInput';
-import { CustomSelect } from '@/components/CustomSelect';
-import Tab from '@/components/CustomTab';
-import { CustomUpload } from '@/components/CustomUpload';
-import NormalUpload from '@/components/CustomUpload/NormalUpload';
-import { EProductStatus, EProductType } from '@/enums';
-import { branchState, profileState } from '@/recoil/state';
+} from "@/api/product.service";
+import ArrowDownIcon from "@/assets/arrowDownGray.svg";
+import PlusCircleIcon from "@/assets/plus-circle.svg";
+import { CustomButton } from "@/components/CustomButton";
+import { CustomInput } from "@/components/CustomInput";
+import { CustomSelect } from "@/components/CustomSelect";
+import Tab from "@/components/CustomTab";
+import { CustomUpload } from "@/components/CustomUpload";
+import NormalUpload from "@/components/CustomUpload/NormalUpload";
+import { EProductStatus, EProductType } from "@/enums";
+import { branchState, profileState } from "@/recoil/state";
 
-import { AddManufactureModal } from '../components/AddManufacture';
-import Detail from './Detail';
-import Info from './Info';
-import { schema } from './schema';
-import { hasPermission } from '@/helpers';
-import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
+import { AddManufactureModal } from "../components/AddManufacture";
+import Detail from "./Detail";
+import Info from "./Info";
+import { schema } from "./schema";
+import { hasPermission } from "@/helpers";
+import { RoleAction, RoleModel } from "@/modules/settings/role/role.enum";
 
 const AddMedicine = ({
   productId,
@@ -54,7 +54,7 @@ const AddMedicine = ({
     formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
-    mode: 'onChange',
+    mode: "onChange",
     defaultValues: {
       status: EProductStatus.active,
       type: EProductType.MEDICINE,
@@ -73,25 +73,31 @@ const AddMedicine = ({
     useState<any>();
 
   const { data: manufactures } = useQuery(
-    ['MANUFACTURE', manufactureKeyword],
+    ["MANUFACTURE", manufactureKeyword],
     () => getManufacture({ page: 1, limit: 20, keyword: manufactureKeyword })
   );
 
-  const { data: countries } = useQuery(['COUNTRIES', countryKeyword], () =>
+  const { data: countries } = useQuery(["COUNTRIES", countryKeyword], () =>
     getCountries({ page: 1, limit: 20, keyword: countryKeyword })
   );
 
   const { data: productDetail } = useQuery(
-    ['DETAIL_PRODUCT', productId],
+    ["DETAIL_PRODUCT", productId],
     () => getProductDetail(Number(productId)),
     { enabled: !!productId }
   );
 
   useEffect(() => {
     if (profile?.role?.permissions) {
-      if (!hasPermission(profile?.role?.permissions, RoleModel.list_product, RoleAction.create)) {
-        message.error('Bạn không có quyền truy cập vào trang này');
-        router.push('/products/list');
+      if (
+        !hasPermission(
+          profile?.role?.permissions,
+          RoleModel.list_product,
+          RoleAction.create
+        )
+      ) {
+        message.error("Bạn không có quyền truy cập vào trang này");
+        router.push("/products/list");
       }
     }
   }, [profile?.role?.permissions]);
@@ -101,7 +107,7 @@ const AddMedicine = ({
       const record = JSON.parse(selectedMedicineCategory);
 
       Object.keys(schema.fields).forEach((key: any) => {
-        if (![undefined, null].includes(record[key]) && key !== 'type') {
+        if (![undefined, null].includes(record[key]) && key !== "type") {
           if (key !== "code") {
             setValue(key, record[key], {
               shouldValidate: true,
@@ -113,9 +119,11 @@ const AddMedicine = ({
       setManufactureKeyword(record?.manufacture?.name);
       setCountryKeyword(record?.country?.name);
 
-      setValue('baseUnit', record?.unit?.name, {
-        shouldValidate: true,
-      });
+      if (!isCopy) {
+        setValue("baseUnit", record?.unit?.name, {
+          shouldValidate: true,
+        });
+      }
     }
   }, [selectedMedicineCategory]);
 
@@ -124,15 +132,17 @@ const AddMedicine = ({
       Object.keys(schema.fields).forEach((key: any) => {
         if (
           ![undefined, null].includes(productDetail.data[key]) &&
-          key !== 'productUnits'
+          key !== "productUnits"
         ) {
-          if (isCopy && ['code', 'barCode'].includes(key)) {
+          if (isCopy && ["code", "barCode"].includes(key)) {
             // nothing
           } else {
             setValue(key, productDetail.data[key], {
               shouldValidate: true,
             });
-            setValue('point', productDetail.data?.productUnit[0]?.point, { shouldValidate: true })
+            setValue("point", productDetail.data?.productUnit[0]?.point, {
+              shouldValidate: true,
+            });
           }
         }
       });
@@ -144,7 +154,7 @@ const AddMedicine = ({
       setManufactureKeyword(productDetail?.data?.productManufacture?.name);
       setCountryKeyword(productDetail?.data?.country?.name);
 
-      setValue('productUnits', productUnits, { shouldValidate: true });
+      setValue("productUnits", productUnits, { shouldValidate: true });
     }
   }, [productDetail]);
 
@@ -153,23 +163,25 @@ const AddMedicine = ({
       () => {
         const payload: any = {
           ...Object.fromEntries(
-            Object.entries(getValues()).filter(([key]) => key !== 'point')
+            Object.entries(getValues()).filter(([key]) => key !== "point")
           ),
           branchId,
-          drugCode: selectedMedicineCategory ? JSON.parse(selectedMedicineCategory)?.code : productDetail?.data?.drugCode,
+          drugCode: selectedMedicineCategory
+            ? JSON.parse(selectedMedicineCategory)?.code
+            : productDetail?.data?.drugCode,
           productUnits: [
-            ...(getValues('productUnits') || []),
+            ...(getValues("productUnits") || []),
             {
               id: productDetail?.data?.productUnit?.find(
                 (unit) => unit.isBaseUnit
               )?.id,
-              unitName: getValues('baseUnit'),
-              code: '',
-              price: getValues('price'),
-              barCode: '',
-              point: getValues('point'),
+              unitName: getValues("baseUnit"),
+              code: "",
+              price: getValues("price"),
+              barCode: "",
+              point: getValues("point"),
               exchangeValue: 1,
-              isDirectSale: getValues('isDirectSale'),
+              isDirectSale: getValues("isDirectSale"),
               isBaseUnit: true,
             },
           ],
@@ -182,10 +194,10 @@ const AddMedicine = ({
       },
       {
         onSuccess: async () => {
-          await queryClient.invalidateQueries(['LIST_PRODUCT']);
+          await queryClient.invalidateQueries(["LIST_PRODUCT"]);
           reset();
 
-          router.push('/products/list');
+          router.push("/products/list");
         },
         onError: (err: any) => {
           message.error(err?.message);
@@ -198,9 +210,9 @@ const AddMedicine = ({
   };
 
   const title = useMemo(() => {
-    if (isCopy) return 'Sao chép hàng hóa';
+    if (isCopy) return "Sao chép hàng hóa";
 
-    return productDetail ? 'Cập nhật thuốc' : 'Thêm mới thuốc';
+    return productDetail ? "Cập nhật thuốc" : "Thêm mới thuốc";
   }, [productDetail, isCopy]);
 
   return (
@@ -210,7 +222,7 @@ const AddMedicine = ({
         <div className="flex gap-4">
           <CustomButton
             outline={true}
-            onClick={() => router.push('/products/list')}
+            onClick={() => router.push("/products/list")}
           >
             Hủy bỏ
           </CustomButton>
@@ -220,16 +232,16 @@ const AddMedicine = ({
           <CustomButton
             disabled={isLoadingCreateMedicine}
             onClick={() => {
-              const productUnits = getValues('productUnits')?.map((unit) => {
+              const productUnits = getValues("productUnits")?.map((unit) => {
                 return {
                   ...unit,
                   price: !unit.price
-                    ? Number(unit.exchangeValue) * Number(getValues('price'))
+                    ? Number(unit.exchangeValue) * Number(getValues("price"))
                     : unit.price,
                 };
               });
 
-              setValue('productUnits', productUnits, {
+              setValue("productUnits", productUnits, {
                 shouldValidate: true,
               });
               handleSubmit(onSubmit)();
@@ -244,11 +256,11 @@ const AddMedicine = ({
         <div
           className="h-fit flex-[2] bg-white p-5"
           style={{
-            boxShadow: '0px 8px 13px -3px rgba(0, 0, 0, 0.07)',
+            boxShadow: "0px 8px 13px -3px rgba(0, 0, 0, 0.07)",
           }}
         >
           <Tab
-            menu={['Thông tin', 'Mô tả chi tiết']}
+            menu={["Thông tin", "Mô tả chi tiết"]}
             components={[
               <Info
                 useForm={{
@@ -258,7 +270,10 @@ const AddMedicine = ({
                   setError,
                 }}
                 key="0"
-                selectedMedicineCategory={selectedMedicineCategory && JSON.parse(selectedMedicineCategory)}
+                selectedMedicineCategory={
+                  selectedMedicineCategory &&
+                  JSON.parse(selectedMedicineCategory)
+                }
                 setSelectedMedicineCategory={setSelectedMedicineCategory}
                 groupProductName={productDetail?.data?.groupProduct?.name}
                 dosageName={productDetail?.data?.productDosage?.name}
@@ -281,7 +296,7 @@ const AddMedicine = ({
         <div
           className="flex h-fit flex-1 flex-col gap-5 bg-white p-5"
           style={{
-            boxShadow: '0px 8px 13px -3px rgba(0, 0, 0, 0.07)',
+            boxShadow: "0px 8px 13px -3px rgba(0, 0, 0, 0.07)",
           }}
         >
           <div>
@@ -290,7 +305,7 @@ const AddMedicine = ({
             </div>
             <CustomUpload
               onChangeValue={(value) =>
-                setValue('imageId', value, { shouldValidate: true })
+                setValue("imageId", value, { shouldValidate: true })
               }
               values={[productDetail?.data?.image?.path]}
             >
@@ -303,11 +318,11 @@ const AddMedicine = ({
               className=" h-11"
               placeholder="Nhập số đăng ký"
               onChange={(e) =>
-                setValue('registerNumber', e, {
+                setValue("registerNumber", e, {
                   shouldValidate: true,
                 })
               }
-              value={getValues('registerNumber')}
+              value={getValues("registerNumber")}
               disabled={true}
             />
           </div>
@@ -317,11 +332,11 @@ const AddMedicine = ({
               className=" h-11"
               placeholder="Nhập tên hoạt chất"
               onChange={(e) =>
-                setValue('activeElement', e, {
+                setValue("activeElement", e, {
                   shouldValidate: true,
                 })
               }
-              value={getValues('activeElement')}
+              value={getValues("activeElement")}
               disabled={true}
             />
           </div>
@@ -331,11 +346,11 @@ const AddMedicine = ({
               className=" h-11"
               placeholder="Nhập hàm lượng"
               onChange={(e) =>
-                setValue('content', e, {
+                setValue("content", e, {
                   shouldValidate: true,
                 })
               }
-              value={getValues('content')}
+              value={getValues("content")}
               disabled={true}
             />
           </div>
@@ -347,11 +362,11 @@ const AddMedicine = ({
               className=" h-11"
               placeholder="Quy cách đóng gói"
               onChange={(e) =>
-                setValue('packingSpecification', e, {
+                setValue("packingSpecification", e, {
                   shouldValidate: true,
                 })
               }
-              value={getValues('packingSpecification')}
+              value={getValues("packingSpecification")}
               disabled={true}
             />
           </div>
@@ -359,7 +374,7 @@ const AddMedicine = ({
             <div className="mb-2 font-medium text-[#15171A]">Hãng sản xuất</div>
             <CustomSelect
               onChange={(value) =>
-                setValue('manufactureId', value, { shouldValidate: true })
+                setValue("manufactureId", value, { shouldValidate: true })
               }
               showSearch={true}
               onSearch={debounce((value) => {
@@ -381,7 +396,7 @@ const AddMedicine = ({
                   />
                 </div>
               }
-              value={getValues('manufactureId')}
+              value={getValues("manufactureId")}
               disabled={true}
             />
           </div>
@@ -389,7 +404,7 @@ const AddMedicine = ({
             <div className="mb-2 font-medium text-[#15171A]">Nước sản xuất</div>
             <CustomSelect
               onChange={(value) =>
-                setValue('countryId', value, { shouldValidate: true })
+                setValue("countryId", value, { shouldValidate: true })
               }
               options={countries?.data?.items?.map((item) => ({
                 value: item.id,
@@ -401,7 +416,7 @@ const AddMedicine = ({
               }, 300)}
               className="h-11 !rounded"
               placeholder="Nhập tên nước"
-              value={getValues('countryId')}
+              value={getValues("countryId")}
               disabled={true}
             />
           </div>
