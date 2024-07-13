@@ -177,7 +177,7 @@ export const ProductDiscountProduct = ({
             <div key={index} className="flex items-baseline gap-2">
               <div className="flex flex-[3] flex-col px-4">
                 <div className='w-full flex items-baseline gap-x-2'>
-                  <div className='w-24'>
+                  <div className='w-52'>
                     <CustomInput
                       className="mt-0 h-10"
                       value={row?.condition?.product?.from}
@@ -207,7 +207,7 @@ export const ProductDiscountProduct = ({
                         }}
                         loading={isLoadingProduct}
                         defaultValue={row?.condition?.productUnitId}
-                        value={row?.condition?.productUnitId}
+                        value={isProduct ? row?.condition?.productUnitId : row?.condition?.groupId}
                         notFoundContent={isLoadingProduct ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
                         size='large'
                       >

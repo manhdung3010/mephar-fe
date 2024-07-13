@@ -159,7 +159,7 @@ export const ProductGiftPoint = ({
             <div className="flex items-baseline gap-2">
               <div className="flex flex-[3] flex-col px-4">
                 <div className='w-full flex items-baseline gap-x-2'>
-                  <div className='w-24'>
+                  <div className='w-40'>
                     <CustomInput
                       className="mt-0 h-10"
                       value={row?.condition?.product?.from}

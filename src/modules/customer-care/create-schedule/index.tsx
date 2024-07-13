@@ -101,7 +101,7 @@ function CreateSchedule() {
       setStartAddress(tripDetail?.data?.startAddress);
       setValue('lat', tripDetail?.data?.lat, { shouldValidate: true });
       setValue('lng', tripDetail?.data?.lng, { shouldValidate: true });
-      const customers = tripDetail?.data?.tripCustomer?.map((item) => ({ id: item?.customerId, address: item?.address, lat: item?.lat, lng: item?.lng }));
+      const customers = tripDetail?.data?.tripCustomer?.map((item) => ({ id: item?.customerId, address: item?.address, lat: item?.lat, lng: item?.lng, status: item?.status }));
       setValue('listCustomer', customers, { shouldValidate: true });
       tripDetail?.data?.tripCustomer?.forEach((item, index) => {
         handleAddMarker(+item?.lng, +item?.lat, item?.customer, item?.stt)
@@ -269,6 +269,7 @@ function CreateSchedule() {
                                   <Select
                                     placeholder="Chọn khách hàng"
                                     className="h-11 !rounded w-full"
+                                    disabled={row?.status === 'visited'}
                                     onChange={(value) => {
                                       const customer = customers?.data?.items?.find((item) => item?.id === value);
                                       const listCustomer = getValues('listCustomer');
@@ -330,6 +331,7 @@ function CreateSchedule() {
                                   <Select
                                     placeholder="Địa chỉ khách hàng"
                                     className="h-11 !rounded w-full"
+                                    disabled={row?.status === 'visited'}
                                     onChange={async (value) => {
                                       // setRefId(value);
                                       const res = await getLatLng({ refId: value });
@@ -365,16 +367,21 @@ function CreateSchedule() {
                                 </div>
                                 <InputError error={errors.listCustomer?.[index]?.message} />
                               </div>
-                              <div className='cursor-pointer w-5 flex-shrink-0'>
-                                <Image src={DeleteIcon} onClick={() => {
-                                  const listCustomer = getValues('listCustomer')
-                                  listCustomer.splice(index, 1)
-                                  setValue('listCustomer', listCustomer, { shouldValidate: true })
-                                  const customer = customers?.data?.items?.find((item) => item?.id === row?.id);
-                                  if (customer) {
-                                    handleDeleteMarker(customer?.lng, customer?.lat)
-                                  }
-                                }} alt='icon' />
+                              <div className={`cursor-pointer w-5 flex-shrink-0 ${row?.status === 'visited' && 'cursor-not-allowed'}`}>
+                                <Image
+                                  src={DeleteIcon}
+                                  onClick={() => {
+                                    if (row?.status === 'visited') return;
+                                    const listCustomer = getValues('listCustomer')
+                                    listCustomer.splice(index, 1)
+                                    setValue('listCustomer', listCustomer, { shouldValidate: true })
+                                    const customer = customers?.data?.items?.find((item) => item?.id === row?.id);
+                                    if (customer) {
+                                      handleDeleteMarker(customer?.lng, customer?.lat)
+                                    }
+                                  }}
+                                  alt='icon'
+                                />
                               </div>
                             </div>
                           ))
