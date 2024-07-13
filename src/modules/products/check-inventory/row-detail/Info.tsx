@@ -249,7 +249,7 @@ export function Info({ record }: { record: any }) {
         })}
         expandable={{
           // eslint-disable-next-line @typescript-eslint/no-shadow
-          expandedRowRender: (record: IProduct) => {
+          expandedRowRender: (record: any) => {
             setIdProduct(record.productUnit.product.id);
             return (
               <>
@@ -324,30 +324,30 @@ export function Info({ record }: { record: any }) {
           RoleModel.check_inventory,
           RoleAction.create
         ) && (
-          <CustomButton
-            type="primary"
-            outline={true}
-            prefixIcon={<Image src={CopyBlueIcon} alt="" />}
-            onClick={() =>
-              router.push(`/products/check-inventory/coupon?id=${record.id}`)
-            }
-          >
-            Sao chép
-          </CustomButton>
-        )}
+            <CustomButton
+              type="primary"
+              outline={true}
+              prefixIcon={<Image src={CopyBlueIcon} alt="" />}
+              onClick={() =>
+                router.push(`/products/check-inventory/coupon?id=${record.id}`)
+              }
+            >
+              Sao chép
+            </CustomButton>
+          )}
         {hasPermission(
           profile?.role?.permissions,
           RoleModel.check_inventory,
           RoleAction.delete
         ) && (
-          <CustomButton
-            outline={true}
-            prefixIcon={<Image src={CloseIcon} alt="" />}
-            onClick={() => setOpenDelete(true)}
-          >
-            Hủy bỏ
-          </CustomButton>
-        )}
+            <CustomButton
+              outline={true}
+              prefixIcon={<Image src={CloseIcon} alt="" />}
+              onClick={() => setOpenDelete(true)}
+            >
+              Hủy bỏ
+            </CustomButton>
+          )}
       </div>
 
       <DeleteModal
