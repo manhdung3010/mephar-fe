@@ -28,7 +28,7 @@ const DeleteModal = ({
       width={500}
     >
       <div className="flex flex-col items-center justify-center gap-6 text-[#1C1C28]">
-        <div className="text-xl font-semibold">xóa {content}</div>
+        <div className="text-xl font-semibold">Xóa {content}</div>
         <div className="h-[1px] w-full bg-[#C7C9D9]" />
         <Image src={BoyImg} alt="" />
         <div className="flex text-center text-lg">

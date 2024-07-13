@@ -3,6 +3,9 @@ import axiosClient from "./index";
 export function createTrip(payload) {
   return axiosClient.post(`trip`, payload);
 }
+export function updateTrip(id: number, payload) {
+  return axiosClient.patch(`trip/${id}`, payload);
+}
 export function getAllTrip(params: {
   page: number;
   limit: number;
@@ -18,6 +21,9 @@ export function searchPlace(params: { keyword: string }) {
 }
 export function getLatLng(params: { refId: string }) {
   return axiosClient.get(`trip/search/place`, { params });
+}
+export function deleteTrip(id: any) {
+  return axiosClient.delete(`trip/${id}`);
 }
 export function updateCustomerStatus(
   customerId: string,

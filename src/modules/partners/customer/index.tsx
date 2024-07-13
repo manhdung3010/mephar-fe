@@ -47,12 +47,12 @@ export function Customer() {
   const router = useRouter();
   const branchId = useRecoilValue(branchState);
   const profile = useRecoilValue(profileState);
-
+  const { code } = router.query;
   const [deletedId, setDeletedId] = useState<number>();
   const [formFilter, setFormFilter] = useState({
     page: 1,
     limit: 20,
-    keyword: '',
+    keyword: code || null,
     pointStart: null,
     pointEnd: null,
     createdBy: null,
@@ -75,7 +75,7 @@ export function Customer() {
     () => getCustomer(formFilter)
   );
 
-  
+
 
   const [expandedRowKeys, setExpandedRowKeys] = useState<
     Record<string, boolean>

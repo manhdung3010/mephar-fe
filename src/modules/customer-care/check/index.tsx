@@ -15,6 +15,8 @@ import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { schema } from './schema';
+import { useRouter } from 'next/router';
+import Link from 'next/link';
 const { Option } = Select;
 function Check() {
   const mapRef = useRef<any>(null);
@@ -37,6 +39,7 @@ function Check() {
       radius: 5000,
     },
   });
+  const router = useRouter();
 
   const [customerList, setCustomerList] = useState([])
 
@@ -175,31 +178,33 @@ function Check() {
                             <Spin size='default' />
                           </div>
                         ) : searchResult?.map((item, index) => (
-                          <div className='py-3 px-4 rounded border-[1px] border-[#D3D5D7]' key={item?.id}>
-                            <div className='font-semibold'>
-                              <span className='text-red-main'>{item?.code}</span> - <span className='text-[#404040]'>{item?.fullName}</span>
-                              <span className={`ml-1 ${item?.status === 'active' ? 'bg-[#e5f8ec] text-[#00B63E] border-[1px] border-[#00B63E]' : item?.status === 'inactive' ? 'bg-[#feeaea] text-[#F32B2B] border-[1px] border-[#F32B2B]' : 'bg-[#f0e5fa] text-[#6600CC] border-[1px] border-[#6600CC]'}  rounded-full px-2 py-1 text-xs`}>{item?.status === 'active' ? "Hoạt động" : item?.status === 'inactive' ? "Ngưng hoạt động" : "Tiềm năng"}</span>
+                          <Link href={`/partners/customer?code=${item?.code}`}>
+                            <div className='py-3 px-4 rounded border-[1px] border-[#D3D5D7] hover:bg-[#f2f7ff] hover:border-[#0177FB] transition-all cursor-pointer' key={item?.id}>
+                              <div className='font-semibold'>
+                                <span className='text-red-main'>{item?.code}</span> - <span className='text-[#404040]'>{item?.fullName}</span>
+                                <span className={`ml-1 ${item?.status === 'active' ? 'bg-[#e5f8ec] text-[#00B63E] border-[1px] border-[#00B63E]' : item?.status === 'inactive' ? 'bg-[#feeaea] text-[#F32B2B] border-[1px] border-[#F32B2B]' : 'bg-[#f0e5fa] text-[#6600CC] border-[1px] border-[#6600CC]'}  rounded-full px-2 py-1 text-xs`}>{item?.status === 'active' ? "Hoạt động" : item?.status === 'inactive' ? "Ngưng hoạt động" : "Tiềm năng"}</span>
 
-                            </div>
-                            <div className='flex gap-1 text-[#455468]'>
-                              <div className='w-4 grid place-items-center flex-shrink-0'>
-                                <Image src={PhoneIcon} />
                               </div>
-                              {item?.phone}
-                            </div>
-                            <div className='flex gap-1 text-[#455468]'>
-                              <div className='w-4 grid place-items-center flex-shrink-0'>
-                                <Image src={MarkIcon} />
+                              <div className='flex gap-1 text-[#455468]'>
+                                <div className='w-4 grid place-items-center flex-shrink-0'>
+                                  <Image src={PhoneIcon} />
+                                </div>
+                                {item?.phone}
                               </div>
-                              <span className='line-clamp-1'>{item?.address}</span>
-                            </div>
-                            <div className='flex gap-1 text-[#455468]'>
-                              <div className='w-4 grid place-items-center flex-shrink-0'>
-                                <Image src={DistanceIcon} />
+                              <div className='flex gap-1 text-[#455468]'>
+                                <div className='w-4 grid place-items-center flex-shrink-0'>
+                                  <Image src={MarkIcon} />
+                                </div>
+                                <span className='line-clamp-1'>{item?.address}</span>
                               </div>
-                              {formatDistance(item?.distance)}
+                              <div className='flex gap-1 text-[#455468]'>
+                                <div className='w-4 grid place-items-center flex-shrink-0'>
+                                  <Image src={DistanceIcon} />
+                                </div>
+                                {formatDistance(item?.distance)}
+                              </div>
                             </div>
-                          </div>
+                          </Link>
                         ))
                       }
                     </div>

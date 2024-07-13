@@ -1,7 +1,7 @@
-import { getTripDetail } from '@/api/trip.service';
+import { deleteTrip, getTripDetail } from '@/api/trip.service';
 import { CustomButton } from '@/components/CustomButton';
 import Label from '@/components/CustomLabel';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import React, { useEffect, useRef, useState } from 'react'
@@ -18,14 +18,18 @@ import CustomMap from '@/components/CustomMap'
 import { formatDateTime } from '@/helpers';
 import UpdateStatusModal from './UpdateTripStatusModal';
 import { ECustomerStatus } from '../enum';
+import DeleteModal from '@/components/CustomModal/ModalDeleteItem';
+import { message } from 'antd';
 
 function TripDetail() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { id } = router.query;
   const mapRef = useRef<any>(null);
 
   const [isMapFull, setIsMapFull] = useState<boolean>(false);
   const [isShowModal, setIsShowModal] = useState<boolean>(false);
+  const [isOpenDelete, setIsOpenDelete] = useState<boolean>(false);
   const [customerInfo, setCustomerInfo] = useState(null);
   const [tripCustomerId, setTripCustomerId] = useState(null);
 
@@ -38,6 +42,22 @@ function TripDetail() {
     }
   );
 
+  const { mutate: mutateDeleteTrip, isLoading: isLoadingDeleteTrip } =
+    useMutation(
+      () => {
+        return deleteTrip(id)
+      },
+      {
+        onSuccess: async () => {
+          await queryClient.invalidateQueries(["TRIPS"]);
+          router.push("/customer-care/list-schedule");
+        },
+        onError: (err: any) => {
+          message.error(err?.message);
+        },
+      }
+    );
+
   const handleAddMarker = (lng, lat, customerInfo?: any, customerIndex?: number) => {
     const coordinates = [lng, lat];
     if (mapRef.current) {
@@ -46,9 +66,6 @@ function TripDetail() {
   };
 
   useEffect(() => {
-
-    // else {
-    // }
     if (tripDetail?.data) {
       if (tripDetail?.data?.customerCurrent) {
         handleAddMarker(+tripDetail?.data?.customerCurrent?.lng, +tripDetail?.data?.customerCurrent?.lat);
@@ -58,6 +75,10 @@ function TripDetail() {
       }
     }
   }, [tripDetail])
+
+  const handleDelete = () => {
+    mutateDeleteTrip()
+  };
   return (
     <>
       <div className="my-6 flex items-center justify-between bg-white p-5">
@@ -68,14 +89,13 @@ function TripDetail() {
           <CustomButton
             outline={true}
             type="danger"
-            onClick={() => router.push("/customer-care/list-schedule")}
+            onClick={() => setIsOpenDelete(true)}
             prefixIcon={<Image src={DeleteIcon} alt="icon" />}
           >
             Xóa
           </CustomButton>
           <CustomButton
-            // disabled={isLoadingCreateCustomer}
-            // onClick={handleSubmit(onSubmit)}
+            onClick={() => router.push(`/customer-care/create-schedule?id=${id}&isEdit=true`)}
             type="success"
             prefixIcon={<Image src={EditIcon} alt="icon" />}
           >
@@ -207,6 +227,16 @@ function TripDetail() {
         onSuccess={() => setIsShowModal(false)}
         content={customerInfo}
         tripCustomerId={tripCustomerId}
+      />
+      <DeleteModal
+        isOpen={isOpenDelete}
+        onCancel={() => setIsOpenDelete(false)}
+        onSuccess={() => {
+          handleDelete()
+          setIsOpenDelete(false)
+        }}
+        content={'lịch trình'}
+      // isLoading={isLoadingDelete}
       />
     </>
   )

@@ -24,18 +24,23 @@ import MarkIcon from '@/assets/markIcon.svg';
 import InputError from '@/components/InputError'
 import { message, Select, Spin } from 'antd'
 import { ECustomerStatus, ECustomerStatusLabel } from '@/enums'
-import { createTrip, getLatLng, searchPlace } from '@/api/trip.service'
+import { createTrip, getLatLng, getTripDetail, searchPlace, updateTrip } from '@/api/trip.service'
 import { useRecoilValue } from 'recoil'
 import { profileState } from '@/recoil/state'
 const { Option } = Select;
 
 function CreateSchedule() {
+  const mapRef = useRef<any>(null);
+  const markersRef = useRef<any>([]);
   const queryClient = useQueryClient();
   const profile = useRecoilValue(profileState);
   const router = useRouter();
+  const { id, isEdit } = router.query;
   const [customerKeyword, setCustomerKeyword] = useState("");
   const [placeKeyword, setPlaceKeyword] = useState("");
   const [isMapFull, setIsMapFull] = useState(false);
+
+  const [startAddress, setStartAddress] = useState('');
 
   const [customerAddress, setCustomerAddress] = useState('');
 
@@ -57,6 +62,15 @@ function CreateSchedule() {
       listCustomer: []
     }
   });
+
+  const { data: tripDetail, isLoading: isLoadingTripDetail } = useQuery(
+    ["TRIP_DETAIL", id],
+    () =>
+      getTripDetail(id),
+    {
+      enabled: !!id && !!isEdit,
+    }
+  );
 
   const { data: customers, isLoading } = useQuery(
     ["CUSTOMER", customerKeyword],
@@ -81,6 +95,22 @@ function CreateSchedule() {
   );
 
   useEffect(() => {
+    if (tripDetail?.data) {
+      setValue('name', tripDetail?.data?.name, { shouldValidate: true });
+      setValue('time', tripDetail?.data?.time, { shouldValidate: true });
+      setStartAddress(tripDetail?.data?.startAddress);
+      setValue('lat', tripDetail?.data?.lat, { shouldValidate: true });
+      setValue('lng', tripDetail?.data?.lng, { shouldValidate: true });
+      const customers = tripDetail?.data?.tripCustomer?.map((item) => ({ id: item?.customerId, address: item?.address, lat: item?.lat, lng: item?.lng }));
+      setValue('listCustomer', customers, { shouldValidate: true });
+      tripDetail?.data?.tripCustomer?.forEach((item, index) => {
+        handleAddMarker(+item?.lng, +item?.lat, item?.customer, item?.stt)
+      })
+      handleAddMarker(+tripDetail?.data?.lng, +tripDetail?.data?.lat)
+    }
+  }, [tripDetail])
+
+  useEffect(() => {
     if (latLng) {
       setValue('lat', latLng?.data?.lat, { shouldValidate: true });
       setValue('lng', latLng?.data?.lng, { shouldValidate: true });
@@ -95,6 +125,9 @@ function CreateSchedule() {
         let payload = {
           ...getValues(),
           userId: profile?.id
+        }
+        if (!!id && !!isEdit) {
+          return updateTrip(Number(id), payload)
         }
         return createTrip(payload)
       },
@@ -114,9 +147,6 @@ function CreateSchedule() {
     mutateCreateTrip()
   }
 
-  const mapRef = useRef<any>(null);
-  const markersRef = useRef<any>([]);
-
   const handleAddMarker = (lng, lat, customerInfo?: any, customerIndex?: number) => {
     const coordinates = [lng, lat];
     if (mapRef.current) {
@@ -130,7 +160,7 @@ function CreateSchedule() {
     }
   };
   const handleDeleteMarker = (lng, lat) => {
-    const coordinates = [lng, lat];
+    const coordinates = [+lng, +lat];
     if (mapRef.current) {
       mapRef.current.deleteMarker(coordinates)
     }
@@ -140,7 +170,7 @@ function CreateSchedule() {
     <>
       <div className="my-6 flex items-center justify-between bg-white p-5">
         <div className="text-2xl font-medium uppercase">
-          {"Thêm mới lịch trình"}
+          {`${tripDetail ? 'Cập nhật' : 'Thêm mới'} lịch trình`}
         </div>
         <div className="flex gap-4">
           <CustomButton
@@ -207,6 +237,7 @@ function CreateSchedule() {
                               const textContent = option.children.props.children[1].props.children;
                               return textContent.toLowerCase().includes(input.toLowerCase());
                             }}
+                            value={places?.data?.find((item) => item.ref_id === refId)?.name || startAddress || undefined}
                           >
                             {places?.data?.map((item) => (
                               <Option key={item.ref_id} value={item.ref_id}>
@@ -223,17 +254,17 @@ function CreateSchedule() {
                       </div>
                       <div className='flex gap-y-3 flex-col'>
                         {
-                          getValues('listCustomer').map((row, index) => (
-                            <div className='flex gap-2 items-center'>
+                          getValues('listCustomer').map((row: any, index) => (
+                            <div className='flex gap-2 items-center w-full'>
                               <div className='w-6 flex-shrink-0 flex items-center relative'>
                                 <div className='bg-[#0063F7] rounded-full text-white w-6 h-6 grid place-items-center z-10'>
                                   {index + 1}
                                 </div>
-                                <div className='absolute bottom-0 left-1/2 -translate-x-1/2 z-0'>
+                                <div className={`absolute bottom-0 left-1/2 -translate-x-1/2 z-0 ${index === 0 && 'h-20 overflow-hidden'}`}>
                                   <Image src={LineIcon} alt='icon' />
                                 </div>
                               </div>
-                              <div className='w-full'>
+                              <div className='flex-1'>
                                 <div className='flex flex-col gap-1'>
                                   <Select
                                     placeholder="Chọn khách hàng"
@@ -318,14 +349,14 @@ function CreateSchedule() {
                                       const textContent = option.children.props.children[1].props.children;
                                       return textContent.toLowerCase().includes(input.toLowerCase());
                                     }}
-                                    value={row?.address}
+                                    value={row?.address?.length > 70 ? row?.address?.slice(0, 70) + '...' : row?.address || undefined}
                                   >
                                     {places?.data?.map((item) => (
                                       <Option key={item.ref_id} value={item.ref_id}>
                                         <div className='flex items-center gap-1 py-2'>
                                           <Image src={MarkIcon} />
                                           <span className='display'>
-                                            {item?.display}
+                                            {item?.name}
                                           </span>
                                         </div>
                                       </Option>
@@ -334,15 +365,17 @@ function CreateSchedule() {
                                 </div>
                                 <InputError error={errors.listCustomer?.[index]?.message} />
                               </div>
-                              <Image src={DeleteIcon} onClick={() => {
-                                const listCustomer = getValues('listCustomer')
-                                listCustomer.splice(index, 1)
-                                setValue('listCustomer', listCustomer, { shouldValidate: true })
-                                const customer = customers?.data?.items?.find((item) => item?.id === row?.id);
-                                if (customer) {
-                                  handleDeleteMarker(customer?.lng, customer?.lat)
-                                }
-                              }} alt='icon' className='cursor-pointer' />
+                              <div className='cursor-pointer w-5 flex-shrink-0'>
+                                <Image src={DeleteIcon} onClick={() => {
+                                  const listCustomer = getValues('listCustomer')
+                                  listCustomer.splice(index, 1)
+                                  setValue('listCustomer', listCustomer, { shouldValidate: true })
+                                  const customer = customers?.data?.items?.find((item) => item?.id === row?.id);
+                                  if (customer) {
+                                    handleDeleteMarker(customer?.lng, customer?.lat)
+                                  }
+                                }} alt='icon' />
+                              </div>
                             </div>
                           ))
                         }
