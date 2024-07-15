@@ -44,6 +44,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
   const router = useRouter();
   const [placeKeyword, setPlaceKeyword] = useState("");
   const [refId, setRefId] = useState("");
+  const [point, setPoint] = useState("");
 
   const {
     getValues,
@@ -86,9 +87,18 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
     if (latLng) {
       setValue("lng", String(latLng?.data?.lng), { shouldValidate: true });
       setValue("lat", String(latLng?.data?.lat), { shouldValidate: true });
+      setPoint(`${latLng?.data?.lat},${latLng?.data?.lng}`);
       setValue("address", latLng?.data?.display, { shouldValidate: true });
     }
   }, [latLng]);
+
+  useEffect(() => {
+    if (point) {
+      const [lat, lng] = point.split(",");
+      setValue("lng", lng?.trim(), { shouldValidate: true });
+      setValue("lat", lat?.trim(), { shouldValidate: true });
+    }
+  }, [point]);
 
   const { provinces, districts, wards } = useAddress(
     getValues("provinceId"),
@@ -104,6 +114,8 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
     () =>
       getGroupCustomer({ page: 1, limit: 20, keyword: groupCustomerKeyword })
   );
+
+  console.log('errors', errors);
 
   const { mutate: mutateCreateCustomer, isLoading: isLoadingCreateCustomer } =
     useMutation(
@@ -134,8 +146,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
     );
 
   const onSubmit = () => {
-    // mutateCreateCustomer();
-    console.log(getValues());
+    mutateCreateCustomer();
   };
 
   const profile = useRecoilValue(profileState);
@@ -255,15 +266,15 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
                       RoleModel.group_customer,
                       RoleAction.create
                     ) && (
-                      <div className="flex items-center">
-                        <Image src={ArrowDownIcon} alt="" />
-                        <Image
-                          src={PlusCircleIcon}
-                          alt=""
-                          onClick={() => setOpenAddGroupCustomerModal(true)}
-                        />
-                      </div>
-                    )}
+                        <div className="flex items-center">
+                          <Image src={ArrowDownIcon} alt="" />
+                          <Image
+                            src={PlusCircleIcon}
+                            alt=""
+                            onClick={() => setOpenAddGroupCustomerModal(true)}
+                          />
+                        </div>
+                      )}
                   </>
                 }
               />
@@ -448,7 +459,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
               />
               <InputError error={errors.wardId?.message} />
             </div>
-            <div>
+            {/* <div>
               <Label infoText="" label="Kinh độ" />
               <CustomInput
                 placeholder="Kinh độ"
@@ -464,6 +475,15 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
                 className="h-11"
                 onChange={(e) => setValue("lat", e, { shouldValidate: true })}
                 value={getValues("lat")}
+              />
+            </div> */}
+            <div>
+              <Label infoText="" label="Tọa độ" />
+              <CustomInput
+                placeholder="Nhập tọa độ"
+                className="h-11"
+                onChange={(e) => setPoint(e)}
+                value={point}
               />
             </div>
 

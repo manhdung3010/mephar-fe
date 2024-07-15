@@ -15,7 +15,7 @@ import EditIcon from "@/assets/editWhite.svg";
 import SuccessCircleIcon from "@/assets/successCircleIcon.svg";
 import ArrowLeftIcon from "@/assets/arrowLeftIcon2.svg";
 import CustomMap from '@/components/CustomMap'
-import { formatDateTime } from '@/helpers';
+import { formatDateTime, formatDistance } from '@/helpers';
 import UpdateStatusModal from './UpdateTripStatusModal';
 import { ECustomerStatus } from '../enum';
 import DeleteModal from '@/components/CustomModal/ModalDeleteItem';
@@ -176,7 +176,7 @@ function TripDetail() {
                                 )
                               }
                               <div
-                                className={`w-full border-[1px] border-[#D3D5D7] rounded py-3 px-4 ${item?.status === ECustomerStatus.VISITED ? 'bg-[#f2fff9] border-[#11A75C]' : 'hover:bg-[#f2f7ff] hover:border-[#0177FB] transition-all cursor-pointer'} `}
+                                className={`w-full border-[1px] border-[#D3D5D7] rounded py-3 px-4 ${item?.status === ECustomerStatus.VISITED ? 'bg-[#f2fff9] border-[#11A75C]' : 'hover:bg-[#f2f7ff] hover:border-[#0177FB] transition-all cursor-pointer'} ${item?.status === ECustomerStatus.WAITED ? 'bg-gray-200' : ''}`}
                                 onClick={() => {
                                   if (item?.status === ECustomerStatus.VISITED) return;
                                   setCustomerInfo(item?.customer)
@@ -184,9 +184,16 @@ function TripDetail() {
                                   setIsShowModal(true)
                                 }}
                               >
-                                <div className='font-semibold'>
-                                  <span className='text-red-main'>{item?.customer?.code}</span> - <span>{item?.customer?.fullName}</span>
-                                  <span className={`ml-1 ${item?.customer?.status === 'active' ? 'bg-[#e5f8ec] text-[#00B63E] border-[1px] border-[#00B63E]' : item?.customer?.status === 'inactive' ? 'bg-[#feeaea] text-[#F32B2B] border-[1px] border-[#F32B2B]' : 'bg-[#f0e5fa] text-[#6600CC] border-[1px] border-[#6600CC]'}  rounded-full px-2 py-1 text-xs`}>{item?.customer?.status === 'active' ? "Hoạt động" : item?.customer?.status === 'inactive' ? "Ngưng hoạt động" : "Tiềm năng"}</span>
+                                <div className='flex justify-between'>
+                                  <div className='font-semibold'>
+                                    <span className='text-red-main'>{item?.customer?.code}</span> - <span>{item?.customer?.fullName}</span>
+                                    <span className={`ml-1 ${item?.customer?.status === 'active' ? 'bg-[#e5f8ec] text-[#00B63E] border-[1px] border-[#00B63E]' : item?.customer?.status === 'inactive' ? 'bg-[#feeaea] text-[#F32B2B] border-[1px] border-[#F32B2B]' : 'bg-[#f0e5fa] text-[#6600CC] border-[1px] border-[#6600CC]'}  rounded-full px-2 py-1 text-xs`}>{item?.customer?.status === 'active' ? "Hoạt động" : item?.customer?.status === 'inactive' ? "Ngưng hoạt động" : "Tiềm năng"}</span>
+                                  </div>
+                                  {
+                                    item?.status !== ECustomerStatus.VISITED && (
+                                      <div>{formatDistance(item?.distances)}</div>
+                                    )
+                                  }
                                 </div>
                                 <div className="text-gray-600 mt-2">
                                   <div className="flex items-center space-x-1">
