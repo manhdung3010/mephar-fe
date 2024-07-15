@@ -29,20 +29,21 @@ import InputError from "@/components/InputError";
 import { ECustomerStatus, ECustomerType, EGender } from "@/enums";
 import { formatDate, hasPermission } from "@/helpers";
 import { useAddress } from "@/hooks/useAddress";
-import MarkIcon from '@/assets/markIcon.svg';
+import MarkIcon from "@/assets/markIcon.svg";
 import { AddGroupCustomerModal } from "../../group-customer/AddGroupCustomerModal";
 import { schema } from "./schema";
 import { useRecoilValue } from "recoil";
 import { profileState } from "@/recoil/state";
 import { RoleAction, RoleModel } from "@/modules/settings/role/role.enum";
 import { getLatLng, searchPlace } from "@/api/trip.service";
+import dayjs from "dayjs";
 const { Option } = Select;
 
 export function AddCustomer({ customerId }: { customerId?: string }) {
   const queryClient = useQueryClient();
   const router = useRouter();
   const [placeKeyword, setPlaceKeyword] = useState("");
-  const [refId, setRefId] = useState('');
+  const [refId, setRefId] = useState("");
 
   const {
     getValues,
@@ -67,19 +68,17 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
 
   const { data: places, isLoading: isLoadingPlace } = useQuery(
     ["SEARCH_PLACE", placeKeyword],
-    () =>
-      searchPlace({ keyword: placeKeyword }),
+    () => searchPlace({ keyword: placeKeyword }),
     {
-      enabled: placeKeyword.length > 0
+      enabled: placeKeyword.length > 0,
     }
   );
 
   const { data: latLng, isLoading: isLoadingLatLng } = useQuery(
     ["SEARCH_LATLNG", refId],
-    () =>
-      getLatLng({ refId: refId }),
+    () => getLatLng({ refId: refId }),
     {
-      enabled: refId.length > 0
+      enabled: refId.length > 0,
     }
   );
 
@@ -87,7 +86,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
     if (latLng) {
       setValue("lng", String(latLng?.data?.lng), { shouldValidate: true });
       setValue("lat", String(latLng?.data?.lat), { shouldValidate: true });
-      setValue("address", latLng?.data?.display, { shouldValidate: true })
+      setValue("address", latLng?.data?.display, { shouldValidate: true });
     }
   }, [latLng]);
 
@@ -135,16 +134,22 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
     );
 
   const onSubmit = () => {
-    mutateCreateCustomer();
-
+    // mutateCreateCustomer();
+    console.log(getValues());
   };
 
   const profile = useRecoilValue(profileState);
   useEffect(() => {
     if (profile?.role?.permissions) {
-      if (!hasPermission(profile?.role?.permissions, RoleModel.customer, RoleAction.create)) {
-        message.error('Bạn không có quyền truy cập vào trang này');
-        router.push('/partners/customer');
+      if (
+        !hasPermission(
+          profile?.role?.permissions,
+          RoleModel.customer,
+          RoleAction.create
+        )
+      ) {
+        message.error("Bạn không có quyền truy cập vào trang này");
+        router.push("/partners/customer");
       }
     }
   }, [profile?.role?.permissions]);
@@ -156,6 +161,10 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
           setValue(key, customerDetail.data[key], { shouldValidate: true });
         }
       });
+      setValue("address", customerDetail?.data?.address);
+      setValue("districtId", customerDetail?.data?.district.id);
+      setValue("wardId", customerDetail?.data?.ward.id);
+      setValue("provinceId", customerDetail?.data?.province.id);
 
       setGroupCustomerKeyword(customerDetail.data?.groupCustomer?.name);
     }
@@ -241,18 +250,20 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
                 placeholder="Chọn nhóm khách hàng"
                 suffixIcon={
                   <>
-                    {
-                      hasPermission(profile?.role?.permissions, RoleModel.group_customer, RoleAction.create) && (
-                        <div className="flex items-center">
-                          <Image src={ArrowDownIcon} alt="" />
-                          <Image
-                            src={PlusCircleIcon}
-                            alt=""
-                            onClick={() => setOpenAddGroupCustomerModal(true)}
-                          />
-                        </div>
-                      )
-                    }
+                    {hasPermission(
+                      profile?.role?.permissions,
+                      RoleModel.group_customer,
+                      RoleAction.create
+                    ) && (
+                      <div className="flex items-center">
+                        <Image src={ArrowDownIcon} alt="" />
+                        <Image
+                          src={PlusCircleIcon}
+                          alt=""
+                          onClick={() => setOpenAddGroupCustomerModal(true)}
+                        />
+                      </div>
+                    )}
                   </>
                 }
               />
@@ -298,7 +309,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
                     shouldValidate: true,
                   });
                 }}
-                value={getValues("birthday")}
+                value={dayjs(getValues("birthday"))}
               />
               <InputError error={errors.birthday?.message} />
             </div>
@@ -354,20 +365,29 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
                 onSearch={debounce((value) => {
                   setPlaceKeyword(value);
                 }, 300)}
+                value={getValues("address")}
                 showSearch={true}
-                notFoundContent={isLoadingPlace ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
+                notFoundContent={
+                  isLoadingPlace ? (
+                    <Spin
+                      size="small"
+                      className="flex justify-center p-4 w-full"
+                    />
+                  ) : null
+                }
                 filterOption={(input, option: any) => {
-                  const textContent = option.children.props.children[1].props.children;
-                  return textContent.toLowerCase().includes(input.toLowerCase());
+                  const textContent =
+                    option.children.props.children[1].props.children;
+                  return textContent
+                    .toLowerCase()
+                    .includes(input.toLowerCase());
                 }}
               >
                 {places?.data?.map((item) => (
                   <Option key={item.ref_id} value={item.ref_id}>
-                    <div className='flex items-center gap-1 py-2'>
+                    <div className="flex items-center gap-1 py-2">
                       <Image src={MarkIcon} />
-                      <span className='display'>
-                        {item?.display}
-                      </span>
+                      <span className="display">{item?.display}</span>
                     </div>
                   </Option>
                 ))}

@@ -33,4 +33,6 @@ export interface ICustomer {
     name: string;
   };
   note?: string;
+  lat?: string; // Thêm trường lat kiểu string
+  lng?: string; // Thêm trường lng kiểu string
 }
