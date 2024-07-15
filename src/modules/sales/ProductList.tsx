@@ -236,8 +236,8 @@ export function ProductList({
                   return product.productUnitId !== productUnitId;
                 }
               );
-              setOrderDiscount([]);
-              setProductDiscount([]);
+              // setOrderDiscount([]);
+              // setProductDiscount([]);
               setDiscountType("order");
               setOrderObject(orderObjectClone);
             }}

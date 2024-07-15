@@ -175,7 +175,7 @@ export function ListBatchModal({
         return false;
       }
 
-      if (batch.isSelected && batch.quantity > (batch.saleQuantity ?? 0)) {
+      if (batch.isSelected && batch.quantity > (batch.originalInventory ?? 0)) {
         message.error(
           "Số lượng sản phẩm chọn phải nhỏ hơn hoặc bằng số lượng đã nhập"
         );
