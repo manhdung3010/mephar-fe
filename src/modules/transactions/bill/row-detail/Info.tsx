@@ -45,6 +45,7 @@ interface IRecord {
   refund: number;
   unitName: string;
   batches?: any[];
+  itemPrice?: number
 }
 
 export function Info({ record }: { record: IOrder }) {
@@ -144,7 +145,7 @@ export function Info({ record }: { record: IOrder }) {
       dataIndex: "discount",
       key: "discount",
       render: (_, { quantity, price, itemPrice }) =>
-        formatMoney(price - itemPrice),
+        formatMoney(price - Number(itemPrice ?? 0)),
     },
     {
       title: "Giá bán",
@@ -427,14 +428,14 @@ export function Info({ record }: { record: IOrder }) {
           RoleModel.bill,
           RoleAction.delete
         ) && (
-          <CustomButton
-            outline={true}
-            prefixIcon={<Image src={CloseIcon} alt="" />}
-            onClick={() => setOpenCancelBill(true)}
-          >
-            Hủy bỏ
-          </CustomButton>
-        )}
+            <CustomButton
+              outline={true}
+              prefixIcon={<Image src={CloseIcon} alt="" />}
+              onClick={() => setOpenCancelBill(true)}
+            >
+              Hủy bỏ
+            </CustomButton>
+          )}
         {record?.canReturn && (
           <CustomButton
             type="success"
