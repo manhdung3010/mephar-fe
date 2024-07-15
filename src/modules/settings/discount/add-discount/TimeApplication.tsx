@@ -336,6 +336,8 @@ const TimeApplication = ({ setValue, getValues, errors }: any) => {
     setValue('time', timesFormat, { shouldValidate: true })
   }
 
+  console.log('getValues("time")', getValues("time"))
+
   return (
     <div className="mt-5">
       <div className="mb-5 grid grid-cols-2 gap-x-[42px] gap-y-5">
@@ -427,7 +429,7 @@ const TimeApplication = ({ setValue, getValues, errors }: any) => {
       </div>
       <div className='grid grid-cols-2 gap-x-[42px] gap-y-5'>
         <div className="flex gap-2">
-          <Checkbox checked={getValues("time")?.isBirthday} onChange={(e) => handleChange("isBirthday", e.target.checked)} />
+          <Checkbox checked={getValues("time")?.isBirthDay} onChange={(e) => handleChange("isBirthday", e.target.checked)} />
           <div className="flex items-center gap-2">
             <div>Áp dụng vào</div>
             ngày

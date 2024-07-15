@@ -26,6 +26,7 @@ import { RightContent } from './RightContent';
 import { schema } from './schema';
 import { useRouter } from 'next/router';
 import { getInventoryDetail } from '@/api/check-inventory';
+import { message } from 'antd';
 
 export function CheckInventoryCoupon() {
   const {
@@ -262,18 +263,24 @@ export function CheckInventoryCoupon() {
           hasPlus={true}
           defaultValue={realQuantity}
           value={realQuantity}
-          type="number"
+          type="text"
           disabled={product?.isBatchExpireControl ? true : false}
-          onChange={(value) =>
-            onChangeValueProduct(productKey, "realQuantity", value)
+          onChange={(value) => {
+            // validate if value is not a number
+            if (isNaN(value)) {
+              message.error("Vui lòng nhập số");
+              return;
+            }
+            onChangeValueProduct(productKey, "realQuantity", +value)
+          }
           }
           onMinus={(value) => {
             if (product?.isBatchExpireControl) return;
-            onChangeValueProduct(productKey, "realQuantity", value)
+            onChangeValueProduct(productKey, "realQuantity", +value)
           }}
           onPlus={(value) => {
             if (product?.isBatchExpireControl) return;
-            onChangeValueProduct(productKey, "realQuantity", value)
+            onChangeValueProduct(productKey, "realQuantity", +value)
           }}
         />
       ),

@@ -214,7 +214,7 @@ export const ProductDiscountProduct = ({
                         {
                           isProduct ? products?.data?.items?.map((product) => (
                             <Option key={product.id} value={product.productUnit?.id}>
-                              {product?.productUnit?.code} - {product?.product?.name} - {product?.productUnit?.unitName}
+                              {product?.product?.name} - {product?.productUnit?.unitName}
                             </Option>
                           ))
                             : groupProduct?.data?.items?.map((product) => (
@@ -234,7 +234,7 @@ export const ProductDiscountProduct = ({
               <div className="flex flex-[2] flex-col px-4">
                 <div className='w-full flex items-center gap-x-2'>
                   <CustomInput
-                    className="mt-0 h-10 w-full"
+                    className="mt-0 h-10 w-24 flex-shrink-0"
                     wrapClassName="w-full"
                     type='number'
                     value={row?.apply?.discountValue || 0}
@@ -310,7 +310,7 @@ export const ProductDiscountProduct = ({
                       {
                         isProductDiscount ? products?.data?.items?.map((product) => (
                           <Option key={product.id} value={product.productUnit?.id}>
-                            {product?.productUnit?.code} - {product?.product?.name} - {product?.productUnit?.unitName}
+                            {product?.product?.name} - {product?.productUnit?.unitName}
                           </Option>
                         ))
                           : groupProduct?.data?.items?.map((product) => (

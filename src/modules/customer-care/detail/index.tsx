@@ -94,13 +94,17 @@ function TripDetail() {
           >
             Xóa
           </CustomButton>
-          <CustomButton
-            onClick={() => router.push(`/customer-care/create-schedule?id=${id}&isEdit=true`)}
-            type="success"
-            prefixIcon={<Image src={EditIcon} alt="icon" />}
-          >
-            Cập nhật
-          </CustomButton>
+          {
+            tripDetail?.data?.status === 'done' ? null : (
+              <CustomButton
+                onClick={() => router.push(`/customer-care/create-schedule?id=${id}&isEdit=true`)}
+                type="success"
+                prefixIcon={<Image src={EditIcon} alt="icon" />}
+              >
+                Cập nhật
+              </CustomButton>
+            )
+          }
         </div>
       </div>
       <div className="my-6 flex gap-6">
