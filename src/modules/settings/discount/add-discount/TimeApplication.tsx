@@ -430,12 +430,7 @@ const TimeApplication = ({ setValue, getValues, errors }: any) => {
           <Checkbox checked={getValues("time")?.isBirthday} onChange={(e) => handleChange("isBirthday", e.target.checked)} />
           <div className="flex items-center gap-2">
             <div>Áp dụng vào</div>
-            <CustomSelect
-              onChange={() => { }}
-              className="border-underline"
-              wrapClassName="!w-[100px]"
-              placeholder="Ngày"
-            />
+            ngày
             <div>sinh nhật của khách hàng</div>
           </div>
         </div>

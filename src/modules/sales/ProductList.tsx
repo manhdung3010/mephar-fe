@@ -303,9 +303,9 @@ export function ProductList({
           </span>{' '}
           - (tồn {inventory})
         </div> */}
-            <div className="font-medium italic text-[#0070F4]">
+            {/* <div className="font-medium italic text-[#0070F4]">
               Liều dùng: {product?.productDosage?.name}
-            </div>
+            </div> */}
           </div>
         );
       },

@@ -17,6 +17,6 @@ export const schema = yup.object().shape({
   birthday: yup.string(),
   address: yup.string(),
   roleId: yup.number().required('Đây là trường bắt buộc!'),
-  branchId: yup.number().required('Đây là trường bắt buộc!'),
+  listBranchId: yup.array().of(yup.number()).required('Đây là trường bắt buộc!'),
   position: yup.string(),
 });

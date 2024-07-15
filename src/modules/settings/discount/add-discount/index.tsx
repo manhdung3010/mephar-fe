@@ -278,21 +278,6 @@ const AddDiscount = () => {
           }
           return acc;
         }, []);
-
-        // const items = formatItem.reduce((acc: any, item: any) => {
-        //   const existingItem = acc.find((i: any) => i.condition.productUnitId[0] === item.condition.productUnitId[0]);
-        //   if (existingItem) {
-        //     existingItem.condition.order.from = Math.min(existingItem.condition.order.from, item.condition.order.from);
-        //     existingItem.condition.product.from = Math.min(existingItem.condition.product.from, item.condition.product.from);
-        //     existingItem.apply.discountValue = Math.min(existingItem.apply.discountValue, item.apply.discountValue);
-        //     existingItem.apply.discountType = existingItem.apply.discountValue === item.apply.discountValue ? item.apply.discountType : "PERCENT";
-        //     existingItem.apply.maxQuantity = Math.max(existingItem.apply.maxQuantity, item.apply.maxQuantity);
-        //   } else {
-        //     acc.push(item);
-        //   }
-        //   return acc;
-        // }, []);
-
         setValue("items", items);
       }
       setValue("scope", {
@@ -313,7 +298,7 @@ const AddDiscount = () => {
         byHour: dcDetail.discountTime[0].byHour?.split("//").filter(element => element !== "").map(Number),
         byWeekDay: dcDetail.discountTime[0].byWeekDay?.split("//").filter(element => element !== "").map(Number),
         isWarning: dcDetail.discountTime[0].isWarning,
-        isBirthDay: dcDetail.discountTime[0].isBirthDay,
+        isBirthDay: dcDetail.discountTime[0].isBirthday,
       }, { shouldValidate: true });
     }
   }, [dcDetail]);

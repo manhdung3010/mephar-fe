@@ -1,6 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { message } from "antd";
+import { message, Select } from "antd";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -81,8 +81,7 @@ export function AddEmployee({ employeeId }: { employeeId?: string }) {
     );
 
   const onSubmit = () => {
-    // mutateCreateEmployee();
-    console.log(getValues());
+    mutateCreateEmployee();
   };
 
   useEffect(() => {
@@ -92,13 +91,20 @@ export function AddEmployee({ employeeId }: { employeeId?: string }) {
           setValue(key, employeeDetail.data[key], { shouldValidate: true });
         }
       });
-      setValue("branchId", employeeDetail?.data?.branch?.id, {
-        shouldValidate: true,
-      });
-    }
-  }, [employeeDetail]);
 
-  console.log(employeeDetail);
+      if (Array.isArray(employeeDetail.data.branches)) {
+        const listBranch = employeeDetail.data.branches.map(
+          (item) => item.branch.id
+        );
+
+        setValue("listBranchId", listBranch, {
+          shouldValidate: true,
+        });
+      }
+    }
+  }, [employeeDetail, schema.fields, setValue]);
+
+  console.log(getValues("listBranchId"));
 
   return (
     <>
@@ -298,19 +304,27 @@ export function AddEmployee({ employeeId }: { employeeId?: string }) {
 
               <div>
                 <Label infoText="" label="Chi nhánh" required />
-                <CustomSelect
-                  placeholder="Chọn chi nhánh"
-                  className="h-11 !rounded"
-                  onChange={(value) =>
-                    setValue("branchId", value, { shouldValidate: true })
-                  }
-                  options={branches?.data?.items?.map((branch) => ({
-                    value: branch.id,
+                <Select
+                  mode="multiple"
+                  onChange={(value) => {
+                    if (Array.isArray(value)) {
+                      setValue("listBranchId", value, { shouldValidate: true });
+                    }
+                  }}
+                  defaultValue={getValues("listBranchId") || []}
+                  value={getValues("listBranchId")}
+                  className="border-underline grow w-full"
+                  placeholder="Chọn chi nhánh áp dụng"
+                  showSearch
+                  optionFilterProp="label"
+                  options={branches?.data?.items.map((branch) => ({
                     label: branch.name,
+                    value: branch.id,
                   }))}
-                  value={getValues("branchId")}
+                  size="large"
                 />
-                <InputError error={errors.branchId?.message} />
+
+                <InputError error={errors.listBranchId?.message} />
               </div>
 
               <div>

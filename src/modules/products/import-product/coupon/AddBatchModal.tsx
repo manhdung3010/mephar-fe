@@ -1,18 +1,18 @@
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { message } from 'antd';
-import { useForm } from 'react-hook-form';
-import { useRecoilValue } from 'recoil';
-import * as yup from 'yup';
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { message } from "antd";
+import { useForm } from "react-hook-form";
+import { useRecoilValue } from "recoil";
+import * as yup from "yup";
 
-import { createBatch } from '@/api/batch.service';
-import { CustomDatePicker } from '@/components/CustomDatePicker';
-import { CustomInput } from '@/components/CustomInput';
-import Label from '@/components/CustomLabel';
-import { CustomModal } from '@/components/CustomModal';
-import InputError from '@/components/InputError';
-import { formatDate } from '@/helpers';
-import { branchState } from '@/recoil/state';
+import { createBatch } from "@/api/batch.service";
+import { CustomDatePicker } from "@/components/CustomDatePicker";
+import { CustomInput } from "@/components/CustomInput";
+import Label from "@/components/CustomLabel";
+import { CustomModal } from "@/components/CustomModal";
+import InputError from "@/components/InputError";
+import { formatDate } from "@/helpers";
+import { branchState } from "@/recoil/state";
 
 export function AddBatchModal({
   isOpen,
@@ -37,12 +37,12 @@ export function AddBatchModal({
   } = useForm({
     resolver: yupResolver(
       yup.object().shape({
-        name: yup.string().required('Đây là trường bắt buộc!'),
-        expiryDate: yup.string().required('Đây là trường bắt buộc!'),
-        quantity: yup.number().required('Đây là trường bắt buộc!'),
+        name: yup.string().required("Đây là trường bắt buộc!"),
+        expiryDate: yup.string().required("Đây là trường bắt buộc!"),
+        quantity: yup.number().required("Đây là trường bắt buộc!"),
       })
     ),
-    mode: 'onChange',
+    mode: "onChange",
   });
 
   const { mutate: mutateCreateBatch, isLoading: isLoadingCreateBatch } =
@@ -55,7 +55,7 @@ export function AddBatchModal({
         }),
       {
         onSuccess: async (res) => {
-          await queryClient.invalidateQueries(['LIST_BATCH']);
+          await queryClient.invalidateQueries(["LIST_BATCH"]);
           setListBatchSelected((preValue) => [
             ...preValue,
             {
@@ -66,7 +66,8 @@ export function AddBatchModal({
             },
           ]);
 
-          reset();
+          setValue("name", "");
+          setValue("quantity", 0);
           onCancel();
         },
         onError: (err: any) => {
@@ -95,8 +96,8 @@ export function AddBatchModal({
         <CustomInput
           placeholder="Nhập tên lô"
           className="h-11"
-          onChange={(e) => setValue('name', e, { shouldValidate: true })}
-          value={getValues('name')}
+          onChange={(e) => setValue("name", e, { shouldValidate: true })}
+          value={getValues("name")}
         />
         <InputError error={errors.name?.message} />
       </div>
@@ -107,11 +108,11 @@ export function AddBatchModal({
           placeholder="Nhập hạn sử dụng"
           className="h-11 w-full rounded-r-none"
           onChange={(value) => {
-            setValue('expiryDate', formatDate(value, 'YYYY-MM-DD'), {
+            setValue("expiryDate", formatDate(value, "YYYY-MM-DD"), {
               shouldValidate: true,
             });
           }}
-          value={getValues('expiryDate')}
+          value={getValues("expiryDate")}
         />
         <InputError error={errors.name?.message} />
       </div>
@@ -121,10 +122,10 @@ export function AddBatchModal({
         <CustomInput
           placeholder="Nhập số lượng"
           className="h-11"
-          onChange={(e) => setValue('quantity', e, { shouldValidate: true })}
-          value={getValues('quantity')}
+          onChange={(e) => setValue("quantity", e, { shouldValidate: true })}
+          value={getValues("quantity")}
           type="number"
-        // allowDecimal={true}
+          // allowDecimal={true}
         />
         <InputError error={errors.quantity?.message} />
       </div>

@@ -210,7 +210,7 @@ export const BillGiftProduct = ({
                       }}
                       loading={isLoadingProduct ?? isLoadingGroup}
                       defaultValue={row?.apply?.productUnitId}
-                      value={row?.apply?.productUnitId}
+                      value={isProduct ? row?.apply?.productUnitId : row?.apply?.groupId}
                       notFoundContent={isLoadingProduct || isLoadingGroup ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
                       size='large'
                     >

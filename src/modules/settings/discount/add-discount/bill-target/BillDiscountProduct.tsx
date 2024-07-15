@@ -217,7 +217,7 @@ export const BillDiscountProduct = ({
                   <div className='flex gap-2'>
                     <Select
                       mode="multiple"
-                      className="!rounded w-full"
+                      className="!rounded w-full overflow-hidden"
                       placeholder={isProduct ? 'Nhập tên hàng, sản phẩm...' : "Nhập tên nhóm hàng..."}
                       optionFilterProp="children"
                       showSearch
@@ -233,7 +233,7 @@ export const BillDiscountProduct = ({
                       loading={isLoadingProduct ?? isLoadingGroup}
                       defaultValue={row?.apply?.productUnitId}
                       // suffixIcon={<Image onClick={() => setProductType('group')} src={DocumentIcon} />}
-                      value={row?.apply?.productUnitId}
+                      value={isProduct ? row?.apply?.productUnitId : row?.apply?.groupId}
                       notFoundContent={isLoadingProduct || isLoadingGroup ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
                       size='large'
                     >
@@ -253,10 +253,12 @@ export const BillDiscountProduct = ({
                           ))
                       }
                     </Select>
-                    <Tooltip title="Nhóm hàng">
-                      <Image onClick={() => setIsProduct(!isProduct)} src={DocumentIcon} className='cursor-pointer' />
-                    </Tooltip>
+                    <Tooltip title="Nhóm hàng" className='!w-10 flex-shrink-0'>
+                      <Image onClick={() => {
+                        setIsProduct(!isProduct)
 
+                      }} src={DocumentIcon} className='cursor-pointer' />
+                    </Tooltip>
                   </div>
                   {
                     errors?.items && <InputError className='' error={errors?.items[index]?.apply?.productUnitId?.message} />
