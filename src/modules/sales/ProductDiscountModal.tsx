@@ -248,7 +248,12 @@ export function ProductDiscountModal({
             const selectedDiscount = listDiscount.find(
               (batch) => batch.isSelected
             );
-            if (selectedDiscount.type === "gift") {
+
+
+            if (
+              selectedDiscount.type === "gift" ||
+              selectedDiscount.type === "product_price"
+            ) {
               return message.error("Chưa chọn quà khuyến mại/ quà tặng");
             }
 

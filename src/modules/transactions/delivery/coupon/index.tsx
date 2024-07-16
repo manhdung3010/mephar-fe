@@ -328,23 +328,15 @@ export function DeliveryCoupon() {
       title: `SL ${moveDetail ? "nhận" : "chuyển"}`,
       dataIndex: "quantity",
       key: "quantity",
-      render: (quantity, totalQuantity, { productKey }) => {
+      render: (quantity, { productKey, newInventory }) => {
         return (
           <CustomInput
             wrapClassName="!w-[110px]"
             className="!h-6 !w-[80px] text-center"
             hasMinus={true}
             hasPlus={true}
-            defaultValue={
-              quantity > totalQuantity.totalQuantity
-                ? totalQuantity.totalQuantity
-                : quantity
-            }
-            value={
-              quantity > totalQuantity.totalQuantity
-                ? totalQuantity.totalQuantity
-                : quantity
-            }
+            defaultValue={quantity > newInventory ? newInventory : quantity}
+            value={quantity > newInventory ? newInventory : quantity}
             type="number"
             onChange={(value) =>
               onChangeValueProduct(productKey, "quantity", value)

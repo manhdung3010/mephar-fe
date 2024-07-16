@@ -29,8 +29,8 @@ import CopyBlueIcon from "@/assets/copyBlue.svg";
 import { RoleAction, RoleModel } from "@/modules/settings/role/role.enum";
 import { useRouter } from "next/router";
 import { IProduct } from "../../list-product/types";
-import ProductDetail from "../../list-product/row-detail";
 import { getProductDetail } from "@/api/product.service";
+import ProductDetail from "./ProductDetail";
 
 interface IRecord {
   key: number;
@@ -324,30 +324,30 @@ export function Info({ record }: { record: any }) {
           RoleModel.check_inventory,
           RoleAction.create
         ) && (
-            <CustomButton
-              type="primary"
-              outline={true}
-              prefixIcon={<Image src={CopyBlueIcon} alt="" />}
-              onClick={() =>
-                router.push(`/products/check-inventory/coupon?id=${record.id}`)
-              }
-            >
-              Sao chép
-            </CustomButton>
-          )}
+          <CustomButton
+            type="primary"
+            outline={true}
+            prefixIcon={<Image src={CopyBlueIcon} alt="" />}
+            onClick={() =>
+              router.push(`/products/check-inventory/coupon?id=${record.id}`)
+            }
+          >
+            Sao chép
+          </CustomButton>
+        )}
         {hasPermission(
           profile?.role?.permissions,
           RoleModel.check_inventory,
           RoleAction.delete
         ) && (
-            <CustomButton
-              outline={true}
-              prefixIcon={<Image src={CloseIcon} alt="" />}
-              onClick={() => setOpenDelete(true)}
-            >
-              Hủy bỏ
-            </CustomButton>
-          )}
+          <CustomButton
+            outline={true}
+            prefixIcon={<Image src={CloseIcon} alt="" />}
+            onClick={() => setOpenDelete(true)}
+          >
+            Hủy bỏ
+          </CustomButton>
+        )}
       </div>
 
       <DeleteModal

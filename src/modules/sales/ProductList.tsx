@@ -257,8 +257,6 @@ export function ProductList({
       dataIndex: "name",
       key: "name",
       render: (_, { product, batches, isDiscount, itemDiscountProduct }) => {
-        console.log("adsasdasd", itemDiscountProduct);
-
         return (
           <div>
             <div className=" font-medium flex gap-2 items-center">
@@ -303,9 +301,11 @@ export function ProductList({
           </span>{' '}
           - (tồn {inventory})
         </div> */}
-            {/* <div className="font-medium italic text-[#0070F4]">
-              Liều dùng: {product?.productDosage?.name}
-            </div> */}
+            {product?.productDosage && (
+              <div className="font-medium italic text-[#0070F4]">
+                Liều dùng: {product?.productDosage?.name}
+              </div>
+            )}
           </div>
         );
       },
@@ -671,7 +671,6 @@ export function ProductList({
     setOrderObject(orderObjectClone);
   };
 
-  console.log("orderObject[orderActive]", orderObject[orderActive]);
 
   return (
     <ProductTableStyled className="p-4">

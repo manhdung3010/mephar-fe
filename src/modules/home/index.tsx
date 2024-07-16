@@ -76,6 +76,7 @@ export function Home() {
     purchase_return: "trả hàng nhập",
     inventory_checking: "kiểm kho",
     move: "chuyển hàng",
+    receive: "nhận hàng",
   };
 
   useEffect(() => {
