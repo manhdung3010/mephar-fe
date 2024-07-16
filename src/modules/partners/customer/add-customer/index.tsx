@@ -4,7 +4,7 @@ import { message, Select, Spin } from "antd";
 import { debounce } from "lodash";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import {
@@ -45,8 +45,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
   const router = useRouter();
   const [placeKeyword, setPlaceKeyword] = useState("");
   const [refId, setRefId] = useState("");
-  const [point, setPoint] = useState("");
-  const [isGetAddress, setIsGetAddress] = useState(false);
+  const [tempKeyword, setTempKeyword] = useState("");
 
   const {
     getValues,
@@ -60,6 +59,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
       status: ECustomerStatus.active,
       gender: EGender.male,
       type: ECustomerType.PERSONAL,
+      point: "",
     },
   });
 
@@ -85,35 +85,39 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
     }
   );
   const { data: address, isLoading: isLoadingAddress } = useQuery(
-    ["ADDRESS", point],
-    () => getAddress({ lat: Number(point.split(",")[0]), lng: Number(point.split(",")[1]) }),
+    ["ADDRESS", getValues("point")],
+    () => getAddress({ lat: Number(getValues("point")?.split(",")[0]), lng: Number(getValues("point")?.split(",")[1]) }),
     {
-      enabled: point?.length > 0,
+      enabled: !!getValues("point")
     }
   );
 
   useEffect(() => {
-    if (address?.data?.address && isGetAddress) {
+    if (address?.data?.address) {
       setValue("address", address?.data?.address, { shouldValidate: true });
+      setTempKeyword(address?.data?.address);
     }
-  }, [address?.data?.address, isGetAddress]);
-
+  }, [address?.data?.address]);
   useEffect(() => {
     if (latLng) {
       setValue("lng", String(latLng?.data?.lng), { shouldValidate: true });
       setValue("lat", String(latLng?.data?.lat), { shouldValidate: true });
-      setPoint(`${latLng?.data?.lat},${latLng?.data?.lng}`);
+      setValue("point", `${latLng?.data?.lat},${latLng?.data?.lng}`, { shouldValidate: true });
       setValue("address", latLng?.data?.display, { shouldValidate: true });
     }
   }, [latLng]);
 
   useEffect(() => {
-    if (point) {
-      const [lat, lng] = point.split(",");
+    if (getValues('point')) {
+      const [lat, lng]: any = getValues('point')?.split(",");
       setValue("lng", lng?.trim(), { shouldValidate: true });
       setValue("lat", lat?.trim(), { shouldValidate: true });
     }
-  }, [point]);
+    else {
+      setValue("lng", '', { shouldValidate: true });
+      setValue("lat", '', { shouldValidate: true });
+    }
+  }, [getValues('point')]);
 
   const { provinces, districts, wards } = useAddress(
     getValues("provinceId"),
@@ -195,6 +199,13 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
       setGroupCustomerKeyword(customerDetail.data?.groupCustomer?.name);
     }
   }, [customerDetail]);
+
+  const onSearch = useCallback(
+    debounce((value) => {
+      setPlaceKeyword(value);
+    }, 300),
+    [placeKeyword]
+  );
 
   return (
     <>
@@ -380,14 +391,16 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
                 // prefixIcon={<Image src={SearchIcon} alt="" />}
                 wrapClassName="w-full !rounded bg-white"
                 onSelect={(value) => {
+                  setTempKeyword(places?.data?.find((item) => item.ref_id === value)?.display)
                   setRefId(value);
                 }}
                 showSearch={true}
                 listHeight={300}
-                onSearch={debounce((value) => {
-                  setPlaceKeyword(value);
-                }, 300)}
-                value={getValues("address")}
+                onSearch={(value) => {
+                  setTempKeyword(value);
+                  onSearch(value)
+                }}
+                value={tempKeyword}
                 options={places?.data.map((item) => ({
                   value: item?.ref_id,
                   label: (
@@ -461,10 +474,9 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
                 placeholder="Nhập tọa độ"
                 className="h-11"
                 onChange={(e) => {
-                  setPoint(e)
-                  setIsGetAddress(true)
+                  setValue("point", e, { shouldValidate: true });
                 }}
-                value={point}
+                value={getValues("point")}
               />
             </div>
 
