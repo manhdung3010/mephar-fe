@@ -199,9 +199,12 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
         }
       });
       setValue("address", customerDetail?.data?.address);
-      setValue("districtId", customerDetail?.data?.district.id);
-      setValue("wardId", customerDetail?.data?.ward.id);
-      setValue("provinceId", customerDetail?.data?.province.id);
+      setValue("districtId", customerDetail?.data?.district?.id);
+      setValue("wardId", customerDetail?.data?.ward?.id);
+      setValue("provinceId", customerDetail?.data?.province?.id);
+      setValue('address', customerDetail?.data?.address);
+      setTempKeyword(customerDetail?.data?.address);
+      setValue('point', `${customerDetail?.data?.lat},${customerDetail?.data?.lng}`, { shouldValidate: true });
 
       setGroupCustomerKeyword(customerDetail.data?.groupCustomer?.name);
     }
