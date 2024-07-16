@@ -95,9 +95,9 @@ export function RightContent({
             batches:
               product?.batches?.length > 0
                 ? product.batches.map((batch: any) => ({
-                    id: batch?.batch?.id || batch.id,
-                    quantity: batch?.quantity,
-                  }))
+                  id: batch?.batch?.id || batch.id,
+                  quantity: batch?.quantity,
+                }))
                 : [],
           };
         }
@@ -142,18 +142,18 @@ export function RightContent({
         ...(!product.isBatchExpireControl
           ? null
           : {
-              batches: importId
-                ? batches?.map((batch: any) => ({
-                    id: batch.batch?.id,
-                    quantity: batch.quantity,
-                    expiryDate: batch?.expiryDate,
-                  }))
-                : batches?.map(({ id, quantity, expiryDate }) => ({
-                    id,
-                    quantity,
-                    expiryDate,
-                  })),
-            }),
+            batches: importId
+              ? batches?.map((batch: any) => ({
+                id: batch.batch?.id,
+                quantity: batch.quantity,
+                expiryDate: batch?.expiryDate,
+              }))
+              : batches?.map(({ id, quantity, expiryDate }) => ({
+                id,
+                quantity,
+                expiryDate,
+              })),
+          }),
       })
     );
     setValue("products", products);
@@ -332,17 +332,7 @@ export function RightContent({
 
       <div className="my-4 h-[1px] w-full bg-[#E4E4E4]"></div>
 
-      <div className="grid grid-cols-2 gap-3 px-6 pb-4">
-        <CustomButton
-          className="!h-12 text-lg font-semibold"
-          onClick={() => {
-            changePayload(EImportProductStatus.DRAFT);
-            handleSubmit(onSubmit)();
-          }}
-          disabled={isLoadingCreateProductReturn}
-        >
-          Lưu tạm
-        </CustomButton>
+      <div className="grid grid-cols-1 gap-3 px-6 pb-4">
         <CustomButton
           className="!h-12 text-lg font-semibold"
           type="success"
