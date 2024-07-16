@@ -15,7 +15,6 @@ interface IRecord {
   discountType: string;
   productDiscount: any[];
   pointType?: string;
-  changeType?: string;
 }
 
 export function DiscountInfo({ record }: any) {
@@ -420,144 +419,6 @@ export function DiscountInfo({ record }: any) {
       ),
     },
   ];
-
-  const columns8: ColumnsType<IRecord> = [
-    {
-      title: "Giá bán khuyến mại",
-      dataIndex: "fixedPrice",
-      key: "fixedPrice",
-      className: "",
-      render: (text, { changeType }) => {
-        return (
-          <span>
-            {changeType === "type_discount" && "Giảm"} {formatMoney(text)}
-          </span>
-        );
-      },
-    },
-    {
-      title: "Hàng/Nhóm hàng tặng",
-      dataIndex: "orderFrom",
-      key: "orderFrom",
-      className: "",
-      render: (text, { productDiscount }) => (
-        <div className="flex gap-2 flex-wrap">
-          {
-            // map item to product name from productDiscount
-            productDiscount[0]?.groupId
-              ? productDiscount
-                  .map((item) => {
-                    const product = groupProduct?.data?.items.find(
-                      (product) => product?.id === item.groupId
-                    );
-                    return product;
-                  })
-                  .map((product, index) => (
-                    <span
-                      className="bg-[#f0f0f0] rounded px-2 py-1"
-                      key={index}
-                    >
-                      {product?.name}
-                    </span>
-                  ))
-              : productDiscount
-                  .map((item) => {
-                    const product = products?.data?.items.find(
-                      (product) =>
-                        product.productUnit?.id === item.productUnitId
-                    );
-                    return product;
-                  })
-                  .map((product, index) => (
-                    <span
-                      className="bg-[#f0f0f0] rounded px-2 py-1"
-                      key={index}
-                    >
-                      {product?.productUnit?.code +
-                        " - " +
-                        product?.product?.name +
-                        " - " +
-                        product?.productUnit?.unitName}
-                    </span>
-                  ))
-          }
-        </div>
-      ),
-    },
-    {
-      title: "Số lượng",
-      dataIndex: "fromQuantity",
-      key: "fromQuantity",
-      className: "",
-      render: (text) => <span>{formatNumber(text)}</span>,
-    },
-  ];
-
-  const columns9: ColumnsType<IRecord> = [
-    {
-      title: "Tổng tiền hàng từ",
-      dataIndex: "orderFrom",
-      key: "orderFrom",
-      className: "",
-      render: (text) => <span>{formatMoney(text)}</span>,
-    },
-    {
-      title: "Hàng/Nhóm hàng tặng",
-      dataIndex: "orderFrom",
-      key: "orderFrom",
-      className: "",
-      render: (text, { productDiscount }) => (
-        <div className="flex gap-2 flex-wrap">
-          {
-            // map item to product name from productDiscount
-            productDiscount[0]?.groupId
-              ? productDiscount
-                  .map((item) => {
-                    const product = groupProduct?.data?.items.find(
-                      (product) => product?.id === item.groupId
-                    );
-                    return product;
-                  })
-                  .map((product, index) => (
-                    <span
-                      className="bg-[#f0f0f0] rounded px-2 py-1"
-                      key={index}
-                    >
-                      {product?.name}
-                    </span>
-                  ))
-              : productDiscount
-                  .map((item) => {
-                    const product = products?.data?.items.find(
-                      (product) =>
-                        product.productUnit?.id === item.productUnitId
-                    );
-                    return product;
-                  })
-                  .map((product, index) => (
-                    <span
-                      className="bg-[#f0f0f0] rounded px-2 py-1"
-                      key={index}
-                    >
-                      {product?.productUnit?.code +
-                        " - " +
-                        product?.product?.name +
-                        " - " +
-                        product?.productUnit?.unitName}
-                    </span>
-                  ))
-          }
-        </div>
-      ),
-    },
-    {
-      title: "Số lượng",
-      dataIndex: "fromQuantity",
-      key: "fromQuantity",
-      className: "",
-      render: (text) => <span>{formatNumber(text)}</span>,
-    },
-  ];
   const checkType = (target: string, type: string) => {
     if (target === "order" && type === "order_price") {
       return columns;
@@ -571,16 +432,11 @@ export function DiscountInfo({ record }: any) {
       return columns6;
     } else if (target === "product" && type === "loyalty") {
       return columns7;
-    } else if (target === "product" && type === "price_by_buy_number") {
-      return columns8;
-    } else if (target === "order" && type === "gift") {
-      return columns9;
     } else {
       return columns3;
     }
   };
 
-  console.log(record?.target, record?.type);
   console.log(record?.discountItem);
 
   return (
