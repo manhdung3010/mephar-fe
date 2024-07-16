@@ -18,6 +18,7 @@ import { schema } from './schema';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { CustomInput } from '@/components/CustomInput';
+import { CustomAutocomplete } from '@/components/CustomAutocomplete';
 const { Option } = Select;
 function Check() {
   const mapRef = useRef<any>(null);
@@ -112,7 +113,7 @@ function Check() {
                   <div className='bg-white p-5 shadow-sm flex flex-col gap-3'>
                     <div>
                       <Label infoText="" label="Vị trí muốn check" required />
-                      <Select
+                      {/* <Select
                         placeholder="Vị trí check điểm bán"
                         className="h-11 !rounded w-full"
                         onChange={(value) => {
@@ -140,7 +141,33 @@ function Check() {
                             </div>
                           </Option>
                         ))}
-                      </Select>
+                      </Select> */}
+                      <CustomAutocomplete
+                        placeholder="Vị trí check điểm bán"
+                        className="h-11 !rounded w-full"
+                        // prefixIcon={<Image src={SearchIcon} alt="" />}
+                        wrapClassName="w-full !rounded bg-white"
+                        onSelect={(value) => {
+                          setRefId(value);
+                        }}
+                        showSearch={true}
+                        listHeight={300}
+                        onSearch={debounce((value) => {
+                          setPlaceKeyword(value);
+                        }, 300)}
+                        value={places?.data?.find((item) => item.ref_id === refId)?.display}
+                        options={places?.data.map((item) => ({
+                          value: item?.ref_id,
+                          label: (
+                            <div className='flex items-center gap-1 py-2'>
+                              <Image src={MarkIcon} />
+                              <span className='display'>
+                                {item?.display}
+                              </span>
+                            </div>
+                          ),
+                        }))}
+                      />
                     </div>
                     <div>
                       <Label infoText="" label="Khoảng cách quét" required />

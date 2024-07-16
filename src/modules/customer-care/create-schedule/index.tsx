@@ -28,6 +28,7 @@ import { createTrip, getLatLng, getTripDetail, searchPlace, updateTrip } from '@
 import { useRecoilValue } from 'recoil'
 import { profileState } from '@/recoil/state'
 import { CustomAutocomplete } from '@/components/CustomAutocomplete'
+import { checkTextInText, sliceString } from '@/helpers'
 const { Option } = Select;
 
 function CreateSchedule() {
@@ -45,6 +46,7 @@ function CreateSchedule() {
 
   const [customerAddress, setCustomerAddress] = useState('');
   const [tempKeyword, setTempKeyword] = useState('');
+  const [tempDisplay, setTempDisplay] = useState('');
 
   const [refId, setRefId] = useState('');
 
@@ -251,6 +253,8 @@ function CreateSchedule() {
                             // prefixIcon={<Image src={SearchIcon} alt="" />}
                             wrapClassName="w-full !rounded bg-white"
                             onSelect={(value) => {
+                              setTempDisplay(places?.data?.find((item) => item.ref_id === value)?.display);
+                              setTempKeyword(places?.data?.find((item) => item.ref_id === value)?.display)
                               setRefId(value);
                             }}
                             showSearch={true}
@@ -272,35 +276,6 @@ function CreateSchedule() {
                               ),
                             }))}
                           />
-                          {/* <Select
-                            placeholder="Chọn vị trí xuất phát"
-                            className="h-11 !rounded w-full"
-                            onChange={(value) => {
-                              setRefId(value);
-                            }}
-                            onSearch={debounce((value) => {
-                              setPlaceKeyword(value);
-                            }, 300)}
-                            showSearch={true}
-                            // optionFilterProp="children"
-                            // notFoundContent={isLoadingPlace ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
-                            filterOption={(input, option: any) => {
-                              const textContent = option.children.props.children[1].props.children;
-                              return textContent.toLowerCase().includes(input.toLowerCase());
-                            }}
-                            value={places?.data?.find((item) => item.ref_id === refId)?.name || startAddress || undefined}
-                          >
-                            {places?.data?.map((item) => (
-                              <Option key={item.ref_id} value={item.ref_id}>
-                                <div className='flex items-center gap-1 py-2'>
-                                  <Image src={MarkIcon} />
-                                  <span className='display'>
-                                    {item?.display}
-                                  </span>
-                                </div>
-                              </Option>
-                            ))}
-                          </Select> */}
                         </div>
                       </div>
                       <div className='flex gap-y-3 flex-col'>
@@ -379,41 +354,7 @@ function CreateSchedule() {
                                       ))
                                     }
                                   </Select>
-                                  <CustomAutocomplete
-                                    placeholder="Địa chỉ khách hàng"
-                                    className="h-11 !rounded w-full"
-                                    disabled={row?.status === 'visited'}
-                                    // prefixIcon={<Image src={SearchIcon} alt="" />}
-                                    wrapClassName="w-full !rounded bg-white"
-                                    // onSelect={(value) => handleSelectProduct(value)}
-                                    onSelect={async (value) => {
-                                      // setRefId(value);
-                                      const res = await getLatLng({ refId: value });
-                                      if (res?.data) {
-                                        const listCustomer = getValues('listCustomer');
-                                        listCustomer[index] = { ...listCustomer[index], address: res?.data?.display, lat: res?.data?.lat, lng: res?.data?.lng };
-                                        setValue('listCustomer', listCustomer, { shouldValidate: true });
-                                        handleUpdateMarker(res?.data?.lng, res?.data?.lat, null, index + 1)
-                                      }
-                                    }}
-                                    showSearch={true}
-                                    listHeight={300}
-                                    onSearch={debounce((value) => {
-                                      setPlaceKeyword(value);
-                                    }, 300)}
-                                    value={row?.address?.length > 70 ? row?.address?.slice(0, 70) + '...' : row?.address || undefined}
-                                    options={places?.data.map((item) => ({
-                                      value: JSON.stringify(item?.ref_id),
-                                      label: (
-                                        <div className='flex items-center gap-1 py-2'>
-                                          <Image src={MarkIcon} />
-                                          <span className='display'>
-                                            {item?.display}
-                                          </span>
-                                        </div>
-                                      ),
-                                    }))}
-                                  />
+                                  <CustomerRowAddress row={row} index={index} setValue={setValue} getValues={getValues} handleUpdateMarker={handleUpdateMarker} />
                                   {/* <Select
                                     placeholder="Địa chỉ khách hàng"
                                     className="h-11 !rounded w-full"
@@ -432,9 +373,12 @@ function CreateSchedule() {
                                       setPlaceKeyword(value);
                                     }, 300)}
                                     showSearch={true}
-                                    notFoundContent={isLoadingPlace ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
+                                    // notFoundContent={isLoadingPlace ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
                                     filterOption={(input, option: any) => {
+                                      console.log('input', input)
                                       const textContent = option.children.props.children[1].props.children;
+                                      console.log('textContent', textContent.toLowerCase())
+                                      console.log('check', textContent.toLowerCase().includes(input.toLowerCase()))
                                       return textContent.toLowerCase().includes(input.toLowerCase());
                                     }}
                                     value={row?.address?.length > 70 ? row?.address?.slice(0, 70) + '...' : row?.address || undefined}
@@ -507,6 +451,62 @@ function CreateSchedule() {
         </div>
       </div>
     </>
+  )
+}
+
+const CustomerRowAddress = ({ row, index, setValue, getValues, handleUpdateMarker }) => {
+  const [placeKeyword, setPlaceKeyword] = useState("");
+  const { data: places, isLoading: isLoadingPlace } = useQuery(
+    ["SEARCH_PLACE", placeKeyword],
+    () =>
+      searchPlace({ keyword: placeKeyword }),
+    {
+      enabled: placeKeyword.length > 0
+    }
+  );
+  useEffect(() => {
+    if (row?.address) {
+      setPlaceKeyword(row?.address)
+    }
+  }, [row?.address])
+  return (
+    <CustomAutocomplete
+      placeholder="Địa chỉ khách hàng"
+      className="h-11 !rounded w-full"
+      disabled={row?.status === 'visited'}
+      // prefixIcon={<Image src={SearchIcon} alt="" />}
+      wrapClassName="w-full !rounded bg-white"
+      // onSelect={(value) => handleSelectProduct(value)}
+      onSelect={async (value) => {
+        // setRefId(value);
+        const res = await getLatLng({ refId: value });
+        if (res?.data) {
+          const listCustomer = getValues('listCustomer');
+          listCustomer[index] = { ...listCustomer[index], address: res?.data?.display, lat: res?.data?.lat, lng: res?.data?.lng };
+          setValue('listCustomer', listCustomer, { shouldValidate: true });
+          handleUpdateMarker(res?.data?.lng, res?.data?.lat, null, index + 1)
+        }
+      }}
+      showSearch={true}
+      listHeight={300}
+      onSearch={(value) => {
+        setPlaceKeyword(value);
+        // onSearch(value);
+      }}
+
+      value={placeKeyword || null}
+      options={places?.data.map((item) => ({
+        value: item?.ref_id,
+        label: (
+          <div className='flex items-center gap-1 py-2'>
+            <Image src={MarkIcon} />
+            <span className='display'>
+              {item?.display}
+            </span>
+          </div>
+        ),
+      }))}
+    />
   )
 }
 

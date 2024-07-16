@@ -35,8 +35,9 @@ import { schema } from "./schema";
 import { useRecoilValue } from "recoil";
 import { profileState } from "@/recoil/state";
 import { RoleAction, RoleModel } from "@/modules/settings/role/role.enum";
-import { getLatLng, searchPlace } from "@/api/trip.service";
+import { getAddress, getLatLng, searchPlace } from "@/api/trip.service";
 import dayjs from "dayjs";
+import { CustomAutocomplete } from "@/components/CustomAutocomplete";
 const { Option } = Select;
 
 export function AddCustomer({ customerId }: { customerId?: string }) {
@@ -45,6 +46,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
   const [placeKeyword, setPlaceKeyword] = useState("");
   const [refId, setRefId] = useState("");
   const [point, setPoint] = useState("");
+  const [isGetAddress, setIsGetAddress] = useState(false);
 
   const {
     getValues,
@@ -82,6 +84,19 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
       enabled: refId.length > 0,
     }
   );
+  const { data: address, isLoading: isLoadingAddress } = useQuery(
+    ["ADDRESS", point],
+    () => getAddress({ lat: Number(point.split(",")[0]), lng: Number(point.split(",")[1]) }),
+    {
+      enabled: point?.length > 0,
+    }
+  );
+
+  useEffect(() => {
+    if (address?.data?.address && isGetAddress) {
+      setValue("address", address?.data?.address, { shouldValidate: true });
+    }
+  }, [address?.data?.address, isGetAddress]);
 
   useEffect(() => {
     if (latLng) {
@@ -359,51 +374,32 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
 
             <div>
               <Label infoText="" label="Địa chỉ" />
-              {/* <CustomInput
-                placeholder="Nhập địa chỉ"
-                className="h-11"
-                onChange={(e) =>
-                  setValue("address", e, { shouldValidate: true })
-                }
-                value={getValues("address")}
-              /> */}
-              <Select
+              <CustomAutocomplete
                 placeholder="Tìm kiếm địa chỉ"
                 className="h-11 !rounded w-full"
-                onChange={(value) => {
+                // prefixIcon={<Image src={SearchIcon} alt="" />}
+                wrapClassName="w-full !rounded bg-white"
+                onSelect={(value) => {
                   setRefId(value);
                 }}
+                showSearch={true}
+                listHeight={300}
                 onSearch={debounce((value) => {
                   setPlaceKeyword(value);
                 }, 300)}
                 value={getValues("address")}
-                showSearch={true}
-                notFoundContent={
-                  isLoadingPlace ? (
-                    <Spin
-                      size="small"
-                      className="flex justify-center p-4 w-full"
-                    />
-                  ) : null
-                }
-                filterOption={(input, option: any) => {
-                  const textContent =
-                    option.children.props.children[1].props.children;
-                  return textContent
-                    .toLowerCase()
-                    .includes(input.toLowerCase());
-                }}
-              >
-                {places?.data?.map((item) => (
-                  <Option key={item.ref_id} value={item.ref_id}>
-                    <div className="flex items-center gap-1 py-2">
+                options={places?.data.map((item) => ({
+                  value: item?.ref_id,
+                  label: (
+                    <div className='flex items-center gap-1 py-2'>
                       <Image src={MarkIcon} />
-                      <span className="display">{item?.display}</span>
+                      <span className='display'>
+                        {item?.display}
+                      </span>
                     </div>
-                  </Option>
-                ))}
-              </Select>
-              <InputError error={errors.address?.message} />
+                  ),
+                }))}
+              />
             </div>
 
             <div>
@@ -459,30 +455,15 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
               />
               <InputError error={errors.wardId?.message} />
             </div>
-            {/* <div>
-              <Label infoText="" label="Kinh độ" />
-              <CustomInput
-                placeholder="Kinh độ"
-                className="h-11"
-                onChange={(e) => setValue("lng", e, { shouldValidate: true })}
-                value={getValues("lng")}
-              />
-            </div>
-            <div>
-              <Label infoText="" label="Vĩ độ" />
-              <CustomInput
-                placeholder="Vĩ độ"
-                className="h-11"
-                onChange={(e) => setValue("lat", e, { shouldValidate: true })}
-                value={getValues("lat")}
-              />
-            </div> */}
             <div>
               <Label infoText="" label="Tọa độ" />
               <CustomInput
                 placeholder="Nhập tọa độ"
                 className="h-11"
-                onChange={(e) => setPoint(e)}
+                onChange={(e) => {
+                  setPoint(e)
+                  setIsGetAddress(true)
+                }}
                 value={point}
               />
             </div>
