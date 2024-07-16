@@ -140,6 +140,13 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
     useMutation(
       () => {
         const customerData = getValues();
+        if (customerData.point) {
+          const [lat, lng]: any = customerData.point.split(",");
+          customerData.lat = lat;
+          customerData.lng = lng;
+        }
+        delete customerData.point;
+
         const customerId = customerDetail?.data?.id;
 
         const customerMutation = customerId
