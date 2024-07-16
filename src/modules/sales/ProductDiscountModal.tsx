@@ -282,6 +282,7 @@ export function ProductDiscountModal({
             setDiscountType("product");
             onSave(selectedDiscountProduct);
             onCancel();
+            return
           }}
           className="h-[46px] min-w-[150px] py-2 px-4"
           disabled={!listDiscount.some((batch) => batch.isSelected)}
