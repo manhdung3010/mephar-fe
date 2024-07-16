@@ -83,7 +83,6 @@ export function CheckInventoryCoupon() {
     }
   );
 
-  console.log('importProducts', importProducts);
 
   useEffect(() => {
     setImportProducts([]);
