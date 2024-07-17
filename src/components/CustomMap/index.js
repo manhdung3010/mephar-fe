@@ -68,7 +68,10 @@ const CustomMap = forwardRef((props, ref) => {
   useEffect(() => {
     console.log('coordinatesRouting', coordinatesRouting?.length)
     if (coordinatesRouting?.length > 0) {
-      addGeojsonLine();
+      // addGeojsonLine();
+      setTimeout(() => {
+        addGeojsonLine();
+      }, 1000);
     }
   }, [coordinatesRouting]);
 
@@ -337,7 +340,6 @@ const CustomMap = forwardRef((props, ref) => {
         });
       }
     } else {
-      console.log('called')
       mapRef.current.on("load", () => {
         console.log("Map loaded. Adding new route source and layer.");
         if (mapRef.current.getSource("route")) {
@@ -369,19 +371,16 @@ const CustomMap = forwardRef((props, ref) => {
           },
         });
       });
+      console.log('called')
+      // if map is not loaded, then add the line when the map is loaded
     }
   };
-  // useEffect(() => {
-  //   if (mapRef.current) {
-  //     mapRef.current.resize();
-  //   }
-  // }, [isMapFull]);
 
   useEffect(() => {
     if (mapRef.current) {
       mapRef.current.resize();
       // Ensure the map is loaded before adding the line
-      if (mapRef.current.isStyleLoaded() && coordinatesRouting.length > 0) {
+      if (mapRef.current.isStyleLoaded() && coordinatesRouting?.length > 0) {
         addGeojsonLine();
       } else {
         mapRef.current.on('load', addGeojsonLine);
