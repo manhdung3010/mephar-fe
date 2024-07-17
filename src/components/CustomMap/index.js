@@ -5,7 +5,7 @@ import React, {
   useImperativeHandle,
   useState,
 } from "react";
-import { getRouting } from "../../api/trip.service.ts"
+import { getRouting } from "../../api/trip.service.ts";
 
 const CustomMap = forwardRef((props, ref) => {
   const { isMapFull, tripCustomer, nowLocation, radiusCircle } = props;
@@ -38,30 +38,30 @@ const CustomMap = forwardRef((props, ref) => {
       try {
         if (tripCustomer && tripCustomer.length > 0 && currentPoint) {
           console.log('currentPoint', currentPoint)
-          const currentPoint1 = currentPoint
-          const markers = markersRef.current.filter((d) => d.status !== "visited").map((item) => item.coordinates)
+          const currentPoint1 = currentPoint;
+          const markers = markersRef.current.filter((d) => d.status !== "visited").map((item) => item.coordinates);
           const newMarkers = markers?.map((item) => {
             return {
               lat: item[1],
               lng: item[0]
-            }
-          })
-          const listPoint = [currentPoint1, ...newMarkers]
+            };
+          });
+          const listPoint = [currentPoint1, ...newMarkers];
           const payload = {
             listPoint: listPoint,
             vehicle: 'car',
-          }
+          };
           const res = await getRouting(payload);
           if (res?.code === 200) {
-            setCoordinatesRouting(res?.data?.paths[0]?.points?.coordinates)
+            setCoordinatesRouting(res?.data?.paths[0]?.points?.coordinates);
             // reset current point
-            setCurrentPoint(null)
+            setCurrentPoint(null);
           }
         }
       } catch (error) {
-        console.log('error', error)
+        console.log('error', error);
       }
-    }
+    };
     callRouting();
   }, [tripCustomer, currentPoint]);
 
@@ -74,8 +74,7 @@ const CustomMap = forwardRef((props, ref) => {
   const loadMap = () => {
     mapRef.current = new vietmapgl.Map({
       container: "map",
-      style:
-        "https://maps.vietmap.vn/mt/tm/style.json?apikey=53e31413d7968153044cd0a760cb2a6550590d1fa5213645",
+      style: "https://maps.vietmap.vn/mt/tm/style.json?apikey=53e31413d7968153044cd0a760cb2a6550590d1fa5213645",
       center: [105.8542, 21.0285],
       zoom: 14,
       pitch: 0, // Set pitch to 0 for flat display
@@ -109,8 +108,7 @@ const CustomMap = forwardRef((props, ref) => {
     customMarker.style.height = "56px";
     if (customerStatus === 'visited') {
       customMarker.style.backgroundImage = 'url("https://res.cloudinary.com/dvrqupkgg/image/upload/v1720695045/markBgSuccessIcon_kf8zj7.svg")'; // Green color
-    }
-    else {
+    } else {
       customMarker.style.backgroundImage = 'url("https://res.cloudinary.com/dvrqupkgg/image/upload/v1720693956/markBgIcon_ummkoy.svg")';
       customMarker.textContent = customerIndex; // Set the number inside the marker
     }

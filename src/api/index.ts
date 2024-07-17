@@ -51,7 +51,7 @@ axiosClient.interceptors.response.use(
         "discount/product",
         "discount/config",
         "trip/geofencing?page=1&limit=999",
-        "map-routing",
+        "trip/map-routing",
       ];
 
       if (!excludeUrl.includes(response.config?.url as string)) {
