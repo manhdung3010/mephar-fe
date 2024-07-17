@@ -69,7 +69,7 @@ const CustomMap = forwardRef((props, ref) => {
     if (coordinatesRouting?.length > 0) {
       addGeojsonLine();
     }
-  }, [coordinatesRouting])
+  }, [coordinatesRouting]);
 
   const loadMap = () => {
     mapRef.current = new vietmapgl.Map({
@@ -285,8 +285,6 @@ const CustomMap = forwardRef((props, ref) => {
   };
 
   const addGeojsonLine = () => {
-    console.log('coordinatesRouting?.length', coordinatesRouting?.length);
-
     if (!mapRef.current) {
       console.error("Map reference is not available.");
       return;
@@ -331,7 +329,7 @@ const CustomMap = forwardRef((props, ref) => {
             "line-cap": "round",
           },
           paint: {
-            "line-color": "red",
+            "line-color": "#6600CC",
             "line-width": 8,
           },
         });
@@ -339,6 +337,10 @@ const CustomMap = forwardRef((props, ref) => {
     } else {
       mapRef.current.on("load", () => {
         console.log("Map loaded. Adding new route source and layer.");
+        if (mapRef.current.getSource("route")) {
+          mapRef.current.removeLayer("route");
+          mapRef.current.removeSource("route");
+        }
         mapRef.current.addSource("route", {
           type: "geojson",
           data: {
