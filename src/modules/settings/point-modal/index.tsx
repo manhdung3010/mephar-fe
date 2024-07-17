@@ -182,7 +182,7 @@ function PointModal({
                     })
                   }
                 />{" "}
-                Thanh toán bằng điểm sau
+                Cho phép thanh toán bằng điểm
               </div>
               <div className="flex items-center gap-2 col-span-3">
                 <div>
@@ -223,7 +223,7 @@ function PointModal({
               </div>
             </div>
             <div className="grid grid-cols-5 items-center">
-              <div className="col-span-2">Cho phép thanh toán bằng điểm</div>
+              <div className="col-span-2">Thanh toán bằng điểm sau</div>
               <div className="flex items-center gap-2 col-span-3">
                 <div className="flex-1">
                   <CustomInput

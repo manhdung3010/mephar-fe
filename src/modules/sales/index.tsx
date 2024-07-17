@@ -1,41 +1,56 @@
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useQuery } from '@tanstack/react-query';
-import { Popover } from 'antd';
-import cx from 'classnames';
-import { cloneDeep, debounce, orderBy } from 'lodash';
-import Image from 'next/image';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useQuery } from "@tanstack/react-query";
+import { Popover } from "antd";
+import cx from "classnames";
+import { cloneDeep, debounce, orderBy } from "lodash";
+import Image from "next/image";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useRecoilState, useRecoilValue } from "recoil";
 
-import { getSaleProducts, getSampleMedicines } from '@/api/product.service';
-import BarcodeIcon from '@/assets/barcode.svg';
-import CloseIcon from '@/assets/closeIcon.svg';
-import FilterIcon from '@/assets/filterIcon.svg';
-import PlusIcon from '@/assets/plusIcon.svg';
-import SearchIcon from '@/assets/searchIcon.svg';
-import { CustomAutocomplete } from '@/components/CustomAutocomplete';
-import { EPaymentMethod } from '@/enums';
-import { formatMoney, formatNumber, getImage, randomString, roundNumber } from '@/helpers';
-import { branchState, orderActiveState, orderDiscountSelected, orderState, productDiscountSelected } from '@/recoil/state';
+import { getSaleProducts, getSampleMedicines } from "@/api/product.service";
+import BarcodeIcon from "@/assets/barcode.svg";
+import CloseIcon from "@/assets/closeIcon.svg";
+import FilterIcon from "@/assets/filterIcon.svg";
+import PlusIcon from "@/assets/plusIcon.svg";
+import SearchIcon from "@/assets/searchIcon.svg";
+import { CustomAutocomplete } from "@/components/CustomAutocomplete";
+import { EPaymentMethod } from "@/enums";
+import {
+  formatMoney,
+  formatNumber,
+  getImage,
+  randomString,
+  roundNumber,
+} from "@/helpers";
+import {
+  branchState,
+  orderActiveState,
+  orderDiscountSelected,
+  orderState,
+  productDiscountSelected,
+} from "@/recoil/state";
 
-import { getOrderDetail } from '@/api/order.service';
-import { CustomInput } from '@/components/CustomInput';
-import useBarcodeScanner from '@/hooks/useBarcodeScanner';
-import { useRouter } from 'next/router';
-import { SaleHeader } from './Header';
-import { LeftMenu } from './LeftMenu';
-import { ProductList } from './ProductList';
-import { RightContent } from './RightContent';
+import { getOrderDetail } from "@/api/order.service";
+import { CustomInput } from "@/components/CustomInput";
+import useBarcodeScanner from "@/hooks/useBarcodeScanner";
+import { useRouter } from "next/router";
+import { SaleHeader } from "./Header";
+import { LeftMenu } from "./LeftMenu";
+import { ProductList } from "./ProductList";
+import { RightContent } from "./RightContent";
 import type {
   ISaleProduct,
   ISaleProductLocal,
   ISampleMedicine,
-} from './interface';
-import { schema, schemaReturn } from './schema';
-import { RightContentReturn } from './RightContentReturn';
-import { CustomButton } from '@/components/CustomButton';
-import { getOrderDiscountList, getProductDiscountList } from '@/api/discount.service';
+} from "./interface";
+import { schema, schemaReturn } from "./schema";
+import { RightContentReturn } from "./RightContentReturn";
+import { CustomButton } from "@/components/CustomButton";
+import {
+  getOrderDiscountList,
+  getProductDiscountList,
+} from "@/api/discount.service";
 
 const Index = () => {
   const branchId = useRecoilValue(branchState);
@@ -46,12 +61,12 @@ const Index = () => {
     page: 1,
     limit: 20,
     isSale: true,
-    keyword: '',
+    keyword: "",
   });
   const [isSearchSampleMedicine, setIsSearchSampleMedicine] = useState(false);
   const [isScanBarcode, setIsScanBarcode] = useState(false);
   const [orderDetail, setOrderDetail] = useState<any>(null);
-  const [valueScanBarcode, setValueScanBarcode] = useState('');
+  const [valueScanBarcode, setValueScanBarcode] = useState("");
 
   const {
     getValues,
@@ -62,7 +77,7 @@ const Index = () => {
     reset,
   } = useForm({
     resolver: yupResolver(schema),
-    mode: 'onChange',
+    mode: "onChange",
     defaultValues: {
       paymentType: EPaymentMethod.CASH,
       paymentPoint: 0,
@@ -77,7 +92,7 @@ const Index = () => {
     reset: resetReturn,
   } = useForm({
     resolver: yupResolver(schemaReturn),
-    mode: 'onChange',
+    mode: "onChange",
     defaultValues: {
       paymentType: EPaymentMethod.CASH,
     },
@@ -85,15 +100,22 @@ const Index = () => {
 
   const [orderActive, setOrderActive] = useRecoilState(orderActiveState);
   const [orderObject, setOrderObject] = useRecoilState(orderState);
-  const [orderDiscount, setOrderDiscount] = useRecoilState(orderDiscountSelected);
-  const [productDiscount, setProductDiscount] = useRecoilState(productDiscountSelected);
+  const [orderDiscount, setOrderDiscount] = useRecoilState(
+    orderDiscountSelected
+  );
+  const [productDiscount, setProductDiscount] = useRecoilState(
+    productDiscountSelected
+  );
 
-
-  const { data: products, isLoading: isLoadingProduct, isSuccess } = useQuery<{
+  const {
+    data: products,
+    isLoading: isLoadingProduct,
+    isSuccess,
+  } = useQuery<{
     data?: { items: ISaleProduct[] };
   }>(
     [
-      'LIST_SALE_PRODUCT',
+      "LIST_SALE_PRODUCT",
       formFilter.page,
       formFilter.limit,
       formFilter.keyword,
@@ -103,14 +125,12 @@ const Index = () => {
     { enabled: !isSearchSampleMedicine }
   );
 
-  
-
   const { data: sampleMedicines, isLoading: isLoadingSampleMedicines } =
     useQuery<{
       data?: { items: ISampleMedicine[] };
     }>(
       [
-        'LIST_SAMPLE_MEDICINE',
+        "LIST_SAMPLE_MEDICINE",
         formFilter.page,
         formFilter.limit,
         formFilter.keyword,
@@ -133,53 +153,62 @@ const Index = () => {
     return price;
   }, [orderObject, orderActive]);
   const getDiscountPostData = () => {
-    const products = orderObject[orderActive]?.map((product: ISaleProductLocal) => ({
-      productUnitId: product.productUnitId,
-      quantity: product.quantity,
-    }));
+    const products = orderObject[orderActive]?.map(
+      (product: ISaleProductLocal) => ({
+        productUnitId: product.productUnitId,
+        quantity: product.quantity,
+      })
+    );
     return {
       products,
       totalPrice: totalPrice,
-      ...(getValues('customerId') && {
-        customerId: getValues('customerId'),
+      ...(getValues("customerId") && {
+        customerId: getValues("customerId"),
       }),
       branchId: branchId,
-    }
-  }
-  const data: any = getDiscountPostData()
-  const { data: discountList, isLoading } = useQuery(['ORDER_DISCOUNT_LIST', orderObject[orderActive]], () =>
-    getOrderDiscountList(data),
+    };
+  };
+  const data: any = getDiscountPostData();
+  const { data: discountList, isLoading } = useQuery(
+    ["ORDER_DISCOUNT_LIST", orderObject[orderActive]],
+    () => getOrderDiscountList(data),
     {
       enabled: totalPrice > 0,
     }
   );
-  const [searchKeyword, setSearchKeyword] = useState('');
+  const [searchKeyword, setSearchKeyword] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const getDataDetail = async () => {
       if (id) {
-        const orderDetail: any = await getOrderDetail(Number(id))
+        const orderDetail: any = await getOrderDetail(Number(id));
         if (orderDetail?.data?.products) {
-          setOrderDetail(orderDetail?.data)
-          setValue("customerId", orderDetail?.order?.customerId, { shouldValidate: true })
+          setOrderDetail(orderDetail?.data);
+          setValue("customerId", orderDetail?.order?.customerId, {
+            shouldValidate: true,
+          });
           // add order detail to order object when order detail is loaded
           const orderObjectClone = cloneDeep(orderObject);
 
-          orderObjectClone[orderActive + "-RETURN"] = orderDetail?.data?.products.map(
-            (product) => {
+          orderObjectClone[orderActive + "-RETURN"] =
+            orderDetail?.data?.products.map((product) => {
               const productKey = `${product?.productId}-${product.productUnit?.id}`;
 
               return {
                 ...product,
                 productKey,
-                productUnit: { ...product.productUnit, code: product.product?.code, returnPrice: product.productUnit.price },
+                productUnit: {
+                  ...product.productUnit,
+                  code: product.product?.code,
+                  returnPrice: product.productUnit.price,
+                },
                 quantity: product.quantity,
                 productUnitId: product.productUnit.id,
                 originProductUnitId: product.productUnit.id,
                 batches: product.batches?.map((batch) => {
                   const inventory =
-                    (batch.batch.quantity / product.productUnit.exchangeValue)
+                    batch.batch.quantity / product.productUnit.exchangeValue;
 
                   const newBatch = {
                     ...batch,
@@ -199,15 +228,14 @@ const Index = () => {
                   return newBatch;
                 }),
               };
-            }
-          );
-          setOrderActive(orderActive + "-RETURN")
+            });
+          setOrderActive(orderActive + "-RETURN");
           setOrderObject({ ...orderObject, ...orderObjectClone });
         }
       }
-    }
-    getDataDetail()
-  }, [id])
+    };
+    getDataDetail();
+  }, [id]);
 
   const { scannedData, isScanned } = useBarcodeScanner();
 
@@ -215,10 +243,16 @@ const Index = () => {
   useEffect(() => {
     async function handleScannedData() {
       if (scannedData) {
-        const productsScan = await getSaleProducts({ ...formFilter, keyword: scannedData, branchId })
+        const productsScan = await getSaleProducts({
+          ...formFilter,
+          keyword: scannedData,
+          branchId,
+        });
         let product;
         if (productsScan?.data?.items?.length > 0 && !isSearchSampleMedicine) {
-          product = productsScan?.data?.items?.find((item) => item.barCode === scannedData);
+          product = productsScan?.data?.items?.find(
+            (item) => item.barCode === scannedData
+          );
         }
 
         if (product) {
@@ -227,74 +261,83 @@ const Index = () => {
         }
       }
     }
-    handleScannedData()
+    handleScannedData();
   }, [scannedData, products?.data?.items, isSuccess, isSearchSampleMedicine]);
 
   useEffect(() => {
-    setOrderDiscount([])
-  }, [orderActive])
+    setOrderDiscount([]);
+  }, [orderActive]);
 
   // get product discount
   useEffect(() => {
     function handleGetProductDiscount() {
-      if (discountList && orderDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
-        let orderDiscountClone: any = cloneDeep(orderDiscount)
+      if (
+        discountList &&
+        orderDiscount?.length > 0 &&
+        orderObject[orderActive]?.length > 0
+      ) {
+        let orderDiscountClone: any = cloneDeep(orderDiscount);
         orderDiscountClone = orderDiscountClone?.forEach((item) => {
-          const list = item?.items[0]?.apply?.productUnitId
+          const list = item?.items[0]?.apply?.productUnitId;
           if (list?.length > 0) {
             for (const l of list) {
-              const productsScan = getSaleProducts({ ...formFilter, keyword: "", branchId, productUnit: l }).then((res) => {
+              const productsScan = getSaleProducts({
+                ...formFilter,
+                keyword: "",
+                branchId,
+                productUnit: l,
+              }).then((res) => {
                 if (res?.data?.items?.length > 0) {
                   let discountValue = item?.items[0]?.apply?.discountValue;
                   let discountType = item?.items[0]?.apply?.discountType;
                   if (item?.items[0]?.apply?.isGift) {
                     discountType = "amount";
                     discountValue = res?.data?.items[0]?.price;
-                  }
-                  else {
+                  } else {
                     if (discountType === "percent" && discountValue > 100) {
                       discountValue = 100;
-                    }
-                    else if (discountType === "amount" && +discountValue > +res?.data?.items[0]?.price) {
+                    } else if (
+                      discountType === "amount" &&
+                      +discountValue > +res?.data?.items[0]?.price
+                    ) {
                       discountValue = res?.data?.items[0]?.price;
                     }
                   }
 
                   if (res) {
-                    onSelectedProduct(JSON.stringify({
-                      ...res?.data?.items[0],
-                      maxQuantity: item.items[0].apply.maxQuantity,
-                      isDiscount: true,
-                      discountType: discountType,
-                      discountValue: discountValue,
-                      isGift: item?.items[0]?.apply?.isGift,
-                    }));
+                    onSelectedProduct(
+                      JSON.stringify({
+                        ...res?.data?.items[0],
+                        maxQuantity: item.items[0].apply.maxQuantity,
+                        isDiscount: true,
+                        discountType: discountType,
+                        discountValue: discountValue,
+                        isGift: item?.items[0]?.apply?.isGift,
+                      })
+                    );
                   }
                 }
-              }
-              )
+              });
             }
-          }
-          else {
+          } else {
             // remove product added by discount before
             const orderObjectClone = cloneDeep(orderObject);
-            orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
+            orderObjectClone[orderActive] = orderObjectClone[
+              orderActive
+            ]?.filter((product) => !product.isDiscount);
             setOrderObject(orderObjectClone);
           }
-        })
+        });
       }
     }
-    handleGetProductDiscount()
+    handleGetProductDiscount();
   }, [orderDiscount]);
-
-  console.log("productDiscount", productDiscount)
-  console.log("orderDiscount", orderDiscount)
 
   // product discount
   useEffect(() => {
     function handleGetProductDiscount() {
       // if (productDiscount) {
-      let productDiscountClone: any = cloneDeep(productDiscount)
+      let productDiscountClone: any = cloneDeep(productDiscount);
       if (productDiscountClone?.length > 0) {
         productDiscountClone = productDiscountClone?.forEach((item) => {
           const list = item?.items[0]?.apply?.productUnitId;
@@ -302,7 +345,12 @@ const Index = () => {
           let changeType = item?.items[0]?.apply?.changeType;
           if (list?.length > 0) {
             for (const l of list) {
-              getSaleProducts({ ...formFilter, keyword: "", branchId, productUnit: l?.id ?? l }).then((res) => {
+              getSaleProducts({
+                ...formFilter,
+                keyword: "",
+                branchId,
+                productUnit: l?.id ?? l,
+              }).then((res) => {
                 if (res?.data?.items?.length > 0) {
                   let discountValue = item?.items[0]?.apply?.discountValue;
                   let discountType = item?.items[0]?.apply?.discountType;
@@ -310,106 +358,132 @@ const Index = () => {
                   if (item?.items[0]?.apply?.isGift) {
                     discountType = "amount";
                     discountValue = res?.data?.items[0]?.price;
-                  }
-                  else {
+                  } else {
                     if (discountType === "percent" && discountValue > 100) {
                       discountValue = 100;
-                    }
-                    else if (discountType === "amount" && +discountValue > +res?.data?.items[0]?.price) {
+                    } else if (
+                      discountType === "amount" &&
+                      +discountValue > +res?.data?.items[0]?.price
+                    ) {
                       discountValue = res?.data?.items[0]?.price;
                     }
                   }
 
-                  return onSelectedProduct(JSON.stringify({
-                    ...res?.data?.items[0],
-                    discountQuantity: l.discountQuantity || 1,
-                    isDiscount: true,
-                    discountType: discountType,
-                    discountValue: discountValue,
-                    isGift: item?.items[0]?.apply?.isGift,
-                  }));
+                  return onSelectedProduct(
+                    JSON.stringify({
+                      ...res?.data?.items[0],
+                      discountQuantity: l.discountQuantity || 1,
+                      isDiscount: true,
+                      discountType: discountType,
+                      discountValue: discountValue,
+                      isGift: item?.items[0]?.apply?.isGift,
+                    })
+                  );
                 }
-              }
-              )
+              });
             }
-          }
-          else {
+          } else {
             if (fixedPrice > 0 && changeType === "type_price") {
               // update price of product same productUnitId
               const orderObjectClone = cloneDeep(orderObject);
-              orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map(
-                (product: ISaleProductLocal) => {
-                  if (product.productUnitId === item?.items[0]?.condition?.productUnitId[0]) {
-                    return {
-                      ...product,
-                      isDiscount: true,
-                      itemPrice: fixedPrice,
-                      productUnit: { ...product.productUnit, oldPrice: product.productUnit.price, price: fixedPrice },
-                      buyNumberType: 1,
-                    };
-                  }
-                  return product;
+              orderObjectClone[orderActive] = orderObjectClone[
+                orderActive
+              ]?.map((product: ISaleProductLocal) => {
+                if (
+                  product.productUnitId ===
+                  item?.items[0]?.condition?.productUnitId[0]
+                ) {
+                  return {
+                    ...product,
+                    isDiscount: true,
+                    itemPrice: fixedPrice,
+                    productUnit: {
+                      ...product.productUnit,
+                      oldPrice: product.productUnit.price,
+                      price: fixedPrice,
+                    },
+                    buyNumberType: 1,
+                  };
                 }
-              );
+                return product;
+              });
               setOrderObject(orderObjectClone);
-            }
-            else if (fixedPrice > 0 && changeType === "type_discount") {
+            } else if (fixedPrice > 0 && changeType === "type_discount") {
               // update price of product same productUnitId
               const orderObjectClone = cloneDeep(orderObject);
-              orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map(
-                (product: ISaleProductLocal) => {
-                  if (product.productUnitId === item?.items[0]?.condition?.productUnitId[0]) {
-                    return {
-                      ...product,
-                      discountValue: fixedPrice,
-                      isDiscount: true,
-                      discountType: "amount",
-                      itemPrice: product.productUnit.oldPrice ? product.productUnit.oldPrice - fixedPrice : product.productUnit.price - fixedPrice,
-                      ...(product.productUnit?.oldPrice && {
-                        productUnit: { ...product.productUnit, price: product.productUnit.oldPrice }
-                      }),
-                      buyNumberType: 2,
-                    };
-                  }
-                  return product;
+              orderObjectClone[orderActive] = orderObjectClone[
+                orderActive
+              ]?.map((product: ISaleProductLocal) => {
+                if (
+                  product.productUnitId ===
+                  item?.items[0]?.condition?.productUnitId[0]
+                ) {
+                  return {
+                    ...product,
+                    discountValue: fixedPrice,
+                    isDiscount: true,
+                    discountType: "amount",
+                    itemPrice: product.productUnit.oldPrice
+                      ? product.productUnit.oldPrice - fixedPrice
+                      : product.productUnit.price - fixedPrice,
+                    ...(product.productUnit?.oldPrice && {
+                      productUnit: {
+                        ...product.productUnit,
+                        price: product.productUnit.oldPrice,
+                      },
+                    }),
+                    buyNumberType: 2,
+                  };
                 }
-              );
+                return product;
+              });
               setOrderObject(orderObjectClone);
-            }
-            else {
+            } else {
               // remove product added by discount before
               const orderObjectClone = cloneDeep(orderObject);
-              orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
+              orderObjectClone[orderActive] = orderObjectClone[
+                orderActive
+              ]?.filter((product) => !product.isDiscount);
               return setOrderObject(orderObjectClone);
             }
           }
-        })
-      }
-      else {
+        });
+      } else {
         // remove product added by discount before
         const orderObjectClone = cloneDeep(orderObject);
-        orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
+        orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter(
+          (product) => !product.isDiscount
+        );
         return setOrderObject(orderObjectClone);
       }
       // }
     }
-    handleGetProductDiscount()
+    handleGetProductDiscount();
   }, [productDiscount]);
   useEffect(() => {
     // update product when order discount is changed
     if (orderDiscount?.length <= 0) {
       const orderObjectClone = cloneDeep(orderObject);
-      orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
+      orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter(
+        (product) => !product.isDiscount
+      );
       setOrderObject(orderObjectClone);
     }
+  }, [orderDiscount]);
 
-  }, [orderDiscount])
-
-  const onExpandMoreBatches = async (productKey, quantity: number, product?: any) => {
+  const onExpandMoreBatches = async (
+    productKey,
+    quantity: number,
+    product?: any
+  ) => {
     const orderObjectClone = cloneDeep(orderObject);
 
-    const res = await getProductDiscountList({ productUnitId: product?.id, branchId: branchId, quantity: quantity })
-    let itemDiscountProduct = res?.data?.data?.items
+    const res = await getProductDiscountList({
+      productUnitId: product?.id,
+      branchId: branchId,
+      quantity: quantity,
+    });
+    let itemDiscountProduct = res?.data?.data?.items;
 
     orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map(
       (product: ISaleProductLocal) => {
@@ -431,7 +505,7 @@ const Index = () => {
           let sumQuantity = 0;
 
           let batches = cloneDeep(product.batches);
-          batches = orderBy(batches, ['isSelected'], ['desc']);
+          batches = orderBy(batches, ["isSelected"], ["desc"]);
 
           batches = batches.map((batch) => {
             const remainQuantity =
@@ -468,7 +542,6 @@ const Index = () => {
     setOrderObject(orderObjectClone);
   };
 
-
   // select product
   const onSelectedProduct = (value) => {
     const product: ISaleProduct = JSON.parse(value);
@@ -490,12 +563,14 @@ const Index = () => {
               // update batches
               batches: p.batches.map((batch) => {
                 const inventory =
-                  (batch.quantity / product.productUnit.exchangeValue)
+                  batch.quantity / product.productUnit.exchangeValue;
                 const newBatch = {
                   ...batch,
                   // inventory,
                   // originalInventory: batch.quantity,
-                  quantity: batch.isSelected ? batch.quantity + 1 : batch.quantity,
+                  quantity: batch.isSelected
+                    ? batch.quantity + 1
+                    : batch.quantity,
                 };
 
                 return newBatch;
@@ -512,9 +587,14 @@ const Index = () => {
 
       let itemDiscountProduct;
 
-      const res = getProductDiscountList({ productUnitId: product?.id, branchId: branchId, quantity: 1, customerId: getValues("customerId") }).then((res) => {
+      const res = getProductDiscountList({
+        productUnitId: product?.id,
+        branchId: branchId,
+        quantity: 1,
+        customerId: getValues("customerId"),
+      }).then((res) => {
         if (res?.data) {
-          itemDiscountProduct = res?.data?.data?.items
+          itemDiscountProduct = res?.data?.data?.items;
 
           const productLocal: any = {
             ...product,
@@ -526,7 +606,7 @@ const Index = () => {
             originProductUnitId: product.id,
             batches: product.batches?.map((batch) => {
               const inventory =
-                (batch.quantity / product.productUnit.exchangeValue)
+                batch.quantity / product.productUnit.exchangeValue;
 
               const newBatch = {
                 ...batch,
@@ -544,16 +624,17 @@ const Index = () => {
             }),
           };
           // orderObjectClone[orderActive]?.push(productLocal);
-          setOrderObject((pre) => ({ ...pre, [orderActive]: [...pre[orderActive], productLocal] }));
+          setOrderObject((pre) => ({
+            ...pre,
+            [orderActive]: [...pre[orderActive], productLocal],
+          }));
         }
-      })
-
-
+      });
     }
     // setOrderObject((pre) => ({ ...pre, ...orderObjectClone }));
     inputRef.current?.select();
     // setOrderObject(orderObjectClone);
-    setFormFilter((pre) => ({ ...pre, keyword: '' }));
+    setFormFilter((pre) => ({ ...pre, keyword: "" }));
   };
 
   const onSelectedSampleMedicine = (value) => {
@@ -593,7 +674,7 @@ const Index = () => {
           originProductUnitId: product.productUnitId,
           batches: product.batches?.map((batch) => {
             const inventory =
-              (batch.quantity / product.productUnit.exchangeValue)
+              batch.quantity / product.productUnit.exchangeValue;
             const newBatch = {
               ...batch,
               inventory,
@@ -644,8 +725,8 @@ const Index = () => {
             <div className="hidden-scrollbar overflow-x-auto overflow-y-hidden">
               <div className="flex h-[62px] min-w-[800px]  items-center  px-6">
                 <div className="py-3">
-                  {
-                    !isScanBarcode ? <CustomAutocomplete
+                  {!isScanBarcode ? (
+                    <CustomAutocomplete
                       onSelect={(value) => {
                         if (isSearchSampleMedicine) {
                           onSelectedSampleMedicine(value);
@@ -654,8 +735,8 @@ const Index = () => {
 
                         onSelectedProduct(value);
 
-                        setFormFilter((pre) => ({ ...pre, keyword: '' }));
-                        setSearchKeyword('');
+                        setFormFilter((pre) => ({ ...pre, keyword: "" }));
+                        setSearchKeyword("");
                       }}
                       onSearch={(value) => {
                         setSearchKeyword(value);
@@ -669,15 +750,16 @@ const Index = () => {
                         <Popover
                           content={
                             isSearchSampleMedicine
-                              ? 'Tìm kiếm theo đơn thuốc mẫu'
-                              : 'Tìm kiếm theo thuốc, hàng hóa'
+                              ? "Tìm kiếm theo đơn thuốc mẫu"
+                              : "Tìm kiếm theo thuốc, hàng hóa"
                           }
                         >
                           <div
-                            className={`flex cursor-pointer items-center ${isSearchSampleMedicine
-                              ? 'rounded border border-blue-500'
-                              : ''
-                              }`}
+                            className={`flex cursor-pointer items-center ${
+                              isSearchSampleMedicine
+                                ? "rounded border border-blue-500"
+                                : ""
+                            }`}
                           >
                             <Image
                               src={FilterIcon}
@@ -694,83 +776,88 @@ const Index = () => {
                       options={
                         !isSearchSampleMedicine
                           ? products?.data?.items?.map((item) => ({
-                            value: JSON.stringify(item),
-                            label: (
-                              <div className="flex items-center gap-x-4 p-2">
-                                <div className=" flex h-12 w-[68px] items-center rounded border border-gray-300 p-[2px]">
-                                  {item.product?.image?.path && (
-                                    <Image
-                                      src={getImage(item.product?.image?.path)}
-                                      height={40}
-                                      width={68}
-                                      alt=""
-                                      objectFit="cover"
-                                    />
-                                  )}
-                                </div>
+                              value: JSON.stringify(item),
+                              label: (
+                                <div className="flex items-center gap-x-4 p-2">
+                                  <div className=" flex h-12 w-[68px] items-center rounded border border-gray-300 p-[2px]">
+                                    {item.product?.image?.path && (
+                                      <Image
+                                        src={getImage(
+                                          item.product?.image?.path
+                                        )}
+                                        height={40}
+                                        width={68}
+                                        alt=""
+                                        objectFit="cover"
+                                      />
+                                    )}
+                                  </div>
 
-                                <div>
-                                  <div className="mb-2 flex gap-x-3">
-                                    <div>
-                                      <span>{item.code}</span> {" - "}
-                                      <span>{item.product.name}</span>
-                                    </div>
-                                    <div className="rounded bg-red-main px-2 py-[2px] text-white">
-                                      {item.productUnit.unitName}
-                                    </div>
-                                    {
-                                      item.quantity <= 0 && (
+                                  <div>
+                                    <div className="mb-2 flex gap-x-3">
+                                      <div>
+                                        <span>{item.code}</span> {" - "}
+                                        <span>{item.product.name}</span>
+                                      </div>
+                                      <div className="rounded bg-red-main px-2 py-[2px] text-white">
+                                        {item.productUnit.unitName}
+                                      </div>
+                                      {item.quantity <= 0 && (
                                         <div className="rounded text-red-main py-[2px] italic">
                                           Hết hàng
                                         </div>
-                                      )
-                                    }
-                                  </div>
+                                      )}
+                                    </div>
 
-                                  <div className="flex gap-x-3">
-                                    <div>Số lượng: {formatNumber(item.quantity)}</div>
-                                    <div>|</div>
-                                    <div>
-                                      Giá: {formatMoney(item.productUnit.price)}
+                                    <div className="flex gap-x-3">
+                                      <div>
+                                        Số lượng: {formatNumber(item.quantity)}
+                                      </div>
+                                      <div>|</div>
+                                      <div>
+                                        Giá:{" "}
+                                        {formatMoney(item.productUnit.price)}
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
-                              </div>
-                            ),
-                          }))
+                              ),
+                            }))
                           : sampleMedicines?.data?.items?.map((item) => ({
-                            value: JSON.stringify(item),
-                            label: (
-                              <div className="flex items-center gap-x-4 p-2">
-                                <div className=" flex h-12 w-[68px] items-center rounded border border-gray-300 p-[2px]">
-                                  {item.image?.path && (
-                                    <Image
-                                      src={getImage(item.image?.path)}
-                                      height={40}
-                                      width={68}
-                                      alt=""
-                                      objectFit="cover"
-                                    />
-                                  )}
-                                </div>
+                              value: JSON.stringify(item),
+                              label: (
+                                <div className="flex items-center gap-x-4 p-2">
+                                  <div className=" flex h-12 w-[68px] items-center rounded border border-gray-300 p-[2px]">
+                                    {item.image?.path && (
+                                      <Image
+                                        src={getImage(item.image?.path)}
+                                        height={40}
+                                        width={68}
+                                        alt=""
+                                        objectFit="cover"
+                                      />
+                                    )}
+                                  </div>
 
-                                <div>
-                                  <div className="mb-2 flex gap-x-5">
-                                    <div>{item.name}</div>
+                                  <div>
+                                    <div className="mb-2 flex gap-x-5">
+                                      <div>{item.name}</div>
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            ),
-                          }))
+                              ),
+                            }))
                       }
                       value={searchKeyword}
                       isLoading={isLoadingProduct || isLoadingSampleMedicines}
                       listHeight={512}
                       popupClassName="search-product"
                       disabled={orderActive.split("-")[1] === "RETURN"}
-                    /> : <CustomInput
+                    />
+                  ) : (
+                    <CustomInput
                       className="h-[48px] w-[466px] rounded-[30px] bg-white text-sm"
-                      placeholder='Thêm sản phẩm mới vào đơn F3'
+                      placeholder="Thêm sản phẩm mới vào đơn F3"
                       onChange={(value) => {
                         setValueScanBarcode(value);
                       }}
@@ -780,20 +867,18 @@ const Index = () => {
                       autoFocus
                       prefixIcon={<Image src={SearchIcon} alt="" />}
                     />
-                  }
+                  )}
                 </div>
 
-                <CustomButton outline disabled={orderActive.split("-")[1] === "RETURN"}>
-                  <Popover
-                    content={
-                      "Quét mã vạch"
-                    }
-                  >
+                <CustomButton
+                  outline
+                  disabled={orderActive.split("-")[1] === "RETURN"}
+                >
+                  <Popover content={"Quét mã vạch"}>
                     <div
-                      className={`flex cursor-pointer items-center ${isScanBarcode
-                        ? 'rounded border border-blue-500'
-                        : ''
-                        }`}
+                      className={`flex cursor-pointer items-center ${
+                        isScanBarcode ? "rounded border border-blue-500" : ""
+                      }`}
                     >
                       <Image
                         src={BarcodeIcon}
@@ -818,12 +903,13 @@ const Index = () => {
                           setOrderActive(order);
                         }}
                         className={cx(
-                          'w-max mr-2  flex items-center rounded-[40px] border border-[#fff]  py-2 px-4 text-[#D64457]',
-                          order === orderActive ? 'bg-[#F7DADD]' : 'bg-[#fff]'
+                          "w-max mr-2  flex items-center rounded-[40px] border border-[#fff]  py-2 px-4 text-[#D64457]",
+                          order === orderActive ? "bg-[#F7DADD]" : "bg-[#fff]"
                         )}
                       >
-                        <span className={cx('mr-1 text-base font-medium')}>
-                          Đơn {order.split("-")[1] === "RETURN" ? "trả" : "bán"} {index + 1}
+                        <span className={cx("mr-1 text-base font-medium")}>
+                          Đơn {order.split("-")[1] === "RETURN" ? "trả" : "bán"}{" "}
+                          {index + 1}
                         </span>
 
                         <Image
@@ -868,19 +954,31 @@ const Index = () => {
             </div>
           </div>
 
-          <ProductList useForm={{ errors, setError }} orderDetail={orderDetail} listDiscount={discountList} />
+          <ProductList
+            useForm={{ errors, setError }}
+            orderDetail={orderDetail}
+            listDiscount={discountList}
+          />
         </div>
 
-        {
-          orderActive.split("-")[1] === "RETURN" ? <RightContentReturn
-            useForm={{ getValuesReturn, setValueReturn, handleSubmitReturn, errorsReturn, resetReturn }}
+        {orderActive.split("-")[1] === "RETURN" ? (
+          <RightContentReturn
+            useForm={{
+              getValuesReturn,
+              setValueReturn,
+              handleSubmitReturn,
+              errorsReturn,
+              resetReturn,
+            }}
             customerId={orderObject[orderActive]?.[0]?.customerId}
             orderDetail={orderDetail}
-          /> : <RightContent
+          />
+        ) : (
+          <RightContent
             useForm={{ getValues, setValue, handleSubmit, errors, reset }}
             discountList={discountList}
           />
-        }
+        )}
       </div>
     </div>
   );
