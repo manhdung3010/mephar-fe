@@ -283,7 +283,7 @@ const AddDiscount = () => {
       setValue("scope", {
         customer: {
           isAll: dcDetail.discountCustomer?.length > 0 ? false : true,
-          ids: dcDetail.discountCustomer?.length > 0 ? dcDetail.discountCustomer.map((customer: any) => customer.customerId) : []
+          ids: dcDetail.discountCustomer?.length > 0 ? dcDetail.discountCustomer.map((customer: any) => customer.groupCustomerId) : []
         },
         branch: {
           isAll: dcDetail.discountBranch?.length > 0 ? false : true,

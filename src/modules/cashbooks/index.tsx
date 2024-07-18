@@ -86,7 +86,7 @@ export function Cashbook() {
       title: 'Người nộp/nhận',
       dataIndex: 'targetCustomer',
       key: 'targetCustomer',
-      render: (value, record) => record?.targetCustomer?.fullName || record?.targetSupplier?.name || record?.targetOther?.name || record?.targetUser?.name,
+      render: (value, record) => record?.targetCustomer?.fullName || record?.targetSupplier?.name || record?.targetOther?.name || record?.targetUser?.fullName,
     },
     {
       title: 'Giá trị',
