@@ -95,8 +95,6 @@ export function Info({ record }: { record: any }) {
     }
   );
 
-  console.log(productDetail);
-
   const columns: ColumnsType<IRecord> = [
     {
       title: "Mã hàng",

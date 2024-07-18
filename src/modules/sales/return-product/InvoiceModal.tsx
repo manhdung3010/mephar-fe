@@ -57,7 +57,6 @@ function InvoiceModal({
     
   }
 
-  console.log(orders);
   
 
   const columns: ColumnsType<IOrder> = [

@@ -1,8 +1,8 @@
 import classNames from "classnames";
 import { useState } from "react";
 import { IProduct } from "../../list-product/types";
-import Inventory from "../../list-product/row-detail/Inventory";
-import ProductExpire from "../../list-product/row-detail/ProductExpire";
+import SystemLot from "./SystemLot";
+import ProductExpire from "./ProductExpire";
 
 const ProductDetail = ({
   record,
@@ -15,9 +15,7 @@ const ProductDetail = ({
 }) => {
   const [select, setSelect] = useState(0);
 
-  console.log(123123123, record);
-
-  const menu = ["Tồn kho", record?.isBatchExpireControl && "Lô/hạn sử dụng"];
+  const menu = ["Lô hệ thống", "Lô ảnh hưởng"];
 
   return (
     <div
@@ -45,9 +43,13 @@ const ProductDetail = ({
       </div>
 
       {select === 0 && (
-        <Inventory productId={record?.id} record={record} branchId={branchId} />
+        <SystemLot
+          productId={record?.id}
+          branchId={branchId}
+          productUnit={record?.productUnit}
+        />
       )}
-      {select === 1 && record?.isBatchExpireControl && (
+      {select === 1 && (
         <ProductExpire
           productId={record?.id}
           branchId={branchId}
