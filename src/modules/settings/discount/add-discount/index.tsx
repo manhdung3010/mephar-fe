@@ -312,12 +312,16 @@ const AddDiscount = () => {
       setValue("scope", {
         customer: {
           isAll: dcDetail.discountCustomer?.length > 0 ? false : true,
+<<<<<<< HEAD
           ids:
             dcDetail.discountCustomer?.length > 0
               ? dcDetail.discountCustomer.map(
                   (customer: any) => customer.customerId
                 )
               : [],
+=======
+          ids: dcDetail.discountCustomer?.length > 0 ? dcDetail.discountCustomer.map((customer: any) => customer.groupCustomerId) : []
+>>>>>>> 0e6036719c4b96866a3fa88680511f7f141bc4e7
         },
         branch: {
           isAll: dcDetail.discountBranch?.length > 0 ? false : true,

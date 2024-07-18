@@ -429,7 +429,7 @@ const TimeApplication = ({ setValue, getValues, errors }: any) => {
       </div>
       <div className='grid grid-cols-2 gap-x-[42px] gap-y-5'>
         <div className="flex gap-2">
-          <Checkbox checked={getValues("time")?.isBirthDay} onChange={(e) => handleChange("isBirthday", e.target.checked)} />
+          <Checkbox checked={getValues("time")?.isBirthDay} onChange={(e) => handleChange("isBirthDay", e.target.checked)} />
           <div className="flex items-center gap-2">
             <div>Áp dụng vào</div>
             ngày

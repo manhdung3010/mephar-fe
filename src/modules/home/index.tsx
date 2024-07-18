@@ -179,7 +179,7 @@ export function Home() {
                   <span className="mx-2">vừa</span>
                   <span className="text-[#0070F4]">{type[value?.type]}</span>
                 </div>
-                {(value?.type !== type["inventory_checking"] || value?.type !== type['receive']) && (
+                {value?.amount > 0 && (
                   <div>
                     với giá trị{" "}
                     <span className="font-bold">

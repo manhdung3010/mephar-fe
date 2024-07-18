@@ -16,14 +16,18 @@ import EditIcon from "@/assets/editWhite.svg";
 import SuccessCircleIcon from "@/assets/successCircleIcon.svg";
 import ArrowLeftIcon from "@/assets/arrowLeftIcon2.svg";
 import CustomMap from '@/components/CustomMap'
-import { formatDateTime, formatDistance } from '@/helpers';
+import { formatDateTime, formatDistance, hasPermission } from '@/helpers';
 import UpdateStatusModal from './UpdateTripStatusModal';
 import { ECustomerStatus } from '../enum';
 import DeleteModal from '@/components/CustomModal/ModalDeleteItem';
 import { message } from 'antd';
+import { profileState } from '@/recoil/state';
+import { useRecoilValue } from 'recoil';
+import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
 
 function TripDetail() {
   const router = useRouter();
+  const profile = useRecoilValue(profileState);
   const queryClient = useQueryClient();
   const { id } = router.query;
   const mapRef = useRef<any>(null);
@@ -90,16 +94,20 @@ function TripDetail() {
           {"Chi tiết lịch trình"}
         </div>
         <div className="flex gap-4">
-          <CustomButton
-            outline={true}
-            type="danger"
-            onClick={() => setIsOpenDelete(true)}
-            prefixIcon={<Image src={DeleteIcon} alt="icon" />}
-          >
-            Xóa
-          </CustomButton>
           {
-            tripDetail?.data?.status === 'done' ? null : (
+            hasPermission(profile?.role?.permissions, RoleModel.map, RoleAction.delete) && (
+              <CustomButton
+                outline={true}
+                type="danger"
+                onClick={() => setIsOpenDelete(true)}
+                prefixIcon={<Image src={DeleteIcon} alt="icon" />}
+              >
+                Xóa
+              </CustomButton>
+            )
+          }
+          {
+            hasPermission(profile?.role?.permissions, RoleModel.map, RoleAction.update) && tripDetail?.data?.status !== 'done' && (
               <CustomButton
                 onClick={() => router.push(`/customer-care/create-schedule?id=${id}&isEdit=true`)}
                 type="success"
