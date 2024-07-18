@@ -1,26 +1,26 @@
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { message } from 'antd';
-import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { message } from "antd";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
 
-import { getStore, updateStore } from '@/api/store.service';
-import { CustomButton } from '@/components/CustomButton';
-import { CustomInput } from '@/components/CustomInput';
-import Label from '@/components/CustomLabel';
-import { CustomSelect } from '@/components/CustomSelect';
-import { CustomUpload } from '@/components/CustomUpload';
-import NormalUpload from '@/components/CustomUpload/NormalUpload';
-import InputError from '@/components/InputError';
-import { formatDate } from '@/helpers';
-import { useAddress } from '@/hooks/useAddress';
+import { getStore, updateStore } from "@/api/store.service";
+import { CustomButton } from "@/components/CustomButton";
+import { CustomInput } from "@/components/CustomInput";
+import Label from "@/components/CustomLabel";
+import { CustomSelect } from "@/components/CustomSelect";
+import { CustomUpload } from "@/components/CustomUpload";
+import NormalUpload from "@/components/CustomUpload/NormalUpload";
+import InputError from "@/components/InputError";
+import { formatDate } from "@/helpers";
+import { useAddress } from "@/hooks/useAddress";
 
-import { schema } from './schema';
+import { schema } from "./schema";
 
 export function StoreInfo() {
   const queryClient = useQueryClient();
 
-  const { data: stores } = useQuery(['SETTING_STORE'], () => getStore());
+  const { data: stores } = useQuery(["SETTING_STORE"], () => getStore());
 
   const {
     getValues,
@@ -29,7 +29,7 @@ export function StoreInfo() {
     formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
-    mode: 'onChange',
+    mode: "onChange",
   });
 
   useEffect(() => {
@@ -40,21 +40,21 @@ export function StoreInfo() {
         }
       });
       setValue(
-        'businessRegistrationImageId',
+        "businessRegistrationImageId",
         stores?.data?.items[0]?.businessRegistrationImage?.id
       );
     }
   }, [stores]);
 
   const { provinces, districts, wards } = useAddress(
-    getValues('provinceId'),
-    getValues('districtId')
+    getValues("provinceId"),
+    getValues("districtId")
   );
 
   const { mutate: mutateUpdateStore, isLoading: isLoadingUpdateStore } =
     useMutation(() => updateStore(stores?.data?.items[0]?.id, getValues()), {
       onSuccess: async () => {
-        await queryClient.invalidateQueries(['SETTING_STORE']);
+        await queryClient.invalidateQueries(["SETTING_STORE"]);
       },
       onError: (err: any) => {
         message.error(err?.message);
@@ -89,8 +89,8 @@ export function StoreInfo() {
           <Label infoText="" label="Tên cửa hàng" required />
           <CustomInput
             className="h-11"
-            value={getValues('name')}
-            onChange={(e) => setValue('name', e, { shouldValidate: true })}
+            value={getValues("name")}
+            onChange={(e) => setValue("name", e, { shouldValidate: true })}
           />
           <InputError error={errors.name?.message} />
         </div>
@@ -109,8 +109,8 @@ export function StoreInfo() {
           <Label infoText="" label="Số điện thoại" required />
           <CustomInput
             className="h-11"
-            value={getValues('phone')}
-            onChange={(e) => setValue('phone', e, { shouldValidate: true })}
+            value={getValues("phone")}
+            onChange={(e) => setValue("phone", e, { shouldValidate: true })}
           />
           <InputError error={errors.phone?.message} />
         </div>
@@ -119,9 +119,9 @@ export function StoreInfo() {
           <Label infoText="" label="Số đăng ký kinh doanh" required />
           <CustomInput
             className="h-11"
-            value={getValues('businessRegistrationNumber')}
+            value={getValues("businessRegistrationNumber")}
             onChange={(e) =>
-              setValue('businessRegistrationNumber', e, {
+              setValue("businessRegistrationNumber", e, {
                 shouldValidate: true,
               })
             }
@@ -139,9 +139,9 @@ export function StoreInfo() {
             <CustomSelect
               className="h-11 !rounded"
               onChange={(value) => {
-                setValue('provinceId', value, { shouldValidate: true });
-                setValue('districtId', null as any, { shouldValidate: true });
-                setValue('wardId', null as any, { shouldValidate: true });
+                setValue("provinceId", value, { shouldValidate: true });
+                setValue("districtId", null as any, { shouldValidate: true });
+                setValue("wardId", null as any, { shouldValidate: true });
               }}
               placeholder="Chọn tỉnh/thành phố"
               options={provinces?.data?.items?.map((province) => ({
@@ -149,7 +149,7 @@ export function StoreInfo() {
                 label: province.name,
               }))}
               showSearch={true}
-              value={getValues('provinceId')}
+              value={getValues("provinceId")}
             />
             <InputError error={errors.provinceId?.message} />
           </div>
@@ -158,15 +158,15 @@ export function StoreInfo() {
             <CustomSelect
               className="h-11 !rounded"
               onChange={(value) => {
-                setValue('districtId', value, { shouldValidate: true });
-                setValue('wardId', null as any, { shouldValidate: true });
+                setValue("districtId", value, { shouldValidate: true });
+                setValue("wardId", null as any, { shouldValidate: true });
               }}
               placeholder="Chọn quận/huyện"
               options={districts?.data?.items?.map((district) => ({
                 value: district.id,
                 label: district.name,
               }))}
-              value={getValues('districtId')}
+              value={getValues("districtId")}
               showSearch={true}
             />
             <InputError error={errors.districtId?.message} />
@@ -178,14 +178,14 @@ export function StoreInfo() {
           <CustomSelect
             className="h-11 !rounded"
             onChange={(value) => {
-              setValue('wardId', value, { shouldValidate: true });
+              setValue("wardId", value, { shouldValidate: true });
             }}
             placeholder="Phường/Xã"
             options={wards?.data?.items?.map((ward) => ({
               value: ward.id,
               label: ward.name,
             }))}
-            value={getValues('wardId')}
+            value={getValues("wardId")}
             showSearch={true}
           />
           <InputError error={errors.wardId?.message} />
@@ -195,9 +195,9 @@ export function StoreInfo() {
           <Label infoText="" label="Địa chỉ" required />
           <CustomInput
             className="h-11"
-            value={getValues('address')}
+            value={getValues("address")}
             onChange={(value) =>
-              setValue('address', value, { shouldValidate: true })
+              setValue("address", value, { shouldValidate: true })
             }
           />
         </div>
@@ -218,7 +218,7 @@ export function StoreInfo() {
         <CustomUpload
           className="!w-fit"
           onChangeValue={(value) =>
-            setValue('logoId', value, { shouldValidate: true })
+            setValue("logoId", value, { shouldValidate: true })
           }
           values={[stores?.data?.items[0]?.logo?.path]}
         >

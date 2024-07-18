@@ -122,8 +122,6 @@ function SelectProductDiscount({
     },
   ];
 
-  console.log(11111, listProduct);
-
   return (
     <CustomModal
       isOpen={isOpen}

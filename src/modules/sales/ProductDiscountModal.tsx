@@ -249,7 +249,6 @@ export function ProductDiscountModal({
               (batch) => batch.isSelected
             );
 
-
             if (
               selectedDiscount.type === "gift" ||
               selectedDiscount.type === "product_price"
@@ -287,7 +286,7 @@ export function ProductDiscountModal({
             setDiscountType("product");
             onSave(selectedDiscountProduct);
             onCancel();
-            return
+            return;
           }}
           className="h-[46px] min-w-[150px] py-2 px-4"
           disabled={!listDiscount.some((batch) => batch.isSelected)}
