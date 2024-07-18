@@ -176,6 +176,7 @@ const Index = () => {
       enabled: totalPrice > 0,
     }
   );
+
   const [searchKeyword, setSearchKeyword] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
