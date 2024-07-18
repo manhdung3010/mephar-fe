@@ -53,3 +53,11 @@ export function getHistoryCustomer(id: string) {
 export const getAddress = (params: { lat: number; lng: number }) => {
   return axiosClient.get(`trip/search/reverse`, { params });
 };
+
+// vẽ đường đi
+export const getRouting = (payload: {
+  listPoint: { lng: string; lat: string }[];
+  vehicle: string;
+}) => {
+  return axiosClient.post(`trip/map-routing`, payload);
+};
