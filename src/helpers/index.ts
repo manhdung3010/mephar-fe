@@ -1,4 +1,8 @@
 import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+
+// Sử dụng plugin
+dayjs.extend(customParseFormat);
 
 export function formatDate(date?: Date | string, format?: string): string {
   return dayjs(date).format(format ?? "DD/MM/YYYY");

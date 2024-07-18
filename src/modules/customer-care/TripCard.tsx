@@ -21,7 +21,7 @@ function TripCard({ data }: any) {
           <div className="flex items-center text-gray-600 space-x-4">
             <div className="flex items-center space-x-1">
               <Image src={DateIcon} alt="" />
-              <span>{formatDateTime(data?.time)}</span>
+              <span>{formatDateTime(data?.createdAt)}</span>
             </div>
             <div className="flex items-center space-x-1">
               <Image src={MarkIcon} alt="" />

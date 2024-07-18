@@ -5,6 +5,7 @@ import Label from '@/components/CustomLabel'
 import { useRouter } from 'next/router'
 import LocationIcon from "@/assets/location.svg";
 import LineIcon from "@/assets/LineDotLargeIcon.svg";
+import EndMarkIcon from "@/assets/endMarkIcon.svg";
 import ArrowLeftIcon from "@/assets/arrowLeftIcon2.svg";
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
@@ -43,12 +44,16 @@ function CreateSchedule() {
   const [isMapFull, setIsMapFull] = useState(false);
 
   const [startAddress, setStartAddress] = useState('');
+  const [endAddress, setEndAddress] = useState('');
 
   const [customerAddress, setCustomerAddress] = useState('');
   const [tempKeyword, setTempKeyword] = useState('');
+  const [tempKeywordEnd, setTempKeywordEnd] = useState('');
   const [tempDisplay, setTempDisplay] = useState('');
+  const [tempDisplayEnd, setTempDisplayEnd] = useState('');
 
   const [refId, setRefId] = useState('');
+  const [isEnd, setIsEnd] = useState(false);
 
   const {
     getValues,
@@ -103,9 +108,12 @@ function CreateSchedule() {
       setValue('name', tripDetail?.data?.name, { shouldValidate: true });
       setValue('time', tripDetail?.data?.time, { shouldValidate: true });
       setStartAddress(tripDetail?.data?.startAddress);
+      setEndAddress(tripDetail?.data?.endAddress);
       setValue('lat', tripDetail?.data?.lat, { shouldValidate: true });
       setValue('lng', tripDetail?.data?.lng, { shouldValidate: true });
-      const customers = tripDetail?.data?.tripCustomer?.map((item) => ({ id: item?.customerId, address: item?.address, lat: item?.lat, lng: item?.lng, status: item?.status }));
+      setValue('latEnd', tripDetail?.data?.latEnd, { shouldValidate: true });
+      setValue('lngEnd', tripDetail?.data?.lngEnd, { shouldValidate: true });
+      const customers = tripDetail?.data?.tripCustomer?.map((item) => ({ id: item?.customerId, tripCustomerId: item?.id, address: item?.address, lat: item?.lat, lng: item?.lng, status: item?.status }));
       setValue('listCustomer', customers, { shouldValidate: true });
       tripDetail?.data?.tripCustomer?.forEach((item, index) => {
         handleAddMarker(+item?.lng, +item?.lat, item?.customer, item?.stt)
@@ -116,10 +124,17 @@ function CreateSchedule() {
 
   useEffect(() => {
     if (latLng) {
-      setValue('lat', latLng?.data?.lat, { shouldValidate: true });
-      setValue('lng', latLng?.data?.lng, { shouldValidate: true });
+      if (isEnd) {
+        setValue('latEnd', latLng?.data?.lat, { shouldValidate: true });
+        setValue('lngEnd', latLng?.data?.lng, { shouldValidate: true });
+        handleAddMarker(latLng?.data?.lng, latLng?.data?.lat, null, undefined, true)
+      }
+      else {
+        setValue('lat', latLng?.data?.lat, { shouldValidate: true });
+        setValue('lng', latLng?.data?.lng, { shouldValidate: true });
+        handleAddMarker(latLng?.data?.lng, latLng?.data?.lat)
+      }
 
-      handleAddMarker(latLng?.data?.lng, latLng?.data?.lat)
     }
   }, [latLng])
 
@@ -153,6 +168,16 @@ function CreateSchedule() {
       message.error('Vui lòng chọn ít nhất 1 khách hàng');
       return;
     }
+    console.log('lat', getValues('lat'))
+    if (!getValues('lat') || !getValues('lng')) {
+      message.error('Vui lòng chọn điểm xuất phát');
+      return;
+    }
+    if (!getValues('latEnd') || !getValues('lngEnd')) {
+      message.error('Vui lòng chọn điểm kết thúc');
+      return;
+    }
+
     // add validation duplicate customer using lodash
     const listCustomer = getValues('listCustomer');
     const duplicateCustomer = listCustomer.some((item, index) => listCustomer.findIndex((item2) => item2.id === item.id) !== index);
@@ -164,10 +189,10 @@ function CreateSchedule() {
     mutateCreateTrip()
   }
 
-  const handleAddMarker = (lng, lat, customerInfo?: any, customerIndex?: number) => {
+  const handleAddMarker = (lng, lat, customerInfo?: any, customerIndex?: number, isEndPoint?: boolean) => {
     const coordinates = [lng, lat];
     if (mapRef.current) {
-      mapRef.current.addMarker(coordinates, customerInfo ? customerInfo : null, customerIndex ? customerIndex : null);
+      mapRef.current.addMarker(coordinates, customerInfo ? customerInfo : null, customerIndex ? customerIndex : null, isEndPoint);
     }
   };
   const handleUpdateMarker = (lng, lat, customerInfo?: any, customerIndex?: number) => {
@@ -206,7 +231,8 @@ function CreateSchedule() {
             Hủy bỏ
           </CustomButton>
           <CustomButton
-            // disabled={isLoadingCreateCustomer}
+            disabled={isLoadinCreateTrip}
+            loading={isLoadinCreateTrip}
             onClick={handleSubmit(onSubmit)}
             type="danger"
           >
@@ -240,7 +266,7 @@ function CreateSchedule() {
                     <InputError error={errors.time?.message} />
                   </div>
                   <div>
-                    <Label infoText="" label="Chọn điểm tiếp thị" required />
+                    <Label infoText="" label="Chọn lịch trình tiếp thị" required />
                     <div className='flex gap-y-3 flex-col'>
                       <div className='flex items-center'>
                         <div className='w-8 flex-shrink-0 flex items-center z-10'>
@@ -355,45 +381,7 @@ function CreateSchedule() {
                                     }
                                   </Select>
                                   <CustomerRowAddress row={row} index={index} setValue={setValue} getValues={getValues} handleUpdateMarker={handleUpdateMarker} />
-                                  {/* <Select
-                                    placeholder="Địa chỉ khách hàng"
-                                    className="h-11 !rounded w-full"
-                                    disabled={row?.status === 'visited'}
-                                    onChange={async (value) => {
-                                      // setRefId(value);
-                                      const res = await getLatLng({ refId: value });
-                                      if (res?.data) {
-                                        const listCustomer = getValues('listCustomer');
-                                        listCustomer[index] = { ...listCustomer[index], address: res?.data?.display, lat: res?.data?.lat, lng: res?.data?.lng };
-                                        setValue('listCustomer', listCustomer, { shouldValidate: true });
-                                        handleUpdateMarker(res?.data?.lng, res?.data?.lat, null, index + 1)
-                                      }
-                                    }}
-                                    onSearch={debounce((value) => {
-                                      setPlaceKeyword(value);
-                                    }, 300)}
-                                    showSearch={true}
-                                    // notFoundContent={isLoadingPlace ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
-                                    filterOption={(input, option: any) => {
-                                      console.log('input', input)
-                                      const textContent = option.children.props.children[1].props.children;
-                                      console.log('textContent', textContent.toLowerCase())
-                                      console.log('check', textContent.toLowerCase().includes(input.toLowerCase()))
-                                      return textContent.toLowerCase().includes(input.toLowerCase());
-                                    }}
-                                    value={row?.address?.length > 70 ? row?.address?.slice(0, 70) + '...' : row?.address || undefined}
-                                  >
-                                    {places?.data?.map((item) => (
-                                      <Option key={item.ref_id} value={item.ref_id}>
-                                        <div className='flex items-center gap-1 py-2'>
-                                          <Image src={MarkIcon} />
-                                          <span className='display'>
-                                            {item?.display}
-                                          </span>
-                                        </div>
-                                      </Option>
-                                    ))}
-                                  </Select> */}
+
                                 </div>
                                 <InputError error={errors.listCustomer?.[index]?.message} />
                               </div>
@@ -430,6 +418,46 @@ function CreateSchedule() {
                       >
                         Thêm điểm tiếp thị
                       </CustomButton>
+                    </div>
+                    <div className='mt-5'>
+                      <Label infoText="" label="Chọn điểm kết thúc" required />
+                      <div className='flex items-center gap-2'>
+                        <div className='flex-shrink-0 flex items-center z-10 w-6 h-6'>
+                          <Image src={EndMarkIcon} alt='icon' />
+                        </div>
+                        <div className='w-full'>
+                          <CustomAutocomplete
+                            placeholder="Chọn vị trí kết thúc"
+                            className="h-11 !rounded w-full"
+                            // prefixIcon={<Image src={SearchIcon} alt="" />}
+                            wrapClassName="w-full !rounded bg-white"
+                            onSelect={(value) => {
+                              setTempDisplayEnd(places?.data?.find((item) => item.ref_id === value)?.display);
+                              setTempKeywordEnd(places?.data?.find((item) => item.ref_id === value)?.display)
+                              setRefId(value);
+                              setIsEnd(true);
+                            }}
+                            showSearch={true}
+                            listHeight={300}
+                            onSearch={(value) => {
+                              setTempKeywordEnd(value);
+                              onSearch(value);
+                            }}
+                            value={tempKeywordEnd || endAddress || null}
+                            options={places?.data.map((item) => ({
+                              value: item?.ref_id,
+                              label: (
+                                <div className='flex items-center gap-1 py-2'>
+                                  <Image src={MarkIcon} />
+                                  <span className='display'>
+                                    {item?.display}
+                                  </span>
+                                </div>
+                              ),
+                            }))}
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/router';
 import React, { useEffect, useRef, useState } from 'react'
 import LocationIcon from "@/assets/location.svg";
+import EndMarkIcon from "@/assets/endMarkIcon.svg";
 import LineIcon from "@/assets/LineDotLargeIcon.svg";
 import DeleteIcon from "@/assets/deleteRed.svg";
 import DateIcon from "@/assets/dateIcon.svg";
@@ -58,10 +59,10 @@ function TripDetail() {
       }
     );
 
-  const handleAddMarker = (lng, lat, customerInfo?: any, customerIndex?: number) => {
+  const handleAddMarker = (lng, lat, customerInfo?: any, customerIndex?: number, isEnd?: boolean) => {
     const coordinates = [lng, lat];
     if (mapRef.current) {
-      mapRef.current.addMarker(coordinates, customerInfo ? customerInfo : null, customerIndex ? customerIndex : null);
+      mapRef.current.addMarker(coordinates, customerInfo ? customerInfo : null, customerIndex ? customerIndex : null, isEnd);
     }
   };
 
@@ -72,6 +73,9 @@ function TripDetail() {
       }
       else {
         handleAddMarker(+tripDetail?.data?.lng, +tripDetail?.data?.lat);
+      }
+      if (tripDetail?.data?.latEnd) {
+        handleAddMarker(+tripDetail?.data?.lngEnd, +tripDetail?.data?.latEnd, null, undefined, true);
       }
     }
   }, [tripDetail])
@@ -121,7 +125,7 @@ function TripDetail() {
                       <div className='flex items-center gap-1'>
                         <Image src={DateIcon} alt="icon" />
                         <span>
-                          {formatDateTime(tripDetail?.data?.time)}
+                          {formatDateTime(tripDetail?.data?.createdAt)}
                         </span>
                       </div>
                       <div className='flex items-center gap-1'>
@@ -151,8 +155,7 @@ function TripDetail() {
                         {
                           tripDetail?.data?.tripCustomer?.map((item, index) => (
                             <div
-                              className='flex gap-2 items-center'
-
+                              className='flex gap-2 items-center' key={index}
                             >
                               {
                                 item?.status === ECustomerStatus.VISITED ? (
@@ -209,7 +212,23 @@ function TripDetail() {
                             </div>
                           ))
                         }
-
+                        <div className='flex gap-2 items-center'>
+                          <div className='w-6 flex-shrink-0 flex items-center relative cursor-pointer'>
+                            <div className='w-6 h-6 flex-shrink-0 flex items-center z-10'>
+                              <Image src={EndMarkIcon} alt='icon' />
+                            </div>
+                            <div className='absolute bottom-0 left-1/2 -translate-x-1/2 z-0'>
+                              <Image src={LineIcon} className='' alt='icon' />
+                            </div>
+                          </div>
+                          <div className='w-full border-[1px] border-[#D3D5D7] rounded py-3 px-4'>
+                            Vị trí kết thúc
+                            <div className="flex items-center space-x-1 mt-1">
+                              <Image src={MarkIcon} alt="" />
+                              <span>{tripDetail?.data?.endAddress}</span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>

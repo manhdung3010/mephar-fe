@@ -10,11 +10,10 @@ import { getRouting } from "../../api/trip.service.ts"
 const CustomMap = forwardRef((props, ref) => {
   const { isMapFull, tripCustomer, nowLocation, radiusCircle } = props;
   const [coordinatesRouting, setCoordinatesRouting] = useState([]);
-  const [isReadyFromMark, setIsReadyFromMark] = useState(false);
-  const [isReadyMarks, setIsReadyMarks] = useState(false);
   const [currentPoint, setCurrentPoint] = useState();
   const mapRef = useRef(null);
   const fromMarkerRef = useRef('');
+  const endMarkerRef = useRef('');
   const markersRef = useRef([]);
 
   useEffect(() => {
@@ -36,9 +35,10 @@ const CustomMap = forwardRef((props, ref) => {
   useEffect(() => {
     const callRouting = async () => {
       try {
-        if (tripCustomer && tripCustomer.length > 0 && currentPoint) {
+        if (tripCustomer && tripCustomer.length > 0 && currentPoint && endMarkerRef.current) {
           console.log('currentPoint', currentPoint)
-          const currentPoint1 = currentPoint
+          const currentPoint1 = currentPoint;
+          const endPoint = endMarkerRef.current.getLngLat();
           const markers = markersRef.current.filter((d) => d.status !== "visited").map((item) => item.coordinates)
           const newMarkers = markers?.map((item) => {
             return {
@@ -46,7 +46,7 @@ const CustomMap = forwardRef((props, ref) => {
               lng: item[0]
             }
           })
-          const listPoint = [currentPoint1, ...newMarkers]
+          const listPoint = [currentPoint1, ...newMarkers, endPoint]
           const payload = {
             listPoint: listPoint,
             vehicle: 'car',
@@ -63,7 +63,7 @@ const CustomMap = forwardRef((props, ref) => {
       }
     }
     callRouting();
-  }, [tripCustomer, currentPoint]);
+  }, [tripCustomer, currentPoint, endMarkerRef.current]);
 
   useEffect(() => {
     console.log('coordinatesRouting', coordinatesRouting?.length)
@@ -98,11 +98,11 @@ const CustomMap = forwardRef((props, ref) => {
       }
     });
   };
-  const customMarker = () => {
+  const customMarker = (isEnd) => {
     const customMarker = document.createElement("div");
-    customMarker.style.width = "30px";
-    customMarker.style.height = "30px";
-    customMarker.style.backgroundImage = `url("https://res.cloudinary.com/dvrqupkgg/image/upload/v1720519213/nowIcon_vk8zqy.png")`;
+    customMarker.style.width = isEnd ? "32px" : "30px";
+    customMarker.style.height = isEnd ? "45px" : "30px";
+    customMarker.style.backgroundImage = isEnd ? `url("https://res.cloudinary.com/dvrqupkgg/image/upload/v1721275457/endMarkIcon_ynhvxj.svg")` : `url("https://res.cloudinary.com/dvrqupkgg/image/upload/v1720519213/nowIcon_vk8zqy.png")`;
     customMarker.style.backgroundSize = "cover";
     return customMarker;
   };
@@ -147,7 +147,7 @@ const CustomMap = forwardRef((props, ref) => {
 
   const addStartMarker = (coordinates) => {
 
-    const marker = new vietmapgl.Marker(customMarker())
+    const marker = new vietmapgl.Marker(customMarker(false))
       .setLngLat(coordinates)
       .addTo(mapRef.current);
     // clear old marker if exists
@@ -166,6 +166,34 @@ const CustomMap = forwardRef((props, ref) => {
         setCurrentPoint({ lat: coordinates[1], lng: coordinates[0] });
       });
     }
+
+    // Scroll to the new marker
+    mapRef.current.flyTo({
+      center: coordinates,
+      zoom: 14,
+      speed: 1.2,
+    });
+  };
+  const addEndMarker = (coordinates) => {
+    const marker = new vietmapgl.Marker(customMarker(true))
+      .setLngLat(coordinates)
+      .addTo(mapRef.current);
+    // clear old marker if exists
+    if (endMarkerRef.current) {
+      endMarkerRef.current.remove();
+    }
+    endMarkerRef.current = marker;
+
+    // Add circle with a specific radius (e.g., 500 meters)
+    // if (mapRef.current.isStyleLoaded()) {
+    //   addCircle(coordinates, radiusCircle);
+    //   setCurrentPoint({ lat: coordinates[1], lng: coordinates[0] });
+    // } else {
+    //   mapRef.current.on('load', () => {
+    //     addCircle(coordinates, radiusCircle);
+    //     setCurrentPoint({ lat: coordinates[1], lng: coordinates[0] });
+    //   });
+    // }
 
     // Scroll to the new marker
     mapRef.current.flyTo({
@@ -228,10 +256,14 @@ const CustomMap = forwardRef((props, ref) => {
   };
 
   useImperativeHandle(ref, () => ({
-    addMarker(coordinates, customerInfo, customerIndex) {
+    addMarker(coordinates, customerInfo, customerIndex, isEnd = false) {
       if (customerInfo) {
         createMarker(coordinates, customPopup(customerInfo), customerIndex);
-      } else {
+      }
+      else if (isEnd) {
+        addEndMarker(coordinates);
+      }
+      else {
         addStartMarker(coordinates);
       }
     },
@@ -240,7 +272,6 @@ const CustomMap = forwardRef((props, ref) => {
       if (existingMarkerIndex !== -1) {
         markersRef.current[existingMarkerIndex].marker.remove();
         createMarker(coordinates, customPopup(customerInfo), customerIndex);
-        setIsReadyMarks(true);
       }
     },
     deleteMarker(coordinates) {
@@ -252,7 +283,6 @@ const CustomMap = forwardRef((props, ref) => {
         markersRef.current[markerIndex].marker.remove();
         markersRef.current.splice(markerIndex, 1);
         updateCustomerIndices();
-        setIsReadyMarks(true);
       }
     },
   }));
@@ -268,10 +298,8 @@ const CustomMap = forwardRef((props, ref) => {
     if (existingMarkerIndex !== -1) {
       markersRef.current[existingMarkerIndex].marker.remove();
       markersRef.current[existingMarkerIndex] = { marker, coordinates, index: customerIndex, status: customerStatus };
-      setIsReadyMarks(true);
     } else {
       markersRef.current.push({ marker, coordinates, index: customerIndex, status: customerStatus });
-      setIsReadyMarks(true);
     }
     updateCustomerIndices();
     // Scroll to the new marker
