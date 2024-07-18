@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { getReturnPaymentHistory } from '@/api/return-product.service';
 import { formatDateTime, formatMoney } from '@/helpers';
+import CustomPagination from '@/components/CustomPagination';
 
 interface IRecord {
   key: number;
@@ -77,7 +78,18 @@ const History = ({ record }) => {
     },
   ];
 
-  return <CustomTable dataSource={returnHistory?.data?.items} columns={columns} />;
+  return (
+    <div>
+      <CustomTable dataSource={returnHistory?.data?.items} columns={columns} loading={isLoading} />
+      <CustomPagination
+        page={formFilter.page}
+        pageSize={formFilter.limit}
+        setPage={(value) => setFormFilter({ ...formFilter, page: value })}
+        setPerPage={(value) => setFormFilter({ ...formFilter, limit: value })}
+        total={returnHistory?.data?.totalItem}
+      />
+    </div>
+  );
 };
 
 export default History;

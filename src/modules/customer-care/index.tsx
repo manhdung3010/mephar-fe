@@ -7,9 +7,14 @@ import PlusIcon from '@/assets/plusWhiteIcon.svg';
 import { useQuery } from '@tanstack/react-query';
 import { getAllTrip } from '@/api/trip.service';
 import { useRouter } from 'next/router';
+import { hasPermission } from '@/helpers';
+import { useRecoilValue } from 'recoil';
+import { profileState } from '@/recoil/state';
+import { RoleAction, RoleModel } from '../settings/role/role.enum';
 
 function ScheduleList() {
   const router = useRouter();
+  const profile = useRecoilValue(profileState);
   const [select, setSelect] = useState(0);
   const menu = ['Tất cả', 'Đang tiến hành', 'Đã hoàn thành'];
 
@@ -34,9 +39,13 @@ function ScheduleList() {
   );
   return (
     <div>
-      <div className='flex justify-end mt-3'>
-        <CustomButton onClick={() => router.push('/customer-care/create-schedule')} type='danger' prefixIcon={<Image src={PlusIcon} />}>Thêm lịch trình tiếp thị</CustomButton>
-      </div>
+      {
+        hasPermission(profile?.role?.permissions, RoleModel.map, RoleAction.create) && (
+          <div className='flex justify-end mt-3'>
+            <CustomButton onClick={() => router.push('/customer-care/create-schedule')} type='danger' prefixIcon={<Image src={PlusIcon} />}>Thêm lịch trình tiếp thị</CustomButton>
+          </div>
+        )
+      }
       <div
         className="flex flex-col gap-5 bg-white px-4 pt-4 pb-5 mt-3"
         style={{ boxShadow: '0px 8px 13px -3px rgba(0, 0, 0, 0.07)' }}

@@ -26,7 +26,7 @@ export enum RoleModel {
   group_provider = "group_provider",
   doctor = "doctor",
 
-  customer_care = "customer",
+  map = "map",
 
   cashbook = "cashbook",
 
@@ -79,6 +79,8 @@ export enum RoleLabel {
   provider = "Nhà cung cấp",
   group_provider = "Nhóm nhà cung cấp",
   doctor = "Bác sĩ",
+
+  map = "Chăm sóc khách hàng",
 
   cashbook = "Sổ quỹ",
 
@@ -254,6 +256,13 @@ export const ROLE_DEFAULT = {
       update: false,
       delete: false,
     },
+  },
+  map: {
+    all: false,
+    read: false,
+    create: false,
+    update: false,
+    delete: false,
   },
   cashbook: {
     all: false,
