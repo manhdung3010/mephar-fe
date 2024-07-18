@@ -6,9 +6,14 @@ import React, {
   useState,
 } from "react";
 import { getRouting } from "../../api/trip.service.ts"
+import { useRecoilState } from "recoil";
+import { vehicalState } from '@/recoil/state';
 
 const CustomMap = forwardRef((props, ref) => {
   const { isMapFull, tripCustomer, nowLocation, radiusCircle } = props;
+
+  const [vehical, setVehical] = useRecoilState(vehicalState);
+
   const [coordinatesRouting, setCoordinatesRouting] = useState([]);
   const [currentPoint, setCurrentPoint] = useState();
   const mapRef = useRef(null);
@@ -35,9 +40,8 @@ const CustomMap = forwardRef((props, ref) => {
   useEffect(() => {
     const callRouting = async () => {
       try {
-        if (tripCustomer && tripCustomer.length > 0 && currentPoint && endMarkerRef.current) {
-          console.log('currentPoint', currentPoint)
-          const currentPoint1 = currentPoint;
+        if (tripCustomer && fromMarkerRef.current && vehical) {
+          const currentPoint1 = fromMarkerRef.current.getLngLat();
           const endPoint = endMarkerRef.current.getLngLat();
           const markers = markersRef.current.filter((d) => d.status !== "visited").map((item) => item.coordinates)
           const newMarkers = markers?.map((item) => {
@@ -49,13 +53,13 @@ const CustomMap = forwardRef((props, ref) => {
           const listPoint = [currentPoint1, ...newMarkers, endPoint]
           const payload = {
             listPoint: listPoint,
-            vehicle: 'car',
+            vehicle: vehical,
           }
           const res = await getRouting(payload);
           if (res?.code === 200) {
             setCoordinatesRouting(res?.data?.paths[0]?.points?.coordinates)
             // reset current point
-            setCurrentPoint(null)
+            // setCurrentPoint(null)
           }
         }
       } catch (error) {
@@ -63,17 +67,16 @@ const CustomMap = forwardRef((props, ref) => {
       }
     }
     callRouting();
-  }, [tripCustomer, currentPoint, endMarkerRef.current]);
+  }, [vehical, tripCustomer, currentPoint, endMarkerRef.current, fromMarkerRef.current]);
 
   useEffect(() => {
-    console.log('coordinatesRouting', coordinatesRouting?.length)
-    if (coordinatesRouting?.length > 0) {
+    if (coordinatesRouting?.length > 0 && vehical) {
       // addGeojsonLine();
       setTimeout(() => {
         addGeojsonLine();
       }, 1000);
     }
-  }, [coordinatesRouting]);
+  }, [coordinatesRouting, vehical]);
 
   const loadMap = () => {
     mapRef.current = new vietmapgl.Map({
@@ -184,23 +187,12 @@ const CustomMap = forwardRef((props, ref) => {
     }
     endMarkerRef.current = marker;
 
-    // Add circle with a specific radius (e.g., 500 meters)
-    // if (mapRef.current.isStyleLoaded()) {
-    //   addCircle(coordinates, radiusCircle);
-    //   setCurrentPoint({ lat: coordinates[1], lng: coordinates[0] });
-    // } else {
-    //   mapRef.current.on('load', () => {
-    //     addCircle(coordinates, radiusCircle);
-    //     setCurrentPoint({ lat: coordinates[1], lng: coordinates[0] });
-    //   });
-    // }
-
     // Scroll to the new marker
-    mapRef.current.flyTo({
-      center: coordinates,
-      zoom: 14,
-      speed: 1.2,
-    });
+    // mapRef.current.flyTo({
+    //   center: coordinates,
+    //   zoom: 14,
+    //   speed: 1.2,
+    // });
   };
 
   const addCircle = (center, radius) => {
