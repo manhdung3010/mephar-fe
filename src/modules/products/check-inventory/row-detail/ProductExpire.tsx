@@ -38,6 +38,7 @@ const ProductExpire = ({
         return {
           ...item,
           unitId: productUnit.find((item) => item.isBaseUnit)?.id,
+          oldQuantity: item?.oldQuantity,
           quantity: item.quantity,
           inventory: item.quantity,
           productUnit,
@@ -48,28 +49,6 @@ const ProductExpire = ({
   }, [productExpired?.data?.items]);
 
   console.log(data);
-
-  const handleOnChange = (value, recordId) => {
-    const newData = data.map((item) => {
-      // change quantity to new unit
-      if (
-        item.productUnit.find((unit) => unit.id === value) &&
-        item.id === recordId
-      ) {
-        const newQuantity =
-          item.quantity /
-          item.productUnit.find((unit) => unit.id === value).exchangeValue;
-        return {
-          ...item,
-          unitId: value,
-          inventory: Math.floor(newQuantity),
-        };
-      }
-      return item;
-    });
-    // console.log("newData", newData)
-    setData(newData);
-  };
 
   const columns: ColumnsType<IRecord> = [
     {
@@ -85,43 +64,28 @@ const ProductExpire = ({
     },
     {
       title: "Tồn",
-      dataIndex: "inventory",
-      key: "inventory",
-      render: (quantity) => formatNumber(quantity),
+      dataIndex: "oldQuantity",
+      key: "oldQuantity",
+      render: (oldQuantity) => formatNumber(oldQuantity),
     },
-
     {
-      title: "Số lượng",
+      title: "Thực tế",
       dataIndex: "quantity",
       key: "quantity",
       render: (quantity) => formatNumber(quantity),
     },
-    {
-      title: "Đơn vị",
-      dataIndex: "productUnit",
-      key: "productUnit",
-      render: (productUnit, record: any) => (
-        <CustomUnitSelect
-          value={record?.unitId}
-          onChange={(value) => handleOnChange(value, record?.id)}
-          options={productUnit.map((unit) => {
-            return {
-              label: unit.unitName,
-              value: unit.id,
-            };
-          })}
-        />
-      ),
-    },
-    // {
-    //   title: 'Giá nhập gần nhất',
-    //   dataIndex: 'lastInputPrice',
-    //   key: 'lastInputPrice',
-    // },
   ];
 
+  const totalInventory = data?.reduce((sum, item) => sum + item.inventory, 0);
+
   return (
-    <CustomTable dataSource={data} columns={columns} loading={isLoading} />
+    <>
+      {" "}
+      <CustomTable dataSource={data} columns={columns} loading={isLoading} />
+      <div className="text-start">
+        Tổng số lượng: <span className="font-bold">{totalInventory}</span>
+      </div>
+    </>
   );
 };
 
