@@ -179,12 +179,12 @@ function CreateSchedule() {
     }
 
     // add validation duplicate customer using lodash
-    const listCustomer = getValues('listCustomer');
-    const duplicateCustomer = listCustomer.some((item, index) => listCustomer.findIndex((item2) => item2.id === item.id) !== index);
-    if (duplicateCustomer) {
-      message.error('Khách hàng không được trùng nhau');
-      return;
-    }
+    // const listCustomer = getValues('listCustomer');
+    // const duplicateCustomer = listCustomer.some((item, index) => listCustomer.findIndex((item2) => item2.id === item.id) !== index);
+    // if (duplicateCustomer) {
+    //   message.error('Khách hàng không được trùng nhau');
+    //   return;
+    // }
 
     mutateCreateTrip()
   }

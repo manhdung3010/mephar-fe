@@ -245,48 +245,48 @@ export function ProductDiscountModal({
         </CustomButton>
         <CustomButton
           onClick={() => {
-            const selectedDiscount = listDiscount.find(
-              (batch) => batch.isSelected
-            );
+            // const selectedDiscount = listDiscount.find(
+            //   (batch) => batch.isSelected
+            // );
 
-            if (
-              selectedDiscount.type === "gift" ||
-              selectedDiscount.type === "product_price"
-            ) {
-              return message.error("Chưa chọn quà khuyến mại/ quà tặng");
-            }
+            // if (
+            //   selectedDiscount.type === "gift" ||
+            //   selectedDiscount.type === "product_price"
+            // ) {
+            //   return message.error("Chưa chọn quà khuyến mại/ quà tặng");
+            // }
 
-            // setProductDiscount([...productDiscount, ...selectedDiscount].filter((v, i, a) => a.findIndex(t => (t.id === v.id)) === i));
-            const selectedDiscountProduct = {
-              ...selectedDiscount,
-              discountKey:
-                selectedDiscount?.id +
-                "-" +
-                selectedDiscount?.items[0]?.condition?.productUnitId[0],
-              productUnitId:
-                selectedDiscount?.items[0]?.condition?.productUnitId[0],
-            };
+            // // setProductDiscount([...productDiscount, ...selectedDiscount].filter((v, i, a) => a.findIndex(t => (t.id === v.id)) === i));
+            // const selectedDiscountProduct = {
+            //   ...selectedDiscount,
+            //   discountKey:
+            //     selectedDiscount?.id +
+            //     "-" +
+            //     selectedDiscount?.items[0]?.condition?.productUnitId[0],
+            //   productUnitId:
+            //     selectedDiscount?.items[0]?.condition?.productUnitId[0],
+            // };
 
-            // set selectedDiscountProduct to productDiscount, check if it's already exist in productDiscount then replace it
-            const index = productDiscount.findIndex(
-              (item) =>
-                item.productUnitId === selectedDiscountProduct.productUnitId
-            );
+            // // set selectedDiscountProduct to productDiscount, check if it's already exist in productDiscount then replace it
+            // const index = productDiscount.findIndex(
+            //   (item) =>
+            //     item.productUnitId === selectedDiscountProduct.productUnitId
+            // );
 
-            if (index !== -1) {
-              setProductDiscount([
-                ...productDiscount.slice(0, index),
-                selectedDiscountProduct,
-                ...productDiscount.slice(index + 1),
-              ]);
-            } else {
-              setProductDiscount([...productDiscount, selectedDiscountProduct]);
-            }
+            // if (index !== -1) {
+            //   setProductDiscount([
+            //     ...productDiscount.slice(0, index),
+            //     selectedDiscountProduct,
+            //     ...productDiscount.slice(index + 1),
+            //   ]);
+            // } else {
+            //   setProductDiscount([...productDiscount, selectedDiscountProduct]);
+            // }
 
-            setDiscountType("product");
-            onSave(selectedDiscountProduct);
-            onCancel();
-            return;
+            // setDiscountType("product");
+            // onSave(selectedDiscountProduct);
+            // onCancel();
+            // return;
           }}
           className="h-[46px] min-w-[150px] py-2 px-4"
           disabled={!listDiscount.some((batch) => batch.isSelected)}
@@ -295,7 +295,7 @@ export function ProductDiscountModal({
         </CustomButton>
       </div>
 
-      <SelectProductDiscount
+      {/* <SelectProductDiscount
         isOpen={isOpenSelectProduct}
         onCancel={() => setIsOpenSelectProduct(false)}
         products={discountList}
@@ -346,7 +346,7 @@ export function ProductDiscountModal({
           setDiscountType("product");
           onSave(selectedDiscountProduct);
         }}
-      />
+      /> */}
     </CustomModal>
   );
 }
