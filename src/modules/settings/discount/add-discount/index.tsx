@@ -273,15 +273,15 @@ const AddDiscount = () => {
               ),
             },
             apply: {
-              discountValue: item.discountValue,
-              discountType: item.discountType?.toUpperCase(),
-              maxQuantity: item.maxQuantity,
-              productUnitId: item.productDiscount?.map(
+              discountValue: item?.discountValue,
+              discountType: item?.discountType?.toUpperCase(),
+              maxQuantity: item?.maxQuantity,
+              productUnitId: item?.productDiscount?.map(
                 (product: any) => product.productUnitId
               ),
-              fixedPrice: item.fixedPrice,
-              changeType: item.changeType.toUpperCase(),
-              type: dcDetail.type.toUpperCase(),
+              fixedPrice: item?.fixedPrice,
+              changeType: item?.changeType?.toUpperCase(),
+              type: dcDetail?.type?.toUpperCase(),
             },
           };
         });
@@ -296,15 +296,29 @@ const AddDiscount = () => {
             existingItem.childItems.push(item);
           } else {
             acc.push({
+              id: item.id,
               condition: {
+                order: {
+                  from: item.condition.order.from,
+                },
+                product: {
+                  from: item.condition.product.from,
+                },
                 productUnitId: item.condition.productUnitId,
               },
               apply: {
-                productUnitId: item.condition.productUnitId,
+                discountValue: item?.apply?.discountValue,
+                discountType: item?.apply?.discountType?.toUpperCase(),
+                maxQuantity: item?.apply?.maxQuantity,
+                productUnitId: item?.apply?.productUnitId,
+                fixedPrice: item?.apply?.fixedPrice,
+                changeType: item?.apply?.changeType?.toUpperCase(),
+                type: item?.apply?.type?.toUpperCase(),
               },
               childItems: [item],
             });
           }
+
           return acc;
         }, []);
         setValue("items", items);
@@ -312,7 +326,16 @@ const AddDiscount = () => {
       setValue("scope", {
         customer: {
           isAll: dcDetail.discountCustomer?.length > 0 ? false : true,
+<<<<<<< HEAD
+          ids:
+            dcDetail.discountCustomer?.length > 0
+              ? dcDetail.discountCustomer.map(
+                  (customer: any) => customer.customerId
+                )
+              : [],
+=======
           ids: dcDetail.discountCustomer?.length > 0 ? dcDetail.discountCustomer.map((customer: any) => customer.groupCustomerId) : []
+>>>>>>> 32c4984d128401139c8271b48e976abd518c8011
         },
         branch: {
           isAll: dcDetail.discountBranch?.length > 0 ? false : true,
@@ -429,7 +452,7 @@ const AddDiscount = () => {
   );
 
   const onSubmit = () => {
-    // mutateCreateDiscount();
+    mutateCreateDiscount();
   };
   console.log(getValues());
 

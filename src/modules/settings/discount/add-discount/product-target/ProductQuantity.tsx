@@ -13,7 +13,7 @@ import { branchState } from "@/recoil/state";
 import { useQuery } from "@tanstack/react-query";
 import { Select, Spin } from "antd";
 import { debounce } from "lodash";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
 import { EDiscountUnit } from "../Info";
 import { CustomSelect } from "@/components/CustomSelect";
@@ -61,6 +61,13 @@ export const ProductQuantity = ({
     ],
     () => getSaleProducts(formFilter)
   );
+
+  useEffect(() => {
+    const itemsConditionProductUnitId =
+      getValues("items")?.condition?.productUnitId;
+
+    setValue(itemsConditionProductUnitId);
+  }, [getValues]);
 
   const [rows, setRows] = useState([
     {

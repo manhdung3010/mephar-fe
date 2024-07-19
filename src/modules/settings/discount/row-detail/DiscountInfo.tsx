@@ -580,9 +580,6 @@ export function DiscountInfo({ record }: any) {
     }
   };
 
-  console.log(record?.target, record?.type);
-  console.log(record?.discountItem);
-
   return (
     <CustomTable
       dataSource={record?.discountItem}
