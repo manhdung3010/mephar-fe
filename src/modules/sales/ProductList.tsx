@@ -115,6 +115,8 @@ export function ProductList({
     }
   }, [orderObject, orderActive]);
 
+  console.log('orderObject', orderObject)
+
   const onChangeQuantity = async (productKey, newValue, product?: any) => {
     const orderObjectClone = cloneDeep(orderObject);
 
@@ -273,17 +275,17 @@ export function ProductList({
                       src={DiscountIcon}
                       className="block"
                       onClick={() => {
-                        if (
-                          orderDiscount?.length > 0 &&
-                          !discountConfigDetail?.data?.data?.isMergeDiscount
-                        ) {
-                          message.error(
-                            "Bạn đã chọn khuyến mại hóa đơn. Mỗi hóa đơn chỉ được chọn 1 loại khuyến mại"
-                          );
-                        } else {
-                          setOpenProductDiscountList(!openProductDiscountList);
-                          setItemDiscount(itemDiscountProduct);
-                        }
+                        // if (
+                        //   orderDiscount?.length > 0 &&
+                        //   !discountConfigDetail?.data?.data?.isMergeDiscount
+                        // ) {
+                        //   message.error(
+                        //     "Bạn đã chọn khuyến mại hóa đơn. Mỗi hóa đơn chỉ được chọn 1 loại khuyến mại"
+                        //   );
+                        // } else {
+                        setOpenProductDiscountList(!openProductDiscountList);
+                        setItemDiscount(itemDiscountProduct);
+                        // }
                       }}
                       alt="discount-icon"
                     />
@@ -383,19 +385,19 @@ export function ProductList({
     ...(isSaleReturn
       ? []
       : [
-          {
-            title: "TỒN KHO",
-            dataIndex: "newInventory",
-            key: "newInventory",
-            render: (value, record) => (
-              <div>
-                {value
-                  ? formatNumber(Math.floor(value))
-                  : formatNumber(record.inventory)}
-              </div>
-            ),
-          },
-        ]),
+        {
+          title: "TỒN KHO",
+          dataIndex: "newInventory",
+          key: "newInventory",
+          render: (value, record) => (
+            <div>
+              {value
+                ? formatNumber(Math.floor(value))
+                : formatNumber(record.inventory)}
+            </div>
+          ),
+        },
+      ]),
     {
       title: "SỐ LƯỢNG",
       dataIndex: "quantity",
@@ -410,7 +412,7 @@ export function ProductList({
           type="number"
           disabled={
             (isSaleReturn && record?.batches?.length > 0) ||
-            (record?.isDiscount && !record?.buyNumberType)
+              (record?.isDiscount && !record?.buyNumberType)
               ? true
               : false
           }
@@ -518,44 +520,44 @@ export function ProductList({
     },
     ...(isSaleReturn
       ? [
-          {
-            title: "GIÁ TRẢ",
-            dataIndex: "price",
-            key: "price",
-            render: (_, { productUnit, productKey }) => (
-              // input return price
-              <CustomInput
-                wrapClassName="!w-[110px]"
-                className="!h-6 !w-[80px] text-center"
-                hasMinus={false}
-                hasPlus={false}
-                value={productUnit.returnPrice}
-                type="number"
-                onChange={(value) => {
-                  const orderObjectClone = cloneDeep(orderObject);
+        {
+          title: "GIÁ TRẢ",
+          dataIndex: "price",
+          key: "price",
+          render: (_, { productUnit, productKey }) => (
+            // input return price
+            <CustomInput
+              wrapClassName="!w-[110px]"
+              className="!h-6 !w-[80px] text-center"
+              hasMinus={false}
+              hasPlus={false}
+              value={productUnit.returnPrice}
+              type="number"
+              onChange={(value) => {
+                const orderObjectClone = cloneDeep(orderObject);
 
-                  orderObjectClone[orderActive] = orderObjectClone[
-                    orderActive
-                  ]?.map((product: ISaleProductLocal) => {
-                    if (product.productKey === productKey) {
-                      return {
-                        ...product,
-                        productUnit: {
-                          ...product.productUnit,
-                          returnPrice: value,
-                        },
-                      };
-                    }
+                orderObjectClone[orderActive] = orderObjectClone[
+                  orderActive
+                ]?.map((product: ISaleProductLocal) => {
+                  if (product.productKey === productKey) {
+                    return {
+                      ...product,
+                      productUnit: {
+                        ...product.productUnit,
+                        returnPrice: value,
+                      },
+                    };
+                  }
 
-                    return product;
-                  });
+                  return product;
+                });
 
-                  setOrderObject(orderObjectClone);
-                }}
-              />
-            ),
-          },
-        ]
+                setOrderObject(orderObjectClone);
+              }}
+            />
+          ),
+        },
+      ]
       : []),
     {
       title: "ĐƠN GIÁ",
@@ -614,8 +616,8 @@ export function ProductList({
           <div className="flex flex-col">
             {discountType === "percent"
               ? `${formatMoney(
-                  Number(price - (discountValue * price) / 100) * quantity
-                )}`
+                Number(price - (discountValue * price) / 100) * quantity
+              )}`
               : formatMoney(Number((price - discountValue) * quantity))}
           </div>
         ) : buyNumberType === 1 ? (
@@ -775,9 +777,9 @@ export function ProductList({
                         error={
                           errors?.products
                             ? errors?.products[Number(record.key) - 1]?.batches
-                                ?.message ||
-                              errors?.products[Number(record.key) - 1]
-                                ?.batches[0]?.quantity?.message
+                              ?.message ||
+                            errors?.products[Number(record.key) - 1]
+                              ?.batches[0]?.quantity?.message
                             : undefined
                         }
                       />

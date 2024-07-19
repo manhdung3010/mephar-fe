@@ -67,9 +67,9 @@ export function AddRole({ roleId }: { roleId?: string }) {
         return roleDetail
           ? updateRole(roleDetail?.data?.id, { ...getValues(), permissions })
           : createRole({
-              ...getValues(),
-              permissions,
-            });
+            ...getValues(),
+            permissions,
+          });
       },
       {
         onSuccess: async () => {
@@ -239,7 +239,7 @@ export function AddRole({ roleId }: { roleId?: string }) {
         </div>
 
         <div>
-          <div className="grid grid-cols-10 bg-[#F7DADD] py-4">
+          <div className="grid grid-cols-10 bg-[#F7DADD] py-4 sticky top-0 z-10">
             <div className=" col-span-5 px-4 font-medium text-[#0F1824]">
               Tổng quan
             </div>

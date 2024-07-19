@@ -326,20 +326,24 @@ const AddDiscount = () => {
       setValue("scope", {
         customer: {
           isAll: dcDetail.discountCustomer?.length > 0 ? false : true,
+<<<<<<< HEAD
           ids:
             dcDetail.discountCustomer?.length > 0
               ? dcDetail.discountCustomer.map(
                   (customer: any) => customer.customerId
                 )
               : [],
+=======
+          ids: dcDetail.discountCustomer?.length > 0 ? dcDetail.discountCustomer.map((customer: any) => customer.groupCustomerId) : []
+>>>>>>> 32c4984d128401139c8271b48e976abd518c8011
         },
         branch: {
           isAll: dcDetail.discountBranch?.length > 0 ? false : true,
           ids:
             dcDetail.discountBranch?.length > 0
               ? dcDetail.discountBranch.map(
-                  (customer: any) => customer.branchId
-                )
+                (customer: any) => customer.branchId
+              )
               : [],
         },
       });
@@ -399,16 +403,16 @@ const AddDiscount = () => {
 
         return id && !copy
           ? updateDiscount(
-              {
-                ...getValues(),
-                items: childItems,
-              },
-              Number(id)
-            )
-          : createDiscount({
+            {
               ...getValues(),
               items: childItems,
-            });
+            },
+            Number(id)
+          )
+          : createDiscount({
+            ...getValues(),
+            items: childItems,
+          });
       } else {
         const discountData: any = getValues();
         const itemsDiscount: any = getValues("items");

@@ -21,13 +21,15 @@ import UpdateStatusModal from './UpdateTripStatusModal';
 import { ECustomerStatus } from '../enum';
 import DeleteModal from '@/components/CustomModal/ModalDeleteItem';
 import { message } from 'antd';
-import { profileState } from '@/recoil/state';
-import { useRecoilValue } from 'recoil';
+import { profileState, vehicalState } from '@/recoil/state';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
+import { CustomRadio } from '@/components/CustomRadio';
 
 function TripDetail() {
   const router = useRouter();
   const profile = useRecoilValue(profileState);
+  const [vehical, setVehical] = useRecoilState(vehicalState);
   const queryClient = useQueryClient();
   const { id } = router.query;
   const mapRef = useRef<any>(null);
@@ -143,6 +145,22 @@ function TripDetail() {
                         </span>
                       </div>
                     </div>
+                    <div className='mt-5'>
+                      <Label infoText="" label="Phương tiện di chuyển" />
+                      <div>
+                        <CustomRadio
+                          options={[
+                            { value: 'car', label: "Ô tô" },
+                            { value: 'motorcycle', label: "Xe máy" },
+                          ]}
+                          value={vehical}
+                          onChange={(value) => {
+                            setVehical(value)
+                          }
+                          }
+                        />
+                      </div>
+                    </div>
                   </div>
                   <div>
                     <Label infoText="" label="Các điểm tiếp thị" />
@@ -213,7 +231,7 @@ function TripDetail() {
                                   </div>
                                   <div className="flex items-center space-x-1 mt-1">
                                     <Image src={MarkIcon} alt="" />
-                                    <span>{item?.address}</span>
+                                    <span className='line-clamp-1'>{item?.address}</span>
                                   </div>
                                 </div>
                               </div>

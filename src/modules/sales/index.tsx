@@ -270,197 +270,197 @@ const Index = () => {
   }, [orderActive]);
 
   // get product discount
-  useEffect(() => {
-    function handleGetProductDiscount() {
-      if (
-        discountList &&
-        orderDiscount?.length > 0 &&
-        orderObject[orderActive]?.length > 0
-      ) {
-        let orderDiscountClone: any = cloneDeep(orderDiscount);
-        orderDiscountClone = orderDiscountClone?.forEach((item) => {
-          const list = item?.items[0]?.apply?.productUnitId;
-          if (list?.length > 0) {
-            for (const l of list) {
-              const productsScan = getSaleProducts({
-                ...formFilter,
-                keyword: "",
-                branchId,
-                productUnit: l,
-              }).then((res) => {
-                if (res?.data?.items?.length > 0) {
-                  let discountValue = item?.items[0]?.apply?.discountValue;
-                  let discountType = item?.items[0]?.apply?.discountType;
-                  if (item?.items[0]?.apply?.isGift) {
-                    discountType = "amount";
-                    discountValue = res?.data?.items[0]?.price;
-                  } else {
-                    if (discountType === "percent" && discountValue > 100) {
-                      discountValue = 100;
-                    } else if (
-                      discountType === "amount" &&
-                      +discountValue > +res?.data?.items[0]?.price
-                    ) {
-                      discountValue = res?.data?.items[0]?.price;
-                    }
-                  }
+  // useEffect(() => {
+  //   function handleGetProductDiscount() {
+  //     if (
+  //       discountList &&
+  //       orderDiscount?.length > 0 &&
+  //       orderObject[orderActive]?.length > 0
+  //     ) {
+  //       let orderDiscountClone: any = cloneDeep(orderDiscount);
+  //       orderDiscountClone = orderDiscountClone?.forEach((item) => {
+  //         const list = item?.items[0]?.apply?.productUnitId;
+  //         if (list?.length > 0) {
+  //           for (const l of list) {
+  //             const productsScan = getSaleProducts({
+  //               ...formFilter,
+  //               keyword: "",
+  //               branchId,
+  //               productUnit: l,
+  //             }).then((res) => {
+  //               if (res?.data?.items?.length > 0) {
+  //                 let discountValue = item?.items[0]?.apply?.discountValue;
+  //                 let discountType = item?.items[0]?.apply?.discountType;
+  //                 if (item?.items[0]?.apply?.isGift) {
+  //                   discountType = "amount";
+  //                   discountValue = res?.data?.items[0]?.price;
+  //                 } else {
+  //                   if (discountType === "percent" && discountValue > 100) {
+  //                     discountValue = 100;
+  //                   } else if (
+  //                     discountType === "amount" &&
+  //                     +discountValue > +res?.data?.items[0]?.price
+  //                   ) {
+  //                     discountValue = res?.data?.items[0]?.price;
+  //                   }
+  //                 }
 
-                  if (res) {
-                    onSelectedProduct(
-                      JSON.stringify({
-                        ...res?.data?.items[0],
-                        maxQuantity: item.items[0].apply.maxQuantity,
-                        isDiscount: true,
-                        discountType: discountType,
-                        discountValue: discountValue,
-                        isGift: item?.items[0]?.apply?.isGift,
-                      })
-                    );
-                  }
-                }
-              });
-            }
-          } else {
-            // remove product added by discount before
-            const orderObjectClone = cloneDeep(orderObject);
-            orderObjectClone[orderActive] = orderObjectClone[
-              orderActive
-            ]?.filter((product) => !product.isDiscount);
-            setOrderObject(orderObjectClone);
-          }
-        });
-      }
-    }
-    handleGetProductDiscount();
-  }, [orderDiscount]);
+  //                 if (res) {
+  //                   onSelectedProduct(
+  //                     JSON.stringify({
+  //                       ...res?.data?.items[0],
+  //                       maxQuantity: item.items[0].apply.maxQuantity,
+  //                       isDiscount: true,
+  //                       discountType: discountType,
+  //                       discountValue: discountValue,
+  //                       isGift: item?.items[0]?.apply?.isGift,
+  //                     })
+  //                   );
+  //                 }
+  //               }
+  //             });
+  //           }
+  //         } else {
+  //           // remove product added by discount before
+  //           const orderObjectClone = cloneDeep(orderObject);
+  //           orderObjectClone[orderActive] = orderObjectClone[
+  //             orderActive
+  //           ]?.filter((product) => !product.isDiscount);
+  //           setOrderObject(orderObjectClone);
+  //         }
+  //       });
+  //     }
+  //   }
+  //   handleGetProductDiscount();
+  // }, [orderDiscount]);
 
-  // product discount
-  useEffect(() => {
-    function handleGetProductDiscount() {
-      // if (productDiscount) {
-      let productDiscountClone: any = cloneDeep(productDiscount);
-      if (productDiscountClone?.length > 0) {
-        productDiscountClone = productDiscountClone?.forEach((item) => {
-          const list = item?.items[0]?.apply?.productUnitId;
-          let fixedPrice = item?.items[0]?.apply?.fixedPrice;
-          let changeType = item?.items[0]?.apply?.changeType;
-          if (list?.length > 0) {
-            for (const l of list) {
-              getSaleProducts({
-                ...formFilter,
-                keyword: "",
-                branchId,
-                productUnit: l?.id ?? l,
-              }).then((res) => {
-                if (res?.data?.items?.length > 0) {
-                  let discountValue = item?.items[0]?.apply?.discountValue;
-                  let discountType = item?.items[0]?.apply?.discountType;
+  // // product discount
+  // useEffect(() => {
+  //   function handleGetProductDiscount() {
+  //     // if (productDiscount) {
+  //     let productDiscountClone: any = cloneDeep(productDiscount);
+  //     if (productDiscountClone?.length > 0) {
+  //       productDiscountClone = productDiscountClone?.forEach((item) => {
+  //         const list = item?.items[0]?.apply?.productUnitId;
+  //         let fixedPrice = item?.items[0]?.apply?.fixedPrice;
+  //         let changeType = item?.items[0]?.apply?.changeType;
+  //         if (list?.length > 0) {
+  //           for (const l of list) {
+  //             getSaleProducts({
+  //               ...formFilter,
+  //               keyword: "",
+  //               branchId,
+  //               productUnit: l?.id ?? l,
+  //             }).then((res) => {
+  //               if (res?.data?.items?.length > 0) {
+  //                 let discountValue = item?.items[0]?.apply?.discountValue;
+  //                 let discountType = item?.items[0]?.apply?.discountType;
 
-                  if (item?.items[0]?.apply?.isGift) {
-                    discountType = "amount";
-                    discountValue = res?.data?.items[0]?.price;
-                  } else {
-                    if (discountType === "percent" && discountValue > 100) {
-                      discountValue = 100;
-                    } else if (
-                      discountType === "amount" &&
-                      +discountValue > +res?.data?.items[0]?.price
-                    ) {
-                      discountValue = res?.data?.items[0]?.price;
-                    }
-                  }
+  //                 if (item?.items[0]?.apply?.isGift) {
+  //                   discountType = "amount";
+  //                   discountValue = res?.data?.items[0]?.price;
+  //                 } else {
+  //                   if (discountType === "percent" && discountValue > 100) {
+  //                     discountValue = 100;
+  //                   } else if (
+  //                     discountType === "amount" &&
+  //                     +discountValue > +res?.data?.items[0]?.price
+  //                   ) {
+  //                     discountValue = res?.data?.items[0]?.price;
+  //                   }
+  //                 }
 
-                  return onSelectedProduct(
-                    JSON.stringify({
-                      ...res?.data?.items[0],
-                      discountQuantity: l.discountQuantity || 1,
-                      isDiscount: true,
-                      discountType: discountType,
-                      discountValue: discountValue,
-                      isGift: item?.items[0]?.apply?.isGift,
-                    })
-                  );
-                }
-              });
-            }
-          } else {
-            if (fixedPrice > 0 && changeType === "type_price") {
-              // update price of product same productUnitId
-              const orderObjectClone = cloneDeep(orderObject);
-              orderObjectClone[orderActive] = orderObjectClone[
-                orderActive
-              ]?.map((product: ISaleProductLocal) => {
-                if (
-                  product.productUnitId ===
-                  item?.items[0]?.condition?.productUnitId[0]
-                ) {
-                  return {
-                    ...product,
-                    isDiscount: true,
-                    itemPrice: fixedPrice,
-                    productUnit: {
-                      ...product.productUnit,
-                      oldPrice: product.productUnit.price,
-                      price: fixedPrice,
-                    },
-                    buyNumberType: 1,
-                  };
-                }
-                return product;
-              });
-              setOrderObject(orderObjectClone);
-            } else if (fixedPrice > 0 && changeType === "type_discount") {
-              // update price of product same productUnitId
-              const orderObjectClone = cloneDeep(orderObject);
-              orderObjectClone[orderActive] = orderObjectClone[
-                orderActive
-              ]?.map((product: ISaleProductLocal) => {
-                if (
-                  product.productUnitId ===
-                  item?.items[0]?.condition?.productUnitId[0]
-                ) {
-                  return {
-                    ...product,
-                    discountValue: fixedPrice,
-                    isDiscount: true,
-                    discountType: "amount",
-                    itemPrice: product.productUnit.oldPrice
-                      ? product.productUnit.oldPrice - fixedPrice
-                      : product.productUnit.price - fixedPrice,
-                    ...(product.productUnit?.oldPrice && {
-                      productUnit: {
-                        ...product.productUnit,
-                        price: product.productUnit.oldPrice,
-                      },
-                    }),
-                    buyNumberType: 2,
-                  };
-                }
-                return product;
-              });
-              setOrderObject(orderObjectClone);
-            } else {
-              // remove product added by discount before
-              const orderObjectClone = cloneDeep(orderObject);
-              orderObjectClone[orderActive] = orderObjectClone[
-                orderActive
-              ]?.filter((product) => !product.isDiscount);
-              return setOrderObject(orderObjectClone);
-            }
-          }
-        });
-      } else {
-        // remove product added by discount before
-        const orderObjectClone = cloneDeep(orderObject);
-        orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter(
-          (product) => !product.isDiscount
-        );
-        return setOrderObject(orderObjectClone);
-      }
-      // }
-    }
-    handleGetProductDiscount();
-  }, [productDiscount]);
+  //                 return onSelectedProduct(
+  //                   JSON.stringify({
+  //                     ...res?.data?.items[0],
+  //                     discountQuantity: l.discountQuantity || 1,
+  //                     isDiscount: true,
+  //                     discountType: discountType,
+  //                     discountValue: discountValue,
+  //                     isGift: item?.items[0]?.apply?.isGift,
+  //                   })
+  //                 );
+  //               }
+  //             });
+  //           }
+  //         } else {
+  //           if (fixedPrice > 0 && changeType === "type_price") {
+  //             // update price of product same productUnitId
+  //             const orderObjectClone = cloneDeep(orderObject);
+  //             orderObjectClone[orderActive] = orderObjectClone[
+  //               orderActive
+  //             ]?.map((product: ISaleProductLocal) => {
+  //               if (
+  //                 product.productUnitId ===
+  //                 item?.items[0]?.condition?.productUnitId[0]
+  //               ) {
+  //                 return {
+  //                   ...product,
+  //                   isDiscount: true,
+  //                   itemPrice: fixedPrice,
+  //                   productUnit: {
+  //                     ...product.productUnit,
+  //                     oldPrice: product.productUnit.price,
+  //                     price: fixedPrice,
+  //                   },
+  //                   buyNumberType: 1,
+  //                 };
+  //               }
+  //               return product;
+  //             });
+  //             setOrderObject(orderObjectClone);
+  //           } else if (fixedPrice > 0 && changeType === "type_discount") {
+  //             // update price of product same productUnitId
+  //             const orderObjectClone = cloneDeep(orderObject);
+  //             orderObjectClone[orderActive] = orderObjectClone[
+  //               orderActive
+  //             ]?.map((product: ISaleProductLocal) => {
+  //               if (
+  //                 product.productUnitId ===
+  //                 item?.items[0]?.condition?.productUnitId[0]
+  //               ) {
+  //                 return {
+  //                   ...product,
+  //                   discountValue: fixedPrice,
+  //                   isDiscount: true,
+  //                   discountType: "amount",
+  //                   itemPrice: product.productUnit.oldPrice
+  //                     ? product.productUnit.oldPrice - fixedPrice
+  //                     : product.productUnit.price - fixedPrice,
+  //                   ...(product.productUnit?.oldPrice && {
+  //                     productUnit: {
+  //                       ...product.productUnit,
+  //                       price: product.productUnit.oldPrice,
+  //                     },
+  //                   }),
+  //                   buyNumberType: 2,
+  //                 };
+  //               }
+  //               return product;
+  //             });
+  //             setOrderObject(orderObjectClone);
+  //           } else {
+  //             // remove product added by discount before
+  //             const orderObjectClone = cloneDeep(orderObject);
+  //             orderObjectClone[orderActive] = orderObjectClone[
+  //               orderActive
+  //             ]?.filter((product) => !product.isDiscount);
+  //             return setOrderObject(orderObjectClone);
+  //           }
+  //         }
+  //       });
+  //     } else {
+  //       // remove product added by discount before
+  //       const orderObjectClone = cloneDeep(orderObject);
+  //       orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter(
+  //         (product) => !product.isDiscount
+  //       );
+  //       return setOrderObject(orderObjectClone);
+  //     }
+  //     // }
+  //   }
+  //   handleGetProductDiscount();
+  // }, [productDiscount]);
   useEffect(() => {
     // update product when order discount is changed
     if (orderDiscount?.length <= 0) {
@@ -756,11 +756,10 @@ const Index = () => {
                           }
                         >
                           <div
-                            className={`flex cursor-pointer items-center ${
-                              isSearchSampleMedicine
+                            className={`flex cursor-pointer items-center ${isSearchSampleMedicine
                                 ? "rounded border border-blue-500"
                                 : ""
-                            }`}
+                              }`}
                           >
                             <Image
                               src={FilterIcon}
@@ -777,77 +776,77 @@ const Index = () => {
                       options={
                         !isSearchSampleMedicine
                           ? products?.data?.items?.map((item) => ({
-                              value: JSON.stringify(item),
-                              label: (
-                                <div className="flex items-center gap-x-4 p-2">
-                                  <div className=" flex h-12 w-[68px] items-center rounded border border-gray-300 p-[2px]">
-                                    {item.product?.image?.path && (
-                                      <Image
-                                        src={getImage(
-                                          item.product?.image?.path
-                                        )}
-                                        height={40}
-                                        width={68}
-                                        alt=""
-                                        objectFit="cover"
-                                      />
-                                    )}
-                                  </div>
-
-                                  <div>
-                                    <div className="mb-2 flex gap-x-3">
-                                      <div>
-                                        <span>{item.code}</span> {" - "}
-                                        <span>{item.product.name}</span>
-                                      </div>
-                                      <div className="rounded bg-red-main px-2 py-[2px] text-white">
-                                        {item.productUnit.unitName}
-                                      </div>
-                                      {item.quantity <= 0 && (
-                                        <div className="rounded text-red-main py-[2px] italic">
-                                          Hết hàng
-                                        </div>
+                            value: JSON.stringify(item),
+                            label: (
+                              <div className="flex items-center gap-x-4 p-2">
+                                <div className=" flex h-12 w-[68px] items-center rounded border border-gray-300 p-[2px]">
+                                  {item.product?.image?.path && (
+                                    <Image
+                                      src={getImage(
+                                        item.product?.image?.path
                                       )}
-                                    </div>
-
-                                    <div className="flex gap-x-3">
-                                      <div>
-                                        Số lượng: {formatNumber(item.quantity)}
-                                      </div>
-                                      <div>|</div>
-                                      <div>
-                                        Giá:{" "}
-                                        {formatMoney(item.productUnit.price)}
-                                      </div>
-                                    </div>
-                                  </div>
+                                      height={40}
+                                      width={68}
+                                      alt=""
+                                      objectFit="cover"
+                                    />
+                                  )}
                                 </div>
-                              ),
-                            }))
-                          : sampleMedicines?.data?.items?.map((item) => ({
-                              value: JSON.stringify(item),
-                              label: (
-                                <div className="flex items-center gap-x-4 p-2">
-                                  <div className=" flex h-12 w-[68px] items-center rounded border border-gray-300 p-[2px]">
-                                    {item.image?.path && (
-                                      <Image
-                                        src={getImage(item.image?.path)}
-                                        height={40}
-                                        width={68}
-                                        alt=""
-                                        objectFit="cover"
-                                      />
+
+                                <div>
+                                  <div className="mb-2 flex gap-x-3">
+                                    <div>
+                                      <span>{item.code}</span> {" - "}
+                                      <span>{item.product.name}</span>
+                                    </div>
+                                    <div className="rounded bg-red-main px-2 py-[2px] text-white">
+                                      {item.productUnit.unitName}
+                                    </div>
+                                    {item.quantity <= 0 && (
+                                      <div className="rounded text-red-main py-[2px] italic">
+                                        Hết hàng
+                                      </div>
                                     )}
                                   </div>
 
-                                  <div>
-                                    <div className="mb-2 flex gap-x-5">
-                                      <div>{item.name}</div>
+                                  <div className="flex gap-x-3">
+                                    <div>
+                                      Số lượng: {formatNumber(item.quantity)}
+                                    </div>
+                                    <div>|</div>
+                                    <div>
+                                      Giá:{" "}
+                                      {formatMoney(item.productUnit.price)}
                                     </div>
                                   </div>
                                 </div>
-                              ),
-                            }))
+                              </div>
+                            ),
+                          }))
+                          : sampleMedicines?.data?.items?.map((item) => ({
+                            value: JSON.stringify(item),
+                            label: (
+                              <div className="flex items-center gap-x-4 p-2">
+                                <div className=" flex h-12 w-[68px] items-center rounded border border-gray-300 p-[2px]">
+                                  {item.image?.path && (
+                                    <Image
+                                      src={getImage(item.image?.path)}
+                                      height={40}
+                                      width={68}
+                                      alt=""
+                                      objectFit="cover"
+                                    />
+                                  )}
+                                </div>
+
+                                <div>
+                                  <div className="mb-2 flex gap-x-5">
+                                    <div>{item.name}</div>
+                                  </div>
+                                </div>
+                              </div>
+                            ),
+                          }))
                       }
                       value={searchKeyword}
                       isLoading={isLoadingProduct || isLoadingSampleMedicines}
@@ -877,9 +876,8 @@ const Index = () => {
                 >
                   <Popover content={"Quét mã vạch"}>
                     <div
-                      className={`flex cursor-pointer items-center ${
-                        isScanBarcode ? "rounded border border-blue-500" : ""
-                      }`}
+                      className={`flex cursor-pointer items-center ${isScanBarcode ? "rounded border border-blue-500" : ""
+                        }`}
                     >
                       <Image
                         src={BarcodeIcon}

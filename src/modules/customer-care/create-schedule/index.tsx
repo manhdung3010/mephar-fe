@@ -108,7 +108,7 @@ function CreateSchedule() {
       setValue('name', tripDetail?.data?.name, { shouldValidate: true });
       setValue('time', tripDetail?.data?.time, { shouldValidate: true });
       setStartAddress(tripDetail?.data?.startAddress);
-      setEndAddress(tripDetail?.data?.endAddress);
+      setTempKeywordEnd(tripDetail?.data?.endAddress);
       setValue('lat', tripDetail?.data?.lat, { shouldValidate: true });
       setValue('lng', tripDetail?.data?.lng, { shouldValidate: true });
       setValue('latEnd', tripDetail?.data?.latEnd, { shouldValidate: true });
@@ -179,12 +179,12 @@ function CreateSchedule() {
     }
 
     // add validation duplicate customer using lodash
-    const listCustomer = getValues('listCustomer');
-    const duplicateCustomer = listCustomer.some((item, index) => listCustomer.findIndex((item2) => item2.id === item.id) !== index);
-    if (duplicateCustomer) {
-      message.error('Khách hàng không được trùng nhau');
-      return;
-    }
+    // const listCustomer = getValues('listCustomer');
+    // const duplicateCustomer = listCustomer.some((item, index) => listCustomer.findIndex((item2) => item2.id === item.id) !== index);
+    // if (duplicateCustomer) {
+    //   message.error('Khách hàng không được trùng nhau');
+    //   return;
+    // }
 
     mutateCreateTrip()
   }
@@ -443,7 +443,7 @@ function CreateSchedule() {
                               setTempKeywordEnd(value);
                               onSearch(value);
                             }}
-                            value={tempKeywordEnd || endAddress || null}
+                            value={tempKeywordEnd || null}
                             options={places?.data.map((item) => ({
                               value: item?.ref_id,
                               label: (
