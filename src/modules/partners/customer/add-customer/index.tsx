@@ -102,7 +102,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
     if (latLng) {
       setValue("lng", String(latLng?.data?.lng), { shouldValidate: true });
       setValue("lat", String(latLng?.data?.lat), { shouldValidate: true });
-      setValue("point", `${latLng?.data?.lat},${latLng?.data?.lng}`, { shouldValidate: true });
+      setValue("point", `${latLng?.data?.lat?.trim()},${latLng?.data?.lng?.trim()}`, { shouldValidate: true });
       setValue("address", latLng?.data?.display, { shouldValidate: true });
     }
   }, [latLng]);

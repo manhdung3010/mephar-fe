@@ -109,10 +109,10 @@ function CreateSchedule() {
       setValue('time', tripDetail?.data?.time, { shouldValidate: true });
       setStartAddress(tripDetail?.data?.startAddress);
       setTempKeywordEnd(tripDetail?.data?.endAddress);
-      setValue('lat', tripDetail?.data?.lat, { shouldValidate: true });
-      setValue('lng', tripDetail?.data?.lng, { shouldValidate: true });
-      setValue('latEnd', tripDetail?.data?.latEnd, { shouldValidate: true });
-      setValue('lngEnd', tripDetail?.data?.lngEnd, { shouldValidate: true });
+      setValue('lat', tripDetail?.data?.lat?.trim(), { shouldValidate: true });
+      setValue('lng', tripDetail?.data?.lng?.trim(), { shouldValidate: true });
+      setValue('latEnd', tripDetail?.data?.latEnd?.trim(), { shouldValidate: true });
+      setValue('lngEnd', tripDetail?.data?.lngEnd?.trim(), { shouldValidate: true });
       const customers = tripDetail?.data?.tripCustomer?.map((item) => ({ id: item?.customerId, tripCustomerId: item?.id, address: item?.address, lat: item?.lat, lng: item?.lng, status: item?.status }));
       setValue('listCustomer', customers, { shouldValidate: true });
       tripDetail?.data?.tripCustomer?.forEach((item, index) => {
@@ -325,7 +325,7 @@ function CreateSchedule() {
                                     onChange={(value) => {
                                       const customer = customers?.data?.items?.find((item) => item?.id === value);
                                       const listCustomer = getValues('listCustomer');
-                                      listCustomer[index] = { id: value, address: customer?.address, lat: customer?.lat, lng: customer?.lng };
+                                      listCustomer[index] = { id: value, address: customer?.address, lat: customer?.lat?.trim(), lng: customer?.lng?.trim() };
                                       setValue('listCustomer', listCustomer, { shouldValidate: true });
                                       setCustomerAddress(customer?.address)
                                       if (customer) {
