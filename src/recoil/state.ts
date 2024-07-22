@@ -106,5 +106,10 @@ export const discountTypeState = atom<string>({
 export const vehicalState = atom<string>({
   key: "VEHICAL_STATE",
   default: "car",
-  effects: [localStorageEffect("DISCOUNT_TYPE_STATE")],
+  effects: [localStorageEffect("VEHICAL_STATE")],
+});
+export const productDiscountState = atom<string>({
+  key: "DISCOUNT_STATE",
+  default: "",
+  effects: [localStorageEffect("DISCOUNT_STATE")],
 });
