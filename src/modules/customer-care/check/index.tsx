@@ -113,35 +113,6 @@ function Check() {
                   <div className='bg-white p-5 shadow-sm flex flex-col gap-3'>
                     <div>
                       <Label infoText="" label="Vị trí muốn check" required />
-                      {/* <Select
-                        placeholder="Vị trí check điểm bán"
-                        className="h-11 !rounded w-full"
-                        onChange={(value) => {
-                          setRefId(value);
-                        }}
-                        onSearch={debounce((value) => {
-                          setPlaceKeyword(value);
-                        }, 300)}
-                        showSearch={true}
-                        notFoundContent={isLoadingPlace ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
-                        filterOption={(input, option: any) => {
-                          const textContent = option.children.props.children[1].props.children;
-                          return textContent.toLowerCase().includes(input.toLowerCase());
-                        }}
-                      >
-                        {places?.data?.map((item) => (
-                          <Option key={item.ref_id} value={item.ref_id}>
-                            <div className='flex items-center gap-1 py-2'>
-                              <div className='w-4 flex-shrink-0 grid place-items-center'>
-                                <Image src={MarkIcon} />
-                              </div>
-                              <span className='display'>
-                                {item?.display}
-                              </span>
-                            </div>
-                          </Option>
-                        ))}
-                      </Select> */}
                       <CustomAutocomplete
                         placeholder="Vị trí check điểm bán"
                         className="h-11 !rounded w-full"

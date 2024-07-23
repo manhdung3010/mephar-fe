@@ -45,7 +45,6 @@ export function ProductDiscountModal({
   );
   const [discountType, setDiscountType] = useRecoilState(discountTypeState);
   const [isOpenSelectProduct, setIsOpenSelectProduct] = useState(false);
-  const [productDiscountList, setProductDiscountList] = useState([]);
   const [discountId, setDiscountId] = useState();
   // const { data: products, isLoading: isLoadingProduct, isSuccess } = useQuery<{
   //   data?: { items: ISaleProduct[] };

@@ -235,3 +235,8 @@ export interface ISampleMedicine {
   };
   products: ISaleProduct[];
 }
+
+export interface IDiscount {
+  productDiscount: any[];
+  orderDiscount: any[];
+}

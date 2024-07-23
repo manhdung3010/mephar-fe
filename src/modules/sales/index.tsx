@@ -25,6 +25,7 @@ import {
 } from "@/helpers";
 import {
   branchState,
+  discountState,
   orderActiveState,
   orderDiscountSelected,
   orderState,
@@ -67,6 +68,8 @@ const Index = () => {
   const [isScanBarcode, setIsScanBarcode] = useState(false);
   const [orderDetail, setOrderDetail] = useState<any>(null);
   const [valueScanBarcode, setValueScanBarcode] = useState("");
+
+  const [discountObject, setDiscountObject] = useRecoilState(discountState);
 
   const {
     getValues,
@@ -757,8 +760,8 @@ const Index = () => {
                         >
                           <div
                             className={`flex cursor-pointer items-center ${isSearchSampleMedicine
-                                ? "rounded border border-blue-500"
-                                : ""
+                              ? "rounded border border-blue-500"
+                              : ""
                               }`}
                           >
                             <Image
@@ -927,6 +930,12 @@ const Index = () => {
                               Object.keys(orderClone)[0] as string
                             );
 
+                            setDiscountObject((pre) => {
+                              const preClone = { ...pre };
+                              delete preClone[order];
+                              return preClone;
+                            });
+
                             e.stopPropagation();
                           }}
                         />
@@ -944,6 +953,7 @@ const Index = () => {
 
                     setOrderObject(orderClone);
                     setOrderActive(key);
+                    setDiscountObject({ ...discountObject, [key]: { productDiscount: [], orderDiscount: [] } });
                   }}
                   className="ml-4 flex min-w-fit rounded-full border border-[#fff] bg-[#fff] p-[10px]"
                 >

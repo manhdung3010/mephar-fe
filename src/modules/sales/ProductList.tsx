@@ -14,6 +14,7 @@ import InputError from "@/components/InputError";
 import { formatMoney, formatNumber, roundNumber } from "@/helpers";
 import {
   branchState,
+  discountState,
   discountTypeState,
   orderActiveState,
   orderDiscountSelected,
@@ -44,6 +45,7 @@ export function ProductList({
   const { errors, setError } = useForm;
 
   const [orderObject, setOrderObject] = useRecoilState(orderState);
+  const [discountObject, setDiscountObject] = useRecoilState(discountState);
   const orderActive = useRecoilValue(orderActiveState);
   const [orderDiscount, setOrderDiscount] = useRecoilState(
     orderDiscountSelected
@@ -73,6 +75,8 @@ export function ProductList({
     ["DISCOUNT_CONFIG"],
     () => getDiscountConfig()
   );
+
+  console.log('discountObject', discountObject)
 
   useEffect(() => {
     if (orderObject[orderActive]) {
@@ -872,24 +876,24 @@ export function ProductList({
         onCancel={() => setOpenProductDiscountList(false)}
         onSave={(selectedDiscount) => {
           // set selected discount to setValue products
-          const orderObjectClone = cloneDeep(orderObject);
-          orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map(
-            (product: ISaleProductLocal) => {
-              if (
-                selectedDiscount[0]?.items[0]?.condition?.productUnitId.includes(
-                  product.productUnitId
-                )
-              ) {
-                return {
-                  ...product,
-                  discountSelected: selectedDiscount,
-                };
-              }
-              return product;
-            }
-          );
-          setOrderObject(orderObjectClone);
-          setOpenProductDiscountList(false);
+          // const orderObjectClone = cloneDeep(orderObject);
+          // orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map(
+          //   (product: ISaleProductLocal) => {
+          //     if (
+          //       selectedDiscount[0]?.items[0]?.condition?.productUnitId.includes(
+          //         product.productUnitId
+          //       )
+          //     ) {
+          //       return {
+          //         ...product,
+          //         discountSelected: selectedDiscount,
+          //       };
+          //     }
+          //     return product;
+          //   }
+          // );
+          // setOrderObject(orderObjectClone);
+          // setOpenProductDiscountList(false);
         }}
         discountList={itemDiscount}
       />
