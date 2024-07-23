@@ -265,7 +265,7 @@ export const ProductDiscountProduct = ({
                             <Option key={product.id} value={product?.id}>
                               {product?.name}
                             </Option>
-                          ))}
+                          ))}pó
                     </Select>
                     <Tooltip title="Nhóm hàng">
                       <Image

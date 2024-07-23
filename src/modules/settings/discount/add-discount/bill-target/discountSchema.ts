@@ -40,7 +40,7 @@ export const discountSchema = yup.object().shape({
     byHour: yup.array(),
     byWeekDay: yup.array(),
     isWarning: yup.boolean(),
-    isBirthDay: yup.boolean(),
+    isBirthday: yup.boolean(),
   }),
   scope: yup.object({
     customer: yup.object(),

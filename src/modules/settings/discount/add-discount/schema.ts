@@ -108,7 +108,7 @@ export const schema = yup.object().shape({
     byHour: yup.array(),
     byWeekDay: yup.array(),
     isWarning: yup.boolean(),
-    isBirthDay: yup.boolean(),
+    isBirthday: yup.boolean(),
   }),
   scope: yup.object({
     customer: yup.object(),
@@ -164,7 +164,7 @@ export const productSchema = yup.object().shape({
     byHour: yup.array(),
     byWeekDay: yup.array(),
     isWarning: yup.boolean(),
-    isBirthDay: yup.boolean(),
+    isBirthday: yup.boolean(),
   }),
   scope: yup.object({
     customer: yup.object(),
