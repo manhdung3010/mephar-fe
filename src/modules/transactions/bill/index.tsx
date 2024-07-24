@@ -21,6 +21,7 @@ import { IOrder } from "../order/type";
 import Search from "./Search";
 import BillDetail from "./row-detail";
 import useExportToExcel from "@/hooks/useExportExcel";
+import { Dropdown, MenuProps } from "antd";
 
 export function BillTransaction() {
   const branchId = useRecoilValue(branchState);
@@ -152,25 +153,28 @@ export function BillTransaction() {
     cashOfCustomer: "Khách đã trả",
     status: "Trạng thái",
   };
-  
+
   const transformedOrders = orders?.data?.items.map((item) => ({
     code: item.code,
     createdAt: item.createdAt,
     saleReturn: item.saleReturn[0]?.code || "",
     customer: item.customer.fullName,
-    totalPrice: item.products.reduce((total, product) => total + product.price, 0),
+    totalPrice: item.products.reduce(
+      (total, product) => total + product.price,
+      0
+    ),
     discount: item.discountType === 1 ? `${item.discount}%` : item.discount,
     finalTotalPrice: item.totalPrice,
     cashOfCustomer: item.cashOfCustomer,
     status: EOrderStatusLabel[item.status],
   }));
-  
+
   const { exported, exportToExcel } = useExportToExcel(
     transformedOrders,
     columnMapping,
     `HOADON_${Date.now()}.xlsx`
   );
-  
+
   const transformedOrdersDetail = orders?.data?.items.map((item) => ({
     branch: item.branch.name,
     branchId: item.branchId,
@@ -205,7 +209,7 @@ export function BillTransaction() {
     user: item.user.fullName,
     userId: item.userId,
   }));
-  
+
   const columnMappingDetail = {
     branch: "Chi nhánh",
     branchId: "ID Chi nhánh",
@@ -240,12 +244,38 @@ export function BillTransaction() {
     user: "Người dùng",
     userId: "ID Người dùng",
   };
-  
-  const { exported: exportedDetail, exportToExcel: exportToExcelDetail } = useExportToExcel(
-    transformedOrdersDetail,
-    columnMappingDetail,
-    `HOADONCHITIET_${Date.now()}.xlsx`
-  );
+
+  const { exported: exportedDetail, exportToExcel: exportToExcelDetail } =
+    useExportToExcel(
+      transformedOrdersDetail,
+      columnMappingDetail,
+      `HOADONCHITIET_${Date.now()}.xlsx`
+    );
+
+  const items: MenuProps["items"] = [
+    {
+      key: "0",
+      label: (
+        <CustomButton
+          onClick={exportToExcel}
+          prefixIcon={<Image src={ExportIcon} />}
+        >
+          Xuất file
+        </CustomButton>
+      ),
+    },
+    {
+      key: "1",
+      label: (
+        <CustomButton
+          onClick={exportToExcelDetail}
+          prefixIcon={<Image src={ExportIcon} />}
+        >
+          Xuất file chi tiết
+        </CustomButton>
+      ),
+    },
+  ];
 
   return (
     <div>
@@ -263,19 +293,12 @@ export function BillTransaction() {
             Thêm hóa đơn
           </CustomButton>
         )}
-        <CustomButton
-          onClick={exportToExcel}
-          prefixIcon={<Image src={ExportIcon} />}
-        >
-          Xuất file
-        </CustomButton>
 
-        <CustomButton
-          onClick={exportToExcelDetail}
-          prefixIcon={<Image src={ExportIcon} />}
-        >
-          Xuất file chi tiết
-        </CustomButton>
+        <Dropdown menu={{ items }} trigger={["click"]}>
+          <CustomButton prefixIcon={<Image src={ExportIcon} />}>
+            File
+          </CustomButton>
+        </Dropdown>
       </div>
 
       <Search setFormFilter={setFormFilter} formFilter={formFilter} />
