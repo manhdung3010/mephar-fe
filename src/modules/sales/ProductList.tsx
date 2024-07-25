@@ -63,6 +63,9 @@ export function ProductList({
   const [itemDiscount, setItemDiscount] = useState();
   const [productKeyAddBatch, setProductKeyAddBatch] = useState<string>();
 
+  const [orderList, setOrderList] = useState([]);
+
+
   const checkDisplayListBatch = (product: ISaleProductLocal) => {
     return product.product.isBatchExpireControl;
   };
@@ -233,7 +236,6 @@ export function ProductList({
             src={RemoveIcon}
             className={"cursor-pointer"}
             onClick={() => {
-              // if (isDiscount) return
               const orderObjectClone = cloneDeep(orderObject);
               const productsClone = orderObjectClone[orderActive] || [];
               orderObjectClone[orderActive] = productsClone.filter(
@@ -242,10 +244,17 @@ export function ProductList({
                   return product.productUnitId !== productUnitId;
                 }
               );
-              // setOrderDiscount([]);
-              // setProductDiscount([]);
-              setDiscountType("order");
               setOrderObject(orderObjectClone);
+
+              // remove discount from discountObject
+              const discountObjectClone = cloneDeep(discountObject);
+              discountObjectClone[orderActive] = discountObjectClone[
+                orderActive
+              ]?.productDiscount?.filter((product) => product?.items[0]?.condition?.productUnitId[0] !== productUnitId);
+
+              console.log('discountObjectClone', discountObjectClone)
+              setDiscountObject(discountObjectClone);
+
             }}
             alt=""
           />
@@ -429,14 +438,14 @@ export function ProductList({
             }
 
             // remove productDiscount if this product is in productDiscount
-            const productDiscountClone = cloneDeep(productDiscount);
-            productDiscountClone.forEach((item, index) => {
-              if (item.productUnitId === record?.productUnitId) {
-                // remove this item from productDiscount
-                productDiscountClone.splice(index, 1);
-              }
-            });
-            setProductDiscount(productDiscountClone);
+            // const productDiscountClone = cloneDeep(productDiscount);
+            // productDiscountClone.forEach((item, index) => {
+            //   if (item.productUnitId === record?.productUnitId) {
+            //     // remove this item from productDiscount
+            //     productDiscountClone.splice(index, 1);
+            //   }
+            // });
+            // setProductDiscount(productDiscountClone);
             const orderObjectClone = cloneDeep(orderObject);
             orderObjectClone[orderActive] = orderObjectClone[
               orderActive

@@ -106,9 +106,6 @@ const Index = () => {
   const [orderDiscount, setOrderDiscount] = useRecoilState(
     orderDiscountSelected
   );
-  const [productDiscount, setProductDiscount] = useRecoilState(
-    productDiscountSelected
-  );
 
   const {
     data: products,
@@ -122,6 +119,22 @@ const Index = () => {
       formFilter.page,
       formFilter.limit,
       formFilter.keyword,
+      branchId,
+    ],
+    () => getSaleProducts({ ...formFilter, branchId }),
+    { enabled: !isSearchSampleMedicine }
+  );
+  const {
+    data: products2,
+    isLoading: isLoadingProduct2,
+  } = useQuery<{
+    data?: { items: ISaleProduct[] };
+  }>(
+    [
+      "LIST_SALE_PRODUCT2",
+      1,
+      9999,
+      '',
       branchId,
     ],
     () => getSaleProducts({ ...formFilter, branchId }),
@@ -269,8 +282,62 @@ const Index = () => {
   }, [scannedData, products?.data?.items, isSuccess, isSearchSampleMedicine]);
 
   useEffect(() => {
-    setOrderDiscount([]);
-  }, [orderActive]);
+    const discountObjectClone = cloneDeep(discountObject);
+
+    if (
+      discountObjectClone[orderActive]?.productDiscount?.length > 0 &&
+      orderObject[orderActive]?.length > 0
+    ) {
+      discountObjectClone[orderActive] = discountObjectClone[orderActive]?.productDiscount?.forEach((item) => {
+        console.log('item', item)
+        const list = item?.items[0]?.apply?.productUnitId;
+        if (list?.length > 0) {
+          for (const l of list) {
+            const productUnit: any = products2?.data?.items?.find((product) => product.id === l?.id);
+            if (productUnit) {
+              let discountValue = item?.items[0]?.apply?.discountValue;
+              let discountType = item?.items[0]?.apply?.discountType;
+              if (item?.items[0]?.apply?.isGift) {
+                discountType = "amount";
+                discountValue = productUnit?.price;
+              } else {
+                if (discountType === "percent" && discountValue > 100) {
+                  discountValue = 100;
+                } else if (
+                  discountType === "amount" &&
+                  +discountValue > +productUnit?.price
+                ) {
+                  discountValue = productUnit?.price;
+                }
+              }
+
+              if (productUnit && !orderObject[orderActive]?.find((product) => product.productUnitId === l?.id)) {
+                onSelectedProduct(
+                  JSON.stringify({
+                    ...productUnit,
+                    maxQuantity: item.items[0].apply.maxQuantity,
+                    discountQuantity: l?.discountQuantity,
+                    // quantity: l?.discountQuantity,
+                    isDiscount: true,
+                    discountType: discountType,
+                    discountValue: discountValue,
+                    isGift: item?.items[0]?.apply?.isGift,
+                  })
+                );
+              }
+            }
+          }
+        } else {
+          // remove product added by discount before
+          const orderObjectClone = cloneDeep(orderObject);
+          orderObjectClone[orderActive] = orderObjectClone[
+            orderActive
+          ]?.filter((product) => !product.isDiscount);
+          setOrderObject(orderObjectClone);
+        }
+      });
+    }
+  }, [discountObject, orderActive]);
 
   // get product discount
   // useEffect(() => {
@@ -599,6 +666,8 @@ const Index = () => {
       }).then((res) => {
         if (res?.data) {
           itemDiscountProduct = res?.data?.data?.items;
+
+          console.log('product', product)
 
           const productLocal: any = {
             ...product,

@@ -42,6 +42,7 @@ function SelectProductDiscount({
 
   useEffect(() => {
     if (products && discountId && isOpen && productsList?.data?.items) {
+      console.log('products', products)
       // const newProducts = products.map((product) => {
       //   return {
       //     ...product,
@@ -158,11 +159,12 @@ function SelectProductDiscount({
                 return {
                   ...batch,
                   quantity: batch.quantity || 1,
+                  discountQuantity: 1,
                   isSelected: true,
                 };
               }
 
-              return { ...batch, isSelected: false, quantity: 0 };
+              return { ...batch, isSelected: false, quantity: 0, discountQuantity: 0 };
             });
 
             setListProduct(listBatchClone);
@@ -190,7 +192,7 @@ function SelectProductDiscount({
             if (totalQuantity > listProduct[0]?.maxQuantity) {
               message.error(
                 "Tổng số lượng không được lớn hơn " +
-                  listProduct[0]?.maxQuantity
+                listProduct[0]?.maxQuantity
               );
               return;
             }
