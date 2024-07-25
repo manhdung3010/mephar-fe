@@ -326,15 +326,20 @@ const AddDiscount = () => {
       setValue("scope", {
         customer: {
           isAll: dcDetail.discountCustomer?.length > 0 ? false : true,
-          ids: dcDetail.discountCustomer?.length > 0 ? dcDetail.discountCustomer.map((customer: any) => customer.groupCustomerId) : []
+          ids:
+            dcDetail.discountCustomer?.length > 0
+              ? dcDetail.discountCustomer.map(
+                  (customer: any) => customer.groupCustomerId
+                )
+              : [],
         },
         branch: {
           isAll: dcDetail.discountBranch?.length > 0 ? false : true,
           ids:
             dcDetail.discountBranch?.length > 0
               ? dcDetail.discountBranch.map(
-                (customer: any) => customer.branchId
-              )
+                  (customer: any) => customer.branchId
+                )
               : [],
         },
       });
@@ -360,7 +365,7 @@ const AddDiscount = () => {
             .filter((element) => element !== "")
             .map(Number),
           isWarning: dcDetail.discountTime[0].isWarning,
-          isBirthDay: dcDetail.discountTime[0].isBirthday,
+          isBirthday: dcDetail.discountTime[0].isBirthday,
         },
         { shouldValidate: true }
       );
@@ -394,16 +399,16 @@ const AddDiscount = () => {
 
         return id && !copy
           ? updateDiscount(
-            {
+              {
+                ...getValues(),
+                items: childItems,
+              },
+              Number(id)
+            )
+          : createDiscount({
               ...getValues(),
               items: childItems,
-            },
-            Number(id)
-          )
-          : createDiscount({
-            ...getValues(),
-            items: childItems,
-          });
+            });
       } else {
         const discountData: any = getValues();
         const itemsDiscount: any = getValues("items");

@@ -6,5 +6,5 @@ export const schema = yup.object().shape({
     .max(255, 'Tối đa 255 ký tự')
     .required('Đây là trường bắt buộc!'),
   description: yup.string(),
-  branchId: yup.number(),
+  // branchId: yup.number(),
 });
