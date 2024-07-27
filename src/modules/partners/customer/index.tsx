@@ -1,32 +1,34 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { message } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
-import cx from 'classnames';
-import { debounce } from 'lodash';
-import Image from 'next/image';
-import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { message } from "antd";
+import type { ColumnsType } from "antd/es/table";
+import cx from "classnames";
+import { debounce } from "lodash";
+import Image from "next/image";
+import { useRouter } from "next/router";
+import { useRef, useState } from "react";
 
-import { deleteCustomer, getCustomer } from '@/api/customer.service';
-import DeleteIcon from '@/assets/deleteRed.svg';
-import EditIcon from '@/assets/editGreenIcon.svg';
-import ExportIcon from '@/assets/exportFileIcon.svg';
-import ImportIcon from '@/assets/importFileIcon.svg';
-import PlusIcon from '@/assets/plusWhiteIcon.svg';
-import { CustomButton } from '@/components/CustomButton';
-import DeleteModal from '@/components/CustomModal/ModalDeleteItem';
-import CustomPagination from '@/components/CustomPagination';
-import CustomTable from '@/components/CustomTable';
-import { ECustomerStatus, ECustomerStatusLabel } from '@/enums';
-import { formatMoney, hasPermission } from '@/helpers';
+import { deleteCustomer, getCustomer } from "@/api/customer.service";
+import DeleteIcon from "@/assets/deleteRed.svg";
+import EditIcon from "@/assets/editGreenIcon.svg";
+import ExportIcon from "@/assets/exportFileIcon.svg";
+import ImportIcon from "@/assets/importFileIcon.svg";
+import PlusIcon from "@/assets/plusWhiteIcon.svg";
+import { CustomButton } from "@/components/CustomButton";
+import DeleteModal from "@/components/CustomModal/ModalDeleteItem";
+import CustomPagination from "@/components/CustomPagination";
+import CustomTable from "@/components/CustomTable";
+import { ECustomerStatus, ECustomerStatusLabel } from "@/enums";
+import { formatMoney, hasPermission } from "@/helpers";
 
-import RowDetail from './row-detail';
-import Search from './Search';
-import type { ICustomer } from './type';
-import { useRecoilValue } from 'recoil';
-import { branchState, profileState } from '@/recoil/state';
-import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
-import Filter from './Filter';
+import RowDetail from "./row-detail";
+import Search from "./Search";
+import type { ICustomer } from "./type";
+import { useRecoilValue } from "recoil";
+import { branchState, profileState } from "@/recoil/state";
+import { RoleAction, RoleModel } from "@/modules/settings/role/role.enum";
+import Filter from "./Filter";
+import { getCustomerExample, getCustomerExcel } from "@/api/export.service";
+import { uploadCustomerExcel } from "@/api/import.service";
 
 interface IRecord {
   key: number;
@@ -71,11 +73,9 @@ export function Customer() {
     branchId: null,
   });
   const { data: customers, isLoading } = useQuery(
-    ['CUSTOMER_LIST', formFilter],
+    ["CUSTOMER_LIST", formFilter],
     () => getCustomer(formFilter)
   );
-
-
 
   const [expandedRowKeys, setExpandedRowKeys] = useState<
     Record<string, boolean>
@@ -83,14 +83,14 @@ export function Customer() {
 
   const columns: ColumnsType<IRecord> = [
     {
-      title: 'STT',
-      dataIndex: 'key',
-      key: 'key',
+      title: "STT",
+      dataIndex: "key",
+      key: "key",
     },
     {
-      title: 'Mã khách hàng',
-      dataIndex: 'code',
-      key: 'code',
+      title: "Mã khách hàng",
+      dataIndex: "code",
+      key: "code",
       render: (value, _, index) => (
         <span
           className="cursor-pointer text-[#0070F4]"
@@ -111,25 +111,25 @@ export function Customer() {
       ),
     },
     {
-      title: 'Tên khách hàng',
-      dataIndex: 'fullName',
-      key: 'fullName',
+      title: "Tên khách hàng",
+      dataIndex: "fullName",
+      key: "fullName",
     },
     {
-      title: 'Số điện thoại',
-      dataIndex: 'phone',
-      key: 'phone',
+      title: "Số điện thoại",
+      dataIndex: "phone",
+      key: "phone",
     },
     {
-      title: 'Nợ hiện tại',
-      dataIndex: 'totalDebt',
-      key: 'totalDebt',
+      title: "Nợ hiện tại",
+      dataIndex: "totalDebt",
+      key: "totalDebt",
       render: (value) => formatMoney(+value),
     },
     {
-      title: 'Tổng bán',
-      dataIndex: 'totalOrderPay',
-      key: 'totalOrderPay',
+      title: "Tổng bán",
+      dataIndex: "totalOrderPay",
+      key: "totalOrderPay",
       render: (value) => formatMoney(+value),
     },
     // {
@@ -148,19 +148,19 @@ export function Customer() {
     //   key: 'totalSellExceptReturn',
     // },
     {
-      title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
       render: (_, { status }) => (
         <div
           className={cx(
             {
-              'text-[#00B63E] border border-[#00B63E] bg-[#DEFCEC]':
+              "text-[#00B63E] border border-[#00B63E] bg-[#DEFCEC]":
                 status === ECustomerStatus.active,
-              'text-[##666666] border border-[##666666] bg-[#F5F5F5]':
+              "text-[##666666] border border-[##666666] bg-[#F5F5F5]":
                 status === ECustomerStatus.inactive,
             },
-            'px-2 py-1 rounded-2xl w-max'
+            "px-2 py-1 rounded-2xl w-max"
           )}
         >
           {ECustomerStatusLabel[status]}
@@ -168,32 +168,35 @@ export function Customer() {
       ),
     },
     {
-      title: 'Thao tác',
-      dataIndex: 'action',
-      key: 'action',
+      title: "Thao tác",
+      dataIndex: "action",
+      key: "action",
       render: (_, { id }) => (
         <div className="flex gap-3">
-          {
-            hasPermission(profile?.role?.permissions, RoleModel.customer, RoleAction.delete) && (
-              <div className=" cursor-pointer" onClick={() => setDeletedId(id)}>
-                <Image src={DeleteIcon} />
-              </div>
-            )
-          }
+          {hasPermission(
+            profile?.role?.permissions,
+            RoleModel.customer,
+            RoleAction.delete
+          ) && (
+            <div className=" cursor-pointer" onClick={() => setDeletedId(id)}>
+              <Image src={DeleteIcon} />
+            </div>
+          )}
 
-          {
-            hasPermission(profile?.role?.permissions, RoleModel.customer, RoleAction.update) && (
-              <div
-                className=" cursor-pointer"
-                onClick={() =>
-                  router.push(`/partners/customer/add-customer?id=${id}`)
-                }
-              >
-                <Image src={EditIcon} />
-              </div>
-            )
-          }
-
+          {hasPermission(
+            profile?.role?.permissions,
+            RoleModel.customer,
+            RoleAction.update
+          ) && (
+            <div
+              className=" cursor-pointer"
+              onClick={() =>
+                router.push(`/partners/customer/add-customer?id=${id}`)
+              }
+            >
+              <Image src={EditIcon} />
+            </div>
+          )}
         </div>
       ),
     },
@@ -202,7 +205,7 @@ export function Customer() {
   const { mutate: mutateDeleteCustomer, isLoading: isLoadingDeleteCustomer } =
     useMutation(() => deleteCustomer(Number(deletedId)), {
       onSuccess: async () => {
-        await queryClient.invalidateQueries(['CUSTOMER_LIST']);
+        await queryClient.invalidateQueries(["CUSTOMER_LIST"]);
         setDeletedId(undefined);
       },
       onError: (err: any) => {
@@ -214,43 +217,121 @@ export function Customer() {
     mutateDeleteCustomer();
   };
 
+  async function downloadDoctorExcel() {
+    try {
+      const response = await getCustomerExcel();
+      console.log(response);
+
+      const url = URL.createObjectURL(response as any);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "doctor_data.xlsx"; // Specify the file name
+      document.body.appendChild(a); // Append the link to the body
+      a.click(); // Trigger the download
+      document.body.removeChild(a); // Remove the link from the body
+
+      // Clean up the URL object
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading the file", error);
+    }
+  }
+  async function downloadDoctoExamrExcel() {
+    try {
+      const response = await getCustomerExample();
+
+      const url = URL.createObjectURL(response as any);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "doctor_data.xlsx"; // Specify the file name
+      document.body.appendChild(a); // Append the link to the body
+      a.click(); // Trigger the download
+      document.body.removeChild(a); // Remove the link from the body
+
+      // Clean up the URL object
+      URL.revokeObjectURL(url);
+    } catch (error: any) {
+      message.error(error?.message);
+    }
+  }
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      try {
+        await uploadCustomerExcel(file);
+        message.success("Nhập file thành công!");
+      } catch (error: any) {
+        message.error(error?.message);
+      }
+    }
+  };
+
+  const handleImportClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
   return (
     <div className="mb-2 ">
       <div className="my-3 flex items-center justify-end gap-4">
-        <div className="flex items-center gap-2">
+        <div
+          className="flex items-center gap-2 cursor-pointer"
+          onClick={downloadDoctorExcel}
+        >
           <Image src={ExportIcon} /> Xuất file
         </div>
 
-        <div className="h-5 w-[1px] bg-[#D3D5D7]"></div>
-
-        <div className="flex items-center gap-2">
-          <Image src={ImportIcon} /> Nhập file
+        <div
+          className="flex items-center gap-2 cursor-pointer"
+          onClick={downloadDoctoExamrExcel}
+        >
+          <Image src={ExportIcon} /> Xuất file mẫu
         </div>
 
-        {
-          hasPermission(profile?.role?.permissions, RoleModel.customer, RoleAction.create) && (
-            <CustomButton
-              prefixIcon={<Image src={PlusIcon} />}
-              onClick={() => router.push('/partners/customer/add-customer')}
-            >
-              Thêm khách hàng
-            </CustomButton>
-          )
-        }
-
+        <div
+          className="flex items-center gap-2 cursor-pointer"
+          onClick={handleImportClick}
+        >
+          <Image src={ImportIcon} alt="Import Icon" />
+          Nhập file
+          <input
+            type="file"
+            ref={fileInputRef}
+            style={{ display: "none" }}
+            onChange={handleFileChange}
+          />
+        </div>
+        {hasPermission(
+          profile?.role?.permissions,
+          RoleModel.customer,
+          RoleAction.create
+        ) && (
+          <CustomButton
+            prefixIcon={<Image src={PlusIcon} />}
+            onClick={() => router.push("/partners/customer/add-customer")}
+          >
+            Thêm khách hàng
+          </CustomButton>
+        )}
       </div>
 
-      <div className='grid grid-cols-12'>
-        <div className='2xl:col-span-2 col-span-3'>
+      <div className="grid grid-cols-12">
+        <div className="2xl:col-span-2 col-span-3">
           <Filter setFormFilter={setFormFilter} formFilter={formFilter} />
         </div>
-        <div className='2xl:col-span-10 col-span-9'>
-          <div className='sticky top-0 rounded-lg overflow-hidden'>
+        <div className="2xl:col-span-10 col-span-9">
+          <div className="sticky top-0 rounded-lg overflow-hidden">
             <Search setFormFilter={setFormFilter} formFilter={formFilter} />
 
             <CustomTable
               rowSelection={{
-                type: 'checkbox',
+                type: "checkbox",
               }}
               dataSource={customers?.data?.items?.map((item, index) => ({
                 ...item,
@@ -260,20 +341,25 @@ export function Customer() {
               loading={isLoading}
               onRow={(record, rowIndex) => {
                 return {
-                  onClick: event => {
+                  onClick: (event) => {
                     // Check if the click came from the action column
-                    if ((event.target as Element).closest('.ant-table-cell:last-child')) {
+                    if (
+                      (event.target as Element).closest(
+                        ".ant-table-cell:last-child"
+                      )
+                    ) {
                       return;
                     }
 
                     // Toggle expandedRowKeys state here
                     if (expandedRowKeys[record.key - 1]) {
-                      const { [record.key - 1]: value, ...remainingKeys } = expandedRowKeys;
+                      const { [record.key - 1]: value, ...remainingKeys } =
+                        expandedRowKeys;
                       setExpandedRowKeys(remainingKeys);
                     } else {
                       setExpandedRowKeys({ [record.key - 1]: true });
                     }
-                  }
+                  },
                 };
               }}
               expandable={{
@@ -291,7 +377,9 @@ export function Customer() {
               page={formFilter.page}
               pageSize={formFilter.limit}
               setPage={(value) => setFormFilter({ ...formFilter, page: value })}
-              setPerPage={(value) => setFormFilter({ ...formFilter, limit: value })}
+              setPerPage={(value) =>
+                setFormFilter({ ...formFilter, limit: value })
+              }
               total={customers?.data?.totalItem}
             />
           </div>
