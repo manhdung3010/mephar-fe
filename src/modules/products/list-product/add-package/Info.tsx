@@ -470,7 +470,7 @@ const Info = ({
             <Image src={InfoIcon} alt="" />
           </div>
           {
-            pointStatus?.data?.type === "product" && (
+            pointStatus?.data?.status === "active" && (
               <div className="mt-2 flex gap-x-2">
                 <CustomCheckbox
                   onChange={(e) =>
