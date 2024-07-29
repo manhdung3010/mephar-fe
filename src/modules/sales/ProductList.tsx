@@ -122,8 +122,6 @@ export function ProductList({
     }
   }, [orderObject, orderActive]);
 
-  console.log('orderObject', orderObject)
-
   const onChangeQuantity = async (productKey, newValue, product?: any) => {
     const orderObjectClone = cloneDeep(orderObject);
 
@@ -230,7 +228,7 @@ export function ProductList({
       title: "",
       dataIndex: "action",
       key: "action",
-      render: (_, { id, isDiscount, productUnitId }) => (
+      render: (_, { id, isDiscount, productUnitId, discountCode }) => (
         <div className="w-10 flex-shrink-0">
           <Image
             src={RemoveIcon}
@@ -246,14 +244,21 @@ export function ProductList({
               );
               setOrderObject(orderObjectClone);
 
-              // remove discount from discountObject
-              const discountObjectClone = cloneDeep(discountObject);
-              discountObjectClone[orderActive] = discountObjectClone[
-                orderActive
-              ]?.productDiscount?.filter((product) => product?.items[0]?.condition?.productUnitId[0] !== productUnitId);
+              // // remove discount from discountObject
+              // const discountObjectClone = cloneDeep(discountObject);
+              // const productDiscountClone = discountObjectClone[
+              //   orderActive
+              // ]?.productDiscount?.filter((item) => item.code === discountCode)?.filter((a) => a.id !== productUnitId);
 
-              console.log('discountObjectClone', discountObjectClone)
-              setDiscountObject(discountObjectClone);
+              // const newDiscountObject = {
+              //   ...discountObjectClone[orderActive],
+              //   productDiscount: [
+
+              //   ],
+              // };
+
+              // setDiscountObject(newDiscountObject);
+              console.log('discountCode', discountCode)
 
             }}
             alt=""

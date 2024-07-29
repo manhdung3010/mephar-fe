@@ -1,6 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useQuery } from "@tanstack/react-query";
-import { Popover } from "antd";
+import { message, Popover } from "antd";
 import cx from "classnames";
 import { cloneDeep, debounce, orderBy } from "lodash";
 import Image from "next/image";
@@ -289,7 +289,6 @@ const Index = () => {
       orderObject[orderActive]?.length > 0
     ) {
       discountObjectClone[orderActive] = discountObjectClone[orderActive]?.productDiscount?.forEach((item) => {
-        console.log('item', item)
         const list = item?.items[0]?.apply?.productUnitId;
         if (list?.length > 0) {
           for (const l of list) {
@@ -311,6 +310,8 @@ const Index = () => {
                 }
               }
 
+              console.log('productUnit', productUnit)
+
               if (productUnit && !orderObject[orderActive]?.find((product) => product.productUnitId === l?.id)) {
                 onSelectedProduct(
                   JSON.stringify({
@@ -322,9 +323,13 @@ const Index = () => {
                     discountType: discountType,
                     discountValue: discountValue,
                     isGift: item?.items[0]?.apply?.isGift,
+                    discountCode: l?.discountCode
                   })
                 );
               }
+            }
+            else {
+              message.error("Không tìm thấy sản phẩm");
             }
           }
         } else {
@@ -785,10 +790,8 @@ const Index = () => {
   return (
     <div>
       <SaleHeader />
-
       <div className="flex">
         <LeftMenu />
-
         <div className="grow overflow-x-auto">
           <div className="flex px-3 py-2">
             <span className="mr-1 text-[#D64457]">Dashboard / </span>

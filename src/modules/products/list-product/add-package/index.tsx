@@ -104,18 +104,34 @@ const AddPackage = ({
           if (isCopy && ['code', 'barCode'].includes(key)) {
             // nothing
           } else {
+
             setValue(key, product.data[key], {
               shouldValidate: true,
             });
           }
         }
+        else {
+          if (isCopy && key === 'productUnits') {
+            const productUnits = product.data.productUnit.filter(
+              (unit) => !unit.isBaseUnit
+            ).map((unit) => {
+              return {
+                ...unit,
+                code: "",
+                barCode: "",
+              };
+            });
+            setValue(key, productUnits, { shouldValidate: true });
+          }
+          else {
+            const productUnits = product.data.productUnit.filter(
+              (unit) => !unit.isBaseUnit
+            );
+            setValue('productUnits', productUnits, { shouldValidate: true });
+          }
+        }
       });
 
-      const productUnits = product.data.productUnit.filter(
-        (unit) => !unit.isBaseUnit
-      );
-
-      setValue('productUnits', productUnits, { shouldValidate: true });
     }
   }, [product]);
 

@@ -41,9 +41,6 @@ export function ProductDiscountModal({
   const orderActive = useRecoilValue(orderActiveState);
   const [discountObject, setDiscountObject] = useRecoilState(discountState);
   const [listDiscount, setListDiscount] = useState<any[]>([]);
-  const [productDiscount, setProductDiscount] = useRecoilState(
-    productDiscountSelected
-  );
   const [isOpenSelectProduct, setIsOpenSelectProduct] = useState(false);
   const [discountId, setDiscountId] = useState();
   // const { data: products, isLoading: isLoadingProduct, isSuccess } = useQuery<{
@@ -62,26 +59,26 @@ export function ProductDiscountModal({
   useEffect(() => {
     if (discountList) {
       // show old selected discount from productDiscount list, if same productUnitId then set isSelected to true
-      const listBatchClone = cloneDeep(discountList);
       const discounts = cloneDeep(discountObject);
       const productDiscount = discounts[orderActive]?.productDiscount
 
-      const selectedDiscount = listBatchClone.map((batch) => {
-        // const index = productDiscountClone.findIndex(
-        //   (item) => item.code === batch.code
-        // );
-        // // const index = listBatchClone.findIndex((item) => item.productUnitId === batch.productUnitId);
-        // if (index !== -1) {
-        //   return {
-        //     ...batch,
-        //     isSelected: true,
-        //   };
-        // }
+      const selectedDiscount = productDiscount?.map((batch) => {
+        const index = discountList.findIndex(
+          (item) => item.code === batch.code
+        );
+        // const index = listBatchClone.findIndex((item) => item.productUnitId === batch.productUnitId);
+        if (index !== -1) {
+          return {
+            ...batch,
+            isSelected: true,
+          };
+        }
         return {
           ...batch,
           isSelected: false,
         };
       });
+      console.log('selectedDiscount', selectedDiscount);
       setListDiscount(selectedDiscount);
     }
   }, [discountList]);
@@ -359,7 +356,10 @@ export function ProductDiscountModal({
                     const product = selectedProducts.find(
                       (product) => product.id === id
                     );
-                    return product;
+                    return {
+                      ...product,
+                      discountCode: selectedDiscount?.code,
+                    };
                   }).filter((product) => product),
                 },
                 condition: {

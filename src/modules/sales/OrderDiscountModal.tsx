@@ -7,7 +7,9 @@ import { formatMoney, formatNumber } from "@/helpers";
 
 import {
   branchState,
+  discountState,
   discountTypeState,
+  orderActiveState,
   orderDiscountSelected,
 } from "@/recoil/state";
 import { cloneDeep } from "lodash";
@@ -35,6 +37,12 @@ export function OrderDiscountModal({
   const [listDiscount, setListDiscount] = useState<any[]>([]);
   const [orderDiscount, setOrderDiscount] = useRecoilState(
     orderDiscountSelected
+  );
+  const [discountObject, setDiscountObject] = useRecoilState(
+    discountState
+  );
+  const [orderActive, setOrderActive] = useRecoilState(
+    orderActiveState
   );
   const [discountType, setDiscountType] = useRecoilState(discountTypeState);
 
@@ -233,13 +241,16 @@ export function OrderDiscountModal({
             const selectedDiscount = listDiscount.filter(
               (batch) => batch.isSelected
             );
-            setOrderDiscount(selectedDiscount);
-            setDiscountType("order");
+            // setOrderDiscount(selectedDiscount);
+            // setDiscountType("order");
+            const discountObjectClone = cloneDeep(discountObject);
+            discountObjectClone[orderActive].orderDiscount = selectedDiscount;
+            setDiscountObject(discountObjectClone);
             onSave(selectedDiscount);
           }}
           className="h-[46px] min-w-[150px] py-2 px-4"
-          // type={isSaleReturn && batchErr.length > 0 ? 'disable' : 'danger'}
-          // disabled={isSaleReturn && batchErr.length > 0 ? true : false}
+        // type={isSaleReturn && batchErr.length > 0 ? 'disable' : 'danger'}
+        // disabled={isSaleReturn && batchErr.length > 0 ? true : false}
         >
           Áp dụng
         </CustomButton>

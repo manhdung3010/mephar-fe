@@ -7,7 +7,7 @@ import { CustomModal } from "@/components/CustomModal";
 import { CustomRadio } from "@/components/CustomRadio";
 import InputError from "@/components/InputError";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Select, Spin } from "antd";
+import { message, Select, Spin } from "antd";
 import { log } from "console";
 import { useEffect, useState } from "react";
 
@@ -97,8 +97,11 @@ function PointModal({
   );
 
   const onsubmit = () => {
+    if (customerType === 2 && getValues("groupCustomers").length === 0) {
+      message.error("Vui lòng chọn nhóm khách hàng áp dụng");
+      return;
+    }
     mutateCreatePoint();
-    console.log(getValues());
   };
   return (
     <CustomModal

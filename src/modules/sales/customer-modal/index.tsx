@@ -94,7 +94,7 @@ function CustomerModal({
       title: 'Tổng bán',
       dataIndex: 'totalOrderPay',
       key: 'totalOrderPay',
-      render: (value) => formatMoney(value),
+      render: (value) => formatMoney(+value),
     },
   ];
   return (
