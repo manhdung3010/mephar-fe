@@ -4,78 +4,78 @@
 
 @font-face {
   font-family: "SF Pro Display";
-  src: url('../assets/fonts/SFPRODISPLAYREGULAR.OTF');
+  src: url("../assets/fonts/SFPRODISPLAYREGULAR.OTF");
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
   font-family: "SF Pro Display";
-  src: url('../assets/fonts/SFPRODISPLAYSEMIBOLDITALIC.OTF');
+  src: url("../assets/fonts/SFPRODISPLAYSEMIBOLDITALIC.OTF");
   font-weight: 600;
   font-style: italic;
 }
 
 @font-face {
   font-family: "SF Pro Display";
-  src: url('../assets/fonts/SFPRODISPLAYBLACKITALIC.OTF');
+  src: url("../assets/fonts/SFPRODISPLAYBLACKITALIC.OTF");
   font-weight: 900;
   font-style: italic;
 }
 
 @font-face {
   font-family: "SF Pro Display";
-  src: url('../assets/fonts/SFPRODISPLAYBOLD.OTF');
+  src: url("../assets/fonts/SFPRODISPLAYBOLD.OTF");
   font-weight: 700;
   font-style: normal;
 }
 
 @font-face {
   font-family: "SF Pro Display";
-  src: url('../assets/fonts/SFPRODISPLAYHEAVYITALIC.OTF');
+  src: url("../assets/fonts/SFPRODISPLAYHEAVYITALIC.OTF");
   font-weight: 800;
   font-style: italic;
 }
 
 @font-face {
   font-family: "SF Pro Display";
-  src: url('../assets/fonts/SFPRODISPLAYMEDIUM.OTF');
+  src: url("../assets/fonts/SFPRODISPLAYMEDIUM.OTF");
   font-weight: 500;
   font-style: normal;
 }
 
 @font-face {
   font-family: "SF Pro Display";
-  src: url('../assets/fonts/SFPRODISPLAYTHINITALIC.OTF');
+  src: url("../assets/fonts/SFPRODISPLAYTHINITALIC.OTF");
   font-weight: 100;
   font-style: italic;
 }
 
 @font-face {
   font-family: "SF Pro Display";
-  src: url('../assets/fonts/SFPRODISPLAYULTRALIGHTITALIC.OTF');
+  src: url("../assets/fonts/SFPRODISPLAYULTRALIGHTITALIC.OTF");
   font-weight: 200;
   font-style: italic;
 }
 
 @font-face {
   font-family: "SF Pro Display";
-  src: url('../assets/fonts/SFPRODISPLAYLIGHTITALIC.OTF');
+  src: url("../assets/fonts/SFPRODISPLAYLIGHTITALIC.OTF");
   font-weight: 300;
   font-style: italic;
 }
 
 html {
-  font-family: 'SF Pro Display', sans-serif;
+  font-family: "SF Pro Display", sans-serif;
 }
 
 a {
   @apply text-blue-700;
 }
 
-a:hover {
+/* a:hover {
   @apply border-b-2 border-blue-700;
-}
+} */
 
 @tailwind components;
 @tailwind utilities;
@@ -102,4 +102,10 @@ a {
 
 .ant-btn-primary {
   background-color: #1a73e8;
+}
+
+.fluid-container {
+  width: 100%;
+  max-width: 1208px;
+  margin: 0 auto;
 }

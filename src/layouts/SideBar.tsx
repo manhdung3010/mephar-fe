@@ -23,6 +23,7 @@ import BarIcon from "@/assets/barIcon.svg";
 import { collapsedState, profileState } from "@/recoil/state";
 
 import { SideBarStyled } from "./styled";
+import Link from "next/link";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -171,19 +172,21 @@ const items = (permissions: { model: string; action: string }[]) => [
     getItem("Thiết lập giá", keyMenu.PRODUCT_PRICE),
   ]),
 
-  // hasMultiplePermission(permissions, [
-  //   RoleModel.market_common,
-  //   RoleModel.market_store,
-  //   RoleModel.market_setting,
-  // ]) &&
-  // getItem('Chợ', keyMenu.MARKET, <Image src={MarketIcon} />, [
-  //   hasPermission(permissions, RoleModel.market_common) &&
-  //   getItem('Chợ', keyMenu.MARKET_COMMON),
-  //   hasPermission(permissions, RoleModel.market_store) &&
-  //   getItem('Chợ đại lý', keyMenu.MARKET_STORE),
-  //   hasPermission(permissions, RoleModel.market_setting) &&
-  //   getItem('Cấu hình sản phẩm', keyMenu.MARKET_SETTING),
-  // ]),
+  hasMultiplePermission(permissions, [
+    RoleModel.market_common,
+    RoleModel.market_store,
+    RoleModel.market_setting,
+  ]) &&
+  getItem('Chợ', keyMenu.MARKET, <Image src={MarketIcon} />, [
+    hasPermission(permissions, RoleModel.market_common) &&
+    getItem(<Link href={'/markets'} passHref>
+      <a target="_blank">Chợ</a>
+    </Link>, keyMenu.MARKET_COMMON),
+    hasPermission(permissions, RoleModel.market_store) &&
+    getItem('Chợ đại lý', keyMenu.MARKET_STORE),
+    hasPermission(permissions, RoleModel.market_setting) &&
+    getItem('Cấu hình sản phẩm', keyMenu.MARKET_SETTING),
+  ]),
 
   hasPermission(permissions, RoleModel.medicine_category, RoleAction.read) &&
   getItem("Danh mục thuốc", keyMenu.MEDICINE, <Image src={MedicineIcon} />),
