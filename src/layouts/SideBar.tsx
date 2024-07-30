@@ -172,21 +172,21 @@ const items = (permissions: { model: string; action: string }[]) => [
     getItem("Thiết lập giá", keyMenu.PRODUCT_PRICE),
   ]),
 
-  hasMultiplePermission(permissions, [
-    RoleModel.market_common,
-    RoleModel.market_store,
-    RoleModel.market_setting,
-  ]) &&
-  getItem('Chợ', keyMenu.MARKET, <Image src={MarketIcon} />, [
-    hasPermission(permissions, RoleModel.market_common) &&
-    getItem(<Link href={'/markets'} passHref>
-      <a target="_blank">Chợ</a>
-    </Link>, keyMenu.MARKET_COMMON),
-    hasPermission(permissions, RoleModel.market_store) &&
-    getItem('Chợ đại lý', keyMenu.MARKET_STORE),
-    hasPermission(permissions, RoleModel.market_setting) &&
-    getItem('Cấu hình sản phẩm', keyMenu.MARKET_SETTING),
-  ]),
+  // hasMultiplePermission(permissions, [
+  //   RoleModel.market_common,
+  //   RoleModel.market_store,
+  //   RoleModel.market_setting,
+  // ]) &&
+  // getItem('Chợ', keyMenu.MARKET, <Image src={MarketIcon} />, [
+  //   hasPermission(permissions, RoleModel.market_common) &&
+  //   getItem(<Link href={'/markets'} passHref>
+  //     <a target="_blank">Chợ</a>
+  //   </Link>, keyMenu.MARKET_COMMON),
+  //   hasPermission(permissions, RoleModel.market_store) &&
+  //   getItem('Chợ đại lý', keyMenu.MARKET_STORE),
+  //   hasPermission(permissions, RoleModel.market_setting) &&
+  //   getItem('Cấu hình sản phẩm', keyMenu.MARKET_SETTING),
+  // ]),
 
   hasPermission(permissions, RoleModel.medicine_category, RoleAction.read) &&
   getItem("Danh mục thuốc", keyMenu.MEDICINE, <Image src={MedicineIcon} />),
@@ -227,17 +227,17 @@ const items = (permissions: { model: string; action: string }[]) => [
     hasPermission(permissions, RoleModel.doctor, RoleAction.read) &&
     getItem("Bác sĩ", keyMenu.PARTNERS_DOCTOR_LIST),
   ]),
-  hasPermission(permissions, RoleModel.map, RoleAction.read) && getItem(
-    "Chăm sóc khách hàng",
-    keyMenu.CUSTOMER_CARE,
-    <Image src={CSIcon} />,
-    [
-      hasPermission(permissions, RoleModel.map, RoleAction.read) &&
-      getItem("Check điểm bán", keyMenu.CUSTOMER_CARE_CHECK),
-      hasPermission(permissions, RoleModel.map, RoleAction.read) &&
-      getItem("Danh sách lịch trình", keyMenu.CUSTOMER_CARE_LIST),
-    ]
-  ),
+  // hasPermission(permissions, RoleModel.map, RoleAction.read) && getItem(
+  //   "Chăm sóc khách hàng",
+  //   keyMenu.CUSTOMER_CARE,
+  //   <Image src={CSIcon} />,
+  //   [
+  //     hasPermission(permissions, RoleModel.map, RoleAction.read) &&
+  //     getItem("Check điểm bán", keyMenu.CUSTOMER_CARE_CHECK),
+  //     hasPermission(permissions, RoleModel.map, RoleAction.read) &&
+  //     getItem("Danh sách lịch trình", keyMenu.CUSTOMER_CARE_LIST),
+  //   ]
+  // ),
 
   hasPermission(permissions, RoleModel.cashbook, RoleAction.read) &&
   getItem("Sổ quỹ", keyMenu.CASHBOOK, <Image src={CashbookIcon} />),
