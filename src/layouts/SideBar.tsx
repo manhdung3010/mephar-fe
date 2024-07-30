@@ -347,6 +347,7 @@ const SideBar = () => {
           setMenuActive(value);
         }}
         onClick={({ key }) => {
+          if (key === keyMenu.MARKET_COMMON) return;
           router.push(key);
         }}
       />
