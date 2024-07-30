@@ -161,7 +161,7 @@ export const BillGiftPoint = ({
                 <div className="flex h-10 w-fit items-center rounded border border-[#E8EAEB]">
                   <div
                     className={cx(
-                      'h-full w-[50px] text-center rounded-tl rounded-bl flex items-center justify-center cursor-pointer',
+                      'h-full w-[50px] text-center rounded flex items-center justify-center cursor-pointer',
                       {
                         'bg-[#3E7BFA] text-white':
                           row?.apply?.discountType === EDiscountUnit.MONEY,
@@ -171,18 +171,7 @@ export const BillGiftPoint = ({
                   >
                     Điểm
                   </div>
-                  <div
-                    className={cx(
-                      'h-full w-[50px] text-center rounded-tr rounded-br flex items-center justify-center cursor-pointer',
-                      {
-                        'bg-[#3E7BFA] text-white':
-                          row?.apply?.discountType === EDiscountUnit.PERCENT,
-                      }
-                    )}
-                    onClick={() => handleChangeRow(index, 'discountType', EDiscountUnit.PERCENT)}
-                  >
-                    %
-                  </div>
+
                 </div>
               </div>
               <div onClick={() => handleDeleteRow(index)} className="flex flex-1 items-center justify-center px-4 cursor-pointer">

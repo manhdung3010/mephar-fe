@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/router';
 import React, { useEffect, useRef, useState } from 'react'
 import LocationIcon from "@/assets/location.svg";
+import EndMarkIcon from "@/assets/endMarkIcon.svg";
 import LineIcon from "@/assets/LineDotLargeIcon.svg";
 import DeleteIcon from "@/assets/deleteRed.svg";
 import DateIcon from "@/assets/dateIcon.svg";
@@ -15,14 +16,20 @@ import EditIcon from "@/assets/editWhite.svg";
 import SuccessCircleIcon from "@/assets/successCircleIcon.svg";
 import ArrowLeftIcon from "@/assets/arrowLeftIcon2.svg";
 import CustomMap from '@/components/CustomMap'
-import { formatDateTime } from '@/helpers';
+import { formatDateTime, formatDistance, hasPermission } from '@/helpers';
 import UpdateStatusModal from './UpdateTripStatusModal';
 import { ECustomerStatus } from '../enum';
 import DeleteModal from '@/components/CustomModal/ModalDeleteItem';
 import { message } from 'antd';
+import { profileState, vehicalState } from '@/recoil/state';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
+import { CustomRadio } from '@/components/CustomRadio';
 
 function TripDetail() {
   const router = useRouter();
+  const profile = useRecoilValue(profileState);
+  const [vehical, setVehical] = useRecoilState(vehicalState);
   const queryClient = useQueryClient();
   const { id } = router.query;
   const mapRef = useRef<any>(null);
@@ -58,10 +65,10 @@ function TripDetail() {
       }
     );
 
-  const handleAddMarker = (lng, lat, customerInfo?: any, customerIndex?: number) => {
+  const handleAddMarker = (lng, lat, customerInfo?: any, customerIndex?: number, isEnd?: boolean) => {
     const coordinates = [lng, lat];
     if (mapRef.current) {
-      mapRef.current.addMarker(coordinates, customerInfo ? customerInfo : null, customerIndex ? customerIndex : null);
+      mapRef.current.addMarker(coordinates, customerInfo ? customerInfo : null, customerIndex ? customerIndex : null, isEnd);
     }
   };
 
@@ -72,6 +79,9 @@ function TripDetail() {
       }
       else {
         handleAddMarker(+tripDetail?.data?.lng, +tripDetail?.data?.lat);
+      }
+      if (tripDetail?.data?.latEnd) {
+        handleAddMarker(+tripDetail?.data?.lngEnd, +tripDetail?.data?.latEnd, null, undefined, true);
       }
     }
   }, [tripDetail])
@@ -86,21 +96,29 @@ function TripDetail() {
           {"Chi tiết lịch trình"}
         </div>
         <div className="flex gap-4">
-          <CustomButton
-            outline={true}
-            type="danger"
-            onClick={() => setIsOpenDelete(true)}
-            prefixIcon={<Image src={DeleteIcon} alt="icon" />}
-          >
-            Xóa
-          </CustomButton>
-          <CustomButton
-            onClick={() => router.push(`/customer-care/create-schedule?id=${id}&isEdit=true`)}
-            type="success"
-            prefixIcon={<Image src={EditIcon} alt="icon" />}
-          >
-            Cập nhật
-          </CustomButton>
+          {
+            hasPermission(profile?.role?.permissions, RoleModel.map, RoleAction.delete) && (
+              <CustomButton
+                outline={true}
+                type="danger"
+                onClick={() => setIsOpenDelete(true)}
+                prefixIcon={<Image src={DeleteIcon} alt="icon" />}
+              >
+                Xóa
+              </CustomButton>
+            )
+          }
+          {
+            hasPermission(profile?.role?.permissions, RoleModel.map, RoleAction.update) && tripDetail?.data?.status !== 'done' && (
+              <CustomButton
+                onClick={() => router.push(`/customer-care/create-schedule?id=${id}&isEdit=true`)}
+                type="success"
+                prefixIcon={<Image src={EditIcon} alt="icon" />}
+              >
+                Cập nhật
+              </CustomButton>
+            )
+          }
         </div>
       </div>
       <div className="my-6 flex gap-6">
@@ -117,7 +135,7 @@ function TripDetail() {
                       <div className='flex items-center gap-1'>
                         <Image src={DateIcon} alt="icon" />
                         <span>
-                          {formatDateTime(tripDetail?.data?.time)}
+                          {formatDateTime(tripDetail?.data?.createdAt)}
                         </span>
                       </div>
                       <div className='flex items-center gap-1'>
@@ -125,6 +143,22 @@ function TripDetail() {
                         <span>
                           {+tripDetail?.data?.total} điểm đến
                         </span>
+                      </div>
+                    </div>
+                    <div className='mt-5'>
+                      <Label infoText="" label="Phương tiện di chuyển" />
+                      <div>
+                        <CustomRadio
+                          options={[
+                            { value: 'car', label: "Ô tô" },
+                            { value: 'motorcycle', label: "Xe máy" },
+                          ]}
+                          value={vehical}
+                          onChange={(value) => {
+                            setVehical(value)
+                          }
+                          }
+                        />
                       </div>
                     </div>
                   </div>
@@ -147,8 +181,7 @@ function TripDetail() {
                         {
                           tripDetail?.data?.tripCustomer?.map((item, index) => (
                             <div
-                              className='flex gap-2 items-center'
-
+                              className='flex gap-2 items-center' key={index}
                             >
                               {
                                 item?.status === ECustomerStatus.VISITED ? (
@@ -172,7 +205,7 @@ function TripDetail() {
                                 )
                               }
                               <div
-                                className={`w-full border-[1px] border-[#D3D5D7] rounded py-3 px-4 ${item?.status === ECustomerStatus.VISITED ? 'bg-[#f2fff9] border-[#11A75C]' : 'hover:bg-[#f2f7ff] hover:border-[#0177FB] transition-all cursor-pointer'} `}
+                                className={`w-full border-[1px] border-[#D3D5D7] rounded py-3 px-4 ${item?.status === ECustomerStatus.VISITED ? 'bg-[#f2fff9] border-[#11A75C]' : 'hover:bg-[#f2f7ff] hover:border-[#0177FB] transition-all cursor-pointer'} ${item?.status === ECustomerStatus.WAITED ? 'bg-gray-200' : ''}`}
                                 onClick={() => {
                                   if (item?.status === ECustomerStatus.VISITED) return;
                                   setCustomerInfo(item?.customer)
@@ -180,9 +213,16 @@ function TripDetail() {
                                   setIsShowModal(true)
                                 }}
                               >
-                                <div className='font-semibold'>
-                                  <span className='text-red-main'>{item?.customer?.code}</span> - <span>{item?.customer?.fullName}</span>
-                                  <span className={`ml-1 ${item?.customer?.status === 'active' ? 'bg-[#e5f8ec] text-[#00B63E] border-[1px] border-[#00B63E]' : item?.customer?.status === 'inactive' ? 'bg-[#feeaea] text-[#F32B2B] border-[1px] border-[#F32B2B]' : 'bg-[#f0e5fa] text-[#6600CC] border-[1px] border-[#6600CC]'}  rounded-full px-2 py-1 text-xs`}>{item?.customer?.status === 'active' ? "Hoạt động" : item?.customer?.status === 'inactive' ? "Ngưng hoạt động" : "Tiềm năng"}</span>
+                                <div className='flex justify-between'>
+                                  <div className='font-semibold'>
+                                    <span className='text-red-main'>{item?.customer?.code}</span> - <span>{item?.customer?.fullName?.length > 44 ? item?.customer?.fullName?.slice(0, 43) + "..." : item?.customer?.fullName}</span>
+                                    <span className={`ml-1 ${item?.customer?.status === 'active' ? 'bg-[#e5f8ec] text-[#00B63E] border-[1px] border-[#00B63E]' : item?.customer?.status === 'inactive' ? 'bg-[#feeaea] text-[#F32B2B] border-[1px] border-[#F32B2B]' : 'bg-[#f0e5fa] text-[#6600CC] border-[1px] border-[#6600CC]'}  rounded-full px-2 py-1 text-xs`}>{item?.customer?.status === 'active' ? "Hoạt động" : item?.customer?.status === 'inactive' ? "Ngưng hoạt động" : "Tiềm năng"}</span>
+                                  </div>
+                                  {
+                                    item?.status !== ECustomerStatus.VISITED && (
+                                      <div>{formatDistance(item?.distances)}</div>
+                                    )
+                                  }
                                 </div>
                                 <div className="text-gray-600 mt-2">
                                   <div className="flex items-center space-x-1">
@@ -191,14 +231,30 @@ function TripDetail() {
                                   </div>
                                   <div className="flex items-center space-x-1 mt-1">
                                     <Image src={MarkIcon} alt="" />
-                                    <span>{item?.address}</span>
+                                    <span className='line-clamp-1'>{item?.address}</span>
                                   </div>
                                 </div>
                               </div>
                             </div>
                           ))
                         }
-
+                        <div className='flex gap-2 items-center'>
+                          <div className='w-6 flex-shrink-0 flex items-center relative cursor-pointer'>
+                            <div className='w-6 h-6 flex-shrink-0 flex items-center z-10'>
+                              <Image src={EndMarkIcon} alt='icon' />
+                            </div>
+                            <div className='absolute bottom-0 left-1/2 -translate-x-1/2 z-0'>
+                              <Image src={LineIcon} className='' alt='icon' />
+                            </div>
+                          </div>
+                          <div className='w-full border-[1px] border-[#D3D5D7] rounded py-3 px-4'>
+                            Vị trí kết thúc
+                            <div className="flex items-center space-x-1 mt-1">
+                              <Image src={MarkIcon} alt="" />
+                              <span>{tripDetail?.data?.endAddress}</span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>

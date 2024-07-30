@@ -32,6 +32,7 @@ import {
 import { formatMoney, formatNumber, hasPermission } from "@/helpers";
 import {
   branchState,
+  discountState,
   discountTypeState,
   orderActiveState,
   orderDiscountSelected,
@@ -68,6 +69,9 @@ export function RightContent({
   const [orderActive, setOrderActive] = useRecoilState(orderActiveState);
   const [orderDiscount, setOrderDiscount] = useRecoilState(
     orderDiscountSelected
+  );
+  const [discountObject, setDiscountObject] = useRecoilState(
+    discountState
   );
   const [productDiscount, setProductDiscount] = useRecoilState(
     productDiscountSelected
@@ -178,7 +182,7 @@ export function RightContent({
       );
       const discountType =
         EDiscountLabel[
-          getEnumKeyByValue(EDiscountType, getValues("discountType"))
+        getEnumKeyByValue(EDiscountType, getValues("discountType"))
         ];
 
       return `${discountValue}${discountType}`;
@@ -217,8 +221,8 @@ export function RightContent({
     const convertPoint = pointStatus?.data?.convertPoint;
 
     if (convertMoneyPayment && getValues("paymentPoint") > 0) {
-      if (orderDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
-        orderDiscount?.forEach((item) => {
+      if (discountObject[orderActive]?.orderDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
+        discountObject[orderActive]?.orderDiscount?.forEach((item) => {
           if (item.type === "order_price") {
             if (item?.items[0]?.apply?.discountType === "percent") {
               discount +=
@@ -233,12 +237,12 @@ export function RightContent({
         if (getValues("discountType") === EDiscountType.MONEY) {
           return totalPrice > Number(getValues("discount"))
             ? Math.round(
-                totalPrice -
-                  discount -
-                  Number(getValues("discount")) -
-                  (pointStatus?.data?.convertMoneyPayment / convertPoint) *
-                    getValues("paymentPoint")
-              )
+              totalPrice -
+              discount -
+              Number(getValues("discount")) -
+              (pointStatus?.data?.convertMoneyPayment / convertPoint) *
+              getValues("paymentPoint")
+            )
             : 0;
         }
 
@@ -247,12 +251,12 @@ export function RightContent({
             (totalPrice * Number(getValues("discount"))) / 100;
           return totalPrice > discountValue
             ? Math.round(
-                totalPrice -
-                  discount -
-                  discountValue -
-                  (pointStatus?.data?.convertMoneyPayment / convertPoint) *
-                    getValues("paymentPoint")
-              )
+              totalPrice -
+              discount -
+              discountValue -
+              (pointStatus?.data?.convertMoneyPayment / convertPoint) *
+              getValues("paymentPoint")
+            )
             : 0;
         }
       }
@@ -261,11 +265,11 @@ export function RightContent({
         totalPrice -
         discount -
         (pointStatus?.data?.convertMoneyPayment / convertPoint) *
-          getValues("paymentPoint")
+        getValues("paymentPoint")
       );
     } else {
-      if (orderDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
-        orderDiscount?.forEach((item) => {
+      if (discountObject[orderActive]?.orderDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
+        discountObject[orderActive]?.orderDiscount?.forEach((item) => {
           if (item.type === "order_price") {
             if (item?.items[0]?.apply?.discountType === "percent") {
               discount +=
@@ -299,7 +303,7 @@ export function RightContent({
     getValues("discount"),
     getValues("discountType"),
     getValues("customerId"),
-    orderDiscount,
+    discountObject[orderActive],
     getValues("paymentPoint"),
   ]);
   // caculate return price
@@ -497,15 +501,15 @@ export function RightContent({
                 RoleModel.customer,
                 RoleAction.create
               ) && (
-                <Image
-                  src={PlusIcon}
-                  onClick={(e) => {
-                    setIsOpenAddCustomerModal(true);
-                    e.stopPropagation();
-                  }}
-                  alt=""
-                />
-              )}
+                  <Image
+                    src={PlusIcon}
+                    onClick={(e) => {
+                      setIsOpenAddCustomerModal(true);
+                      e.stopPropagation();
+                    }}
+                    alt=""
+                  />
+                )}
             </>
           }
           prefixIcon={<Image src={CustomerIcon} alt="" />}
@@ -565,13 +569,13 @@ export function RightContent({
                     <Image
                       src={DiscountIcon}
                       onClick={() => {
-                        if (
-                          productDiscount?.length > 0 &&
-                          !discountConfigDetail?.data?.data?.isMergeDiscount
-                        )
-                          return message.error(
-                            "Bạn đã chọn khuyến mại hàng hóa. Mỗi hóa đơn chỉ đươc áp dụng 1 loại khuyến mại"
-                          );
+                        // if (
+                        //   productDiscount?.length > 0 &&
+                        //   !discountConfigDetail?.data?.data?.isMergeDiscount
+                        // )
+                        //   return message.error(
+                        //     "Bạn đã chọn khuyến mại hàng hóa. Mỗi hóa đơn chỉ đươc áp dụng 1 loại khuyến mại"
+                        //   );
                         return setIsOpenDiscountModal(!isOpenDiscountModal);
                       }}
                       alt="discount-icon"
@@ -581,7 +585,7 @@ export function RightContent({
               </div>
               <div className="text-lg leading-normal text-[#19191C] flex flex-col items-end">
                 <div className="text-lg">{formatMoney(totalPrice)}</div>
-                {orderDiscount?.map((item) => {
+                {discountObject[orderActive]?.orderDiscount?.map((item) => {
                   if (item.type === "order_price") {
                     return (
                       <div key={item.id} className="text-[#828487] text-base">
@@ -655,8 +659,8 @@ export function RightContent({
                           if (customerPoint < pointStatus?.data?.convertPoint) {
                             message.error(
                               "Khách hàng không đủ điểm để thanh toán. Điểm thanh toán tối thiểu là " +
-                                pointStatus?.data?.convertPoint +
-                                " điểm"
+                              pointStatus?.data?.convertPoint +
+                              " điểm"
                             );
                             return;
                           }
@@ -736,8 +740,8 @@ export function RightContent({
                 {getValues("paymentType") === EPaymentMethod.CASH
                   ? "Tiền mặt"
                   : getValues("paymentType") === EPaymentMethod.BANKING
-                  ? "Chuyển khoản"
-                  : "Khách nợ"}
+                    ? "Chuyển khoản"
+                    : "Khách nợ"}
               </div>
             </div>
 
@@ -848,12 +852,12 @@ export function RightContent({
                 isDiscount: product.isDiscount,
                 ...(product.isDiscount &&
                   !product?.buyNumberType && {
-                    itemPrice: Number(product.price - discountVal),
-                  }),
+                  itemPrice: Number(product.price - discountVal),
+                }),
                 ...(product.isDiscount &&
                   product?.buyNumberType && {
-                    itemPrice: Number(product.itemPrice),
-                  }),
+                  itemPrice: Number(product.itemPrice),
+                }),
                 isBatchExpireControl: product.product.isBatchExpireControl,
                 batches: product.batches
                   .filter((batch) => batch.isSelected)

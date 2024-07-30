@@ -24,4 +24,5 @@ export const schema = yup.object().shape({
   avatarId: yup.number(),
   lng: yup.string(),
   lat: yup.string(),
+  point: yup.string(),
 });

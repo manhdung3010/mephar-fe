@@ -48,3 +48,16 @@ export function getGeo(page: number, limit: number, payload: any) {
 export function getHistoryCustomer(id: string) {
   return axiosClient.get(`customer/${id}/history-visited`);
 }
+
+// lấy địa chỉ từ tọa độ
+export const getAddress = (params: { lat: number; lng: number }) => {
+  return axiosClient.get(`trip/search/reverse`, { params });
+};
+
+// vẽ đường đi
+export const getRouting = (payload: {
+  listPoint: { lng: string; lat: string }[];
+  vehicle: string;
+}) => {
+  return axiosClient.post(`trip/map-routing`, payload);
+};

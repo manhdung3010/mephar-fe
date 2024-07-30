@@ -75,6 +75,7 @@ export function AddCashbookModal({
     keyword: '',
   });
   const [orderList, setOrderList] = useState([]);
+  const [orderListOpen, setOrderListOpen] = useState([]);
   const [confirmDebt, setConfirmDebt] = useState(false);
   const [isOpenDelete, setIsOpenDelete] = useState(false);
   const profile = useRecoilValue(profileState);
@@ -112,7 +113,7 @@ export function AddCashbookModal({
   );
   const { data: customerDebt, isLoading: isLoadingCustomerDebt } = useQuery(
     ['OTHER_USER', getValues('target'), getValues('targetId')],
-    () => getCustomerDebt({ page: 1, limit: 20, keyword: '' }, getValues('targetId')),
+    () => getCustomerDebt({ page: 1, limit: 999, keyword: '' }, getValues('targetId')),
     {
       enabled: getValues('target') === 'customer' && getValues('targetId') !== undefined
     }
@@ -125,19 +126,16 @@ export function AddCashbookModal({
     }
   );
 
-  // useEffect(() => {
-  //   if (isOpen) {
-  //     reset();
-  //   }
-  // }, [isOpen]);
+  console.log('orderList', orderList)
 
   useEffect(() => {
     if (customerDebt?.data) {
-      setOrderList(customerDebt?.data.map((item, index) => ({
+      const newCustomerDebt = customerDebt?.data.map((item, index) => ({
         ...item,
         key: index,
         amount: 0
-      })))
+      }))
+      setOrderList(newCustomerDebt)
     }
   }, [customerDebt?.data])
 
@@ -249,13 +247,13 @@ export function AddCashbookModal({
       title: 'Giá trị hóa đơn',
       dataIndex: 'totalAmount',
       key: 'totalAmount',
-      render: (value) => formatMoney(value),
+      render: (value, { amount }) => formatMoney(value || +amount),
     },
     {
       title: 'Đã thu trước',
       dataIndex: 'receiveUser',
       key: 'receiveUser',
-      render: (value, record) => formatMoney(record?.totalAmount - +record?.debtAmount),
+      render: (value, record) => formatMoney((record?.totalAmount - +record?.debtAmount) || record?.amountCollected),
     },
     ...(transactionDetail?.data?.isPaymentOrder ? [] : [
       {
@@ -269,11 +267,11 @@ export function AddCashbookModal({
       title: 'Tiền thu',
       dataIndex: 'amount',
       key: 'amount',
-      render: (value, { key }) => (
+      render: (value, { key, cashOfCustomer }) => (
         <CustomInput
           type="number"
           className='w-28'
-          value={value}
+          value={value || cashOfCustomer}
           disabled={transactionDetail?.data?.isPaymentOrder}
           onChange={(value) => {
             // update quantity of orderList
@@ -339,11 +337,12 @@ export function AddCashbookModal({
       const newOrderList = data?.listOrder?.map((item, index) => {
         const order = customerDebt?.data?.find((i) => i.orderId === item.orderId)
         return {
-          ...order,
+          ...item,
           amount: +item.amount,
           key: index
         }
       })
+      console.log('newOrderList', newOrderList)
       setOrderList(newOrderList)
       setValue('code', data.code, { shouldValidate: true })
       setValue('target', data.target, { shouldValidate: true })

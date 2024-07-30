@@ -1,64 +1,64 @@
-import { Checkbox } from 'antd';
-import Image from 'next/image';
-import { useState } from 'react';
+import { Checkbox } from "antd";
+import Image from "next/image";
+import { useState } from "react";
 
-import InfoIcon from '@/assets/info-circle.svg';
-import { CustomInput } from '@/components/CustomInput';
-import Label from '@/components/CustomLabel';
-import { CustomRadio } from '@/components/CustomRadio';
-import { CustomSelect } from '@/components/CustomSelect';
+import InfoIcon from "@/assets/info-circle.svg";
+import { CustomInput } from "@/components/CustomInput";
+import Label from "@/components/CustomLabel";
+import { CustomRadio } from "@/components/CustomRadio";
+import { CustomSelect } from "@/components/CustomSelect";
 
-import InputError from '@/components/InputError';
-import { BillDiscount } from './bill-target/BillDiscount';
-import { BillDiscountProduct } from './bill-target/BillDiscountProduct';
-import { BillGiftPoint } from './bill-target/BillGiftPoint';
-import { BillGiftProduct } from './bill-target/BillGiftProduct';
-import { ProductDiscountProduct } from './product-target/ProductDiscountProduct';
-import { ProductGiftProduct } from './product-target/ProductGiftProduct';
-import { ProductGiftPoint } from './product-target/ProductGiftPoint';
-import { ProductQuantity } from './product-target/ProductQuantity';
+import InputError from "@/components/InputError";
+import { BillDiscount } from "./bill-target/BillDiscount";
+import { BillDiscountProduct } from "./bill-target/BillDiscountProduct";
+import { BillGiftPoint } from "./bill-target/BillGiftPoint";
+import { BillGiftProduct } from "./bill-target/BillGiftProduct";
+import { ProductDiscountProduct } from "./product-target/ProductDiscountProduct";
+import { ProductGiftProduct } from "./product-target/ProductGiftProduct";
+import { ProductGiftPoint } from "./product-target/ProductGiftPoint";
+import { ProductQuantity } from "./product-target/ProductQuantity";
 
 export enum EDiscountType {
-  ORDER = 'ORDER',
-  PRODUCT = 'PRODUCT',
+  ORDER = "ORDER",
+  PRODUCT = "PRODUCT",
 }
 
 export enum EDiscountTypeLabel {
-  ORDER = 'Hóa đơn',
-  PRODUCT = 'Hàng hóa',
+  ORDER = "Hóa đơn",
+  PRODUCT = "Hàng hóa",
 }
 
 export enum EDiscountBillMethod {
-  ORDER_PRICE = 'ORDER_PRICE',
-  PRODUCT_PRICE = 'PRODUCT_PRICE',
-  GIFT = 'GIFT',
-  LOYALTY = 'LOYALTY',
+  ORDER_PRICE = "ORDER_PRICE",
+  PRODUCT_PRICE = "PRODUCT_PRICE",
+  GIFT = "GIFT",
+  LOYALTY = "LOYALTY",
 }
 
 export enum EDiscountBillMethodLabel {
-  GIFT = 'Tặng hàng',
-  ORDER_PRICE = 'Giảm giá hóa đơn',
-  PRODUCT_PRICE = 'Giảm giá hàng',
-  LOYALTY = 'Tặng điểm',
+  GIFT = "Tặng hàng",
+  ORDER_PRICE = "Giảm giá hóa đơn",
+  PRODUCT_PRICE = "Giảm giá hàng",
+  LOYALTY = "Tặng điểm",
 }
 
 export enum EDiscountGoodsMethod {
-  PRODUCT_PRICE = 'PRODUCT_PRICE',
-  GIFT = 'GIFT',
-  LOYALTY = 'LOYALTY',
-  PRICE_BY_BUY_NUMBER = 'PRICE_BY_BUY_NUMBER'
+  PRODUCT_PRICE = "PRODUCT_PRICE",
+  GIFT = "GIFT",
+  LOYALTY = "LOYALTY",
+  PRICE_BY_BUY_NUMBER = "PRICE_BY_BUY_NUMBER",
 }
 
 export enum EDiscountGoodsMethodLabel {
-  PRODUCT_PRICE = 'Mua hàng giảm giá hàng',
-  GIFT = 'Mua hàng tặng hàng',
-  LOYALTY = 'Mua hàng tặng điểm',
-  PRICE_BY_BUY_NUMBER = 'Giảm giá theo số lượng mua'
+  PRODUCT_PRICE = "Mua hàng giảm giá hàng",
+  GIFT = "Mua hàng tặng hàng",
+  LOYALTY = "Mua hàng tặng điểm",
+  PRICE_BY_BUY_NUMBER = "Giảm giá theo số lượng mua",
 }
 
 export enum EDiscountUnit {
-  MONEY = 'AMOUNT',
-  PERCENT = 'PERCENT',
+  MONEY = "AMOUNT",
+  PERCENT = "PERCENT",
 }
 
 export const orderOptionData = [
@@ -77,8 +77,8 @@ export const orderOptionData = [
   {
     value: EDiscountBillMethod.LOYALTY,
     label: EDiscountBillMethodLabel.LOYALTY,
-  }
-]
+  },
+];
 
 export const productOptionData = [
   {
@@ -96,8 +96,8 @@ export const productOptionData = [
   {
     value: EDiscountGoodsMethod.PRICE_BY_BUY_NUMBER,
     label: EDiscountGoodsMethodLabel.PRICE_BY_BUY_NUMBER,
-  }
-]
+  },
+];
 
 const Info = ({ setValue, getValues, errors }: any) => {
   return (
@@ -123,10 +123,12 @@ const Info = ({ setValue, getValues, errors }: any) => {
           <div className="h-11 rounded-md border border-[#d9d9d9] px-4 py-[2px]">
             <CustomRadio
               options={[
-                { value: "active", label: 'Kích hoạt' },
-                { value: "inactive", label: 'Chưa áp dụng' },
+                { value: "active", label: "Kích hoạt" },
+                { value: "inactive", label: "Chưa áp dụng" },
               ]}
-              onChange={(value) => setValue("status", value, { shouldValidate: true })}
+              onChange={(value) =>
+                setValue("status", value, { shouldValidate: true })
+              }
               value={getValues("status")}
             />
           </div>
@@ -166,17 +168,17 @@ const Info = ({ setValue, getValues, errors }: any) => {
         className="grid grid-cols-2 gap-x-[42px] gap-y-5"
         style={{
           gridTemplateColumns:
-            getValues('target') === EDiscountType.ORDER
-              ? 'repeat(2, minmax(0, 1fr))'
-              : 'repeat(3, minmax(0, 1fr))',
+            getValues("target") === EDiscountType.ORDER
+              ? "repeat(2, minmax(0, 1fr))"
+              : "repeat(3, minmax(0, 1fr))",
         }}
       >
         <div>
           <Label infoText="" label="Khuyến mại theo" />
           <CustomSelect
             onChange={(value) => {
-              setValue("target", value, { shouldValidate: true })
-              value === "PRODUCT" && setValue("type", "PRODUCT_PRICE")
+              setValue("target", value, { shouldValidate: true });
+              value === "PRODUCT" && setValue("type", "PRODUCT_PRICE");
             }}
             className="h-11 !rounded"
             options={Object.values(EDiscountType).map((value) => ({
@@ -191,7 +193,7 @@ const Info = ({ setValue, getValues, errors }: any) => {
           <Label infoText="" label="Hình thức" />
           <CustomSelect
             onChange={(value) => {
-              setValue("type", value, { shouldValidate: true })
+              setValue("type", value, { shouldValidate: true });
               const newItems = [
                 {
                   condition: {
@@ -199,8 +201,8 @@ const Info = ({ setValue, getValues, errors }: any) => {
                       from: 1,
                     },
                     product: {
-                      type: value
-                    }
+                      type: value,
+                    },
                   },
                   apply: {
                     discountValue: 0,
@@ -209,7 +211,7 @@ const Info = ({ setValue, getValues, errors }: any) => {
                     maxQuantity: 1,
                     isGift: false,
                     pointValue: 0,
-                    type: value
+                    type: value,
                   },
 
                   ...(value === EDiscountGoodsMethod.PRICE_BY_BUY_NUMBER && {
@@ -217,49 +219,56 @@ const Info = ({ setValue, getValues, errors }: any) => {
                       {
                         condition: {
                           product: {
-                            from: 1
+                            from: 1,
                           },
-                          productUnitId: []
+                          productUnitId: [],
                         },
                         apply: {
                           changeType: "TYPE_PRICE",
                           fixedPrice: 0,
-                        }
-                      }
-                    ]
-                  })
-                }
-              ]
-              setValue("items", newItems, { shouldValidate: true })
+                        },
+                      },
+                    ],
+                  }),
+                },
+              ];
+              setValue("items", newItems, { shouldValidate: true });
             }}
             options={
-              getValues('target') === EDiscountType.ORDER
+              getValues("target") === EDiscountType.ORDER
                 ? Object.values(EDiscountBillMethod).map((value) => ({
-                  value,
-                  label: EDiscountBillMethodLabel[value],
-                }))
+                    value,
+                    label: EDiscountBillMethodLabel[value],
+                  }))
                 : Object.values(EDiscountGoodsMethod).map((value) => ({
-                  value,
-                  label: EDiscountGoodsMethodLabel[value],
-                }))
+                    value,
+                    label: EDiscountGoodsMethodLabel[value],
+                  }))
             }
             value={getValues("type")}
             className="h-11 !rounded"
           />
         </div>
 
-        {getValues('target') === EDiscountType.PRODUCT && (
+        {getValues("target") === EDiscountType.PRODUCT && (
           <div className="flex items-end gap-2">
-            <Checkbox checked={getValues("isMultiple")} onChange={(e) => setValue("isMultiple", e.target.checked, { shouldValidate: true })} />
-            <div>Không nhân theo số lượng mua</div>
+            <Checkbox
+              checked={getValues("isMultiple")}
+              onChange={(e) =>
+                setValue("isMultiple", e.target.checked, {
+                  shouldValidate: true,
+                })
+              }
+            />
+            <div>Nhân theo số lượng mua</div>
             <Image src={InfoIcon} alt="" />
           </div>
         )}
       </div>
 
       {/* Bill */}
-      {getValues('target') === EDiscountType.ORDER &&
-        getValues('type') === EDiscountBillMethod.ORDER_PRICE && (
+      {getValues("target") === EDiscountType.ORDER &&
+        getValues("type") === EDiscountBillMethod.ORDER_PRICE && (
           <BillDiscount
             setValue={setValue}
             getValues={getValues}
@@ -267,24 +276,24 @@ const Info = ({ setValue, getValues, errors }: any) => {
           />
         )}
 
-      {getValues('target') === EDiscountType.ORDER &&
-        getValues('type') === EDiscountBillMethod.PRODUCT_PRICE && (
+      {getValues("target") === EDiscountType.ORDER &&
+        getValues("type") === EDiscountBillMethod.PRODUCT_PRICE && (
           <BillDiscountProduct
             setValue={setValue}
             getValues={getValues}
             errors={errors}
           />
         )}
-      {getValues('target') === EDiscountType.ORDER &&
-        getValues('type') === EDiscountBillMethod.GIFT && (
+      {getValues("target") === EDiscountType.ORDER &&
+        getValues("type") === EDiscountBillMethod.GIFT && (
           <BillGiftProduct
             setValue={setValue}
             getValues={getValues}
             errors={errors}
           />
         )}
-      {getValues('target') === EDiscountType.ORDER &&
-        getValues('type') === EDiscountBillMethod.LOYALTY && (
+      {getValues("target") === EDiscountType.ORDER &&
+        getValues("type") === EDiscountBillMethod.LOYALTY && (
           <BillGiftPoint
             setValue={setValue}
             getValues={getValues}
@@ -293,39 +302,38 @@ const Info = ({ setValue, getValues, errors }: any) => {
         )}
 
       {/* Product */}
-      {getValues('target') === EDiscountType.PRODUCT &&
-        getValues('type') === EDiscountGoodsMethod.PRODUCT_PRICE && (
+      {getValues("target") === EDiscountType.PRODUCT &&
+        getValues("type") === EDiscountGoodsMethod.PRODUCT_PRICE && (
           <ProductDiscountProduct
             setValue={setValue}
             getValues={getValues}
             errors={errors}
           />
         )}
-      {getValues('target') === EDiscountType.PRODUCT &&
-        getValues('type') === EDiscountGoodsMethod.GIFT && (
+      {getValues("target") === EDiscountType.PRODUCT &&
+        getValues("type") === EDiscountGoodsMethod.GIFT && (
           <ProductGiftProduct
             setValue={setValue}
             getValues={getValues}
             errors={errors}
           />
         )}
-      {getValues('target') === EDiscountType.PRODUCT &&
-        getValues('type') === EDiscountGoodsMethod.LOYALTY && (
+      {getValues("target") === EDiscountType.PRODUCT &&
+        getValues("type") === EDiscountGoodsMethod.LOYALTY && (
           <ProductGiftPoint
             setValue={setValue}
             getValues={getValues}
             errors={errors}
           />
         )}
-      {getValues('target') === EDiscountType.PRODUCT &&
-        getValues('type') === EDiscountGoodsMethod.PRICE_BY_BUY_NUMBER && (
+      {getValues("target") === EDiscountType.PRODUCT &&
+        getValues("type") === EDiscountGoodsMethod.PRICE_BY_BUY_NUMBER && (
           <ProductQuantity
             setValue={setValue}
             getValues={getValues}
             errors={errors}
           />
         )}
-
     </div>
   );
 };

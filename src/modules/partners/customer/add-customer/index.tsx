@@ -4,7 +4,7 @@ import { message, Select, Spin } from "antd";
 import { debounce } from "lodash";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import {
@@ -29,20 +29,23 @@ import InputError from "@/components/InputError";
 import { ECustomerStatus, ECustomerType, EGender } from "@/enums";
 import { formatDate, hasPermission } from "@/helpers";
 import { useAddress } from "@/hooks/useAddress";
-import MarkIcon from '@/assets/markIcon.svg';
+import MarkIcon from "@/assets/markIcon.svg";
 import { AddGroupCustomerModal } from "../../group-customer/AddGroupCustomerModal";
 import { schema } from "./schema";
 import { useRecoilValue } from "recoil";
 import { profileState } from "@/recoil/state";
 import { RoleAction, RoleModel } from "@/modules/settings/role/role.enum";
-import { getLatLng, searchPlace } from "@/api/trip.service";
+import { getAddress, getLatLng, searchPlace } from "@/api/trip.service";
+import dayjs from "dayjs";
+import { CustomAutocomplete } from "@/components/CustomAutocomplete";
 const { Option } = Select;
 
 export function AddCustomer({ customerId }: { customerId?: string }) {
   const queryClient = useQueryClient();
   const router = useRouter();
   const [placeKeyword, setPlaceKeyword] = useState("");
-  const [refId, setRefId] = useState('');
+  const [refId, setRefId] = useState("");
+  const [tempKeyword, setTempKeyword] = useState("");
 
   const {
     getValues,
@@ -56,6 +59,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
       status: ECustomerStatus.active,
       gender: EGender.male,
       type: ECustomerType.PERSONAL,
+      point: "",
     },
   });
 
@@ -67,29 +71,53 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
 
   const { data: places, isLoading: isLoadingPlace } = useQuery(
     ["SEARCH_PLACE", placeKeyword],
-    () =>
-      searchPlace({ keyword: placeKeyword }),
+    () => searchPlace({ keyword: placeKeyword }),
     {
-      enabled: placeKeyword.length > 0
+      enabled: placeKeyword.length > 0,
     }
   );
 
   const { data: latLng, isLoading: isLoadingLatLng } = useQuery(
     ["SEARCH_LATLNG", refId],
-    () =>
-      getLatLng({ refId: refId }),
+    () => getLatLng({ refId: refId }),
     {
-      enabled: refId.length > 0
+      enabled: refId.length > 0,
+    }
+  );
+  const { data: address, isLoading: isLoadingAddress } = useQuery(
+    ["ADDRESS", getValues("point")],
+    () => getAddress({ lat: Number(getValues("point")?.split(",")[0]), lng: Number(getValues("point")?.split(",")[1]) }),
+    {
+      enabled: !!getValues("point")
     }
   );
 
   useEffect(() => {
+    if (address?.data?.address) {
+      setValue("address", address?.data?.address, { shouldValidate: true });
+      setTempKeyword(address?.data?.address);
+    }
+  }, [address?.data?.address]);
+  useEffect(() => {
     if (latLng) {
       setValue("lng", String(latLng?.data?.lng), { shouldValidate: true });
       setValue("lat", String(latLng?.data?.lat), { shouldValidate: true });
-      setValue("address", latLng?.data?.display, { shouldValidate: true })
+      setValue("point", `${latLng?.data?.lat},${latLng?.data?.lng}`, { shouldValidate: true });
+      setValue("address", latLng?.data?.display, { shouldValidate: true });
     }
   }, [latLng]);
+
+  useEffect(() => {
+    if (getValues('point')) {
+      const [lat, lng]: any = getValues('point')?.split(",");
+      setValue("lng", lng?.trim(), { shouldValidate: true });
+      setValue("lat", lat?.trim(), { shouldValidate: true });
+    }
+    else {
+      setValue("lng", '', { shouldValidate: true });
+      setValue("lat", '', { shouldValidate: true });
+    }
+  }, [getValues('point')]);
 
   const { provinces, districts, wards } = useAddress(
     getValues("provinceId"),
@@ -106,10 +134,19 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
       getGroupCustomer({ page: 1, limit: 20, keyword: groupCustomerKeyword })
   );
 
+  console.log('errors', errors);
+
   const { mutate: mutateCreateCustomer, isLoading: isLoadingCreateCustomer } =
     useMutation(
       () => {
         const customerData = getValues();
+        if (customerData.point) {
+          const [lat, lng]: any = customerData.point.split(",");
+          customerData.lat = lat;
+          customerData.lng = lng;
+        }
+        delete customerData.point;
+
         const customerId = customerDetail?.data?.id;
 
         const customerMutation = customerId
@@ -136,15 +173,20 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
 
   const onSubmit = () => {
     mutateCreateCustomer();
-
   };
 
   const profile = useRecoilValue(profileState);
   useEffect(() => {
     if (profile?.role?.permissions) {
-      if (!hasPermission(profile?.role?.permissions, RoleModel.customer, RoleAction.create)) {
-        message.error('Bạn không có quyền truy cập vào trang này');
-        router.push('/partners/customer');
+      if (
+        !hasPermission(
+          profile?.role?.permissions,
+          RoleModel.customer,
+          RoleAction.create
+        )
+      ) {
+        message.error("Bạn không có quyền truy cập vào trang này");
+        router.push("/partners/customer");
       }
     }
   }, [profile?.role?.permissions]);
@@ -156,10 +198,24 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
           setValue(key, customerDetail.data[key], { shouldValidate: true });
         }
       });
+      setValue("address", customerDetail?.data?.address);
+      setValue("districtId", customerDetail?.data?.district?.id);
+      setValue("wardId", customerDetail?.data?.ward?.id);
+      setValue("provinceId", customerDetail?.data?.province?.id);
+      setValue('address', customerDetail?.data?.address);
+      setTempKeyword(customerDetail?.data?.address);
+      setValue('point', `${customerDetail?.data?.lat},${customerDetail?.data?.lng}`, { shouldValidate: true });
 
       setGroupCustomerKeyword(customerDetail.data?.groupCustomer?.name);
     }
   }, [customerDetail]);
+
+  const onSearch = useCallback(
+    debounce((value) => {
+      setPlaceKeyword(value);
+    }, 300),
+    [placeKeyword]
+  );
 
   return (
     <>
@@ -241,8 +297,11 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
                 placeholder="Chọn nhóm khách hàng"
                 suffixIcon={
                   <>
-                    {
-                      hasPermission(profile?.role?.permissions, RoleModel.group_customer, RoleAction.create) && (
+                    {hasPermission(
+                      profile?.role?.permissions,
+                      RoleModel.group_customer,
+                      RoleAction.create
+                    ) && (
                         <div className="flex items-center">
                           <Image src={ArrowDownIcon} alt="" />
                           <Image
@@ -251,8 +310,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
                             onClick={() => setOpenAddGroupCustomerModal(true)}
                           />
                         </div>
-                      )
-                    }
+                      )}
                   </>
                 }
               />
@@ -298,7 +356,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
                     shouldValidate: true,
                   });
                 }}
-                value={getValues("birthday")}
+                value={dayjs(getValues("birthday"))}
               />
               <InputError error={errors.birthday?.message} />
             </div>
@@ -337,42 +395,34 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
 
             <div>
               <Label infoText="" label="Địa chỉ" />
-              {/* <CustomInput
-                placeholder="Nhập địa chỉ"
-                className="h-11"
-                onChange={(e) =>
-                  setValue("address", e, { shouldValidate: true })
-                }
-                value={getValues("address")}
-              /> */}
-              <Select
+              <CustomAutocomplete
                 placeholder="Tìm kiếm địa chỉ"
                 className="h-11 !rounded w-full"
-                onChange={(value) => {
+                // prefixIcon={<Image src={SearchIcon} alt="" />}
+                wrapClassName="w-full !rounded bg-white"
+                onSelect={(value) => {
+                  setTempKeyword(places?.data?.find((item) => item.ref_id === value)?.display)
                   setRefId(value);
                 }}
-                onSearch={debounce((value) => {
-                  setPlaceKeyword(value);
-                }, 300)}
                 showSearch={true}
-                notFoundContent={isLoadingPlace ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
-                filterOption={(input, option: any) => {
-                  const textContent = option.children.props.children[1].props.children;
-                  return textContent.toLowerCase().includes(input.toLowerCase());
+                listHeight={300}
+                onSearch={(value) => {
+                  setTempKeyword(value);
+                  onSearch(value)
                 }}
-              >
-                {places?.data?.map((item) => (
-                  <Option key={item.ref_id} value={item.ref_id}>
+                value={tempKeyword}
+                options={places?.data.map((item) => ({
+                  value: item?.ref_id,
+                  label: (
                     <div className='flex items-center gap-1 py-2'>
                       <Image src={MarkIcon} />
                       <span className='display'>
                         {item?.display}
                       </span>
                     </div>
-                  </Option>
-                ))}
-              </Select>
-              <InputError error={errors.address?.message} />
+                  ),
+                }))}
+              />
             </div>
 
             <div>
@@ -429,21 +479,14 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
               <InputError error={errors.wardId?.message} />
             </div>
             <div>
-              <Label infoText="" label="Kinh độ" />
+              <Label infoText="" label="Tọa độ" />
               <CustomInput
-                placeholder="Kinh độ"
+                placeholder="Nhập tọa độ"
                 className="h-11"
-                onChange={(e) => setValue("lng", e, { shouldValidate: true })}
-                value={getValues("lng")}
-              />
-            </div>
-            <div>
-              <Label infoText="" label="Vĩ độ" />
-              <CustomInput
-                placeholder="Vĩ độ"
-                className="h-11"
-                onChange={(e) => setValue("lat", e, { shouldValidate: true })}
-                value={getValues("lat")}
+                onChange={(e) => {
+                  setValue("point", e, { shouldValidate: true });
+                }}
+                value={getValues("point")}
               />
             </div>
 

@@ -1,38 +1,47 @@
-import type { ColumnsType } from 'antd/es/table';
+import type { ColumnsType } from "antd/es/table";
 
-import { CustomButton } from '@/components/CustomButton';
-import { CustomModal } from '@/components/CustomModal';
-import CustomTable from '@/components/CustomTable';
-import { formatMoney, formatNumber } from '@/helpers';
+import { CustomButton } from "@/components/CustomButton";
+import { CustomModal } from "@/components/CustomModal";
+import CustomTable from "@/components/CustomTable";
+import { formatMoney, formatNumber } from "@/helpers";
 
-import { branchState, discountTypeState, orderDiscountSelected, productDiscountSelected } from '@/recoil/state';
-import { cloneDeep, set } from 'lodash';
-import { useEffect, useState } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
-import { EDiscountBillMethodLabel, EDiscountGoodsMethodLabel } from '../settings/discount/add-discount/Info';
-import { useQuery } from '@tanstack/react-query';
-import { ISaleProduct } from './interface';
-import { getSaleProducts } from '@/api/product.service';
-import SelectProductDiscount from './SelectProductDiscount';
+import {
+  branchState,
+  discountState,
+  discountTypeState,
+  orderActiveState,
+  orderDiscountSelected,
+  productDiscountSelected,
+} from "@/recoil/state";
+import { cloneDeep, set } from "lodash";
+import { useEffect, useState } from "react";
+import { useRecoilState, useRecoilValue } from "recoil";
+import {
+  EDiscountBillMethodLabel,
+  EDiscountGoodsMethodLabel,
+} from "../settings/discount/add-discount/Info";
+import { useQuery } from "@tanstack/react-query";
+import { ISaleProduct } from "./interface";
+import { getSaleProducts } from "@/api/product.service";
+import SelectProductDiscount from "./SelectProductDiscount";
+import { message } from "antd";
 
 export function ProductDiscountModal({
   isOpen,
   onCancel,
   onSave,
-  discountList
+  discountList,
 }: {
   isOpen: boolean;
   onCancel: () => void;
   onSave: (value) => void;
-  discountList?: any
+  discountList?: any;
 }) {
   const branchId = useRecoilValue(branchState);
+  const orderActive = useRecoilValue(orderActiveState);
+  const [discountObject, setDiscountObject] = useRecoilState(discountState);
   const [listDiscount, setListDiscount] = useState<any[]>([]);
-  const [orderDiscount, setOrderDiscount] = useRecoilState(orderDiscountSelected);
-  const [productDiscount, setProductDiscount] = useRecoilState(productDiscountSelected);
-  const [discountType, setDiscountType] = useRecoilState(discountTypeState);
   const [isOpenSelectProduct, setIsOpenSelectProduct] = useState(false);
-  const [productDiscountList, setProductDiscountList] = useState([]);
   const [discountId, setDiscountId] = useState();
   // const { data: products, isLoading: isLoadingProduct, isSuccess } = useQuery<{
   //   data?: { items: ISaleProduct[] };
@@ -49,12 +58,14 @@ export function ProductDiscountModal({
   // );
   useEffect(() => {
     if (discountList) {
-
       // show old selected discount from productDiscount list, if same productUnitId then set isSelected to true
-      const listBatchClone = cloneDeep(discountList);
-      const productDiscountClone = cloneDeep(productDiscount);
-      const selectedDiscount = listBatchClone.map((batch) => {
-        const index = productDiscountClone.findIndex((item) => item.code === batch.code);
+      const discounts = cloneDeep(discountObject);
+      const productDiscount = discounts[orderActive]?.productDiscount
+
+      const selectedDiscount = productDiscount?.map((batch) => {
+        const index = discountList.findIndex(
+          (item) => item.code === batch.code
+        );
         // const index = listBatchClone.findIndex((item) => item.productUnitId === batch.productUnitId);
         if (index !== -1) {
           return {
@@ -67,31 +78,35 @@ export function ProductDiscountModal({
           isSelected: false,
         };
       });
+      console.log('selectedDiscount', selectedDiscount);
       setListDiscount(selectedDiscount);
-
     }
   }, [discountList]);
 
   const columns: ColumnsType<any> = [
     {
-      title: 'Chương trình khuyến mại',
-      dataIndex: 'name',
-      key: 'name',
+      title: "Chương trình khuyến mại",
+      dataIndex: "name",
+      key: "name",
       // render: (_, { batch }) => batch.name,
     },
     {
-      title: 'Hình thức khuyến mại',
-      dataIndex: 'type',
-      key: 'type',
-      render: (type, { target }) => <span>
-        {target === "order" ? EDiscountBillMethodLabel[type.toUpperCase()] : EDiscountGoodsMethodLabel[type.toUpperCase()]}
-      </span>,
+      title: "Hình thức khuyến mại",
+      dataIndex: "type",
+      key: "type",
+      render: (type, { target }) => (
+        <span>
+          {target === "order"
+            ? EDiscountBillMethodLabel[type.toUpperCase()]
+            : EDiscountGoodsMethodLabel[type.toUpperCase()]}
+        </span>
+      ),
     },
     {
-      title: 'Quà khuyến mại',
-      dataIndex: 'items',
-      key: 'items',
-      render: (items, { type, id }) => (
+      title: "Quà khuyến mại",
+      dataIndex: "items",
+      key: "items",
+      render: (items, { type, id, isSelected }) => (
         <div>
           {/* {
             type === "product_price" && (
@@ -101,22 +116,30 @@ export function ProductDiscountModal({
               </div>
             )
           } */}
-          {
-            type === "product_price" && (
-              <CustomButton type='danger' onClick={() => {
-                setIsOpenSelectProduct(true)
-                setDiscountId(id)
-              }}>Chọn quà khuyến mại</CustomButton>
-            )
-          }
-          {
-            type === "gift" && (
-              <CustomButton type='danger' onClick={() => {
-                setIsOpenSelectProduct(true)
-                setDiscountId(id)
-              }}>Chọn quà tặng</CustomButton>
-            )
-          }
+          {type === "product_price" && (
+            <CustomButton
+              type={isSelected ? "danger" : "disable"}
+              disabled={!isSelected}
+              onClick={() => {
+                setIsOpenSelectProduct(true);
+                setDiscountId(id);
+              }}
+            >
+              Chọn quà khuyến mại
+            </CustomButton>
+          )}
+          {type === "gift" && (
+            <CustomButton
+              type={isSelected ? "danger" : "disable"}
+              disabled={!isSelected}
+              onClick={() => {
+                setIsOpenSelectProduct(true);
+                setDiscountId(id);
+              }}
+            >
+              Chọn quà tặng
+            </CustomButton>
+          )}
           {/* {
             type === "gift" && (
               <div>
@@ -125,56 +148,47 @@ export function ProductDiscountModal({
               </div>
             )
           } */}
-          {
-            type === "loyalty" && (
-              <div>
-                Mua {formatNumber(items[0]?.condition?.product?.from)} được tặng {" "}
-                <span className='text-[#d64457]'>
-                  {
-                    " " + formatNumber(items[0]?.apply?.pointValue)
-                  }
-                </span>
-                {
-                  (items[0]?.apply?.pointType === "amount" ? "" : "%") + " điểm"
-                }
-              </div>
-            )
-          }
-          {
-            type === "price_by_buy_number" && (
-              <div>
-                {items[0]?.apply?.changeType === "type_price" ? (
-                  <div>
-                    Mua {formatNumber(items[0]?.condition?.product?.from)} với giá {" "}
-                    <span className='text-[#d64457]'>
-                      {
-                        formatMoney(items[0]?.apply?.fixedPrice)
-                      }
-                    </span>
-                  </div>
-                ) : (
-                  <div>
-                    Mua {formatNumber(items[0]?.condition?.product?.from)} được giảm giá {" "}
-                    <span className='text-[#d64457]'>
-                      {
-                        formatMoney(items[0]?.apply?.fixedPrice)
-                      }
-                    </span>
-                  </div>
-                )}
-              </div>
-            )
-          }
+          {type === "loyalty" && (
+            <div>
+              Mua {formatNumber(items[0]?.condition?.product?.from)} được tặng{" "}
+              <span className="text-[#d64457]">
+                {" " + formatNumber(items[0]?.apply?.pointValue)}
+              </span>
+              {(items[0]?.apply?.pointType === "amount" ? "" : "%") + " điểm"}
+            </div>
+          )}
+          {type === "price_by_buy_number" && (
+            <div>
+              {items[0]?.apply?.changeType === "type_price" ? (
+                <div>
+                  Mua {formatNumber(items[0]?.condition?.product?.from)} với giá{" "}
+                  <span className="text-[#d64457]">
+                    {formatMoney(items[0]?.apply?.fixedPrice)}
+                  </span>
+                </div>
+              ) : (
+                <div>
+                  Mua {formatNumber(items[0]?.condition?.product?.from)} được
+                  giảm giá{" "}
+                  <span className="text-[#d64457]">
+                    {formatMoney(items[0]?.apply?.fixedPrice)}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       ),
     },
   ];
 
-  useEffect(() => {
-    const selectedDiscount = listDiscount.filter((batch) => batch.isSelected);
-    setOrderDiscount(selectedDiscount);
-    setDiscountType("product")
-  }, [])
+  // useEffect(() => {
+  //   const selectedDiscount = listDiscount.filter((batch) => batch.isSelected);
+  //   setOrderDiscount(selectedDiscount);
+  //   setDiscountType("product");
+  // }, []);
+
+  console.log('listDiscount', listDiscount);
 
   return (
     <CustomModal
@@ -189,15 +203,18 @@ export function ProductDiscountModal({
       <div className="my-5 h-[1px] w-full bg-[#C7C9D9]" />
 
       <CustomTable
-        dataSource={listDiscount && listDiscount?.map((item: any) => ({
-          ...item,
-          key: item.id,
-        }))}
+        dataSource={
+          listDiscount &&
+          listDiscount?.map((item: any) => ({
+            ...item,
+            key: item.id,
+          }))
+        }
         columns={columns}
         scroll={{ x: 600 }}
         // loading={isLoading}
         rowSelection={{
-          type: 'radio',
+          type: "radio",
           selectedRowKeys: [
             ...listDiscount
               .filter((batch) => batch.isSelected)
@@ -212,7 +229,6 @@ export function ProductDiscountModal({
                   isSelected: true,
                 };
               }
-
               return { ...batch, isSelected: false };
             });
             setListDiscount(listBatchClone);
@@ -230,25 +246,86 @@ export function ProductDiscountModal({
         </CustomButton>
         <CustomButton
           onClick={() => {
-            const selectedDiscount = listDiscount.find((batch) => batch.isSelected);
-            // setProductDiscount([...productDiscount, ...selectedDiscount].filter((v, i, a) => a.findIndex(t => (t.id === v.id)) === i));
-            const selectedDiscountProduct = {
-              ...selectedDiscount,
-              discountKey: selectedDiscount?.id + "-" + selectedDiscount?.items[0]?.condition?.productUnitId[0],
-              productUnitId: selectedDiscount?.items[0]?.condition?.productUnitId[0]
-            }
-            // set selectedDiscountProduct to productDiscount, check if it's already exist in productDiscount then replace it
-            const index = productDiscount.findIndex((item) => item.productUnitId === selectedDiscountProduct.productUnitId);
+            // reset selected discount
+            setListDiscount(
+              listDiscount.map((batch) => ({ ...batch, isSelected: false }))
+            );
+          }}
+          outline={true}
+          className="h-[46px] min-w-[150px] py-2 px-4"
+        >
+          Làm mới
+        </CustomButton>
+        <CustomButton
+          onClick={() => {
+
+            const orderObjectClone = cloneDeep(discountObject);
+            const selectedDiscount = listDiscount.find(
+              (batch) => batch.isSelected
+            );
+
+            // update selectedDiscount to discountObject if productUnitId is already exist in productDiscount then replace it
+            const index = orderObjectClone[orderActive].productDiscount?.findIndex(
+              (item) =>
+                item?.items[0]?.condition.productUnitId[0] ===
+                selectedDiscount.items[0]?.condition.productUnitId[0]
+            );
 
             if (index !== -1) {
-              setProductDiscount([...productDiscount.slice(0, index), selectedDiscountProduct, ...productDiscount.slice(index + 1)]);
+              orderObjectClone[orderActive].productDiscount[index] = selectedDiscount;
             } else {
-              setProductDiscount([...productDiscount, selectedDiscountProduct]);
+              orderObjectClone[orderActive].productDiscount.push(selectedDiscount);
             }
 
-            setDiscountType("product")
-            onSave(selectedDiscountProduct);
+            setDiscountObject(orderObjectClone);
             onCancel();
+
+            // orderObjectClone[orderActive].productDiscount = [...orderObjectClone[orderActive].productDiscount, selectedDiscount];
+            // setDiscountObject(orderObjectClone);
+
+
+            // const selectedDiscount = listDiscount.find(
+            //   (batch) => batch.isSelected
+            // );
+
+            // if (
+            //   selectedDiscount.type === "gift" ||
+            //   selectedDiscount.type === "product_price"
+            // ) {
+            //   return message.error("Chưa chọn quà khuyến mại/ quà tặng");
+            // }
+
+            // // setProductDiscount([...productDiscount, ...selectedDiscount].filter((v, i, a) => a.findIndex(t => (t.id === v.id)) === i));
+            // const selectedDiscountProduct = {
+            //   ...selectedDiscount,
+            //   discountKey:
+            //     selectedDiscount?.id +
+            //     "-" +
+            //     selectedDiscount?.items[0]?.condition?.productUnitId[0],
+            //   productUnitId:
+            //     selectedDiscount?.items[0]?.condition?.productUnitId[0],
+            // };
+
+            // // set selectedDiscountProduct to productDiscount, check if it's already exist in productDiscount then replace it
+            // const index = productDiscount.findIndex(
+            //   (item) =>
+            //     item.productUnitId === selectedDiscountProduct.productUnitId
+            // );
+
+            // if (index !== -1) {
+            //   setProductDiscount([
+            //     ...productDiscount.slice(0, index),
+            //     selectedDiscountProduct,
+            //     ...productDiscount.slice(index + 1),
+            //   ]);
+            // } else {
+            //   setProductDiscount([...productDiscount, selectedDiscountProduct]);
+            // }
+
+            // setDiscountType("product");
+            // onSave(selectedDiscountProduct);
+            // onCancel();
+            // return;
           }}
           className="h-[46px] min-w-[150px] py-2 px-4"
           disabled={!listDiscount.some((batch) => batch.isSelected)}
@@ -264,36 +341,51 @@ export function ProductDiscountModal({
         discountId={discountId}
         onSave={(selectedProducts) => {
           // update selectedProducts to productDiscount list
-          const selectedDiscount = listDiscount.find((batch) => batch.isSelected);
-          // // set selected products to selectedDiscount
-          selectedDiscount.items[0].apply.productUnitId = selectedProducts.map((product) => {
-            if (selectedDiscount.code === product.code) {
+          const discountObjectClone = cloneDeep(discountObject);
+          let selectedDiscount = listDiscount.find(
+            (batch) => batch.isSelected
+          );
+          let newSelectedDiscount = cloneDeep(selectedDiscount);
+          // update items in selectedDiscount
+          if (newSelectedDiscount) {
+            newSelectedDiscount.items = selectedDiscount?.items?.map((item) => {
               return {
-                id: product.id,
-                discountQuantity: product?.discountQuantity,
-                isSelected: product?.isSelected,
-              }
-            }
-            return null
-          });
-          const selectedDiscountProduct = {
-            ...selectedDiscount,
-            discountKey: selectedDiscount?.id + "-" + selectedDiscount?.items[0]?.condition?.productUnitId[0],
-            productUnitId: selectedDiscount?.items[0]?.condition?.productUnitId[0],
-            code: selectedDiscount?.code
-          }
-          // set selectedDiscountProduct to productDiscount, check if it's already exist in productDiscount then replace it
-          const index = productDiscount.findIndex((item) => item.code === selectedDiscountProduct.code);
-          if (index !== -1) {
-            setProductDiscount([...productDiscount.slice(0, index), selectedDiscountProduct, ...productDiscount.slice(index + 1)]);
-          } else {
-            setProductDiscount([...productDiscount, selectedDiscountProduct]);
-          }
-          // check product before save
+                apply: {
+                  ...item.apply,
+                  productUnitId: item?.apply?.productUnitId?.map((id) => {
+                    const product = selectedProducts.find(
+                      (product) => product.id === id
+                    );
+                    return {
+                      ...product,
+                      discountCode: selectedDiscount?.code,
+                    };
+                  }).filter((product) => product),
+                },
+                condition: {
+                  ...item.condition
+                }
+              };
+            });
 
-          setDiscountType("product")
-          onSave(selectedDiscountProduct);
-        }}
+            // update selectedDiscount to discountObject if productUnitId is already exist in productDiscount then replace it
+            const index = discountObjectClone[orderActive].productDiscount?.findIndex(
+              (item) =>
+                item?.items[0]?.condition.productUnitId[0] ===
+                newSelectedDiscount.items[0]?.condition.productUnitId[0]
+            );
+
+            if (index !== -1) {
+              discountObjectClone[orderActive].productDiscount[index] = newSelectedDiscount;
+            } else {
+              discountObjectClone[orderActive].productDiscount.push(newSelectedDiscount);
+            }
+
+            setDiscountObject(discountObjectClone);
+            setIsOpenSelectProduct(false);
+          }
+        }
+        }
       />
     </CustomModal>
   );

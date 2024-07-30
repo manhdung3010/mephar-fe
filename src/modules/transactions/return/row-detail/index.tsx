@@ -10,8 +10,6 @@ const ReturnDetail = ({ record }: { record: any }) => {
 
   const menu = ['Thông tin', 'Lịch sử thanh toán'];
 
-  console.log("record", record)
-
   return (
     <div
       className="flex flex-col gap-5 bg-white px-4 pt-4 pb-5"
@@ -37,7 +35,7 @@ const ReturnDetail = ({ record }: { record: any }) => {
         <div className="h-[1px] w-full bg-[#D64457]" />
       </div>
       {select === 0 && <Info record={record} />}
-      {select === 2 && <History />}
+      {select === 1 && <History record={record} />}
     </div>
   );
 };

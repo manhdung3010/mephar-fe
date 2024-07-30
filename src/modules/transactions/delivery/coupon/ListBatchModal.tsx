@@ -54,8 +54,6 @@ export function ListBatchModal({
     });
   }, [productKeyAddBatch]);
 
-  console.log("importProducts", importProducts);
-
   const columns: ColumnsType<IBatch> = [
     {
       title: "Tên",

@@ -1,24 +1,24 @@
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { message } from 'antd';
-import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { useRecoilValue } from 'recoil';
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { message } from "antd";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { useRecoilValue } from "recoil";
 
-import { getBranch } from '@/api/branch.service';
+import { getBranch } from "@/api/branch.service";
 import {
   createGroupProvider,
   getGroupProviderDetail,
   updateGroupProvider,
-} from '@/api/group-provider';
-import { CustomInput, CustomTextarea } from '@/components/CustomInput';
-import Label from '@/components/CustomLabel';
-import { CustomModal } from '@/components/CustomModal';
-import { CustomSelect } from '@/components/CustomSelect';
-import InputError from '@/components/InputError';
-import { branchState } from '@/recoil/state';
+} from "@/api/group-provider";
+import { CustomInput, CustomTextarea } from "@/components/CustomInput";
+import Label from "@/components/CustomLabel";
+import { CustomModal } from "@/components/CustomModal";
+import { CustomSelect } from "@/components/CustomSelect";
+import InputError from "@/components/InputError";
+import { branchState } from "@/recoil/state";
 
-import { schema } from './schema';
+import { schema } from "./schema";
 
 export function AddGroupProviderModal({
   groupProviderId,
@@ -35,12 +35,12 @@ export function AddGroupProviderModal({
   const branchId = useRecoilValue(branchState);
 
   const { data: groupProviderDetail } = useQuery(
-    ['GROUP_PROVIDER_DETAIL', groupProviderId],
+    ["GROUP_PROVIDER_DETAIL", groupProviderId],
     () => getGroupProviderDetail(Number(groupProviderId)),
     { enabled: !!groupProviderId }
   );
 
-  const { data: branches } = useQuery(['SETTING_BRANCH'], () => getBranch());
+  const { data: branches } = useQuery(["SETTING_BRANCH"], () => getBranch());
 
   const {
     getValues,
@@ -51,10 +51,10 @@ export function AddGroupProviderModal({
     formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
-    mode: 'onChange',
-    defaultValues: {
-      branchId,
-    },
+    mode: "onChange",
+    // defaultValues: {
+    //   branchId,
+    // },
   });
 
   const {
@@ -67,12 +67,12 @@ export function AddGroupProviderModal({
         : createGroupProvider(getValues()),
     {
       onSuccess: async (res) => {
-        await queryClient.invalidateQueries(['GROUP_PROVIDER']);
+        await queryClient.invalidateQueries(["GROUP_PROVIDER"]);
 
         if (onSuccess) {
           onSuccess({
             groupProviderId: res.data.id,
-            groupProviderName: getValues('name'),
+            groupProviderName: getValues("name"),
           });
         }
         reset();
@@ -109,8 +109,8 @@ export function AddGroupProviderModal({
       }}
       title={
         groupProviderDetail
-          ? 'Cập nhật nhóm nhà cung cấp'
-          : 'Thêm mới nhóm nhà cung cấp'
+          ? "Cập nhật nhóm nhà cung cấp"
+          : "Thêm mới nhóm nhà cung cấp"
       }
       width={650}
       onSubmit={handleSubmit(onSubmit)}
@@ -118,19 +118,19 @@ export function AddGroupProviderModal({
     >
       <div className="my-5 h-[1px] w-full bg-[#C7C9D9]" />
 
-      <div className="mb-5 grid grid-cols-2 gap-x-8">
+      <div className="mb-5 grid grid-cols-1 gap-x-8">
         <div>
           <Label infoText="" label="Tên nhóm nhà cung cấp" required />
           <CustomInput
             placeholder="Nhập tên nhóm"
             className="h-11"
-            onChange={(e) => setValue('name', e, { shouldValidate: true })}
-            value={getValues('name')}
+            onChange={(e) => setValue("name", e, { shouldValidate: true })}
+            value={getValues("name")}
           />
           <InputError error={errors.name?.message} />
         </div>
 
-        <div>
+        {/* <div>
           <Label infoText="" label="Chi nhánh" />
           <CustomSelect
             onChange={(value) => {
@@ -144,7 +144,7 @@ export function AddGroupProviderModal({
             value={getValues('branchId')}
           />
           <InputError error={errors.branchId?.message} />
-        </div>
+        </div> */}
       </div>
 
       <div>
@@ -153,15 +153,12 @@ export function AddGroupProviderModal({
           rows={10}
           placeholder="Nhập Mô tả"
           onChange={(e) =>
-            setValue('description', e.target.value, { shouldValidate: true })
+            setValue("description", e.target.value, { shouldValidate: true })
           }
-          value={getValues('description')}
+          value={getValues("description")}
         />
         <InputError error={errors.description?.message} />
       </div>
-
-
-      
     </CustomModal>
   );
 }

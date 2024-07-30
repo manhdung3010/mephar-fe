@@ -28,6 +28,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { schema } from '../settings/point-modal/schema';
 import DiscountModal from './discount-modal';
+import CustomerDebtModal from './customer-debt';
 
 export function LeftMenu() {
   const router = useRouter();
@@ -55,6 +56,7 @@ export function LeftMenu() {
   const [openInvoice, setOpenInvoice] = useState(false);
   const [openReport, setOpenReport] = useState(false);
   const [openDiscount, setOpenDiscount] = useState(false);
+  const [openCustomerDebt, setCustomerDebt] = useState(false);
 
   useEffect(() => {
     if (isReturn) {
@@ -105,7 +107,7 @@ export function LeftMenu() {
           </div>
         </div>
 
-        <div onClick={() => setOpenReport(true)} className="mb-3 flex h-[99px] flex-col items-center justify-center rounded-lg bg-[#FBECEE] py-3 px-2 cursor-pointer">
+        <div onClick={() => setCustomerDebt(true)} className="mb-3 flex h-[99px] flex-col items-center justify-center rounded-lg bg-[#FBECEE] py-3 px-2 cursor-pointer">
           <Image src={PayLoan} />
           <div className=" mt-2 text-center font-medium leading-tight text-red-main">
             Khách trả nợ
@@ -165,6 +167,11 @@ export function LeftMenu() {
         handleSubmit={handleSubmit}
         errors={errors}
         reset={reset}
+      />
+      {/* Customer debt */}
+      <CustomerDebtModal
+        isOpen={openCustomerDebt}
+        onCancel={() => setCustomerDebt(false)}
       />
     </LeftMenuStyled>
   );

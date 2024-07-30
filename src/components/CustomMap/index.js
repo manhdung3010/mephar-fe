@@ -3,17 +3,26 @@ import React, {
   useRef,
   forwardRef,
   useImperativeHandle,
+  useState,
 } from "react";
+import { getRouting } from "../../api/trip.service.ts"
+import { useRecoilState } from "recoil";
+import { vehicalState } from '@/recoil/state';
 
 const CustomMap = forwardRef((props, ref) => {
   const { isMapFull, tripCustomer, nowLocation, radiusCircle } = props;
+
+  const [vehical, setVehical] = useRecoilState(vehicalState);
+
+  const [coordinatesRouting, setCoordinatesRouting] = useState([]);
+  const [currentPoint, setCurrentPoint] = useState();
   const mapRef = useRef(null);
   const fromMarkerRef = useRef('');
+  const endMarkerRef = useRef('');
   const markersRef = useRef([]);
 
   useEffect(() => {
     loadMap();
-    addGeojsonLine();
   }, [tripCustomer]);
 
   useEffect(() => {
@@ -28,6 +37,47 @@ const CustomMap = forwardRef((props, ref) => {
     }
   }, [tripCustomer, nowLocation]);
 
+  useEffect(() => {
+    const callRouting = async () => {
+      try {
+        if (tripCustomer && fromMarkerRef.current && vehical) {
+          const currentPoint1 = fromMarkerRef.current.getLngLat();
+          const endPoint = endMarkerRef.current.getLngLat();
+          const markers = markersRef.current.filter((d) => d.status !== "visited").map((item) => item.coordinates)
+          const newMarkers = markers?.map((item) => {
+            return {
+              lat: item[1],
+              lng: item[0]
+            }
+          })
+          const listPoint = [currentPoint1, ...newMarkers, endPoint]
+          const payload = {
+            listPoint: listPoint,
+            vehicle: vehical,
+          }
+          const res = await getRouting(payload);
+          if (res?.code === 200) {
+            setCoordinatesRouting(res?.data?.paths[0]?.points?.coordinates)
+            // reset current point
+            // setCurrentPoint(null)
+          }
+        }
+      } catch (error) {
+        console.log('error', error)
+      }
+    }
+    callRouting();
+  }, [vehical, tripCustomer, currentPoint, endMarkerRef.current, fromMarkerRef.current]);
+
+  useEffect(() => {
+    if (coordinatesRouting?.length > 0 && vehical) {
+      // addGeojsonLine();
+      setTimeout(() => {
+        addGeojsonLine();
+      }, 1000);
+    }
+  }, [coordinatesRouting, vehical]);
+
   const loadMap = () => {
     mapRef.current = new vietmapgl.Map({
       container: "map",
@@ -39,22 +89,23 @@ const CustomMap = forwardRef((props, ref) => {
       bearing: 0, // Set bearing to 0 for no rotation
     });
 
-    // Add navigation control at the top-left position
     mapRef.current.addControl(new vietmapgl.NavigationControl(), 'bottom-right');
 
     mapRef.current.on('load', () => {
-      // Map is fully loaded
       if (fromMarkerRef.current) {
         addCircle(fromMarkerRef.current.getLngLat(), radiusCircle);
       }
+      // You might want to call addGeojsonLine here if coordinatesRouting is already populated
+      if (coordinatesRouting.length > 0) {
+        addGeojsonLine();
+      }
     });
   };
-
-  const customMarker = () => {
+  const customMarker = (isEnd) => {
     const customMarker = document.createElement("div");
-    customMarker.style.width = "30px";
-    customMarker.style.height = "30px";
-    customMarker.style.backgroundImage = `url("https://res.cloudinary.com/dvrqupkgg/image/upload/v1720519213/nowIcon_vk8zqy.png")`;
+    customMarker.style.width = isEnd ? "32px" : "30px";
+    customMarker.style.height = isEnd ? "45px" : "30px";
+    customMarker.style.backgroundImage = isEnd ? `url("https://res.cloudinary.com/dvrqupkgg/image/upload/v1721275457/endMarkIcon_ynhvxj.svg")` : `url("https://res.cloudinary.com/dvrqupkgg/image/upload/v1720519213/nowIcon_vk8zqy.png")`;
     customMarker.style.backgroundSize = "cover";
     return customMarker;
   };
@@ -98,7 +149,8 @@ const CustomMap = forwardRef((props, ref) => {
   };
 
   const addStartMarker = (coordinates) => {
-    const marker = new vietmapgl.Marker(customMarker())
+
+    const marker = new vietmapgl.Marker(customMarker(false))
       .setLngLat(coordinates)
       .addTo(mapRef.current);
     // clear old marker if exists
@@ -110,9 +162,11 @@ const CustomMap = forwardRef((props, ref) => {
     // Add circle with a specific radius (e.g., 500 meters)
     if (mapRef.current.isStyleLoaded()) {
       addCircle(coordinates, radiusCircle);
+      setCurrentPoint({ lat: coordinates[1], lng: coordinates[0] });
     } else {
       mapRef.current.on('load', () => {
         addCircle(coordinates, radiusCircle);
+        setCurrentPoint({ lat: coordinates[1], lng: coordinates[0] });
       });
     }
 
@@ -122,6 +176,23 @@ const CustomMap = forwardRef((props, ref) => {
       zoom: 14,
       speed: 1.2,
     });
+  };
+  const addEndMarker = (coordinates) => {
+    const marker = new vietmapgl.Marker(customMarker(true))
+      .setLngLat(coordinates)
+      .addTo(mapRef.current);
+    // clear old marker if exists
+    if (endMarkerRef.current) {
+      endMarkerRef.current.remove();
+    }
+    endMarkerRef.current = marker;
+
+    // Scroll to the new marker
+    // mapRef.current.flyTo({
+    //   center: coordinates,
+    //   zoom: 14,
+    //   speed: 1.2,
+    // });
   };
 
   const addCircle = (center, radius) => {
@@ -177,10 +248,14 @@ const CustomMap = forwardRef((props, ref) => {
   };
 
   useImperativeHandle(ref, () => ({
-    addMarker(coordinates, customerInfo, customerIndex) {
+    addMarker(coordinates, customerInfo, customerIndex, isEnd = false) {
       if (customerInfo) {
         createMarker(coordinates, customPopup(customerInfo), customerIndex);
-      } else {
+      }
+      else if (isEnd) {
+        addEndMarker(coordinates);
+      }
+      else {
         addStartMarker(coordinates);
       }
     },
@@ -214,9 +289,9 @@ const CustomMap = forwardRef((props, ref) => {
     const existingMarkerIndex = markersRef.current.findIndex(({ index }) => index === customerIndex);
     if (existingMarkerIndex !== -1) {
       markersRef.current[existingMarkerIndex].marker.remove();
-      markersRef.current[existingMarkerIndex] = { marker, coordinates, index: customerIndex };
+      markersRef.current[existingMarkerIndex] = { marker, coordinates, index: customerIndex, status: customerStatus };
     } else {
-      markersRef.current.push({ marker, coordinates, index: customerIndex });
+      markersRef.current.push({ marker, coordinates, index: customerIndex, status: customerStatus });
     }
     updateCustomerIndices();
     // Scroll to the new marker
@@ -235,32 +310,103 @@ const CustomMap = forwardRef((props, ref) => {
   };
 
   const addGeojsonLine = () => {
-    mapRef.current.on("load", () => {
-      mapRef.current.addSource("route", {
-        type: "geojson",
-        data: {
+    if (!mapRef.current) {
+      console.error("Map reference is not available.");
+      return;
+    }
+
+    if (coordinatesRouting.length === 0) {
+      console.error("coordinatesRouting is empty.");
+      return;
+    }
+
+    if (mapRef.current.isStyleLoaded()) {
+      if (mapRef.current.getSource("route")) {
+        console.log("Updating existing route source.");
+        mapRef.current.getSource("route").setData({
           type: "Feature",
           properties: {},
           geometry: {
             type: "LineString",
-            coordinates: [
-              [106.7061597962484, 10.770688562901288],
-              [106.69057544335796, 10.768747133937572],
-              [106.68189581514225, 10.764994908339784],
-              [106.67440708752872, 10.757690582434833],
-              [106.65985878585263, 10.7548236124389],
-            ],
+            coordinates: coordinatesRouting,
           },
-        },
+        });
+      } else {
+        console.log("Adding new route source and layer.");
+        mapRef.current.addSource("route", {
+          type: "geojson",
+          data: {
+            type: "Feature",
+            properties: {},
+            geometry: {
+              type: "LineString",
+              coordinates: coordinatesRouting,
+            },
+          },
+        });
+
+        mapRef.current.addLayer({
+          id: "route",
+          type: "line",
+          source: "route",
+          layout: {
+            "line-join": "round",
+            "line-cap": "round",
+          },
+          paint: {
+            "line-color": "#6600CC",
+            "line-width": 8,
+          },
+        });
+      }
+    } else {
+      mapRef.current.on("load", () => {
+        console.log("Map loaded. Adding new route source and layer.");
+        if (mapRef.current.getSource("route")) {
+          mapRef.current.removeLayer("route");
+          mapRef.current.removeSource("route");
+        }
+        mapRef.current.addSource("route", {
+          type: "geojson",
+          data: {
+            type: "Feature",
+            properties: {},
+            geometry: {
+              type: "LineString",
+              coordinates: coordinatesRouting,
+            },
+          },
+        });
+        mapRef.current.addLayer({
+          id: "route",
+          type: "line",
+          source: "route",
+          layout: {
+            "line-join": "round",
+            "line-cap": "round",
+          },
+          paint: {
+            "line-color": "#6600CC",
+            "line-width": 8,
+          },
+        });
       });
-    });
+      console.log('called')
+      // if map is not loaded, then add the line when the map is loaded
+    }
   };
 
   useEffect(() => {
     if (mapRef.current) {
       mapRef.current.resize();
+      // Ensure the map is loaded before adding the line
+      if (mapRef.current.isStyleLoaded() && coordinatesRouting?.length > 0) {
+        addGeojsonLine();
+      } else {
+        mapRef.current.on('load', addGeojsonLine);
+      }
     }
-  }, [isMapFull]);
+  }, [isMapFull, coordinatesRouting, tripCustomer, nowLocation]);
 
   return <div id="map" className="w-full h-full"></div>;
 });

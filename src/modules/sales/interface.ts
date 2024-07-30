@@ -172,6 +172,7 @@ export interface ISaleProductLocal extends Omit<ISaleProduct, "batches"> {
   isBuyByNumber?: boolean;
   buyNumberType?: number;
   itemPrice?: number;
+  discountCode?: string;
   batches: {
     batchId: number;
     productUnitId: number;
@@ -234,4 +235,9 @@ export interface ISampleMedicine {
     createdAt: string;
   };
   products: ISaleProduct[];
+}
+
+export interface IDiscount {
+  productDiscount: any[];
+  orderDiscount: any[];
 }

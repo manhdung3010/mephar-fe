@@ -16,7 +16,7 @@ export const schema = yup.object().shape({
   provinceId: yup.number().required("Đây là trường bắt buộc!"),
   districtId: yup.number().required("Đây là trường bắt buộc!"),
   wardId: yup.number().required("Đây là trường bắt buộc!"),
-  businessRegistrationImageId: yup.number().required("Đây là trường bắt buộc!"),
+  businessRegistrationImageId: yup.number().nullable(),
   businessRegistrationNumber: yup.string().required("Đây là trường bắt buộc!"),
   logoId: yup.string().nullable(),
 });

@@ -9,7 +9,7 @@ function index() {
       meta={
         <Meta title="Pharm - Web dashboard" description="Danh sách sản phẩm" />
       }
-      title="Danh sách sản phẩm"
+      title="Danh sách sản phẩm 123"
     >
       <CommonPage />
     </Layout>

@@ -29,8 +29,8 @@ import CopyBlueIcon from "@/assets/copyBlue.svg";
 import { RoleAction, RoleModel } from "@/modules/settings/role/role.enum";
 import { useRouter } from "next/router";
 import { IProduct } from "../../list-product/types";
-import ProductDetail from "../../list-product/row-detail";
 import { getProductDetail } from "@/api/product.service";
+import ProductDetail from "./ProductDetail";
 
 interface IRecord {
   key: number;
@@ -95,8 +95,6 @@ export function Info({ record }: { record: any }) {
     }
   );
 
-  console.log(productDetail);
-
   const columns: ColumnsType<IRecord> = [
     {
       title: "Mã hàng",
@@ -151,7 +149,7 @@ export function Info({ record }: { record: any }) {
       dataIndex: "diffAmount",
       key: "diffAmount",
       render: (_, record) =>
-        formatNumber(record?.difference * record?.productUnit?.product?.price),
+        formatNumber(record?.difference * record?.productUnit?.price),
     },
   ];
 

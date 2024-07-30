@@ -17,6 +17,8 @@ import { useForm } from 'react-hook-form';
 import { schema } from './schema';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import { CustomInput } from '@/components/CustomInput';
+import { CustomAutocomplete } from '@/components/CustomAutocomplete';
 const { Option } = Select;
 function Check() {
   const mapRef = useRef<any>(null);
@@ -36,7 +38,7 @@ function Check() {
     resolver: yupResolver(schema),
     mode: 'onChange',
     defaultValues: {
-      radius: 5000,
+      radius: 1000,
     },
   });
   const router = useRouter();
@@ -111,52 +113,49 @@ function Check() {
                   <div className='bg-white p-5 shadow-sm flex flex-col gap-3'>
                     <div>
                       <Label infoText="" label="Vị trí muốn check" required />
-                      <Select
+                      <CustomAutocomplete
                         placeholder="Vị trí check điểm bán"
                         className="h-11 !rounded w-full"
-                        onChange={(value) => {
+                        // prefixIcon={<Image src={SearchIcon} alt="" />}
+                        wrapClassName="w-full !rounded bg-white"
+                        onSelect={(value) => {
                           setRefId(value);
                         }}
+                        showSearch={true}
+                        listHeight={300}
                         onSearch={debounce((value) => {
                           setPlaceKeyword(value);
                         }, 300)}
-                        showSearch={true}
-                        notFoundContent={isLoadingPlace ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
-                        filterOption={(input, option: any) => {
-                          const textContent = option.children.props.children[1].props.children;
-                          return textContent.toLowerCase().includes(input.toLowerCase());
-                        }}
-                      >
-                        {places?.data?.map((item) => (
-                          <Option key={item.ref_id} value={item.ref_id}>
+                        value={places?.data?.find((item) => item.ref_id === refId)?.display}
+                        options={places?.data.map((item) => ({
+                          value: item?.ref_id,
+                          label: (
                             <div className='flex items-center gap-1 py-2'>
-                              <div className='w-4 flex-shrink-0 grid place-items-center'>
-                                <Image src={MarkIcon} />
-                              </div>
+                              <Image src={MarkIcon} />
                               <span className='display'>
                                 {item?.display}
                               </span>
                             </div>
-                          </Option>
-                        ))}
-                      </Select>
+                          ),
+                        }))}
+                      />
                     </div>
                     <div>
-                      <Label infoText="" label="Khoảng cách quét" />
-                      <Select
-                        className='w-full h-11 !rounded'
-                        options={[
-                          { value: 5000, label: '5km' },
-                          { value: 10000, label: '10km' },
-                          { value: 20000, label: '20km' },
-                          { value: 50000, label: '50km' },
-                          { value: 100000, label: '100km' },
-                        ]}
-                        value={getValues('radius')}
-                        onChange={(value) => {
-                          setValue('radius', Number(value), { shouldValidate: true });
-                        }}
-                      />
+                      <Label infoText="" label="Khoảng cách quét" required />
+                      <div className='flex items-center gap-2'>
+                        <div className='w-full'>
+                          <CustomInput
+                            placeholder='Nhập bán kính tìm kiếm'
+                            className='w-full h-11 !rounded'
+                            type='number'
+                            value={getValues('radius')}
+                            onChange={(value) => {
+                              setValue('radius', Number(value), { shouldValidate: true });
+                            }}
+                          />
+                        </div>
+                        <span className='w-5 font-semibold text-base'>m</span>
+                      </div>
                     </div>
                     <CustomButton
                       className='w-full !h-10'

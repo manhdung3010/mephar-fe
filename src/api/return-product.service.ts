@@ -1,4 +1,4 @@
-import axiosClient from './index';
+import axiosClient from "./index";
 
 export function getReturnProduct(params: {
   page: number;
@@ -8,7 +8,7 @@ export function getReturnProduct(params: {
   userId?: number;
   dateRange?: { startDate?: string; endDate?: string };
 }) {
-  return axiosClient.get('purchase-return', { params });
+  return axiosClient.get("purchase-return", { params });
 }
 
 export function getReturnProductDetail(id: number) {
@@ -25,4 +25,15 @@ export function createReturnProduct(payload) {
 
 export function deleteReturnProduct(id: number) {
   return axiosClient.delete(`purchase-return/${id}`);
+}
+
+// lịch sử thanh toán
+export function getReturnPaymentHistory(
+  params: {
+    page: number;
+    limit: number;
+  },
+  id: number
+) {
+  return axiosClient.get(`sale-return/${id}/history-payment`, { params });
 }

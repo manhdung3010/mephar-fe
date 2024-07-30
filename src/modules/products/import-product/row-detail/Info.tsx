@@ -214,7 +214,7 @@ export function Info({ record }: { record: IRecord }) {
         </div>
 
         <div className="grid grid-cols-2 gap-5">
-          <div className="text-gray-main">Người trả:</div>
+          <div className="text-gray-main">Người nhập:</div>
           <div className="text-black-main">
             {importProductDetail?.data?.inbound?.user?.fullName}
           </div>

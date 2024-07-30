@@ -4,7 +4,7 @@ import { atom } from "recoil";
 
 import { randomString } from "@/helpers";
 import type { IImportProductLocal } from "@/modules/products/import-product/coupon/interface";
-import type { ISaleProductLocal } from "@/modules/sales/interface";
+import type { IDiscount, ISaleProductLocal } from "@/modules/sales/interface";
 
 const store = typeof window !== "undefined" ? window.localStorage : null;
 
@@ -102,4 +102,19 @@ export const discountTypeState = atom<string>({
   key: "DISCOUNT_TYPE_STATE",
   default: "",
   effects: [localStorageEffect("DISCOUNT_TYPE_STATE")],
+});
+export const vehicalState = atom<string>({
+  key: "VEHICAL_STATE",
+  default: "car",
+  effects: [localStorageEffect("VEHICAL_STATE")],
+});
+export const discountState = atom<{ [x: string]: IDiscount } | "">({
+  key: "DISCOUNT_STATE",
+  default: {
+    [defaultOrder]: {
+      productDiscount: [],
+      orderDiscount: [],
+    },
+  },
+  effects: [localStorageEffect("DISCOUNT_STATE")],
 });

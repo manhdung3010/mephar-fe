@@ -7,6 +7,7 @@ import CustomTable from '../../../../components/CustomTable';
 import { useQuery } from '@tanstack/react-query';
 import { getProductInventory } from '@/api/product.service';
 import { formatNumber } from '@/helpers';
+import { useEffect, useState } from 'react';
 
 interface IRecord {
   key: number;
@@ -21,7 +22,7 @@ interface IRecord {
 }
 
 const Inventory = ({ productId, branchId, record }: { productId: number, branchId: number, record: any }) => {
-
+  const [inventory, setInventory] = useState([]);
   const { data: productInventory, isLoading } = useQuery(
     [
       'PRODUCT_INVENTORY', productId, branchId

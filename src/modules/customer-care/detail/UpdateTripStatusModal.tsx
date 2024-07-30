@@ -68,8 +68,8 @@ const UpdateStatusModal = ({
         <div className="text-xl font-semibold">Cập nhật trạng thái</div>
         <div className="h-[1px] w-full bg-[#C7C9D9]" />
         <Image src={BoyImg} alt="" />
-        <div className="flex text-center text-lg">
-          Bạn có muốn cập nhật trạng thái của KH<span className='font-semibold text-lg mx-1'>{content?.fullName}</span> trong lịch trình?
+        <div className="flex text-center">
+          <span className='text-lg'>Bạn có muốn cập nhật trạng thái của KH<span className='font-semibold text-lg mx-1'>{content?.fullName}</span> trong lịch trình?</span>
         </div>
 
         <div className="grid w-full grid-cols-3 gap-4">

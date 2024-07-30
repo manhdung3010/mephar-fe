@@ -14,6 +14,7 @@ import InputError from "@/components/InputError";
 import { formatMoney, formatNumber, roundNumber } from "@/helpers";
 import {
   branchState,
+  discountState,
   discountTypeState,
   orderActiveState,
   orderDiscountSelected,
@@ -44,6 +45,7 @@ export function ProductList({
   const { errors, setError } = useForm;
 
   const [orderObject, setOrderObject] = useRecoilState(orderState);
+  const [discountObject, setDiscountObject] = useRecoilState(discountState);
   const orderActive = useRecoilValue(orderActiveState);
   const [orderDiscount, setOrderDiscount] = useRecoilState(
     orderDiscountSelected
@@ -61,6 +63,9 @@ export function ProductList({
   const [itemDiscount, setItemDiscount] = useState();
   const [productKeyAddBatch, setProductKeyAddBatch] = useState<string>();
 
+  const [orderList, setOrderList] = useState([]);
+
+
   const checkDisplayListBatch = (product: ISaleProductLocal) => {
     return product.product.isBatchExpireControl;
   };
@@ -73,6 +78,8 @@ export function ProductList({
     ["DISCOUNT_CONFIG"],
     () => getDiscountConfig()
   );
+
+  console.log('discountObject', discountObject)
 
   useEffect(() => {
     if (orderObject[orderActive]) {
@@ -221,13 +228,12 @@ export function ProductList({
       title: "",
       dataIndex: "action",
       key: "action",
-      render: (_, { id, isDiscount, productUnitId }) => (
+      render: (_, { id, isDiscount, productUnitId, discountCode }) => (
         <div className="w-10 flex-shrink-0">
           <Image
             src={RemoveIcon}
             className={"cursor-pointer"}
             onClick={() => {
-              // if (isDiscount) return
               const orderObjectClone = cloneDeep(orderObject);
               const productsClone = orderObjectClone[orderActive] || [];
               orderObjectClone[orderActive] = productsClone.filter(
@@ -236,10 +242,24 @@ export function ProductList({
                   return product.productUnitId !== productUnitId;
                 }
               );
-              setOrderDiscount([]);
-              setProductDiscount([]);
-              setDiscountType("order");
               setOrderObject(orderObjectClone);
+
+              // // remove discount from discountObject
+              // const discountObjectClone = cloneDeep(discountObject);
+              // const productDiscountClone = discountObjectClone[
+              //   orderActive
+              // ]?.productDiscount?.filter((item) => item.code === discountCode)?.filter((a) => a.id !== productUnitId);
+
+              // const newDiscountObject = {
+              //   ...discountObjectClone[orderActive],
+              //   productDiscount: [
+
+              //   ],
+              // };
+
+              // setDiscountObject(newDiscountObject);
+              console.log('discountCode', discountCode)
+
             }}
             alt=""
           />
@@ -257,8 +277,6 @@ export function ProductList({
       dataIndex: "name",
       key: "name",
       render: (_, { product, batches, isDiscount, itemDiscountProduct }) => {
-        console.log("adsasdasd", itemDiscountProduct);
-
         return (
           <div>
             <div className=" font-medium flex gap-2 items-center">
@@ -275,17 +293,17 @@ export function ProductList({
                       src={DiscountIcon}
                       className="block"
                       onClick={() => {
-                        if (
-                          orderDiscount?.length > 0 &&
-                          !discountConfigDetail?.data?.data?.isMergeDiscount
-                        ) {
-                          message.error(
-                            "Bạn đã chọn khuyến mại hóa đơn. Mỗi hóa đơn chỉ được chọn 1 loại khuyến mại"
-                          );
-                        } else {
-                          setOpenProductDiscountList(!openProductDiscountList);
-                          setItemDiscount(itemDiscountProduct);
-                        }
+                        // if (
+                        //   orderDiscount?.length > 0 &&
+                        //   !discountConfigDetail?.data?.data?.isMergeDiscount
+                        // ) {
+                        //   message.error(
+                        //     "Bạn đã chọn khuyến mại hóa đơn. Mỗi hóa đơn chỉ được chọn 1 loại khuyến mại"
+                        //   );
+                        // } else {
+                        setOpenProductDiscountList(!openProductDiscountList);
+                        setItemDiscount(itemDiscountProduct);
+                        // }
                       }}
                       alt="discount-icon"
                     />
@@ -303,9 +321,11 @@ export function ProductList({
           </span>{' '}
           - (tồn {inventory})
         </div> */}
-            {/* <div className="font-medium italic text-[#0070F4]">
-              Liều dùng: {product?.productDosage?.name}
-            </div> */}
+            {product?.productDosage && (
+              <div className="font-medium italic text-[#0070F4]">
+                Liều dùng: {product?.productDosage?.name}
+              </div>
+            )}
           </div>
         );
       },
@@ -383,19 +403,19 @@ export function ProductList({
     ...(isSaleReturn
       ? []
       : [
-          {
-            title: "TỒN KHO",
-            dataIndex: "newInventory",
-            key: "newInventory",
-            render: (value, record) => (
-              <div>
-                {value
-                  ? formatNumber(Math.floor(value))
-                  : formatNumber(record.inventory)}
-              </div>
-            ),
-          },
-        ]),
+        {
+          title: "TỒN KHO",
+          dataIndex: "newInventory",
+          key: "newInventory",
+          render: (value, record) => (
+            <div>
+              {value
+                ? formatNumber(Math.floor(value))
+                : formatNumber(record.inventory)}
+            </div>
+          ),
+        },
+      ]),
     {
       title: "SỐ LƯỢNG",
       dataIndex: "quantity",
@@ -410,7 +430,7 @@ export function ProductList({
           type="number"
           disabled={
             (isSaleReturn && record?.batches?.length > 0) ||
-            (record?.isDiscount && !record?.buyNumberType)
+              (record?.isDiscount && !record?.buyNumberType)
               ? true
               : false
           }
@@ -423,14 +443,14 @@ export function ProductList({
             }
 
             // remove productDiscount if this product is in productDiscount
-            const productDiscountClone = cloneDeep(productDiscount);
-            productDiscountClone.forEach((item, index) => {
-              if (item.productUnitId === record?.productUnitId) {
-                // remove this item from productDiscount
-                productDiscountClone.splice(index, 1);
-              }
-            });
-            setProductDiscount(productDiscountClone);
+            // const productDiscountClone = cloneDeep(productDiscount);
+            // productDiscountClone.forEach((item, index) => {
+            //   if (item.productUnitId === record?.productUnitId) {
+            //     // remove this item from productDiscount
+            //     productDiscountClone.splice(index, 1);
+            //   }
+            // });
+            // setProductDiscount(productDiscountClone);
             const orderObjectClone = cloneDeep(orderObject);
             orderObjectClone[orderActive] = orderObjectClone[
               orderActive
@@ -518,44 +538,44 @@ export function ProductList({
     },
     ...(isSaleReturn
       ? [
-          {
-            title: "GIÁ TRẢ",
-            dataIndex: "price",
-            key: "price",
-            render: (_, { productUnit, productKey }) => (
-              // input return price
-              <CustomInput
-                wrapClassName="!w-[110px]"
-                className="!h-6 !w-[80px] text-center"
-                hasMinus={false}
-                hasPlus={false}
-                value={productUnit.returnPrice}
-                type="number"
-                onChange={(value) => {
-                  const orderObjectClone = cloneDeep(orderObject);
+        {
+          title: "GIÁ TRẢ",
+          dataIndex: "price",
+          key: "price",
+          render: (_, { productUnit, productKey }) => (
+            // input return price
+            <CustomInput
+              wrapClassName="!w-[110px]"
+              className="!h-6 !w-[80px] text-center"
+              hasMinus={false}
+              hasPlus={false}
+              value={productUnit.returnPrice}
+              type="number"
+              onChange={(value) => {
+                const orderObjectClone = cloneDeep(orderObject);
 
-                  orderObjectClone[orderActive] = orderObjectClone[
-                    orderActive
-                  ]?.map((product: ISaleProductLocal) => {
-                    if (product.productKey === productKey) {
-                      return {
-                        ...product,
-                        productUnit: {
-                          ...product.productUnit,
-                          returnPrice: value,
-                        },
-                      };
-                    }
+                orderObjectClone[orderActive] = orderObjectClone[
+                  orderActive
+                ]?.map((product: ISaleProductLocal) => {
+                  if (product.productKey === productKey) {
+                    return {
+                      ...product,
+                      productUnit: {
+                        ...product.productUnit,
+                        returnPrice: value,
+                      },
+                    };
+                  }
 
-                    return product;
-                  });
+                  return product;
+                });
 
-                  setOrderObject(orderObjectClone);
-                }}
-              />
-            ),
-          },
-        ]
+                setOrderObject(orderObjectClone);
+              }}
+            />
+          ),
+        },
+      ]
       : []),
     {
       title: "ĐƠN GIÁ",
@@ -614,8 +634,8 @@ export function ProductList({
           <div className="flex flex-col">
             {discountType === "percent"
               ? `${formatMoney(
-                  Number(price - (discountValue * price) / 100) * quantity
-                )}`
+                Number(price - (discountValue * price) / 100) * quantity
+              )}`
               : formatMoney(Number((price - discountValue) * quantity))}
           </div>
         ) : buyNumberType === 1 ? (
@@ -671,7 +691,6 @@ export function ProductList({
     setOrderObject(orderObjectClone);
   };
 
-  console.log("orderObject[orderActive]", orderObject[orderActive]);
 
   return (
     <ProductTableStyled className="p-4">
@@ -776,9 +795,9 @@ export function ProductList({
                         error={
                           errors?.products
                             ? errors?.products[Number(record.key) - 1]?.batches
-                                ?.message ||
-                              errors?.products[Number(record.key) - 1]
-                                ?.batches[0]?.quantity?.message
+                              ?.message ||
+                            errors?.products[Number(record.key) - 1]
+                              ?.batches[0]?.quantity?.message
                             : undefined
                         }
                       />
@@ -871,24 +890,24 @@ export function ProductList({
         onCancel={() => setOpenProductDiscountList(false)}
         onSave={(selectedDiscount) => {
           // set selected discount to setValue products
-          const orderObjectClone = cloneDeep(orderObject);
-          orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map(
-            (product: ISaleProductLocal) => {
-              if (
-                selectedDiscount[0]?.items[0]?.condition?.productUnitId.includes(
-                  product.productUnitId
-                )
-              ) {
-                return {
-                  ...product,
-                  discountSelected: selectedDiscount,
-                };
-              }
-              return product;
-            }
-          );
-          setOrderObject(orderObjectClone);
-          setOpenProductDiscountList(false);
+          // const orderObjectClone = cloneDeep(orderObject);
+          // orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map(
+          //   (product: ISaleProductLocal) => {
+          //     if (
+          //       selectedDiscount[0]?.items[0]?.condition?.productUnitId.includes(
+          //         product.productUnitId
+          //       )
+          //     ) {
+          //       return {
+          //         ...product,
+          //         discountSelected: selectedDiscount,
+          //       };
+          //     }
+          //     return product;
+          //   }
+          // );
+          // setOrderObject(orderObjectClone);
+          // setOpenProductDiscountList(false);
         }}
         discountList={itemDiscount}
       />

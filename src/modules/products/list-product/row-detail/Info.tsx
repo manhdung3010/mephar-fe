@@ -139,14 +139,19 @@ const Info = ({
             <div className="text-gray-main">Mã hàng:</div>
             <div className="text-black-main">{record?.code}</div>
           </div>
+
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Mã vạch:</div>
             <div className="text-black-main">{record?.barCode}</div>
           </div>
-          {/* <div className="grid grid-cols-2 gap-5">
-            <div className="text-gray-main">Mã thuốc:</div>
-            <div className="text-black-main">{record?.drugCode}</div>
-          </div> */}
+          {
+            record?.type === EProductType.MEDICINE && (
+              <div className="grid grid-cols-2 gap-5">
+                <div className="text-gray-main">Mã thuốc:</div>
+                <div className="text-black-main">{record?.drugCode}</div>
+              </div>
+            )
+          }
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Nhóm hàng: </div>
             <div className="text-black-main">{record?.groupProduct?.name}</div>
@@ -157,8 +162,8 @@ const Info = ({
               {record?.type === 1
                 ? "Thuốc"
                 : record?.type === 2
-                ? "Hàng hóa"
-                : "Combo - đóng gói"}
+                  ? "Hàng hóa"
+                  : "Combo - đóng gói"}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-5">
@@ -183,10 +188,14 @@ const Info = ({
             <div className="text-gray-main">Trọng lượng:</div>
             <div className="text-black-main">{record?.weight}</div>
           </div>
-          {/* <div className="grid grid-cols-2 gap-5">
-            <div className="text-gray-main">Đường dùng:</div>
-            <div className="text-black-main">{record?.productDosage?.name}</div>
-          </div> */}
+          {
+            record?.type === EProductType.MEDICINE && (
+              <div className="grid grid-cols-2 gap-5">
+                <div className="text-gray-main">Đường dùng:</div>
+                <div className="text-black-main">{record?.productDosage?.name}</div>
+              </div>
+            )
+          }
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Vị trí:</div>
             <div className="text-black-main">
@@ -199,18 +208,30 @@ const Info = ({
               {record?.warningExpiryDate || record?.warningExpiryText}
             </div>
           </div> */}
-          {/* <div className="grid grid-cols-2 gap-5">
-            <div className="text-gray-main">Số đăng ký:</div>
-            <div className="text-black-main">{record?.registerNumber}</div>
-          </div>
-          <div className="grid grid-cols-2 gap-5">
-            <div className="text-gray-main">Hoạt chất:</div>
-            <div className="text-black-main">{record?.activeElement}</div>
-          </div> */}
-          <div className="grid grid-cols-2 gap-5">
-            <div className="text-gray-main">Hàm lượng:</div>
-            <div className="text-black-main">{record?.content}</div>
-          </div>
+          {
+            record?.type === EProductType.MEDICINE && (
+              <div className="grid grid-cols-2 gap-5">
+                <div className="text-gray-main">Số đăng ký:</div>
+                <div className="text-black-main">{record?.registerNumber}</div>
+              </div>
+            )
+          }
+          {
+            record?.type === EProductType.MEDICINE && (
+              <div className="grid grid-cols-2 gap-5">
+                <div className="text-gray-main">Hoạt chất:</div>
+                <div className="text-black-main">{record?.activeElement}</div>
+              </div>
+            )
+          }
+          {
+            record?.type === EProductType.MEDICINE && (
+              <div className="grid grid-cols-2 gap-5">
+                <div className="text-gray-main">Hàm lượng:</div>
+                <div className="text-black-main">{record?.content}</div>
+              </div>
+            )
+          }
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Hãng sản xuất:</div>
             <div className="text-black-main">
@@ -264,15 +285,14 @@ const Info = ({
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Trạng thái:</div>
             <div
-              className={`${
-                record?.status === EProductStatus.active
-                  ? "text-[#00B63E]"
-                  : "text-gray-main"
-              }`}
+              className={`${record?.status === EProductStatus.active
+                ? "text-[#00B63E]"
+                : "text-gray-main"
+                }`}
             >
               {
                 EProductStatusLabel[
-                  getEnumKeyByValue(EProductStatus, record?.status)
+                getEnumKeyByValue(EProductStatus, record?.status)
                 ]
               }
             </div>
@@ -285,26 +305,26 @@ const Info = ({
           RoleModel.list_product,
           RoleAction.update
         ) && (
-          <CustomButton
-            type={
-              record?.status === EProductStatus.inactive ? "success" : "disable"
-            }
-            outline={true}
-            prefixIcon={
-              record?.status === EProductStatus.inactive ? (
-                <div></div>
-              ) : (
-                <Image src={LockGrayIcon} alt="" />
-              )
-            }
-            onClick={() => setOpenUpdateProductStatusModal(true)}
-            disabled={isLoadingUpdateStatusProduct}
-          >
-            {record?.status === EProductStatus.inactive
-              ? "Mở bán"
-              : "Ngưng kinh doanh"}
-          </CustomButton>
-        )}
+            <CustomButton
+              type={
+                record?.status === EProductStatus.inactive ? "success" : "disable"
+              }
+              outline={true}
+              prefixIcon={
+                record?.status === EProductStatus.inactive ? (
+                  <div></div>
+                ) : (
+                  <Image src={LockGrayIcon} alt="" />
+                )
+              }
+              onClick={() => setOpenUpdateProductStatusModal(true)}
+              disabled={isLoadingUpdateStatusProduct}
+            >
+              {record?.status === EProductStatus.inactive
+                ? "Mở bán"
+                : "Ngưng kinh doanh"}
+            </CustomButton>
+          )}
         <CustomButton
           type="primary"
           outline={true}
@@ -325,42 +345,42 @@ const Info = ({
           RoleModel.list_product,
           RoleAction.create
         ) && (
-          <CustomButton
-            type="primary"
-            outline={true}
-            prefixIcon={<Image src={CopyBlueIcon} alt="" />}
-            onClick={redirectCopy}
-          >
-            Sao chép
-          </CustomButton>
-        )}
+            <CustomButton
+              type="primary"
+              outline={true}
+              prefixIcon={<Image src={CopyBlueIcon} alt="" />}
+              onClick={redirectCopy}
+            >
+              Sao chép
+            </CustomButton>
+          )}
 
         {hasPermission(
           profile?.role?.permissions,
           RoleModel.list_product,
           RoleAction.delete
         ) && (
-          <CustomButton
-            outline={true}
-            onClick={() => setOpenDeleteProductModal(true)}
-            prefixIcon={<Image src={DeleteRedIcon} alt="" />}
-          >
-            Xoá
-          </CustomButton>
-        )}
+            <CustomButton
+              outline={true}
+              onClick={() => setOpenDeleteProductModal(true)}
+              prefixIcon={<Image src={DeleteRedIcon} alt="" />}
+            >
+              Xoá
+            </CustomButton>
+          )}
         {hasPermission(
           profile?.role?.permissions,
           RoleModel.list_product,
           RoleAction.update
         ) && (
-          <CustomButton
-            type="success"
-            prefixIcon={<Image src={EditWhiteIcon} alt="" />}
-            onClick={redirectUpdate}
-          >
-            Cập nhật
-          </CustomButton>
-        )}
+            <CustomButton
+              type="success"
+              prefixIcon={<Image src={EditWhiteIcon} alt="" />}
+              onClick={redirectUpdate}
+            >
+              Cập nhật
+            </CustomButton>
+          )}
       </div>
 
       <PrintBarcodeModal

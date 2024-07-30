@@ -146,15 +146,28 @@ const AddMedicine = ({
           }
         }
       });
+      if (isCopy) {
+        const productUnits = productDetail.data.productUnit?.filter(
+          (unit) => !unit.isBaseUnit
+        )?.map((unit) => {
+          return {
+            ...unit,
+            code: "",
+            barCode: "",
+          };
+        });
+        setValue('productUnits', productUnits, { shouldValidate: true });
 
-      const productUnits = productDetail.data?.productUnit?.filter(
-        (unit) => !unit.isBaseUnit
-      );
+      }
+      else {
+        const productUnits = productDetail.data.productUnit?.filter(
+          (unit) => !unit.isBaseUnit
+        );
+        setValue('productUnits', productUnits, { shouldValidate: true });
+      }
 
       setManufactureKeyword(productDetail?.data?.productManufacture?.name);
       setCountryKeyword(productDetail?.data?.country?.name);
-
-      setValue("productUnits", productUnits, { shouldValidate: true });
     }
   }, [productDetail]);
 

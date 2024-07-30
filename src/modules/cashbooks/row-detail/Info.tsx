@@ -28,7 +28,7 @@ export function Info({ record }: { record: any }) {
         <div ref={invoiceComponentRef} className={styles.invoicePrint}>
           <InvoicePrint saleInvoice={record} />
         </div>
-        <div className="mb-4 grid w-2/3 grid-cols-2 gap-5">
+        <div className="mb-4 grid w-3/4 grid-cols-2 gap-4">
           <div className="grid grid-cols-3 gap-5">
             <div className="col-span-1 text-gray-main">Mã phiếu:</div>
             <div className="text-black-main">{record?.code}</div>
@@ -75,7 +75,7 @@ export function Info({ record }: { record: any }) {
               {record?.targetCustomer?.fullName ||
                 record?.targetBranch?.name ||
                 record?.targetOther?.name ||
-                record?.targetSupplier?.name}
+                record?.targetSupplier?.name || record?.targetUser?.fullName}
             </div>
           </div>
           <div className="grid grid-cols-3 gap-5">
@@ -84,7 +84,7 @@ export function Info({ record }: { record: any }) {
               {record?.targetCustomer?.phone ||
                 record?.targetBranch?.phone ||
                 record?.targetOther?.phone ||
-                record?.targetSupplier?.phone}
+                record?.targetSupplier?.phone || record?.targetUser?.phone}
             </div>
           </div>
 
@@ -94,10 +94,10 @@ export function Info({ record }: { record: any }) {
               {record?.target === "customer"
                 ? "Khách hàng"
                 : record?.target === "supplier"
-                ? "Nhà cung cấp"
-                : record?.target === "user"
-                ? "Nhân viên"
-                : "Khác"}
+                  ? "Nhà cung cấp"
+                  : record?.target === "user"
+                    ? "Nhân viên"
+                    : "Khác"}
             </div>
           </div>
 
