@@ -2,7 +2,7 @@ import Link from 'next/link'
 import React from 'react'
 import ProductCard from './ProductCard'
 
-const productList = [
+export const productList = [
   {
     id: 1,
     name: 'Sản phẩm 1',

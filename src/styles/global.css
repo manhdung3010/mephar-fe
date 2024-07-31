@@ -104,8 +104,22 @@ a {
   background-color: #1a73e8;
 }
 
+.ant-upload-btn {
+  padding: 0 !important;
+}
+
 .fluid-container {
   width: 100%;
   max-width: 1208px;
   margin: 0 auto;
+}
+
+/* slick slider */
+.slick-dots {
+  position: relative !important;
+}
+.slick-dots li {
+  width: 83px !important;
+  height: 83px !important;
+  bottom: unset;
 }

@@ -12,6 +12,10 @@ import { EProductSettingStatus, EProductSettingStatusLabel } from "@/enums";
 
 import BillDetail from "./row-detail";
 import Search from "./Search";
+import { useQuery } from "@tanstack/react-query";
+import { getConfigProduct } from "@/api/market.service";
+import { useRecoilValue } from "recoil";
+import { branchState } from "@/recoil/state";
 
 interface IRecord {
   key: number;
@@ -27,10 +31,22 @@ interface IRecord {
 
 export function MarketSetting() {
   const router = useRouter();
+  const branchId = useRecoilValue(branchState);
+  const [formFilter, setFormFilter] = useState({
+    page: 1,
+    limit: 20,
+    keyword: "",
+    branchId
+  });
 
   const [expandedRowKeys, setExpandedRowKeys] = useState<
     Record<string, boolean>
   >({});
+
+  const { data: configProduct, isLoading } = useQuery(
+    ['CONFIG_PRODUCT', JSON.stringify(formFilter)],
+    () => getConfigProduct(formFilter),
+  );
 
   const record = {
     key: 1,
@@ -137,39 +153,38 @@ export function MarketSetting() {
     },
   ];
   return (
-    // <div>
-    //   <div className="my-3 flex justify-end gap-4">
-    //     <CustomButton
-    //       onClick={() => router.push('/markets/setting/add-setting')}
-    //       type="success"
-    //       prefixIcon={<Image src={PlusIcon} />}
-    //     >
-    //       Thêm mới
-    //     </CustomButton>
+    <div>
+      <div className="my-3 flex justify-end gap-4">
+        <CustomButton
+          onClick={() => router.push('/markets/setting/add-setting')}
+          type="success"
+          prefixIcon={<Image src={PlusIcon} />}
+        >
+          Thêm mới
+        </CustomButton>
 
-    //     <CustomButton prefixIcon={<Image src={ExportIcon} />}>
-    //       Xuất file
-    //     </CustomButton>
-    //   </div>
+        <CustomButton prefixIcon={<Image src={ExportIcon} />}>
+          Xuất file
+        </CustomButton>
+      </div>
 
-    //   <Search />
+      <Search />
 
-    //   <CustomTable
-    //     rowSelection={{
-    //       type: 'checkbox',
-    //     }}
-    //     dataSource={dataSource}
-    //     columns={columns}
-    //     expandable={{
-    //       // eslint-disable-next-line @typescript-eslint/no-shadow
-    //       expandedRowRender: (record: IRecord) => (
-    //         <BillDetail record={record} />
-    //       ),
-    //       expandIcon: () => <></>,
-    //       expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key),
-    //     }}
-    //   />
-    // </div>
-    <div className="py-5">Đang cập nhật...</div>
+      <CustomTable
+        rowSelection={{
+          type: 'checkbox',
+        }}
+        dataSource={dataSource}
+        columns={columns}
+        expandable={{
+          // eslint-disable-next-line @typescript-eslint/no-shadow
+          expandedRowRender: (record: IRecord) => (
+            <BillDetail record={record} />
+          ),
+          expandIcon: () => <></>,
+          expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key),
+        }}
+      />
+    </div>
   );
 }
