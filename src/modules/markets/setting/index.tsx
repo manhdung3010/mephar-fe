@@ -10,12 +10,16 @@ import { CustomButton } from "@/components/CustomButton";
 import CustomTable from "@/components/CustomTable";
 import { EProductSettingStatus, EProductSettingStatusLabel } from "@/enums";
 
-import BillDetail from "./row-detail";
+import RowDetail from "./row-detail";
 import Search from "./Search";
 import { useQuery } from "@tanstack/react-query";
 import { getConfigProduct } from "@/api/market.service";
 import { useRecoilValue } from "recoil";
-import { branchState } from "@/recoil/state";
+import { branchState, profileState } from "@/recoil/state";
+import { formatDateTime, formatNumber, hasPermission } from "@/helpers";
+import CustomPagination from "@/components/CustomPagination";
+import { debounce } from "lodash";
+import { RoleAction, RoleModel } from "@/modules/settings/role/role.enum";
 
 interface IRecord {
   key: number;
@@ -29,13 +33,23 @@ interface IRecord {
   updatedAt: string;
 }
 
+const marketType = {
+  common: 'Chợ chung',
+  private: 'Chợ riêng',
+}
+
 export function MarketSetting() {
   const router = useRouter();
+  const profile = useRecoilValue(profileState);
   const branchId = useRecoilValue(branchState);
   const [formFilter, setFormFilter] = useState({
     page: 1,
     limit: 20,
     keyword: "",
+    type: "",
+    status: "",
+    "createdAt[start]": undefined,
+    "createdAt[end]": undefined,
     branchId
   });
 
@@ -47,24 +61,7 @@ export function MarketSetting() {
     ['CONFIG_PRODUCT', JSON.stringify(formFilter)],
     () => getConfigProduct(formFilter),
   );
-
-  const record = {
-    key: 1,
-    name: "Panactol",
-    groupProduct: "Nhóm 1",
-    marketType: "Loại chợ",
-    inventoryQuantity: 100,
-    soldQuantity: 50,
-    status: EProductSettingStatus.SELLING,
-    createdAt: "09:10, 1212/2023",
-    updatedAt: "09:10, 1212/2023",
-  };
-
-  const dataSource: IRecord[] = Array(8)
-    .fill(0)
-    .map((_, index) => ({ ...record, key: index }));
-
-  const columns: ColumnsType<IRecord> = [
+  const columns: ColumnsType<any> = [
     {
       title: "STT",
       dataIndex: "key",
@@ -72,9 +69,9 @@ export function MarketSetting() {
     },
     {
       title: "Sản phẩm",
-      dataIndex: "name",
-      key: "name",
-      render: (value, _, index) => (
+      dataIndex: "product",
+      key: "product",
+      render: (value, record, index) => (
         <span
           className="cursor-pointer text-[#0070F4]"
           onClick={() => {
@@ -88,7 +85,7 @@ export function MarketSetting() {
             setExpandedRowKeys({ ...temp });
           }}
         >
-          {value}
+          {record.product?.name}
         </span>
       ),
     },
@@ -96,36 +93,40 @@ export function MarketSetting() {
       title: "Nhóm sản phẩm",
       dataIndex: "groupProduct",
       key: "groupProduct",
+      render: (_, record) => record?.groupProduct?.name,
     },
     {
       title: "Loại chợ",
       dataIndex: "marketType",
       key: "marketType",
+      render: (_, record) => marketType[record.marketType],
     },
     {
       title: "SL tồn",
-      dataIndex: "inventoryQuantity",
-      key: "inventoryQuantity",
+      dataIndex: "quantity",
+      key: "quantity",
+      render: (value) => formatNumber(value),
     },
     {
       title: "SL đã bán",
-      dataIndex: "soldQuantity",
-      key: "soldQuantity",
+      dataIndex: "quantitySold",
+      key: "quantitySold",
+      render: (value) => formatNumber(value),
     },
     {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
-      render: (_, { status }) => (
+      render: (value) => (
         <div
           className={cx(
-            status === EProductSettingStatus.SELLING
+            value === EProductSettingStatus.active
               ? "text-[#00B63E] border border-[#00B63E] bg-[#DEFCEC]"
               : "text-[#6D6D6D] border border-[#6D6D6D] bg-[#F0F1F1]",
             "px-2 py-1 rounded-2xl w-max"
           )}
         >
-          {EProductSettingStatusLabel[status]}
+          {EProductSettingStatusLabel[value]}
         </div>
       ),
     },
@@ -133,10 +134,10 @@ export function MarketSetting() {
       title: "Thời gian tạo",
       dataIndex: "createdAt",
       key: "createdAt",
-      render: (value) => (
+      render: (value, record) => (
         <div>
-          <div>{value}</div>
-          <div className="font-medium text-[#222325]">Nv: Quyentt</div>
+          <div>{formatDateTime(value)}</div>
+          <div className="font-medium text-[#222325]">Nv: {record?.userCreated?.fullName}</div>
         </div>
       ),
     },
@@ -144,46 +145,90 @@ export function MarketSetting() {
       title: "Cập nhật cuối",
       dataIndex: "updatedAt",
       key: "updatedAt",
-      render: (value) => (
+      render: (value, record) => (
         <div>
-          <div>{value}</div>
-          <div className="font-medium text-[#222325]">Nv: Quyentt</div>
+          <div>{formatDateTime(value)}</div>
+          <div className="font-medium text-[#222325]">Nv: {record?.userUpdated?.fullName}</div>
         </div>
       ),
     },
   ];
   return (
     <div>
-      <div className="my-3 flex justify-end gap-4">
-        <CustomButton
-          onClick={() => router.push('/markets/setting/add-setting')}
-          type="success"
-          prefixIcon={<Image src={PlusIcon} />}
-        >
-          Thêm mới
-        </CustomButton>
+      {
+        hasPermission(profile?.role?.permissions, RoleModel.market_setting, RoleAction.create) && (
+          <div className="my-3 flex justify-end gap-4">
+            <CustomButton
+              onClick={() => router.push('/markets/setting/add-setting')}
+              type="success"
+              prefixIcon={<Image src={PlusIcon} />}
+            >
+              Thêm mới
+            </CustomButton>
 
-        <CustomButton prefixIcon={<Image src={ExportIcon} />}>
-          Xuất file
-        </CustomButton>
-      </div>
+            <CustomButton prefixIcon={<Image src={ExportIcon} />}>
+              Xuất file
+            </CustomButton>
+          </div>
+        )
+      }
 
-      <Search />
+
+      <Search
+        onChange={debounce((value) => {
+          setFormFilter((preValue) => ({
+            ...preValue,
+            keyword: value?.keyword,
+            'createdAt[start]': value?.timeStart,
+            'createdAt[end]': value?.timeEnd,
+            type: value?.type,
+            status: value?.status,
+          }));
+        }, 300)}
+      />
 
       <CustomTable
         rowSelection={{
           type: 'checkbox',
         }}
-        dataSource={dataSource}
+        dataSource={configProduct?.data?.items.map((item, index) => ({
+          ...item,
+          key: index + 1,
+        }))}
         columns={columns}
+        loading={isLoading}
+        onRow={(record, rowIndex) => {
+          return {
+            onClick: (event) => {
+              // Toggle expandedRowKeys state here
+              if (expandedRowKeys[record.key - 1]) {
+                const { [record.key - 1]: value, ...remainingKeys } =
+                  expandedRowKeys;
+                setExpandedRowKeys(remainingKeys);
+              } else {
+                setExpandedRowKeys({
+                  [record.key - 1]: true,
+                });
+              }
+            },
+          };
+        }}
         expandable={{
           // eslint-disable-next-line @typescript-eslint/no-shadow
           expandedRowRender: (record: IRecord) => (
-            <BillDetail record={record} />
+            <RowDetail record={record} />
           ),
           expandIcon: () => <></>,
-          expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key),
+          expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key + 1),
         }}
+      />
+
+      <CustomPagination
+        page={formFilter.page}
+        pageSize={formFilter.limit}
+        setPage={(value) => setFormFilter({ ...formFilter, page: value })}
+        setPerPage={(value) => setFormFilter({ ...formFilter, limit: value })}
+        total={configProduct?.data?.totalItem}
       />
     </div>
   );

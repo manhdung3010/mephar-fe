@@ -178,13 +178,13 @@ const items = (permissions: { model: string; action: string }[]) => [
     RoleModel.market_setting,
   ]) &&
   getItem('Chợ', keyMenu.MARKET, <Image src={MarketIcon} />, [
-    hasPermission(permissions, RoleModel.market_common) &&
+    hasPermission(permissions, RoleModel.market_common, RoleAction.read) &&
     getItem(<Link href={'/markets'} passHref>
       <a target="_blank">Chợ</a>
     </Link>, keyMenu.MARKET_COMMON),
-    hasPermission(permissions, RoleModel.market_store) &&
-    getItem('Chợ đại lý', keyMenu.MARKET_STORE),
-    hasPermission(permissions, RoleModel.market_setting) &&
+    hasPermission(permissions, RoleModel.market_store, RoleAction.read) &&
+    getItem('Chợ đại lý', keyMenu.MARKET_STORE,),
+    hasPermission(permissions, RoleModel.market_setting, RoleAction.read) &&
     getItem('Cấu hình sản phẩm', keyMenu.MARKET_SETTING),
   ]),
 

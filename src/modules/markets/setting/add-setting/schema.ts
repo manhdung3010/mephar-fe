@@ -4,7 +4,7 @@ export const schema = yup.object().shape({
   productId: yup.string().required("Đây là trường bắt buộc!"),
   quantity: yup.number().required("Đây là trường bắt buộc!"),
   marketType: yup.string().required("Đây là trường bắt buộc!"),
-  productUnit: yup.string().required("Đây là trường bắt buộc!"),
+  productUnitId: yup.string().required("Đây là trường bắt buộc!"),
   price: yup
     .number()
     .required("Đây là trường bắt buộc!")
@@ -13,4 +13,5 @@ export const schema = yup.object().shape({
   description: yup.string(),
   thumbnail: yup.string().required("Đây là trường bắt buộc!"),
   images: yup.array(),
+  batches: yup.array(),
 });

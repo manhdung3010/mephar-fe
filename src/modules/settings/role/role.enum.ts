@@ -63,6 +63,7 @@ export enum RoleLabel {
   market_common = "Chợ",
   market_store = "Chợ đại lý",
   market_setting = "Cấu hình sản phẩm",
+  market_confirm = "Xác nhận đơn hàng",
 
   medicine_category = "Danh mục thuốc",
 
@@ -174,6 +175,13 @@ export const ROLE_DEFAULT = {
       delete: false,
     },
     market_setting: {
+      all: false,
+      read: false,
+      create: false,
+      update: false,
+      delete: false,
+    },
+    market_confirm: {
       all: false,
       read: false,
       create: false,

@@ -7,6 +7,8 @@ import { Info } from './Info';
 const RowDetail = ({ record }: { record: any }) => {
   const [select, setSelect] = useState(0);
 
+  console.log('record', record);
+
   const menu = ['Thông tin'];
 
   return (

@@ -1,116 +1,170 @@
 import Image from 'next/image';
 
-import CloseIcon from '@/assets/closeIcon.svg';
+import { deleteConfigProduct } from '@/api/market.service';
 import DeleteIcon from '@/assets/deleteRed.svg';
-import ProductImage from '@/assets/images/product.png';
-import Product1Image from '@/assets/images/product-sample.png';
-import SaveIcon from '@/assets/saveIcon.svg';
+import EditIcon from '@/assets/editWhite.svg';
 import { CustomButton } from '@/components/CustomButton';
-import { CustomSelect } from '@/components/CustomSelect';
-
+import DeleteModal from '@/components/CustomModal/ModalDeleteItem';
+import { EProductSettingStatus, EProductSettingStatusLabel } from '@/enums';
+import { formatDateTime, formatMoney, formatNumber, hasPermission } from '@/helpers';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { message } from 'antd';
+import cx from "classnames";
+import { useRouter } from 'next/router';
+import { useState } from 'react';
+import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
+import { useRecoilValue } from 'recoil';
+import { profileState } from '@/recoil/state';
 export function Info({ record }: { record: any }) {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+  const profile = useRecoilValue(profileState);
+  const [isOpenDelete, setIsOpenDelete] = useState(false);
+
+  const { mutate: mutateDeleteConfigProduct, isLoading } =
+    useMutation(
+      () => {
+        return deleteConfigProduct(record?.id);
+      },
+      {
+        onSuccess: async () => {
+          await queryClient.invalidateQueries(["CONFIG_PRODUCT"]);
+        },
+        onError: (err: any) => {
+          message.error(err?.message);
+        },
+      }
+    );
+
+  const handleDelete = () => {
+    mutateDeleteConfigProduct();
+  }
   return (
     <div className="gap-12 ">
       <div className="mb-10 flex gap-9">
         <div>
           <div className="mb-2 h-[223px] w-[223px] rounded-md border border-[#C9C6D9] py-1 px-4">
-            <Image src={ProductImage} />
+            <img src={record?.imageCenter?.filePath} className='w-full h-full object-cover' loading='lazy' />
           </div>
 
-          <div className="flex justify-between gap-2">
-            <div className="flex w-1/3 items-center rounded-md border border-[#C9C6D9] p-1">
-              <Image src={Product1Image} />
-            </div>
-            <div className="flex w-1/3 items-center  rounded-md border border-[#C9C6D9] p-1">
-              <Image src={Product1Image} />
-            </div>
-            <div className="flex w-1/3 items-center rounded-md border border-[#C9C6D9] p-1">
-              <Image src={Product1Image} />
-            </div>
+          <div className="grid grid-cols-3 gap-2 max-w-[223px]">
+            {
+              record?.images?.map((image, index) => (
+                <div className="items-center rounded-md border border-[#C9C6D9] p-1" key={image?.id}>
+                  <img src={image?.filePath} className='w-full h-full object-cover' loading='lazy' />
+                </div>
+              )
+              )
+            }
           </div>
         </div>
         <div className="mb-4 grid grow grid-cols-2 gap-4 gap-x-9">
           <div className="grid grid-cols-3 gap-5">
             <div className="text-gray-main">Nhóm sản phẩm:</div>
-            <div className="col-span-2 text-black-main">Nhóm 1</div>
+            <div className="col-span-2 text-black-main">{record?.product?.groupProduct?.name}</div>
           </div>
 
           <div className="grid grid-cols-3 gap-5">
             <div className="text-gray-main">Giá bán (VND):</div>
-            <div className="col-span-2  text-black-main">100000</div>
+            <div className="col-span-2  text-black-main">{formatMoney(record?.price)}</div>
           </div>
 
           <div className="grid grid-cols-3 gap-5">
             <div className="text-gray-main">Sản phẩm:</div>
             <div className="col-span-2 text-black-main">
-              Kim Chích Máu Accu-Chek Softclix Roche
+              {record?.product?.name}
             </div>
           </div>
 
           <div className="grid grid-cols-3 gap-5">
             <div className="text-gray-main">Giá khuyến mãi (VND):</div>
-            <div className="col-span-2 text-black-main">98.000</div>
+            <div className="col-span-2 text-black-main">{record?.discountPrice > 0 ? formatMoney(record?.discountPrice) : ''}</div>
           </div>
 
           <div className="grid grid-cols-3 gap-5">
             <div className="text-gray-main">Loại chợ:</div>
-            <div className="col-span-2 text-black-main">Chợ chung</div>
+            <div className="col-span-2 text-black-main">{record?.marketType === 'common' ? "Chợ chung" : "Chợ riêng"}</div>
           </div>
 
           <div className="grid grid-cols-3 gap-5">
             <div className="text-gray-main">Người tạo:</div>
-            <div className="col-span-2 text-black-main">Quyentt</div>
+            <div className="col-span-2 text-black-main">{record?.userCreated?.fullName}</div>
           </div>
 
-          <div className="flex grid grid-cols-3 items-center gap-5">
+          <div className="grid grid-cols-3 items-center gap-5">
             <div className="text-gray-main">Trạng thái:</div>
             <div className="col-span-2">
-              <CustomSelect onChange={() => {}} className="border-underline " />
+              <div
+                className={cx(
+                  record?.status === EProductSettingStatus.active
+                    ? "text-[#00B63E] border border-[#00B63E] bg-[#DEFCEC]"
+                    : "text-[#6D6D6D] border border-[#6D6D6D] bg-[#F0F1F1]",
+                  "px-2 py-1 rounded-2xl w-max"
+                )}
+              >
+                {EProductSettingStatusLabel[record?.status]}
+              </div>
             </div>
           </div>
 
           <div className="grid grid-cols-3 gap-5">
             <div className="text-gray-main">Thời gian cập nhật cuối:</div>
-            <div className="col-span-2 text-black-main">10:30, 12/02/2023</div>
+            <div className="col-span-2 text-black-main">{formatDateTime(record?.updatedAt)}</div>
           </div>
 
           <div className="grid grid-cols-3 gap-5">
             <div className="text-gray-main">Số lượng tồn:</div>
-            <div className="col-span-2 text-black-main">100</div>
+            <div className="col-span-2 text-black-main">{formatNumber(record?.quantity)}</div>
           </div>
 
           <div className="grid grid-cols-3 gap-5">
             <div className="text-gray-main">Người cập nhật cuối:</div>
-            <div className="col-span-2 text-black-main">Quyentt</div>
+            <div className="col-span-2 text-black-main">{record?.userUpdated?.fullName}</div>
           </div>
 
           <div className="grid grid-cols-3 gap-5">
             <div className="text-gray-main">Số lượng đã bán:</div>
-            <div className="col-span-2 text-black-main">12</div>
+            <div className="col-span-2 text-black-main">{formatNumber(record?.quantitySold)}</div>
           </div>
         </div>
       </div>
 
       <div className="flex justify-end gap-4">
-        <CustomButton
-          outline={true}
-          prefixIcon={<Image src={DeleteIcon} alt="" />}
-        >
-          Xóa
-        </CustomButton>
-        <CustomButton
-          outline={true}
-          prefixIcon={<Image src={CloseIcon} alt="" />}
-        >
-          Hủy bỏ
-        </CustomButton>
-        <CustomButton
-          type="success"
-          prefixIcon={<Image src={SaveIcon} alt="" />}
-        >
-          Lưu
-        </CustomButton>
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.market_setting, RoleAction.delete) && (
+            <CustomButton
+              outline={true}
+              prefixIcon={<Image src={DeleteIcon} alt="" />}
+              onClick={() => setIsOpenDelete(true)}
+            >
+              Xóa
+            </CustomButton>
+          )
+        }
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.market_setting, RoleAction.update) && (
+            <CustomButton
+              type="success"
+              prefixIcon={<Image src={EditIcon} alt="" />}
+              onClick={() => router.push(`/markets/setting/add-setting?id=${record?.id}`)}
+            >
+              Cập nhật
+            </CustomButton>
+          )
+        }
+
       </div>
+
+      <DeleteModal
+        isOpen={isOpenDelete}
+        onCancel={() => setIsOpenDelete(false)}
+        onSuccess={() => {
+          handleDelete()
+          setIsOpenDelete(false)
+        }}
+        content={'cấu hình sản phẩm'}
+        isLoading={isLoading}
+      />
     </div>
   );
 }

@@ -80,11 +80,13 @@ export enum EReturnTransactionStatusLabel {
 }
 
 export enum EProductSettingStatus {
-  SELLING = "SELLING",
+  active = "active",
+  inactive = "inactive",
 }
 
 export enum EProductSettingStatusLabel {
-  SELLING = "Đang bán",
+  active = "Đang bán",
+  inactive = "Ngừng bán",
 }
 
 export enum EPaymentMethod {

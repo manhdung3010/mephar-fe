@@ -1,31 +1,30 @@
 import Image from 'next/image';
 
+import { createConfigProduct, getConfigProductDetail } from '@/api/market.service';
+import { getSaleProducts } from '@/api/product.service';
 import ArrowDownIcon from '@/assets/arrowDownGray.svg';
 import PhotographIcon from '@/assets/photograph.svg';
 import SearchIcon from '@/assets/searchIcon.svg';
+import { CustomAutocomplete } from '@/components/CustomAutocomplete';
 import { CustomButton } from '@/components/CustomButton';
 import { CustomInput, CustomTextarea } from '@/components/CustomInput';
 import Label from '@/components/CustomLabel';
 import { CustomSelect } from '@/components/CustomSelect';
 import { CustomUpload } from '@/components/CustomUpload';
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { schema } from './schema';
-import { truncate } from 'fs';
-import { cloneDeep, debounce } from 'lodash';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ISaleProduct } from '@/modules/sales/interface';
-import { useCallback, useState } from 'react';
-import { useRecoilValue } from 'recoil';
-import { branchState } from '@/recoil/state';
-import { getSaleProducts } from '@/api/product.service';
-import { CustomAutocomplete } from '@/components/CustomAutocomplete';
-import { formatMoney, formatNumber, getImage } from '@/helpers';
 import InputError from '@/components/InputError';
-import { createConfigProduct } from '@/api/market.service';
+import { formatMoney, formatNumber, getImage } from '@/helpers';
+import { IBatch, ISaleProduct } from '@/modules/sales/interface';
+import { branchState } from '@/recoil/state';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { message } from 'antd';
+import { cloneDeep, debounce } from 'lodash';
 import { useRouter } from 'next/router';
-
+import { useCallback, useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { useRecoilValue } from 'recoil';
+import ListBatchModal from './ListBatchModal';
+import { schema } from './schema';
 export function AddMarketSetting() {
   const {
     getValues,
@@ -46,10 +45,13 @@ export function AddMarketSetting() {
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  const [formFilter, setFormFilter] = useState({ page: 1, limit: 10, keyword: "" });
-  const [searchKeyword, setSearchKeyword] = useState("");
-  const [productSelected, setProductSelected] = useState<ISaleProduct | null>(null);
+  const { id } = router.query;
 
+  const [formFilter, setFormFilter] = useState({ page: 1, limit: 10, keyword: "", isSale: true });
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [productSelected, setProductSelected] = useState<any>(null);
+  const [openListBatchModal, setOpenListBatchModal] = useState(false);
+  const [listBatchSelected, setListBatchSelected] = useState<any[]>([]);
   const {
     data: products,
     isLoading: isLoadingProduct,
@@ -67,15 +69,75 @@ export function AddMarketSetting() {
     () => getSaleProducts({ ...formFilter, branchId }),
   );
 
+  const {
+    data: productDetail,
+    isLoading: isLoadingProductDetail,
+  } = useQuery<{
+    data?: { item: any };
+  }>(
+    [
+      "CONFIG_PRODUCT_DETAIL",
+      id,
+    ],
+    () => getConfigProductDetail(String(id)),
+    {
+      enabled: !!id,
+    }
+  );
+
+  useEffect(() => {
+    if (!productDetail && productSelected) {
+      setListBatchSelected([]);
+    }
+  }, [productSelected])
+
+  useEffect(() => {
+    if (productDetail?.data?.item) {
+      const { product, productUnit, productUnitId, batches, ...rest } = productDetail?.data?.item;
+      // setValue('productId', product.id, { shouldValidate: true });
+      // setValue('productUnitId', productUnit.id, { shouldValidate: true });
+      const productSelected = getSaleProducts({ ...formFilter, productUnit: productUnitId, branchId }).then((res) => {
+        onSelectedProduct(JSON.stringify(res.data.items[0]));
+        const newBatches = batches.map((batch) => {
+          const nBatch = res.data.items[0].batches.find((item) => item.id === batch.batchId);
+          return {
+            ...nBatch,
+            originalQuantity: nBatch.quantity,
+            quantity: batch.quantity,
+          }
+        });
+        setListBatchSelected(newBatches);
+        setValue('batches', batches, { shouldValidate: true });
+      }
+      );
+      setValue('price', rest.price, { shouldValidate: true });
+      rest.discountPrice > 0 && setValue('discountPrice', rest.discountPrice, { shouldValidate: true });
+      setValue('quantity', rest.quantity, { shouldValidate: true });
+      setValue('description', rest.description), { shouldValidate: true };
+      setValue('marketType', rest.marketType, { shouldValidate: true });
+      setValue('thumbnail', rest?.imageCenter?.id, { shouldValidate: true });
+      setValue('images', rest.images, { shouldValidate: true });
+      setProductSelected(productDetail?.data?.item);
+    }
+  }, [productDetail])
+
+  console.log('listBatchSelected', listBatchSelected);
+
   const { mutate: mutateCreateConfigProduct, isLoading } =
     useMutation(
       () => {
+        const payload = {
+          ...getValues(),
+        }
+        if (!payload?.batches) {
+          delete payload.batches;
+        }
 
         return createConfigProduct({ ...getValues(), branchId });
       },
       {
         onSuccess: async () => {
-          await queryClient.invalidateQueries(["LIST_PRODUCT"]);
+          await queryClient.invalidateQueries(["CONFIG_PRODUCT"]);
           reset();
 
           router.push("/markets/setting");
@@ -97,15 +159,26 @@ export function AddMarketSetting() {
   );
 
   const onSubmit = () => {
+    if (productSelected?.batches?.length > 0 && listBatchSelected.length === 0) {
+      message.error('Vui lòng chọn lô sản phẩm');
+      return;
+    }
     mutateCreateConfigProduct();
   }
 
-  console.log('productSelected', productSelected);
+  const onSelectedProduct = (value) => {
+    const parseProduct = JSON.parse(value);
+    setValue('productId', parseProduct.productId, { shouldValidate: true });
+    setValue('productUnitId', parseProduct.productUnit?.id, { shouldValidate: true });
+    setProductSelected(parseProduct);
+    setFormFilter((pre) => ({ ...pre, keyword: "" }));
+    setSearchKeyword(parseProduct?.product?.name);
+  }
   return (
     <>
       <div className="my-6 flex items-center justify-between bg-white p-5">
         <div className="text-2xl font-medium uppercase">
-          Thêm mới CẤU HÌNH SẢN PHẨM LÊN CHỢ
+          {id ? 'Cập nhật' : 'thêm mới'} CẤU HÌNH SẢN PHẨM LÊN CHỢ
         </div>
         <div className="flex gap-4">
           <CustomButton outline={true}>Hủy bỏ</CustomButton>
@@ -120,12 +193,7 @@ export function AddMarketSetting() {
               <Label infoText="" label="Sản phẩm" required />
               <CustomAutocomplete
                 onSelect={(value) => {
-                  const parseProduct = JSON.parse(value);
-                  setValue('productId', parseProduct.productId, { shouldValidate: true });
-                  setValue('productUnit', parseProduct.productUnit?.id, { shouldValidate: true });
-                  setProductSelected(parseProduct);
-                  setFormFilter((pre) => ({ ...pre, keyword: "" }));
-                  setSearchKeyword(parseProduct?.product?.name);
+                  onSelectedProduct(value);
                 }}
                 onSearch={(value) => {
                   setSearchKeyword(value);
@@ -207,7 +275,7 @@ export function AddMarketSetting() {
             <div>
               <Label infoText="" label="Đơn vị" required />
               <CustomSelect
-                onChange={(value) => setValue('productUnit', value, { shouldValidate: true })}
+                onChange={(value) => setValue('productUnitId', value, { shouldValidate: true })}
                 className="suffix-icon h-11 !rounded"
                 placeholder="Chọn đơn vị"
                 options={productSelected?.product?.productUnit?.map((item) => {
@@ -216,14 +284,34 @@ export function AddMarketSetting() {
                     value: item.id,
                   };
                 })}
-                value={getValues('productUnit')}
+                value={getValues('productUnitId')}
               />
-              <InputError error={errors.productUnit?.message} />
+              <InputError error={errors.productUnitId?.message} />
             </div>
             <div>
-              <Label infoText="" label="Lô" required />
-              <div>
-                Chọn lô
+              <Label infoText="" label="Lô" />
+              <div className='flex gap-2'>
+                <div className='w-fit'>
+                  <CustomButton outline onClick={() => setOpenListBatchModal(true)} className='!h-11 p-1' disabled={productSelected?.batches?.length > 0 ? false : true} type={productSelected?.batches?.length > 0 ? 'danger' : 'disable'}>
+                    Chọn lô
+                  </CustomButton>
+                </div>
+                <div className='flex gap-1 flex-wrap'>
+                  {
+                    listBatchSelected && listBatchSelected.length > 0 && listBatchSelected.map((batch) => (
+                      <div
+                        key={batch.batchId}
+                        className="flex min-w-fit items-center rounded bg-red-main py-1 px-2 text-white"
+                      >
+                        <span className="mr-2">
+                          {batch?.name} - {batch?.expiryDate}{" "}
+                          - SL: {batch.quantity}
+                        </span>
+                      </div>
+                    ))
+                  }
+                </div>
+
               </div>
             </div>
 
@@ -300,8 +388,8 @@ export function AddMarketSetting() {
             <CustomUpload
               onChangeValue={(value) => {
                 setValue('thumbnail', value, { shouldValidate: true })
-              }
-              }
+              }}
+              values={[productDetail?.data?.item?.imageCenter?.path]}
             >
               <div
                 className={
@@ -330,8 +418,8 @@ export function AddMarketSetting() {
                       const images: any = cloneDeep(getValues('images'));
                       images[index] = value;
                       setValue('images', images, { shouldValidate: true })
-                    }
-                    }
+                    }}
+                    values={[productDetail?.data?.item?.images[index]?.path]}
                   >
                     <div className="flex h-[90px] w-full items-center justify-center rounded-md border-2 border-dashed border-[#9CA1AD]">
                       <Image src={PhotographIcon} alt="" />
@@ -343,6 +431,22 @@ export function AddMarketSetting() {
           </div>
         </div>
       </div>
+
+      <ListBatchModal
+        isOpen={openListBatchModal}
+        onCancel={() => setOpenListBatchModal(false)}
+        selectedProduct={productSelected}
+        productUnit={getValues('productUnitId')}
+        onSave={(listBatch: IBatch[]) => {
+          const newListBatch = listBatch.filter((item) => item.isSelected).map((item) => ({
+            batchId: item.id,
+            quantity: item.quantity,
+          }));
+          setListBatchSelected(listBatch.filter((item) => item.isSelected));
+          setValue('batches', newListBatch, { shouldValidate: true });
+        }}
+        listBatchSelected={listBatchSelected}
+      />
     </>
   );
 }

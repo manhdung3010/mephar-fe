@@ -8,6 +8,7 @@ export function getConfigProduct(params: {
   limit: number;
   keyword: any;
   status?: any;
+  type?: string;
   groupAgencyId?: string;
   agencyId?: string;
   groupProductId?: string;
@@ -16,4 +17,11 @@ export function getConfigProduct(params: {
   isConfig?: boolean;
 }) {
   return axiosClient.get(`market/config/product`, { params });
+}
+
+export function deleteConfigProduct(id: string) {
+  return axiosClient.delete(`market/config/product/${id}`);
+}
+export function getConfigProductDetail(id: string) {
+  return axiosClient.get(`market/config/product/${id}`);
 }
