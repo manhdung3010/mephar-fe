@@ -1,6 +1,6 @@
 import Image from 'next/image';
 
-import { deleteConfigProduct } from '@/api/market.service';
+import { deleteConfigProduct, updateConfigStatus } from '@/api/market.service';
 import DeleteIcon from '@/assets/deleteRed.svg';
 import EditIcon from '@/assets/editWhite.svg';
 import { CustomButton } from '@/components/CustomButton';
@@ -15,11 +15,13 @@ import { useState } from 'react';
 import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
 import { useRecoilValue } from 'recoil';
 import { profileState } from '@/recoil/state';
+import UpdateStatusModal from '@/components/CustomModal/ModalUpdateStatusItem';
 export function Info({ record }: { record: any }) {
   const queryClient = useQueryClient();
   const router = useRouter();
   const profile = useRecoilValue(profileState);
   const [isOpenDelete, setIsOpenDelete] = useState(false);
+  const [isOpenUpdateStatus, setIsOpenUpdateStatus] = useState(false);
 
   const { mutate: mutateDeleteConfigProduct, isLoading } =
     useMutation(
@@ -35,9 +37,26 @@ export function Info({ record }: { record: any }) {
         },
       }
     );
+  const { mutate: mutateUpdaetConfigStatus, isLoading: isLoadingUpdateStatus } =
+    useMutation(
+      () => {
+        return updateConfigStatus(record?.id, record?.status === 'active' ? 'inactive' : 'active');
+      },
+      {
+        onSuccess: async () => {
+          await queryClient.invalidateQueries(["CONFIG_PRODUCT"]);
+        },
+        onError: (err: any) => {
+          message.error(err?.message);
+        },
+      }
+    );
 
   const handleDelete = () => {
     mutateDeleteConfigProduct();
+  }
+  const handleUpdate = () => {
+    mutateUpdaetConfigStatus();
   }
   return (
     <div className="gap-12 ">
@@ -131,13 +150,24 @@ export function Info({ record }: { record: any }) {
 
       <div className="flex justify-end gap-4">
         {
-          hasPermission(profile?.role?.permissions, RoleModel.market_setting, RoleAction.delete) && (
+          hasPermission(profile?.role?.permissions, RoleModel.market_setting, RoleAction.update) && (
             <CustomButton
               outline={true}
               prefixIcon={<Image src={DeleteIcon} alt="" />}
               onClick={() => setIsOpenDelete(true)}
             >
               Xóa
+            </CustomButton>
+          )
+        }
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.market_setting, RoleAction.delete) && (
+            <CustomButton
+              outline={true}
+              onClick={() => setIsOpenUpdateStatus(true)}
+              type={record?.status === 'active' ? 'disable' : 'success'}
+            >
+              {record?.status === 'active' ? 'Ngưng bán' : 'Mở bán'}
             </CustomButton>
           )
         }
@@ -164,6 +194,16 @@ export function Info({ record }: { record: any }) {
         }}
         content={'cấu hình sản phẩm'}
         isLoading={isLoading}
+      />
+      <UpdateStatusModal
+        isOpen={isOpenUpdateStatus}
+        onCancel={() => setIsOpenUpdateStatus(false)}
+        onSuccess={() => {
+          handleUpdate()
+          setIsOpenUpdateStatus(false)
+        }}
+        content={'trạng thái sản phẩm'}
+        isLoading={isLoadingUpdateStatus}
       />
     </div>
   );

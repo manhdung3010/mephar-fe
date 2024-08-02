@@ -1,6 +1,6 @@
 import Image from 'next/image';
 
-import { createConfigProduct, getConfigProductDetail } from '@/api/market.service';
+import { createConfigProduct, getConfigProductDetail, updateConfigProduct } from '@/api/market.service';
 import { getSaleProducts } from '@/api/product.service';
 import ArrowDownIcon from '@/assets/arrowDownGray.svg';
 import PhotographIcon from '@/assets/photograph.svg';
@@ -25,6 +25,7 @@ import { useForm } from 'react-hook-form';
 import { useRecoilValue } from 'recoil';
 import ListBatchModal from './ListBatchModal';
 import { schema } from './schema';
+import CustomTextEditor from '@/components/CustomTextEditor';
 export function AddMarketSetting() {
   const {
     getValues,
@@ -113,10 +114,10 @@ export function AddMarketSetting() {
       setValue('price', rest.price, { shouldValidate: true });
       rest.discountPrice > 0 && setValue('discountPrice', rest.discountPrice, { shouldValidate: true });
       setValue('quantity', rest.quantity, { shouldValidate: true });
-      setValue('description', rest.description), { shouldValidate: true };
+      setValue('description', rest.description || ''), { shouldValidate: true };
       setValue('marketType', rest.marketType, { shouldValidate: true });
       setValue('thumbnail', rest?.imageCenter?.id, { shouldValidate: true });
-      setValue('images', rest.images, { shouldValidate: true });
+      setValue('images', rest.images?.map((item) => item.id), { shouldValidate: true });
       setProductSelected(productDetail?.data?.item);
     }
   }, [productDetail])
@@ -133,7 +134,7 @@ export function AddMarketSetting() {
           delete payload.batches;
         }
 
-        return createConfigProduct({ ...getValues(), branchId });
+        return id ? updateConfigProduct(id, { ...getValues(), branchId }) : createConfigProduct({ ...getValues(), branchId });
       },
       {
         onSuccess: async () => {
@@ -182,7 +183,7 @@ export function AddMarketSetting() {
         </div>
         <div className="flex gap-4">
           <CustomButton outline={true}>Hủy bỏ</CustomButton>
-          <CustomButton onClick={handleSubmit(onSubmit)}>Lưu</CustomButton>
+          <CustomButton onClick={handleSubmit(onSubmit)} loading={isLoading} disabled={isLoading}>Lưu</CustomButton>
         </div>
       </div>
 
@@ -371,6 +372,7 @@ export function AddMarketSetting() {
 
           <div>
             <Label infoText="" label="Mô tả" />
+            {/* <CustomTextEditor /> */}
             <CustomTextarea rows={10} placeholder="Nhập mô tả" value={getValues('description')} onChange={(e) => setValue('description', e.target.value, { shouldValidate: true })} />
           </div>
         </div>
@@ -442,8 +444,10 @@ export function AddMarketSetting() {
             batchId: item.id,
             quantity: item.quantity,
           }));
+          const totalQuantity = newListBatch.reduce((total, item) => total + item.quantity, 0);
           setListBatchSelected(listBatch.filter((item) => item.isSelected));
           setValue('batches', newListBatch, { shouldValidate: true });
+          setValue('quantity', totalQuantity, { shouldValidate: true });
         }}
         listBatchSelected={listBatchSelected}
       />

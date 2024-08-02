@@ -146,7 +146,7 @@ export function AddProvider({ providerId }: { providerId?: string }) {
               />
             </div>
 
-            <div>
+            {/* <div>
               <Label infoText="" label="Chi nhánh" />
               <CustomSelect
                 onChange={(value) =>
@@ -161,7 +161,7 @@ export function AddProvider({ providerId }: { providerId?: string }) {
                 value={getValues('branchId')}
               />
               <InputError error={errors.branchId?.message} />
-            </div>
+            </div> */}
 
             <div>
               <Label infoText="" label="Tên nhà cung cấp" required />
