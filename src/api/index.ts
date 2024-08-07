@@ -38,8 +38,10 @@ axiosClient.interceptors.response.use(
       window.location.replace("/auth/sign-in");
     }
 
-    if (![200, 201, 204].includes(response.data.code)) {
-      throw response.data;
+    if (response.data.code) {
+      if (![200, 201, 204].includes(response.data.code)) {
+        throw response.data;
+      }
     }
 
     if (response.config.method === "post") {
