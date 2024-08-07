@@ -1,14 +1,14 @@
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { message } from 'antd';
-import { useForm } from 'react-hook-form';
-import * as yup from 'yup';
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { message } from "antd";
+import { useForm } from "react-hook-form";
+import * as yup from "yup";
 
-import { createGroupProduct } from '@/api/product.service';
-import { CustomInput } from '@/components/CustomInput';
-import Label from '@/components/CustomLabel';
-import { CustomModal } from '@/components/CustomModal';
-import InputError from '@/components/InputError';
+import { createGroupProduct } from "@/api/product.service";
+import { CustomInput } from "@/components/CustomInput";
+import Label from "@/components/CustomLabel";
+import { CustomModal } from "@/components/CustomModal";
+import InputError from "@/components/InputError";
 
 export function AddGroupProductModal({
   isOpen,
@@ -32,10 +32,10 @@ export function AddGroupProductModal({
   } = useForm({
     resolver: yupResolver(
       yup.object().shape({
-        name: yup.string().required('Đây là trường bắt buộc!'),
+        name: yup.string().required("Đây là trường bắt buộc!"),
       })
     ),
-    mode: 'onChange',
+    mode: "onChange",
   });
 
   const {
@@ -43,10 +43,10 @@ export function AddGroupProductModal({
     isLoading: isLoadingCreateGroupProduct,
   } = useMutation(() => createGroupProduct(getValues()), {
     onSuccess: async (res) => {
-      setGroupProductKeyword(getValues('name'));
-      setProductValue('groupProductId', res.data.id);
+      setGroupProductKeyword(getValues("name"));
+      setProductValue("groupProductId", res.data.id);
       reset();
-      await queryClient.invalidateQueries(['GROUP_PRODUCT']);
+      await queryClient.invalidateQueries(["GROUP_PRODUCT"]);
 
       onCancel();
     },
@@ -75,8 +75,8 @@ export function AddGroupProductModal({
         <CustomInput
           placeholder="Nhập tên nhóm sản phẩm"
           className="h-11"
-          onChange={(e) => setValue('name', e, { shouldValidate: true })}
-          value={getValues('name')}
+          onChange={(e) => setValue("name", e, { shouldValidate: true })}
+          value={getValues("name")}
         />
         <InputError error={errors.name?.message} />
       </div>
