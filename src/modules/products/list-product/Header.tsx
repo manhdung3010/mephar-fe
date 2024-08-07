@@ -12,7 +12,11 @@ import { useRecoilValue } from "recoil";
 import { branchState, profileState } from "@/recoil/state";
 import { hasPermission } from "@/helpers";
 import { RoleAction, RoleModel } from "@/modules/settings/role/role.enum";
-import { getProductExample, getProductExampleKiot, getProductExcel } from "@/api/export.service";
+import {
+  getProductExample,
+  getProductExampleKiot,
+  getProductExcel,
+} from "@/api/export.service";
 import { useRef, useState } from "react";
 import { uploadProductExcel } from "@/api/import.service";
 import { ImportFileProductModal } from "./ImportFileProductModal";
@@ -187,7 +191,7 @@ const Header = ({ data }: any) => {
             className="flex h-auto items-center justify-center py-[6px] px-[5px] text-black-main"
           >
             <Image src={DocumentUpload} alt="" />
-            <span className="pl-[6px]">Xuất file</span>
+            <span className="pl-[6px]">Xuất file mẫu</span>
           </Button>
         </Dropdown>
 
