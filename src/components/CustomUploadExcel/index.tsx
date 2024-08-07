@@ -50,8 +50,7 @@ export function CustomUploadExcel({
         onCancel();
       } catch (error: any) {
         message.error(error?.message || "Đã xảy ra lỗi");
-        resetFileInput(); // Reset input file khi có lỗi
-        onCancel();
+        // resetFileInput(); // Reset input file khi có lỗi
       } finally {
         setLoading(false); // Kết thúc loading
       }
@@ -75,10 +74,9 @@ export function CustomUploadExcel({
           await uploadProductExcelKiot(file, branchId);
         }
         message.success("Nhập file thành công!");
-        onCancel();
       } catch (error: any) {
         message.error(error?.message || "Đã xảy ra lỗi");
-        resetFileInput(); // Reset input file khi có lỗi
+        // resetFileInput(); // Reset input file khi có lỗi
       } finally {
         setLoading(false); // Kết thúc loading
       }
