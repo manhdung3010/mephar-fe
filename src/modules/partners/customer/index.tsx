@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { message } from "antd";
+import { Dropdown, MenuProps, message } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import cx from "classnames";
 import { debounce } from "lodash";
@@ -27,8 +27,13 @@ import { useRecoilValue } from "recoil";
 import { branchState, profileState } from "@/recoil/state";
 import { RoleAction, RoleModel } from "@/modules/settings/role/role.enum";
 import Filter from "./Filter";
-import { getCustomerExample, getCustomerExcel } from "@/api/export.service";
+import {
+  getCustomerExample,
+  getCustomerExampleKiot,
+  getCustomerExcel,
+} from "@/api/export.service";
 import { uploadCustomerExcel } from "@/api/import.service";
+import { ImportFileCustomerModal } from "./ImportFileCustomerModal";
 
 interface IRecord {
   key: number;
@@ -76,6 +81,8 @@ export function Customer() {
     ["CUSTOMER_LIST", formFilter],
     () => getCustomer(formFilter)
   );
+
+  const [isOpenModal, setIsOpenModal] = useState(false);
 
   const [expandedRowKeys, setExpandedRowKeys] = useState<
     Record<string, boolean>
@@ -217,7 +224,7 @@ export function Customer() {
     mutateDeleteCustomer();
   };
 
-  async function downloadDoctorExcel() {
+  async function downloadExcel() {
     try {
       const response = await getCustomerExcel();
       console.log(response);
@@ -226,7 +233,7 @@ export function Customer() {
 
       const a = document.createElement("a");
       a.href = url;
-      a.download = "doctor_data.xlsx"; // Specify the file name
+      a.download = "customer_data.xlsx"; // Specify the file name
       document.body.appendChild(a); // Append the link to the body
       a.click(); // Trigger the download
       document.body.removeChild(a); // Remove the link from the body
@@ -237,7 +244,7 @@ export function Customer() {
       console.error("Error downloading the file", error);
     }
   }
-  async function downloadDoctoExamrExcel() {
+  async function downloadExamExcel() {
     try {
       const response = await getCustomerExample();
 
@@ -245,7 +252,27 @@ export function Customer() {
 
       const a = document.createElement("a");
       a.href = url;
-      a.download = "doctor_data.xlsx"; // Specify the file name
+      a.download = "customer_data_exam.xlsx"; // Specify the file name
+      document.body.appendChild(a); // Append the link to the body
+      a.click(); // Trigger the download
+      document.body.removeChild(a); // Remove the link from the body
+
+      // Clean up the URL object
+      URL.revokeObjectURL(url);
+    } catch (error: any) {
+      message.error(error?.message);
+    }
+  }
+
+  async function downloadExamExcelKiot() {
+    try {
+      const response = await getCustomerExampleKiot();
+
+      const url = URL.createObjectURL(response as any);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "customer_data_kiot.xlsx"; // Specify the file name
       document.body.appendChild(a); // Append the link to the body
       a.click(); // Trigger the download
       document.body.removeChild(a); // Remove the link from the body
@@ -259,53 +286,53 @@ export function Customer() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = async (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      try {
-        await uploadCustomerExcel(file);
-        message.success("Nhập file thành công!");
-      } catch (error: any) {
-        message.error(error?.message);
-      }
-    }
-  };
-
-  const handleImportClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
+  const items: MenuProps["items"] = [
+    {
+      key: "0",
+      label: (
+        <div
+          className="flex items-center gap-2 cursor-pointer"
+          onClick={downloadExamExcel}
+        >
+          <Image src={ExportIcon} /> Xuất file mẫu
+        </div>
+      ),
+    },
+    {
+      key: "1",
+      label: (
+        <div
+          className="flex items-center gap-2 cursor-pointer"
+          onClick={downloadExamExcelKiot}
+        >
+          <Image src={ExportIcon} /> Xuất file mẫu KiotViet
+        </div>
+      ),
+    },
+  ];
 
   return (
     <div className="mb-2 ">
       <div className="my-3 flex items-center justify-end gap-4">
         <div
           className="flex items-center gap-2 cursor-pointer"
-          onClick={downloadDoctorExcel}
+          onClick={downloadExcel}
         >
           <Image src={ExportIcon} /> Xuất file
         </div>
 
-        <div
-          className="flex items-center gap-2 cursor-pointer"
-          onClick={downloadDoctoExamrExcel}
-        >
-          <Image src={ExportIcon} /> Xuất file mẫu
-        </div>
+        <Dropdown menu={{ items }} trigger={["click"]}>
+          <div className="flex items-center gap-2 cursor-pointer">
+            <Image src={ExportIcon} /> Xuất file mẫu
+          </div>
+        </Dropdown>
 
         <div
           className="flex items-center gap-2 cursor-pointer"
-          onClick={handleImportClick}
+          onClick={() => setIsOpenModal(true)}
         >
           <Image src={ImportIcon} alt="Import Icon" />
           Nhập file
-          <input
-            type="file"
-            ref={fileInputRef}
-            style={{ display: "none" }}
-            onChange={handleFileChange}
-          />
         </div>
         {hasPermission(
           profile?.role?.permissions,
@@ -392,6 +419,13 @@ export function Customer() {
         onSuccess={onSubmit}
         content="khách hàng"
         isLoading={isLoadingDeleteCustomer}
+      />
+
+      <ImportFileCustomerModal
+        isOpen={isOpenModal}
+        onCancel={() => {
+          setIsOpenModal(false);
+        }}
       />
     </div>
   );

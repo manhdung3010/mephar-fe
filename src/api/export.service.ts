@@ -28,6 +28,13 @@ export function getCustomerExample() {
   });
 }
 
+export function getCustomerExampleKiot() {
+  return axiosClient.get(`/customer/export/example?type=kiotviet`, {
+    responseType: "blob", // Ensure the response is treated as binary data
+  });
+}
+
+
 // Xuất dữ liệu product ra Excel
 export function getProductExcel(params: { branchId: number }) {
   return axiosClient.get(`/product/export/excel`, {
@@ -39,6 +46,12 @@ export function getProductExcel(params: { branchId: number }) {
 // Xuất file mẫu cho product
 export function getProductExample() {
   return axiosClient.get(`/product/export/example`, {
+    responseType: "blob", // Ensure the response is treated as binary data
+  });
+}
+
+export function getProductExampleKiot() {
+  return axiosClient.get(`/product/export/example?type=kiotviet`, {
     responseType: "blob", // Ensure the response is treated as binary data
   });
 }
