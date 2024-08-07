@@ -14,4 +14,5 @@ export const schema = yup.object().shape({
   thumbnail: yup.string().required("Đây là trường bắt buộc!"),
   images: yup.array(),
   batches: yup.array(),
+  isDefaultPrice: yup.boolean(),
 });

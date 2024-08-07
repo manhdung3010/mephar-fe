@@ -50,6 +50,7 @@ export function MarketSetting() {
     status: "",
     "createdAt[start]": undefined,
     "createdAt[end]": undefined,
+    isConfig: true,
     branchId
   });
 

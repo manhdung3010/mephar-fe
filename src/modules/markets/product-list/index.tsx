@@ -1,6 +1,9 @@
 import Link from 'next/link'
-import React from 'react'
+import React, { useState } from 'react'
 import ProductCard from './ProductCard'
+import { useQuery } from '@tanstack/react-query';
+import { getConfigProduct } from '@/api/market.service';
+import { sortBy } from 'lodash';
 
 export const productList = [
   {
@@ -115,13 +118,29 @@ export const productList = [
 ]
 
 function MarketProductList() {
+  const [formFilter, setFormFilter] = useState({
+    page: 1,
+    limit: 20,
+    keyword: "",
+    status: "",
+    "createdAt[start]": undefined,
+    "createdAt[end]": undefined,
+    sortBy: "quantitySold",
+    isConfig: false,
+    type: 'common'
+  });
+
+  const { data: configProduct, isLoading } = useQuery(
+    ['CONFIG_PRODUCT', JSON.stringify(formFilter)],
+    () => getConfigProduct(formFilter),
+  );
   return (
     <div className='fluid-container !mt-16'>
       <h2 className='text-5xl font-semibold text-center'>Danh sách sản phẩm</h2>
 
       <div className='mt-12 grid grid-cols-4 gap-10'>
         {
-          productList.map((product) => (
+          configProduct?.data?.items.map((product) => (
             <ProductCard product={product} key={product.id} />
           ))
         }

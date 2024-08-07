@@ -48,7 +48,7 @@ export function hasPermission(
 }
 
 export function formatMoney(value?: string | number) {
-  return value ? `${value.toLocaleString("en-US")}đ` : "0đ";
+  return value ? `${Number(value || 0).toLocaleString("en-US")}đ` : "0đ";
 }
 
 export function formatNumber(value?: string | number) {
@@ -311,31 +311,4 @@ export const formatDistance = (distance: number) => {
 
 export const sliceString = (str: string, maxLength: number) => {
   return str?.length > maxLength ? str?.slice(0, maxLength) + "..." : str;
-};
-
-function normalizeText(text) {
-  /**
-   * Chuẩn hóa văn bản bằng cách loại bỏ khoảng trắng thừa và dấu câu.
-   *
-   * @param {string} text - Văn bản cần chuẩn hóa.
-   * @return {string} - Văn bản đã được chuẩn hóa.
-   */
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-export const checkTextInText = (text1, text2) => {
-  /**
-   * Kiểm tra xem text1 có nằm trong text2 sau khi chuẩn hóa hay không.
-   *
-   * @param {string} text1 - Đoạn văn bản cần kiểm tra.
-   * @param {string} text2 - Đoạn văn bản chứa.
-   * @return {boolean} - True nếu text1 nằm trong text2, False nếu không.
-   */
-  const normalizedText1 = normalizeText(text1);
-  const normalizedText2 = normalizeText(text2);
-  return normalizedText2.includes(normalizedText1);
 };

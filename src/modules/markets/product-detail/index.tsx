@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import React from 'react';
+import React, { useEffect } from 'react';
 import Slider from "react-slick";
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
@@ -12,16 +12,22 @@ import StoreCard from './StoreCard';
 import ArrowIcon from '@/assets/arrow-down-red-icon.svg';
 import { productList } from '../product-list';
 import ProductCard from '../product-list/ProductCard';
+import { useQuery } from '@tanstack/react-query';
+import { useRouter } from 'next/router';
+import { getConfigProductDetail } from '@/api/market.service';
+import { formatMoney, formatNumber } from '@/helpers';
 
 const ProductDetail = () => {
-
   const [isShowDetail, setIsShowDetail] = React.useState(false);
+  const [images, setImages] = React.useState<any>([]);
+  const router = useRouter();
+  const { id } = router.query;
 
   const settings = {
     customPaging: function (i) {
       return (
-        <a className='h-24 w-24'>
-          <img className='object-cover h-full' src={`https://mephar-sit.acdtech.asia/_next/image/?url=https%3A%2F%2Fmephar-sit-api.acdtech.asia%2F%2Fupload%2Fimages%2F2024-06-14%2Fed4c6e71-4f03-42a0-8bac-a7238ce4c63b.jpeg&w=256&q=75`} />
+        <a className='h-24 w-24 '>
+          <img className='object-cover h-full border-[#C7C9D9] border-[1px] rounded overflow-hidden' src={images[i]?.filePath} />
         </a>
       );
     },
@@ -33,6 +39,20 @@ const ProductDetail = () => {
     slidesToShow: 1,
     slidesToScroll: 1
   };
+
+  const { data: configProduct, isLoading } = useQuery(
+    ['MARKET_PRODUCT_DETAIL', JSON.stringify(id)],
+    () => getConfigProductDetail(String(id)),
+  );
+
+  console.log('configProduct', configProduct)
+
+  useEffect(() => {
+    if (configProduct?.data?.item) {
+      const newImages = [...[configProduct?.data?.item.imageCenter], ...configProduct?.data?.item.images]
+      setImages(newImages)
+    }
+  }, [configProduct])
   return (
     <div className='bg-[#fafafc]'>
       <div className="fluid-container">
@@ -50,28 +70,25 @@ const ProductDetail = () => {
         <div className="flex gap-6 mt-3 bg-white p-4 rounded-2xl">
           <div className='slider-container w-2/5'>
             <Slider {...settings}>
-              <div className='border-[#C7C9D9] border-[1px] rounded-lg overflow-hidden flex h-[450px] w-[450px]'>
-                <img src={"https://mephar-sit.acdtech.asia/_next/image/?url=https%3A%2F%2Fmephar-sit-api.acdtech.asia%2F%2Fupload%2Fimages%2F2024-06-14%2Fed4c6e71-4f03-42a0-8bac-a7238ce4c63b.jpeg&w=256&q=75"} className='w-full h-full object-cover' />
-              </div>
-              <div className='border-[#C7C9D9] border-[1px] rounded-lg overflow-hidden flex h-[450px] w-[450px]'>
-                <img src={"https://mephar-sit.acdtech.asia/_next/image/?url=https%3A%2F%2Fmephar-sit-api.acdtech.asia%2F%2Fupload%2Fimages%2F2024-06-14%2Fed4c6e71-4f03-42a0-8bac-a7238ce4c63b.jpeg&w=256&q=75"} className='w-full h-full object-cover' />
-
-              </div>
-              <div className='border-[#C7C9D9] border-[1px] rounded-lg overflow-hidden flex h-[450px] w-[450px]'>
-                <img src={"https://mephar-sit.acdtech.asia/_next/image/?url=https%3A%2F%2Fmephar-sit-api.acdtech.asia%2F%2Fupload%2Fimages%2F2024-06-14%2Fed4c6e71-4f03-42a0-8bac-a7238ce4c63b.jpeg&w=256&q=75"} className='w-full h-full object-cover' />
-              </div>
-              <div className='border-[#C7C9D9] border-[1px] rounded-lg overflow-hidden flex h-[450px] w-[450px]'>
-                <img src={"https://mephar-sit.acdtech.asia/_next/image/?url=https%3A%2F%2Fmephar-sit-api.acdtech.asia%2F%2Fupload%2Fimages%2F2024-06-14%2Fed4c6e71-4f03-42a0-8bac-a7238ce4c63b.jpeg&w=256&q=75"} className='w-full h-full object-cover' />
-              </div>
+              {
+                images?.map((image) => (
+                  <div className='border-[#C7C9D9] border-[1px] rounded-lg overflow-hidden flex h-[450px] w-[450px]' key={image?.id}>
+                    <img src={image?.filePath} className='w-full h-full object-cover' />
+                  </div>
+                ))
+              }
             </Slider>
           </div>
           <div className="flex-1">
             <h1 className="text-2xl font-semibold">
-              OTiV – Viên Uống Hỗ Trợ Não Bộ Chính Hãng Của Mỹ
+              {configProduct?.data?.item?.product?.name}
             </h1>
-            <p className='mt-4'>Đã bán 2.6k</p>
+            <p className='mt-4'>Đã bán {formatNumber(configProduct?.data?.item?.quantitySold)}</p>
             <div className="text-red-main text-xl mt-[22px]">
-              1.000.000 VND <span className='text-gray-500 ml-3'>Giá gốc: <span className="line-through">1.500.000 VND</span></span>
+              {configProduct?.data?.item?.discountPrice > 0 ? formatMoney(configProduct?.data?.item?.discountPrice) : formatMoney(configProduct?.data?.item?.price)}
+              {
+                configProduct?.data?.item?.discountPrice > 0 && <span className='text-xl font-medium text-[#999999] line-through ml-2'>{formatMoney(configProduct?.data?.item?.price)}</span>
+              }
             </div>
             <p className="mt-4 text-gray-700">
               PANCAL được bào chế dạng dung dịch uống, với mùi vị hương cam dễ sử dụng. Thuốc giúp bổ sung calci ở những người thiếu hụt calci.

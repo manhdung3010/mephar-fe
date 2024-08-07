@@ -26,6 +26,12 @@ import { useRecoilValue } from 'recoil';
 import ListBatchModal from './ListBatchModal';
 import { schema } from './schema';
 import CustomTextEditor from '@/components/CustomTextEditor';
+import { CustomCheckbox } from '@/components/CustomCheckbox';
+import CustomTable from '@/components/CustomTable';
+import { ColumnsType } from 'antd/es/table';
+import DeleteIcon from '@/assets/deleteRed.svg';
+import PlusCircleIcon from '@/assets/plus-circle.svg';
+import AgencyModal from './AgencyModal';
 export function AddMarketSetting() {
   const {
     getValues,
@@ -40,6 +46,7 @@ export function AddMarketSetting() {
     defaultValues: {
       marketType: 'common',
       images: [],
+      isDefaultPrice: true,
     },
   });
   const branchId = useRecoilValue(branchState)
@@ -52,7 +59,9 @@ export function AddMarketSetting() {
   const [searchKeyword, setSearchKeyword] = useState("");
   const [productSelected, setProductSelected] = useState<any>(null);
   const [openListBatchModal, setOpenListBatchModal] = useState(false);
+  const [openAgencyModal, setOpenAgencyModal] = useState(false);
   const [listBatchSelected, setListBatchSelected] = useState<any[]>([]);
+  const [listAgencySelected, setListAgencySelected] = useState<any[]>([]);
   const {
     data: products,
     isLoading: isLoadingProduct,
@@ -95,8 +104,6 @@ export function AddMarketSetting() {
   useEffect(() => {
     if (productDetail?.data?.item) {
       const { product, productUnit, productUnitId, batches, ...rest } = productDetail?.data?.item;
-      // setValue('productId', product.id, { shouldValidate: true });
-      // setValue('productUnitId', productUnit.id, { shouldValidate: true });
       const productSelected = getSaleProducts({ ...formFilter, productUnit: productUnitId, branchId }).then((res) => {
         onSelectedProduct(JSON.stringify(res.data.items[0]));
         const newBatches = batches.map((batch) => {
@@ -119,6 +126,15 @@ export function AddMarketSetting() {
       setValue('thumbnail', rest?.imageCenter?.id, { shouldValidate: true });
       setValue('images', rest.images?.map((item) => item.id), { shouldValidate: true });
       setProductSelected(productDetail?.data?.item);
+      setValue('isDefaultPrice', rest.isDefaultPrice, { shouldValidate: true });
+
+      setListAgencySelected(rest.agencys?.map((item) => {
+        return {
+          ...item,
+          isGroup: item.groupAgencyId ? true : false,
+          id: item.groupAgencyId || item.agencyId,
+        }
+      }));
     }
   }, [productDetail])
 
@@ -127,14 +143,25 @@ export function AddMarketSetting() {
   const { mutate: mutateCreateConfigProduct, isLoading } =
     useMutation(
       () => {
-        const payload = {
+        console.log(getValues('marketType'))
+        const payload: any = {
           ...getValues(),
+          agencys: listAgencySelected?.map((item) => {
+            return {
+              ...(item.isGroup ? { groupId: item.id } : { agencyId: item.id }),
+              price: item.price,
+              discountPrice: item.discountPrice,
+            }
+          }),
+        }
+        if (getValues('marketType') === 'common') {
+          delete payload.agencys;
         }
         if (!payload?.batches) {
           delete payload.batches;
         }
 
-        return id ? updateConfigProduct(id, { ...getValues(), branchId }) : createConfigProduct({ ...getValues(), branchId });
+        return id ? updateConfigProduct(id, { ...payload, branchId }) : createConfigProduct({ ...payload, branchId });
       },
       {
         onSuccess: async () => {
@@ -175,6 +202,98 @@ export function AddMarketSetting() {
     setFormFilter((pre) => ({ ...pre, keyword: "" }));
     setSearchKeyword(parseProduct?.product?.name);
   }
+
+  const columns: ColumnsType<any> = [
+    {
+      title: "STT",
+      dataIndex: "key",
+      key: "key",
+    },
+    {
+      title: "Loại",
+      dataIndex: "groupAgency",
+      key: "groupAgency",
+      render: (_, record) => record?.isGroup ? 'Nhóm đại lý' : 'Đại lý',
+    },
+    {
+      title: "Nhóm đại lý/Đại lý",
+      dataIndex: "groupProduct",
+      key: "groupProduct",
+      render: (_, record) => record?.isGroup ? record?.name : `${record?.groupAgency?.store?.name} - ${record?.groupAgency?.store?.phone}`,
+    },
+    {
+      title: "Giá bán",
+      dataIndex: "price",
+      key: "price",
+      render: (value, record) => (
+        <CustomInput
+          value={value}
+          onChange={(value) => {
+            const newAgency = listAgencySelected.map((item) => {
+              if (item.id === record.id && item.isGroup === record.isGroup) {
+                return {
+                  ...item,
+                  price: value,
+                }
+              }
+              return item;
+            });
+            setListAgencySelected(newAgency);
+          }}
+          className="h-11 w-32"
+          type='number'
+          disabled={getValues('isDefaultPrice')}
+        />
+      ),
+    },
+    {
+      title: "Giá khuyến mại",
+      dataIndex: "discountPrice",
+      key: "discountPrice",
+      render: (value, record) => (
+        <CustomInput
+          value={value}
+          onChange={(value) => {
+            const newAgency = listAgencySelected.map((item) => {
+              if (item.id === record.id && item.isGroup === record.isGroup) {
+                return {
+                  ...item,
+                  discountPrice: value,
+                }
+              }
+              return item;
+            });
+            setListAgencySelected(newAgency);
+          }}
+          className="h-11 w-32"
+          type='number'
+          disabled={getValues('isDefaultPrice')}
+        />
+      ),
+    },
+    {
+      title: '',
+      dataIndex: 'action',
+      key: 'action',
+      render: (_, record) => (
+        <div className="flex gap-3">
+          {
+            <div className=" cursor-pointer" onClick={() => {
+              const newAgency = listAgencySelected.map((item) => {
+                if (item.id === record.id && item.isGroup === record.isGroup) {
+                  return null
+                }
+                return item;
+              }).filter((item) => item);
+              setListAgencySelected(newAgency);
+            }}>
+              <Image src={DeleteIcon} />
+            </div>
+          }
+        </div>
+      ),
+    },
+  ];
   return (
     <>
       <div className="my-6 flex items-center justify-between bg-white p-5">
@@ -331,7 +450,9 @@ export function AddMarketSetting() {
             <div>
               <Label infoText="" label="Loại chợ" required />
               <CustomSelect
-                onChange={() => { }}
+                onChange={(value) => {
+                  setValue('marketType', value, { shouldValidate: true })
+                }}
                 className="suffix-icon h-11 !rounded"
                 suffixIcon={
                   <div className="flex items-center">
@@ -368,7 +489,36 @@ export function AddMarketSetting() {
               />
               <InputError error={errors.price?.message} />
             </div>
+            {
+              getValues('marketType') === 'private' && (
+                <>
+
+                  <div className=''>
+                    <div className='flex items-center gap-2 h-11'>
+                      <CustomCheckbox checked={getValues('isDefaultPrice') ? false : true} onChange={(e) => setValue('isDefaultPrice', !e.target.checked, { shouldValidate: true })} />
+                      <span>Set giá riêng cho từng đại lý</span>
+                    </div>
+                  </div>
+                </>
+              )
+            }
           </div>
+
+          {
+            getValues('marketType') === 'private' && (
+              <div className='mb-5'>
+                <CustomTable
+                  dataSource={listAgencySelected.map((item: any, index) => ({ ...item, key: index + 1 })) || []}
+                  columns={columns}
+                  loading={isLoading}
+                />
+
+                <div className='w-fit mt-3'>
+                  <CustomButton className='!border-0' onClick={() => setOpenAgencyModal(true)} prefixIcon={<Image src={PlusCircleIcon} />} outline >Thêm đại lý</CustomButton>
+                </div>
+              </div>
+            )
+          }
 
           <div>
             <Label infoText="" label="Mô tả" />
@@ -450,6 +600,34 @@ export function AddMarketSetting() {
           setValue('quantity', totalQuantity, { shouldValidate: true });
         }}
         listBatchSelected={listBatchSelected}
+      />
+
+      <AgencyModal
+        isOpen={openAgencyModal}
+        onCancel={() => setOpenAgencyModal(false)}
+        isLoading={isLoading}
+        onSuccess={() => setOpenAgencyModal(false)}
+        onSave={(data) => {
+          const newData = data.map((item) => {
+            return {
+              ...item,
+              price: getValues('price'),
+              discountPrice: getValues('discountPrice'),
+            }
+          });
+          // check agency exist
+          const agencyExist = newData.filter((item) => item.isGroup === false).some((item) => listAgencySelected.some((agency) => agency.id === item.id));
+          const agencyGroupExist = newData.filter((item) => item.isGroup === true).some((item) => listAgencySelected.some((agency) => agency.isGroup === true && agency.id === item.id));
+          if (agencyExist) {
+            message.error('Đại lý đã tồn tại');
+            return;
+          }
+          else if (agencyGroupExist) {
+            message.error('Nhóm đại lý đã tồn tại');
+            return;
+          }
+          setListAgencySelected([...listAgencySelected, ...newData]);
+        }}
       />
     </>
   );

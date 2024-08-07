@@ -183,7 +183,7 @@ export function Home() {
                   <div>
                     với giá trị{" "}
                     <span className="font-bold">
-                      {formatMoney(value?.amount)}
+                      {formatMoney(+value?.amount)}
                     </span>
                   </div>
                 )}

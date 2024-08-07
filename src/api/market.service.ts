@@ -33,3 +33,11 @@ export function updateConfigStatus(id: string, status: string) {
 export function getConfigProductDetail(id: string) {
   return axiosClient.get(`market/config/product/${id}`);
 }
+
+// đại lý
+export function getAgency(params) {
+  return axiosClient.get(`market/config/agency`, { params });
+}
+export function getAgencyGroup(params) {
+  return axiosClient.get(`market/config/group-agency`, { params });
+}
