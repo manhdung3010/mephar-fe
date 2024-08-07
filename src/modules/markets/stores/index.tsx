@@ -1,7 +1,13 @@
 import React from 'react'
 import StoreCard from '../product-detail/StoreCard'
+import { useQuery } from '@tanstack/react-query';
+import { getMarketStore } from '@/api/market.service';
 
 function Store() {
+  const { data: stores, isLoading } = useQuery(
+    ['MARKET_STORE'],
+    () => getMarketStore(),
+  );
   return (
     <div className='bg-[#fafafc] '>
       <div className='fluid-container'>
@@ -19,8 +25,8 @@ function Store() {
 
         <div className='grid grid-cols-1 gap-5 mt-6'>
           {
-            Object.keys([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]).map((item, index) => (
-              <StoreCard key={index} />
+            stores?.data.map((item, index) => (
+              <StoreCard key={index} store={item} branch={null} />
             ))
           }
         </div>

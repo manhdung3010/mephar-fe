@@ -14,7 +14,7 @@ import { productList } from '../product-list';
 import ProductCard from '../product-list/ProductCard';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/router';
-import { getConfigProductDetail } from '@/api/market.service';
+import { getConfigProductDetail, getSaleProductDetail } from '@/api/market.service';
 import { formatMoney, formatNumber } from '@/helpers';
 
 const ProductDetail = () => {
@@ -42,10 +42,8 @@ const ProductDetail = () => {
 
   const { data: configProduct, isLoading } = useQuery(
     ['MARKET_PRODUCT_DETAIL', JSON.stringify(id)],
-    () => getConfigProductDetail(String(id)),
+    () => getSaleProductDetail(String(id)),
   );
-
-  console.log('configProduct', configProduct)
 
   useEffect(() => {
     if (configProduct?.data?.item) {
@@ -81,7 +79,7 @@ const ProductDetail = () => {
           </div>
           <div className="flex-1">
             <h1 className="text-2xl font-semibold">
-              {configProduct?.data?.item?.product?.name}
+              {configProduct?.data?.item?.product?.name} - {configProduct?.data?.item?.productUnit?.unitName}
             </h1>
             <p className='mt-4'>Đã bán {formatNumber(configProduct?.data?.item?.quantitySold)}</p>
             <div className="text-red-main text-xl mt-[22px]">
@@ -91,7 +89,7 @@ const ProductDetail = () => {
               }
             </div>
             <p className="mt-4 text-gray-700">
-              PANCAL được bào chế dạng dung dịch uống, với mùi vị hương cam dễ sử dụng. Thuốc giúp bổ sung calci ở những người thiếu hụt calci.
+              {configProduct?.data?.item?.product?.note}
             </p>
             <div className="mt-4 flex items-center gap-6">
               <span>Số lượng:</span>
@@ -116,7 +114,7 @@ const ProductDetail = () => {
 
                 }}
               />
-              <div className='text-[#3E7BFA] py-1 px-4 bg-[#ecf0ff] rounded'>Còn hàng</div>
+              <div className={`${configProduct?.data?.item?.quantity > 0 ? 'text-[#3E7BFA]' : 'text-red-main'} py-1 px-4 bg-[#ecf0ff] rounded`}>{configProduct?.data?.item?.quantity > 0 ? 'Còn hàng' : 'Hết hàng'}</div>
             </div>
             <div className="mt-6 space-x-3 flex pb-[22px] border-b-[1px] border-[#C7C9D9]">
               <CustomButton outline className='!h-[46px]' prefixIcon={<Image src={CartIcon} />}>Thêm vào giỏ hàng</CustomButton>
@@ -124,14 +122,14 @@ const ProductDetail = () => {
             </div>
 
             <div className=' mt-6 flex flex-col gap-3'>
-              <span>Mã: P198354</span>
+              <span>Mã: {configProduct?.data?.item?.product?.code}</span>
               <div className='w-fit py-1 px-4 bg-[#ecf0ff] rounded'>Thực phẩm chống lão hóa</div>
             </div>
           </div>
         </div>
 
         <div className='my-6'>
-          <StoreCard />
+          <StoreCard store={configProduct?.data?.item?.store} branch={configProduct?.data?.item?.branch} />
         </div>
 
         <div className='grid grid-cols-12  gap-10 '>
@@ -140,40 +138,27 @@ const ProductDetail = () => {
               <h5 className='bg-[#FAFAFA] text-xl font-semibold p-5 rounded-lg uppercase'>Thông tin sản phẩm</h5>
               <div className='mt-6'>
                 <div className={isShowDetail ? '' : 'line-clamp-5'}>
-                  1. CÔNG DỤNG
-                  OTiV chứa các hoạt chất sinh học quý được tinh chiết từ Blueberry
-                  Giúp cải thiện tình trạng thiếu máu não, mất ngủ, đau nửa đầu; giảm nguy cơ tai biến mạch máu não.
-                  Giúp cải thiện tình trạng sa sút trí tuệ, suy giảm trí nhớ; giảm stress; cải thiện thính giác và thị giác.
-                  Hỗ trợ chống oxy hóa, trung hòa gốc tự do, bảo vệ và chống lão hóa tế bào thần kinh.
-                  1. CÔNG DỤNG
-                  OTiV chứa các hoạt chất sinh học quý được tinh chiết từ Blueberry
-                  Giúp cải thiện tình trạng thiếu máu não, mất ngủ, đau nửa đầu; giảm nguy cơ tai biến mạch máu não.
-                  Giúp cải thiện tình trạng sa sút trí tuệ, suy giảm trí nhớ; giảm stress; cải thiện thính giác và thị giác.
-                  Hỗ trợ chống oxy hóa, trung hòa gốc tự do, bảo vệ và chống lão hóa tế bào thần kinh.
-                  1. CÔNG DỤNG
-                  OTiV chứa các hoạt chất sinh học quý được tinh chiết từ Blueberry
-                  Giúp cải thiện tình trạng thiếu máu não, mất ngủ, đau nửa đầu; giảm nguy cơ tai biến mạch máu não.
-                  Giúp cải thiện tình trạng sa sút trí tuệ, suy giảm trí nhớ; giảm stress; cải thiện thính giác và thị giác.
-                  Hỗ trợ chống oxy hóa, trung hòa gốc tự do, bảo vệ và chống lão hóa tế bào thần kinh.
-                  1. CÔNG DỤNG
-                  OTiV chứa các hoạt chất sinh học quý được tinh chiết từ Blueberry
-                  Giúp cải thiện tình trạng thiếu máu não, mất ngủ, đau nửa đầu; giảm nguy cơ tai biến mạch máu não.
-                  Giúp cải thiện tình trạng sa sút trí tuệ, suy giảm trí nhớ; giảm stress; cải thiện thính giác và thị giác.
-                  Hỗ trợ chống oxy hóa, trung hòa gốc tự do, bảo vệ và chống lão hóa tế bào thần kinh.
+                  {configProduct?.data?.item?.description}
                 </div>
               </div>
-              <div className='flex justify-center mt-3'>
-                <CustomButton
-                  onClick={() => setIsShowDetail(!isShowDetail)}
-                  className='!border-0 !w-fit'
-                  outline suffixIcon={<Image src={ArrowIcon} className={isShowDetail ? '' : 'rotate-180'} />}>{isShowDetail ? 'Thu gọn' : 'Xem thêm'}</CustomButton></div>
+              {
+                configProduct?.data?.item?.description?.length > 200 && (
+                  <div className='flex justify-center mt-3'>
+                    <CustomButton
+                      onClick={() => setIsShowDetail(!isShowDetail)}
+                      className='!border-0 !w-fit'
+                      outline suffixIcon={<Image src={ArrowIcon} className={isShowDetail ? '' : 'rotate-180'} />}>{isShowDetail ? 'Thu gọn' : 'Xem thêm'}
+                    </CustomButton>
+                  </div>
+                )
+              }
             </div>
 
             <div className='mt-6'>
               <h2 className='text-[32px] font-semibold'>Sản phẩm khác của đại lý</h2>
               <div className='grid grid-cols-3 gap-10 mt-6 '>
                 {
-                  productList?.slice(0, 3).map((product) => (
+                  configProduct?.data?.item?.productWillCare?.map((product) => (
                     <ProductCard product={product} key={product.id} />
                   ))
                 }

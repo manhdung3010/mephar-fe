@@ -1,8 +1,34 @@
 import React, { useState } from 'react'
 import classNames from 'classnames'
+import { useRouter } from 'next/router';
+import { useQuery } from '@tanstack/react-query';
+import { getConfigProduct } from '@/api/market.service';
+import { useRecoilValue } from 'recoil';
+import { branchState } from '@/recoil/state';
 
 function StoreDetail() {
+
+  const router = useRouter()
+  const { id } = router.query
+  const branchId = useRecoilValue(branchState);
   const [select, setSelect] = useState(0);
+
+  const [formFilter, setFormFilter] = useState({
+    page: 1,
+    limit: 20,
+    keyword: "",
+    type: "",
+    status: "",
+    "createdAt[start]": undefined,
+    "createdAt[end]": undefined,
+    isConfig: true,
+    branchId
+  });
+
+  const { data: configProduct, isLoading } = useQuery(
+    ['CONFIG_PRODUCT', JSON.stringify(formFilter)],
+    () => getConfigProduct(formFilter),
+  );
 
   const menu = ['Sản phẩm mới', 'Bán chạy', 'Thuốc', 'Thực phẩm'];
   return (

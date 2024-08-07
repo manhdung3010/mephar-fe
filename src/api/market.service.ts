@@ -41,3 +41,13 @@ export function getAgency(params) {
 export function getAgencyGroup(params) {
   return axiosClient.get(`market/config/group-agency`, { params });
 }
+
+// Chợ
+export function getSaleProductDetail(id: string) {
+  return axiosClient.get(`market/sell/product/${id}`);
+}
+
+// store
+export function getMarketStore() {
+  return axiosClient.get(`market/sell/store`);
+}

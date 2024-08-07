@@ -29,7 +29,6 @@ import { createTrip, getLatLng, getTripDetail, searchPlace, updateTrip } from '@
 import { useRecoilValue } from 'recoil'
 import { profileState } from '@/recoil/state'
 import { CustomAutocomplete } from '@/components/CustomAutocomplete'
-import { checkTextInText, sliceString } from '@/helpers'
 const { Option } = Select;
 
 function CreateSchedule() {
