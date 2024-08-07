@@ -36,9 +36,9 @@ export function CustomUploadExcelCustomer({
         } else {
           await uploadCustomerExcelKiot(file, branchId);
         }
-        message.success("Nhập file thành công!");
         onCancel();
       } catch (error: any) {
+        onCancel();
         message.error(error?.message);
       }
     }

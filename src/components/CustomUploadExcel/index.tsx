@@ -31,13 +31,13 @@ export function CustomUploadExcel({
     if (file) {
       try {
         if (typeImport === "default") {
-          await uploadProductExcel(file, branchId );
+          await uploadProductExcel(file, branchId);
         } else {
-          await uploadProductExcelKiot(file,  branchId );
+          await uploadProductExcelKiot(file, branchId);
         }
-        message.success("Nhập file thành công!");
         onCancel();
       } catch (error: any) {
+        onCancel();
         message.error(error?.message);
       }
     }
