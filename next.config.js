@@ -9,7 +9,7 @@ module.exports = withBundleAnalyzer({
     ignoreDuringBuilds: true,
   },
   images: {
-    domains: ['45.32.106.84', '157.10.44.228', 'mephar.acdtech.asia', 'mephar-staging-api.acdtech.asia', 'mephar-dev-api.acdtech.asia', 'mephar-sit-api.acdtech.asia', 'mephar-sit.acdtech.asia'],
+    domains: ['45.32.106.84', '157.10.44.228', 'mephar.acdtech.asia', 'mephar-staging-api.acdtech.asia', 'mephar-dev-api.acdtech.asia', 'mephar-sit-api.acdtech.asia', 'mephar-sit.acdtech.asia', 'cdn2-retail-images.kiotviet.vn', 'cdn-images.kiotviet.vn'],
   },
   poweredByHeader: false,
   trailingSlash: true,

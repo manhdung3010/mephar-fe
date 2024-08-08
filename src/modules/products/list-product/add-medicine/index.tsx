@@ -321,6 +321,7 @@ const AddMedicine = ({
                 setValue("imageId", value, { shouldValidate: true })
               }
               values={[productDetail?.data?.image?.path]}
+              fileUrl={productDetail?.data?.imageUrl || ""}
             >
               <NormalUpload className="!h-[200px]" />
             </CustomUpload>

@@ -248,6 +248,7 @@ const AddPackage = ({
                 manufactureName={product?.data?.productManufacture?.name}
                 countryName={product?.data?.country?.name}
                 isCopy={isCopy}
+                images={product && product?.data?.image}
               />,
               <Detail
                 useForm={{

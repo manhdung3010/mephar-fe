@@ -119,11 +119,11 @@ const Info = ({
       </div>
       <div className="flex gap-12">
         <div className="flex flex-col gap-5 p-5">
-          {record?.image?.path ? (
+          {(record?.image?.path || record?.imageUrl) ? (
             <Image
               width={235}
               height={235}
-              src={getImage(record?.image?.path)}
+              src={getImage(record?.image?.path) || record?.imageUrl}
               alt=""
               objectFit="contain"
             />

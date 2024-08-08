@@ -9,6 +9,7 @@ export const schema = yup.object().shape({
   weight: yup.string(),
   groupProductId: yup.number(),
   imageId: yup.number(),
+  imageUrl: yup.string(),
   primePrice: yup.string(),
   price: yup.string().required("Đây là trường bắt buộc!"),
   point: yup.number(),

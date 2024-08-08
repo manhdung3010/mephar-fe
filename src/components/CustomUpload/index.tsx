@@ -15,12 +15,14 @@ export function CustomUpload({
   onChangeValue,
   values,
   maxCount = 1,
+  fileUrl
 }: {
   children: ReactNode;
   className?: string;
   onChangeValue?: (value) => void;
   values?: string[];
   maxCount?: number;
+  fileUrl?: any
 }) {
   const [files, setFiles] = useState<string[]>([]);
 
@@ -58,6 +60,8 @@ export function CustomUpload({
     multiple: maxCount > 1,
   };
 
+  console.log('fileUrl', fileUrl);
+
   return (
     <ImgCrop rotationSlider>
       <>
@@ -84,7 +88,23 @@ export function CustomUpload({
                   </div>
                 )
               }
-              return null;
+              else if (fileUrl) {
+                return (
+                  <div
+                    key={file}
+                    className=" relative -mt-2 flex h-[102px] w-[102px] items-center justify-center rounded-lg !border !border-[#d9d9d9] p-1"
+                  >
+                    <NextImage
+                      width={102}
+                      height={102}
+                      className=" rounded-lg object-cover py-1"
+                      src={fileUrl}
+                      alt=""
+                    />
+                  </div>
+                )
+              }
+              return null
             })}
           </div>
         )}

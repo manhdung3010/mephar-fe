@@ -38,6 +38,7 @@ export interface IProduct {
   country?: { name: string };
   status: EProductStatus;
   image?: { path: string };
+  imageUrl?: any;
   batches?: {
     batchId: number;
     name: string;

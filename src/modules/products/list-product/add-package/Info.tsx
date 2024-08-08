@@ -40,6 +40,7 @@ const Info = ({
   selectedMedicineCategory,
   setSelectedMedicineCategory,
   isCopy,
+  images
 
 }: any) => {
   const { getValues, setValue, errors } = useForm;
@@ -49,7 +50,7 @@ const Info = ({
     defaultUnit(getValues('productUnits'))
   );
 
-  console.log("errors", errors)
+  console.log("images", images)
 
   const [isOpenAddGroupProduct, setIsOpenAddGroupProduct] = useState(false);
   const [isOpenAddPosition, setIsOpenAddPosition] = useState(false);
@@ -137,6 +138,8 @@ const Info = ({
       setListUnit(getValues('productUnits'));
     }
   }, [getValues('productUnits')]);
+
+  console.log('values', getValues());
 
   return (
     <div className="mt-5">
@@ -451,6 +454,8 @@ const Info = ({
             onChangeValue={(value) =>
               setValue('imageId', value, { shouldValidate: true })
             }
+            values={[images?.path]}
+            fileUrl={getValues('imageUrl')}
           >
             <NormalUpload className="!h-[160px] w-[360px] py-0" />
           </CustomUpload>
