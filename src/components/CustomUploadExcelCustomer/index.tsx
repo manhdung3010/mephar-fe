@@ -1,3 +1,5 @@
+import RemoveIcon from "@/assets/removeIcon.svg";
+
 import type { ReactNode, ChangeEvent } from "react";
 import React, { useRef, useState } from "react";
 import { message, Spin } from "antd";
@@ -10,6 +12,8 @@ import {
 } from "@/api/import.service";
 import { branchState } from "@/recoil/state";
 import { useRecoilValue } from "recoil";
+import { useQueryClient } from "@tanstack/react-query";
+import Image from "next/image";
 
 interface CustomUploadExcelProps {
   children: ReactNode;
@@ -29,11 +33,12 @@ export function CustomUploadExcelCustomer({
   const [loading, setLoading] = useState<boolean>(false);
   const branchId = useRecoilValue(branchState);
 
+  const queryClient = useQueryClient();
+
   const resetFileInput = () => {
     if (fileInputRef.current) {
-      fileInputRef.current.value = ""; // Reset giá trị input file
+      fileInputRef.current.value = "";
     }
-    setFileName(null); // Xóa tên file
   };
 
   const handleFileChange = async (event) => {
@@ -47,12 +52,12 @@ export function CustomUploadExcelCustomer({
         } else {
           await uploadCustomerExcelKiot(file, branchId);
         }
-        message.success("Nhập file thành công!");
-
-        onCancel();
+        await queryClient.invalidateQueries(["CUSTOMER_LIST"]);
+        onCancel?.();
+        resetFileInput(); // Reset input file on error
+        setFileName(null);
       } catch (error: any) {
         message.error(error?.message || "Đã xảy ra lỗi");
-        // resetFileInput(); // Reset input file khi có lỗi
       } finally {
         setLoading(false); // Kết thúc loading
       }
@@ -75,10 +80,13 @@ export function CustomUploadExcelCustomer({
         } else {
           await uploadProductExcelKiot(file, branchId);
         }
-        message.success("Nhập file thành công!");
+
+        await queryClient.invalidateQueries(["CUSTOMER_LIST"]);
+        onCancel?.();
+        resetFileInput(); // Reset input file on error
+        setFileName(null);
       } catch (error: any) {
         message.error(error?.message || "Đã xảy ra lỗi");
-        // resetFileInput(); // Reset input file khi có lỗi
       } finally {
         setLoading(false); // Kết thúc loading
       }
@@ -89,6 +97,13 @@ export function CustomUploadExcelCustomer({
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
+  };
+
+  const handleRemoveFile = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation(); // Stop the event from bubbling up to the parent element
+    setFileName(null);
+    resetFileInput(); // Reset the file input so a new file can be selected
   };
 
   return (
@@ -113,7 +128,14 @@ export function CustomUploadExcelCustomer({
       ) : (
         <label className="custom-upload-label">{children}</label>
       )}
-      {fileName && <div className="file-name">{fileName}</div>}
+      {fileName && (
+        <div className="flex gap-2 pt-2">
+          <div className="file-name">{fileName}</div>
+          <button onClick={handleRemoveFile}>
+            <Image src={RemoveIcon} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }
