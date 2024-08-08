@@ -13,6 +13,7 @@ export function ImportFileCustomerModal({
   onCancel: () => void;
 }) {
   const [typeImport, setTypeImport] = useState("default");
+  
 
   return (
     <CustomModal
