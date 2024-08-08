@@ -86,9 +86,13 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
   );
   const { data: address, isLoading: isLoadingAddress } = useQuery(
     ["ADDRESS", getValues("point")],
-    () => getAddress({ lat: Number(getValues("point")?.split(",")[0]), lng: Number(getValues("point")?.split(",")[1]) }),
+    () =>
+      getAddress({
+        lat: Number(getValues("point")?.split(",")[0]),
+        lng: Number(getValues("point")?.split(",")[1]),
+      }),
     {
-      enabled: !!getValues("point")
+      enabled: !!getValues("point"),
     }
   );
 
@@ -102,22 +106,23 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
     if (latLng) {
       setValue("lng", String(latLng?.data?.lng), { shouldValidate: true });
       setValue("lat", String(latLng?.data?.lat), { shouldValidate: true });
-      setValue("point", `${latLng?.data?.lat},${latLng?.data?.lng}`, { shouldValidate: true });
+      setValue("point", `${latLng?.data?.lat},${latLng?.data?.lng}`, {
+        shouldValidate: true,
+      });
       setValue("address", latLng?.data?.display, { shouldValidate: true });
     }
   }, [latLng]);
 
   useEffect(() => {
-    if (getValues('point')) {
-      const [lat, lng]: any = getValues('point')?.split(",");
+    if (getValues("point")) {
+      const [lat, lng]: any = getValues("point")?.split(",");
       setValue("lng", lng?.trim(), { shouldValidate: true });
       setValue("lat", lat?.trim(), { shouldValidate: true });
+    } else {
+      setValue("lng", "", { shouldValidate: true });
+      setValue("lat", "", { shouldValidate: true });
     }
-    else {
-      setValue("lng", '', { shouldValidate: true });
-      setValue("lat", '', { shouldValidate: true });
-    }
-  }, [getValues('point')]);
+  }, [getValues("point")]);
 
   const { provinces, districts, wards } = useAddress(
     getValues("provinceId"),
@@ -134,7 +139,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
       getGroupCustomer({ page: 1, limit: 20, keyword: groupCustomerKeyword })
   );
 
-  console.log('errors', errors);
+  console.log("errors", errors);
 
   const { mutate: mutateCreateCustomer, isLoading: isLoadingCreateCustomer } =
     useMutation(
@@ -202,9 +207,13 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
       setValue("districtId", customerDetail?.data?.district?.id);
       setValue("wardId", customerDetail?.data?.ward?.id);
       setValue("provinceId", customerDetail?.data?.province?.id);
-      setValue('address', customerDetail?.data?.address);
+      setValue("address", customerDetail?.data?.address);
       setTempKeyword(customerDetail?.data?.address);
-      setValue('point', `${customerDetail?.data?.lat},${customerDetail?.data?.lng}`, { shouldValidate: true });
+      setValue(
+        "point",
+        `${customerDetail?.data?.lat},${customerDetail?.data?.lng}`,
+        { shouldValidate: true }
+      );
 
       setGroupCustomerKeyword(customerDetail.data?.groupCustomer?.name);
     }
@@ -279,6 +288,17 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
             </div>
 
             <div>
+              <Label infoText="" label="Facebook" />
+              <CustomInput
+                placeholder="Nhập facebook"
+                className="h-11"
+                onChange={(e) => setValue("facebook", e)}
+                value={getValues("facebook")}
+              />
+              <InputError error={errors.facebook?.message} />
+            </div>
+
+            <div>
               <Label infoText="" label="Nhóm khách hàng" />
               <CustomSelect
                 options={groupCustomers?.data?.items?.map((item) => ({
@@ -302,15 +322,15 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
                       RoleModel.group_customer,
                       RoleAction.create
                     ) && (
-                        <div className="flex items-center">
-                          <Image src={ArrowDownIcon} alt="" />
-                          <Image
-                            src={PlusCircleIcon}
-                            alt=""
-                            onClick={() => setOpenAddGroupCustomerModal(true)}
-                          />
-                        </div>
-                      )}
+                      <div className="flex items-center">
+                        <Image src={ArrowDownIcon} alt="" />
+                        <Image
+                          src={PlusCircleIcon}
+                          alt=""
+                          onClick={() => setOpenAddGroupCustomerModal(true)}
+                        />
+                      </div>
+                    )}
                   </>
                 }
               />
@@ -401,24 +421,24 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
                 // prefixIcon={<Image src={SearchIcon} alt="" />}
                 wrapClassName="w-full !rounded bg-white"
                 onSelect={(value) => {
-                  setTempKeyword(places?.data?.find((item) => item.ref_id === value)?.display)
+                  setTempKeyword(
+                    places?.data?.find((item) => item.ref_id === value)?.display
+                  );
                   setRefId(value);
                 }}
                 showSearch={true}
                 listHeight={300}
                 onSearch={(value) => {
                   setTempKeyword(value);
-                  onSearch(value)
+                  onSearch(value);
                 }}
                 value={tempKeyword}
                 options={places?.data.map((item) => ({
                   value: item?.ref_id,
                   label: (
-                    <div className='flex items-center gap-1 py-2'>
+                    <div className="flex items-center gap-1 py-2">
                       <Image src={MarkIcon} />
-                      <span className='display'>
-                        {item?.display}
-                      </span>
+                      <span className="display">{item?.display}</span>
                     </div>
                   ),
                 }))}
