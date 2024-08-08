@@ -126,7 +126,6 @@ function MarketProductList() {
     "createdAt[start]": undefined,
     "createdAt[end]": undefined,
     sortBy: "quantitySold",
-    isConfig: false,
     type: 'common'
   });
 

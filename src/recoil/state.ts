@@ -118,3 +118,8 @@ export const discountState = atom<{ [x: string]: IDiscount } | "">({
   },
   effects: [localStorageEffect("DISCOUNT_STATE")],
 });
+export const marketCartState = atom<any[]>({
+  key: "MARKET_CART_STATE",
+  default: [],
+  effects: [localStorageEffect("MARKET_CART_STATE")],
+});

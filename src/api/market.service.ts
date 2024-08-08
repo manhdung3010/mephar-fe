@@ -46,6 +46,15 @@ export function getAgencyGroup(params) {
 export function getSaleProductDetail(id: string) {
   return axiosClient.get(`market/sell/product/${id}`);
 }
+export function createMarketCart(payload) {
+  return axiosClient.post(`market/sell/cart`, payload);
+}
+export function getMarketCart(params) {
+  return axiosClient.get(`market/sell/cart`, { params });
+}
+export function deletMarketCart(id: string) {
+  return axiosClient.delete(`market/sell/cart/${id}`);
+}
 
 // store
 export function getMarketStore() {

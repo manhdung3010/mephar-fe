@@ -1,9 +1,14 @@
 import { CustomButton } from '@/components/CustomButton'
 import Image from 'next/image'
-import React from 'react'
+import React, { useState } from 'react'
 // import ProductImage from '@/assets/images/product1.jpg'
 import { formatMoney, formatNumber } from '@/helpers'
 import { useRouter } from 'next/router'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { createMarketCart, getMarketCart } from '@/api/market.service'
+import { message } from 'antd'
+import { useRecoilState, useRecoilValue } from 'recoil'
+import { branchState, marketCartState } from '@/recoil/state'
 
 interface ProductCardProps {
   id: number
@@ -26,7 +31,42 @@ interface ProductCardProps {
 }
 
 function ProductCard({ product }: { product: any }) {
-  const router = useRouter()
+  const router = useRouter();
+  const branchId = useRecoilValue(branchState);
+
+  const [marketCart, setMarketCart] = useRecoilState(marketCartState);
+  const [cartStatus, setCartStatus] = useState<any>(null)
+
+  const { mutate: mutateCreateCart, isLoading } =
+    useMutation(
+      (marketProductId) => {
+        const payload = {
+          marketProductId,
+          branchId,
+          quantity: 1,
+        }
+        return createMarketCart(payload)
+      },
+      {
+        onSuccess: async (res) => {
+          setCartStatus(new Date().getTime())
+        },
+        onError: (err: any) => {
+          message.error(err?.message);
+        },
+      }
+    );
+
+  const { data: marketCartRes, isLoading: isLoadingMarketCart } = useQuery(
+    ['MARKET_CART', cartStatus],
+    () => getMarketCart({ branchId }),
+    {
+      onSuccess: (res) => {
+        setMarketCart(res?.data?.item)
+      }
+    }
+  );
+
   return (
     <div className='shadow-lg rounded-[19px] overflow-hidden'>
       <div className='w-full h-[190px] cursor-pointer' onClick={() => router.push(`/markets/products/${product?.id}`)}>
@@ -44,7 +84,7 @@ function ProductCard({ product }: { product: any }) {
           <span>{product?.address || 'Hà Nội'}</span>
           <span>Đã bán: {formatNumber(product?.quantitySold)}</span>
         </div>
-        <CustomButton className='!h-12 !rounded-xl' outline>Thêm vào giỏ hàng</CustomButton>
+        <CustomButton className='!h-12 !rounded-xl' outline onClick={() => mutateCreateCart(product?.id)}>Thêm vào giỏ hàng</CustomButton>
       </div>
     </div>
   )

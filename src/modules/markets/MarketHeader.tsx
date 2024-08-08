@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import Logo from '@/assets/whiteLogo.svg'
 import MenuMarket1 from '@/assets/menuMarket1.svg'
 import MenuMarket2 from '@/assets/menuMarket2.svg'
@@ -8,13 +8,24 @@ import NotificationIcon from '@/assets/notificationIcon.svg'
 import Image from 'next/image'
 import { CustomInput } from '@/components/CustomInput'
 import { useRouter } from 'next/router'
-import { useRecoilValue } from 'recoil'
-import { profileState } from '@/recoil/state'
+import { useRecoilState, useRecoilValue } from 'recoil'
+import { branchState, marketCartState, profileState } from '@/recoil/state'
+import { useQuery } from '@tanstack/react-query'
+import { getMarketCart } from '@/api/market.service'
+import { formatNumber } from '@/helpers'
 
 function MarketHeader() {
   const router = useRouter();
+  const branchId = useRecoilValue(branchState);
   const profile = useRecoilValue(profileState)
-  console.log('profile', profile)
+  const [marketCart, setMarketCart] = useRecoilState(marketCartState);
+
+  const totalItem = useMemo(() => {
+    return marketCart?.reduce((total, item) => total + item?.products?.length, 0)
+  }, [marketCart])
+
+  console.log('marketCart', marketCart)
+
   return (
     <div className='bg-[#D64457]'>
       <div className='fluid-container grid grid-cols-12 gap-x-6 items-center py-5'>
@@ -34,8 +45,13 @@ function MarketHeader() {
             </div>
           </div>
           <div className='flex items-center gap-6'>
-            <Image src={CartIcon} />
-            <Image src={NotificationIcon} />
+            <div className='relative cursor-pointer' onClick={() => router.push('/markets/cart')}>
+              <Image src={CartIcon} />
+              <span className='absolute -top-1 -right-2 w-5 h-5 rounded-full bg-white text-red-main grid place-items-center'>{formatNumber(totalItem)}</span>
+            </div>
+            <div>
+              <Image src={NotificationIcon} />
+            </div>
             <div className='flex items-center gap-2'>
               <div className='rounded-full w-6 h-6 overflow-hidden border-[1px] border-[#efb4bc] grid place-items-center'>
                 <Image src={profile?.avatar?.pathName || Logo} />
