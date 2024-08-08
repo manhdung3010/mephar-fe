@@ -98,6 +98,11 @@ export function Info({ record }: { record: ICustomer }) {
           </div>
 
           <div className="grid grid-cols-3 gap-5">
+            <div className="col-span-1 text-gray-main">Facebook:</div>
+            <div className="text-black-main">{record.facebook}</div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-5">
             <div className="col-span-1 text-gray-main">Ngày sinh:</div>
             <div className="text-black-main">{record.birthday}</div>
           </div>

@@ -25,4 +25,5 @@ export const schema = yup.object().shape({
   lng: yup.string(),
   lat: yup.string(),
   point: yup.string(),
+  facebook: yup.string(),
 });

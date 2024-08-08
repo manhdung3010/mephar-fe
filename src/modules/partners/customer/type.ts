@@ -9,6 +9,7 @@ export interface ICustomer {
   address: string;
   avatarId: string;
   birthday: string;
+  facebook: string;
   gender: EGender;
   groupCustomerId?: number;
   groupCustomer?: { name: string };
