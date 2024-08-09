@@ -1,23 +1,23 @@
-import Image from 'next/image'
-import React, { useState } from 'react'
+import { deletMarketCart, getConfigProduct, getMarketCart, updateMarketCart } from '@/api/market.service'
+import DeleteIcon from '@/assets/deleteRed.svg'
 import StoreIcon from '@/assets/storeIcon.svg'
-import { CustomRadio } from '@/components/CustomRadio'
+import { CustomButton } from '@/components/CustomButton'
 import { CustomCheckbox } from '@/components/CustomCheckbox'
 import { CustomInput } from '@/components/CustomInput'
-import Logo from "@/public/apple-touch-icon.png";
-import DeleteIcon from '@/assets/deleteRed.svg'
-import { formatMoney, getImage } from '@/helpers'
-import { CustomButton } from '@/components/CustomButton'
-import { useMutation, useQuery } from '@tanstack/react-query'
-import { deletMarketCart, getConfigProduct, getMarketCart } from '@/api/market.service'
-import ProductCard from '../product-list/ProductCard'
-import { useRecoilState, useRecoilValue } from 'recoil'
-import { branchState, marketCartState } from '@/recoil/state'
-import { message, Radio } from 'antd'
 import DeleteModal from '@/components/CustomModal/ModalDeleteItem'
+import { formatMoney, getImage } from '@/helpers'
+import { branchState, marketCartState, paymentProductState } from '@/recoil/state'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { message, Radio } from 'antd'
+import Image from 'next/image'
+import { useEffect, useState } from 'react'
+import { useRecoilState, useRecoilValue } from 'recoil'
+import ProductCard from '../product-list/ProductCard'
+import { useRouter } from 'next/router'
 
 function Cart() {
   const branchId = useRecoilValue(branchState);
+  const router = useRouter()
   const [formFilter, setFormFilter] = useState({
     page: 1,
     limit: 20,
@@ -31,10 +31,13 @@ function Cart() {
   });
 
   const [marketCart, setMarketCart] = useRecoilState(marketCartState);
+  const [paymentProduct, setPaymentProduct] = useRecoilState(paymentProductState);
   const [storeSelected, setStoreSelected] = useState(null);
   const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
   const [productId, setProductId] = useState(null);
   const [cartTemp, setCartTemp] = useState<any>(null);
+
+  const [cartList, setCartList] = useState<any>([]);
 
   const { data: configProduct, isLoading } = useQuery(
     ['CONFIG_PRODUCT', JSON.stringify(formFilter)],
@@ -45,6 +48,23 @@ function Cart() {
     useMutation(
       () => {
         return deletMarketCart(String(productId))
+      },
+      {
+        onSuccess: async (res) => {
+          setCartTemp(new Date().getTime())
+        },
+        onError: (err: any) => {
+          message.error(err?.message);
+        },
+      }
+    );
+  const { mutate: mutateUpdateCart, isLoading: isUpdateCart } =
+    useMutation(
+      (value: {
+        id: string;
+        quantity: number;
+      }) => {
+        return updateMarketCart(String(value?.id), Number(value?.quantity))
       },
       {
         onSuccess: async (res) => {
@@ -66,16 +86,41 @@ function Cart() {
     }
   );
 
+  useEffect(() => {
+    if (marketCart) {
+      const newCartList = marketCart.map((cart) => {
+        return {
+          ...cart,
+          products: cart?.products.map((product) => {
+            if (cart?.storeId === storeSelected) {
+              return {
+                ...product,
+                selected: true
+              }
+            } else {
+              return {
+                ...product,
+                selected: false
+              }
+            }
+          })
+        }
+      })
+
+      setCartList(newCartList)
+    }
+  }, [marketCart])
+
   const handleDelete = () => {
-    // const newCart = marketCart?.map((cart) => {
-    //   const newProducts = cart?.products.filter((product) => product?.marketProduct?.store?.id !== storeSelected)
-    //   return {
-    //     ...cart,
-    //     products: newProducts
-    //   }
-    // })
-    // setMarketCart(newCart)
     mutateDeleteCart()
+  }
+
+  const updateQuantity = (id, value) => {
+    if (value < 1) {
+      message.error('Số lượng mua tối thiểu là 1')
+      return
+    }
+    mutateUpdateCart({ id, quantity: value })
   }
 
   return (
@@ -114,12 +159,43 @@ function Cart() {
         </div>
         <Radio.Group className='flex flex-col gap-3'>
           {
-            marketCart?.map((cart) => (
+            cartList?.map((cart) => (
               <div className='flex flex-col gap-3' key={cart?.storeId}>
                 <div className=''>
                   <div className='grid grid-cols-12 p-[22px] bg-white rounded font-semibold border-b-[1px] border-[#DDDDDD]'>
                     <div className='col-span-6 flex items-center'>
-                      <Radio value={cart?.storeId} onChange={() => setStoreSelected(cart?.storeId)} />
+                      <Radio
+                        value={cart?.storeId}
+                        checked={storeSelected === cart?.storeId}
+                        onChange={() => {
+                          setStoreSelected(cart?.storeId)
+
+                          const newCartList = cartList.map((cartItem) => {
+                            if (cartItem?.storeId === cart?.storeId) {
+                              return {
+                                ...cartItem,
+                                products: cartItem?.products.map((product) => {
+                                  return {
+                                    ...product,
+                                    selected: true
+                                  }
+                                })
+                              }
+                            } else {
+                              return {
+                                ...cartItem,
+                                products: cartItem?.products.map((product) => {
+                                  return {
+                                    ...product,
+                                    selected: false
+                                  }
+                                })
+                              }
+                            }
+                          })
+                          setCartList(newCartList)
+                        }}
+                      />
                       <div className='ml-7 mr-2 grid place-items-center'>
                         <Image src={StoreIcon} />
                       </div>
@@ -130,7 +206,10 @@ function Cart() {
                     cart?.products.map((product, index) => (
                       <div className={`grid grid-cols-12 p-[22px] bg-white rounded ${index === cart?.products?.length - 1 ? 'border-0' : 'border-b-[1px] border-[#DDDDDD]'}`} key={product?.id}>
                         <div className='col-span-6 flex items-center'>
-                          <CustomCheckbox disabled={storeSelected !== cart?.storeId} />
+                          <CustomCheckbox
+                            disabled={storeSelected !== cart?.storeId}
+                            checked={product?.selected}
+                          />
                           <div className='ml-12 mr-5 w-20 h-20 rounded overflow-hidden border-[#E4E4EB] border-[1px] grid place-items-center'>
                             <Image src={getImage(product?.marketProduct?.imageCenter?.path)} className='object-cover' width={80} height={80} />
                           </div>
@@ -149,13 +228,13 @@ function Cart() {
                               value={product?.quantity}
                               type="number"
                               onChange={(value) => {
-
+                                updateQuantity(product?.id, value)
                               }}
                               onMinus={async (value) => {
-
+                                updateQuantity(product?.id, value)
                               }}
                               onPlus={async (value) => {
-
+                                updateQuantity(product?.id, value)
                               }}
                               onBlur={(e) => {
 
@@ -185,11 +264,45 @@ function Cart() {
           marketCart?.length > 0 && (
             <div className='bg-white shadow-lg p-6 mt-3'>
               <div className=''>
-                <div className='flex justify-end'>
+                <div className='flex justify-between items-center'>
+                  <div
+                    className='cursor-pointer'
+                    onClick={() => {
+                      // unselected all product
+                      const newCartList = cartList.map((cartItem) => {
+                        return {
+                          ...cartItem,
+                          products: cartItem?.products.map((product) => {
+                            return {
+                              ...product,
+                              selected: false
+                            }
+                          })
+                        }
+                      })
+                      setCartList(newCartList)
+                    }}
+                  >
+                    Bỏ chọn tất cả
+                  </div>
                   <div className='font-medium text-base'>Tổng thanh toán (0 sản phẩm): <span className='text-red-main ml-4'>{formatMoney(3000000)}</span></div>
                 </div>
                 <div className='flex justify-end mt-5'>
-                  <CustomButton className='!w-[300px] !h-[46px]'>Mua hàng</CustomButton>
+                  <CustomButton
+                    className='!w-[300px] !h-[46px]'
+                    disabled={!storeSelected}
+                    onClick={() => {
+                      const paymentProduct = cartList?.filter((item) => item.storeId === storeSelected && item?.products?.filter((product) => product?.selected)?.length > 0)
+                      if (paymentProduct?.length <= 0) {
+                        message.error('Vui lòng chọn sản phẩm')
+                        return
+                      }
+                      setPaymentProduct(paymentProduct)
+                      router.push('/markets/payment')
+                    }}
+                  >
+                    Mua hàng
+                  </CustomButton>
                 </div>
               </div>
             </div>

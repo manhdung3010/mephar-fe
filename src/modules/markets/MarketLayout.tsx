@@ -8,7 +8,7 @@ type ILayoutProps = {
 };
 
 const MarketLayout = (props: ILayoutProps) => (
-  <div>
+  <div className='market-layout'>
     {props.meta}
     <div className="mx-auto min-h-screen w-full ">
       <MarketHeader />

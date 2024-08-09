@@ -10,7 +10,6 @@ import { CustomInput } from '@/components/CustomInput';
 import { CustomButton } from '@/components/CustomButton';
 import StoreCard from './StoreCard';
 import ArrowIcon from '@/assets/arrow-down-red-icon.svg';
-import { productList } from '../product-list';
 import ProductCard from '../product-list/ProductCard';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/router';
@@ -34,7 +33,7 @@ const ProductDetail = () => {
     dots: true,
     navigator: false,
     dotsClass: "slick-dots slick-thumb",
-    infinite: true,
+    // infinite: true,
     speed: 500,
     slidesToShow: 1,
     slidesToScroll: 1
@@ -51,6 +50,8 @@ const ProductDetail = () => {
       setImages(newImages)
     }
   }, [configProduct])
+
+  console.log('images', images)
   return (
     <div className='bg-[#fafafc]'>
       <div className="fluid-container">
@@ -66,7 +67,7 @@ const ProductDetail = () => {
           </ul>
         </nav>
         <div className="flex gap-6 mt-3 bg-white p-4 rounded-2xl">
-          <div className='slider-container w-2/5'>
+          <div className={`slider-container w-2/5 ${images?.length <= 1 ? 'hidden-slide' : ''}`}>
             <Slider {...settings}>
               {
                 images?.map((image) => (
@@ -165,7 +166,7 @@ const ProductDetail = () => {
               </div>
             </div>
           </div>
-          <div className='col-span-3'>
+          {/* <div className='col-span-3'>
             <h4 className='text-center text-base font-bold mb-4'>Có thể bạn muốn mua</h4>
             <div className='grid grid-col-1 gap-10'>
               {
@@ -174,7 +175,7 @@ const ProductDetail = () => {
                 ))
               }
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

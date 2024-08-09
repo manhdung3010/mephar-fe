@@ -64,10 +64,15 @@
   font-weight: 300;
   font-style: italic;
 }
+/* Lato */
 
 html {
   font-family: "SF Pro Display", sans-serif;
 }
+
+/* html .market-layout {
+  font-family: "Lato", sans-serif;
+} */
 
 a {
   @apply text-blue-700;
@@ -123,4 +128,7 @@ a {
   width: 83px !important;
   height: 83px !important;
   bottom: unset;
+}
+.hidden-slide .slick-cloned[aria-hidden="true"] {
+  display: none !important;
 }
