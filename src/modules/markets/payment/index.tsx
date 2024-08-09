@@ -7,15 +7,21 @@ import { useRecoilState } from 'recoil'
 import { paymentProductState } from '@/recoil/state'
 import { formatMoney, formatNumber, getImage } from '@/helpers'
 import { CustomInput } from '@/components/CustomInput'
+import StickyNoteIcon from '@/assets/stickynote.svg'
+import { CustomButton } from '@/components/CustomButton'
 
 function Payment() {
   const [paymentProduct, setPaymentProduct] = useRecoilState<any>(paymentProductState);
 
   console.log('paymentProduct', paymentProduct)
 
-  // const totalMoney = useMemo(() => {
+  const totalMoney = useMemo(() => {
+    return paymentProduct[0]?.products?.reduce((total, product) => {
+      return total + (product?.marketProduct?.discountPrice > 0 ? product?.marketProduct?.discountPrice : product?.price) * product?.quantity
+    }, 0)
+  }, [paymentProduct[0]?.products])
 
-  // }, [paymentProduct[0]?.products])
+  const shipFee = 50000
   return (
     <div className='bg-[#fafafc] text-[#28293D]'>
       <div className='fluid-container'>
@@ -117,9 +123,37 @@ function Payment() {
           </div>
           <div className='px-4 flex justify-between pt-4 pb-4'>
             <span className='text-base font-medium '>Tổng số tiền ({formatNumber(paymentProduct[0]?.products?.length)} sp)</span>
-            <CustomInput onChange={() => { }} placeholder='Lưu ý cho người bán' className='!border-0' />
+            <span className='text-red-main text-base font-medium'>{formatMoney(totalMoney)}</span>
+          </div>
+
+          <div className='px-4'>
+            <div className='py-2 border-t-[6px] border-b-[6px] border-[#ECECEC]'>
+              <div className='flex items-center gap-1'>
+                <Image src={StickyNoteIcon} />
+                <span className='text-base font-medium '>Chi tiết thanh toán</span>
+              </div>
+              <div className='mt-[14px] flex flex-col gap-3'>
+                <div className='flex justify-between items-center font-medium'>
+                  <span>Tổng tiền hàng</span>
+                  <span>{formatMoney(totalMoney)}</span>
+                </div>
+                <div className='flex justify-between items-center font-medium'>
+                  <span>Tổng tiền phí vận chuyển</span>
+                  <span>{formatMoney(shipFee)}</span>
+                </div>
+                <div className='flex justify-between items-center font-medium'>
+                  <span className='text-base'>Tổng thanh toán</span>
+                  <span className='text-red-main text-xl font-semibold'>{formatMoney(totalMoney + shipFee)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className='flex justify-end my-4'>
+            <CustomButton className='!w-[300px] !h-[46px]'>Đặt hàng</CustomButton>
           </div>
         </div>
+
+
       </div>
     </div>
   )
