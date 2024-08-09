@@ -2,7 +2,7 @@ import { CustomButton } from '@/components/CustomButton'
 import Image from 'next/image'
 import React, { useState } from 'react'
 // import ProductImage from '@/assets/images/product1.jpg'
-import { formatMoney, formatNumber } from '@/helpers'
+import { formatMoney, formatNumber, getImage } from '@/helpers'
 import { useRouter } from 'next/router'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { createMarketCart, getMarketCart } from '@/api/market.service'
@@ -69,8 +69,8 @@ function ProductCard({ product }: { product: any }) {
 
   return (
     <div className='shadow-lg rounded-[19px] overflow-hidden'>
-      <div className='w-full h-[190px] cursor-pointer' onClick={() => router.push(`/markets/products/${product?.id}`)}>
-        <img className='object-cover w-full h-full' src={product?.imageCenter?.filePath} />
+      <div className='w-full cursor-pointer' onClick={() => router.push(`/markets/products/${product?.id}`)}>
+        <Image className='object-cover' height={190} width={272} src={getImage(product?.imageCenter?.path)} />
       </div>
       <div className='p-4 pb-5 flex flex-col gap-3'>
         <h3 className='text-base font-semibold line-clamp-1 cursor-pointer' onClick={() => {
