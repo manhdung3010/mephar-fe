@@ -5,12 +5,12 @@ import { CustomButton } from '@/components/CustomButton'
 import { CustomCheckbox } from '@/components/CustomCheckbox'
 import { CustomInput } from '@/components/CustomInput'
 import DeleteModal from '@/components/CustomModal/ModalDeleteItem'
-import { formatMoney, getImage } from '@/helpers'
+import { formatMoney, formatNumber, getImage } from '@/helpers'
 import { branchState, marketCartState, paymentProductState } from '@/recoil/state'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { message, Radio } from 'antd'
 import Image from 'next/image'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRecoilState, useRecoilValue } from 'recoil'
 import ProductCard from '../product-list/ProductCard'
 import { useRouter } from 'next/router'
@@ -92,7 +92,7 @@ function Cart() {
         return {
           ...cart,
           products: cart?.products.map((product) => {
-            if (cart?.storeId === storeSelected) {
+            if (cart?.branchId === storeSelected) {
               return {
                 ...product,
                 selected: true
@@ -122,6 +122,32 @@ function Cart() {
     }
     mutateUpdateCart({ id, quantity: value })
   }
+
+  const caculateMoney = (products) => {
+    console.log('products', products)
+    return (products?.marketProduct?.discountPrice > 0 ? products?.marketProduct?.discountPrice : products?.price) * products?.quantity
+  }
+
+  const totalProductSelected = useMemo(() => {
+    const selectedCart = cartList?.filter((item) => item.branchId === storeSelected && item?.products?.filter((product) => product?.selected))
+    return selectedCart?.reduce((total, cart) => {
+      return total + cart?.products?.filter((product) => product?.selected)?.length
+    }, 0)
+  }, [cartList, storeSelected])
+
+  const totalMoney = useMemo(() => {
+    const selectedCart = cartList?.filter((item) => item.branchId === storeSelected && item?.products?.filter((product) => product?.selected))
+    // only caculate selected product
+    return selectedCart?.reduce((total, cart) => {
+      return total + cart?.products?.reduce((totalProduct, product) => {
+        if (product?.selected) {
+          return totalProduct + caculateMoney(product)
+        } else {
+          return totalProduct
+        }
+      }, 0)
+    }, 0)
+  }, [cartList, storeSelected])
 
   return (
     <div className='bg-[#fafafc]'>
@@ -160,18 +186,18 @@ function Cart() {
         <Radio.Group className='flex flex-col gap-3'>
           {
             cartList?.map((cart) => (
-              <div className='flex flex-col gap-3' key={cart?.storeId}>
+              <div className='flex flex-col gap-3' key={cart?.branchId}>
                 <div className=''>
                   <div className='grid grid-cols-12 p-[22px] bg-white rounded font-semibold border-b-[1px] border-[#DDDDDD]'>
                     <div className='col-span-6 flex items-center'>
                       <Radio
-                        value={cart?.storeId}
-                        checked={storeSelected === cart?.storeId}
+                        value={cart?.branchId}
+                        checked={storeSelected === cart?.branchId}
                         onChange={() => {
-                          setStoreSelected(cart?.storeId)
+                          setStoreSelected(cart?.branchId)
 
                           const newCartList = cartList.map((cartItem) => {
-                            if (cartItem?.storeId === cart?.storeId) {
+                            if (cartItem?.branchId === cart?.branchId) {
                               return {
                                 ...cartItem,
                                 products: cartItem?.products.map((product) => {
@@ -207,8 +233,30 @@ function Cart() {
                       <div className={`grid grid-cols-12 p-[22px] bg-white rounded ${index === cart?.products?.length - 1 ? 'border-0' : 'border-b-[1px] border-[#DDDDDD]'}`} key={product?.id}>
                         <div className='col-span-6 flex items-center'>
                           <CustomCheckbox
-                            disabled={storeSelected !== cart?.storeId}
+                            disabled={storeSelected !== cart?.branchId}
                             checked={product?.selected}
+                            onChange={(e) => {
+                              const newCartList = cartList.map((cartItem) => {
+                                if (cartItem?.branchId === cart?.branchId) {
+                                  return {
+                                    ...cartItem,
+                                    products: cartItem?.products.map((productItem) => {
+                                      if (productItem?.id === product?.id) {
+                                        return {
+                                          ...productItem,
+                                          selected: e.target.checked
+                                        }
+                                      } else {
+                                        return productItem
+                                      }
+                                    })
+                                  }
+                                } else {
+                                  return cartItem
+                                }
+                              })
+                              setCartList(newCartList)
+                            }}
                           />
                           <div className='ml-12 mr-5 w-20 h-20 rounded overflow-hidden border-[#E4E4EB] border-[1px] grid place-items-center'>
                             <Image src={getImage(product?.marketProduct?.imageCenter?.path)} className='object-cover' width={80} height={80} />
@@ -217,7 +265,7 @@ function Cart() {
                         </div>
                         <div className='col-span-6 grid grid-cols-4 items-center gap-2'>
                           <div className='text-center'>
-                            {formatMoney(product?.marketProduct?.price)}
+                            {formatMoney(product?.marketProduct?.discountPrice > 0 ? product?.marketProduct?.discountPrice : product?.price)}
                           </div>
                           <div className='text-center'>
                             <CustomInput
@@ -242,7 +290,7 @@ function Cart() {
                             />
                           </div>
                           <div className='text-center'>
-                            {formatMoney(+product?.marketProduct?.price * +product?.marketProduct?.quantity)}
+                            {formatMoney(caculateMoney(product))}
                           </div>
                           <div className='text-center cursor-pointer' onClick={() => {
                             setOpenDeleteConfirm(true)
@@ -285,14 +333,14 @@ function Cart() {
                   >
                     Bỏ chọn tất cả
                   </div>
-                  <div className='font-medium text-base'>Tổng thanh toán (0 sản phẩm): <span className='text-red-main ml-4'>{formatMoney(3000000)}</span></div>
+                  <div className='font-medium text-base'>Tổng thanh toán ({formatNumber(totalProductSelected)} sản phẩm): <span className='text-red-main ml-4'>{formatMoney(totalMoney)}</span></div>
                 </div>
                 <div className='flex justify-end mt-5'>
                   <CustomButton
                     className='!w-[300px] !h-[46px]'
                     disabled={!storeSelected}
                     onClick={() => {
-                      const paymentProduct = cartList?.filter((item) => item.storeId === storeSelected && item?.products?.filter((product) => product?.selected)?.length > 0)
+                      const paymentProduct = cartList?.filter((item) => item.branchId === storeSelected && item?.products?.filter((product) => product?.selected)?.length > 0)
                       if (paymentProduct?.length <= 0) {
                         message.error('Vui lòng chọn sản phẩm')
                         return

@@ -61,6 +61,27 @@ export function updateMarketCart(id: string, quantity: number) {
 export function createShipAddress(payload) {
   return axiosClient.post(`market/sell/address`, payload);
 }
+export function updateShipAddress(
+  id: string,
+  branchId?: string,
+  payload?: any
+) {
+  return axiosClient.patch(
+    `market/sell/address/${id}?branchId=${branchId}`,
+    payload
+  );
+}
+export function getShipAddress(params) {
+  return axiosClient.get(`market/sell/address`, { params });
+}
+export function getShipAddressDetail(id: string, branchId: string) {
+  return axiosClient.get(`market/sell/address/${id}?branchId=${branchId}`);
+}
+
+// order
+export function createMarketOrder(payload) {
+  return axiosClient.post(`market/sell/market-order`, payload);
+}
 
 // store
 export function getMarketStore() {

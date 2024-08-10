@@ -1,21 +1,40 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import MarkIcon from '@/assets/markRedIcon.svg'
 import ArrowIcon from '@/assets/arrow-right-red.svg'
 import Image from 'next/image'
 import StoreIcon from '@/assets/storeIcon.svg'
-import { useRecoilState } from 'recoil'
-import { paymentProductState } from '@/recoil/state'
+import { useRecoilState, useRecoilValue } from 'recoil'
+import { branchState, paymentProductState, profileState } from '@/recoil/state'
 import { formatMoney, formatNumber, getImage } from '@/helpers'
 import { CustomInput } from '@/components/CustomInput'
 import StickyNoteIcon from '@/assets/stickynote.svg'
 import { CustomButton } from '@/components/CustomButton'
 import AddressModal from './AddressModal'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { createMarketOrder, getShipAddress } from '@/api/market.service'
+import { message } from 'antd'
+import OrderModal from './OrderModal'
 
 function Payment() {
   const [paymentProduct, setPaymentProduct] = useRecoilState<any>(paymentProductState);
   const [openAddress, setOpenAddress] = React.useState(false);
+  const [openOrderSuccess, setOpenOrderSuccess] = React.useState(false);
+  const [selectedAddress, setSelectedAddress] = React.useState<any>(null);
+  const [orderInfo, setOrderInfo] = useState<any>(null);
+  const profile = useRecoilValue(profileState);
+  const branchId = useRecoilValue(branchState);
 
-  console.log('paymentProduct', paymentProduct)
+  const { data: address, isLoading } = useQuery(
+    ['SHIP_ADDRESS', JSON.stringify({ page: 1, limit: 10, isDefaultAddress: 1, branchId })],
+    () => getShipAddress({ page: 1, limit: 10, isDefaultAddress: 1, branchId }),
+    {
+      onSuccess: (data) => {
+        if (data?.data?.items) {
+          setSelectedAddress(data?.data?.items[0]);
+        }
+      }
+    }
+  );
 
   const totalMoney = useMemo(() => {
     return paymentProduct[0]?.products?.reduce((total, product) => {
@@ -23,7 +42,45 @@ function Payment() {
     }, 0)
   }, [paymentProduct[0]?.products])
 
-  const shipFee = 50000
+  const shipFee = 50000;
+  const calculateDeliveryDate = (daysToAdd) => {
+    const date = new Date();
+    date.setDate(date.getDate() + daysToAdd);
+    return date.toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  };
+
+  const deliveryDate = calculateDeliveryDate(3);
+
+  const { mutate: mutateCreateOrder, isLoading: isLoadingCreateOrder } =
+    useMutation(
+      () => {
+        const payload = {
+          branchId,
+          addressId: selectedAddress?.id,
+          listProduct: paymentProduct[0]?.products?.map((product) => {
+            return {
+              marketProductId: product?.marketProductId,
+              quantity: product?.quantity,
+            }
+          }),
+          toBranchId: paymentProduct[0]?.products[0]?.marketProduct?.branchId,
+        }
+        return createMarketOrder(payload)
+      },
+      {
+        onSuccess: async (data) => {
+          setOrderInfo(data?.data?.item);
+          setOpenOrderSuccess(true);
+        },
+        onError: (err: any) => {
+          message.error(err?.message);
+        },
+      }
+    );
+
+  const onSubmit = () => {
+    mutateCreateOrder()
+  }
   return (
     <div className='bg-[#fafafc] text-[#28293D]'>
       <div className='fluid-container'>
@@ -49,10 +106,14 @@ function Payment() {
               <Image src={MarkIcon} />
               <span>Địa chỉ nhận hàng</span>
             </div>
-            <div className='mt-1 ml-7 text-[#28293D]'>
-              <p className=''>Nguyễn Văn A | 0123456789</p>
-              <p className=''>Số 12, Ngõ 12, Đường Nguyễn Văn A, Hà Nội</p>
-            </div>
+            {
+              selectedAddress && (
+                <div className='mt-1 ml-7 text-[#28293D]'>
+                  <p className=''>{profile?.fullName} | {selectedAddress?.phone}</p>
+                  <p className=''>{selectedAddress?.address}, {selectedAddress?.ward?.name}, {selectedAddress?.district?.name}, {selectedAddress?.province?.name}</p>
+                </div>
+              )
+            }
           </div>
           <div className='w-1/4 flex justify-end'>
             <Image src={ArrowIcon} className='cursor-pointer' onClick={() => setOpenAddress(true)} />
@@ -110,10 +171,10 @@ function Payment() {
             <div className='pt-3 flex items-center'>
               <div className='w-3/4 flex flex-col'>
                 <span className='font-semibold'>Nhanh</span>
-                <span className='text-[#8F90A6]'>Nhận hàng vào 3 Th07 - 5 Th07</span>
+                <span className='text-[#8F90A6]'>Nhận hàng vào {deliveryDate}</span>
               </div>
               <div className='flex items-center w-1/4 justify-end'>
-                {formatMoney(20000)}
+                {formatMoney(shipFee)}
                 <Image src={ArrowIcon} />
               </div>
             </div>
@@ -151,14 +212,19 @@ function Payment() {
             </div>
           </div>
           <div className='flex justify-end my-4'>
-            <CustomButton className='!w-[300px] !h-[46px]'>Đặt hàng</CustomButton>
+            <CustomButton className='!w-[300px] !h-[46px]' onClick={onSubmit}>Đặt hàng</CustomButton>
           </div>
         </div>
-
-
       </div>
 
-      <AddressModal isOpen={openAddress} onCancel={() => setOpenAddress(false)} />
+      <AddressModal
+        isOpen={openAddress}
+        onCancel={() => setOpenAddress(false)}
+        onSave={(selectedAddress) => {
+          setSelectedAddress(selectedAddress)
+        }}
+      />
+      <OrderModal isOpen={openOrderSuccess} onCancel={() => setOpenOrderSuccess(false)} orderInfo={orderInfo} />
     </div>
   )
 }

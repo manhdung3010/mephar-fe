@@ -1,7 +1,7 @@
 import { CustomButton } from '@/components/CustomButton'
 import { CustomModal } from '@/components/CustomModal'
 import { yupResolver } from '@hookform/resolvers/yup';
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useForm } from 'react-hook-form';
 import { schema } from './schema';
 import Label from '@/components/CustomLabel';
@@ -13,14 +13,15 @@ import InputError from '@/components/InputError';
 import { useAddress } from '@/hooks/useAddress';
 import { CustomSwitch } from '@/components/CustomSwitch';
 import { message } from 'antd';
-import { useMutation } from '@tanstack/react-query';
-import { createShipAddress } from '@/api/market.service';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { createShipAddress, getShipAddressDetail, updateShipAddress } from '@/api/market.service';
 
-function AddAddressModal({ isOpen, onCancel }) {
+function AddAddressModal({ isOpen, onCancel, addressId }) {
   const {
     getValues,
     setValue,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
@@ -31,25 +32,20 @@ function AddAddressModal({ isOpen, onCancel }) {
   });
   const profile = useRecoilValue(profileState);
   const branchId = useRecoilValue(branchState)
-
-  const { provinces, districts, wards } = useAddress(
-    getValues("provinceId"),
-    getValues("districtId")
-  );
+  const queryClient = useQueryClient();
 
   const { mutate: mutateCreateAddress, isLoading } =
     useMutation(
       () => {
-        const payload = {
-          ...getValues(),
-          branchId,
-        };
-        return createShipAddress(payload)
+        if (addressId) {
+          return updateShipAddress(addressId, branchId, getValues());
+        }
+        return createShipAddress({ ...getValues(), branchId });
       },
       {
         onSuccess: async () => {
-          // await queryClient.invalidateQueries(["TRANSACTION"]);
-          // reset();
+          await queryClient.invalidateQueries(["SHIP_ADDRESS"]);
+          reset();
           onCancel();
         },
         onError: (err: any) => {
@@ -57,6 +53,28 @@ function AddAddressModal({ isOpen, onCancel }) {
         },
       }
     );
+
+  const { data: addressDetail, isLoading: isLoadingDetail } = useQuery(
+    ['MARKET_PRODUCT_DETAIL', JSON.stringify(addressId)],
+    () => getShipAddressDetail(String(addressId), branchId),
+    {
+      enabled: !!addressId,
+      onSuccess: (data) => {
+        setValue("phone", data?.data?.item?.phone);
+        setValue("provinceId", data?.data?.item?.provinceId);
+        setValue("districtId", data?.data?.item?.districtId);
+        setValue("wardId", data?.data?.item?.wardId);
+        setValue("address", data?.data?.item?.address);
+        setValue("isDefaultAddress", data?.data?.item?.isDefaultAddress);
+
+      }
+    }
+  );
+
+  const { provinces, districts, wards } = useAddress(
+    getValues("provinceId"),
+    getValues("districtId")
+  );
 
   const onSubmit = () => {
     mutateCreateAddress()
@@ -66,7 +84,7 @@ function AddAddressModal({ isOpen, onCancel }) {
     <CustomModal
       isOpen={isOpen}
       onCancel={onCancel}
-      title={`Thêm địa chỉ mới`}
+      title={`${addressId ? 'Cập nhật địa chỉ' : 'Thêm địa chỉ mới'}`}
       width={900}
       customFooter={true}
     >
@@ -137,7 +155,7 @@ function AddAddressModal({ isOpen, onCancel }) {
       </div>
 
       <div className="flex justify-end gap-2">
-        <CustomButton outline type='original' className='!w-[180px] !h-11'>Hủy</CustomButton>
+        <CustomButton outline type='original' className='!w-[180px] !h-11' onClick={onCancel}>Hủy</CustomButton>
         <CustomButton className='!w-[180px] !h-11' onClick={handleSubmit(onSubmit)}>Lưu </CustomButton>
       </div>
     </CustomModal>

@@ -67,8 +67,6 @@ function ProductCard({ product }: { product: any }) {
     }
   );
 
-  console.log('product', product)
-
   return (
     <div className='shadow-lg rounded-[19px] overflow-hidden'>
       <div className='w-full cursor-pointer' onClick={() => router.push(`/markets/products/${product?.id}`)}>
