@@ -110,7 +110,7 @@ export function ReturnTransaction() {
       dataIndex: 'customer',
       key: 'customer',
       render: (customer) => (
-        <span>{customer.fullName}</span>
+        <span>{customer?.fullName}</span>
       ),
     },
     {

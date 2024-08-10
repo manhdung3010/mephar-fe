@@ -9,9 +9,11 @@ import { formatMoney, formatNumber, getImage } from '@/helpers'
 import { CustomInput } from '@/components/CustomInput'
 import StickyNoteIcon from '@/assets/stickynote.svg'
 import { CustomButton } from '@/components/CustomButton'
+import AddressModal from './AddressModal'
 
 function Payment() {
   const [paymentProduct, setPaymentProduct] = useRecoilState<any>(paymentProductState);
+  const [openAddress, setOpenAddress] = React.useState(false);
 
   console.log('paymentProduct', paymentProduct)
 
@@ -53,7 +55,7 @@ function Payment() {
             </div>
           </div>
           <div className='w-1/4 flex justify-end'>
-            <Image src={ArrowIcon} className='cursor-pointer' />
+            <Image src={ArrowIcon} className='cursor-pointer' onClick={() => setOpenAddress(true)} />
           </div>
         </div>
 
@@ -155,6 +157,8 @@ function Payment() {
 
 
       </div>
+
+      <AddressModal isOpen={openAddress} onCancel={() => setOpenAddress(false)} />
     </div>
   )
 }

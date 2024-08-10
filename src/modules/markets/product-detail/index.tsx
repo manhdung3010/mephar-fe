@@ -1,23 +1,21 @@
+import { getSaleProductDetail } from '@/api/market.service';
+import ArrowIcon from '@/assets/arrow-down-red-icon.svg';
+import CartIcon from '@/assets/cartIconRed.svg';
+import { CustomButton } from '@/components/CustomButton';
+import { CustomInput } from '@/components/CustomInput';
+import { formatMoney, formatNumber, getImage } from '@/helpers';
+import { useQuery } from '@tanstack/react-query';
 import Image from 'next/image';
-import Link from 'next/link';
+import { useRouter } from 'next/router';
 import React, { useEffect } from 'react';
 import Slider from "react-slick";
-import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
-import Label from '@/components/CustomLabel';
-import CartIcon from '@/assets/cartIconRed.svg';
-import { CustomInput } from '@/components/CustomInput';
-import { CustomButton } from '@/components/CustomButton';
+import 'slick-carousel/slick/slick.css';
 import StoreCard from './StoreCard';
-import ArrowIcon from '@/assets/arrow-down-red-icon.svg';
-import ProductCard from '../product-list/ProductCard';
-import { useQuery } from '@tanstack/react-query';
-import { useRouter } from 'next/router';
-import { getConfigProductDetail, getSaleProductDetail } from '@/api/market.service';
-import { formatMoney, formatNumber } from '@/helpers';
 
 const ProductDetail = () => {
   const [isShowDetail, setIsShowDetail] = React.useState(false);
+
   const [images, setImages] = React.useState<any>([]);
   const router = useRouter();
   const { id } = router.query;
@@ -72,7 +70,7 @@ const ProductDetail = () => {
               {
                 images?.map((image) => (
                   <div className='border-[#C7C9D9] border-[1px] rounded-lg overflow-hidden flex h-[450px] w-[450px]' key={image?.id}>
-                    <img src={image?.filePath} className='w-full h-full object-cover' />
+                    <img src={getImage(image?.path)} className='w-full h-full object-cover' />
                   </div>
                 ))
               }
@@ -119,7 +117,7 @@ const ProductDetail = () => {
             </div>
             <div className="mt-6 space-x-3 flex pb-[22px] border-b-[1px] border-[#C7C9D9]">
               <CustomButton outline className='!h-[46px]' prefixIcon={<Image src={CartIcon} />}>Thêm vào giỏ hàng</CustomButton>
-              <CustomButton className='!h-[46px]'>Đặt hàng</CustomButton>
+              <CustomButton className='!h-[46px]' >Đặt hàng</CustomButton>
             </div>
 
             <div className=' mt-6 flex flex-col gap-3'>
@@ -157,13 +155,13 @@ const ProductDetail = () => {
 
             <div className='mt-6'>
               <h2 className='text-[32px] font-semibold'>Sản phẩm khác của đại lý</h2>
-              <div className='grid grid-cols-3 gap-10 mt-6 '>
+              {/* <div className='grid grid-cols-3 gap-10 mt-6 '>
                 {
                   configProduct?.data?.item?.productWillCare?.map((product) => (
                     <ProductCard product={product} key={product.id} />
                   ))
                 }
-              </div>
+              </div> */}
             </div>
           </div>
           {/* <div className='col-span-3'>
@@ -178,6 +176,8 @@ const ProductDetail = () => {
           </div> */}
         </div>
       </div>
+
+
     </div>
   );
 };

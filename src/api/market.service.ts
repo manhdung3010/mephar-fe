@@ -58,6 +58,9 @@ export function deletMarketCart(id: string) {
 export function updateMarketCart(id: string, quantity: number) {
   return axiosClient.patch(`market/sell/cart/${id}/${quantity}`);
 }
+export function createShipAddress(payload) {
+  return axiosClient.post(`market/sell/address`, payload);
+}
 
 // store
 export function getMarketStore() {
