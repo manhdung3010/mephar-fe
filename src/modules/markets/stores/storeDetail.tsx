@@ -2,9 +2,17 @@ import React, { useState } from 'react'
 import classNames from 'classnames'
 import { useRouter } from 'next/router';
 import { useQuery } from '@tanstack/react-query';
-import { getConfigProduct } from '@/api/market.service';
+import { getConfigProduct, getMarketStoreDetail } from '@/api/market.service';
 import { useRecoilValue } from 'recoil';
 import { branchState } from '@/recoil/state';
+import { formatNumber, getImage } from '@/helpers';
+import ProductCard from '../product-list/ProductCard';
+import ProductCardSkeleton from '../product-list/ProductCardSkeleton';
+import CustomPagination from '@/components/CustomPagination';
+import { Pagination } from 'antd';
+import { MarketPaginationStyled } from '@/components/CustomPagination/styled';
+import Logo from "@/public/apple-touch-icon.png";
+import Image from 'next/image';
 
 function StoreDetail() {
 
@@ -13,21 +21,29 @@ function StoreDetail() {
   const branchId = useRecoilValue(branchState);
   const [select, setSelect] = useState(0);
 
-  const [formFilter, setFormFilter] = useState({
+  const [formFilter, setFormFilter] = useState<any>({
     page: 1,
-    limit: 20,
+    limit: 5,
     keyword: "",
     type: "",
     status: "",
     "createdAt[start]": undefined,
     "createdAt[end]": undefined,
     isConfig: true,
+    storeId: id,
     branchId
   });
 
   const { data: configProduct, isLoading } = useQuery(
     ['CONFIG_PRODUCT', JSON.stringify(formFilter)],
     () => getConfigProduct(formFilter),
+  );
+  const { data: storeDetail, isLoading: isLoadingStoreDetail } = useQuery(
+    ['MARKET_STORE_DETAIL', id],
+    () => getMarketStoreDetail(String(id)),
+    {
+      enabled: !!id
+    }
   );
 
   const menu = ['Sản phẩm mới', 'Bán chạy', 'Thuốc', 'Thực phẩm'];
@@ -49,14 +65,14 @@ function StoreDetail() {
 
           <div className='grid grid-cols-12 gap-8 mt-3'>
             <div className='col-span-5'>
-              <div className={` h-[220px] rounded-2xl overflow-hidden relative bg-bottom bg-cover`} style={{ backgroundImage: 'url("https://mephar-sit.acdtech.asia/_next/image/?url=https%3A%2F%2Fmephar-sit-api.acdtech.asia%2F%2Fupload%2Fimages%2F2024-06-14%2Fed4c6e71-4f03-42a0-8bac-a7238ce4c63b.jpeg&w=256&q=75")' }}>
+              <div className={` h-[220px] rounded-2xl overflow-hidden relative bg-bottom bg-cover`} style={{ backgroundImage: `url(${getImage(storeDetail?.data?.logo?.path)})` }}>
                 <div className='flex gap-3 items-center absolute top-1/2 -translate-y-1/2 px-9 z-50'>
-                  <div className='w-[100px] h-[100px] flex-shrink-0 rounded-full overflow-hidden'>
-                    <img className='w-full h-full object-cover' src="https://mephar-sit.acdtech.asia/_next/image/?url=https%3A%2F%2Fmephar-sit-api.acdtech.asia%2F%2Fupload%2Fimages%2F2024-06-14%2Fed4c6e71-4f03-42a0-8bac-a7238ce4c63b.jpeg&w=256&q=75" alt="" />
+                  <div className='w-[100px] h-[100px] flex-shrink-0 rounded-full overflow-hidden bg-white'>
+                    <Image width={100} height={100} objectFit='scale-down' className='w-full h-full object-cover' src={getImage(storeDetail?.data?.logo?.path) || Logo} alt="" />
                   </div>
                   <div className='text-white flex flex-col gap-2'>
-                    <h4 className='text-xl font-semibold line-clamp-1'>TIM Care Diamond TIM Care Diamond TIM Care Diamond</h4>
-                    <p className='text-[#FAFAFC]'>Chi nhánh Hà Nội</p>
+                    <h4 className='text-xl font-semibold line-clamp-1'>{storeDetail?.data?.name}</h4>
+                    {/* <p className='text-[#FAFAFC]'>Chi nhánh Hà Nội</p> */}
                   </div>
                 </div>
                 <div className='absolute w-full h-full top-0 bottom-0 left-0 right-0 z-10' style={{ backgroundColor: 'rgba(0, 0, 0, .5)' }}>
@@ -66,19 +82,27 @@ function StoreDetail() {
             <div className='col-span-7 grid grid-cols-2'>
               <div className='flex items-center'>
                 <span className='w-40'>Tổng sản phẩm: </span>
-                <span className='text-red-main'>100</span>
+                <span className='text-red-main'>{formatNumber(storeDetail?.data?.totalProduct)}</span>
               </div>
               <div className='flex items-center'>
                 <span className='w-40'>Đã bán: </span>
-                <span className='text-red-main'>100</span>
+                <span className='text-red-main'>{formatNumber(storeDetail?.data?.totalQuantitySold)}</span>
+              </div>
+              <div className='flex items-center'>
+                <span className='w-40'>Đánh giá: </span>
+                <span className='text-red-main'>99+</span>
+              </div>
+              <div className='flex items-center'>
+                <span className='w-40'>Mức giá: </span>
+                <span className='text-red-main'>$$$</span>
               </div>
               <div className='flex items-center'>
                 <span className='w-40'>Giờ mở cửa: </span>
-                <span className='text-red-main'>100</span>
+                <span className='text-red-main'>08:00 - 22:00</span>
               </div>
               <div className='flex items-center'>
                 <span className='w-40'>Địa chỉ: </span>
-                <span className='text-red-main'>100</span>
+                <span className='text-red-main'>{storeDetail?.data?.address}</span>
               </div>
             </div>
           </div>
@@ -94,7 +118,37 @@ function StoreDetail() {
                         ? 'text-red-main'
                         : 'text-black-main'
                     )}
-                    onClick={() => setSelect(index)}
+                    onClick={() => {
+                      setSelect(index)
+                      if (index === 1) {
+                        setFormFilter({
+                          ...formFilter,
+                          sortBy: 'quantitySold'
+                        })
+                      }
+                      else if (index === 2) {
+                        // remove sortBy
+                        setFormFilter({
+                          ...formFilter,
+                          productType: 1,
+                          sortBy: undefined
+                        })
+                      }
+                      else if (index === 3) {
+                        setFormFilter({
+                          ...formFilter,
+                          productType: 2,
+                          sortBy: undefined
+                        })
+                      }
+                      else {
+                        setFormFilter({
+                          ...formFilter,
+                          sortBy: undefined,
+                          productType: undefined
+                        })
+                      }
+                    }}
                   >
                     {item}
                     {
@@ -105,11 +159,32 @@ function StoreDetail() {
               </div>
             </div>
           </div>
+          <p className='mt-6 text-[#555770] font-medium'>
+            Hiển thị {formFilter?.limit} sản phẩm trong tổng số {configProduct?.data?.totalItem} sản phẩm
+          </p>
+          <div className='mt-8'>
+            <h2 className='text-5xl font-semibold text-[#242424] text-center mb-12'>Sản phẩm mới</h2>
+            <div className='grid grid-cols-4 gap-10'>
+              {
+                isLoading ? (
+                  Array.from({ length: 8 }).map((_, index) => (
+                    <ProductCardSkeleton key={index} />
+                  ))
+                ) : configProduct?.data?.items?.map((item, index) => (
+                  <ProductCard key={item?.id} product={item} />
+                ))
+              }
+            </div>
+            <div className='flex justify-center my-12'>
+              <MarketPaginationStyled>
+                <Pagination pageSize={formFilter?.limit} current={formFilter?.page} onChange={(value) => setFormFilter({ ...formFilter, page: value })} total={configProduct?.data?.totalItem} />
+              </MarketPaginationStyled>
+            </div>
+
+          </div>
         </div>
       </div>
-      <div className=' h-36'>
 
-      </div>
     </div>
   )
 }

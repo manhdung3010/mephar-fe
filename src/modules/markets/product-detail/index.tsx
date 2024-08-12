@@ -1,10 +1,10 @@
-import { getConfigProduct, getSaleProductDetail } from '@/api/market.service';
+import { createMarketCart, getConfigProduct, getSaleProductDetail } from '@/api/market.service';
 import ArrowIcon from '@/assets/arrow-down-red-icon.svg';
 import CartIcon from '@/assets/cartIconRed.svg';
 import { CustomButton } from '@/components/CustomButton';
 import { CustomInput } from '@/components/CustomInput';
 import { formatMoney, formatNumber, getImage } from '@/helpers';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
@@ -13,11 +13,15 @@ import 'slick-carousel/slick/slick-theme.css';
 import 'slick-carousel/slick/slick.css';
 import StoreCard from './StoreCard';
 import ProductCard from '../product-list/ProductCard';
+import { message } from 'antd';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { branchState, paymentProductState } from '@/recoil/state';
 
 const ProductDetail = () => {
   const [isShowDetail, setIsShowDetail] = React.useState(false);
 
   const [images, setImages] = React.useState<any>([]);
+  const [productQuantity, setProductQuantity] = React.useState(1);
   const router = useRouter();
   const { id } = router.query;
 
@@ -37,6 +41,10 @@ const ProductDetail = () => {
     slidesToShow: 1,
     slidesToScroll: 1
   };
+
+  const branchId = useRecoilValue(branchState);
+  const [paymentProduct, setPaymentProduct] = useRecoilState(paymentProductState);
+  const queryClient = useQueryClient();
 
   const { data: configProduct, isLoading } = useQuery(
     ['MARKET_PRODUCT_DETAIL', JSON.stringify(id)],
@@ -65,6 +73,27 @@ const ProductDetail = () => {
     ['CONFIG_PRODUCT', JSON.stringify(formFilter)],
     () => getConfigProduct(formFilter),
   );
+
+  const { mutate: mutateCreateCart, isLoading: isLoadingAddCart } =
+    useMutation(
+      (marketProductId) => {
+        const payload = {
+          marketProductId,
+          branchId,
+          quantity: productQuantity,
+        }
+        return createMarketCart(payload)
+      },
+      {
+        onSuccess: async (res) => {
+          await queryClient.invalidateQueries(["MARKET_CART"]);
+        },
+        onError: (err: any) => {
+          message.error(err?.message);
+        },
+      }
+    );
+
   return (
     <div className='bg-[#fafafc]'>
       <div className="fluid-container">
@@ -112,27 +141,54 @@ const ProductDetail = () => {
                 className="!h-8 !w-[80px] text-center text-lg"
                 hasMinus={true}
                 hasPlus={true}
-                defaultValue={1}
-                // value={isNaN(quantity) ? 0 : quantity}
+                value={productQuantity}
                 type="number"
                 onChange={(value) => {
-
+                  setProductQuantity(value)
                 }}
                 onMinus={async (value) => {
-
+                  if (value < 1) {
+                    setProductQuantity(1)
+                    return
+                  }
+                  setProductQuantity(value)
                 }}
                 onPlus={async (value) => {
-
+                  setProductQuantity(value)
                 }}
                 onBlur={(e) => {
-
+                  if (e.target.value === '') {
+                    setProductQuantity(1)
+                  }
                 }}
               />
               <div className={`${configProduct?.data?.item?.quantity > 0 ? 'text-[#3E7BFA]' : 'text-red-main'} py-1 px-4 bg-[#ecf0ff] rounded`}>{configProduct?.data?.item?.quantity > 0 ? 'Còn hàng' : 'Hết hàng'}</div>
             </div>
             <div className="mt-6 space-x-3 flex pb-[22px] border-b-[1px] border-[#C7C9D9]">
-              <CustomButton outline className='!h-[46px]' prefixIcon={<Image src={CartIcon} />}>Thêm vào giỏ hàng</CustomButton>
-              <CustomButton className='!h-[46px]' >Đặt hàng</CustomButton>
+              <CustomButton outline className='!h-[46px]'
+                prefixIcon={<Image src={CartIcon} />}
+                onClick={() => mutateCreateCart(configProduct?.data?.item?.id)}
+              >
+                Thêm vào giỏ hàng
+              </CustomButton>
+              <CustomButton
+                className='!h-[46px]'
+                onClick={() => {
+                  const paymentProduct = [{
+                    branchId: configProduct?.data?.item?.branchId,
+                    products: [{
+                      ...configProduct?.data?.item,
+                      marketProduct: configProduct?.data?.item,
+                      marketProductId: configProduct?.data?.item?.id,
+                      quantity: productQuantity,
+                    }]
+                  }]
+                  setPaymentProduct(paymentProduct)
+                  router.push('/markets/payment')
+                }}
+              >
+                Đặt hàng
+              </CustomButton>
             </div>
 
             <div className=' mt-6 flex flex-col gap-3'>

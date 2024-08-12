@@ -69,16 +69,21 @@ function ProductCard({ product }: { product: any }) {
 
   return (
     <div className='shadow-md hover:shadow-xl transition-all rounded-[19px] overflow-hidden'>
-      <div className='w-full cursor-pointer' onClick={() => router.push(`/markets/products/${product?.id}`)}>
+      <div className='w-full cursor-pointer relative flex' onClick={() => router.push(`/markets/products/${product?.id}`)}>
         <Image className='object-cover' height={190} width={272} src={getImage(product?.imageCenter?.path)} />
+        {
+          product?.discountPrice > 0 && <div className='absolute bottom-2 left-[14px] bg-[#2F80ED] rounded-[48px] px-3 text-base text-white py-1'>Extra discount</div>
+        }
       </div>
       <div className='p-4 pb-5 flex flex-col gap-3'>
         <h3 className='text-base font-semibold line-clamp-1 cursor-pointer' onClick={() => {
           router.push(`/markets/products/${product?.id}`)
         }}>{product?.product?.name}</h3>
         <div className='flex items-center gap-3'>
-          <span className='text-red-main text-xl font-semibold'>{formatMoney(product?.price)}</span>
-          <span className='text-xl font-medium text-[#999999] line-through'>{formatMoney(product?.discountPrice)}</span>
+          <span className='text-red-main text-xl font-semibold'>{formatMoney(product?.discountPrice > 0 ? product?.discountPrice : product?.price)}</span>
+          {
+            product?.discountPrice > 0 && <span className='text-xl font-medium text-[#999999] line-through'>{formatMoney(product?.price)}</span>
+          }
         </div>
         <div className='flex justify-between'>
           <span>{product?.address || 'Hà Nội'}</span>

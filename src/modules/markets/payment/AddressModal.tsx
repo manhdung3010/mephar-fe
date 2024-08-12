@@ -1,6 +1,6 @@
 import { CustomButton } from '@/components/CustomButton'
 import { CustomModal } from '@/components/CustomModal'
-import { Radio } from 'antd'
+import { message, Radio } from 'antd'
 import React from 'react'
 import EditIcon from '@/assets/editIcon.svg'
 import PlusIcon from '@/assets/plusIcon.svg'
@@ -78,11 +78,18 @@ function AddressModal({ isOpen, onCancel, onSave }) {
 
       <div className="flex justify-end gap-2">
         <CustomButton outline type='original' className='!w-[180px] !h-11' onClick={onCancel}>Hủy</CustomButton>
-        <CustomButton className='!w-[180px] !h-11' onClick={() => {
-          const newSelectedAddress = address?.data?.items?.find((item) => item?.id === selectedAddress);
-          onSave(newSelectedAddress);
-          onCancel();
-        }}>Xác nhận</CustomButton>
+        <CustomButton className='!w-[180px] !h-11'
+          onClick={() => {
+            const newSelectedAddress = address?.data?.items?.find((item) => item?.id === selectedAddress);
+            if (!newSelectedAddress) {
+              message.error('Vui lòng chọn địa chỉ nhận hàng');
+              return;
+            }
+            onSave(newSelectedAddress);
+            onCancel();
+          }}>
+          Xác nhận
+        </CustomButton>
       </div>
 
       <AddAddressModal isOpen={openAddAddress} onCancel={() => setOpenAddAddress(false)} addressId={selectedAddress?.id} />

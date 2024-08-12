@@ -124,7 +124,6 @@ function Cart() {
   }
 
   const caculateMoney = (products) => {
-    console.log('products', products)
     return (products?.marketProduct?.discountPrice > 0 ? products?.marketProduct?.discountPrice : products?.price) * products?.quantity
   }
 

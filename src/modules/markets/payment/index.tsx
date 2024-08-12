@@ -143,7 +143,7 @@ function Payment() {
             paymentProduct[0]?.products?.map((product) => (
               <div className='p-[14px] grid grid-cols-10 text-center items-center' key={product?.id}>
                 <div className='col-span-4 flex items-center gap-5'>
-                  <Image src={getImage(product?.marketProduct?.imageCenter?.path)} width={80} height={80} className='object-cover rounded-lg border-[1px] border-[#E4E4EB]' />
+                  <Image src={getImage(product?.marketProduct?.imageCenter?.path || product?.imageCenter?.path)} width={80} height={80} className='object-cover rounded-lg border-[1px] border-[#E4E4EB]' />
                   <span className='text-base font-medium'>{product?.marketProduct?.product?.name}</span>
                 </div>
                 <div className='col-span-2 flex items-center justify-center gap-1'>

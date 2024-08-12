@@ -2,8 +2,9 @@ import { getConfigProduct } from '@/api/market.service';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import ProductCard from './ProductCard';
-import { Skeleton } from 'antd'; // Import Skeleton from Ant Design
+import { Pagination, Skeleton } from 'antd'; // Import Skeleton from Ant Design
 import ProductCardSkeleton from './ProductCardSkeleton';
+import { MarketPaginationStyled } from '@/components/CustomPagination/styled';
 
 function MarketProductList() {
   const [formFilter, setFormFilter] = useState({
@@ -38,6 +39,12 @@ function MarketProductList() {
             <ProductCard product={product} key={product.id} />
           ))
         )}
+      </div>
+
+      <div className='flex justify-center my-12'>
+        <MarketPaginationStyled>
+          <Pagination pageSize={formFilter?.limit} current={formFilter?.page} onChange={(value) => setFormFilter({ ...formFilter, page: value })} total={configProduct?.data?.totalItem} />
+        </MarketPaginationStyled>
       </div>
     </div>
   );

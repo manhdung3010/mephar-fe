@@ -87,3 +87,6 @@ export function createMarketOrder(payload) {
 export function getMarketStore() {
   return axiosClient.get(`market/sell/store`);
 }
+export function getMarketStoreDetail(id: string) {
+  return axiosClient.get(`market/sell/store/${id}`);
+}
