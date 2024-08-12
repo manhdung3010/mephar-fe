@@ -9,7 +9,7 @@ import { MarketPaginationStyled } from '@/components/CustomPagination/styled';
 function MarketProductList() {
   const [formFilter, setFormFilter] = useState({
     page: 1,
-    limit: 12,
+    limit: 16,
     keyword: "",
     status: "",
     "createdAt[start]": undefined,

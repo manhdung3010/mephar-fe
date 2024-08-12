@@ -16,7 +16,7 @@ function StoreCard({ store, branch }: { store: any, branch: any }) {
         <div className='flex flex-col gap-2'>
           <h4 className='text-xl font-semibold'>{store?.name}</h4>
           <p className='text-gray-400'>{branch?.name}</p>
-          <CustomButton className='!h-8 !rounded-lg' outline onClick={() => router.push(`/markets/stores/${store?.id}`)}>Xem cửa hàng</CustomButton>
+          <CustomButton className='!h-8 !rounded-lg !w-[100px]' outline onClick={() => router.push(`/markets/stores/${store?.id}`)}>Xem cửa hàng</CustomButton>
         </div>
       </div>
       <div className='flex flex-col gap-8 pl-[42px]'>

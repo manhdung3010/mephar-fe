@@ -1,18 +1,17 @@
-import React, { useState } from 'react'
-import classNames from 'classnames'
-import { useRouter } from 'next/router';
-import { useQuery } from '@tanstack/react-query';
 import { getConfigProduct, getMarketStoreDetail } from '@/api/market.service';
-import { useRecoilValue } from 'recoil';
-import { branchState } from '@/recoil/state';
+import { MarketPaginationStyled } from '@/components/CustomPagination/styled';
 import { formatNumber, getImage } from '@/helpers';
+import Logo from "@/public/apple-touch-icon.png";
+import { branchState } from '@/recoil/state';
+import { useQuery } from '@tanstack/react-query';
+import { Pagination } from 'antd';
+import classNames from 'classnames';
+import Image from 'next/image';
+import { useRouter } from 'next/router';
+import { useState } from 'react';
+import { useRecoilValue } from 'recoil';
 import ProductCard from '../product-list/ProductCard';
 import ProductCardSkeleton from '../product-list/ProductCardSkeleton';
-import CustomPagination from '@/components/CustomPagination';
-import { Pagination } from 'antd';
-import { MarketPaginationStyled } from '@/components/CustomPagination/styled';
-import Logo from "@/public/apple-touch-icon.png";
-import Image from 'next/image';
 
 function StoreDetail() {
 
@@ -23,7 +22,7 @@ function StoreDetail() {
 
   const [formFilter, setFormFilter] = useState<any>({
     page: 1,
-    limit: 5,
+    limit: 16,
     keyword: "",
     type: "",
     status: "",
@@ -65,7 +64,7 @@ function StoreDetail() {
 
           <div className='grid grid-cols-12 gap-8 mt-3'>
             <div className='col-span-5'>
-              <div className={` h-[220px] rounded-2xl overflow-hidden relative bg-bottom bg-cover`} style={{ backgroundImage: `url(${getImage(storeDetail?.data?.logo?.path)})` }}>
+              <div className={`h-[220px] rounded-2xl overflow-hidden relative bg-bottom bg-cover`} style={{ backgroundImage: `url(${getImage(storeDetail?.data?.logo?.path)})` }}>
                 <div className='flex gap-3 items-center absolute top-1/2 -translate-y-1/2 px-9 z-50'>
                   <div className='w-[100px] h-[100px] flex-shrink-0 rounded-full overflow-hidden bg-white'>
                     <Image width={100} height={100} objectFit='scale-down' className='w-full h-full object-cover' src={getImage(storeDetail?.data?.logo?.path) || Logo} alt="" />
@@ -159,32 +158,34 @@ function StoreDetail() {
               </div>
             </div>
           </div>
-          <p className='mt-6 text-[#555770] font-medium'>
-            Hiển thị {formFilter?.limit} sản phẩm trong tổng số {configProduct?.data?.totalItem} sản phẩm
-          </p>
-          <div className='mt-8'>
-            <h2 className='text-5xl font-semibold text-[#242424] text-center mb-12'>Sản phẩm mới</h2>
-            <div className='grid grid-cols-4 gap-10'>
-              {
-                isLoading ? (
-                  Array.from({ length: 8 }).map((_, index) => (
-                    <ProductCardSkeleton key={index} />
-                  ))
-                ) : configProduct?.data?.items?.map((item, index) => (
-                  <ProductCard key={item?.id} product={item} />
-                ))
-              }
-            </div>
-            <div className='flex justify-center my-12'>
-              <MarketPaginationStyled>
-                <Pagination pageSize={formFilter?.limit} current={formFilter?.page} onChange={(value) => setFormFilter({ ...formFilter, page: value })} total={configProduct?.data?.totalItem} />
-              </MarketPaginationStyled>
-            </div>
-
-          </div>
         </div>
       </div>
+      <div className='fluid-container'>
+        <p className='mt-6 text-[#555770] font-medium'>
+          Hiển thị {(formFilter.page - 1) * formFilter.limit + 1} - {Math.min(formFilter.page * formFilter.limit, configProduct?.data?.totalItem)} trong tổng số {formatNumber(configProduct?.data?.totalItem)} sản phẩm
+        </p>
 
+        <div className='mt-8'>
+          <h2 className='text-5xl font-semibold text-[#242424] text-center mb-12'>Sản phẩm mới</h2>
+          <div className='grid grid-cols-4 gap-10'>
+            {
+              isLoading ? (
+                Array.from({ length: 8 }).map((_, index) => (
+                  <ProductCardSkeleton key={index} />
+                ))
+              ) : configProduct?.data?.items?.map((item, index) => (
+                <ProductCard key={item?.id} product={item} />
+              ))
+            }
+          </div>
+          <div className='flex justify-center py-12'>
+            <MarketPaginationStyled>
+              <Pagination pageSize={formFilter?.limit} current={formFilter?.page} onChange={(value) => setFormFilter({ ...formFilter, page: value })} total={configProduct?.data?.totalItem} />
+            </MarketPaginationStyled>
+          </div>
+
+        </div>
+      </div>
     </div>
   )
 }
