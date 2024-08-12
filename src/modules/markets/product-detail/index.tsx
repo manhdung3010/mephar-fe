@@ -1,4 +1,4 @@
-import { getSaleProductDetail } from '@/api/market.service';
+import { getConfigProduct, getSaleProductDetail } from '@/api/market.service';
 import ArrowIcon from '@/assets/arrow-down-red-icon.svg';
 import CartIcon from '@/assets/cartIconRed.svg';
 import { CustomButton } from '@/components/CustomButton';
@@ -7,11 +7,12 @@ import { formatMoney, formatNumber, getImage } from '@/helpers';
 import { useQuery } from '@tanstack/react-query';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Slider from "react-slick";
 import 'slick-carousel/slick/slick-theme.css';
 import 'slick-carousel/slick/slick.css';
 import StoreCard from './StoreCard';
+import ProductCard from '../product-list/ProductCard';
 
 const ProductDetail = () => {
   const [isShowDetail, setIsShowDetail] = React.useState(false);
@@ -49,7 +50,21 @@ const ProductDetail = () => {
     }
   }, [configProduct])
 
-  console.log('images', images)
+  const [formFilter, setFormFilter] = useState({
+    page: 1,
+    limit: 5,
+    keyword: "",
+    status: "",
+    "createdAt[start]": undefined,
+    "createdAt[end]": undefined,
+    sortBy: "quantitySold",
+    type: 'common'
+  });
+
+  const { data: configProductList, isLoading: isLoadingProductList } = useQuery(
+    ['CONFIG_PRODUCT', JSON.stringify(formFilter)],
+    () => getConfigProduct(formFilter),
+  );
   return (
     <div className='bg-[#fafafc]'>
       <div className="fluid-container">
@@ -155,25 +170,25 @@ const ProductDetail = () => {
 
             <div className='mt-6'>
               <h2 className='text-[32px] font-semibold'>Sản phẩm khác của đại lý</h2>
-              {/* <div className='grid grid-cols-3 gap-10 mt-6 '>
+              <div className='grid grid-cols-3 gap-10 mt-6 '>
                 {
                   configProduct?.data?.item?.productWillCare?.map((product) => (
                     <ProductCard product={product} key={product.id} />
                   ))
                 }
-              </div> */}
+              </div>
             </div>
           </div>
-          {/* <div className='col-span-3'>
+          <div className='col-span-3'>
             <h4 className='text-center text-base font-bold mb-4'>Có thể bạn muốn mua</h4>
             <div className='grid grid-col-1 gap-10'>
               {
-                productList?.slice(0, 4).map((product) => (
+                configProductList?.data?.items?.map((product) => (
                   <ProductCard product={product} key={product.id} />
                 ))
               }
             </div>
-          </div> */}
+          </div>
         </div>
       </div>
 

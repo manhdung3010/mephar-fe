@@ -68,7 +68,7 @@ function ProductCard({ product }: { product: any }) {
   );
 
   return (
-    <div className='shadow-lg rounded-[19px] overflow-hidden'>
+    <div className='shadow-md hover:shadow-xl transition-all rounded-[19px] overflow-hidden'>
       <div className='w-full cursor-pointer' onClick={() => router.push(`/markets/products/${product?.id}`)}>
         <Image className='object-cover' height={190} width={272} src={getImage(product?.imageCenter?.path)} />
       </div>
