@@ -224,7 +224,7 @@ function Payment() {
           setSelectedAddress(selectedAddress)
         }}
       />
-      <OrderModal isOpen={openOrderSuccess} onCancel={() => setOpenOrderSuccess(false)} orderInfo={orderInfo} />
+      <OrderModal isOpen={openOrderSuccess} onCancel={() => setOpenOrderSuccess(false)} orderInfo={orderInfo} totalMoney={totalMoney + shipFee} />
     </div>
   )
 }

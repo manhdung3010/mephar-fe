@@ -1,9 +1,16 @@
-import React from 'react'
+import React, { useState } from 'react'
 import StoreCard from '../product-detail/StoreCard'
 import { useQuery } from '@tanstack/react-query';
 import { getMarketStore } from '@/api/market.service';
+import { MarketPaginationStyled } from '@/components/CustomPagination/styled';
+import { Pagination } from 'antd';
 
 function Store() {
+  const [formFilter, setFormFilter] = useState<any>({
+    page: 1,
+    limit: 10,
+    keyword: "",
+  });
   const { data: stores, isLoading } = useQuery(
     ['MARKET_STORE'],
     () => getMarketStore(),
@@ -29,6 +36,12 @@ function Store() {
               <StoreCard key={index} store={item} branch={null} />
             ))
           }
+        </div>
+
+        <div className='flex justify-center py-12'>
+          <MarketPaginationStyled>
+            <Pagination pageSize={formFilter?.limit} current={formFilter?.page} onChange={(value) => setFormFilter({ ...formFilter, page: value })} total={stores?.data?.totalItem} />
+          </MarketPaginationStyled>
         </div>
       </div>
     </div>

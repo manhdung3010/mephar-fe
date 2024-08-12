@@ -28,8 +28,8 @@ const ProductDetail = () => {
   const settings = {
     customPaging: function (i) {
       return (
-        <a className='h-24 w-24 '>
-          <img className='object-cover h-full border-[#C7C9D9] border-[1px] rounded overflow-hidden' src={images[i]?.filePath} />
+        <a className=''>
+          <Image width={83} height={83} className='object-cover h-full border-[#C7C9D9] border-[1px] rounded overflow-hidden' src={getImage(images[i]?.path)} />
         </a>
       );
     },

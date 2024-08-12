@@ -110,6 +110,11 @@ export const MarketPaginationStyled = styled.div`
 
     &:hover {
       opacity: 0.8;
+      border: 1px solid #d64457;
+      color: #d64457;
+      a {
+        color: #d64457;
+      }
     }
 
     a {

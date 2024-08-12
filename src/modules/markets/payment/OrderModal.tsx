@@ -6,7 +6,7 @@ import { CustomButton } from '@/components/CustomButton'
 import { formatDateTime, formatMoney } from '@/helpers'
 import { useRouter } from 'next/router'
 
-function OrderModal({ isOpen, onCancel, orderInfo }) {
+function OrderModal({ isOpen, onCancel, orderInfo, totalMoney }) {
   const router = useRouter()
   return (
     <CustomModal
@@ -33,7 +33,7 @@ function OrderModal({ isOpen, onCancel, orderInfo }) {
           </div>
           <div className='flex justify-between items-center'>
             <p className='text-[#8F90A6]'>Tổng tiền:</p>
-            <p className='text-red-main'>{formatMoney(1000000)}</p>
+            <p className='text-red-main'>{formatMoney(+totalMoney)}</p>
           </div>
           <div className='flex justify-between items-center'>
             <p className='text-[#8F90A6]'>Phương thức thanh toán:</p>
