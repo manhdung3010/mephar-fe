@@ -15,6 +15,7 @@ import { createMarketOrder, getShipAddress } from '@/api/market.service'
 import { message } from 'antd'
 import OrderModal from './OrderModal'
 
+export const shipFee = 50000;
 function Payment() {
   const [paymentProduct, setPaymentProduct] = useRecoilState<any>(paymentProductState);
   const [openAddress, setOpenAddress] = React.useState(false);
@@ -42,7 +43,7 @@ function Payment() {
     }, 0)
   }, [paymentProduct[0]?.products])
 
-  const shipFee = 50000;
+
   const calculateDeliveryDate = (daysToAdd) => {
     const date = new Date();
     date.setDate(date.getDate() + daysToAdd);

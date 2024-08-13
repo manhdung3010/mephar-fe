@@ -82,6 +82,12 @@ export function getShipAddressDetail(id: string, branchId: string) {
 export function createMarketOrder(payload) {
   return axiosClient.post(`market/sell/market-order`, payload);
 }
+export function getMarketOrder(params) {
+  return axiosClient.get(`market/sell/market-order`, { params });
+}
+export function getMarketOrderDetail(id: string) {
+  return axiosClient.get(`market/sell/market-order/${id}`);
+}
 
 // store
 export function getMarketStore() {
