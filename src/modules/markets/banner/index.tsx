@@ -31,7 +31,7 @@ function MarketBanner() {
       </div>
       <div className='col-span-1 flex flex-col gap-5'>
         <Image src={Banner1} alt="" />
-        <Image src={Banner2} alt="" />
+        <Image src={Banner1} alt="" />
       </div>
     </div>
   )
