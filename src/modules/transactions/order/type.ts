@@ -1,4 +1,5 @@
 import { EDiscountType, EGender, EOrderStatus } from "@/enums";
+import { EOrderMarketStatus } from "@/modules/markets/type";
 
 export interface IOrder {
   id: number;
@@ -11,7 +12,7 @@ export interface IOrder {
   creator?: any;
   customer: { fullName: string };
   delivery: string;
-  status: EOrderStatus;
+  status: EOrderMarketStatus;
   createdAt: string;
   note: string;
   totalPrice: number;

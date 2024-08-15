@@ -1,27 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
 import { Select } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import cx from "classnames";
+import { debounce } from "lodash";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
-import { debounce } from "lodash";
-
-import { getOrder } from "@/api/order.service";
 import ArrowDownIcon from "@/assets/arrowDownGray.svg";
 import ExportIcon from "@/assets/exportFileIcon.svg";
 import ImportIcon from "@/assets/importFileIcon.svg";
-import PlusIcon from "@/assets/plusWhiteIcon.svg";
-import { CustomButton } from "@/components/CustomButton";
 import CustomPagination from "@/components/CustomPagination";
 import CustomTable from "@/components/CustomTable";
-import { EOrderStatus, EOrderStatusLabel } from "@/enums";
 import { formatMoney } from "@/helpers";
 import { branchState } from "@/recoil/state";
-
+import { getMarketOrder } from "@/api/market.service";
+import { EOrderMarketStatus, EOrderMarketStatusLabel } from "@/modules/markets/type";
 import OrderDetail from "./row-detail";
-import { IOrder } from "./type";
 import Search from "./Search";
+import { IOrder } from "./type";
 
 export function OrderTransaction() {
   const branchId = useRecoilValue(branchState);
@@ -36,13 +31,12 @@ export function OrderTransaction() {
     page: 1,
     limit: 20,
     keyword: '',
-    dateRange: { startDate: undefined, endDate: undefined },
-    status: undefined,
+    type: 'sell',
   });
 
   const { data: orders, isLoading } = useQuery(
-    ['ORDER_LIST', formFilter, branchId],
-    () => getOrder({ ...formFilter, branchId })
+    ['MAKET_ORDER', formFilter, branchId],
+    () => getMarketOrder({ ...formFilter, branchId })
   );
 
   const filterData = (keyword: string) => {
@@ -113,25 +107,29 @@ export function OrderTransaction() {
     },
     {
       title: "Tổng số SP",
-      dataIndex: "totalProducts",
-      key: "totalProducts",
+      dataIndex: "products",
+      key: "products",
+      render: (products) => products?.length,
     },
     {
       title: "Tổng tiền thanh toán",
       dataIndex: "cashOfCustomer",
       key: "cashOfCustomer",
-      render: (value) => formatMoney(value),
-    },
-    {
-      title: "Doanh thu",
-      dataIndex: "earnMoney",
-      key: "earnMoney",
+      render: (value, record) => (
+        <span className="text-red-main font-medium">
+          {formatMoney(
+            record?.products?.reduce(
+              (acc, cur) => acc + cur.price * cur.quantity,
+              0
+            )
+          )}
+        </span>)
     },
     {
       title: "Người mua",
-      dataIndex: "customer",
-      key: "customer",
-      render: (data) => data?.fullName,
+      dataIndex: "branch",
+      key: "branch",
+      render: (data) => data?.store?.name,
     },
     // {
     //   title: "ĐVVC",
@@ -144,21 +142,16 @@ export function OrderTransaction() {
       key: "status",
       render: (_, { status }) => (
         <div
-          className={cx(
-            {
-              "text-[#FF8800] border border-[#FF8800] bg-[#fff]":
-                status === EOrderStatus.PENDING,
-              "text-[#00B63E] border border-[#00B63E] bg-[#DEFCEC]":
-                status === EOrderStatus.SUCCEED,
-              "text-[#0070F4] border border-[#0070F4] bg-[#E4F0FE]":
-                status === EOrderStatus.DELIVERING,
-              "text-[#EA2020] border border-[#EA2020] bg-[#FFE7E9]":
-                status === EOrderStatus.CANCELLED,
-            },
-            "px-2 py-1 rounded-2xl w-max"
-          )}
+          className={
+            `py-1 px-2 rounded-2xl border-[1px]  w-max
+          ${status === EOrderMarketStatus.PENDING && ' bg-[#fff2eb] border-[#FF8800] text-[#FF8800]'}
+          ${status === EOrderMarketStatus.CONFIRM || status === EOrderMarketStatus.PROCESSING || status === EOrderMarketStatus.SEND && ' bg-[#e5f0ff] border-[#0063F7] text-[#0063F7]'}
+          ${status === EOrderMarketStatus.DONE && ' bg-[#e3fff1] border-[#05A660] text-[#05A660]'}
+          ${status === EOrderMarketStatus.CANCEL || status === EOrderMarketStatus.CLOSED && ' bg-[#ffe5e5] border-[#FF3B3B] text-[#FF3B3B]'}
+          `
+          }
         >
-          {EOrderStatusLabel[status]}
+          {EOrderMarketStatusLabel[status?.toUpperCase()]}
         </div>
       ),
     },
@@ -192,7 +185,7 @@ export function OrderTransaction() {
         </CustomButton> */}
       </div>
 
-      {/* <div className="mb-2 bg-white">
+      <div className="mb-2 bg-white">
         <div className="flex items-center border-b border-[#C7C9D9] p-5">
           <span className="mr-6 font-bold text-[#15171A]">
             ĐƠN HÀNG CẦN XỬ LÝ
@@ -277,7 +270,7 @@ export function OrderTransaction() {
             <div className="text-xl font-medium text-[#182537]">0</div>
           </div>
         </div>
-      </div> */}
+      </div>
 
       <Search setFormFilter={setFormFilter} formFilter={formFilter} />
 

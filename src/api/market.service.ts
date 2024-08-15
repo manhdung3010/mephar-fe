@@ -89,6 +89,11 @@ export function getMarketOrderDetail(id: string) {
   return axiosClient.get(`market/sell/market-order/${id}`);
 }
 
+// update order status
+export function updateMarketOrderStatus(id: string, payload) {
+  return axiosClient.patch(`market/sell/market-order/${id}`, payload);
+}
+
 // store
 export function getMarketStore() {
   return axiosClient.get(`market/sell/store`);
