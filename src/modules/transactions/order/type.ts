@@ -12,7 +12,7 @@ export interface IOrder {
   creator?: any;
   customer: { fullName: string };
   delivery: string;
-  status: EOrderMarketStatus;
+  status: EOrderMarketStatus | EOrderStatus;
   createdAt: string;
   note: string;
   totalPrice: number;
