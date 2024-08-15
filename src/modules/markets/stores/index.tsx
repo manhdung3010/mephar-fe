@@ -32,7 +32,7 @@ function Store() {
 
         <div className='grid grid-cols-1 gap-5 mt-6'>
           {
-            stores?.data.map((item, index) => (
+            stores?.data?.items?.map((item, index) => (
               <StoreCard key={index} store={item} branch={null} />
             ))
           }

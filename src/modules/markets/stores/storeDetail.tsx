@@ -1,10 +1,10 @@
-import { getConfigProduct, getMarketStoreDetail } from '@/api/market.service';
+import { createFollowStore, getConfigProduct, getFollowStore, getMarketStoreDetail } from '@/api/market.service';
 import { MarketPaginationStyled } from '@/components/CustomPagination/styled';
 import { formatNumber, getImage } from '@/helpers';
 import Logo from "@/public/apple-touch-icon.png";
 import { branchState } from '@/recoil/state';
-import { useQuery } from '@tanstack/react-query';
-import { Pagination } from 'antd';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { message, Pagination } from 'antd';
 import classNames from 'classnames';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
@@ -12,6 +12,11 @@ import { useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import ProductCard from '../product-list/ProductCard';
 import ProductCardSkeleton from '../product-list/ProductCardSkeleton';
+import { CustomButton } from '@/components/CustomButton';
+import CartPlusIcon from '@/assets/cart-plus.svg';
+import CartHeartIcon from '@/assets/cart-heart.svg';
+import { EFollowStoreStatus } from '../type';
+import { LoadingIcon } from '@/components/LoadingIcon';
 
 function StoreDetail() {
 
@@ -19,6 +24,7 @@ function StoreDetail() {
   const { id } = router.query
   const branchId = useRecoilValue(branchState);
   const [select, setSelect] = useState(0);
+  const queryClient = useQueryClient();
 
   const [formFilter, setFormFilter] = useState<any>({
     page: 1,
@@ -29,13 +35,15 @@ function StoreDetail() {
     "createdAt[start]": undefined,
     "createdAt[end]": undefined,
     isConfig: true,
-    storeId: id,
     branchId
   });
 
   const { data: configProduct, isLoading } = useQuery(
-    ['CONFIG_PRODUCT', JSON.stringify(formFilter)],
-    () => getConfigProduct(formFilter),
+    ['CONFIG_PRODUCT', JSON.stringify(formFilter), id],
+    () => getConfigProduct({ ...formFilter, storeId: id }),
+    {
+      enabled: !!id
+    }
   );
   const { data: storeDetail, isLoading: isLoadingStoreDetail } = useQuery(
     ['MARKET_STORE_DETAIL', id],
@@ -44,6 +52,32 @@ function StoreDetail() {
       enabled: !!id
     }
   );
+  const { data: followStore, isLoading: isLoadingFollowStore } = useQuery(
+    ['FOLLOW_STORE', id],
+    () => getFollowStore(String(id)),
+    {
+      enabled: !!id
+    }
+  );
+
+  const { mutate: muateCreateFollow, isLoading: isLoadingCreateFollow } =
+    useMutation(
+      () => {
+        const payload = {
+          listAgency: [id],
+          isFollow: true
+        }
+        return createFollowStore(payload)
+      },
+      {
+        onSuccess: async (res) => {
+          await queryClient.invalidateQueries(["FOLLOW_STORE"]);
+        },
+        onError: (err: any) => {
+          message.error(err?.message);
+        },
+      }
+    );
 
   const menu = ['Sản phẩm mới', 'Bán chạy', 'Thuốc', 'Thực phẩm'];
   return (
@@ -71,7 +105,34 @@ function StoreDetail() {
                   </div>
                   <div className='text-white flex flex-col gap-2'>
                     <h4 className='text-xl font-semibold line-clamp-1'>{storeDetail?.data?.name}</h4>
-                    {/* <p className='text-[#FAFAFC]'>Chi nhánh Hà Nội</p> */}
+                    <button
+                      className={`bg-white rounded-lg ${(followStore?.data?.status === EFollowStoreStatus.FALSE || followStore?.data?.status === EFollowStoreStatus.PENDING) ? 'text-red-main' : 'text-[#05A660]'} py-2 px-4 `}
+                    >
+                      {
+                        followStore?.data?.status === EFollowStoreStatus.FALSE && (
+                          <p className='flex items-center gap-2' onClick={() => muateCreateFollow()}>
+                            <Image src={CartPlusIcon} />
+                            <span className='text-base font-medium'>Đăng ký mua hàng</span>
+                          </p>
+                        )
+                      }
+                      {
+                        followStore?.data?.status === EFollowStoreStatus.PENDING && (
+                          <p className='flex items-center gap-2'>
+                            <LoadingIcon />
+                            <span className='text-base font-medium'>Đang chờ duyệt</span>
+                          </p>
+                        )
+                      }
+                      {
+                        followStore?.data?.status === EFollowStoreStatus.ACTIVE && (
+                          <p className='flex items-center gap-2'>
+                            <Image src={CartHeartIcon} />
+                            <span className='text-base font-medium'>Đã đăng ký mua hàng</span>
+                          </p>
+                        )
+                      }
+                    </button>
                   </div>
                 </div>
                 <div className='absolute w-full h-full top-0 bottom-0 left-0 right-0 z-10' style={{ backgroundColor: 'rgba(0, 0, 0, .5)' }}>

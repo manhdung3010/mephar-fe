@@ -17,3 +17,14 @@ export enum EOrderMarketStatusLabel {
   CANCEL = "Giao hàng thất bại",
   CLOSED = "Đã hủy",
 }
+
+export enum EFollowStoreStatus {
+  FALSE = "false",
+  PENDING = "pending",
+  ACTIVE = "active",
+}
+export enum EAcceptFollowStoreStatus {
+  CANCLE = "cancle",
+  PENDING = "pending",
+  ACTIVE = "active",
+}

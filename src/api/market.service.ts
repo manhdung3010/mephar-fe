@@ -96,3 +96,17 @@ export function getMarketStore() {
 export function getMarketStoreDetail(id: string) {
   return axiosClient.get(`market/sell/store/${id}`);
 }
+
+// follow store
+export function getFollowStore(id: string) {
+  return axiosClient.get(`market/config/agency/${id}`);
+}
+export function createFollowStore(payload) {
+  return axiosClient.post(`market/config/agency`, payload);
+}
+export function getAllFollowStore(params) {
+  return axiosClient.get(`market/config/agency`, { params });
+}
+export function updateStoreStatus(id: string, status: string) {
+  return axiosClient.patch(`market/config/agency/${id}/${status}`);
+}

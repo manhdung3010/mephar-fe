@@ -11,7 +11,7 @@ import StickyNoteIcon from '@/assets/stickynote.svg'
 import { shipFee } from '../payment';
 import GHNIcon from '@/assets/giaohangnhanh.svg'
 
-function BuyOrderDetail() {
+function SaleOrderDetail() {
   const profile = useRecoilValue(profileState)
   const router = useRouter();
   const { id } = router.query;
@@ -146,4 +146,4 @@ function BuyOrderDetail() {
   )
 }
 
-export default BuyOrderDetail
+export default SaleOrderDetail
