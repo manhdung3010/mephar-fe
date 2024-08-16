@@ -38,8 +38,8 @@ function MarketHeader() {
   });
 
   const { data: configProduct, isLoading } = useQuery(
-    ['CONFIG_PRODUCT', JSON.stringify(formFilter)],
-    () => getConfigProduct(formFilter),
+    ['CONFIG_PRODUCT', JSON.stringify(formFilter), branchId],
+    () => getConfigProduct({ ...formFilter, branchId }),
     {
       enabled: tempKeyword === '' ? false : true
     }

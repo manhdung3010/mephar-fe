@@ -3,8 +3,11 @@ import classNames from 'classnames';
 import AgencyList from './AgencyList';
 import { useQuery } from '@tanstack/react-query';
 import { getAllFollowStore } from '@/api/market.service';
+import { useRecoilValue } from 'recoil';
+import { branchState } from '@/recoil/state';
 
 function Agency() {
+  const branchId = useRecoilValue(branchState);
   const [select, setSelect] = useState(0);
   const [formFilter, setFormFilter] = useState<any>({
     page: 1,
@@ -21,8 +24,8 @@ function Agency() {
   }, [select]);
 
   const { data: agency, isLoading } = useQuery(
-    ['AGENCY_LIST', JSON.stringify(formFilter)],
-    () => getAllFollowStore(formFilter),
+    ['AGENCY_LIST', JSON.stringify(formFilter), branchId],
+    () => getAllFollowStore({ ...formFilter, branchId }),
   );
 
   const menu = ['Khách hàng đã đăng ký', 'Khách hàng đã chấp nhận'];

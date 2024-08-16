@@ -47,8 +47,8 @@ const ProductDetail = () => {
   const queryClient = useQueryClient();
 
   const { data: configProduct, isLoading } = useQuery(
-    ['MARKET_PRODUCT_DETAIL', JSON.stringify(id)],
-    () => getSaleProductDetail(String(id)),
+    ['MARKET_PRODUCT_DETAIL', JSON.stringify(id), branchId],
+    () => getSaleProductDetail(String(id), branchId),
   );
 
   useEffect(() => {
@@ -70,8 +70,8 @@ const ProductDetail = () => {
   });
 
   const { data: configProductList, isLoading: isLoadingProductList } = useQuery(
-    ['CONFIG_PRODUCT', JSON.stringify(formFilter)],
-    () => getConfigProduct(formFilter),
+    ['CONFIG_PRODUCT', JSON.stringify(formFilter), branchId],
+    () => getConfigProduct({ ...formFilter, branchId }),
   );
 
   const { mutate: mutateCreateCart, isLoading: isLoadingAddCart } =
@@ -199,7 +199,7 @@ const ProductDetail = () => {
         </div>
 
         <div className='my-6'>
-          <StoreCard store={configProduct?.data?.item?.store} branch={configProduct?.data?.item?.branch} />
+          <StoreCard store={configProduct?.data?.item?.branch} branch={configProduct?.data?.item?.branch?.name} />
         </div>
 
         <div className='grid grid-cols-12  gap-10 '>

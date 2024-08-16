@@ -19,13 +19,11 @@ import { EFollowStoreStatus } from '../type';
 import { LoadingIcon } from '@/components/LoadingIcon';
 
 function StoreDetail() {
-
   const router = useRouter()
   const { id } = router.query
   const branchId = useRecoilValue(branchState);
   const [select, setSelect] = useState(0);
   const queryClient = useQueryClient();
-
   const [formFilter, setFormFilter] = useState<any>({
     page: 1,
     limit: 16,
@@ -40,7 +38,7 @@ function StoreDetail() {
 
   const { data: configProduct, isLoading } = useQuery(
     ['CONFIG_PRODUCT', JSON.stringify(formFilter), id],
-    () => getConfigProduct({ ...formFilter, storeId: id }),
+    () => getConfigProduct({ ...formFilter, otherBranchId: id }),
     {
       enabled: !!id
     }
@@ -53,8 +51,8 @@ function StoreDetail() {
     }
   );
   const { data: followStore, isLoading: isLoadingFollowStore } = useQuery(
-    ['FOLLOW_STORE', id],
-    () => getFollowStore(String(id)),
+    ['FOLLOW_STORE', id, branchId],
+    () => getFollowStore(String(id), branchId),
     {
       enabled: !!id
     }
@@ -65,7 +63,8 @@ function StoreDetail() {
       () => {
         const payload = {
           listAgency: [id],
-          isFollow: true
+          isFollow: true,
+          branchId
         }
         return createFollowStore(payload)
       },
@@ -78,7 +77,6 @@ function StoreDetail() {
         },
       }
     );
-
   const menu = ['Sản phẩm mới', 'Bán chạy', 'Thuốc', 'Thực phẩm'];
   return (
     <div className='bg-[#fafafc]'>
@@ -95,7 +93,6 @@ function StoreDetail() {
               </li>
             </ul>
           </nav>
-
           <div className='grid grid-cols-12 gap-8 mt-3'>
             <div className='col-span-5'>
               <div className={`h-[220px] rounded-2xl overflow-hidden relative bg-bottom bg-cover`} style={{ backgroundImage: `url(${getImage(storeDetail?.data?.logo?.path)})` }}>
@@ -104,7 +101,8 @@ function StoreDetail() {
                     <Image width={100} height={100} objectFit='scale-down' className='w-full h-full object-cover' src={getImage(storeDetail?.data?.logo?.path) || Logo} alt="" />
                   </div>
                   <div className='text-white flex flex-col gap-2'>
-                    <h4 className='text-xl font-semibold line-clamp-1'>{storeDetail?.data?.name}</h4>
+                    <h4 className='text-xl font-semibold line-clamp-1'>{storeDetail?.data?.store?.name}</h4>
+                    <p className='text-gray-300'>{storeDetail?.data?.name}</p>
                     <button
                       className={`bg-white rounded-lg ${(followStore?.data?.status === EFollowStoreStatus.FALSE || followStore?.data?.status === EFollowStoreStatus.PENDING) ? 'text-red-main' : 'text-[#05A660]'} py-2 px-4 `}
                     >

@@ -40,8 +40,8 @@ function Cart() {
   const [cartList, setCartList] = useState<any>([]);
 
   const { data: configProduct, isLoading } = useQuery(
-    ['CONFIG_PRODUCT', JSON.stringify(formFilter)],
-    () => getConfigProduct(formFilter),
+    ['CONFIG_PRODUCT', JSON.stringify(formFilter), branchId],
+    () => getConfigProduct({ ...formFilter, branchId }),
   );
 
   const { mutate: mutateDeleteCart, isLoading: isLoadingDelete } =

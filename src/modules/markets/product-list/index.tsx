@@ -5,8 +5,11 @@ import ProductCard from './ProductCard';
 import { Pagination, Skeleton } from 'antd'; // Import Skeleton from Ant Design
 import ProductCardSkeleton from './ProductCardSkeleton';
 import { MarketPaginationStyled } from '@/components/CustomPagination/styled';
+import { useRecoilValue } from 'recoil';
+import { branchState } from '@/recoil/state';
 
 function MarketProductList() {
+  const branchId = useRecoilValue(branchState);
   const [formFilter, setFormFilter] = useState({
     page: 1,
     limit: 16,
@@ -15,12 +18,12 @@ function MarketProductList() {
     "createdAt[start]": undefined,
     "createdAt[end]": undefined,
     sortBy: "quantitySold",
-    type: 'common'
+    type: 'common',
   });
 
   const { data: configProduct, isLoading } = useQuery(
-    ['CONFIG_PRODUCT', JSON.stringify(formFilter)],
-    () => getConfigProduct(formFilter),
+    ['CONFIG_PRODUCT', JSON.stringify(formFilter), branchId],
+    () => getConfigProduct({ ...formFilter, branchId }),
   );
 
   return (

@@ -6,10 +6,13 @@ import ProductCard from '../product-list/ProductCard';
 import ProductCardSkeleton from '../product-list/ProductCardSkeleton';
 import { MarketPaginationStyled } from '@/components/CustomPagination/styled';
 import { Pagination } from 'antd';
+import { useRecoilValue } from 'recoil';
+import { branchState } from '@/recoil/state';
 
 function MarketSearch() {
   const router = useRouter();
   const { keyword } = router.query;
+  const branchId = useRecoilValue(branchState);
 
   const [formFilter, setFormFilter] = useState<any>({
     page: 1,
@@ -31,8 +34,8 @@ function MarketSearch() {
   }, [keyword]);
 
   const { data: configProduct, isLoading } = useQuery(
-    ['CONFIG_PRODUCT', JSON.stringify(formFilter)],
-    () => getConfigProduct(formFilter),
+    ['CONFIG_PRODUCT', JSON.stringify(formFilter), branchId],
+    () => getConfigProduct({ ...formFilter, branchId }),
   );
 
   return (

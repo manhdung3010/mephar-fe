@@ -18,6 +18,8 @@ export function getConfigProduct(params: {
   "createdAt[start]"?: string;
   "createdAt[end]"?: string;
   isConfig?: boolean;
+  otherBranchId?: string;
+  branchId: string;
 }) {
   return axiosClient.get(`market/config/product`, { params });
 }
@@ -43,8 +45,8 @@ export function getAgencyGroup(params) {
 }
 
 // Chợ
-export function getSaleProductDetail(id: string) {
-  return axiosClient.get(`market/sell/product/${id}`);
+export function getSaleProductDetail(id: string, branchId: string) {
+  return axiosClient.get(`market/sell/product/${id}?branchId=${branchId}`);
 }
 export function createMarketCart(payload) {
   return axiosClient.post(`market/sell/cart`, payload);
@@ -95,16 +97,16 @@ export function updateMarketOrderStatus(id: string, payload) {
 }
 
 // store
-export function getMarketStore() {
-  return axiosClient.get(`market/sell/store`);
+export function getMarketStore(params) {
+  return axiosClient.get(`market/sell/branch`, { params });
 }
 export function getMarketStoreDetail(id: string) {
-  return axiosClient.get(`market/sell/store/${id}`);
+  return axiosClient.get(`market/sell/branch/${id}`);
 }
 
 // follow store
-export function getFollowStore(id: string) {
-  return axiosClient.get(`market/config/agency/${id}`);
+export function getFollowStore(id: string, branchId: string) {
+  return axiosClient.get(`market/config/agency/${id}?branchId=${branchId}`);
 }
 export function createFollowStore(payload) {
   return axiosClient.post(`market/config/agency`, payload);
