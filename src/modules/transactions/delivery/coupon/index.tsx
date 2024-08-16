@@ -77,11 +77,11 @@ export function DeliveryCoupon() {
     mode: "onChange",
     defaultValues: moveId
       ? {
-          branchId,
-        }
+        branchId,
+      }
       : {
-          fromBranchId: branchId,
-        },
+        fromBranchId: branchId,
+      },
   });
   const profile = useRecoilValue(profileState);
 
@@ -132,9 +132,8 @@ export function DeliveryCoupon() {
         };
         const localProduct: IImportProductLocal = {
           ...newProduct,
-          productKey: `${product.product.id || product.productId}-${
-            product.id
-          }`,
+          productKey: `${product.product.id || product.productId}-${product.id
+            }`,
           code: product.product.code,
           // inventory: product.quantity,
           productId: product.id,
@@ -315,14 +314,14 @@ export function DeliveryCoupon() {
 
     ...(moveDetail
       ? [
-          {
-            title: "SL chuyển",
-            dataIndex: "totalQuantity",
-            key: "totalQuantity",
-            render: (totalQuantity, { productKey }) =>
-              formatNumber(totalQuantity),
-          },
-        ]
+        {
+          title: "SL chuyển",
+          dataIndex: "totalQuantity",
+          key: "totalQuantity",
+          render: (totalQuantity, { productKey }) =>
+            formatNumber(totalQuantity),
+        },
+      ]
       : []),
     {
       title: `SL ${moveDetail ? "nhận" : "chuyển"}`,
@@ -353,41 +352,41 @@ export function DeliveryCoupon() {
     },
     ...(moveDetail
       ? [
-          {
-            title: "Giá chuyển",
-            dataIndex: "price",
-            key: "price",
-            render: (price, { productKey }) => (
-              <CustomInput
-                className="!w-[110px]"
-                type="number"
-                onChange={(value) =>
-                  onChangeValueProduct(productKey, "price", value)
-                }
-                value={price}
-                defaultValue={price}
-              />
-            ),
-          },
-        ]
+        {
+          title: "Giá chuyển",
+          dataIndex: "price",
+          key: "price",
+          render: (price, { productKey }) => (
+            <CustomInput
+              className="!w-[110px]"
+              type="number"
+              onChange={(value) =>
+                onChangeValueProduct(productKey, "price", value)
+              }
+              value={price}
+              defaultValue={price}
+            />
+          ),
+        },
+      ]
       : [
-          {
-            title: "Giá chuyển",
-            dataIndex: "primePrice",
-            key: "primePrice",
-            render: (price, { productKey }) => (
-              <CustomInput
-                className="!w-[110px]"
-                type="number"
-                onChange={(value) =>
-                  onChangeValueProduct(productKey, "primePrice", value)
-                }
-                value={price}
-                defaultValue={price}
-              />
-            ),
-          },
-        ]),
+        {
+          title: "Giá chuyển",
+          dataIndex: "primePrice",
+          key: "primePrice",
+          render: (price, { productKey }) => (
+            <CustomInput
+              className="!w-[110px]"
+              type="number"
+              onChange={(value) =>
+                onChangeValueProduct(productKey, "primePrice", value)
+              }
+              value={price}
+              defaultValue={price}
+            />
+          ),
+        },
+      ]),
   ];
 
   const checkDisplayListBatch = (product: IImportProductLocal) => {
@@ -515,7 +514,7 @@ export function DeliveryCoupon() {
                 value: JSON.stringify(item),
                 label: (
                   <div className="flex items-center gap-x-4 p-2">
-                    <div className=" flex h-12 w-[68px] items-center rounded border border-gray-300 p-[2px]">
+                    <div className=" flex h-12 w-[68px] flex-shrink-0 items-center rounded border border-gray-300 p-[2px]">
                       {item.product.image?.path && (
                         <Image
                           src={getImage(item.product.image?.path)}
@@ -561,18 +560,18 @@ export function DeliveryCoupon() {
                     <>
                       {moveDetail
                         ? record?.toBatches?.map((batch, index) => (
-                            <div className="bg-[#FFF3E6] px-6 py-2 ">
-                              <div className="flex items-center gap-x-3">
-                                <div
-                                  key={batch.id}
-                                  className="flex items-center rounded bg-red-main py-1 px-2 text-white"
-                                >
-                                  <span className="mr-2">
-                                    {batch.batch.name} -{" "}
-                                    {batch.batch.expiryDate} - SL:{" "}
-                                    {record.fromBatches[index].quantity}
-                                  </span>{" "}
-                                  {/* <Image
+                          <div className="bg-[#FFF3E6] px-6 py-2 ">
+                            <div className="flex items-center gap-x-3">
+                              <div
+                                key={batch.id}
+                                className="flex items-center rounded bg-red-main py-1 px-2 text-white"
+                              >
+                                <span className="mr-2">
+                                  {batch.batch.name} -{" "}
+                                  {batch.batch.expiryDate} - SL:{" "}
+                                  {record.fromBatches[index].quantity}
+                                </span>{" "}
+                                {/* <Image
                         className=" cursor-pointer"
                         src={CloseIcon}
                         onClick={() => {
@@ -583,58 +582,58 @@ export function DeliveryCoupon() {
                         }}
                         alt=""
                       /> */}
-                                </div>
                               </div>
                             </div>
-                          ))
+                          </div>
+                        ))
                         : checkDisplayListBatch(record) && (
-                            <div className="bg-[#FFF3E6] px-6 py-2 ">
-                              <div className="flex items-center gap-x-3">
-                                <div
-                                  className="ml-1 cursor-pointer font-medium text-[#0070F4]"
-                                  onClick={() => {
-                                    setProductKeyAddBatch(record.productKey);
-                                    setOpenListBatchModal(true);
-                                  }}
-                                >
-                                  Chọn lô
-                                </div>
-
-                                {record.batches?.map(
-                                  (batch) =>
-                                    batch.isSelected && (
-                                      <div
-                                        key={batch.id}
-                                        className="flex items-center rounded bg-red-main py-1 px-2 text-white"
-                                      >
-                                        <span className="mr-2">
-                                          {batch.name} - {batch.expiryDate} -
-                                          SL: {batch.quantity}
-                                        </span>{" "}
-                                        <Image
-                                          className=" cursor-pointer"
-                                          src={CloseIcon}
-                                          onClick={() => {
-                                            handleRemoveBatch(
-                                              record.productKey,
-                                              batch.id
-                                            );
-                                          }}
-                                          alt=""
-                                        />
-                                      </div>
-                                    )
-                                )}
+                          <div className="bg-[#FFF3E6] px-6 py-2 ">
+                            <div className="flex items-center gap-x-3">
+                              <div
+                                className="ml-1 cursor-pointer font-medium text-[#0070F4]"
+                                onClick={() => {
+                                  setProductKeyAddBatch(record.productKey);
+                                  setOpenListBatchModal(true);
+                                }}
+                              >
+                                Chọn lô
                               </div>
-                              <InputError
-                                error={
-                                  errors?.products &&
-                                  errors?.products[Number(record.key) - 1]
-                                    ?.batches?.message
-                                }
-                              />
+
+                              {record.batches?.map(
+                                (batch) =>
+                                  batch.isSelected && (
+                                    <div
+                                      key={batch.id}
+                                      className="flex items-center rounded bg-red-main py-1 px-2 text-white"
+                                    >
+                                      <span className="mr-2">
+                                        {batch.name} - {batch.expiryDate} -
+                                        SL: {batch.quantity}
+                                      </span>{" "}
+                                      <Image
+                                        className=" cursor-pointer"
+                                        src={CloseIcon}
+                                        onClick={() => {
+                                          handleRemoveBatch(
+                                            record.productKey,
+                                            batch.id
+                                          );
+                                        }}
+                                        alt=""
+                                      />
+                                    </div>
+                                  )
+                              )}
                             </div>
-                          )}
+                            <InputError
+                              error={
+                                errors?.products &&
+                                errors?.products[Number(record.key) - 1]
+                                  ?.batches?.message
+                              }
+                            />
+                          </div>
+                        )}
                     </>
                   );
                 },

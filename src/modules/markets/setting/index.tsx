@@ -94,7 +94,7 @@ export function MarketSetting() {
       title: "Nhóm sản phẩm",
       dataIndex: "groupProduct",
       key: "groupProduct",
-      render: (_, record) => record?.groupProduct?.name,
+      render: (_, record) => record?.product?.groupProduct?.name,
     },
     {
       title: "Loại chợ",

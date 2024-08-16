@@ -854,7 +854,7 @@ const Index = () => {
                             value: JSON.stringify(item),
                             label: (
                               <div className="flex items-center gap-x-4 p-2">
-                                <div className=" flex h-12 w-[68px] items-center rounded border border-gray-300 p-[2px]">
+                                <div className=" flex h-12 w-[68px] flex-shrink-0 items-center rounded border border-gray-300 p-[2px]">
                                   {item.product?.image?.path && (
                                     <Image
                                       src={getImage(

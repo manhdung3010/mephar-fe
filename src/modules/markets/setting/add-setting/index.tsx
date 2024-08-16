@@ -138,12 +138,9 @@ export function AddMarketSetting() {
     }
   }, [productDetail])
 
-  console.log('listBatchSelected', listBatchSelected);
-
   const { mutate: mutateCreateConfigProduct, isLoading } =
     useMutation(
       () => {
-        console.log(getValues('marketType'))
         const payload: any = {
           ...getValues(),
           agencys: listAgencySelected?.map((item) => {
@@ -189,6 +186,16 @@ export function AddMarketSetting() {
   const onSubmit = () => {
     if (productSelected?.batches?.length > 0 && listBatchSelected.length === 0) {
       message.error('Vui lòng chọn lô sản phẩm');
+      return;
+    }
+    if (getValues('marketType') === 'private' && listAgencySelected.length === 0) {
+      message.error('Vui lòng chọn đại lý');
+      return;
+    }
+    // check quantity with batch selected
+    const totalQuantity = listBatchSelected.reduce((total, item) => total + item.newInventory, 0);
+    if (getValues('quantity') > totalQuantity) {
+      message.error('Số lượng tồn không được lớn hơn số lượng tồn của lô');
       return;
     }
     mutateCreateConfigProduct();
@@ -294,6 +301,7 @@ export function AddMarketSetting() {
       ),
     },
   ];
+
   return (
     <>
       <div className="my-6 flex items-center justify-between bg-white p-5">
@@ -301,7 +309,7 @@ export function AddMarketSetting() {
           {id ? 'Cập nhật' : 'thêm mới'} CẤU HÌNH SẢN PHẨM LÊN CHỢ
         </div>
         <div className="flex gap-4">
-          <CustomButton outline={true}>Hủy bỏ</CustomButton>
+          <CustomButton outline={true} onClick={() => router.push('/markets/setting')}>Hủy bỏ</CustomButton>
           <CustomButton onClick={handleSubmit(onSubmit)} loading={isLoading} disabled={isLoading}>Lưu</CustomButton>
         </div>
       </div>
@@ -325,6 +333,7 @@ export function AddMarketSetting() {
                 suffixIcon={
                   <Image src={SearchIcon} />
                 }
+                disabled={id ? true : false}
                 placeholder="Tìm kiếm sản phẩm"
                 options={products?.data?.items?.map((item) => ({
                   value: JSON.stringify(item),
@@ -395,7 +404,10 @@ export function AddMarketSetting() {
             <div>
               <Label infoText="" label="Đơn vị" required />
               <CustomSelect
-                onChange={(value) => setValue('productUnitId', value, { shouldValidate: true })}
+                onChange={(value) => {
+                  // change inventory of batch when change product unit
+
+                }}
                 className="suffix-icon h-11 !rounded"
                 placeholder="Chọn đơn vị"
                 options={productSelected?.product?.productUnit?.map((item) => {
@@ -434,14 +446,24 @@ export function AddMarketSetting() {
 
               </div>
             </div>
-
             <div>
-              <Label infoText="" label="Số lượng tồn" required />
+              <Label infoText="" label={`Số lượng tồn ${productSelected?.batches?.length < 1 ? `(Tồn: ${formatNumber(productSelected?.quantity)})` : ''}`} required />
               <CustomInput
                 placeholder="Nhập số lượng tồn"
                 className="h-11"
                 type='number'
-                onChange={(value) => setValue('quantity', value, { shouldValidate: true })}
+                onChange={(value) => {
+                  // update quantity of batch selected
+                  const newBatch = listBatchSelected.slice(0, 1).map((item) => {
+                    return {
+                      ...item,
+                      quantity: value,
+                    }
+                  });
+                  setListBatchSelected(newBatch);
+                  setValue('quantity', value, { shouldValidate: true });
+
+                }}
                 value={getValues('quantity')}
               />
               <InputError error={errors.quantity?.message} />
@@ -524,6 +546,7 @@ export function AddMarketSetting() {
             <Label infoText="" label="Mô tả" />
             {/* <CustomTextEditor /> */}
             <CustomTextarea rows={10} placeholder="Nhập mô tả" value={getValues('description')} onChange={(e) => setValue('description', e.target.value, { shouldValidate: true })} />
+            <InputError error={errors.description?.message} />
           </div>
         </div>
 
@@ -539,6 +562,14 @@ export function AddMarketSetting() {
             </div>
             <CustomUpload
               onChangeValue={(value) => {
+                // validate if value size > 2MB
+                if (+value.size > 2 * 1024 * 1024) {
+                  setError('thumbnail', {
+                    type: 'manual',
+                    message: 'Dung lượng ảnh không được lớn hơn 2MB',
+                  });
+                  return;
+                }
                 setValue('thumbnail', value, { shouldValidate: true })
               }}
               values={[productDetail?.data?.item?.imageCenter?.path]}

@@ -88,9 +88,8 @@ export default function ReturnCoupon() {
               ...batch,
               inventory,
               productUnit: product?.productUnit,
-              productKey: `${product.productId || product.productId}-${
-                product.id
-              }`,
+              productKey: `${product.productId || product.productId}-${product.id
+                }`,
               productId: product.productId,
               id: batch.batch.id,
               batchId: batch.batch.id,
@@ -344,16 +343,16 @@ export default function ReturnCoupon() {
       render: (value) => (
         <span
           className="cursor-pointer text-[#0070F4]"
-          // onClick={() => {
-          //   const currentState = expandedRowKeys[`${index}`];
-          //   const temp = { ...expandedRowKeys };
-          //   if (currentState) {
-          //     delete temp[`${index}`];
-          //   } else {
-          //     temp[`${index}`] = true;
-          //   }
-          //   setExpandedRowKeys({ ...temp });
-          // }}
+        // onClick={() => {
+        //   const currentState = expandedRowKeys[`${index}`];
+        //   const temp = { ...expandedRowKeys };
+        //   if (currentState) {
+        //     delete temp[`${index}`];
+        //   } else {
+        //     temp[`${index}`] = true;
+        //   }
+        //   setExpandedRowKeys({ ...temp });
+        // }}
         >
           {value}
         </span>
@@ -466,7 +465,7 @@ export default function ReturnCoupon() {
         <CustomInput
           type="number"
           bordered={false}
-          onChange={(value) => {}}
+          onChange={(value) => { }}
           wrapClassName="w-[100px]"
           defaultValue={primePrice}
           disabled
@@ -606,7 +605,7 @@ export default function ReturnCoupon() {
             <CustomAutocomplete
               className="!h-[48px] w-full !rounded text-base"
               prefixIcon={<Image src={SearchIcon} alt="" />}
-              placeholder="Tìm kiếm theo mã nhập hàng"
+              placeholder="Tìm kiếm theo mã sản phẩm, tên sản phẩm"
               wrapClassName="w-full !rounded bg-white"
               listHeight={512}
               disabled={id ? true : false}
@@ -623,7 +622,7 @@ export default function ReturnCoupon() {
                 value: JSON.stringify(item),
                 label: (
                   <div className="flex items-center gap-x-4 p-2">
-                    <div className=" flex h-12 w-[68px] items-center rounded border border-gray-300 p-[2px]">
+                    <div className=" flex h-12 w-[68px] flex-shrink-0 items-center rounded border border-gray-300 p-[2px]">
                       {item.product.image?.path && (
                         <Image
                           src={getImage(item.product.image?.path)}
