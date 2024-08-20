@@ -19,7 +19,7 @@ export const schema = yup.object().shape({
   status: yup.string(),
   type: yup.number(),
   taxCode: yup.string(),
-  groupCustomerId: yup.number(),
+  groupCustomerId: yup.array(),
   note: yup.string(),
   avatarId: yup.number(),
   lng: yup.string(),

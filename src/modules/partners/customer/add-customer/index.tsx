@@ -136,10 +136,8 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
   const { data: groupCustomers } = useQuery(
     ["GROUP_CUSTOMER", groupCustomerKeyword],
     () =>
-      getGroupCustomer({ page: 1, limit: 20, keyword: groupCustomerKeyword })
+      getGroupCustomer({ page: 1, limit: 9999, keyword: groupCustomerKeyword })
   );
-
-  console.log("errors", errors);
 
   const { mutate: mutateCreateCustomer, isLoading: isLoadingCreateCustomer } =
     useMutation(
@@ -150,8 +148,11 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
           customerData.lat = lat;
           customerData.lng = lng;
         }
+        if (customerData?.lat?.length === 0 || customerData?.lng?.length === 0) {
+          delete customerData.lat;
+          delete customerData.lng;
+        }
         delete customerData.point;
-
         const customerId = customerDetail?.data?.id;
 
         const customerMutation = customerId
@@ -209,13 +210,18 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
       setValue("provinceId", customerDetail?.data?.province?.id);
       setValue("address", customerDetail?.data?.address);
       setTempKeyword(customerDetail?.data?.address);
-      setValue(
-        "point",
-        `${customerDetail?.data?.lat},${customerDetail?.data?.lng}`,
-        { shouldValidate: true }
-      );
-
+      if (customerDetail?.data?.lat && customerDetail?.data?.lng) {
+        setValue("point", `${customerDetail?.data?.lat},${customerDetail?.data?.lng}`, {
+          shouldValidate: true,
+        });
+      }
+      else {
+        setValue("point", "", {
+          shouldValidate: true,
+        });
+      }
       setGroupCustomerKeyword(customerDetail.data?.groupCustomer?.name);
+      setValue('groupCustomerId', customerDetail.data?.listGroupCustomer?.map((item) => item?.groupCustomer?.id), { shouldValidate: true });
     }
   }, [customerDetail]);
 
@@ -301,6 +307,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
             <div>
               <Label infoText="" label="Nhóm khách hàng" />
               <CustomSelect
+                mode="multiple"
                 options={groupCustomers?.data?.items?.map((item) => ({
                   value: item.id,
                   label: item.name,
@@ -313,8 +320,9 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
                 onSearch={debounce((value) => {
                   setGroupCustomerKeyword(value);
                 }, 300)}
-                className=" h-11 !rounded"
+                className="!rounded "
                 placeholder="Chọn nhóm khách hàng"
+                size="small"
                 suffixIcon={
                   <>
                     {hasPermission(
@@ -322,15 +330,15 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
                       RoleModel.group_customer,
                       RoleAction.create
                     ) && (
-                      <div className="flex items-center">
-                        <Image src={ArrowDownIcon} alt="" />
-                        <Image
-                          src={PlusCircleIcon}
-                          alt=""
-                          onClick={() => setOpenAddGroupCustomerModal(true)}
-                        />
-                      </div>
-                    )}
+                        <div className="flex items-center">
+                          <Image src={ArrowDownIcon} alt="" />
+                          <Image
+                            src={PlusCircleIcon}
+                            alt=""
+                            onClick={() => setOpenAddGroupCustomerModal(true)}
+                          />
+                        </div>
+                      )}
                   </>
                 }
               />
