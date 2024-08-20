@@ -10,16 +10,19 @@ import { useRouter } from 'next/router';
 import { useQuery } from '@tanstack/react-query';
 import { getMarketOrderDetail } from '@/api/market.service';
 import { getImage } from '@/helpers';
+import { useRecoilValue } from 'recoil';
+import { branchState } from '@/recoil/state';
 
 export function ProcessOrder() {
   const router = useRouter();
+  const branchId = useRecoilValue(branchState);
   const { id } = router.query;
   const [openSeriDetailModal, setOpenSeriDetailModal] = useState(false);
   const [orderInfo, setOrderInfo] = useState<any>(null);
 
   const { data: orderDetail, isLoading } = useQuery(
     ['MAKET_ORDER_ORDER_DETAIL', id],
-    () => getMarketOrderDetail(id as string),
+    () => getMarketOrderDetail(id as string, branchId as string),
     {
       enabled: !!id,
       onSuccess: (res) => {
@@ -64,7 +67,7 @@ export function ProcessOrder() {
                 >
                   {product?.marketProduct?.product?.name}
                 </div>
-                <div className="font-medium text-[#FF8800]">Đã thêm: 2/10</div>
+                <div className="font-medium text-[#FF8800]">Đã thêm: {product?.series?.length}/{product?.quantity}</div>
               </div>
               <div className="w-[360px]">
                 <div className="mb-2 text-[#A3A8AF]">Nhập seri để thêm:</div>

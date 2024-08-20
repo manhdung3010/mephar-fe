@@ -9,10 +9,14 @@ import CustomTable from '@/components/CustomTable';
 import classNames from 'classnames';
 import { CustomButton } from '@/components/CustomButton';
 import { EAcceptFollowStoreStatus, EFollowStoreStatus } from '../type';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateStoreStatus } from '@/api/market.service';
+import ConfirmStatusModal from './ConfirmStatusModal';
 
 function AgencyList({ data, formFilter, setFormFilter, isLoading }) {
+  const queryClient = useQueryClient();
+  const [openConfirmModal, setOpenConfirmModal] = React.useState(false);
+  const [deleteId, setDeleteId] = React.useState(null);
 
   const { mutate: mutateUpdateStoreStatus, isLoading: isLoadingCreateOrder } =
     useMutation(
@@ -21,7 +25,7 @@ function AgencyList({ data, formFilter, setFormFilter, isLoading }) {
       },
       {
         onSuccess: async (data) => {
-
+          await queryClient.invalidateQueries(["AGENCY_LIST"]);
         },
         onError: (err: any) => {
           message.error(err?.message);
@@ -40,7 +44,19 @@ function AgencyList({ data, formFilter, setFormFilter, isLoading }) {
       title: "Tên cửa hàng",
       dataIndex: "agency",
       key: "agency",
-      render: (value) => value?.name,
+      render: (value) => <span>{value?.store?.name + " - " + value?.name}</span>,
+    },
+    {
+      title: "Số điện thoại",
+      dataIndex: "phone",
+      key: "phone",
+      render: (value, record) => record?.branch?.phone,
+    },
+    {
+      title: "Địa chỉ",
+      dataIndex: "address",
+      key: "address",
+      render: (value, record) => record?.branch?.address1,
     },
     {
       title: "Thao tác",
@@ -53,7 +69,7 @@ function AgencyList({ data, formFilter, setFormFilter, isLoading }) {
             onClick={() => {
               const newPayload = {
                 id: record?.id,
-                status: EAcceptFollowStoreStatus.CANCLE,
+                status: EAcceptFollowStoreStatus.CANCEL,
               }
               mutateUpdateStoreStatus(newPayload)
             }}
@@ -68,7 +84,10 @@ function AgencyList({ data, formFilter, setFormFilter, isLoading }) {
         </div>
       ) : (
         <div className='flex items-center gap-2'>
-          <CustomButton outline>Hủy quyền mua</CustomButton>
+          <CustomButton outline onClick={() => {
+            setOpenConfirmModal(true)
+            setDeleteId(record?.id)
+          }}>Hủy quyền mua</CustomButton>
         </div>
       ),
     },
@@ -114,6 +133,19 @@ function AgencyList({ data, formFilter, setFormFilter, isLoading }) {
         setPage={(value) => setFormFilter({ ...formFilter, page: value })}
         setPerPage={(value) => setFormFilter({ ...formFilter, limit: value })}
         total={data?.totalItem}
+      />
+
+      <ConfirmStatusModal
+        isOpen={openConfirmModal}
+        onCancel={() => setOpenConfirmModal(false)}
+        onSuccess={() => {
+          const newPayload = {
+            id: deleteId,
+            status: EAcceptFollowStoreStatus.CANCEL,
+          }
+          mutateUpdateStoreStatus(newPayload)
+        }}
+        content={''}
       />
     </div>
   )

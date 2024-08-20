@@ -1,5 +1,5 @@
 import { getMarketOrderDetail } from '@/api/market.service';
-import { profileState } from '@/recoil/state'
+import { branchState, profileState } from '@/recoil/state'
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/router';
 import React, { useMemo } from 'react'
@@ -13,12 +13,13 @@ import GHNIcon from '@/assets/giaohangnhanh.svg'
 
 function SaleOrderDetail() {
   const profile = useRecoilValue(profileState)
+  const branchId = useRecoilValue(branchState)
   const router = useRouter();
   const { id } = router.query;
 
   const { data: orderDetail, isLoading } = useQuery(
     ['ORDER_DETAIL', id],
-    () => getMarketOrderDetail(id as string),
+    () => getMarketOrderDetail(id as string, branchId as string),
     {
       enabled: !!id
     }

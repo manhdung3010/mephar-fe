@@ -87,8 +87,8 @@ export function createMarketOrder(payload) {
 export function getMarketOrder(params) {
   return axiosClient.get(`market/sell/market-order`, { params });
 }
-export function getMarketOrderDetail(id: string) {
-  return axiosClient.get(`market/sell/market-order/${id}`);
+export function getMarketOrderDetail(id: string, branchId: string) {
+  return axiosClient.get(`market/sell/market-order/${id}?branchId=${branchId}`);
 }
 
 // update order status

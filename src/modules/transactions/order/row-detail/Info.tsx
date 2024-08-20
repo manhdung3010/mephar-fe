@@ -133,7 +133,7 @@ export function Info({ record }: { record: any }) {
           </div>
           <div className="mb-4 grid grid-cols-3 gap-5">
             <div className="text-gray-main ">Tên người nhận:</div>
-            <div className="col-span-2 text-black-main">---</div>
+            <div className="col-span-2 text-black-main">{record?.fullName}</div>
           </div>
           <div className="mb-4 grid grid-cols-3 gap-5">
             <div className="text-gray-main ">Số điện thoại:</div>
@@ -176,7 +176,7 @@ export function Info({ record }: { record: any }) {
             key={product.productId}
             className="mb-5 flex items-center gap-x-3"
           >
-            <div className="rounded border border-gray-500 p-1 w-[60px] h-[60px]">
+            <div className="rounded border border-gray-300 overflow-hidden w-[60px] h-[60px]">
               {product.marketProduct?.imageCenter?.path && (
                 <Image
                   width={60}

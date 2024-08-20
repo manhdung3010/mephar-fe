@@ -20,11 +20,12 @@ export enum EOrderMarketStatusLabel {
 
 export enum EFollowStoreStatus {
   FALSE = "false",
+  CANCEL = "cancel",
   PENDING = "pending",
   ACTIVE = "active",
 }
 export enum EAcceptFollowStoreStatus {
-  CANCLE = "cancle",
+  CANCEL = "cancel",
   PENDING = "pending",
   ACTIVE = "active",
 }

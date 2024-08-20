@@ -1,34 +1,33 @@
+import { getCustomer } from '@/api/customer.service'
+import { createTrip, getLatLng, getTripDetail, searchPlace, updateTrip } from '@/api/trip.service'
+import LineIcon from "@/assets/LineDotLargeIcon.svg"
+import ArrowLeftIcon from "@/assets/arrowLeftIcon2.svg"
+import DeleteIcon from '@/assets/deleteRed.svg'
+import EndMarkIcon from "@/assets/endMarkIcon.svg"
+import LocationIcon from "@/assets/location.svg"
+import MarkIcon from '@/assets/markIcon.svg'
+import PhoneIcon from '@/assets/phoneIcon.svg'
+import { CustomAutocomplete } from '@/components/CustomAutocomplete'
 import { CustomButton } from '@/components/CustomButton'
 import { CustomDatePicker } from '@/components/CustomDatePicker'
 import { CustomInput } from '@/components/CustomInput'
 import Label from '@/components/CustomLabel'
-import { useRouter } from 'next/router'
-import LocationIcon from "@/assets/location.svg";
-import LineIcon from "@/assets/LineDotLargeIcon.svg";
-import EndMarkIcon from "@/assets/endMarkIcon.svg";
-import ArrowLeftIcon from "@/assets/arrowLeftIcon2.svg";
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import Image from 'next/image'
-import { CustomSelect } from '@/components/CustomSelect'
-import { debounce } from 'lodash'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { getCustomer } from '@/api/customer.service'
 import CustomMap from '@/components/CustomMap'
-import cx from 'classnames';
-import { useForm } from 'react-hook-form'
-import { yupResolver } from '@hookform/resolvers/yup'
-import { schema } from './schema'
-import dayjs from 'dayjs'
-import DeleteIcon from '@/assets/deleteRed.svg';
-import PhoneIcon from '@/assets/phoneIcon.svg';
-import MarkIcon from '@/assets/markIcon.svg';
 import InputError from '@/components/InputError'
-import { message, Select, Spin } from 'antd'
 import { ECustomerStatus, ECustomerStatusLabel } from '@/enums'
-import { createTrip, getLatLng, getTripDetail, searchPlace, updateTrip } from '@/api/trip.service'
-import { useRecoilValue } from 'recoil'
 import { profileState } from '@/recoil/state'
-import { CustomAutocomplete } from '@/components/CustomAutocomplete'
+import { yupResolver } from '@hookform/resolvers/yup'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { message, Select } from 'antd'
+import cx from 'classnames'
+import dayjs from 'dayjs'
+import { debounce } from 'lodash'
+import Image from 'next/image'
+import { useRouter } from 'next/router'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { useRecoilValue } from 'recoil'
+import { schema } from './schema'
 const { Option } = Select;
 
 function CreateSchedule() {
@@ -43,13 +42,9 @@ function CreateSchedule() {
   const [isMapFull, setIsMapFull] = useState(false);
 
   const [startAddress, setStartAddress] = useState('');
-  const [endAddress, setEndAddress] = useState('');
-
   const [customerAddress, setCustomerAddress] = useState('');
   const [tempKeyword, setTempKeyword] = useState('');
   const [tempKeywordEnd, setTempKeywordEnd] = useState('');
-  const [tempDisplay, setTempDisplay] = useState('');
-  const [tempDisplayEnd, setTempDisplayEnd] = useState('');
 
   const [refId, setRefId] = useState('');
   const [isEnd, setIsEnd] = useState(false);
@@ -214,6 +209,13 @@ function CreateSchedule() {
     }, 300),
     [customerKeyword]
   );
+  // Search customer
+  const onSearchCustomer = useCallback(
+    debounce((value) => {
+      setCustomerKeyword(value);
+    }, 300),
+    [customerKeyword]
+  );
 
   return (
     <>
@@ -278,7 +280,6 @@ function CreateSchedule() {
                             // prefixIcon={<Image src={SearchIcon} alt="" />}
                             wrapClassName="w-full !rounded bg-white"
                             onSelect={(value) => {
-                              setTempDisplay(places?.data?.find((item) => item.ref_id === value)?.display);
                               setTempKeyword(places?.data?.find((item) => item.ref_id === value)?.display)
                               setRefId(value);
                             }}
@@ -306,101 +307,20 @@ function CreateSchedule() {
                       <div className='flex gap-y-3 flex-col'>
                         {
                           getValues('listCustomer').map((row: any, index) => (
-                            <div className='flex gap-2 items-center w-full'>
-                              <div className='w-6 flex-shrink-0 flex items-center relative'>
-                                <div className='bg-[#0063F7] rounded-full text-white w-6 h-6 grid place-items-center z-10'>
-                                  {index + 1}
-                                </div>
-                                <div className={`absolute bottom-0 left-1/2 -translate-x-1/2 z-0 ${index === 0 && 'h-20 overflow-hidden'}`}>
-                                  <Image src={LineIcon} alt='icon' />
-                                </div>
-                              </div>
-                              <div className='flex-1'>
-                                <div className='flex flex-col gap-1'>
-                                  <Select
-                                    placeholder="Chọn khách hàng"
-                                    className="h-11 !rounded w-full"
-                                    disabled={row?.status === 'visited'}
-                                    onChange={(value) => {
-                                      const customer = customers?.data?.items?.find((item) => item?.id === value);
-                                      const listCustomer = getValues('listCustomer');
-                                      listCustomer[index] = { id: value, address: customer?.address, lat: customer?.lat?.trim(), lng: customer?.lng?.trim() };
-                                      setValue('listCustomer', listCustomer, { shouldValidate: true });
-                                      setCustomerAddress(customer?.address)
-                                      if (customer) {
-                                        handleAddMarker(customer?.lng, customer?.lat, customer, index + 1)
-                                      }
-                                    }}
-                                    onSearch={debounce((value) => {
-                                      setCustomerKeyword(value);
-                                    }, 300)}
-                                    showSearch={true}
-                                    notFoundContent={isLoading ? <Spin size="small" className='flex justify-center p-4 w-full' /> : null}
-                                    value={customers?.data?.items?.find((item) => item?.id === row?.id)?.fullName || undefined}
-                                    filterOption={(input, option) => {
-                                      const divChildren = option?.props?.children.props.children;
-                                      const fullNameDiv = divChildren[0]?.props?.children[1]
-
-                                      const textContent = fullNameDiv ? fullNameDiv.props.children.toString().toLowerCase() : '';
-                                      return textContent.includes(input.toLowerCase());
-                                    }}
-                                  >
-                                    {
-                                      customers?.data?.items?.map((item) => (
-                                        <Option key={item.id} value={item.id}>
-                                          <div className='flex flex-col gap-1 border-b-[1px] border-b-[#E9EFF6]'>
-                                            <div className='pt-1'>
-                                              <span className='text-red-main'>{item.code} - </span>
-                                              <span className='fullName'>
-                                                {item.fullName}
-                                              </span>
-                                              <span
-                                                className={cx(
-                                                  {
-                                                    'text-[#00B63E] border border-[#00B63E] bg-[#DEFCEC]':
-                                                      item?.status === ECustomerStatus.active,
-                                                    'text-[#666666] border border-[#666666] bg-[#F5F5F5]':
-                                                      item?.status === ECustomerStatus.inactive,
-                                                  },
-                                                  'px-2 py-1 rounded-2xl w-max ml-2'
-                                                )}
-                                              >
-                                                {ECustomerStatusLabel[item?.status]}
-                                              </span>
-                                            </div>
-                                            <div className='flex items-center gap-1'>
-                                              <Image src={PhoneIcon} /> <span>{item?.phone}</span>
-                                            </div>
-                                            <div className='flex items-center gap-1 pb-1'>
-                                              <Image src={MarkIcon} /> <span>{item?.address}</span>
-                                            </div>
-                                          </div>
-                                        </Option>
-                                      ))
-                                    }
-                                  </Select>
-                                  <CustomerRowAddress row={row} index={index} setValue={setValue} getValues={getValues} handleUpdateMarker={handleUpdateMarker} />
-
-                                </div>
-                                <InputError error={errors.listCustomer?.[index]?.message} />
-                              </div>
-                              <div className={`cursor-pointer w-5 flex-shrink-0 ${row?.status === 'visited' && 'cursor-not-allowed'}`}>
-                                <Image
-                                  src={DeleteIcon}
-                                  onClick={() => {
-                                    if (row?.status === 'visited') return;
-                                    const listCustomer = getValues('listCustomer')
-                                    listCustomer.splice(index, 1)
-                                    setValue('listCustomer', listCustomer, { shouldValidate: true })
-                                    const customer = customers?.data?.items?.find((item) => item?.id === row?.id);
-                                    if (customer) {
-                                      handleDeleteMarker(customer?.lng, customer?.lat)
-                                    }
-                                  }}
-                                  alt='icon'
-                                />
-                              </div>
-                            </div>
+                            <CustomerRow
+                              key={index}
+                              row={row}
+                              index={index}
+                              setValue={setValue}
+                              getValues={getValues}
+                              handleUpdateMarker={handleUpdateMarker}
+                              customers={customers}
+                              setCustomerAddress={setCustomerAddress}
+                              handleAddMarker={handleAddMarker}
+                              onSearchCustomer={onSearchCustomer}
+                              errors={errors}
+                              handleDeleteMarker={handleDeleteMarker}
+                            />
                           ))
                         }
                       </div>
@@ -431,7 +351,6 @@ function CreateSchedule() {
                             // prefixIcon={<Image src={SearchIcon} alt="" />}
                             wrapClassName="w-full !rounded bg-white"
                             onSelect={(value) => {
-                              setTempDisplayEnd(places?.data?.find((item) => item.ref_id === value)?.display);
                               setTempKeywordEnd(places?.data?.find((item) => item.ref_id === value)?.display)
                               setRefId(value);
                               setIsEnd(true);
@@ -534,6 +453,101 @@ const CustomerRowAddress = ({ row, index, setValue, getValues, handleUpdateMarke
         ),
       }))}
     />
+  )
+}
+
+const CustomerRow = ({ row, index, setValue, getValues, handleUpdateMarker, customers, setCustomerAddress, handleAddMarker, onSearchCustomer, errors, handleDeleteMarker }) => {
+  const [customerKeyword, setCustomerKeyword] = useState("");
+  return (
+    <div className='flex gap-2 items-center w-full'>
+      <div className='w-6 flex-shrink-0 flex items-center relative'>
+        <div className='bg-[#0063F7] rounded-full text-white w-6 h-6 grid place-items-center z-10'>
+          {index + 1}
+        </div>
+        <div className={`absolute bottom-0 left-1/2 -translate-x-1/2 z-0 ${index === 0 && 'h-20 overflow-hidden'}`}>
+          <Image src={LineIcon} alt='icon' />
+        </div>
+      </div>
+      <div className='flex-1'>
+        <div className='flex flex-col gap-1'>
+          <CustomAutocomplete
+            placeholder="Chọn khách hàng"
+            className="h-11 !rounded w-full"
+            // prefixIcon={<Image src={SearchIcon} alt="" />}
+            wrapClassName="w-full !rounded bg-white"
+            onSelect={(value) => {
+              const customer = customers?.data?.items?.find((item) => item?.id === value);
+              const listCustomer = getValues('listCustomer');
+              listCustomer[index] = { id: value, address: customer?.address, lat: customer?.lat?.trim(), lng: customer?.lng?.trim(), fullName: customer?.fullName };
+              setValue('listCustomer', listCustomer, { shouldValidate: true });
+              setCustomerAddress(customer?.address)
+              if (customer) {
+                handleAddMarker(customer?.lng, customer?.lat, customer, index + 1)
+              }
+              // update tempCustomerKeyword
+            }}
+            showSearch={true}
+            listHeight={300}
+            onSearch={(value) => {
+              onSearchCustomer(value);
+              setCustomerKeyword(value);
+            }}
+            value={customerKeyword || row?.fullName || null}
+            options={customers?.data?.items?.map((item) => ({
+              value: item?.id,
+              label: (
+                <div className='flex flex-col gap-1 border-b-[1px] border-b-[#E9EFF6]'>
+                  <div className='pt-1'>
+                    <span className='text-red-main'>{item.code} - </span>
+                    <span className='fullName'>
+                      {item.fullName}
+                    </span>
+                    <span
+                      className={cx(
+                        {
+                          'text-[#00B63E] border border-[#00B63E] bg-[#DEFCEC]':
+                            item?.status === ECustomerStatus.active,
+                          'text-[#666666] border border-[#666666] bg-[#F5F5F5]':
+                            item?.status === ECustomerStatus.inactive,
+                        },
+                        'px-2 py-1 rounded-2xl w-max ml-2'
+                      )}
+                    >
+                      {ECustomerStatusLabel[item?.status]}
+                    </span>
+                  </div>
+                  <div className='flex items-center gap-1'>
+                    <Image src={PhoneIcon} /> <span>{item?.phone}</span>
+                  </div>
+                  <div className='flex items-center gap-1 pb-1'>
+                    <Image src={MarkIcon} /> <span>{item?.address}</span>
+                  </div>
+                </div>
+              ),
+            }))}
+          />
+          <CustomerRowAddress row={row} index={index} setValue={setValue} getValues={getValues} handleUpdateMarker={handleUpdateMarker} />
+
+        </div>
+        <InputError error={errors.listCustomer?.[index]?.message} />
+      </div>
+      <div className={`cursor-pointer w-5 flex-shrink-0 ${row?.status === 'visited' && 'cursor-not-allowed'}`}>
+        <Image
+          src={DeleteIcon}
+          onClick={() => {
+            if (row?.status === 'visited') return;
+            const listCustomer = getValues('listCustomer')
+            listCustomer.splice(index, 1)
+            setValue('listCustomer', listCustomer, { shouldValidate: true })
+            const customer = customers?.data?.items?.find((item) => item?.id === row?.id);
+            if (customer) {
+              handleDeleteMarker(customer?.lng, customer?.lat)
+            }
+          }}
+          alt='icon'
+        />
+      </div>
+    </div>
   )
 }
 
