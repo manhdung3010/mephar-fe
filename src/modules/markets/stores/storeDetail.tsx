@@ -108,7 +108,7 @@ function StoreDetail() {
                       className={`bg-white rounded-lg ${(followStore?.data?.status === EFollowStoreStatus.FALSE || followStore?.data?.status === EFollowStoreStatus.PENDING) ? 'text-red-main' : 'text-[#05A660]'} py-2 px-4 `}
                     >
                       {
-                        followStore?.data?.status === EFollowStoreStatus.FALSE || followStore?.data?.status === EFollowStoreStatus.CANCEL && (
+                        (followStore?.data?.status === EFollowStoreStatus.FALSE || followStore?.data?.status === EFollowStoreStatus.CANCEL) && (
                           <p className='flex items-center gap-2' onClick={() => muateCreateFollow()}>
                             <Image src={CartPlusIcon} />
                             <span className='text-base font-medium'>Đăng ký mua hàng</span>

@@ -208,7 +208,7 @@ export function Info({ record }: { record: any }) {
 
       <div className="flex justify-end gap-4">
         {
-          record?.status === EOrderMarketStatus.CONFIRM && (
+          (record?.status === EOrderMarketStatus.CONFIRM || record?.status === EOrderMarketStatus.PROCESSING) && (
             <CustomButton
               type="primary"
               outline={true}
