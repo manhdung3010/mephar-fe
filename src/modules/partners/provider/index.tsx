@@ -1,26 +1,27 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { message } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
-import { debounce } from 'lodash';
-import Image from 'next/image';
-import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { message } from "antd";
+import type { ColumnsType } from "antd/es/table";
+import { debounce } from "lodash";
+import Image from "next/image";
+import { useRouter } from "next/router";
+import { useState } from "react";
 
-import { deleteProvider, getProvider } from '@/api/provider.service';
-import DeleteIcon from '@/assets/deleteRed.svg';
-import EditIcon from '@/assets/editGreenIcon.svg';
-import PlusIcon from '@/assets/plusWhiteIcon.svg';
-import { CustomButton } from '@/components/CustomButton';
-import DeleteModal from '@/components/CustomModal/ModalDeleteItem';
-import CustomPagination from '@/components/CustomPagination';
-import CustomTable from '@/components/CustomTable';
+import { deleteProvider, getProvider } from "@/api/provider.service";
+import DeleteIcon from "@/assets/deleteRed.svg";
+import EditIcon from "@/assets/editGreenIcon.svg";
+import PlusIcon from "@/assets/plusWhiteIcon.svg";
+import { CustomButton } from "@/components/CustomButton";
+import DeleteModal from "@/components/CustomModal/ModalDeleteItem";
+import CustomPagination from "@/components/CustomPagination";
+import CustomTable from "@/components/CustomTable";
 
-import RowDetail from './row-detail';
-import Search from './Search';
-import { hasPermission } from '@/helpers';
-import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
-import { useRecoilValue } from 'recoil';
-import { profileState } from '@/recoil/state';
+import RowDetail from "./row-detail";
+import Search from "./Search";
+import { hasPermission } from "@/helpers";
+import { RoleAction, RoleModel } from "@/modules/settings/role/role.enum";
+import { useRecoilValue } from "recoil";
+import { profileState } from "@/recoil/state";
+import ActionFile from "./ActionFile";
 
 export interface IRecord {
   key: number;
@@ -43,7 +44,7 @@ export interface IRecord {
   };
   created_by?: {
     username: string;
-  }
+  };
   companyName: string;
   taxCode: string;
   createdAt: string;
@@ -57,13 +58,13 @@ export function Provider() {
   const [formFilter, setFormFilter] = useState({
     page: 1,
     limit: 20,
-    keyword: '',
+    keyword: "",
   });
   const [deletedId, setDeletedId] = useState<number>();
   const profile = useRecoilValue(profileState);
 
   const { data: providers, isLoading } = useQuery(
-    ['PROVIDER_LIST', formFilter.page, formFilter.limit, formFilter.keyword],
+    ["PROVIDER_LIST", formFilter.page, formFilter.limit, formFilter.keyword],
     () => getProvider(formFilter)
   );
 
@@ -73,14 +74,14 @@ export function Provider() {
 
   const columns: ColumnsType<IRecord> = [
     {
-      title: 'STT',
-      dataIndex: 'key',
-      key: 'key',
+      title: "STT",
+      dataIndex: "key",
+      key: "key",
     },
     {
-      title: 'Mã nhà cung cấp',
-      dataIndex: 'code',
-      key: 'code',
+      title: "Mã nhà cung cấp",
+      dataIndex: "code",
+      key: "code",
       render: (value, _, index) => (
         <span
           className="cursor-pointer text-[#0070F4]"
@@ -100,56 +101,60 @@ export function Provider() {
       ),
     },
     {
-      title: 'Tên nhà cung cấp',
-      dataIndex: 'name',
-      key: 'name',
+      title: "Tên nhà cung cấp",
+      dataIndex: "name",
+      key: "name",
     },
     {
-      title: 'Số điện thoại',
-      dataIndex: 'phone',
-      key: 'phone',
+      title: "Số điện thoại",
+      dataIndex: "phone",
+      key: "phone",
     },
     {
-      title: 'Email',
-      dataIndex: 'email',
-      key: 'email',
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
     },
     {
-      title: 'Nợ cần trả hiện tại',
-      dataIndex: 'debt',
-      key: 'debt',
+      title: "Nợ cần trả hiện tại",
+      dataIndex: "debt",
+      key: "debt",
     },
 
     {
-      title: 'Tổng mua',
-      dataIndex: 'total',
-      key: 'total',
+      title: "Tổng mua",
+      dataIndex: "total",
+      key: "total",
     },
     {
-      title: 'Thao tác',
-      dataIndex: 'action',
-      key: 'action',
+      title: "Thao tác",
+      dataIndex: "action",
+      key: "action",
       render: (_, { id }) => (
         <div className="flex gap-3">
-          {
-            hasPermission(profile?.role?.permissions, RoleModel.provider, RoleAction.delete) && (
-              <div className=" cursor-pointer" onClick={() => setDeletedId(id)}>
-                <Image src={DeleteIcon} />
-              </div>
-            )
-          }
-          {
-            hasPermission(profile?.role?.permissions, RoleModel.provider, RoleAction.update) && (
-              <div
-                className=" cursor-pointer"
-                onClick={() =>
-                  router.push(`/partners/provider/add-provider?id=${id}`)
-                }
-              >
-                <Image src={EditIcon} />
-              </div>
-            )
-          }
+          {hasPermission(
+            profile?.role?.permissions,
+            RoleModel.provider,
+            RoleAction.delete
+          ) && (
+            <div className=" cursor-pointer" onClick={() => setDeletedId(id)}>
+              <Image src={DeleteIcon} />
+            </div>
+          )}
+          {hasPermission(
+            profile?.role?.permissions,
+            RoleModel.provider,
+            RoleAction.update
+          ) && (
+            <div
+              className=" cursor-pointer"
+              onClick={() =>
+                router.push(`/partners/provider/add-provider?id=${id}`)
+              }
+            >
+              <Image src={EditIcon} />
+            </div>
+          )}
         </div>
       ),
     },
@@ -158,7 +163,7 @@ export function Provider() {
   const { mutate: mutateDeleteProvider, isLoading: isLoadingDeleteProvider } =
     useMutation(() => deleteProvider(Number(deletedId)), {
       onSuccess: async () => {
-        await queryClient.invalidateQueries(['PROVIDER_LIST']);
+        await queryClient.invalidateQueries(["PROVIDER_LIST"]);
         setDeletedId(undefined);
       },
       onError: (err: any) => {
@@ -173,16 +178,19 @@ export function Provider() {
   return (
     <div className="mb-2">
       <div className="my-3 flex items-center justify-end gap-4">
-        {
-          hasPermission(profile?.role?.permissions, RoleModel.provider, RoleAction.create) && (
-            <CustomButton
-              prefixIcon={<Image src={PlusIcon} />}
-              onClick={() => router.push('/partners/provider/add-provider')}
-            >
-              Thêm nhà cung cấp
-            </CustomButton>
-          )
-        }
+        <ActionFile />
+        {hasPermission(
+          profile?.role?.permissions,
+          RoleModel.provider,
+          RoleAction.create
+        ) && (
+          <CustomButton
+            prefixIcon={<Image src={PlusIcon} />}
+            onClick={() => router.push("/partners/provider/add-provider")}
+          >
+            Thêm nhà cung cấp
+          </CustomButton>
+        )}
       </div>
 
       <Search
@@ -196,7 +204,7 @@ export function Provider() {
 
       <CustomTable
         rowSelection={{
-          type: 'checkbox',
+          type: "checkbox",
         }}
         dataSource={providers?.data?.items?.map((item, key) => ({
           ...item,
@@ -206,20 +214,23 @@ export function Provider() {
         columns={columns}
         onRow={(record, rowIndex) => {
           return {
-            onClick: event => {
+            onClick: (event) => {
               // Check if the click came from the action column
-              if ((event.target as Element).closest('.ant-table-cell:last-child')) {
+              if (
+                (event.target as Element).closest(".ant-table-cell:last-child")
+              ) {
                 return;
               }
 
               // Toggle expandedRowKeys state here
               if (expandedRowKeys[record.key - 1]) {
-                const { [record.key - 1]: value, ...remainingKeys } = expandedRowKeys;
+                const { [record.key - 1]: value, ...remainingKeys } =
+                  expandedRowKeys;
                 setExpandedRowKeys(remainingKeys);
               } else {
                 setExpandedRowKeys({ [record.key - 1]: true });
               }
-            }
+            },
           };
         }}
         expandable={{

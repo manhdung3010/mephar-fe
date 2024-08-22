@@ -37,7 +37,6 @@ export function uploadCustomerExcelKiot(file: File, branchId: number) {
   });
 }
 
-
 // Nhập dữ liệu product từ file Excel
 export function uploadProductExcel(file: File, branchId: number) {
   const formData = new FormData();
@@ -56,6 +55,18 @@ export function uploadProductExcelKiot(file: File, branchId: number) {
   formData.append("file", file);
 
   return axiosClient.post(`/product/upload/kiotviet`, formData, {
+    params: { branchId },
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+}
+
+export function uploadSupplierExcelKiot(file: File, branchId: number) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return axiosClient.post(`/supplier/upload/kiotviet`, formData, {
     params: { branchId },
     headers: {
       "Content-Type": "multipart/form-data",
