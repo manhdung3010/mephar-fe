@@ -1,6 +1,6 @@
-import { Layout } from '@/layouts/Layout';
-import { Meta } from '@/layouts/Meta';
-import { Cashbook } from '@/modules/cashbooks';
+import { Layout } from "@/layouts/Layout";
+import { Meta } from "@/layouts/Meta";
+import { Cashbook } from "@/modules/cashbooks";
 
 const Index = () => {
   return (
