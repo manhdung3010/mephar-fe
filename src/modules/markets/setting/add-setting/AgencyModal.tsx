@@ -12,6 +12,8 @@ import { cloneDeep } from 'lodash';
 import { message } from 'antd';
 import { CustomInput } from '@/components/CustomInput';
 import SearchIcon from '@/assets/searchIcon.svg';
+import { useRecoilValue } from 'recoil';
+import { branchState } from '@/recoil/state';
 
 function AgencyModal({
   isOpen,
@@ -26,21 +28,21 @@ function AgencyModal({
   isLoading?: boolean;
   onSave?: any;
 }) {
-
+  const branchId = useRecoilValue(branchState);
   const [agencyKeyword, setAgencyKeyword] = React.useState<string>('');
   const [agencyType, setAgencyType] = React.useState<string>('agency');
   const [agencyList, setAgencyList] = React.useState<any>([]);
 
   const { data: angency, isLoading: isLoadingAgency } = useQuery(
-    ['AGENCY_LIST', agencyKeyword],
-    () => getAgency(agencyKeyword),
+    ['AGENCY_LIST', agencyKeyword, branchId],
+    () => getAgency({ keyword: agencyKeyword, branchId }),
     {
       enabled: agencyType === 'agency',
     }
   );
   const { data: angencyGroup, isLoading: isLoadingAgencyGroup } = useQuery(
-    ['AGENCY_GROUP_LIST', agencyKeyword],
-    () => getAgencyGroup(agencyKeyword),
+    ['AGENCY_GROUP_LIST', agencyKeyword, branchId],
+    () => getAgencyGroup({ keyword: agencyKeyword, branchId }),
     {
       enabled: agencyType === 'agencyGroup',
     }

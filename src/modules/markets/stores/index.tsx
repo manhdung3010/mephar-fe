@@ -1,12 +1,22 @@
-import React from 'react'
+import React, { useState } from 'react'
 import StoreCard from '../product-detail/StoreCard'
 import { useQuery } from '@tanstack/react-query';
 import { getMarketStore } from '@/api/market.service';
+import { MarketPaginationStyled } from '@/components/CustomPagination/styled';
+import { Pagination } from 'antd';
+import { useRecoilValue } from 'recoil';
+import { branchState } from '@/recoil/state';
 
 function Store() {
+  const branchId = useRecoilValue(branchState);
+  const [formFilter, setFormFilter] = useState<any>({
+    page: 1,
+    limit: 10,
+    keyword: "",
+  });
   const { data: stores, isLoading } = useQuery(
-    ['MARKET_STORE'],
-    () => getMarketStore(),
+    ['MARKET_STORE', JSON.stringify(formFilter), branchId],
+    () => getMarketStore({ ...formFilter, branchId }),
   );
   return (
     <div className='bg-[#fafafc] '>
@@ -25,10 +35,16 @@ function Store() {
 
         <div className='grid grid-cols-1 gap-5 mt-6'>
           {
-            stores?.data.map((item, index) => (
-              <StoreCard key={index} store={item} branch={null} />
+            stores?.data?.items?.map((item, index) => (
+              <StoreCard key={index} store={item} branch={item?.name} />
             ))
           }
+        </div>
+
+        <div className='flex justify-center py-12'>
+          <MarketPaginationStyled>
+            <Pagination pageSize={formFilter?.limit} current={formFilter?.page} onChange={(value) => setFormFilter({ ...formFilter, page: value })} total={stores?.data?.totalItem} />
+          </MarketPaginationStyled>
         </div>
       </div>
     </div>

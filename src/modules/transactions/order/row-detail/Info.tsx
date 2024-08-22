@@ -1,37 +1,60 @@
-import cx from 'classnames';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
-
+import { useMemo, useState } from 'react';
 import CloseIcon from '@/assets/closeIcon.svg';
 import DeliveryIcon from '@/assets/deliveryIcon.svg';
 import DocumentIcon from '@/assets/documentBlueIcon.svg';
 import DolarIcon from '@/assets/dolarBlueIcon.svg';
 import ReportIcon from '@/assets/reportBlueIcon.svg';
 import { CustomButton } from '@/components/CustomButton';
-import { EOrderStatus, EOrderStatusLabel } from '@/enums';
-import { formatMoney, formatNumber, hasPermission } from '@/helpers';
-
-
-import { OrderHistoryModal } from './HistoryModal';
-import { IOrder } from '../type';
+import { formatMoney, getImage, hasPermission } from '@/helpers';
+import { updateMarketOrderStatus } from '@/api/market.service';
+import { shipFee } from '@/modules/markets/payment';
+import { EOrderMarketStatus, EOrderMarketStatusLabel } from '@/modules/markets/type';
 import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
-import { useRecoilValue } from 'recoil';
 import { profileState } from '@/recoil/state';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { message } from 'antd';
+import { useRecoilValue } from 'recoil';
+import { OrderHistoryModal } from './HistoryModal';
+import UpdateStatusModal from '@/components/CustomModal/ModalUpdateStatusItem';
 
-export function Info({ record }: { record: IOrder }) {
+export function Info({ record }: { record: any }) {
   const router = useRouter();
-  const [totalPrice, setTotalPrice] = useState(0);
   const profile = useRecoilValue(profileState);
+  const [isShowModal, setIsShowModal] = useState(false);
+  const [statusTemp, setStatusTemp] = useState<string>('');
 
-  useEffect(() => {
-    const total = record.products.reduce((acc, product) => {
-      return acc + product.price;
+  const totalPrice = useMemo(() => {
+    return record.products.reduce((total, product) => {
+      return total + product.price * product.quantity;
     }, 0);
-    setTotalPrice(total);
-  }, [record.products])
-
+  }, [record.products]);
   const [openHistoryModal, setOpenHistoryModal] = useState(false);
+  const queryClient = useQueryClient();
+
+  const {
+    mutate: mutateCreateGroupProduct,
+    isLoading: isLoadingCreateGroupProduct,
+  } = useMutation((payload: any) => {
+    if (payload?.status === EOrderMarketStatus.CONFIRM) {
+      return updateMarketOrderStatus(payload?.id, { status: payload?.status });
+    }
+    return updateMarketOrderStatus(payload?.id, { status: payload?.status });
+  }, {
+    onSuccess: async (res) => {
+      await queryClient.invalidateQueries(['MAKET_ORDER']);
+      setStatusTemp('');
+    },
+    onError: (err: any) => {
+      message.error(err?.message);
+    },
+  });
+
+  const updateOrderStatus = (id: string, status: string) => {
+    mutateCreateGroupProduct({ id, status: status });
+  }
+
   return (
     <div className="gap-12 ">
       <div className="mb-4 grid grid-cols-2 border-b border-[#E8EAEB]">
@@ -46,32 +69,26 @@ export function Info({ record }: { record: IOrder }) {
           <div className="mb-4 grid grid-cols-3 gap-5">
             <div className="text-gray-main ">Người mua:</div>
             <div className="col-span-2 text-black-main">
-              {record.customer?.fullName}
+              {record.branch?.store?.name}
             </div>
           </div>
           <div className="mb-4 grid grid-cols-3 gap-5">
             <div className="text-gray-main ">Trạng thái:</div>
             <div
-              className={cx(
-                {
-                  'text-[#FF8800] border border-[#FF8800] bg-[#fff]':
-                    record.status === EOrderStatus.PENDING,
-                  'text-[#00B63E] border border-[#00B63E] bg-[#DEFCEC]':
-                    record.status === EOrderStatus.SUCCEED,
-                  'text-[#0070F4] border border-[#0070F4] bg-[#E4F0FE]':
-                    record.status === EOrderStatus.DELIVERING,
-                  'text-[#EA2020] border border-[#EA2020] bg-[#FFE7E9]':
-                    record.status === EOrderStatus.CANCELLED,
-                },
-                'px-2 py-1 rounded-2xl w-max'
-              )}
+              className={
+                `py-1 px-2 rounded-2xl border-[1px]  w-max
+              ${record?.status === EOrderMarketStatus.PENDING && ' bg-[#fff2eb] border-[#FF8800] text-[#FF8800]'}
+              ${record?.status === EOrderMarketStatus.CONFIRM || record?.status === EOrderMarketStatus.PROCESSING || record?.status === EOrderMarketStatus.SEND && ' bg-[#e5f0ff] border-[#0063F7] text-[#0063F7]'}
+              ${record?.status === EOrderMarketStatus.DONE && ' bg-[#e3fff1] border-[#05A660] text-[#05A660]'}
+              ${record?.status === EOrderMarketStatus.CANCEL || record?.status === EOrderMarketStatus.CLOSED && ' bg-[#ffe5e5] border-[#FF3B3B] text-[#FF3B3B]'}
+              `}
             >
-              {EOrderStatusLabel[record.status]}
+              {EOrderMarketStatusLabel[record.status?.toUpperCase()]}
             </div>
           </div>
           <div className="mb-4 grid grid-cols-3 gap-5">
             <div className="text-gray-main ">Ghi chú:</div>
-            <div className="col-span-2 text-black-main">{record?.description}</div>
+            <div className="col-span-2 text-black-main">{record?.note}</div>
           </div>
           {/* <div className="mb-4 grid grid-cols-3 gap-5">
             <div className="text-gray-main ">Lý do huỷ:</div>
@@ -79,13 +96,13 @@ export function Info({ record }: { record: IOrder }) {
           </div> */}
         </div>
 
-        {/* <div>
+        <div>
           <div className="mb-4 font-semibold text-black-main">
             Thông tin vận chuyển
           </div>
           <div className="mb-4 grid grid-cols-3 gap-5">
             <div className="text-gray-main ">Đơn vị vận chuyển:</div>
-            <div className="col-span-2 text-black-main">---</div>
+            <div className="col-span-2 text-black-main">Giao hàng nhanh</div>
           </div>
           <div className="mb-4 grid grid-cols-3 gap-5">
             <div className="text-gray-main ">Mã vận chuyển:</div>
@@ -93,7 +110,7 @@ export function Info({ record }: { record: IOrder }) {
           </div>
           <div className="mb-4 grid grid-cols-3 gap-5">
             <div className="text-gray-main ">Phí vận chuyển:</div>
-            <div className="col-span-2 text-black-main">---</div>
+            <div className="col-span-2 text-black-main">{formatMoney(shipFee)}</div>
           </div>
           <div className="mb-4 grid grid-cols-3 gap-5">
             <div className="text-gray-main ">Dự kiến nhận hàng:</div>
@@ -106,27 +123,29 @@ export function Info({ record }: { record: IOrder }) {
           >
             Lịch sử đơn hàng
           </button>
-        </div> */}
+        </div>
       </div>
 
       <div className="mb-4 grid grid-cols-2 border-b border-[#E8EAEB]">
-        {/* <div>
+        <div>
           <div className="mb-4 font-semibold text-black-main">
             Thông tin NHẬN HÀNG
           </div>
           <div className="mb-4 grid grid-cols-3 gap-5">
             <div className="text-gray-main ">Tên người nhận:</div>
-            <div className="col-span-2 text-black-main">---</div>
+            <div className="col-span-2 text-black-main">{record?.fullName}</div>
           </div>
           <div className="mb-4 grid grid-cols-3 gap-5">
             <div className="text-gray-main ">Số điện thoại:</div>
-            <div className="col-span-2 text-black-main">----</div>
+            <div className="col-span-2 text-black-main">{record?.phone}</div>
           </div>
           <div className="mb-4 grid grid-cols-3 gap-5">
             <div className="text-gray-main ">Địa chỉ:</div>
-            <div className="col-span-2 text-black-main">-----</div>
+            <div className="col-span-2 text-black-main">
+              {record?.address}, {record?.ward?.name}
+            </div>
           </div>
-        </div> */}
+        </div>
 
         <div>
           <div className="mb-4 font-semibold text-black-main">
@@ -141,7 +160,7 @@ export function Info({ record }: { record: IOrder }) {
           <div className="mb-4 grid grid-cols-3 gap-5">
             <div className="text-gray-main ">Tổng tiền thanh toán:</div>
             <div className="col-span-2 text-black-main">
-              {formatMoney(record.cashOfCustomer)}
+              {formatMoney(totalPrice + shipFee)}
             </div>
           </div>
         </div>
@@ -157,12 +176,12 @@ export function Info({ record }: { record: IOrder }) {
             key={product.productId}
             className="mb-5 flex items-center gap-x-3"
           >
-            <div className="rounded border border-gray-500 p-1 w-[60px] h-[60px]">
-              {product.product?.image?.path && (
+            <div className="rounded border border-gray-300 overflow-hidden w-[60px] h-[60px]">
+              {product.marketProduct?.imageCenter?.path && (
                 <Image
                   width={60}
                   height={60}
-                  src={product.product?.image?.path}
+                  src={getImage(product.marketProduct?.imageCenter?.path)}
                   alt=""
                   objectFit="cover"
                 />
@@ -170,16 +189,16 @@ export function Info({ record }: { record: IOrder }) {
             </div>
             <div className="text-black-main">
               <div className="font-semibold text-gray-main">
-                {product.product?.shortName} – {product.product?.name}
+                {product?.marketProduct?.product?.name}
               </div>
               <div className="font-semibold text-gray-main">
-                {formatNumber(product.productUnit?.price)}vnđ/{' '}
-                {product.productUnit?.unitName}
+                {formatMoney(product?.price)}/{' '}
+                {product?.marketProduct?.productUnit?.unitName}
               </div>
               <div className="flex justify-between gap-x-40">
                 <div>x{product.quantity}</div>
                 <div className="text-[#00B63E]">
-                  Tổng tiền: {formatMoney(product.price)}
+                  Tổng tiền: {formatMoney(product.price * product.quantity)}
                 </div>
               </div>
             </div>
@@ -188,40 +207,54 @@ export function Info({ record }: { record: IOrder }) {
       </div>
 
       <div className="flex justify-end gap-4">
-        {/* <CustomButton
-          type="primary"
-          outline={true}
-          onClick={() => {
-            router.push('/transactions/order/process-order');
-          }}
-          prefixIcon={<Image src={DocumentIcon} alt="" />}
-        >
-          Xử lý đơn hàng
-        </CustomButton>
+        {
+          (record?.status === EOrderMarketStatus.CONFIRM || record?.status === EOrderMarketStatus.PROCESSING) && (
+            <CustomButton
+              type="primary"
+              outline={true}
+              onClick={() => {
+                router.push('/transactions/order/process-order?id=' + record.id);
+              }}
+              prefixIcon={<Image src={DocumentIcon} alt="" />}
+            >
+              Xử lý đơn hàng
+            </CustomButton>
+          )
+        }
 
-        <CustomButton
-          type="primary"
-          outline={true}
-          prefixIcon={<Image src={ReportIcon} alt="" />}
-        >
-          Xác nhận
-        </CustomButton>
-
-        <CustomButton
-          type="primary"
-          outline={true}
-          prefixIcon={<Image src={DeliveryIcon} alt="" />}
-        >
-          Gửi ĐVVC
-        </CustomButton>
-
+        {
+          record?.status === EOrderMarketStatus.PENDING && (
+            <CustomButton
+              type="primary"
+              outline={true}
+              prefixIcon={<Image src={ReportIcon} alt="" />}
+              onClick={() => {
+                setIsShowModal(true);
+                setStatusTemp(EOrderMarketStatus.CONFIRM)
+              }}
+            >
+              Xác nhận
+            </CustomButton>
+          )
+        }
+        {
+          record?.status === EOrderMarketStatus.PROCESSING && (
+            <CustomButton
+              type="primary"
+              outline={true}
+              prefixIcon={<Image src={DeliveryIcon} alt="" />}
+            >
+              Gửi ĐVVC
+            </CustomButton>
+          )
+        }
         <CustomButton
           type="primary"
           outline={true}
           prefixIcon={<Image src={DolarIcon} alt="" />}
         >
           Đã thanh toán
-        </CustomButton> */}
+        </CustomButton>
         {
           hasPermission(profile?.role?.permissions, RoleModel.order, RoleAction.delete) && (
             <CustomButton
@@ -232,13 +265,19 @@ export function Info({ record }: { record: IOrder }) {
             </CustomButton>
           )
         }
-
-
       </div>
-
       <OrderHistoryModal
         isOpen={openHistoryModal}
         onCancel={() => setOpenHistoryModal(false)}
+      />
+      <UpdateStatusModal
+        isOpen={isShowModal}
+        onCancel={() => setIsShowModal(false)}
+        onSuccess={() => {
+          updateOrderStatus(record.id, statusTemp);
+          setIsShowModal(false);
+        }}
+        content="trạng thái đơn hàng"
       />
     </div>
   );

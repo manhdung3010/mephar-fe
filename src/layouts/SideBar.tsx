@@ -72,6 +72,7 @@ export const transactionGroup = {
 export const marketGroup = {
   MARKET_COMMON: "/markets/common",
   MARKET_STORE: "/markets/store",
+  MARKET_AGENCY: "/markets/agency",
   MARKET_SETTING: "/markets/setting",
   MARKET_ADD_SETTING: "/markets/add-setting",
 };
@@ -184,6 +185,8 @@ const items = (permissions: { model: string; action: string }[]) => [
     </Link>, keyMenu.MARKET_COMMON),
     hasPermission(permissions, RoleModel.market_store, RoleAction.read) &&
     getItem('Chợ đại lý', keyMenu.MARKET_STORE,),
+    hasPermission(permissions, RoleModel.market_store, RoleAction.read) &&
+    getItem('Đăng ký mua hàng từ đại lý', keyMenu.MARKET_AGENCY,),
     hasPermission(permissions, RoleModel.market_setting, RoleAction.read) &&
     getItem('Cấu hình sản phẩm', keyMenu.MARKET_SETTING),
   ]),

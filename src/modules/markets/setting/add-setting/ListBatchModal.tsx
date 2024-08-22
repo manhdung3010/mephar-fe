@@ -13,7 +13,7 @@ function ListBatchModal({ isOpen, onCancel, selectedProduct, productUnit, onSave
   const [listBatch, setListBatch] = useState<any[]>([]);
 
   useEffect(() => {
-    if (selectedProduct?.batches && productUnit) {
+    if (selectedProduct?.batches && productUnit && listBatchSelected) {
       const curUnit = selectedProduct.product?.productUnit?.find((unit) => unit.id === productUnit);
       const newBatch = selectedProduct.batches.map((batch) => ({
         ...batch,
@@ -34,7 +34,7 @@ function ListBatchModal({ isOpen, onCancel, selectedProduct, productUnit, onSave
       });
       setListBatch(newListBatch)
     }
-  }, [selectedProduct, productUnit]);
+  }, [selectedProduct, productUnit, listBatchSelected]);
 
   const columns: ColumnsType<IBatch> = [
     {

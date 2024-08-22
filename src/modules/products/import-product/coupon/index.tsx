@@ -409,7 +409,7 @@ export default function ImportCoupon() {
             <CustomAutocomplete
               className="!h-[48px] w-full !rounded text-base"
               prefixIcon={<Image src={SearchIcon} alt="" />}
-              placeholder="Tìm kiếm theo mã nhập hàng"
+              placeholder="Tìm kiếm theo tên sản phẩm, mã sản phẩm"
               wrapClassName="w-full !rounded bg-white"
               onSelect={(value) => handleSelectProduct(value)}
               showSearch={true}
@@ -425,7 +425,7 @@ export default function ImportCoupon() {
                 value: JSON.stringify(item),
                 label: (
                   <div className="flex items-center gap-x-4 p-2">
-                    <div className=" flex h-12 w-[68px] items-center rounded border border-gray-300 p-[2px]">
+                    <div className=" flex h-12 w-[68px] flex-shrink-0 items-center rounded border border-gray-300 p-[2px]">
                       {item?.product?.image?.path && (
                         <Image
                           src={getImage(item?.product?.image?.path)}

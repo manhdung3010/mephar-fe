@@ -6,7 +6,7 @@ import EditIcon from '@/assets/editWhite.svg';
 import { CustomButton } from '@/components/CustomButton';
 import DeleteModal from '@/components/CustomModal/ModalDeleteItem';
 import { EProductSettingStatus, EProductSettingStatusLabel } from '@/enums';
-import { formatDateTime, formatMoney, formatNumber, hasPermission } from '@/helpers';
+import { formatDateTime, formatMoney, formatNumber, getImage, hasPermission } from '@/helpers';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { message } from 'antd';
 import cx from "classnames";
@@ -62,15 +62,15 @@ export function Info({ record }: { record: any }) {
     <div className="gap-12 ">
       <div className="mb-10 flex gap-9">
         <div>
-          <div className="mb-2 h-[223px] w-[223px] rounded-md border border-[#C9C6D9] py-1 px-4">
-            <img src={record?.imageCenter?.filePath} className='w-full h-full object-cover' loading='lazy' />
+          <div className="mb-2  flex">
+            <Image src={getImage(record?.imageCenter?.path)} width={223} height={223} className='object-cover rounded-md border border-[#C9C6D9] py-1 overflow-hidden' />
           </div>
 
           <div className="grid grid-cols-3 gap-2 max-w-[223px]">
             {
               record?.images?.map((image, index) => (
-                <div className="items-center rounded-md border border-[#C9C6D9] p-1" key={image?.id}>
-                  <img src={image?.filePath} className='w-full h-full object-cover' loading='lazy' />
+                <div className="items-center rounded-md border border-[#C9C6D9] flex w-[70px] h-[70px] overflow-hidden " key={image?.id}>
+                  <Image src={getImage(image?.path)} width={70} height={70} className='object-cover rounded-md' loading='lazy' />
                 </div>
               )
               )

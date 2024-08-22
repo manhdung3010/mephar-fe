@@ -51,7 +51,6 @@ export function MarketSetting() {
     "createdAt[start]": undefined,
     "createdAt[end]": undefined,
     isConfig: true,
-    branchId
   });
 
   const [expandedRowKeys, setExpandedRowKeys] = useState<
@@ -59,8 +58,8 @@ export function MarketSetting() {
   >({});
 
   const { data: configProduct, isLoading } = useQuery(
-    ['CONFIG_PRODUCT', JSON.stringify(formFilter)],
-    () => getConfigProduct(formFilter),
+    ['CONFIG_PRODUCT', JSON.stringify(formFilter), branchId],
+    () => getConfigProduct({ ...formFilter, branchId }),
   );
   const columns: ColumnsType<any> = [
     {
@@ -94,7 +93,7 @@ export function MarketSetting() {
       title: "Nhóm sản phẩm",
       dataIndex: "groupProduct",
       key: "groupProduct",
-      render: (_, record) => record?.groupProduct?.name,
+      render: (_, record) => record?.product?.groupProduct?.name,
     },
     {
       title: "Loại chợ",

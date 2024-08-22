@@ -10,7 +10,12 @@ export const schema = yup.object().shape({
     .required("Đây là trường bắt buộc!")
     .test("price", "Giá bán phải lớn hơn 0", (value) => value > 0),
   discountPrice: yup.number(),
-  description: yup.string(),
+  description: yup
+    .string()
+    .test("description", "Mô tả không được lớn hơn 3000 ký tự", (value) => {
+      if (!value) return true;
+      return value.length <= 3000;
+    }),
   thumbnail: yup.string().required("Đây là trường bắt buộc!"),
   images: yup.array(),
   batches: yup.array(),

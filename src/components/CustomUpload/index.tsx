@@ -8,6 +8,7 @@ import { uploadSingleFile } from '@/api/upload.service';
 import { getImage } from '@/helpers';
 
 import { UploadStyled } from './styled';
+import { message } from 'antd';
 
 export function CustomUpload({
   children,
@@ -27,7 +28,13 @@ export function CustomUpload({
   const [files, setFiles] = useState<string[]>([]);
 
   const props: UploadProps = {
-    async onChange(info) {
+    async onChange(info: any) {
+      // validate file size
+      if (info.file.size > 2 * 1024 * 1024) {
+        message.error('Dung lượng file không được lớn hơn 2MB');
+        return;
+      }
+
       setFiles((preValues) => [...preValues, info.file.name]);
       const res = await uploadSingleFile(info.file);
       if (res?.data?.id) {
@@ -37,6 +44,12 @@ export function CustomUpload({
       }
     },
     async onPreview(file: UploadFile) {
+      // Hide preview if file size is larger than 2MB
+      if (file.size && file.size > 2 * 1024 * 1024) {
+        message.error('Không thể xem trước các tệp lớn hơn 2MB');
+        return;
+      }
+
       let src = file.url as string;
       if (!src) {
         src = await new Promise((resolve) => {
@@ -60,15 +73,12 @@ export function CustomUpload({
     multiple: maxCount > 1,
   };
 
-  console.log('fileUrl', fileUrl);
-
   return (
     <ImgCrop rotationSlider>
       <>
         <UploadStyled className={className} {...props}>
           {children}
         </UploadStyled>
-
         {!files.length && values?.length && (
           <div className="mt-3">
             {values.map((file) => {
@@ -76,12 +86,12 @@ export function CustomUpload({
                 return (
                   <div
                     key={file}
-                    className=" relative -mt-2 flex h-[102px] w-[102px] items-center justify-center rounded-lg !border !border-[#d9d9d9] p-1"
+                    className="relative -mt-2 flex h-[102px] w-[102px] items-center justify-center rounded-lg !border !border-[#d9d9d9] p-1"
                   >
                     <NextImage
                       width={102}
                       height={102}
-                      className=" rounded-lg object-cover py-1"
+                      className="rounded-lg object-cover py-1"
                       src={getImage(file)}
                       alt=""
                     />
@@ -92,12 +102,12 @@ export function CustomUpload({
                 return (
                   <div
                     key={file}
-                    className=" relative -mt-2 flex h-[102px] w-[102px] items-center justify-center rounded-lg !border !border-[#d9d9d9] p-1"
+                    className="relative -mt-2 flex h-[102px] w-[102px] items-center justify-center rounded-lg !border !border-[#d9d9d9] p-1"
                   >
                     <NextImage
                       width={102}
                       height={102}
-                      className=" rounded-lg object-cover py-1"
+                      className="rounded-lg object-cover py-1"
                       src={fileUrl}
                       alt=""
                     />
