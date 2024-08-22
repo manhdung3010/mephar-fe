@@ -1,15 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 import type { AtomEffect } from "recoil";
 import { atom } from "recoil";
-
 import { randomString } from "@/helpers";
 import type { IImportProductLocal } from "@/modules/products/import-product/coupon/interface";
 import type { IDiscount, ISaleProductLocal } from "@/modules/sales/interface";
-
 const store = typeof window !== "undefined" ? window.localStorage : null;
-
 const defaultOrder = randomString();
-
 export const localStorageEffect: (key: string) => AtomEffect<any> =
   (key) =>
   ({ setSelf, onSet }) => {
@@ -30,7 +26,6 @@ export const localStorageEffect: (key: string) => AtomEffect<any> =
       if (store) {
         store.removeItem(key);
       }
-
       console.log(e);
     }
   };
