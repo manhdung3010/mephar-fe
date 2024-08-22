@@ -122,7 +122,6 @@ const Header = ({ data }: any) => {
       message.error(error?.message);
     }
   }
-
   async function downloadExamExcelKiot() {
     try {
       const response = await getProductExampleKiot();
