@@ -18,11 +18,14 @@ import { message } from 'antd';
 import { useRecoilValue } from 'recoil';
 import { OrderHistoryModal } from './HistoryModal';
 import UpdateStatusModal from '@/components/CustomModal/ModalUpdateStatusItem';
+import CloseIconRed from '@/assets/closeIcon.svg';
+import PaymentModal from './PaymentModal';
 
 export function Info({ record }: { record: any }) {
   const router = useRouter();
   const profile = useRecoilValue(profileState);
   const [isShowModal, setIsShowModal] = useState(false);
+  const [isShowPaymentModal, setIsShowPaymentModal] = useState(false);
   const [statusTemp, setStatusTemp] = useState<string>('');
 
   const totalPrice = useMemo(() => {
@@ -39,6 +42,17 @@ export function Info({ record }: { record: any }) {
   } = useMutation((payload: any) => {
     if (payload?.status === EOrderMarketStatus.CONFIRM) {
       return updateMarketOrderStatus(payload?.id, { status: payload?.status });
+    }
+    if (payload?.status === EOrderMarketStatus.SEND) {
+      const newPayload = {
+        status: payload?.status,
+        delivery: {
+          code: 'SHIP123123123',
+          price: shipFee,
+          name: 'Giao hàng nhanh',
+        }
+      }
+      return updateMarketOrderStatus(payload?.id, newPayload);
     }
     return updateMarketOrderStatus(payload?.id, { status: payload?.status });
   }, {
@@ -243,23 +257,66 @@ export function Info({ record }: { record: any }) {
               type="primary"
               outline={true}
               prefixIcon={<Image src={DeliveryIcon} alt="" />}
+              onClick={() => {
+                setIsShowModal(true);
+                setStatusTemp(EOrderMarketStatus.SEND)
+              }}
             >
               Gửi ĐVVC
             </CustomButton>
           )
         }
-        <CustomButton
-          type="primary"
-          outline={true}
-          prefixIcon={<Image src={DolarIcon} alt="" />}
-        >
-          Đã thanh toán
-        </CustomButton>
         {
-          hasPermission(profile?.role?.permissions, RoleModel.order, RoleAction.delete) && (
+          record?.status === EOrderMarketStatus.SEND && (
+            <CustomButton
+              type="primary"
+              outline={true}
+              prefixIcon={<Image src={DeliveryIcon} alt="" />}
+              onClick={() => {
+                setIsShowModal(true);
+                setStatusTemp(EOrderMarketStatus.DONE)
+              }}
+            >
+              Giao hàng thành công
+            </CustomButton>
+          )
+        }
+        {
+          record?.status === EOrderMarketStatus.SEND && (
+            <CustomButton
+              type="danger"
+              outline={true}
+              prefixIcon={<Image src={CloseIconRed} alt="" />}
+              onClick={() => {
+                setIsShowModal(true);
+                setStatusTemp(EOrderMarketStatus.CANCEL)
+              }}
+            >
+              Giao hàng thất bại
+            </CustomButton>
+          )
+        }
+        {
+          (record?.isPayment === false) && record?.status !== EOrderMarketStatus.CLOSED && (
+            <CustomButton
+              type="primary"
+              outline={true}
+              prefixIcon={<Image src={DolarIcon} alt="" />}
+              onClick={() => setIsShowPaymentModal(true)}
+            >
+              Đã thanh toán
+            </CustomButton>
+          )
+        }
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.order, RoleAction.delete) && record?.status === EOrderMarketStatus.PENDING && (
             <CustomButton
               outline={true}
               prefixIcon={<Image src={CloseIcon} alt="" />}
+              onClick={() => {
+                setIsShowModal(true);
+                setStatusTemp(EOrderMarketStatus.CLOSED)
+              }}
             >
               Hủy bỏ
             </CustomButton>
@@ -269,6 +326,7 @@ export function Info({ record }: { record: any }) {
       <OrderHistoryModal
         isOpen={openHistoryModal}
         onCancel={() => setOpenHistoryModal(false)}
+        historyPurchase={record?.historyPurchase}
       />
       <UpdateStatusModal
         isOpen={isShowModal}
@@ -279,6 +337,7 @@ export function Info({ record }: { record: any }) {
         }}
         content="trạng thái đơn hàng"
       />
+      <PaymentModal isOpen={isShowPaymentModal} onCancel={() => setIsShowPaymentModal(false)} id={record?.id} />
     </div>
   );
 }

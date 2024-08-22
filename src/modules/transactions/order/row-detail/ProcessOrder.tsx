@@ -8,7 +8,7 @@ import { CustomInput } from '@/components/CustomInput';
 import { SeriDetailModal } from './SeriDetailModal';
 import { useRouter } from 'next/router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getMarketOrderDetail, processingMarketOrder, updateSeri } from '@/api/market.service';
+import { getMarketOrderDetail, updateMarketOrderStatus, updateSeri } from '@/api/market.service';
 import { getImage } from '@/helpers';
 import { useRecoilValue } from 'recoil';
 import { branchState } from '@/recoil/state';
@@ -82,7 +82,7 @@ export function ProcessOrder() {
             }
           })
         }
-        return processingMarketOrder(String(id), payload)
+        return updateMarketOrderStatus(String(id), payload)
       },
       {
         onSuccess: async () => {
@@ -137,8 +137,6 @@ export function ProcessOrder() {
     mutateUpdateOrder()
   }
   const onUpdateSeri = () => {
-    // validate if all seri = quantity
-
     mutateUpdateSeri()
   }
   return (
@@ -146,7 +144,7 @@ export function ProcessOrder() {
       <div className="mt-6 flex items-center justify-between bg-white p-5">
         <div className="text-2xl font-medium uppercase">Xử lý đơn hàng</div>
         <div className="flex gap-4">
-          <CustomButton outline={true}>Quay lại</CustomButton>
+          <CustomButton outline={true} onClick={() => router.push('/transactions/order')}>Quay lại</CustomButton>
           <CustomButton onClick={handleSubmit(onUpdateSeri)}>Lưu</CustomButton>
           {
             (orderInfo?.status === EOrderMarketStatus.CONFIRM || orderInfo?.status === EOrderMarketStatus.PENDING) && (
@@ -193,6 +191,7 @@ export function ProcessOrder() {
                   onChange={(value) => {
                     handleInputChange(product?.id, value);
                   }}
+                  placeholder='Nhập seri, nhấn enter để thêm'
                   value={inputValues[product?.id]}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {

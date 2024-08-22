@@ -6,6 +6,7 @@ import { MarketPaginationStyled } from '@/components/CustomPagination/styled';
 import { Pagination } from 'antd';
 import { useRecoilValue } from 'recoil';
 import { branchState } from '@/recoil/state';
+import StoreCardSkeleton from '../product-detail/StoreCardSkeleton';
 
 function Store() {
   const branchId = useRecoilValue(branchState);
@@ -35,7 +36,11 @@ function Store() {
 
         <div className='grid grid-cols-1 gap-5 mt-6'>
           {
-            stores?.data?.items?.map((item, index) => (
+            isLoading ? (
+              Array.from({ length: 10 }).map((_, index) => (
+                <StoreCardSkeleton key={index} />
+              ))
+            ) : stores?.data?.items?.map((item, index) => (
               <StoreCard key={index} store={item} branch={item?.name} />
             ))
           }

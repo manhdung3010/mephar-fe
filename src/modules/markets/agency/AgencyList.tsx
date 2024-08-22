@@ -73,21 +73,35 @@ function AgencyList({ data, formFilter, setFormFilter, isLoading }) {
               }
               mutateUpdateStoreStatus(newPayload)
             }}
-          >Từ chối</CustomButton>
+            loading={isLoadingCreateOrder}
+            disabled={isLoadingCreateOrder}
+          >
+            Từ chối
+          </CustomButton>
           <CustomButton onClick={() => {
             const newPayload = {
               id: record?.id,
               status: EAcceptFollowStoreStatus.ACTIVE,
             }
             mutateUpdateStoreStatus(newPayload)
-          }}>Chấp nhận</CustomButton>
+          }}
+            loading={isLoadingCreateOrder}
+            disabled={isLoadingCreateOrder}
+          >
+            Chấp nhận
+          </CustomButton>
         </div>
       ) : (
         <div className='flex items-center gap-2'>
           <CustomButton outline onClick={() => {
             setOpenConfirmModal(true)
             setDeleteId(record?.id)
-          }}>Hủy quyền mua</CustomButton>
+          }}
+            loading={isLoadingCreateOrder}
+            disabled={isLoadingCreateOrder}
+          >
+            Hủy quyền mua
+          </CustomButton>
         </div>
       ),
     },
@@ -117,7 +131,6 @@ function AgencyList({ data, formFilter, setFormFilter, isLoading }) {
           <p className='italic font-medium text-[#8F90A6] my-6'>Số lượng đã chấp nhận: {data?.totalItem}</p>
         )
       }
-
       <CustomTable
         dataSource={data?.items?.map((item, index) => ({
           ...item,

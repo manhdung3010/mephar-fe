@@ -90,11 +90,13 @@ export function getMarketOrder(params) {
 export function getMarketOrderDetail(id: string, branchId: string) {
   return axiosClient.get(`market/sell/market-order/${id}?branchId=${branchId}`);
 }
-export function processingMarketOrder(id: string, payload) {
-  return axiosClient.patch(`market/sell/market-order/${id}`, payload);
-}
 export function updateSeri(payload) {
   return axiosClient.patch(`market/sell/seri`, payload);
+}
+
+// payment order
+export function createPaymentOrder(id: string, payload) {
+  return axiosClient.patch(`market/sell/market-order/payment/${id}`, payload);
 }
 
 // update order status

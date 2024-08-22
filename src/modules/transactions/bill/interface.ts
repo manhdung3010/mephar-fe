@@ -1,28 +1,36 @@
 import { EOrderStatus, EOrderStatusLabel } from "@/enums";
+import {
+  EOrderMarketStatus,
+  EOrderMarketStatusLabel,
+} from "@/modules/markets/type";
 
 export const billStatusData = [
   {
-    value: EOrderStatus.SUCCEED,
-    label: EOrderStatusLabel.SUCCEED,
+    value: EOrderMarketStatus.PENDING,
+    label: EOrderMarketStatusLabel.PENDING,
   },
   {
-    value: EOrderStatus.CONFIRMING,
-    label: EOrderStatusLabel.CONFIRMING,
+    value: EOrderMarketStatus.CONFIRM,
+    label: EOrderMarketStatusLabel.CONFIRM,
   },
   {
-    value: EOrderStatus.SHIPPING,
-    label: EOrderStatusLabel.SHIPPING,
+    value: EOrderMarketStatus.PROCESSING,
+    label: EOrderMarketStatusLabel.PROCESSING,
   },
   {
-    value: EOrderStatus.DELIVERING,
-    label: EOrderStatusLabel.DELIVERING,
+    value: EOrderMarketStatus.SEND,
+    label: EOrderMarketStatusLabel.SEND,
   },
   {
-    value: EOrderStatus.PAID,
-    label: EOrderStatusLabel.PAID,
+    value: EOrderMarketStatus.DONE,
+    label: EOrderMarketStatusLabel.DONE,
   },
   {
-    value: EOrderStatus.CANCELLED,
-    label: EOrderStatusLabel.CANCELLED,
+    value: EOrderMarketStatus.CANCEL,
+    label: EOrderMarketStatusLabel.CANCEL,
+  },
+  {
+    value: EOrderMarketStatus.CLOSED,
+    label: EOrderMarketStatusLabel.CLOSED,
   },
 ];

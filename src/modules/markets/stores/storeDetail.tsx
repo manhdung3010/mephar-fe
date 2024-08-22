@@ -104,34 +104,38 @@ function StoreDetail() {
                   <div className='text-white flex flex-col gap-2'>
                     <h4 className='text-xl font-semibold line-clamp-1'>{storeDetail?.data?.store?.name}</h4>
                     <p className='text-gray-300'>{storeDetail?.data?.name}</p>
-                    <button
-                      className={`bg-white rounded-lg ${(followStore?.data?.status === EFollowStoreStatus.FALSE || followStore?.data?.status === EFollowStoreStatus.PENDING) ? 'text-red-main' : 'text-[#05A660]'} py-2 px-4 `}
-                    >
-                      {
-                        (followStore?.data?.status === EFollowStoreStatus.FALSE || followStore?.data?.status === EFollowStoreStatus.CANCEL) && (
-                          <p className='flex items-center gap-2' onClick={() => muateCreateFollow()}>
-                            <Image src={CartPlusIcon} />
-                            <span className='text-base font-medium'>Đăng ký mua hàng</span>
-                          </p>
-                        )
-                      }
-                      {
-                        followStore?.data?.status === EFollowStoreStatus.PENDING && (
-                          <p className='flex items-center gap-2'>
-                            <LoadingIcon />
-                            <span className='text-base font-medium'>Đang chờ duyệt</span>
-                          </p>
-                        )
-                      }
-                      {
-                        followStore?.data?.status === EFollowStoreStatus.ACTIVE && (
-                          <p className='flex items-center gap-2'>
-                            <Image src={CartHeartIcon} />
-                            <span className='text-base font-medium'>Đã đăng ký mua hàng</span>
-                          </p>
-                        )
-                      }
-                    </button>
+                    {
+                      storeDetail?.data?.isAgency && (
+                        <button
+                          className={`bg-white rounded-lg ${(followStore?.data?.status === EFollowStoreStatus.FALSE || followStore?.data?.status === EFollowStoreStatus.PENDING) ? 'text-red-main' : 'text-[#05A660]'} py-2 px-4 `}
+                        >
+                          {
+                            (followStore?.data?.status === EFollowStoreStatus.FALSE || followStore?.data?.status === EFollowStoreStatus.CANCEL) && (
+                              <p className='flex items-center gap-2' onClick={() => muateCreateFollow()}>
+                                <Image src={CartPlusIcon} />
+                                <span className='text-base font-medium text-red-main'>Đăng ký mua hàng</span>
+                              </p>
+                            )
+                          }
+                          {
+                            followStore?.data?.status === EFollowStoreStatus.PENDING && (
+                              <p className='flex items-center gap-2'>
+                                {/* <LoadingIcon /> */}
+                                <span className='text-base font-medium'>Đang chờ duyệt</span>
+                              </p>
+                            )
+                          }
+                          {
+                            followStore?.data?.status === EFollowStoreStatus.ACTIVE && (
+                              <p className='flex items-center gap-2'>
+                                <Image src={CartHeartIcon} />
+                                <span className='text-base font-medium'>Đã đăng ký mua hàng</span>
+                              </p>
+                            )
+                          }
+                        </button>
+                      )
+                    }
                   </div>
                 </div>
                 <div className='absolute w-full h-full top-0 bottom-0 left-0 right-0 z-10' style={{ backgroundColor: 'rgba(0, 0, 0, .5)' }}>

@@ -67,7 +67,7 @@ const Search = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void,
             }}
           />
           <div className="w-[1px] bg-[#D3D5D7]" />
-          <Select
+          {/* <Select
             className="w-[150px]"
             bordered={false}
             suffixIcon={<Image src={ArrowDownGray} alt="" />}
@@ -96,7 +96,7 @@ const Search = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void,
               label: item.fullName,
             }))}
             value={employees?.data?.items?.find((item) => item?.id === formFilter?.userId)?.fullName || undefined}
-          />
+          /> */}
           <Select
             className="w-[150px]"
             bordered={false}

@@ -213,7 +213,7 @@ function Payment() {
             </div>
           </div>
           <div className='flex justify-end my-4'>
-            <CustomButton className='!w-[300px] !h-[46px]' onClick={onSubmit}>Đặt hàng</CustomButton>
+            <CustomButton className='!w-[300px] !h-[46px]' onClick={onSubmit} loading={isLoadingCreateOrder} disabled={isLoadingCreateOrder}>Đặt hàng</CustomButton>
           </div>
         </div>
       </div>
