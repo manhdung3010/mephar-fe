@@ -22,7 +22,6 @@ function MarketSearch() {
     "createdAt[start]": undefined,
     "createdAt[end]": undefined,
     sortBy: "quantitySold",
-    isConfig: false,
     type: 'common'
   });
 

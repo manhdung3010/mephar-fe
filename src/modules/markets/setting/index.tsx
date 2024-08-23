@@ -3,13 +3,11 @@ import cx from "classnames";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useState } from "react";
-
 import ExportIcon from "@/assets/exportIcon.svg";
 import PlusIcon from "@/assets/plusWhiteIcon.svg";
 import { CustomButton } from "@/components/CustomButton";
 import CustomTable from "@/components/CustomTable";
 import { EProductSettingStatus, EProductSettingStatusLabel } from "@/enums";
-
 import RowDetail from "./row-detail";
 import Search from "./Search";
 import { useQuery } from "@tanstack/react-query";
@@ -20,7 +18,6 @@ import { formatDateTime, formatNumber, hasPermission } from "@/helpers";
 import CustomPagination from "@/components/CustomPagination";
 import { debounce } from "lodash";
 import { RoleAction, RoleModel } from "@/modules/settings/role/role.enum";
-
 interface IRecord {
   key: number;
   name: string;

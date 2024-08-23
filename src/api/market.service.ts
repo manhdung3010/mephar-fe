@@ -36,6 +36,13 @@ export function getConfigProductDetail(id: string) {
   return axiosClient.get(`market/config/product/${id}`);
 }
 
+// product privite
+export function getConfigProductPrivate(branchId: string, toBranchId: string) {
+  return axiosClient.get(
+    `market/sell/product-private?branchId=${branchId}&toBranchId=${toBranchId}`
+  );
+}
+
 // đại lý
 export function getAgency(params) {
   return axiosClient.get(`market/config/agency`, { params });

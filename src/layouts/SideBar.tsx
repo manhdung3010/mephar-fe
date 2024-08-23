@@ -342,15 +342,19 @@ const SideBar = () => {
         style={{ width: collapsedVal ? 80 : 230 }}
         inlineCollapsed={collapsedVal}
         onSelect={({ selectedKeys }) => {
+          if (selectedKeys[0] === keyMenu.MARKET_COMMON) {
+            return;
+          }
           router.push(selectedKeys[0] as string);
-
           setMenuActive(selectedKeys);
         }}
         onOpenChange={(value) => {
           setMenuActive(value);
         }}
         onClick={({ key }) => {
-          if (key === keyMenu.MARKET_COMMON) return;
+          if (key === keyMenu.MARKET_COMMON) {
+            return;
+          }
           router.push(key);
         }}
       />

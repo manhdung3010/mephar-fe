@@ -1,4 +1,4 @@
-import { createFollowStore, getConfigProduct, getFollowStore, getMarketStoreDetail } from '@/api/market.service';
+import { createFollowStore, getConfigProduct, getConfigProductPrivate, getFollowStore, getMarketStoreDetail } from '@/api/market.service';
 import { MarketPaginationStyled } from '@/components/CustomPagination/styled';
 import { formatNumber, getImage } from '@/helpers';
 import Logo from "@/public/apple-touch-icon.png";
@@ -35,19 +35,25 @@ function StoreDetail() {
     isConfig: true,
     branchId
   });
-
-  const { data: configProduct, isLoading } = useQuery(
-    ['CONFIG_PRODUCT', JSON.stringify(formFilter), id],
-    () => getConfigProduct({ ...formFilter, otherBranchId: id }),
-    {
-      enabled: !!id
-    }
-  );
   const { data: storeDetail, isLoading: isLoadingStoreDetail } = useQuery(
     ['MARKET_STORE_DETAIL', id],
     () => getMarketStoreDetail(String(id)),
     {
       enabled: !!id
+    }
+  );
+  const { data: configProduct, isLoading } = useQuery(
+    ['CONFIG_PRODUCT', JSON.stringify(formFilter), id],
+    () => getConfigProduct({ ...formFilter, otherBranchId: id }),
+    {
+      enabled: !!id && !storeDetail?.data?.isAgency
+    }
+  );
+  const { data: configProductPrivate, isLoading: isLoadingConfigProductPrivate } = useQuery(
+    ['CONFIG_PRODUCT_PRIVATE', JSON.stringify(formFilter), id],
+    () => getConfigProductPrivate(branchId, String(id)),
+    {
+      enabled: !!id && storeDetail?.data?.isAgency
     }
   );
   const { data: followStore, isLoading: isLoadingFollowStore } = useQuery(
@@ -230,18 +236,37 @@ function StoreDetail() {
         </p>
 
         <div className='mt-8'>
-          <h2 className='text-5xl font-semibold text-[#242424] text-center mb-12'>Sản phẩm mới</h2>
-          <div className='grid grid-cols-4 gap-10'>
-            {
-              isLoading ? (
-                Array.from({ length: 8 }).map((_, index) => (
-                  <ProductCardSkeleton key={index} />
-                ))
-              ) : configProduct?.data?.items?.map((item, index) => (
-                <ProductCard key={item?.id} product={item} />
-              ))
-            }
-          </div>
+          <h2 className='text-5xl font-semibold text-[#242424] text-center mb-12'>{menu[select]}</h2>
+          {
+            storeDetail?.data?.isAgency && (
+              <div className='grid grid-cols-4 gap-10'>
+                {
+                  isLoading ? (
+                    Array.from({ length: 8 }).map((_, index) => (
+                      <ProductCardSkeleton key={index} />
+                    ))
+                  ) : configProductPrivate?.data?.items?.map((item, index) => (
+                    <ProductCard key={item?.id} product={item} />
+                  ))
+                }
+              </div>
+            )
+          }
+          {
+            !storeDetail?.data?.isAgency && (
+              <div className='grid grid-cols-4 gap-10'>
+                {
+                  isLoading ? (
+                    Array.from({ length: 8 }).map((_, index) => (
+                      <ProductCardSkeleton key={index} />
+                    ))
+                  ) : configProduct?.data?.items?.map((item, index) => (
+                    <ProductCard key={item?.id} product={item} />
+                  ))
+                }
+              </div>
+            )
+          }
           <div className='flex justify-center py-12'>
             <MarketPaginationStyled>
               <Pagination pageSize={formFilter?.limit} current={formFilter?.page} onChange={(value) => setFormFilter({ ...formFilter, page: value })} total={configProduct?.data?.totalItem} />

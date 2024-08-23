@@ -359,6 +359,7 @@ export function DeliveryCoupon() {
           render: (price, { productKey }) => (
             <CustomInput
               className="!w-[110px]"
+              disabled={true}
               type="number"
               onChange={(value) =>
                 onChangeValueProduct(productKey, "price", value)
