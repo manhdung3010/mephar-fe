@@ -78,7 +78,7 @@ export function PointHistory({ record, branchId }: { record: any, branchId: numb
       title: 'Giá trị',
       dataIndex: 'totalPrice',
       key: 'totalPrice',
-      render: (value, record) => formatMoney(record?.order?.totalPrice),
+      render: (value, record) => formatMoney(value),
     },
     {
       title: 'Điểm GD',

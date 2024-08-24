@@ -171,7 +171,7 @@ function StoreDetail() {
               </div>
               <div className='flex items-center'>
                 <span className='w-40'>Địa chỉ: </span>
-                <span className='text-red-main'>{storeDetail?.data?.address}</span>
+                <span className='text-red-main'>{storeDetail?.data?.address1 || storeDetail?.data?.address2}</span>
               </div>
             </div>
           </div>

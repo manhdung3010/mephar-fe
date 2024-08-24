@@ -42,7 +42,7 @@ function OrderModal({ isOpen, onCancel, orderInfo, totalMoney }) {
         </div>
         <div className='grid grid-cols-2 gap-2 mt-7'>
           <CustomButton className='!h-11 !rounded-lg' outline type='original' onClick={() => router.push('/markets')}>Trang chủ</CustomButton>
-          <CustomButton className='!h-11 !rounded-lg' onClick={() => router.push('markets/buy-order/')}>Đơn mua</CustomButton>
+          <CustomButton className='!h-11 !rounded-lg' onClick={() => router.push('/markets/buy-order/')}>Đơn mua</CustomButton>
         </div>
       </div>
     </CustomModal>

@@ -13,6 +13,7 @@ export interface ICustomer {
   gender: EGender;
   groupCustomerId?: number;
   groupCustomer?: { name: string };
+  listGroupCustomer?: any;
   position?: EUserPositions;
   taxCode?: string;
   type: 1;

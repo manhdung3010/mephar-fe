@@ -71,6 +71,12 @@ function AddAddressModal({ isOpen, onCancel, addressId }) {
     }
   );
 
+  useEffect(() => {
+    if (!isOpen) {
+      reset();
+    }
+  }, [isOpen]);
+
   const { provinces, districts, wards } = useAddress(
     getValues("provinceId"),
     getValues("districtId")

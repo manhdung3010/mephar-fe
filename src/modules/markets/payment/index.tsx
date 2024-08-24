@@ -62,6 +62,7 @@ function Payment() {
             return {
               marketProductId: product?.marketProductId,
               quantity: product?.quantity,
+              price: product?.price
             }
           }),
           toBranchId: paymentProduct[0]?.products[0]?.marketProduct?.branchId,

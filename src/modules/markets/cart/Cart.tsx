@@ -26,19 +26,15 @@ function Cart() {
     "createdAt[start]": undefined,
     "createdAt[end]": undefined,
     sortBy: "quantitySold",
-    isConfig: false,
     type: 'common'
   });
-
   const [marketCart, setMarketCart] = useRecoilState(marketCartState);
   const [paymentProduct, setPaymentProduct] = useRecoilState(paymentProductState);
   const [storeSelected, setStoreSelected] = useState(null);
   const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
   const [productId, setProductId] = useState(null);
   const [cartTemp, setCartTemp] = useState<any>(null);
-
   const [cartList, setCartList] = useState<any>([]);
-
   const { data: configProduct, isLoading } = useQuery(
     ['CONFIG_PRODUCT', JSON.stringify(formFilter), branchId],
     () => getConfigProduct({ ...formFilter, branchId }),

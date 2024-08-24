@@ -406,7 +406,13 @@ export function AddMarketSetting() {
               <CustomSelect
                 onChange={(value) => {
                   // change inventory of batch when change product unit
-
+                  const newBatch = listBatchSelected.map((item) => {
+                    return {
+                      ...item,
+                    }
+                  });
+                  setListBatchSelected(newBatch);
+                  setValue('productUnitId', value, { shouldValidate: true });
                 }}
                 className="suffix-icon h-11 !rounded"
                 placeholder="Chọn đơn vị"

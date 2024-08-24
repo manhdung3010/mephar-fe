@@ -114,7 +114,9 @@ export function Info({ record }: { record: ICustomer }) {
 
           <div className="grid grid-cols-3 gap-5">
             <div className="col-span-1 text-gray-main">Nhóm KH:</div>
-            <div className="text-black-main">{record.groupCustomer?.name}</div>
+            <div className="text-black-main">{record?.listGroupCustomer?.map((item, index) => {
+              return item?.groupCustomer?.name + (index < record?.listGroupCustomer?.length - 1 ? ', ' : '');
+            })}</div>
           </div>
 
           <div className="grid grid-cols-3 gap-5">
@@ -168,59 +170,59 @@ export function Info({ record }: { record: ICustomer }) {
           RoleModel.customer,
           RoleAction.update
         ) && (
-          <CustomButton
-            type={
-              String(record?.status) === ECustomerStatus.active
-                ? `disable`
-                : "success"
-            }
-            outline={true}
-            // prefixIcon={<Image src={LockIcon} alt="" />}
-            loading={isLoadingUpdateCustomer}
-            disabled={isLoadingUpdateCustomer}
-            onClick={() =>
-              handleUpdateStatus(
-                record.id as any,
+            <CustomButton
+              type={
                 String(record?.status) === ECustomerStatus.active
-                  ? ECustomerStatus.inactive
-                  : ECustomerStatus.active
-              )
-            }
-          >
-            {String(record?.status) === ECustomerStatus.active
-              ? ECustomerStatusLabel.inactive
-              : ECustomerStatusLabel.active}
-          </CustomButton>
-        )}
+                  ? `disable`
+                  : "success"
+              }
+              outline={true}
+              // prefixIcon={<Image src={LockIcon} alt="" />}
+              loading={isLoadingUpdateCustomer}
+              disabled={isLoadingUpdateCustomer}
+              onClick={() =>
+                handleUpdateStatus(
+                  record.id as any,
+                  String(record?.status) === ECustomerStatus.active
+                    ? ECustomerStatus.inactive
+                    : ECustomerStatus.active
+                )
+              }
+            >
+              {String(record?.status) === ECustomerStatus.active
+                ? ECustomerStatusLabel.inactive
+                : ECustomerStatusLabel.active}
+            </CustomButton>
+          )}
         {hasPermission(
           profile?.role?.permissions,
           RoleModel.customer,
           RoleAction.delete
         ) && (
-          <CustomButton
-            type="danger"
-            outline={true}
-            prefixIcon={<Image src={DeleteIcon} alt="" />}
-            onClick={() => setDeletedId(record.id)}
-          >
-            Xóa
-          </CustomButton>
-        )}
+            <CustomButton
+              type="danger"
+              outline={true}
+              prefixIcon={<Image src={DeleteIcon} alt="" />}
+              onClick={() => setDeletedId(record.id)}
+            >
+              Xóa
+            </CustomButton>
+          )}
         {hasPermission(
           profile?.role?.permissions,
           RoleModel.customer,
           RoleAction.update
         ) && (
-          <CustomButton
-            type="success"
-            prefixIcon={<Image src={EditIcon} alt="" />}
-            onClick={() =>
-              router.push(`/partners/customer/add-customer?id=${record.id}`)
-            }
-          >
-            Cập nhật
-          </CustomButton>
-        )}
+            <CustomButton
+              type="success"
+              prefixIcon={<Image src={EditIcon} alt="" />}
+              onClick={() =>
+                router.push(`/partners/customer/add-customer?id=${record.id}`)
+              }
+            >
+              Cập nhật
+            </CustomButton>
+          )}
       </div>
 
       <DeleteModal
