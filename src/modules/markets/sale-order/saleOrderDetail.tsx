@@ -24,8 +24,9 @@ function SaleOrderDetail() {
       enabled: !!id
     }
   );
-
-  console.log('orderDetail', orderDetail)
+  const isSaleOrder = useMemo(() => {
+    return router?.asPath?.split('/')[2] === 'sale-order'
+  }, [router?.asPath])
 
   const totalMoney = useMemo(() => {
     return orderDetail?.data?.item?.products?.reduce((total, product) => {
@@ -43,7 +44,7 @@ function SaleOrderDetail() {
               <span className="mx-2">/</span>
             </li>
             <li>
-              <a href="#" className="text-gray-500 hover:text-gray-700">Đơn hàng mua</a>
+              <a href="#" className="text-gray-500 hover:text-gray-700">Đơn hàng {isSaleOrder ? 'bán' : 'mua'}</a>
             </li>
           </ul>
         </nav>

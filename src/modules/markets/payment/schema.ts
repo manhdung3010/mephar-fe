@@ -6,6 +6,7 @@ export const schema = yup.object().shape({
     .string()
     .required("Đây là trường bắt buộc!")
     .matches(regexPhoneNumber, "Vui lòng nhập đúng định dạng số điện thoại"),
+  fullName: yup.string().required("Đây là trường bắt buộc!"),
   wardId: yup.number().required("Đây là trường bắt buộc!"),
   districtId: yup.number().required("Đây là trường bắt buộc!"),
   provinceId: yup.number().required("Đây là trường bắt buộc!"),

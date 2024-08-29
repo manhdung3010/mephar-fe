@@ -27,9 +27,13 @@ export function getConfigProduct(params: {
 export function deleteConfigProduct(id: string) {
   return axiosClient.delete(`market/config/product/${id}`);
 }
-export function updateConfigStatus(id: string, status: string) {
+export function updateConfigStatus(
+  id: string,
+  status: string,
+  branchId: string
+) {
   return axiosClient.patch(
-    `market/config/product/changeStatus/${id}/${status}`
+    `market/config/product/changeStatus/${id}/${status}?branchId=${branchId}`
   );
 }
 export function getConfigProductDetail(id: string) {

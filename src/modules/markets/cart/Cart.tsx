@@ -5,7 +5,7 @@ import { CustomButton } from '@/components/CustomButton'
 import { CustomCheckbox } from '@/components/CustomCheckbox'
 import { CustomInput } from '@/components/CustomInput'
 import DeleteModal from '@/components/CustomModal/ModalDeleteItem'
-import { formatMoney, formatNumber, getImage } from '@/helpers'
+import { formatMoney, formatNumber, getImage, sliceString } from '@/helpers'
 import { branchState, marketCartState, paymentProductState } from '@/recoil/state'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { message, Radio } from 'antd'
@@ -253,10 +253,10 @@ function Cart() {
                               setCartList(newCartList)
                             }}
                           />
-                          <div className='ml-12 mr-5 w-20 h-20 rounded overflow-hidden border-[#E4E4EB] border-[1px] grid place-items-center'>
+                          <div className='ml-12 mr-5 w-20 h-20 flex-shrink-0 rounded overflow-hidden border-[#E4E4EB] border-[1px] grid place-items-center'>
                             <Image src={getImage(product?.marketProduct?.imageCenter?.path)} className='object-cover' width={80} height={80} />
                           </div>
-                          <span>{product?.marketProduct?.product?.name}</span>
+                          <span>{sliceString(product?.marketProduct?.product?.name, 55)}</span>
                         </div>
                         <div className='col-span-6 grid grid-cols-4 items-center gap-2'>
                           <div className='text-center'>

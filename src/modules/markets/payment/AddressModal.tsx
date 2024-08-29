@@ -51,7 +51,7 @@ function AddressModal({ isOpen, onCancel, onSave }) {
                 <Radio value={item?.id}></Radio>
                 <div className='w-full flex justify-between items-center ml-2'>
                   <div className='flex flex-col gap-1'>
-                    <p className='text-[#28293D] font-medium'>{profile?.fullName} | {item?.phone}</p>
+                    <p className='text-[#28293D] font-medium'>{item?.fullName} | {item?.phone}</p>
                     <span className='text-[#555770]'>{item?.address}, {item?.ward?.name}, {item?.district?.name}, {item?.province?.name}</span>
                     {
                       item?.isDefaultAddress && (

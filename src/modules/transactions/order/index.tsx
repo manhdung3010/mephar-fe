@@ -10,7 +10,7 @@ import ExportIcon from "@/assets/exportFileIcon.svg";
 import ImportIcon from "@/assets/importFileIcon.svg";
 import CustomPagination from "@/components/CustomPagination";
 import CustomTable from "@/components/CustomTable";
-import { formatMoney } from "@/helpers";
+import { formatMoney, formatNumber } from "@/helpers";
 import { branchState } from "@/recoil/state";
 import { getMarketOrder } from "@/api/market.service";
 import { EOrderMarketStatus, EOrderMarketStatusLabel } from "@/modules/markets/type";
@@ -32,6 +32,7 @@ export function OrderTransaction() {
     limit: 20,
     keyword: '',
     type: 'sell',
+    dateNumber: 90,
   });
 
   const { data: orders, isLoading } = useQuery(
@@ -192,9 +193,14 @@ export function OrderTransaction() {
           </span>
           <Select
             bordered={false}
-            defaultValue={"1"}
+            defaultValue={formFilter.dateNumber}
             className="min-w-[150px] text-red-main"
-            options={[{ label: "90 ngày gần nhất", value: "1" }]}
+            options={[
+              { label: "90 ngày gần nhất", value: 90 },
+              { label: "60 ngày gần nhất", value: 60 },
+              { label: "30 ngày gần nhất", value: 30 }
+            ]}
+            onChange={(value) => setFormFilter({ ...formFilter, dateNumber: value })}
             suffixIcon={<Image src={ArrowDownIcon} />}
           />
         </div>
@@ -202,72 +208,77 @@ export function OrderTransaction() {
         <div className="flex justify-between p-4">
           <div>
             <div className="mb-2 text-[#15171A]">
-              Chờ duyệt
+              Chờ xác nhận
               <span className="ml-1 rounded-[10px] bg-[#FBECEE] px-[6px] py-1 text-red-main">
-                0
+                {formatNumber(orders?.data?.filterOrderByStatus[0]?.count)}
               </span>
             </div>
-            <div className="text-xl font-medium text-[#182537]">0</div>
+            <div className="text-xl font-medium text-[#182537]">{formatMoney(orders?.data?.filterOrderByStatus[0]?.sum)}</div>
+          </div>
+          <div className="mx-6 w-[1px] border-l border-dashed border-[#ABABAB]" />
+          <div>
+            <div className="mb-2 text-[#15171A]">
+              Đã xác nhận
+              <span className="ml-1 rounded-[10px] bg-[#FBECEE] px-[6px] py-1 text-red-main">
+                {formatNumber(orders?.data?.filterOrderByStatus[1]?.count)}
+              </span>
+            </div>
+            <div className="text-xl font-medium text-[#182537]">{formatMoney(orders?.data?.filterOrderByStatus[1]?.sum)}</div>
+          </div>
+          <div className="mx-6 w-[1px] border-l border-dashed border-[#ABABAB]" />
+          <div>
+            <div className="mb-2 text-[#15171A]">
+              Đang xử lý
+              <span className="ml-1 rounded-[10px] bg-[#FBECEE] px-[6px] py-1 text-red-main">
+                {formatNumber(orders?.data?.filterOrderByStatus[2]?.count)}
+              </span>
+            </div>
+            <div className="text-xl font-medium text-[#182537]">{formatMoney(orders?.data?.filterOrderByStatus[2]?.sum)}</div>
+          </div>
+          <div className="mx-6 w-[1px] border-l border-dashed border-[#ABABAB]" />
+          <div>
+            <div className="mb-2 text-[#15171A]">
+              Đã giao cho ĐVVC
+              <span className="ml-1 rounded-[10px] bg-[#FBECEE] px-[6px] py-1 text-red-main">
+                {formatNumber(orders?.data?.filterOrderByStatus[3]?.count)}
+              </span>
+            </div>
+            <div className="text-xl font-medium text-[#182537]">{formatMoney(orders?.data?.filterOrderByStatus[3]?.sum)}</div>
           </div>
 
           <div className="mx-6 w-[1px] border-l border-dashed border-[#ABABAB]" />
 
           <div>
             <div className="mb-2 text-[#15171A]">
-              Chờ thanh toán
+              Hoàn thành
               <span className="ml-1 rounded-[10px] bg-[#FBECEE] px-[6px] py-1 text-red-main">
-                0
+                {formatNumber(orders?.data?.filterOrderByStatus[6]?.count)}
               </span>
             </div>
-            <div className="text-xl font-medium text-[#182537]">0</div>
+            <div className="text-xl font-medium text-[#182537]">{formatMoney(orders?.data?.filterOrderByStatus[6]?.sum)}</div>
           </div>
 
           <div className="mx-6 w-[1px] border-l border-dashed border-[#ABABAB]" />
 
           <div>
             <div className="mb-2 text-[#15171A]">
-              Chờ đóng gói
+              Giao hàng thất bại
               <span className="ml-1 rounded-[10px] bg-[#FBECEE] px-[6px] py-1 text-red-main">
-                0
+                {formatNumber(orders?.data?.filterOrderByStatus[4]?.count)}
               </span>
             </div>
-            <div className="text-xl font-medium text-[#182537]">0</div>
+            <div className="text-xl font-medium text-[#182537]">{formatMoney(orders?.data?.filterOrderByStatus[4]?.sum)}</div>
           </div>
-
           <div className="mx-6 w-[1px] border-l border-dashed border-[#ABABAB]" />
 
           <div>
             <div className="mb-2 text-[#15171A]">
-              Chờ lấy hàng
+              Đã hủy
               <span className="ml-1 rounded-[10px] bg-[#FBECEE] px-[6px] py-1 text-red-main">
-                0
+                {formatNumber(orders?.data?.filterOrderByStatus[5]?.count)}
               </span>
             </div>
-            <div className="text-xl font-medium text-[#182537]">0</div>
-          </div>
-
-          <div className="mx-6 w-[1px] border-l border-dashed border-[#ABABAB]" />
-
-          <div>
-            <div className="mb-2 text-[#15171A]">
-              Chờ lấy hàng
-              <span className="ml-1 rounded-[10px] bg-[#FBECEE] px-[6px] py-1 text-red-main">
-                0
-              </span>
-            </div>
-            <div className="text-xl font-medium text-[#182537]">0</div>
-          </div>
-
-          <div className="mx-6 w-[1px] border-l border-dashed border-[#ABABAB]" />
-
-          <div>
-            <div className="mb-2 text-[#15171A]">
-              Chờ giao lại
-              <span className="ml-1 rounded-[10px] bg-[#FBECEE] px-[6px] py-1 text-red-main">
-                0
-              </span>
-            </div>
-            <div className="text-xl font-medium text-[#182537]">0</div>
+            <div className="text-xl font-medium text-[#182537]">{formatMoney(orders?.data?.filterOrderByStatus[5]?.sum)}</div>
           </div>
         </div>
       </div>

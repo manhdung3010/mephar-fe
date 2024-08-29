@@ -12,7 +12,7 @@ import Label from '@/components/CustomLabel';
 import { CustomSelect } from '@/components/CustomSelect';
 import { CustomUpload } from '@/components/CustomUpload';
 import InputError from '@/components/InputError';
-import { formatMoney, formatNumber, getImage } from '@/helpers';
+import { formatMoney, formatNumber, getImage, sliceString } from '@/helpers';
 import { IBatch, ISaleProduct } from '@/modules/sales/interface';
 import { branchState } from '@/recoil/state';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -20,7 +20,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { message } from 'antd';
 import { cloneDeep, debounce } from 'lodash';
 import { useRouter } from 'next/router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRecoilValue } from 'recoil';
 import ListBatchModal from './ListBatchModal';
@@ -62,6 +62,7 @@ export function AddMarketSetting() {
   const [openAgencyModal, setOpenAgencyModal] = useState(false);
   const [listBatchSelected, setListBatchSelected] = useState<any[]>([]);
   const [listAgencySelected, setListAgencySelected] = useState<any[]>([]);
+  const [noBatchInventory, setNoBatchInventory] = useState(0);
   const {
     data: products,
     isLoading: isLoadingProduct,
@@ -193,10 +194,18 @@ export function AddMarketSetting() {
       return;
     }
     // check quantity with batch selected
-    const totalQuantity = listBatchSelected.reduce((total, item) => total + item.newInventory, 0);
-    if (getValues('quantity') > totalQuantity) {
-      message.error('Số lượng tồn không được lớn hơn số lượng tồn của lô');
-      return;
+    if (listBatchSelected?.length > 0) {
+      const totalQuantity = listBatchSelected.reduce((total, item) => total + item.newInventory, 0);
+      if (getValues('quantity') > totalQuantity) {
+        message.error('Số lượng tồn không được lớn hơn số lượng tồn của lô');
+        return;
+      }
+    }
+    else {
+      if (getValues('quantity') > productSelected?.quantity) {
+        message.error('Số lượng tồn không được lớn hơn số lượng tồn của sản phẩm');
+        return;
+      }
     }
     mutateCreateConfigProduct();
   }
@@ -302,6 +311,22 @@ export function AddMarketSetting() {
     },
   ];
 
+  useEffect(() => {
+    if (productSelected && getValues('productUnitId')) {
+      const productUnit = productSelected?.product?.productUnit?.find((item) => item.id === getValues('productUnitId'));
+      let inventory = 0;
+      const mainInventory = productSelected?.quantity * productSelected?.exchangeValue;
+      if (productUnit?.isBaseUnit) {
+        inventory = Math.floor(mainInventory / productUnit?.exchangeValue);
+      }
+      else {
+
+        inventory = Math.floor(mainInventory / productUnit?.exchangeValue);
+      }
+      setNoBatchInventory(inventory);
+    }
+  }, [productSelected, getValues('productUnitId')])
+
   return (
     <>
       <div className="my-6 flex items-center justify-between bg-white p-5">
@@ -339,7 +364,7 @@ export function AddMarketSetting() {
                   value: JSON.stringify(item),
                   label: (
                     <div className="flex items-center gap-x-4 p-2">
-                      <div className=" flex h-12 w-[68px] items-center rounded border border-gray-300 p-[2px]">
+                      <div className=" flex h-12 w-[68px] flex-shrink-0 items-center rounded border border-gray-300 p-[2px]">
                         {item.product?.image?.path && (
                           <Image
                             src={getImage(
@@ -357,7 +382,7 @@ export function AddMarketSetting() {
                         <div className="mb-2 flex gap-x-3">
                           <div>
                             <span>{item.code}</span> {" - "}
-                            <span>{item.product.name}</span>
+                            <span>{sliceString(item.product.name, 80)}</span>
                           </div>
                           <div className="rounded bg-red-main px-2 py-[2px] text-white">
                             {item.productUnit.unitName}
@@ -453,7 +478,7 @@ export function AddMarketSetting() {
               </div>
             </div>
             <div>
-              <Label infoText="" label={`Số lượng tồn ${productSelected?.batches?.length < 1 ? `(Tồn: ${formatNumber(productSelected?.quantity)})` : ''}`} required />
+              <Label infoText="" label={`Số lượng tồn ${productSelected?.batches?.length < 1 ? `(Tồn: ${formatNumber(noBatchInventory)})` : ''}`} required />
               <CustomInput
                 placeholder="Nhập số lượng tồn"
                 className="h-11"
@@ -550,7 +575,10 @@ export function AddMarketSetting() {
 
           <div>
             <Label infoText="" label="Mô tả" />
-            {/* <CustomTextEditor /> */}
+            {/* <CustomTextEditor value={getValues('description')} onChange={(value: string) => {
+              setValue('description', value, { shouldValidate: true })
+              console.log(value);
+            }} /> */}
             <CustomTextarea rows={10} placeholder="Nhập mô tả" value={getValues('description')} onChange={(e) => setValue('description', e.target.value, { shouldValidate: true })} />
             <InputError error={errors.description?.message} />
           </div>

@@ -5,7 +5,7 @@ import Image from 'next/image'
 import StoreIcon from '@/assets/storeIcon.svg'
 import { useRecoilState, useRecoilValue } from 'recoil'
 import { branchState, paymentProductState, profileState } from '@/recoil/state'
-import { formatMoney, formatNumber, getImage } from '@/helpers'
+import { formatMoney, formatNumber, getImage, sliceString } from '@/helpers'
 import { CustomInput } from '@/components/CustomInput'
 import StickyNoteIcon from '@/assets/stickynote.svg'
 import { CustomButton } from '@/components/CustomButton'
@@ -145,7 +145,9 @@ function Payment() {
             paymentProduct[0]?.products?.map((product) => (
               <div className='p-[14px] grid grid-cols-10 text-center items-center' key={product?.id}>
                 <div className='col-span-4 flex items-center gap-5'>
-                  <Image src={getImage(product?.marketProduct?.imageCenter?.path || product?.imageCenter?.path)} width={80} height={80} className='object-cover rounded-lg border-[1px] border-[#E4E4EB]' />
+                  <div className='flex-shrink-0 h-20 w-20'>
+                    <Image src={getImage(product?.marketProduct?.imageCenter?.path || product?.imageCenter?.path)} width={80} height={80} className='object-cover rounded-lg border-[1px] border-[#E4E4EB]' />
+                  </div>
                   <span className='text-base font-medium'>{product?.marketProduct?.product?.name}</span>
                 </div>
                 <div className='col-span-2 flex items-center justify-center gap-1'>

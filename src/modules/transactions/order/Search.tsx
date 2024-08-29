@@ -138,7 +138,7 @@ const Search = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void,
       <div className='flex items-center gap-4 p-4'>
         {
           Object.keys(formFilter).map((key, index) => {
-            if (formFilter[key] && key !== "page" && key !== "limit" && key !== "keyword" && key !== "branchId" && key !== 'type') {
+            if (formFilter[key] && key !== "page" && key !== "limit" && key !== "keyword" && key !== "branchId" && key !== 'type' && key !== 'dateNumber') {
               if (key === "dateRange" && formFilter[key] !== null) {
                 // render date range to Tag
                 const dateRange = typeof formFilter[key] === "string" ? JSON?.parse(formFilter[key]) : formFilter[key];

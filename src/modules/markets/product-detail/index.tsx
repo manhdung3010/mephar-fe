@@ -3,7 +3,7 @@ import ArrowIcon from '@/assets/arrow-down-red-icon.svg';
 import CartIcon from '@/assets/cartIconRed.svg';
 import { CustomButton } from '@/components/CustomButton';
 import { CustomInput } from '@/components/CustomInput';
-import { formatMoney, formatNumber, getImage } from '@/helpers';
+import { formatMoney, formatNumber, getImage, sliceString } from '@/helpers';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
@@ -49,6 +49,9 @@ const ProductDetail = () => {
   const { data: configProduct, isLoading } = useQuery(
     ['MARKET_PRODUCT_DETAIL', JSON.stringify(id), branchId],
     () => getSaleProductDetail(String(id), branchId),
+    {
+      enabled: !!id && !!branchId,
+    }
   );
 
   useEffect(() => {
@@ -109,7 +112,7 @@ const ProductDetail = () => {
           </ul>
         </nav>
         <div className="flex gap-6 mt-3 bg-white p-4 rounded-2xl">
-          <div className={`slider-container w-2/5 ${images?.length <= 1 ? 'hidden-slide' : ''}`}>
+          <div className={`slider-container w-2/5 flex-shrink-0 ${images?.length <= 1 ? 'hidden-slide' : ''}`}>
             <Slider {...settings}>
               {
                 images?.map((image) => (
@@ -122,7 +125,7 @@ const ProductDetail = () => {
           </div>
           <div className="flex-1">
             <h1 className="text-2xl font-semibold">
-              {configProduct?.data?.item?.product?.name} - {configProduct?.data?.item?.productUnit?.unitName}
+              {sliceString(configProduct?.data?.item?.product?.name, 50)} - {configProduct?.data?.item?.productUnit?.unitName}
             </h1>
             <p className='mt-4'>Đã bán {formatNumber(configProduct?.data?.item?.quantitySold)}</p>
             <div className="text-red-main text-xl mt-[22px]">

@@ -1,14 +1,32 @@
-import { Editor } from "react-draft-wysiwyg";
+import { EditorState } from 'draft-js';
+import { useState } from 'react';
+import { Editor } from 'react-draft-wysiwyg';
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 
-const CustomTextEditor = () => {
-  return (
-    <Editor
-      toolbarClassName="toolbarClassName"
-      wrapperClassName="wrapperClassName"
-      editorClassName="editorClassName"
-    />
-  );
-};
+const EditorConvertToHTML = (
+  {
+    value,
+    onChange
+  }: {
+    value: string | any,
+    onChange: (value: string) => void
+  }
+) => {
 
-export default CustomTextEditor
+  return (
+    <div>
+      <Editor
+        editorState={value}
+        wrapperClassName="demo-wrapper"
+        editorClassName="demo-editor"
+        onEditorStateChange={onChange}
+      />
+      {/* <textarea
+        disabled
+        value={draftToHtml(convertToRaw(editorState.getCurrentContent()))}
+      /> */}
+    </div>
+  );
+}
+
+export default EditorConvertToHTML;

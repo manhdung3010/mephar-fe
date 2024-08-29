@@ -54,6 +54,12 @@ function AddAddressModal({ isOpen, onCancel, addressId }) {
       }
     );
 
+  useEffect(() => {
+    if (isOpen) {
+      setValue('fullName', profile?.fullName, { shouldValidate: true });
+    }
+  }, [isOpen]);
+
   const { data: addressDetail, isLoading: isLoadingDetail } = useQuery(
     ['MARKET_PRODUCT_DETAIL', JSON.stringify(addressId)],
     () => getShipAddressDetail(String(addressId), branchId),
@@ -95,9 +101,9 @@ function AddAddressModal({ isOpen, onCancel, addressId }) {
       customFooter={true}
     >
       <div className='my-6'>
-        <div className='border-b-[1px] border-[#EBEBF0] py-2 ml-2'>
-          <Label infoText="" label="Tên" />
-          <span>{profile?.fullName}</span>
+        <div className='border-b-[1px] border-[#EBEBF0] py-2'>
+          <CustomInput placeholder='Họ tên' className='border-0 py-2' value={getValues('fullName')} onChange={(value) => setValue('fullName', value, { shouldValidate: true })} />
+          <InputError error={errors.fullName?.message} />
         </div>
         <div className='border-b-[1px] border-[#EBEBF0] py-2'>
           <CustomInput placeholder='Số điện thoại' className='border-0 py-2' value={getValues('phone')} onChange={(value) => setValue('phone', value, { shouldValidate: true })} />

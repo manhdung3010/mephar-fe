@@ -14,7 +14,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getConfigProduct } from "@/api/market.service";
 import { useRecoilValue } from "recoil";
 import { branchState, profileState } from "@/recoil/state";
-import { formatDateTime, formatNumber, hasPermission } from "@/helpers";
+import { formatDateTime, formatNumber, hasPermission, sliceString } from "@/helpers";
 import CustomPagination from "@/components/CustomPagination";
 import { debounce } from "lodash";
 import { RoleAction, RoleModel } from "@/modules/settings/role/role.enum";
@@ -82,7 +82,7 @@ export function MarketSetting() {
             setExpandedRowKeys({ ...temp });
           }}
         >
-          {record.product?.name}
+          {sliceString(record.product?.name, 60)}
         </span>
       ),
     },

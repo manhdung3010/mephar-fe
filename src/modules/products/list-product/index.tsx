@@ -7,7 +7,7 @@ import { useRecoilValue } from "recoil";
 import { getProduct } from "@/api/product.service";
 import CustomPagination from "@/components/CustomPagination";
 import { EProductType, EProductTypeLabel, getEnumKeyByValue } from "@/enums";
-import { formatMoney, formatNumber } from "@/helpers";
+import { formatMoney, formatNumber, sliceString } from "@/helpers";
 import { branchState } from "@/recoil/state";
 
 import CustomTable from "../../../components/CustomTable";
@@ -93,7 +93,7 @@ const ProductList = () => {
             setExpandedRowKeys({ ...temp });
           }}
         >
-          {value}
+          {sliceString(value, 80)}
         </span>
       ),
     },
@@ -170,7 +170,7 @@ const ProductList = () => {
     );
   };
 
-  
+
 
   return (
     <div>

@@ -14,11 +14,12 @@ import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
 import { useRecoilValue } from 'recoil';
-import { profileState } from '@/recoil/state';
+import { branchState, profileState } from '@/recoil/state';
 import UpdateStatusModal from '@/components/CustomModal/ModalUpdateStatusItem';
 export function Info({ record }: { record: any }) {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const branchId = useRecoilValue(branchState);
   const profile = useRecoilValue(profileState);
   const [isOpenDelete, setIsOpenDelete] = useState(false);
   const [isOpenUpdateStatus, setIsOpenUpdateStatus] = useState(false);
@@ -40,7 +41,7 @@ export function Info({ record }: { record: any }) {
   const { mutate: mutateUpdaetConfigStatus, isLoading: isLoadingUpdateStatus } =
     useMutation(
       () => {
-        return updateConfigStatus(record?.id, record?.status === 'active' ? 'inactive' : 'active');
+        return updateConfigStatus(record?.id, record?.status === 'active' ? 'inactive' : 'active', branchId);
       },
       {
         onSuccess: async () => {
