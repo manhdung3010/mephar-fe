@@ -104,6 +104,12 @@ export function getMarketOrderDetail(id: string, branchId: string) {
 export function updateSeri(payload) {
   return axiosClient.patch(`market/sell/seri`, payload);
 }
+export function updateMarketOrder(id: string, payload) {
+  return axiosClient.patch(
+    `market/sell/market-order/update-order/${id}`,
+    payload
+  );
+}
 
 // payment order
 export function createPaymentOrder(id: string, payload) {

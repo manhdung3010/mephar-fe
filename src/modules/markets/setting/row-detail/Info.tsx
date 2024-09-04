@@ -6,7 +6,7 @@ import EditIcon from '@/assets/editWhite.svg';
 import { CustomButton } from '@/components/CustomButton';
 import DeleteModal from '@/components/CustomModal/ModalDeleteItem';
 import { EProductSettingStatus, EProductSettingStatusLabel } from '@/enums';
-import { formatDateTime, formatMoney, formatNumber, getImage, hasPermission } from '@/helpers';
+import { formatDateTime, formatMoney, formatNumber, getImage, hasPermission, sliceString } from '@/helpers';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { message } from 'antd';
 import cx from "classnames";
@@ -62,7 +62,7 @@ export function Info({ record }: { record: any }) {
   return (
     <div className="gap-12 ">
       <div className="mb-10 flex gap-9">
-        <div>
+        <div className='w-[223px] flex-shrink-0'>
           <div className="mb-2  flex">
             <Image src={getImage(record?.imageCenter?.path)} width={223} height={223} className='object-cover rounded-md border border-[#C9C6D9] py-1 overflow-hidden' />
           </div>
@@ -81,7 +81,7 @@ export function Info({ record }: { record: any }) {
         <div className="mb-4 grid grow grid-cols-2 gap-4 gap-x-9">
           <div className="grid grid-cols-3 gap-5">
             <div className="text-gray-main">Nhóm sản phẩm:</div>
-            <div className="col-span-2 text-black-main">{record?.product?.groupProduct?.name}</div>
+            <div className="col-span-2 text-black-main line-clamp-1">{record?.product?.groupProduct?.name}</div>
           </div>
 
           <div className="grid grid-cols-3 gap-5">
@@ -91,7 +91,7 @@ export function Info({ record }: { record: any }) {
 
           <div className="grid grid-cols-3 gap-5">
             <div className="text-gray-main">Sản phẩm:</div>
-            <div className="col-span-2 text-black-main">
+            <div className="col-span-2 text-black-main line-clamp-1">
               {record?.product?.name}
             </div>
           </div>

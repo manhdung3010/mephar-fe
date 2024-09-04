@@ -528,6 +528,10 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
                       value: ECustomerStatus.inactive,
                       label: "Ngưng hoạt động",
                     },
+                    {
+                      value: ECustomerStatus.potential,
+                      label: "Tiềm năng",
+                    },
                   ]}
                   value={getValues("status")}
                   onChange={(value) =>

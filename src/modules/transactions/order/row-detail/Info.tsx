@@ -203,15 +203,15 @@ export function Info({ record }: { record: any }) {
               )}{' '}
             </div>
             <div className="text-black-main">
-              <div className="font-semibold text-gray-main">
+              <div className="font-semibold text-gray-main line-clamp-1">
                 {product?.marketProduct?.product?.name}
               </div>
               <div className="font-semibold text-gray-main">
                 {formatMoney(product?.price)}/{' '}
                 {product?.marketProduct?.productUnit?.unitName}
               </div>
-              <div className="flex justify-between gap-x-40">
-                <div>x{product.quantity}</div>
+              <div className="flex gap-x-40">
+                <div className='w-5 flex-shrink-0'>x{product.quantity}</div>
                 <div className="text-[#00B63E]">
                   Tổng tiền: {formatMoney(product.price * product.quantity)}
                 </div>

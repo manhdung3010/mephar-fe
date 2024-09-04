@@ -195,7 +195,7 @@ const ProductDetail = () => {
             </div>
 
             <div className=' mt-6 flex flex-col gap-3'>
-              <span>Mã: {configProduct?.data?.item?.product?.code}</span>
+              <span>Mã: {configProduct?.data?.item?.productUnit?.code}</span>
               <div className='w-fit py-1 px-4 bg-[#ecf0ff] rounded'>Thực phẩm chống lão hóa</div>
             </div>
           </div>

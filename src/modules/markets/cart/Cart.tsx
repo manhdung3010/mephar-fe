@@ -260,7 +260,7 @@ function Cart() {
                         </div>
                         <div className='col-span-6 grid grid-cols-4 items-center gap-2'>
                           <div className='text-center'>
-                            {formatMoney(product?.marketProduct?.discountPrice > 0 ? product?.marketProduct?.discountPrice : product?.price)}
+                            {product?.price}
                           </div>
                           <div className='text-center'>
                             <CustomInput

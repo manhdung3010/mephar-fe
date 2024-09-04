@@ -16,7 +16,7 @@ import { message } from 'antd';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createShipAddress, getShipAddressDetail, updateShipAddress } from '@/api/market.service';
 
-function AddAddressModal({ isOpen, onCancel, addressId }) {
+function AddAddressModal({ isOpen, onCancel, addressId, newBranchId }: { isOpen: boolean, onCancel: any, addressId: string, newBranchId?: string }) {
   const {
     getValues,
     setValue,
@@ -40,7 +40,7 @@ function AddAddressModal({ isOpen, onCancel, addressId }) {
         if (addressId) {
           return updateShipAddress(addressId, branchId, getValues());
         }
-        return createShipAddress({ ...getValues(), branchId });
+        return createShipAddress({ ...getValues(), branchId: newBranchId || branchId });
       },
       {
         onSuccess: async () => {

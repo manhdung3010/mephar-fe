@@ -13,52 +13,89 @@ import { debounce } from 'lodash';
 import EmployeeIcon from '@/assets/employeeIcon.svg';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { branchState, checkInventoryState, profileState } from '@/recoil/state';
-import { formatNumber } from '@/helpers';
-import { message } from 'antd';
+import { formatMoney, formatNumber } from '@/helpers';
+import { message, Radio } from 'antd';
 import { createCheckInventory } from '@/api/check-inventory';
 import { useRouter } from 'next/router';
 import InputError from '@/components/InputError';
+import CustomerIcon from "@/assets/customerIcon.svg";
+import { getShipAddress, updateMarketOrder } from '@/api/market.service';
+import AddAddressModal from '@/modules/markets/payment/AddAddressModal';
 
-export function RightContent({ getValues, setValue, errors, handleSubmit, reset }: any) {
+export function RightContent({ getValues, setValue, errors, handleSubmit, reset, detail, id }: any) {
   const router = useRouter();
   const branchId = useRecoilValue(branchState);
   const profile = useRecoilValue(profileState);
-  const [importProducts, setImportProducts] =
-    useRecoilState(checkInventoryState);
   const [searchEmployeeText, setSearchEmployeeText] = useState('');
+  const [openAddAddress, setOpenAddAddress] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState<any>(null);
 
   const { data: employees } = useQuery(
     ['EMPLOYEE_LIST', searchEmployeeText],
     () => getEmployee({ page: 1, limit: 20, keyword: searchEmployeeText })
   );
 
-  const totalQuantity = useMemo(() => {
-    let total = 0;
-    importProducts.forEach((item: any) => {
-      total += item.realQuantity;
-    });
-    return total;
-  }, [importProducts]);
+  const totalMoney = useMemo(() => {
+    return detail?.products?.reduce((total: number, item: any) => {
+      return total + item.quantity * item.price;
+    }, 0);
+  }, [detail?.products]);
+
+  const [formFilter, setFormFilter] = useState({
+    page: 1,
+    limit: 10,
+    branchId: null
+  });
+
+  const { data: address, isLoading } = useQuery(
+    ['SHIP_ADDRESS', JSON.stringify(formFilter)],
+    () => getShipAddress(formFilter),
+    {
+      onSuccess: (data) => {
+        if (data?.data?.items) {
+          const defaultAddress = data?.data?.items?.find((item) => item?.isDefaultAddress);
+          if (!selectedAddress && defaultAddress) {
+            setSelectedAddress(defaultAddress);
+          }
+        }
+      }
+    }
+  );
 
   useEffect(() => {
     if (profile) {
       setValue('userCreateId', profile.id);
     }
   }, [profile]);
+  useEffect(() => {
+    if (detail) {
+      setFormFilter({
+        ...formFilter,
+        branchId: detail?.branch?.id,
+      });
+      setSelectedAddress(detail?.addressId);
+    }
+  }, [detail]);
 
   const { mutate: mutateCreateOrder, isLoading: isLoadingCreateOrder } =
     useMutation(
       () => {
-        return createCheckInventory({
-          ...getValues(),
-          branchId,
-        });
+        const payload = {
+          branchId: branchId,
+          addressId: selectedAddress,
+          listProduct: getValues('listProduct')?.map((item) => ({
+            marketProductId: item?.marketProductId,
+            marketOrderProductId: item?.id,
+            quantity: item?.quantity,
+            price: item?.price,
+          }))
+        }
+        return updateMarketOrder(String(id), payload);
       },
       {
         onSuccess: async (res) => {
           reset();
-          router.push(`/products/check-inventory`);
-          setImportProducts([]);
+          router.push(`/transactions/order`);
         },
         onError: (err: any) => {
           message.error(err?.message);
@@ -72,7 +109,7 @@ export function RightContent({ getValues, setValue, errors, handleSubmit, reset 
     // console.log("value", getValues());
   }
 
-  console.log("errors", errors)
+  console.log("errors", errors);
 
   return (
     <div className="flex h-[calc(100vh-52px)] w-[360px] min-w-[360px] flex-col border-l border-[#E4E4E4] bg-white">
@@ -96,6 +133,16 @@ export function RightContent({ getValues, setValue, errors, handleSubmit, reset 
           prefixIcon={<Image src={EmployeeIcon} alt="" />}
         />
         <InputError error={errors.userCreateId?.message} />
+        <CustomInput
+          // bordered={false}
+          disabled
+          className="h-[44px] rounded-[58px]"
+          onChange={(value) => {
+          }}
+          value={detail?.branch?.store?.name + " - " + detail?.branch?.phone}
+          prefixIcon={<Image src={CustomerIcon} alt="" />}
+        />
+        <span className='flex justify-end mt-2'>Nguồn: <span className='text-red-main ml-2'>Chợ</span></span>
       </div>
 
       <div className="my-6 h-[1px] w-full bg-[#E4E4E4]"></div>
@@ -103,7 +150,7 @@ export function RightContent({ getValues, setValue, errors, handleSubmit, reset 
       <div className="flex grow flex-col px-6">
         <div className="grow">
           <div className="mb-5 border-b-2 border-dashed border-[#E4E4E4]">
-            <div className="mb-5 grid grid-cols-2">
+            {/* <div className="mb-5 grid grid-cols-2">
               <div className=" leading-normal text-[#828487]">
                 Mã kiểm kho
               </div>
@@ -113,34 +160,60 @@ export function RightContent({ getValues, setValue, errors, handleSubmit, reset 
                 className="h-6 pr-0 text-end"
                 onChange={() => { }}
               />
+            </div> */}
+
+            <div className="mb-5 flex justify-between">
+              <div className=" leading-normal text-[#828487]">Tổng tiền (<span className='text-red-main'>{detail?.products?.length}sp</span>)</div>
+              <div className=" leading-normal text-[#19191C]">{formatMoney(totalMoney)}</div>
             </div>
 
             <div className="mb-5 flex justify-between">
-              <div className=" leading-normal text-[#828487]">Trạng thái</div>
-              <div className=" leading-normal text-[#19191C]">Phiếu tạm</div>
-            </div>
-
-            <div className="mb-5 flex justify-between">
-              <div className=" leading-normal text-[#828487]">
-                Tổng SL thực tế
+              <div className=" leading-normal ">
+                KHÁCH PHẢI TRẢ
               </div>
-              <div className=" leading-normal text-[#19191C]">{formatNumber(totalQuantity)}</div>
+              <div className=" leading-normal text-[#19191C]">{formatMoney(totalMoney)}</div>
             </div>
           </div>
-
-          {/* <div className="mb-5">
-            <div className="mb-5 font-medium">KIẾM GẦN ĐÂY</div>
-
+          <div className="mb-5 border-b-2 border-dashed border-[#E4E4E4]">
+            <span>ĐỊA CHỈ GIAO HÀNG</span>
             <div className="mb-5 flex justify-between">
-              <div className=" leading-normal text-[#828487] ">
-                Bạch đái hoàn Xuân quang
+              <div className='my-8'>
+                <Radio.Group className='flex flex-col gap-6' value={selectedAddress} onChange={(e) => setSelectedAddress(e.target.value)}>
+                  {
+                    address?.data?.items?.map((item, index) => (
+                      <div className='pb-6 border-b-[1px] border-[#EBEBF0] flex items-center' key={item?.id}>
+                        <Radio value={item?.id}></Radio>
+                        <div className='w-full flex justify-between items-center ml-2'>
+                          <div className='flex flex-col gap-1'>
+                            <p className='text-[#28293D] font-medium'>{item?.fullName} | {item?.phone}</p>
+                            <span className='text-[#555770] line-clamp-1'>{item?.address}, {item?.ward?.name}, {item?.district?.name}, {item?.province?.name}</span>
+                            {
+                              item?.isDefaultAddress && (
+                                <p className='bg-[#fde5eb] text-red-main p-1 font-semibold w-fit rounded'>Địa chỉ mặc định</p>
+                              )
+                            }
+                          </div>
+                          <div>
+                            <Image src={EditIcon} className='cursor-pointer' onClick={() => {
+                              setSelectedAddress(item);
+                              setOpenAddAddress(true);
+                            }} />
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  }
+
+                  <div className='w-fit'>
+                    <CustomButton type='original' outline onClick={() => setOpenAddAddress(true)}>Thêm địa chỉ mới</CustomButton>
+                  </div>
+                </Radio.Group>
               </div>
-              <Image src={CopyIcon} />
             </div>
-          </div> */}
+          </div>
         </div>
 
-        <div className="-mx-3">
+        {/* <div className="-mx-3">
           <CustomInput
             bordered={false}
             prefixIcon={<Image src={EditIcon} />}
@@ -151,40 +224,20 @@ export function RightContent({ getValues, setValue, errors, handleSubmit, reset 
               setValue('note', value, { shouldValidate: true });
             }}
           />
-        </div>
+        </div> */}
       </div>
 
       <div className="my-4 h-[1px] w-full bg-[#E4E4E4]"></div>
 
       <div className="grid grid-cols-1 gap-3 px-6 pb-4">
-        {/* <CustomButton className="!h-12 text-lg font-semibold">
-          Lưu tạm
-        </CustomButton> */}
-        <CustomButton onClick={() => {
-          const formatProducts = importProducts.map((item: any) => ({
-            productUnitId: item.id,
-            ...(item?.batches?.length <= 0 && {
-              realQuantity: item.realQuantity,
-            }),
-            // isBatchExpireControl: item.product?.isBatchExpireControl,
-            ...(item?.batches?.length > 0 && {
-              inventoryCheckingBatch: item.batches.filter((b) => b.isSelected).map((batch) => {
-                return {
-                  batchId: batch.id,
-                  realQuantity: batch.quantity,
-                };
-
-              })
-            })
-          }));
-
-          setValue('products', formatProducts, { shouldValidate: true });
-          handleSubmit(onSubmit)();
-        }}
+        <CustomButton
+          onClick={onSubmit}
           className="!h-12 text-lg font-semibold" type="success">
           Hoàn thành
         </CustomButton>
       </div>
+
+      <AddAddressModal isOpen={openAddAddress} onCancel={() => setOpenAddAddress(false)} addressId={selectedAddress?.id} newBranchId={detail?.branch?.id} />
     </div>
   );
 }

@@ -53,15 +53,14 @@ const Search = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void,
               if (value) {
                 setFormFilter((preValue) => ({
                   ...preValue,
-                  dateRange: JSON.stringify({
-                    startDate: dayjs(value[0]).format('YYYY-MM-DD'),
-                    endDate: dayjs(value[1]).format('YYYY-MM-DD'),
-                  }),
+                  startDate: dayjs(value[0]).format('YYYY-MM-DD'),
+                  endDate: dayjs(value[1]).format('YYYY-MM-DD'),
                 }));
               } else {
                 setFormFilter((preValue) => ({
                   ...preValue,
-                  dateRange: undefined,
+                  startDate: undefined,
+                  endDate: undefined,
                 }));
               }
             }}
@@ -138,28 +137,8 @@ const Search = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void,
       <div className='flex items-center gap-4 p-4'>
         {
           Object.keys(formFilter).map((key, index) => {
-            if (formFilter[key] && key !== "page" && key !== "limit" && key !== "keyword" && key !== "branchId" && key !== 'type' && key !== 'dateNumber') {
-              if (key === "dateRange" && formFilter[key] !== null) {
-                // render date range to Tag
-                const dateRange = typeof formFilter[key] === "string" ? JSON?.parse(formFilter[key]) : formFilter[key];
-                return <>
-                  {dateRange?.startDate && dateRange?.endDate && <Tag
-                    key={index}
-                    style={{ userSelect: 'none' }}
-                    className='py-1 px-4'
-                  >
-                    <span>
-                      Từ ngày:
-                    </span>
-                    <span className='ml-1 font-semibold'>{formatDate(dateRange.startDate)}</span>
-                    <span className='mx-2'>-</span>
-                    <span>
-                      Đến ngày:
-                    </span>
-                    <span className='ml-1 font-semibold'>{formatDate(dateRange.endDate)}</span>
-                  </Tag>}
-                </>
-              }
+            if (formFilter[key] && key !== "page" && key !== "limit" && key !== "keyword" && key !== "branchId" && key !== 'type' && key !== 'dateNumber' && key !== 'startDate' && key !== 'endDate') {
+
               return (
                 <Tag
                   key={index}

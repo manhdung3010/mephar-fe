@@ -10,3 +10,8 @@ export const schema = yup.object().shape({
     })
   ),
 });
+export const updateOrderSchema = yup.object().shape({
+  branchId: yup.string(),
+  addressId: yup.string(),
+  listProduct: yup.array(),
+});

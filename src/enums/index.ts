@@ -98,11 +98,13 @@ export enum EPaymentMethod {
 export enum ECustomerStatus {
   active = "active",
   inactive = "inactive",
+  potential = "potential",
 }
 
 export enum ECustomerStatusLabel {
   active = "Hoạt động",
   inactive = "Ngưng hoạt động",
+  potential = "Tiềm năng",
 }
 
 export enum EDoctorStatus {
