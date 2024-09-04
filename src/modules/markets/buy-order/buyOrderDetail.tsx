@@ -25,8 +25,6 @@ function BuyOrderDetail() {
     }
   );
 
-  console.log('orderDetail', orderDetail)
-
   const totalMoney = useMemo(() => {
     return orderDetail?.data?.item?.products?.reduce((total, product) => {
       return total + (product?.marketProduct?.discountPrice > 0 ? product?.marketProduct?.discountPrice : product?.price) * product?.quantity

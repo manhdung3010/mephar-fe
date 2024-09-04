@@ -335,7 +335,12 @@ function Cart() {
                     className='!w-[300px] !h-[46px]'
                     disabled={!storeSelected}
                     onClick={() => {
-                      const paymentProduct = cartList?.filter((item) => item.branchId === storeSelected && item?.products?.filter((product) => product?.selected)?.length > 0)
+                      const paymentProduct = cartList?.filter((cart) => cart?.branchId === storeSelected)?.map((cart) => {
+                        return {
+                          branchId: cart?.branchId,
+                          products: cart?.products?.filter((product) => product?.selected)
+                        }
+                      })?.flat()
                       if (paymentProduct?.length <= 0) {
                         message.error('Vui lòng chọn sản phẩm')
                         return

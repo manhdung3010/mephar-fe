@@ -67,8 +67,6 @@ function ProductCard({ product }: { product: any }) {
     }
   );
 
-  console.log('product', product)
-
   return (
     <div className='shadow-md hover:shadow-xl transition-all rounded-[19px] overflow-hidden'>
       <div className='w-full cursor-pointer relative flex' onClick={() => router.push(`/markets/products/${product?.id}`)}>

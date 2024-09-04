@@ -19,6 +19,7 @@ import { useRecoilValue } from 'recoil';
 import { OrderHistoryModal } from './HistoryModal';
 import UpdateStatusModal from '@/components/CustomModal/ModalUpdateStatusItem';
 import CloseIconRed from '@/assets/closeIcon.svg';
+import EditIcon from '@/assets/editIcon.svg';
 import PaymentModal from './PaymentModal';
 
 export function Info({ record }: { record: any }) {
@@ -222,6 +223,20 @@ export function Info({ record }: { record: any }) {
 
       <div className="flex justify-end gap-4">
         {
+          (record?.status === EOrderMarketStatus.PENDING || record?.status === EOrderMarketStatus.PROCESSING) && (
+            <CustomButton
+              type="danger"
+              outline={true}
+              onClick={() => {
+                router.push('/transactions/order/edit-order?id=' + record.id);
+              }}
+              prefixIcon={<Image src={EditIcon} alt="" />}
+            >
+              Chỉnh sửa đơn hàng
+            </CustomButton>
+          )
+        }
+        {
           (record?.status === EOrderMarketStatus.CONFIRM || record?.status === EOrderMarketStatus.PROCESSING) && (
             <CustomButton
               type="primary"
@@ -235,7 +250,6 @@ export function Info({ record }: { record: any }) {
             </CustomButton>
           )
         }
-
         {
           record?.status === EOrderMarketStatus.PENDING && (
             <CustomButton

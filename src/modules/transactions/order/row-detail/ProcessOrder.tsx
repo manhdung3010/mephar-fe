@@ -1,23 +1,22 @@
 import Image from 'next/image';
 import { useState } from 'react';
 
-import SampleProduct from '@/assets/images/product-sample.png';
 import { CustomButton } from '@/components/CustomButton';
 import { CustomInput } from '@/components/CustomInput';
 
-import { SeriDetailModal } from './SeriDetailModal';
-import { useRouter } from 'next/router';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getMarketOrderDetail, updateMarketOrderStatus, updateSeri } from '@/api/market.service';
-import { getImage } from '@/helpers';
-import { useRecoilValue } from 'recoil';
-import { branchState } from '@/recoil/state';
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { schema } from './schema';
-import { cloneDeep } from 'lodash';
-import { message } from 'antd';
+import { formatNumber, getImage } from '@/helpers';
 import { EOrderMarketStatus } from '@/modules/markets/type';
+import { branchState } from '@/recoil/state';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { message } from 'antd';
+import { cloneDeep } from 'lodash';
+import { useRouter } from 'next/router';
+import { useForm } from 'react-hook-form';
+import { useRecoilValue } from 'recoil';
+import { schema } from './schema';
+import { SeriDetailModal } from './SeriDetailModal';
 
 export function ProcessOrder() {
   const router = useRouter();
@@ -74,11 +73,16 @@ export function ProcessOrder() {
       () => {
         const payload = {
           status: EOrderMarketStatus.PROCESSING,
-          products: getValues('products')?.map((product) => {
+          products: getValues('products')?.map((product: any) => {
             return {
               marketProductId: product?.marketProductId,
               marketOrderProductId: product?.marketOrderProductId,
-              listSeri: product?.listSeri
+              listSeri: product?.listSeri.map((seri) => {
+                return {
+                  code: seri,
+                  id: orderDetail?.data?.item?.products?.find((p) => p.marketProductId === product?.marketProductId)?.series?.find((s) => s.code === seri)?.id
+                }
+              })
             }
           })
         }
@@ -164,17 +168,17 @@ export function ProcessOrder() {
           Người mua: <span className="ml-4 text-[#0F1824]">{orderInfo?.branch?.store?.name}</span>
         </div>
 
-        <div className="mb-5 font-semibold text-[#232325] uppercase">sản phẩm (3)</div>
+        <div className="mb-5 font-semibold text-[#232325] uppercase">sản phẩm ({formatNumber(getValues('products')?.length)})</div>
 
         {
           getValues('products')?.map((product: any, index) => (
             <div className="mb-5 flex items-center gap-3" key={product.id}>
-              <div className='border border-[#d7d8e1] rounded-xl w-20 h-20 overflow-hidden'>
+              <div className='border border-[#d7d8e1] rounded-xl w-20 h-20 overflow-hidden flex-shrink-0'>
                 <Image className=' object-cover' src={getImage(product?.marketProduct?.imageCenter?.path)} width={80} height={80} alt="" />
               </div>
               <div className="grow">
                 <div
-                  className="mb-2 cursor-pointer font-medium text-[#333]"
+                  className="mb-2 cursor-pointer font-medium text-[#333] line-clamp-1"
                   onClick={() => {
                     setOpenSeriDetailModal(true);
                     setSeriInfo(product);
@@ -184,7 +188,7 @@ export function ProcessOrder() {
                 </div>
                 <div className={`font-medium ${product?.listSeri?.length === product?.quantity ? 'text-[#05A660]' : 'text-[#FF8800]'}`}>Đã thêm: {product?.listSeri?.length}/{product?.quantity}</div>
               </div>
-              <div className="w-[360px]">
+              <div className="w-[360px] flex-shrink-0">
                 <div className="mb-2 text-[#A3A8AF]">Nhập seri để thêm:</div>
                 <CustomInput
                   className="h-12"
@@ -198,6 +202,10 @@ export function ProcessOrder() {
                       // validate if seri is existed
                       if (product?.listSeri?.includes(e.target.value)) {
                         message.error('Seri đã tồn tại trong sản phẩm');
+                        return;
+                      }
+                      if (e.target.value?.trim()?.length <= 0) {
+                        message.error('Seri của sản phẩm không được để trống')
                         return;
                       }
                       // validate if seri is enough
