@@ -235,7 +235,7 @@ export function AddMarketSetting() {
       title: "Nhóm đại lý/Đại lý",
       dataIndex: "groupProduct",
       key: "groupProduct",
-      render: (_, record) => record?.isGroup ? record?.name : `${record?.groupAgency?.store?.name} - ${record?.groupAgency?.store?.phone}`,
+      render: (_, record) => record?.isGroup ? record?.name : `${record?.agency?.store?.name} - ${record?.agency?.store?.phone}`,
     },
     {
       title: "Giá bán",

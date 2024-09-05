@@ -2,13 +2,14 @@ import { CustomButton } from '@/components/CustomButton'
 import Image from 'next/image'
 import React, { useState } from 'react'
 // import ProductImage from '@/assets/images/product1.jpg'
-import { formatMoney, formatNumber, getImage } from '@/helpers'
+import { formatMoney, formatNumber, getImage, hasPermission } from '@/helpers'
 import { useRouter } from 'next/router'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { createMarketCart, getMarketCart } from '@/api/market.service'
 import { message } from 'antd'
 import { useRecoilState, useRecoilValue } from 'recoil'
-import { branchState, marketCartState } from '@/recoil/state'
+import { branchState, marketCartState, profileState } from '@/recoil/state'
+import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum'
 
 interface ProductCardProps {
   id: number
@@ -33,6 +34,7 @@ interface ProductCardProps {
 function ProductCard({ product }: { product: any }) {
   const router = useRouter();
   const branchId = useRecoilValue(branchState);
+  const profile = useRecoilValue(profileState);
 
   const [marketCart, setMarketCart] = useRecoilState(marketCartState);
   const [cartStatus, setCartStatus] = useState<any>(null)
@@ -89,7 +91,11 @@ function ProductCard({ product }: { product: any }) {
           <span>{product?.address || 'Hà Nội'}</span>
           <span>Đã bán: {formatNumber(product?.quantitySold)}</span>
         </div>
-        <CustomButton className='!h-12 !rounded-xl' outline onClick={() => mutateCreateCart(product?.id)}>Thêm vào giỏ hàng</CustomButton>
+        {
+          hasPermission(profile?.role?.permissions, RoleModel.market_common, RoleAction.create) && (
+            <CustomButton className='!h-12 !rounded-xl' outline onClick={() => mutateCreateCart(product?.id)}>Thêm vào giỏ hàng</CustomButton>
+          )
+        }
       </div>
     </div>
   )

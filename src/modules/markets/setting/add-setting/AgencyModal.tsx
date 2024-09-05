@@ -35,7 +35,7 @@ function AgencyModal({
 
   const { data: angency, isLoading: isLoadingAgency } = useQuery(
     ['AGENCY_LIST', agencyKeyword, branchId],
-    () => getAgency({ keyword: agencyKeyword, branchId }),
+    () => getAgency({ keyword: agencyKeyword, branchId, status: 'active' }),
     {
       enabled: agencyType === 'agency',
     }
@@ -70,7 +70,7 @@ function AgencyModal({
         dataIndex: "groupProduct",
         key: "groupProduct",
         render: (_, record) => <span>
-          {record?.groupAgency?.store?.name} - {record?.groupAgency?.store?.phone}
+          {record?.agency?.store?.name} - {record?.agency?.store?.phone}
         </span>,
       },
     ] : []),
@@ -78,7 +78,7 @@ function AgencyModal({
       title: "Nhóm đại lý",
       dataIndex: "groupAgency",
       key: "groupAgency",
-      render: (_, record) => record?.groupAgency?.name || record?.name,
+      render: (_, record) => record?.agency?.name || record?.name,
     },
   ];
 

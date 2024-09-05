@@ -175,7 +175,7 @@ export function Info({ record }: { record: any }) {
           <div className="mb-4 grid grid-cols-3 gap-5">
             <div className="text-gray-main ">Tổng tiền thanh toán:</div>
             <div className="col-span-2 text-black-main">
-              {formatMoney(totalPrice + shipFee)}
+              {formatMoney(totalPrice)}
             </div>
           </div>
         </div>
@@ -223,103 +223,109 @@ export function Info({ record }: { record: any }) {
 
       <div className="flex justify-end gap-4">
         {
-          (record?.status === EOrderMarketStatus.PENDING || record?.status === EOrderMarketStatus.PROCESSING) && (
-            <CustomButton
-              type="danger"
-              outline={true}
-              onClick={() => {
-                router.push('/transactions/order/edit-order?id=' + record.id);
-              }}
-              prefixIcon={<Image src={EditIcon} alt="" />}
-            >
-              Chỉnh sửa đơn hàng
-            </CustomButton>
-          )
-        }
-        {
-          (record?.status === EOrderMarketStatus.CONFIRM || record?.status === EOrderMarketStatus.PROCESSING) && (
-            <CustomButton
-              type="primary"
-              outline={true}
-              onClick={() => {
-                router.push('/transactions/order/process-order?id=' + record.id);
-              }}
-              prefixIcon={<Image src={DocumentIcon} alt="" />}
-            >
-              Xử lý đơn hàng
-            </CustomButton>
-          )
-        }
-        {
-          record?.status === EOrderMarketStatus.PENDING && (
-            <CustomButton
-              type="primary"
-              outline={true}
-              prefixIcon={<Image src={ReportIcon} alt="" />}
-              onClick={() => {
-                setIsShowModal(true);
-                setStatusTemp(EOrderMarketStatus.CONFIRM)
-              }}
-            >
-              Xác nhận
-            </CustomButton>
-          )
-        }
-        {
-          record?.status === EOrderMarketStatus.PROCESSING && (
-            <CustomButton
-              type="primary"
-              outline={true}
-              prefixIcon={<Image src={DeliveryIcon} alt="" />}
-              onClick={() => {
-                setIsShowModal(true);
-                setStatusTemp(EOrderMarketStatus.SEND)
-              }}
-            >
-              Gửi ĐVVC
-            </CustomButton>
-          )
-        }
-        {
-          record?.status === EOrderMarketStatus.SEND && (
-            <CustomButton
-              type="primary"
-              outline={true}
-              prefixIcon={<Image src={DeliveryIcon} alt="" />}
-              onClick={() => {
-                setIsShowModal(true);
-                setStatusTemp(EOrderMarketStatus.DONE)
-              }}
-            >
-              Giao hàng thành công
-            </CustomButton>
-          )
-        }
-        {
-          record?.status === EOrderMarketStatus.SEND && (
-            <CustomButton
-              type="danger"
-              outline={true}
-              prefixIcon={<Image src={CloseIconRed} alt="" />}
-              onClick={() => {
-                setIsShowModal(true);
-                setStatusTemp(EOrderMarketStatus.CANCEL)
-              }}
-            >
-              Giao hàng thất bại
-            </CustomButton>
-          )
-        }
-        {
-          (record?.isPayment === false) && record?.status !== EOrderMarketStatus.CLOSED && (
-            <CustomButton
-              type="primary"
-              outline={true}
-              prefixIcon={<Image src={DolarIcon} alt="" />}
-              onClick={() => setIsShowPaymentModal(true)}
-            >
-              Đã thanh toán
-            </CustomButton>
+          hasPermission(profile?.role?.permissions, RoleModel.order, RoleAction.update) && (
+            <>
+              {
+                (record?.status === EOrderMarketStatus.PENDING) && (
+                  <CustomButton
+                    type="danger"
+                    outline={true}
+                    onClick={() => {
+                      router.push('/transactions/order/edit-order?id=' + record.id);
+                    }}
+                    prefixIcon={<Image src={EditIcon} alt="" />}
+                  >
+                    Chỉnh sửa đơn hàng
+                  </CustomButton>
+                )
+              }
+              {
+                (record?.status === EOrderMarketStatus.CONFIRM) && (
+                  <CustomButton
+                    type="primary"
+                    outline={true}
+                    onClick={() => {
+                      router.push('/transactions/order/process-order?id=' + record.id);
+                    }}
+                    prefixIcon={<Image src={DocumentIcon} alt="" />}
+                  >
+                    Xử lý đơn hàng
+                  </CustomButton>
+                )
+              }
+              {
+                record?.status === EOrderMarketStatus.PENDING && (
+                  <CustomButton
+                    type="primary"
+                    outline={true}
+                    prefixIcon={<Image src={ReportIcon} alt="" />}
+                    onClick={() => {
+                      setIsShowModal(true);
+                      setStatusTemp(EOrderMarketStatus.CONFIRM)
+                    }}
+                  >
+                    Xác nhận
+                  </CustomButton>
+                )
+              }
+              {
+                record?.status === EOrderMarketStatus.PROCESSING && (
+                  <CustomButton
+                    type="primary"
+                    outline={true}
+                    prefixIcon={<Image src={DeliveryIcon} alt="" />}
+                    onClick={() => {
+                      setIsShowModal(true);
+                      setStatusTemp(EOrderMarketStatus.SEND)
+                    }}
+                  >
+                    Gửi ĐVVC
+                  </CustomButton>
+                )
+              }
+              {
+                record?.status === EOrderMarketStatus.SEND && (
+                  <CustomButton
+                    type="primary"
+                    outline={true}
+                    prefixIcon={<Image src={DeliveryIcon} alt="" />}
+                    onClick={() => {
+                      setIsShowModal(true);
+                      setStatusTemp(EOrderMarketStatus.DONE)
+                    }}
+                  >
+                    Giao hàng thành công
+                  </CustomButton>
+                )
+              }
+              {
+                record?.status === EOrderMarketStatus.SEND && (
+                  <CustomButton
+                    type="danger"
+                    outline={true}
+                    prefixIcon={<Image src={CloseIconRed} alt="" />}
+                    onClick={() => {
+                      setIsShowModal(true);
+                      setStatusTemp(EOrderMarketStatus.CANCEL)
+                    }}
+                  >
+                    Giao hàng thất bại
+                  </CustomButton>
+                )
+              }
+              {
+                (record?.isPayment === false) && record?.status !== EOrderMarketStatus.CLOSED && (
+                  <CustomButton
+                    type="primary"
+                    outline={true}
+                    prefixIcon={<Image src={DolarIcon} alt="" />}
+                    onClick={() => setIsShowPaymentModal(true)}
+                  >
+                    Đã thanh toán
+                  </CustomButton>
+                )
+              }
+            </>
           )
         }
         {

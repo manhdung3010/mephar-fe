@@ -1,8 +1,8 @@
 import { createFollowStore, getConfigProduct, getConfigProductPrivate, getFollowStore, getMarketStoreDetail } from '@/api/market.service';
 import { MarketPaginationStyled } from '@/components/CustomPagination/styled';
-import { formatNumber, getImage } from '@/helpers';
+import { formatNumber, getImage, hasPermission } from '@/helpers';
 import Logo from "@/public/apple-touch-icon.png";
-import { branchState } from '@/recoil/state';
+import { branchState, profileState } from '@/recoil/state';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { message, Pagination } from 'antd';
 import classNames from 'classnames';
@@ -17,10 +17,12 @@ import CartPlusIcon from '@/assets/cart-plus.svg';
 import CartHeartIcon from '@/assets/cart-heart.svg';
 import { EFollowStoreStatus } from '../type';
 import { LoadingIcon } from '@/components/LoadingIcon';
+import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
 
 function StoreDetail() {
   const router = useRouter()
   const { id } = router.query
+  const profile = useRecoilValue(profileState);
   const branchId = useRecoilValue(branchState);
   const [select, setSelect] = useState(0);
   const queryClient = useQueryClient();
@@ -116,7 +118,7 @@ function StoreDetail() {
                           className={`bg-white rounded-lg ${(followStore?.data?.status === EFollowStoreStatus.FALSE || followStore?.data?.status === EFollowStoreStatus.PENDING) ? 'text-red-main' : 'text-[#05A660]'} py-2 px-4 `}
                         >
                           {
-                            (followStore?.data?.status === EFollowStoreStatus.FALSE || followStore?.data?.status === EFollowStoreStatus.CANCEL) && (
+                            (followStore?.data?.status === EFollowStoreStatus.FALSE || followStore?.data?.status === EFollowStoreStatus.CANCEL) && hasPermission(profile?.role?.permissions, RoleModel.market_common, RoleAction.create) && (
                               <p className='flex items-center gap-2' onClick={() => muateCreateFollow()}>
                                 <Image src={CartPlusIcon} />
                                 <span className='text-base font-medium text-red-main'>Đăng ký mua hàng</span>

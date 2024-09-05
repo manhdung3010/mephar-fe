@@ -142,3 +142,8 @@ export function getAllFollowStore(params) {
 export function updateStoreStatus(id: string, status: string) {
   return axiosClient.patch(`market/config/agency/${id}/${status}`);
 }
+
+// check product
+export function checkProduct(seri: string) {
+  return axiosClient.get(`market/sell/seri/getMarketOrder/${seri}`);
+}

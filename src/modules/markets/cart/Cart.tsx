@@ -5,8 +5,8 @@ import { CustomButton } from '@/components/CustomButton'
 import { CustomCheckbox } from '@/components/CustomCheckbox'
 import { CustomInput } from '@/components/CustomInput'
 import DeleteModal from '@/components/CustomModal/ModalDeleteItem'
-import { formatMoney, formatNumber, getImage, sliceString } from '@/helpers'
-import { branchState, marketCartState, paymentProductState } from '@/recoil/state'
+import { formatMoney, formatNumber, getImage, hasPermission, sliceString } from '@/helpers'
+import { branchState, marketCartState, paymentProductState, profileState } from '@/recoil/state'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { message, Radio } from 'antd'
 import Image from 'next/image'
@@ -14,10 +14,12 @@ import { useEffect, useMemo, useState } from 'react'
 import { useRecoilState, useRecoilValue } from 'recoil'
 import ProductCard from '../product-list/ProductCard'
 import { useRouter } from 'next/router'
+import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum'
 
 function Cart() {
   const branchId = useRecoilValue(branchState);
   const router = useRouter()
+  const profile = useRecoilValue(profileState);
   const [formFilter, setFormFilter] = useState({
     page: 1,
     limit: 20,
@@ -220,7 +222,7 @@ function Cart() {
                       <div className='ml-7 mr-2 grid place-items-center'>
                         <Image src={StoreIcon} />
                       </div>
-                      <span>{cart?.products[0]?.marketProduct?.store?.name}</span>
+                      <span>{cart?.products[0]?.marketProduct?.store?.name} - {cart?.products[0]?.marketProduct?.branch?.name}</span>
                     </div>
                   </div>
                   {
@@ -260,7 +262,7 @@ function Cart() {
                         </div>
                         <div className='col-span-6 grid grid-cols-4 items-center gap-2'>
                           <div className='text-center'>
-                            {product?.price}
+                            {formatMoney(product?.price)}
                           </div>
                           <div className='text-center'>
                             <CustomInput
@@ -269,6 +271,7 @@ function Cart() {
                               hasMinus={true}
                               hasPlus={true}
                               value={product?.quantity}
+                              disabled={hasPermission(profile?.role?.permissions, RoleModel.market_common, RoleAction.update) ? false : true}
                               type="number"
                               onChange={(value) => {
                                 updateQuantity(product?.id, value)
@@ -288,6 +291,7 @@ function Cart() {
                             {formatMoney(caculateMoney(product))}
                           </div>
                           <div className='text-center cursor-pointer' onClick={() => {
+                            if (!hasPermission(profile?.role?.permissions, RoleModel.market_common, RoleAction.delete)) return
                             setOpenDeleteConfirm(true)
                             setProductId(product?.id)
                           }}>
