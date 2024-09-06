@@ -16,6 +16,7 @@ import ProductCard from '../product-list/ProductCard';
 import { message } from 'antd';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { branchState, paymentProductState } from '@/recoil/state';
+import parse from 'html-react-parser';
 
 const ProductDetail = () => {
   const [isShowDetail, setIsShowDetail] = React.useState(false);
@@ -211,7 +212,7 @@ const ProductDetail = () => {
               <h5 className='bg-[#FAFAFA] text-xl font-semibold p-5 rounded-lg uppercase'>Thông tin sản phẩm</h5>
               <div className='mt-6'>
                 <div className={isShowDetail ? '' : 'line-clamp-5'}>
-                  {configProduct?.data?.item?.description}
+                  {parse(String(configProduct?.data?.item?.description))}
                 </div>
               </div>
               {

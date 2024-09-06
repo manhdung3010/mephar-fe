@@ -264,10 +264,10 @@ export function OrderTransaction() {
             <div className="mb-2 text-[#15171A]">
               Giao hàng thất bại
               <span className="ml-1 rounded-[10px] bg-[#FBECEE] px-[6px] py-1 text-red-main">
-                {formatNumber(orders?.data?.filterOrderByStatus[4]?.count)}
+                {formatNumber(orders?.data?.filterOrderByStatus[5]?.count)}
               </span>
             </div>
-            <div className="text-xl font-medium text-[#182537]">{formatMoney(orders?.data?.filterOrderByStatus[4]?.sum)}</div>
+            <div className="text-xl font-medium text-[#182537]">{formatMoney(orders?.data?.filterOrderByStatus[5]?.sum)}</div>
           </div>
           <div className="mx-6 w-[1px] border-l border-dashed border-[#ABABAB]" />
 
@@ -275,10 +275,10 @@ export function OrderTransaction() {
             <div className="mb-2 text-[#15171A]">
               Đã hủy
               <span className="ml-1 rounded-[10px] bg-[#FBECEE] px-[6px] py-1 text-red-main">
-                {formatNumber(orders?.data?.filterOrderByStatus[5]?.count)}
+                {formatNumber(orders?.data?.filterOrderByStatus[4]?.count)}
               </span>
             </div>
-            <div className="text-xl font-medium text-[#182537]">{formatMoney(orders?.data?.filterOrderByStatus[5]?.sum)}</div>
+            <div className="text-xl font-medium text-[#182537]">{formatMoney(orders?.data?.filterOrderByStatus[4]?.sum)}</div>
           </div>
         </div>
       </div>

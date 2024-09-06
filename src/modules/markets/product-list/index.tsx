@@ -14,7 +14,7 @@ function MarketProductList() {
     page: 1,
     limit: 16,
     keyword: "",
-    status: "",
+    status: "active",
     "createdAt[start]": undefined,
     "createdAt[end]": undefined,
     sortBy: "quantitySold",

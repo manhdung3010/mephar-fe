@@ -25,6 +25,7 @@ export const warehouseStatus = {
   ADJUSTMENT: 5,
   MOVE_RECEIVE: 6,
   SALE_RETURN: 7,
+  SALE_MARKET: 8,
 };
 
 export const warehouseStatusLable = {
@@ -35,6 +36,7 @@ export const warehouseStatusLable = {
   [warehouseStatus.ADJUSTMENT]: "Kiểm kho",
   [warehouseStatus.MOVE_RECEIVE]: "Nhận hàng",
   [warehouseStatus.SALE_RETURN]: "Trả hàng bán",
+  [warehouseStatus.SALE_MARKET]: "Bán trên chợ",
 };
 
 const WareHouseCard = ({ productId, branchId }) => {

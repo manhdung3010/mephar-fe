@@ -3,6 +3,7 @@ import { CustomButton } from '@/components/CustomButton';
 import { CustomInput } from '@/components/CustomInput';
 import Label from '@/components/CustomLabel';
 import { CustomModal } from '@/components/CustomModal'
+import { formatMoney } from '@/helpers';
 import { branchState } from '@/recoil/state';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { message } from 'antd';
@@ -12,11 +13,13 @@ import { useRecoilValue } from 'recoil';
 function PaymentModal({
   isOpen,
   onCancel,
-  id
+  id,
+  totalMoney,
 }: {
   isOpen: boolean;
   onCancel: () => void;
   id: string;
+  totalMoney: number;
 }) {
   const branchId = useRecoilValue(branchState);
   const queryClient = useQueryClient();
@@ -46,6 +49,10 @@ function PaymentModal({
       message.error('Số tiền thanh toán phải lớn hơn 0');
       return;
     }
+    if (paymentValue > totalMoney) {
+      message.error('Số tiền thanh toán không được lớn hơn số tiền cần thanh toán');
+      return;
+    }
     mutatePayment();
   }
 
@@ -58,8 +65,10 @@ function PaymentModal({
       customFooter={true}
     >
       <div className='my-5'>
-        <Label infoText="" label="Số tiền thanh toán" required />
-        <CustomInput className='!h-11' value={paymentValue} type='number' onChange={(value) => setPaymentValue(+value)} />
+        <Label infoText="" label={`Số tiền thanh toán (${formatMoney(totalMoney)})`} required />
+        <CustomInput className='!h-11' value={paymentValue} type='number' onChange={(value) => {
+          setPaymentValue(+value);
+        }} />
       </div>
       <CustomButton className="ml-auto !h-11 !w-[120px] mt-3" onClick={onSubmit} loading={isLoading} disabled={isLoading}>
         Thanh toán

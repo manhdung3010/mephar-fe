@@ -262,7 +262,10 @@ function Cart() {
                         </div>
                         <div className='col-span-6 grid grid-cols-4 items-center gap-2'>
                           <div className='text-center'>
-                            {formatMoney(product?.price)}
+                            {product?.marketProduct?.discountPrice > 0 && (
+                              <span className='text-[#999999] line-through'>{formatMoney(product?.price)}</span>
+                            )}
+                            <span className='ml-1'>{formatMoney(product?.marketProduct?.discountPrice > 0 ? product?.marketProduct?.discountPrice : product?.price)}</span>
                           </div>
                           <div className='text-center'>
                             <CustomInput

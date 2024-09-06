@@ -62,7 +62,7 @@ function Payment() {
             return {
               marketProductId: product?.marketProductId,
               quantity: product?.quantity,
-              price: product?.price
+              price: product?.marketProduct?.discountPrice > 0 ? product?.marketProduct?.discountPrice : product?.price,
             }
           }),
           toBranchId: paymentProduct[0]?.products[0]?.marketProduct?.branchId,
@@ -152,7 +152,7 @@ function Payment() {
                 </div>
                 <div className='col-span-2 flex items-center justify-center gap-1'>
                   {product?.marketProduct?.discountPrice > 0 && (
-                    <span className='text-[#999999] line-through'>{formatMoney(product?.discountPrice)}</span>
+                    <span className='text-[#999999] line-through'>{formatMoney(product?.price)}</span>
                   )}
                   <span className='text-base text-[#28293D] font-medium'>{formatMoney(product?.marketProduct?.discountPrice > 0 ? product?.marketProduct?.discountPrice : product?.price)}</span>
                 </div>

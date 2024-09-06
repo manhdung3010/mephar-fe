@@ -32,6 +32,7 @@ import { ColumnsType } from 'antd/es/table';
 import DeleteIcon from '@/assets/deleteRed.svg';
 import PlusCircleIcon from '@/assets/plus-circle.svg';
 import AgencyModal from './AgencyModal';
+import CustomEditor from '@/components/CustomEditor';
 export function AddMarketSetting() {
   const {
     getValues,
@@ -575,11 +576,10 @@ export function AddMarketSetting() {
 
           <div>
             <Label infoText="" label="Mô tả" />
-            {/* <CustomTextEditor value={getValues('description')} onChange={(value: string) => {
+            <CustomEditor value={getValues('description')} onChange={(value) => {
               setValue('description', value, { shouldValidate: true })
-              console.log(value);
-            }} /> */}
-            <CustomTextarea rows={10} placeholder="Nhập mô tả" value={getValues('description')} onChange={(e) => setValue('description', e.target.value, { shouldValidate: true })} />
+            }} />
+            {/* <CustomTextarea rows={10} placeholder="Nhập mô tả" value={getValues('description')} onChange={(e) => setValue('description', e.target.value, { shouldValidate: true })} /> */}
             <InputError error={errors.description?.message} />
           </div>
         </div>

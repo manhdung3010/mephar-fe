@@ -147,12 +147,12 @@ export function Info({ record }: { record: IOrder }) {
       render: (_, { quantity, price, itemPrice }) =>
         formatMoney(price - Number(itemPrice ?? 0)),
     },
-    {
-      title: "Giá bán",
-      dataIndex: "totalPrice",
-      key: "totalPrice",
-      render: (_, { quantity, price }) => formatMoney(price),
-    },
+    // {
+    //   title: "Giá bán",
+    //   dataIndex: "totalPrice",
+    //   key: "totalPrice",
+    //   render: (_, { quantity, price }) => formatMoney(price),
+    // },
     {
       title: "Thành tiền",
       dataIndex: "totalPrice",

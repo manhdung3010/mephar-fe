@@ -357,7 +357,7 @@ export function Info({ record }: { record: any }) {
         }}
         content="trạng thái đơn hàng"
       />
-      <PaymentModal isOpen={isShowPaymentModal} onCancel={() => setIsShowPaymentModal(false)} id={record?.id} />
+      <PaymentModal isOpen={isShowPaymentModal} onCancel={() => setIsShowPaymentModal(false)} id={record?.id} totalMoney={record?.totalPrice} />
     </div>
   );
 }
