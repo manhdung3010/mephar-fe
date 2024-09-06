@@ -31,7 +31,7 @@ function StoreDetail() {
     limit: 16,
     keyword: "",
     type: "",
-    status: "",
+    status: "active",
     "createdAt[start]": undefined,
     "createdAt[end]": undefined,
     isConfig: true,
