@@ -107,7 +107,7 @@ function CreateSchedule() {
       setValue('lng', tripDetail?.data?.lng?.trim(), { shouldValidate: true });
       setValue('latEnd', tripDetail?.data?.latEnd?.trim(), { shouldValidate: true });
       setValue('lngEnd', tripDetail?.data?.lngEnd?.trim(), { shouldValidate: true });
-      const customers = tripDetail?.data?.tripCustomer?.map((item) => ({ id: item?.customerId, tripCustomerId: item?.id, address: item?.address, lat: item?.lat, lng: item?.lng, status: item?.status }));
+      const customers = tripDetail?.data?.tripCustomer?.map((item) => ({ id: item?.customerId, tripCustomerId: item?.id, address: item?.address, lat: item?.lat, lng: item?.lng, status: item?.status, fullName: item?.customer?.fullName }));
       setValue('listCustomer', customers, { shouldValidate: true });
       tripDetail?.data?.tripCustomer?.forEach((item, index) => {
         handleAddMarker(+item?.lng, +item?.lat, item?.customer, item?.stt)
@@ -278,6 +278,7 @@ function CreateSchedule() {
                             className="h-11 !rounded w-full"
                             // prefixIcon={<Image src={SearchIcon} alt="" />}
                             wrapClassName="w-full !rounded bg-white"
+                            disabled={isEdit ? true : false}
                             onSelect={(value) => {
                               setIsEnd(false);
                               setTempKeyword(places?.data?.find((item) => item.ref_id === value)?.display)
@@ -473,6 +474,7 @@ const CustomerRow = ({ row, index, setValue, getValues, handleUpdateMarker, cust
           <CustomAutocomplete
             placeholder="Chọn khách hàng"
             className="h-11 !rounded w-full"
+            disabled={row?.status === 'visited'}
             // prefixIcon={<Image src={SearchIcon} alt="" />}
             wrapClassName="w-full !rounded bg-white"
             onSelect={(value) => {
