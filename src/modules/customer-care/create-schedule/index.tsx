@@ -93,7 +93,7 @@ function CreateSchedule() {
     () =>
       getLatLng({ refId: refId }),
     {
-      enabled: refId.length > 0
+      enabled: refId.length > 0,
     }
   );
 
@@ -130,7 +130,7 @@ function CreateSchedule() {
       }
 
     }
-  }, [latLng])
+  }, [latLng, isEnd])
 
   const { mutate: mutateCreateTrip, isLoading: isLoadinCreateTrip } =
     useMutation(
@@ -162,7 +162,6 @@ function CreateSchedule() {
       message.error('Vui lòng chọn ít nhất 1 khách hàng');
       return;
     }
-    console.log('lat', getValues('lat'))
     if (!getValues('lat') || !getValues('lng')) {
       message.error('Vui lòng chọn điểm xuất phát');
       return;
@@ -280,6 +279,7 @@ function CreateSchedule() {
                             // prefixIcon={<Image src={SearchIcon} alt="" />}
                             wrapClassName="w-full !rounded bg-white"
                             onSelect={(value) => {
+                              setIsEnd(false);
                               setTempKeyword(places?.data?.find((item) => item.ref_id === value)?.display)
                               setRefId(value);
                             }}
@@ -351,9 +351,9 @@ function CreateSchedule() {
                             // prefixIcon={<Image src={SearchIcon} alt="" />}
                             wrapClassName="w-full !rounded bg-white"
                             onSelect={(value) => {
+                              setIsEnd(true);
                               setTempKeywordEnd(places?.data?.find((item) => item.ref_id === value)?.display)
                               setRefId(value);
-                              setIsEnd(true);
                             }}
                             showSearch={true}
                             listHeight={300}
