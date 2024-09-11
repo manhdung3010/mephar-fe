@@ -58,3 +58,8 @@ export function getNoteList(id: number) {
 export function createCustomerNote(payload) {
   return axiosClient.post(`customer-note`, payload);
 }
+
+// lịch sử thanh toán
+export function paymentHistory(id: number, params) {
+  return axiosClient.get(`customer/${id}/payment`, { params });
+}

@@ -47,12 +47,15 @@ export function getConfigProductPrivate(branchId: string, toBranchId: string) {
   );
 }
 
-// đại lý
+// đại lý - group agency
 export function getAgency(params) {
   return axiosClient.get(`market/config/agency`, { params });
 }
 export function getAgencyGroup(params) {
   return axiosClient.get(`market/config/group-agency`, { params });
+}
+export function createAgencyGroup(payload) {
+  return axiosClient.post(`market/config/group-agency`, payload);
 }
 
 // Chợ
@@ -70,6 +73,12 @@ export function deletMarketCart(id: string) {
 }
 export function updateMarketCart(id: string, quantity: number) {
   return axiosClient.patch(`market/sell/cart/${id}/${quantity}`);
+}
+export function updateMarketCartSelect(payload: {
+  branchId: string;
+  ids: string[];
+}) {
+  return axiosClient.patch(`market/sell/cart`, payload);
 }
 export function createShipAddress(payload) {
   return axiosClient.post(`market/sell/address`, payload);

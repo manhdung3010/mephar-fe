@@ -216,6 +216,7 @@ export function AddMarketSetting() {
     setValue('productId', parseProduct.productId, { shouldValidate: true });
     setValue('productUnitId', parseProduct.productUnit?.id, { shouldValidate: true });
     setProductSelected(parseProduct);
+    setValue('price', parseProduct?.price, { shouldValidate: true })
     setFormFilter((pre) => ({ ...pre, keyword: "" }));
     setSearchKeyword(parseProduct?.product?.name);
   }
@@ -257,7 +258,7 @@ export function AddMarketSetting() {
             });
             setListAgencySelected(newAgency);
           }}
-          className="h-11 w-32"
+          className="h-11 w-24"
           type='number'
           disabled={getValues('isDefaultPrice')}
         />
@@ -282,7 +283,7 @@ export function AddMarketSetting() {
             });
             setListAgencySelected(newAgency);
           }}
-          className="h-11 w-32"
+          className="h-11 w-24"
           type='number'
           disabled={getValues('isDefaultPrice')}
         />
@@ -295,7 +296,7 @@ export function AddMarketSetting() {
       render: (_, record) => (
         <div className="flex gap-3">
           {
-            <div className=" cursor-pointer" onClick={() => {
+            <div className="w-5 flex-shrink-0 cursor-pointer" onClick={() => {
               const newAgency = listAgencySelected.map((item) => {
                 if (item.id === record.id && item.isGroup === record.isGroup) {
                   return null
@@ -325,6 +326,7 @@ export function AddMarketSetting() {
         inventory = Math.floor(mainInventory / productUnit?.exchangeValue);
       }
       setNoBatchInventory(inventory);
+      setValue('price', productUnit?.price, { shouldValidate: true })
     }
   }, [productSelected, getValues('productUnitId')])
 
@@ -564,6 +566,7 @@ export function AddMarketSetting() {
                 <CustomTable
                   dataSource={listAgencySelected.map((item: any, index) => ({ ...item, key: index + 1 })) || []}
                   columns={columns}
+                  scroll={{ x: 500 }}
                   loading={isLoading}
                 />
 
@@ -585,7 +588,7 @@ export function AddMarketSetting() {
         </div>
 
         <div
-          className="flex h-fit w-1/3 max-w-[360px] flex-col bg-white p-5"
+          className="flex h-fit w-1/3 max-w-[360px] flex-col bg-white p-5 flex-shrink-0"
           style={{
             boxShadow: '0px 8px 13px -3px rgba(0, 0, 0, 0.07)',
           }}

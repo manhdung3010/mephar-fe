@@ -93,7 +93,7 @@ function Cart() {
             if (cart?.branchId === storeSelected) {
               return {
                 ...product,
-                selected: true
+                selected: cartList?.find((cartItem) => cartItem?.branchId === storeSelected)?.products?.find((productItem) => productItem?.id === product?.id)?.selected || false
               }
             } else {
               return {

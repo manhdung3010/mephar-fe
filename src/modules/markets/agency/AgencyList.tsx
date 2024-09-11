@@ -1,22 +1,24 @@
-import { CustomInput } from '@/components/CustomInput';
-import Image from 'next/image';
-import React from 'react'
+import { updateStoreStatus } from '@/api/market.service';
 import SearchIcon from '@/assets/searchIcon.svg';
-import { debounce } from 'lodash';
-import { message, Spin } from 'antd';
+import { CustomButton } from '@/components/CustomButton';
+import { CustomInput } from '@/components/CustomInput';
 import CustomPagination from '@/components/CustomPagination';
 import CustomTable from '@/components/CustomTable';
-import classNames from 'classnames';
-import { CustomButton } from '@/components/CustomButton';
-import { EAcceptFollowStoreStatus, EFollowStoreStatus } from '../type';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { updateStoreStatus } from '@/api/market.service';
+import { message } from 'antd';
+import { debounce } from 'lodash';
+import Image from 'next/image';
+import React from 'react';
+import { EAcceptFollowStoreStatus, EFollowStoreStatus } from '../type';
 import ConfirmStatusModal from './ConfirmStatusModal';
+import GroupAgencyModal from './GroupAgencyModal';
 
 function AgencyList({ data, formFilter, setFormFilter, isLoading }) {
   const queryClient = useQueryClient();
   const [openConfirmModal, setOpenConfirmModal] = React.useState(false);
+  const [openGroupModal, setOpenGroupModal] = React.useState(false);
   const [deleteId, setDeleteId] = React.useState(null);
+  const [recordId, setRecordId] = React.useState(null);
 
   const { mutate: mutateUpdateStoreStatus, isLoading: isLoadingCreateOrder } =
     useMutation(
@@ -26,6 +28,7 @@ function AgencyList({ data, formFilter, setFormFilter, isLoading }) {
       {
         onSuccess: async (data) => {
           await queryClient.invalidateQueries(["AGENCY_LIST"]);
+          setOpenGroupModal(false)
         },
         onError: (err: any) => {
           message.error(err?.message);
@@ -75,11 +78,8 @@ function AgencyList({ data, formFilter, setFormFilter, isLoading }) {
             }}
           >Từ chối</CustomButton>
           <CustomButton onClick={() => {
-            const newPayload = {
-              id: record?.id,
-              status: EAcceptFollowStoreStatus.ACTIVE,
-            }
-            mutateUpdateStoreStatus(newPayload)
+            setRecordId(record?.id)
+            setOpenGroupModal(true)
           }}>Chấp nhận</CustomButton>
         </div>
       ) : (
@@ -145,6 +145,26 @@ function AgencyList({ data, formFilter, setFormFilter, isLoading }) {
           }
           mutateUpdateStoreStatus(newPayload)
           setOpenConfirmModal(false)
+        }}
+        content={''}
+      />
+      <GroupAgencyModal
+        isOpen={openGroupModal}
+        onCancel={() => {
+          const newPayload = {
+            id: recordId,
+            status: EAcceptFollowStoreStatus.ACTIVE,
+          }
+          mutateUpdateStoreStatus(newPayload)
+
+        }}
+        onSuccess={({ agencyId }) => {
+          const newPayload = {
+            id: recordId,
+            status: EAcceptFollowStoreStatus.ACTIVE,
+            groupAgencyId: agencyId
+          }
+          mutateUpdateStoreStatus(newPayload)
         }}
         content={''}
       />
