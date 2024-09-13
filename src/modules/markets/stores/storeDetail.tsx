@@ -53,8 +53,8 @@ function StoreDetail() {
     }
   );
   const { data: configProductPrivate, isLoading: isLoadingConfigProductPrivate } = useQuery(
-    ['CONFIG_PRODUCT_PRIVATE', formFilter?.sortBy, formFilter?.productType, id],
-    () => getConfigProductPrivate(branchId, String(id), { sortBy: formFilter?.sortBy, productType: formFilter?.productType }),
+    ['CONFIG_PRODUCT_PRIVATE', formFilter?.page, formFilter?.limit, formFilter?.sortBy, formFilter?.productType, id],
+    () => getConfigProductPrivate(branchId, String(id), { page: formFilter?.page, limit: formFilter?.limit, sortBy: formFilter?.sortBy, productType: formFilter?.productType }),
     {
       enabled: !!id && storeDetail?.data?.isAgency
     }
@@ -235,7 +235,7 @@ function StoreDetail() {
       </div>
       <div className='fluid-container'>
         <p className='mt-6 text-[#555770] font-medium'>
-          Hiển thị {(formFilter.page - 1) * formFilter.limit + 1} - {Math.min(formFilter.page * formFilter.limit, configProduct?.data?.totalItem)} trong tổng số {formatNumber(configProduct?.data?.totalItem)} sản phẩm
+          Hiển thị {(formFilter.page - 1) * formFilter.limit + 1} - {Math.min(formFilter.page * formFilter.limit, configProduct?.data?.totalItem)} trong tổng số {formatNumber(storeDetail?.data?.isAgency ? configProductPrivate?.data?.totalItem : configProduct?.data?.totalItem)} sản phẩm
         </p>
 
         <div className='mt-8'>
@@ -272,7 +272,7 @@ function StoreDetail() {
           }
           <div className='flex justify-center py-12'>
             <MarketPaginationStyled>
-              <Pagination pageSize={formFilter?.limit} current={formFilter?.page} onChange={(value) => setFormFilter({ ...formFilter, page: value })} total={configProduct?.data?.totalItem} />
+              <Pagination pageSize={formFilter?.limit} current={formFilter?.page} onChange={(value) => setFormFilter({ ...formFilter, page: value })} total={storeDetail?.data?.isAgency ? configProductPrivate?.data?.totalItem : configProduct?.data?.totalItem} />
             </MarketPaginationStyled>
           </div>
 
