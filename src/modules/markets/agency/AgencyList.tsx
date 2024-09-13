@@ -12,9 +12,12 @@ import React from 'react';
 import { EAcceptFollowStoreStatus, EFollowStoreStatus } from '../type';
 import ConfirmStatusModal from './ConfirmStatusModal';
 import GroupAgencyModal from './GroupAgencyModal';
+import { useRecoilValue } from 'recoil';
+import { branchState } from '@/recoil/state';
 
 function AgencyList({ data, formFilter, setFormFilter, isLoading }) {
   const queryClient = useQueryClient();
+  const branchId = useRecoilValue(branchState);
   const [openConfirmModal, setOpenConfirmModal] = React.useState(false);
   const [openGroupModal, setOpenGroupModal] = React.useState(false);
   const [deleteId, setDeleteId] = React.useState(null);
@@ -23,7 +26,8 @@ function AgencyList({ data, formFilter, setFormFilter, isLoading }) {
   const { mutate: mutateUpdateStoreStatus, isLoading: isLoadingCreateOrder } =
     useMutation(
       (payload: any) => {
-        return updateStoreStatus(payload?.id, payload?.status)
+        console.log('payload', payload);
+        return updateStoreStatus(payload?.id, payload?.status, payload?.groupAgencyId ? { groupAgencyId: payload?.groupAgencyId } : null, branchId);
       },
       {
         onSuccess: async (data) => {

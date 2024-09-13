@@ -121,7 +121,7 @@ export function AddMarketSetting() {
       }
       );
       setValue('price', rest.price, { shouldValidate: true });
-      rest.discountPrice > 0 && setValue('discountPrice', rest.discountPrice, { shouldValidate: true });
+      setValue('discountPrice', rest.discountPrice, { shouldValidate: true });
       setValue('quantity', rest.quantity, { shouldValidate: true });
       setValue('description', rest.description || ''), { shouldValidate: true };
       setValue('marketType', rest.marketType, { shouldValidate: true });

@@ -148,8 +148,16 @@ export function createFollowStore(payload) {
 export function getAllFollowStore(params) {
   return axiosClient.get(`market/config/agency`, { params });
 }
-export function updateStoreStatus(id: string, status: string) {
-  return axiosClient.patch(`market/config/agency/${id}/${status}`);
+export function updateStoreStatus(
+  id: string,
+  status: string,
+  payload?: any,
+  branchId?: string
+) {
+  return axiosClient.patch(
+    `market/config/agency/${id}/${status}?branchId=${branchId}`,
+    payload
+  );
 }
 
 // check product
