@@ -13,7 +13,7 @@ import 'slick-carousel/slick/slick-theme.css';
 import 'slick-carousel/slick/slick.css';
 import StoreCard from './StoreCard';
 import ProductCard from '../product-list/ProductCard';
-import { message } from 'antd';
+import { message, Spin } from 'antd';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { branchState, paymentProductState } from '@/recoil/state';
 import parse from 'html-react-parser';
@@ -47,7 +47,7 @@ const ProductDetail = () => {
   const [paymentProduct, setPaymentProduct] = useRecoilState(paymentProductState);
   const queryClient = useQueryClient();
 
-  const { data: configProduct, isLoading } = useQuery(
+  const { data: configProduct, isLoading, isError } = useQuery(
     ['MARKET_PRODUCT_DETAIL', JSON.stringify(id), branchId],
     () => getSaleProductDetail(String(id), branchId),
     {
@@ -97,6 +97,13 @@ const ProductDetail = () => {
         },
       }
     );
+
+  if (isLoading) {
+    return <div className='grid place-items-center min-h-[600px]'><Spin size='large' /></div>
+  }
+  if (isError) {
+    return <div className='grid place-items-center min-h-[600px] text-2xl'><h4>Bạn không có quyền truy cập vào sản phẩm này</h4></div>
+  }
 
   return (
     <div className='bg-[#fafafc]'>

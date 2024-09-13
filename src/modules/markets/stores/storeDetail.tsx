@@ -18,6 +18,7 @@ import CartHeartIcon from '@/assets/cart-heart.svg';
 import { EFollowStoreStatus } from '../type';
 import { LoadingIcon } from '@/components/LoadingIcon';
 import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
+import { sortBy } from 'lodash';
 
 function StoreDetail() {
   const router = useRouter()
@@ -30,11 +31,11 @@ function StoreDetail() {
     page: 1,
     limit: 16,
     keyword: "",
-    type: "",
     status: "active",
     "createdAt[start]": undefined,
     "createdAt[end]": undefined,
     isConfig: true,
+    type: 'common',
     branchId
   });
   const { data: storeDetail, isLoading: isLoadingStoreDetail } = useQuery(
@@ -52,8 +53,8 @@ function StoreDetail() {
     }
   );
   const { data: configProductPrivate, isLoading: isLoadingConfigProductPrivate } = useQuery(
-    ['CONFIG_PRODUCT_PRIVATE', JSON.stringify(formFilter), id],
-    () => getConfigProductPrivate(branchId, String(id)),
+    ['CONFIG_PRODUCT_PRIVATE', formFilter?.sortBy, formFilter?.productType, id],
+    () => getConfigProductPrivate(branchId, String(id), { sortBy: formFilter?.sortBy, productType: formFilter?.productType }),
     {
       enabled: !!id && storeDetail?.data?.isAgency
     }
@@ -243,7 +244,7 @@ function StoreDetail() {
             storeDetail?.data?.isAgency && (
               <div className='grid grid-cols-4 gap-10'>
                 {
-                  isLoading ? (
+                  isLoadingConfigProductPrivate ? (
                     Array.from({ length: 8 }).map((_, index) => (
                       <ProductCardSkeleton key={index} />
                     ))

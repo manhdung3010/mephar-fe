@@ -41,9 +41,14 @@ export function getConfigProductDetail(id: string) {
 }
 
 // product privite
-export function getConfigProductPrivate(branchId: string, toBranchId: string) {
+export function getConfigProductPrivate(
+  branchId: string,
+  toBranchId: string,
+  params
+) {
   return axiosClient.get(
-    `market/sell/product-private?branchId=${branchId}&toBranchId=${toBranchId}`
+    `market/sell/product-private?branchId=${branchId}&toBranchId=${toBranchId}`,
+    { params }
   );
 }
 
