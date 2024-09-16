@@ -12,7 +12,7 @@ import { updateMarketOrderStatus } from '@/api/market.service';
 import { shipFee } from '@/modules/markets/payment';
 import { EOrderMarketStatus, EOrderMarketStatusLabel } from '@/modules/markets/type';
 import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
-import { profileState } from '@/recoil/state';
+import { branchState, profileState } from '@/recoil/state';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { message } from 'antd';
 import { useRecoilValue } from 'recoil';
@@ -36,13 +36,14 @@ export function Info({ record }: { record: any }) {
   }, [record.products]);
   const [openHistoryModal, setOpenHistoryModal] = useState(false);
   const queryClient = useQueryClient();
+  const branchId = useRecoilValue(branchState);
 
   const {
     mutate: mutateCreateGroupProduct,
     isLoading: isLoadingCreateGroupProduct,
   } = useMutation((payload: any) => {
     if (payload?.status === EOrderMarketStatus.CONFIRM) {
-      return updateMarketOrderStatus(payload?.id, { status: payload?.status });
+      return updateMarketOrderStatus(payload?.id, { status: payload?.status }, branchId);
     }
     if (payload?.status === EOrderMarketStatus.SEND) {
       const newPayload = {
@@ -53,9 +54,9 @@ export function Info({ record }: { record: any }) {
           name: 'Giao hàng nhanh',
         }
       }
-      return updateMarketOrderStatus(payload?.id, newPayload);
+      return updateMarketOrderStatus(payload?.id, newPayload, branchId);
     }
-    return updateMarketOrderStatus(payload?.id, { status: payload?.status });
+    return updateMarketOrderStatus(payload?.id, { status: payload?.status }, branchId);
   }, {
     onSuccess: async (res) => {
       await queryClient.invalidateQueries(['MAKET_ORDER']);
