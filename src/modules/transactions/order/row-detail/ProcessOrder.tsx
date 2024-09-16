@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { CustomButton } from '@/components/CustomButton';
 import { CustomInput } from '@/components/CustomInput';
 
-import { getMarketOrderDetail, updateMarketOrderStatus, updateSeri } from '@/api/market.service';
+import { checkSeriValid, getMarketOrderDetail, updateMarketOrderStatus, updateSeri } from '@/api/market.service';
 import { formatNumber, getImage } from '@/helpers';
 import { EOrderMarketStatus } from '@/modules/markets/type';
 import { branchState } from '@/recoil/state';
@@ -86,7 +86,7 @@ export function ProcessOrder() {
             }
           })
         }
-        return updateMarketOrderStatus(String(id), payload)
+        return updateMarketOrderStatus(String(id), payload, branchId)
       },
       {
         onSuccess: async () => {
@@ -197,13 +197,28 @@ export function ProcessOrder() {
                   }}
                   placeholder='Nhập seri, nhấn enter để thêm'
                   value={inputValues[product?.id]}
-                  onKeyDown={(e) => {
+                  onKeyDown={async (e) => {
                     if (e.key === 'Enter') {
                       // validate if seri is existed
                       if (product?.listSeri?.includes(e.target.value)) {
-                        message.error('Seri đã tồn tại trong sản phẩm');
+                        message.error('Seri đã tồn tại trong sản phẩm này');
                         return;
                       }
+
+                      // validate if seri is existed in other product
+                      const allProduct: any = getValues('products');
+                      const isSeriExisted = allProduct.some((p: any) => p.listSeri.includes(e.target.value));
+                      if (isSeriExisted) {
+                        message.error('Seri đã tồn tại trong sản phẩm khác');
+                        return;
+                      }
+
+                      const isSeriValid: any = await checkSeriValid(e.target.value?.trim(), { branchId });
+                      if (isSeriValid?.data?.isExists) {
+                        message.error('Seri đã tồn tại trong hệ thống');
+                        return;
+                      }
+
                       if (e.target.value?.trim()?.length <= 0) {
                         message.error('Seri của sản phẩm không được để trống')
                         return;

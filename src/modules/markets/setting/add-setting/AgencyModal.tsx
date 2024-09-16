@@ -66,20 +66,27 @@ function AgencyModal({
     },
     ...(agencyType === 'agency' ? [
       {
-        title: "Thông tin",
+        title: "Đại lý",
         dataIndex: "groupProduct",
         key: "groupProduct",
         render: (_, record) => <span>
-          {record?.agency?.store?.name} - {record?.agency?.store?.phone}
+          {record?.agency?.store?.name} - {record?.agency?.name}
         </span>,
       },
-    ] : []),
-    {
+      {
+        title: "Số điện thoại",
+        dataIndex: "phone",
+        key: "phone",
+        render: (_, record) => <span>
+          {record?.agency?.store?.phone}
+        </span>,
+      },
+    ] : [{
       title: "Nhóm đại lý",
       dataIndex: "groupAgency",
       key: "groupAgency",
       render: (_, record) => record?.agency?.name || record?.name,
-    },
+    }]),
   ];
 
   const checkSelection = () => {

@@ -7,6 +7,7 @@ import { getBranch } from '@/api/branch.service';
 import { getProfile } from '@/api/user';
 import { getToken } from '@/helpers/storage';
 import {
+  agencyState,
   branchState,
   orderActiveState,
   orderState,
@@ -20,6 +21,7 @@ export function InitGlobalData() {
 
   const [, setProfileState] = useRecoilState(profileState);
   const [branch, setBranch] = useRecoilState(branchState);
+  const [isAgency, setIsAgency] = useRecoilState(agencyState);
   const orderObject = useRecoilValue(orderState);
   const orderActive = useRecoilValue(orderActiveState);
 
@@ -55,6 +57,7 @@ export function InitGlobalData() {
       setBranch(
         defaultBranch ? defaultBranch.id : branches?.data?.items[0]?.id
       );
+      setIsAgency(defaultBranch ? defaultBranch.isAgency : branches?.data?.items[0]?.isAgency);
     }
   }, [branches, router.pathname]);
 

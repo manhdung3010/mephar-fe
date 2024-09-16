@@ -44,6 +44,11 @@ export const branchState = atom<any>({
   default: null,
   effects: [localStorageEffect("BRANCH_STATE")],
 });
+export const agencyState = atom<any>({
+  key: "AGENCY_STATE",
+  default: null,
+  effects: [localStorageEffect("AGENCY_STATE")],
+});
 
 export const orderState = atom<{ [x: string]: ISaleProductLocal[] } | "">({
   key: "ORDER_STATE",

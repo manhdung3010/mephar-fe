@@ -124,6 +124,9 @@ export function updateMarketOrder(id: string, payload) {
     payload
   );
 }
+export function checkSeriValid(seri: string, params) {
+  return axiosClient.get(`market/sell/seri/check/${seri}`, { params });
+}
 
 // payment order
 export function createPaymentOrder(id: string, payload) {
@@ -131,8 +134,11 @@ export function createPaymentOrder(id: string, payload) {
 }
 
 // update order status
-export function updateMarketOrderStatus(id: string, payload) {
-  return axiosClient.patch(`market/sell/market-order/${id}`, payload);
+export function updateMarketOrderStatus(id: string, payload, branchId: string) {
+  return axiosClient.patch(
+    `market/sell/market-order/${id}?branchId=${branchId}`,
+    payload
+  );
 }
 
 // store

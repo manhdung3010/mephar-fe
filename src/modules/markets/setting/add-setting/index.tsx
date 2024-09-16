@@ -14,7 +14,7 @@ import { CustomUpload } from '@/components/CustomUpload';
 import InputError from '@/components/InputError';
 import { formatMoney, formatNumber, getImage, sliceString } from '@/helpers';
 import { IBatch, ISaleProduct } from '@/modules/sales/interface';
-import { branchState } from '@/recoil/state';
+import { agencyState, branchState } from '@/recoil/state';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { message } from 'antd';
@@ -22,7 +22,7 @@ import { cloneDeep, debounce } from 'lodash';
 import { useRouter } from 'next/router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import ListBatchModal from './ListBatchModal';
 import { schema } from './schema';
 import CustomTextEditor from '@/components/CustomTextEditor';
@@ -56,6 +56,7 @@ export function AddMarketSetting() {
 
   const { id } = router.query;
 
+  const [isAgency, setIsAgency] = useRecoilState(agencyState);
   const [formFilter, setFormFilter] = useState({ page: 1, limit: 10, keyword: "", isSale: true });
   const [searchKeyword, setSearchKeyword] = useState("");
   const [productSelected, setProductSelected] = useState<any>(null);
@@ -64,6 +65,8 @@ export function AddMarketSetting() {
   const [listBatchSelected, setListBatchSelected] = useState<any[]>([]);
   const [listAgencySelected, setListAgencySelected] = useState<any[]>([]);
   const [noBatchInventory, setNoBatchInventory] = useState(0);
+
+  const [imageCenterPath, setImageCenterPath] = useState<string>('');
   const {
     data: products,
     isLoading: isLoadingProduct,
@@ -190,10 +193,6 @@ export function AddMarketSetting() {
       message.error('Vui lòng chọn lô sản phẩm');
       return;
     }
-    if (getValues('marketType') === 'private' && listAgencySelected.length === 0) {
-      message.error('Vui lòng chọn đại lý');
-      return;
-    }
     // check quantity with batch selected
     if (listBatchSelected?.length > 0) {
       const totalQuantity = listBatchSelected.reduce((total, item) => total + item.newInventory, 0);
@@ -213,11 +212,14 @@ export function AddMarketSetting() {
 
   const onSelectedProduct = (value) => {
     const parseProduct = JSON.parse(value);
+    setProductSelected(parseProduct);
     setValue('productId', parseProduct.productId, { shouldValidate: true });
     setValue('productUnitId', parseProduct.productUnit?.id, { shouldValidate: true });
-    setProductSelected(parseProduct);
     setValue('price', parseProduct?.price, { shouldValidate: true })
+    setValue('thumbnail', parseProduct?.product?.image?.id, { shouldValidate: true });
+    setValue('description', parseProduct?.product?.description, { shouldValidate: true });
     setFormFilter((pre) => ({ ...pre, keyword: "" }));
+    setImageCenterPath(parseProduct?.product?.image?.path);
     setSearchKeyword(parseProduct?.product?.name);
   }
 
@@ -518,7 +520,7 @@ export function AddMarketSetting() {
                 value={getValues('marketType')}
                 options={[
                   { label: 'Chợ chung', value: 'common' },
-                  { label: 'Chợ riêng', value: 'private' },
+                  { label: 'Chợ riêng', value: 'private', disabled: isAgency ? false : true },
                 ]}
               />
             </div>
@@ -609,7 +611,7 @@ export function AddMarketSetting() {
                 }
                 setValue('thumbnail', value, { shouldValidate: true })
               }}
-              values={[productDetail?.data?.item?.imageCenter?.path]}
+              values={[productDetail?.data?.item?.imageCenter?.path || imageCenterPath]}
             >
               <div
                 className={

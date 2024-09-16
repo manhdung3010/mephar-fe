@@ -12,6 +12,7 @@ import LocationIcon from '@/assets/locationIcon.svg';
 import { getImage, randomString } from '@/helpers';
 import { setItem, setToken } from '@/helpers/storage';
 import {
+  agencyState,
   branchState,
   orderActiveState,
   orderState,
@@ -24,6 +25,7 @@ export const Header = ({ title }: { title?: string | ReactNode }) => {
 
   const profile = useRecoilValue(profileState);
   const [branch, setBranch] = useRecoilState(branchState);
+  const [isAgency, setIsAgency] = useRecoilState(agencyState);
   const [, setOrderObject] = useRecoilState(orderState);
   const [, setOrderActive] = useRecoilState(orderActiveState);
 
@@ -36,6 +38,7 @@ export const Header = ({ title }: { title?: string | ReactNode }) => {
         onClick={() => {
           const key = randomString();
           setBranch(item.id);
+          setIsAgency(item.isAgency);
           setOrderObject({ [key]: [] });
           setOrderActive(key);
         }}
