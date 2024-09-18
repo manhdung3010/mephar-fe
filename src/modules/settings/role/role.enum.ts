@@ -61,7 +61,7 @@ export enum RoleLabel {
 
   market = "Chợ",
   market_common = "Chợ",
-  market_store = "Chợ đại lý",
+  market_store = "Chợ hàng điểm",
   market_setting = "Cấu hình sản phẩm",
   market_confirm = "Xác nhận đơn hàng",
 

@@ -7,9 +7,9 @@ function index() {
   return (
     <Layout
       meta={
-        <Meta title="Mephar - Chợ đại lý" description="Danh sách đại lý đã theo dõi" />
+        <Meta title="Mephar - Chợ hàng điểm" description="Danh sách hàng điểm đã theo dõi" />
       }
-      title="Danh sách đại lý đã theo dõi"
+      title="Danh sách hàng điểm đã theo dõi"
     >
       <CommonPage />
     </Layout>

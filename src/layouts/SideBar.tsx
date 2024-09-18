@@ -184,7 +184,7 @@ const items = (permissions: { model: string; action: string }[]) => [
       <a target="_blank">Chợ</a>
     </Link>, keyMenu.MARKET_COMMON),
     hasPermission(permissions, RoleModel.market_store, RoleAction.read) &&
-    getItem('Chợ đại lý', keyMenu.MARKET_STORE,),
+    getItem('Chợ hàng điểm', keyMenu.MARKET_STORE,),
     hasPermission(permissions, RoleModel.market_store, RoleAction.read) &&
     getItem('Đăng ký mua hàng từ đại lý', keyMenu.MARKET_AGENCY,),
     hasPermission(permissions, RoleModel.market_setting, RoleAction.read) &&
