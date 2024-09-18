@@ -6,9 +6,9 @@ const Index = () => {
   return (
     <Layout
       meta={
-        <Meta title="Mephar - Đăng ký mua hàng từ đại lý" description="Đăng ký mua hàng từ đại lý" />
+        <Meta title="Mephar - Đại lý bán điểm" description="Đại lý bán điểm" />
       }
-      title="Đăng ký mua hàng từ đại lý"
+      title="Đại lý bán điểm"
     >
       <Agency />
     </Layout>

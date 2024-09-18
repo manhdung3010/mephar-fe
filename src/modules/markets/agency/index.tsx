@@ -19,7 +19,7 @@ function Agency() {
   useEffect(() => {
     setFormFilter((preValue) => ({
       ...preValue,
-      status: menu[select] === 'Khách hàng đã đăng ký' ? 'pending' : 'active',
+      status: menu[select] === 'Yêu cầu làm đại lý' ? 'pending' : 'active',
     }));
   }, [select]);
 
@@ -28,7 +28,7 @@ function Agency() {
     () => getAllFollowStore({ ...formFilter, branchId }),
   );
 
-  const menu = ['Khách hàng đã đăng ký', 'Khách hàng đã chấp nhận'];
+  const menu = ['Danh sách đại lý', 'Yêu cầu làm đại lý'];
   return (
     <div>
       <div

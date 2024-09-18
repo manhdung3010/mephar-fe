@@ -186,7 +186,7 @@ const items = (permissions: { model: string; action: string }[]) => [
     hasPermission(permissions, RoleModel.market_store, RoleAction.read) &&
     getItem('Chợ hàng điểm', keyMenu.MARKET_STORE,),
     hasPermission(permissions, RoleModel.market_store, RoleAction.read) &&
-    getItem('Đăng ký mua hàng từ đại lý', keyMenu.MARKET_AGENCY,),
+    getItem('Đại lý bán điểm', keyMenu.MARKET_AGENCY,),
     hasPermission(permissions, RoleModel.market_setting, RoleAction.read) &&
     getItem('Cấu hình sản phẩm', keyMenu.MARKET_SETTING),
   ]),

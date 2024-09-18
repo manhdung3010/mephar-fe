@@ -57,13 +57,13 @@ function AgencyList({ data, formFilter, setFormFilter, isLoading }) {
       title: "Số điện thoại",
       dataIndex: "phone",
       key: "phone",
-      render: (value, record) => record?.branch?.phone,
+      render: (value, record) => record?.agency?.phone,
     },
     {
       title: "Địa chỉ",
       dataIndex: "address",
       key: "address",
-      render: (value, record) => record?.branch?.address1,
+      render: (value, record) => record?.agency?.address1,
     },
     {
       title: "Thao tác",
@@ -113,12 +113,12 @@ function AgencyList({ data, formFilter, setFormFilter, isLoading }) {
       />
       {
         formFilter?.status === EFollowStoreStatus.PENDING && (
-          <p className='italic font-medium text-[#8F90A6] my-6'>Số lượng đăng ký: {data?.totalItem}</p>
+          <p className='italic font-medium text-[#8F90A6] my-6'>Số lượng yêu cầu: {data?.totalItem}</p>
         )
       }
       {
         formFilter?.status === EFollowStoreStatus.ACTIVE && (
-          <p className='italic font-medium text-[#8F90A6] my-6'>Số lượng đã chấp nhận: {data?.totalItem}</p>
+          <p className='italic font-medium text-[#8F90A6] my-6'>Số lượng đại lý: {data?.totalItem}</p>
         )
       }
 

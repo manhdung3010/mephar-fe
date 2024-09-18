@@ -122,7 +122,7 @@ function StoreDetail() {
                             (followStore?.data?.status === EFollowStoreStatus.FALSE || followStore?.data?.status === EFollowStoreStatus.CANCEL) && hasPermission(profile?.role?.permissions, RoleModel.market_common, RoleAction.create) && (
                               <p className='flex items-center gap-2' onClick={() => muateCreateFollow()}>
                                 <Image src={CartPlusIcon} />
-                                <span className='text-base font-medium text-red-main'>Đăng ký mua hàng</span>
+                                <span className='text-base font-medium text-red-main'>Đăng ký làm đại lý</span>
                               </p>
                             )
                           }
@@ -138,7 +138,7 @@ function StoreDetail() {
                             followStore?.data?.status === EFollowStoreStatus.ACTIVE && (
                               <p className='flex items-center gap-2'>
                                 <Image src={CartHeartIcon} />
-                                <span className='text-base font-medium'>Đã đăng ký mua hàng</span>
+                                <span className='text-base font-medium'>Đã đăng ký làm đại lý</span>
                               </p>
                             )
                           }
