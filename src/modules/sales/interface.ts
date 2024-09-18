@@ -24,6 +24,7 @@ export interface IBatch {
 }
 
 export interface IProductUnit {
+  marketPrice: any;
   id: number;
   unitName: string;
   exchangeValue: number;

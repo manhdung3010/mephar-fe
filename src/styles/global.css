@@ -1,6 +1,7 @@
 @tailwind base;
 
 @import url(./customModal.css);
+@import url(./textEditor.css);
 
 @font-face {
   font-family: "SF Pro Display";

@@ -33,6 +33,7 @@ import { CreateDiscountModal } from "./CreateDiscountModal";
 import { OrderSuccessModal } from "./OrderSuccessModal";
 import type { ISaleProductLocal } from "./interface";
 import { RightContentStyled } from "./styled";
+import { checkTypeOrder } from "./checkTypeOrder";
 
 export function RightContentReturn({
   useForm,
@@ -103,7 +104,7 @@ export function RightContentReturn({
     //caculate total price
     orderObject[orderActive]?.forEach((product: any) => {
       const unit = product.productUnit;
-      price += Number(unit?.price ?? 0) * product.quantity;
+      price += checkTypeOrder(orderDetail?.order?.code) === 1 ? unit?.marketPrice * product?.quantity : Number(unit?.price ?? 0) * product.quantity;
     });
 
     return price;
@@ -114,7 +115,7 @@ export function RightContentReturn({
     //caculate total return price
     orderObject[orderActive]?.forEach((product: any) => {
       const unit = product.productUnit;
-      price += Number(unit?.returnPrice ?? 0) * product.quantity;
+      price += checkTypeOrder(orderDetail?.order?.code) === 1 ? unit?.marketPrice * product?.quantity : Number(unit?.returnPrice ?? 0) * product.quantity;
     });
 
     return price;
@@ -126,7 +127,7 @@ export function RightContentReturn({
     //caculate total return price
     orderObject[orderActive]?.forEach((product: any) => {
       const unit = product.productUnit;
-      price += Number(unit?.returnPrice ?? 0) * product.quantity;
+      price += checkTypeOrder(orderDetail?.order?.code) === 1 ? unit?.marketPrice * product?.quantity : Number(unit?.returnPrice ?? 0) * product.quantity;
     });
 
     price =
@@ -194,8 +195,6 @@ export function RightContentReturn({
 
     return 0;
   }, [customerMustPay, getValuesReturn("cashOfCustomer")]);
-
-  console.log("products", getValuesReturn("products"));
 
   const { mutate: mutateCreateOrder, isLoading: isLoadingCreateOrder } =
     useMutation(
@@ -405,8 +404,8 @@ export function RightContentReturn({
                   {getValuesReturn("paymentType") === EPaymentMethod.CASH
                     ? "Tiền mặt"
                     : getValuesReturn("paymentType") === EPaymentMethod.BANKING
-                    ? "Chuyển khoản"
-                    : "Khách nợ"}
+                      ? "Chuyển khoản"
+                      : "Khách nợ"}
                 </div>
               </div>
 
@@ -493,7 +492,7 @@ export function RightContentReturn({
               productId: product.productId,
               productUnitId: product.productUnitId,
               quantity: product.quantity,
-              price: product.productUnit.returnPrice,
+              price: checkTypeOrder(orderDetail?.order?.code) === 1 ? product?.productUnit?.marketPrice : product.productUnit.returnPrice,
               batches: product.batches
                 .filter((batch) => batch.isSelected)
                 .map((batch: any) => ({

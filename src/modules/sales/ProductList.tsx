@@ -32,6 +32,7 @@ import {
   getProductDiscountList,
 } from "@/api/discount.service";
 import { useQuery } from "@tanstack/react-query";
+import { checkTypeOrder } from "./checkTypeOrder";
 
 export function ProductList({
   useForm,
@@ -78,8 +79,6 @@ export function ProductList({
     ["DISCOUNT_CONFIG"],
     () => getDiscountConfig()
   );
-
-  console.log('discountObject', discountObject)
 
   useEffect(() => {
     if (orderObject[orderActive]) {
@@ -258,8 +257,6 @@ export function ProductList({
               // };
 
               // setDiscountObject(newDiscountObject);
-              console.log('discountCode', discountCode)
-
             }}
             alt=""
           />
@@ -429,8 +426,8 @@ export function ProductList({
           value={isNaN(quantity) ? 0 : quantity}
           type="number"
           disabled={
-            (isSaleReturn && record?.batches?.length > 0) ||
-              (record?.isDiscount && !record?.buyNumberType)
+            // (isSaleReturn && record?.batches?.length > 0) ||
+            (record?.isDiscount && !record?.buyNumberType)
               ? true
               : false
           }
@@ -549,7 +546,7 @@ export function ProductList({
               className="!h-6 !w-[80px] text-center"
               hasMinus={false}
               hasPlus={false}
-              value={productUnit.returnPrice}
+              value={checkTypeOrder(orderDetail?.order?.code) === 1 ? productUnit?.marketPrice : productUnit.returnPrice}
               type="number"
               onChange={(value) => {
                 const orderObjectClone = cloneDeep(orderObject);
@@ -562,7 +559,9 @@ export function ProductList({
                       ...product,
                       productUnit: {
                         ...product.productUnit,
-                        returnPrice: value,
+                        ...(checkTypeOrder(orderDetail?.order?.code) === 1
+                          ? { marketPrice: value }
+                          : { returnPrice: value }),
                       },
                     };
                   }
@@ -583,7 +582,7 @@ export function ProductList({
       key: "price",
       render: (_, { productUnit, buyNumberType }) => (
         <span>
-          {formatMoney(productUnit.price)}
+          {formatMoney(checkTypeOrder(orderDetail?.order?.code) === 1 ? productUnit?.marketPrice : productUnit.price)}
           {productUnit?.oldPrice && buyNumberType === 1 && (
             <span className="text-[#828487] line-through ml-2">
               {"("}Giá cũ: {formatMoney(productUnit.oldPrice)}
@@ -629,7 +628,7 @@ export function ProductList({
         }
       ) =>
         orderDetail ? (
-          formatMoney(Number(productUnit.returnPrice) * quantity)
+          formatMoney(checkTypeOrder(orderDetail?.order?.code) === 1 ? productUnit?.marketPrice * quantity : Number(productUnit.returnPrice) * quantity)
         ) : isDiscount && !buyNumberType ? (
           <div className="flex flex-col">
             {discountType === "percent"
@@ -690,8 +689,6 @@ export function ProductList({
     );
     setOrderObject(orderObjectClone);
   };
-
-
   return (
     <ProductTableStyled className="p-4">
       <CustomTable

@@ -85,7 +85,7 @@ const GroupAgencyModal = ({
           <CustomButton
             outline={true}
             className="!h-11 w-full"
-            onClick={onCancel}
+            onClick={onClose}
           >
             Bỏ qua
           </CustomButton>
@@ -94,8 +94,7 @@ const GroupAgencyModal = ({
             className="!h-11 w-full"
             onClick={() => {
               if (!agencyId) {
-                message.error('Vui lòng chọn nhóm đại lý');
-                return
+                onCancel();
               }
               onSuccess && onSuccess({ agencyId: agencyId || '' });
             }}

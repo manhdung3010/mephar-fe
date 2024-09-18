@@ -22,7 +22,7 @@ import {
   getEnumKeyByValue,
 } from "@/enums";
 import { formatMoney, getImage, hasPermission } from "@/helpers";
-
+import parse from 'html-react-parser';
 import type { IProduct } from "../types";
 import DeleteProductModal from "./DeleteProduct";
 import PrintBarcodeModal from "./PrintBarcodeModal";
@@ -252,7 +252,7 @@ const Info = ({
             <div className="text-gray-main">Mô tả:</div>
             <div className="text-black-main">
               <div className={showFullDescription ? "" : "line-clamp-5"}>
-                {record?.description}
+                {parse(record?.description)}
               </div>
               {record?.description?.length > 240 && (
                 <button onClick={toggleDescription} className="text-blue-500">

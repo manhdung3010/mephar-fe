@@ -217,7 +217,7 @@ const ProductDetail = () => {
           <div className='col-span-9 '>
             <div className='bg-white rounded-2xl py-6 px-7'>
               <h5 className='bg-[#FAFAFA] text-xl font-semibold p-5 rounded-lg uppercase'>Thông tin sản phẩm</h5>
-              <div className='mt-6'>
+              <div className='mt-6 custom-text-editor'>
                 <div className={isShowDetail ? '' : 'line-clamp-5'}>
                   {parse(String(configProduct?.data?.item?.description))}
                 </div>

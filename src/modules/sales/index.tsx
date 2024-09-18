@@ -219,6 +219,7 @@ const Index = () => {
                   ...product.productUnit,
                   code: product.product?.code,
                   returnPrice: product.productUnit.price,
+                  marketPrice: product?.price / product?.quantity,
                 },
                 quantity: product.quantity,
                 productUnitId: product.productUnit.id,
@@ -309,8 +310,6 @@ const Index = () => {
                   discountValue = productUnit?.price;
                 }
               }
-
-              console.log('productUnit', productUnit)
 
               if (productUnit && !orderObject[orderActive]?.find((product) => product.productUnitId === l?.id)) {
                 onSelectedProduct(
@@ -671,9 +670,6 @@ const Index = () => {
       }).then((res) => {
         if (res?.data) {
           itemDiscountProduct = res?.data?.data?.items;
-
-          console.log('product', product)
-
           const productLocal: any = {
             ...product,
             inventory: product.quantity,
