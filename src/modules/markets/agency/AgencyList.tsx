@@ -170,6 +170,7 @@ function AgencyList({ data, formFilter, setFormFilter, isLoading }) {
           }
           mutateUpdateStoreStatus(newPayload)
         }}
+        onClose={() => setOpenGroupModal(false)}
         content={''}
       />
     </div>

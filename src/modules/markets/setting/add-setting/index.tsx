@@ -130,9 +130,8 @@ export function AddMarketSetting() {
       setValue('marketType', rest.marketType, { shouldValidate: true });
       setValue('thumbnail', rest?.imageCenter?.id, { shouldValidate: true });
       setValue('images', rest.images?.map((item) => item.id), { shouldValidate: true });
-      setProductSelected(productDetail?.data?.item);
       setValue('isDefaultPrice', rest.isDefaultPrice, { shouldValidate: true });
-
+      setProductSelected(productDetail?.data?.item);
       setListAgencySelected(rest.agencys?.map((item) => {
         return {
           ...item,
@@ -216,7 +215,12 @@ export function AddMarketSetting() {
     setValue('productId', parseProduct.productId, { shouldValidate: true });
     setValue('productUnitId', parseProduct.productUnit?.id, { shouldValidate: true });
     setValue('price', parseProduct?.price, { shouldValidate: true })
-    setValue('thumbnail', parseProduct?.product?.image?.id, { shouldValidate: true });
+    if (productDetail?.data?.item?.imageCenter?.id) {
+      setValue('thumbnail', productDetail?.data?.item?.imageCenter?.id, { shouldValidate: true });
+    }
+    else {
+      setValue('thumbnail', parseProduct?.product?.image?.id, { shouldValidate: true });
+    }
     setValue('description', parseProduct?.product?.description, { shouldValidate: true });
     setFormFilter((pre) => ({ ...pre, keyword: "" }));
     setImageCenterPath(parseProduct?.product?.image?.path);
@@ -239,7 +243,7 @@ export function AddMarketSetting() {
       title: "Nhóm đại lý/Đại lý",
       dataIndex: "groupProduct",
       key: "groupProduct",
-      render: (_, record) => record?.isGroup ? record?.name : `${record?.agency?.store?.name} - ${record?.agency?.store?.phone}`,
+      render: (_, record) => record?.isGroup ? (record?.name || record?.groupAgency?.name) : record?.agency?.store ? `${record?.agency?.store?.name} - ${record?.agency?.store?.phone}` : `${record?.agency?.agency?.store?.name} - ${record?.agency?.agency?.name}`,
     },
     {
       title: "Giá bán",
@@ -497,8 +501,8 @@ export function AddMarketSetting() {
                     }
                   });
                   setListBatchSelected(newBatch);
+                  setValue('batches', newBatch?.map((item) => ({ batchId: item?.id, quantity: item?.quantity })), { shouldValidate: true });
                   setValue('quantity', value, { shouldValidate: true });
-
                 }}
                 value={getValues('quantity')}
               />

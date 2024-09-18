@@ -115,8 +115,8 @@ export function getMarketOrder(params) {
 export function getMarketOrderDetail(id: string, branchId: string) {
   return axiosClient.get(`market/sell/market-order/${id}?branchId=${branchId}`);
 }
-export function updateSeri(payload) {
-  return axiosClient.patch(`market/sell/seri`, payload);
+export function updateSeri(payload, branchId: string) {
+  return axiosClient.patch(`market/sell/seri?branchId=${branchId}`, payload);
 }
 export function updateMarketOrder(id: string, payload) {
   return axiosClient.patch(

@@ -234,10 +234,13 @@ function StoreDetail() {
         </div>
       </div>
       <div className='fluid-container'>
-        <p className='mt-6 text-[#555770] font-medium'>
-          Hiển thị {(formFilter.page - 1) * formFilter.limit + 1} - {Math.min(formFilter.page * formFilter.limit, configProduct?.data?.totalItem)} trong tổng số {formatNumber(storeDetail?.data?.isAgency ? configProductPrivate?.data?.totalItem : configProduct?.data?.totalItem)} sản phẩm
-        </p>
-
+        {
+          (!isLoading || !isLoadingConfigProductPrivate) && (
+            <p className='mt-6 text-[#555770] font-medium'>
+              Hiển thị {(formFilter.page - 1) * formFilter.limit + 1} - {Math.min(formFilter.page * formFilter.limit, storeDetail?.data?.isAgency ? configProductPrivate?.data?.totalItem : configProduct?.data?.totalItem)} trong tổng số {formatNumber(storeDetail?.data?.isAgency ? configProductPrivate?.data?.totalItem : configProduct?.data?.totalItem)} sản phẩm
+            </p>
+          )
+        }
         <div className='mt-8'>
           <h2 className='text-5xl font-semibold text-[#242424] text-center mb-12'>{menu[select]}</h2>
           {

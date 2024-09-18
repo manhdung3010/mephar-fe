@@ -14,16 +14,19 @@ import PlusCircleIcon from '@/assets/plus-circle.svg';
 import { getAgencyGroup } from '@/api/market.service';
 import { useState } from 'react';
 import AddGroupAgencyModal from './AddGroupAgencyModal';
+import { message } from 'antd';
 
 const GroupAgencyModal = ({
   isOpen,
   onCancel,
   onSuccess,
+  onClose,
   content,
   isLoading,
 }: {
   isOpen: boolean;
   onCancel: () => void;
+  onClose: () => void;
   onSuccess?: any;
   content: string;
   isLoading?: boolean;
@@ -44,7 +47,7 @@ const GroupAgencyModal = ({
     <CustomModal
       closeIcon={<Image src={CloseCircleGrayIcon} alt="" />}
       isOpen={isOpen}
-      onCancel={onCancel}
+      onCancel={onClose}
       onSubmit={onCancel}
       customFooter
       width={600}
@@ -90,6 +93,10 @@ const GroupAgencyModal = ({
             disabled={isLoading}
             className="!h-11 w-full"
             onClick={() => {
+              if (!agencyId) {
+                message.error('Vui lòng chọn nhóm đại lý');
+                return
+              }
               onSuccess && onSuccess({ agencyId: agencyId || '' });
             }}
           >

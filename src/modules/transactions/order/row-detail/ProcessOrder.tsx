@@ -116,7 +116,7 @@ export function ProcessOrder() {
             }
           })
         }
-        return updateSeri(payload)
+        return updateSeri(payload, branchId)
       },
       {
         onSuccess: async () => {
