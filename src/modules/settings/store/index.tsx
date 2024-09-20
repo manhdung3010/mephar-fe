@@ -68,7 +68,7 @@ export function StoreInfo() {
   return (
     <div className="py-6">
       <div className="mb-6 flex items-center justify-between bg-white p-5">
-        <div className="text-2xl font-medium uppercase">ThÔNG TIN CỬA HÀNG</div>
+        <div className="text-2xl font-medium uppercase">THÔNG TIN CỬA HÀNG</div>
         <div className="flex gap-4">
           <CustomButton
             type="danger"

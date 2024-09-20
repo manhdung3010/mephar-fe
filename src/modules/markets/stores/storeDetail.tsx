@@ -195,6 +195,8 @@ function StoreDetail() {
                       if (index === 1) {
                         setFormFilter({
                           ...formFilter,
+                          page: 1,
+                          limit: 16,
                           sortBy: 'quantitySold'
                         })
                       }
@@ -203,12 +205,16 @@ function StoreDetail() {
                         setFormFilter({
                           ...formFilter,
                           productType: 1,
+                          page: 1,
+                          limit: 16,
                           sortBy: undefined
                         })
                       }
                       else if (index === 3) {
                         setFormFilter({
                           ...formFilter,
+                          page: 1,
+                          limit: 16,
                           productType: 2,
                           sortBy: undefined
                         })
@@ -216,6 +222,8 @@ function StoreDetail() {
                       else {
                         setFormFilter({
                           ...formFilter,
+                          page: 1,
+                          limit: 16,
                           sortBy: undefined,
                           productType: undefined
                         })

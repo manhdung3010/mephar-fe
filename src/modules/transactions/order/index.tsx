@@ -128,9 +128,9 @@ export function OrderTransaction() {
     },
     {
       title: "Người mua",
-      dataIndex: "branch",
-      key: "branch",
-      render: (data) => data?.store?.name,
+      dataIndex: "fullName",
+      key: "fullName",
+      render: (fullName) => fullName,
     },
     // {
     //   title: "ĐVVC",

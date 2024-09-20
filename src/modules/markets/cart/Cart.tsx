@@ -32,7 +32,8 @@ function Cart() {
   });
   const [marketCart, setMarketCart] = useRecoilState(marketCartState);
   const [paymentProduct, setPaymentProduct] = useRecoilState(paymentProductState);
-  const [storeSelected, setStoreSelected] = useState(null);
+  const [storeSelected, setStoreSelected] = useState<any>([]);
+
   const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
   const [productId, setProductId] = useState(null);
   const [cartTemp, setCartTemp] = useState<any>(null);
@@ -126,25 +127,39 @@ function Cart() {
   }
 
   const totalProductSelected = useMemo(() => {
-    const selectedCart = cartList?.filter((item) => item.branchId === storeSelected && item?.products?.filter((product) => product?.selected))
+    const selectedCart = cartList?.filter((item) => storeSelected.includes(item.branchId) && item?.products?.some((product) => product?.selected));
     return selectedCart?.reduce((total, cart) => {
-      return total + cart?.products?.filter((product) => product?.selected)?.length
-    }, 0)
-  }, [cartList, storeSelected])
+      return total + cart?.products?.filter((product) => product?.selected)?.length;
+    }, 0);
+  }, [cartList, storeSelected]);
 
   const totalMoney = useMemo(() => {
-    const selectedCart = cartList?.filter((item) => item.branchId === storeSelected && item?.products?.filter((product) => product?.selected))
-    // only caculate selected product
+    const selectedCart = cartList?.filter((item) => storeSelected.includes(item.branchId) && item?.products?.some((product) => product?.selected));
     return selectedCart?.reduce((total, cart) => {
       return total + cart?.products?.reduce((totalProduct, product) => {
-        if (product?.selected) {
-          return totalProduct + caculateMoney(product)
-        } else {
-          return totalProduct
+        return product?.selected ? totalProduct + caculateMoney(product) : totalProduct;
+      }, 0);
+    }, 0);
+  }, [cartList, storeSelected]);
+
+  useEffect(() => {
+    const updatedSelectedStores = cartList.reduce((acc, cartItem) => {
+      const hasSelectedProduct = cartItem.products.some((product) => product.selected);
+
+      if (hasSelectedProduct) {
+        // If the store has selected products, add it to the selected stores
+        if (!storeSelected.includes(cartItem.branchId)) {
+          return [...acc, cartItem.branchId];
         }
-      }, 0)
-    }, 0)
-  }, [cartList, storeSelected])
+        return acc;
+      } else {
+        // If no products selected, ensure the store is not in the selected list
+        return acc.filter(id => id !== cartItem.branchId);
+      }
+    }, storeSelected);
+
+    setStoreSelected(updatedSelectedStores);
+  }, [cartList]);
 
   return (
     <div className='bg-[#fafafc]'>
@@ -187,38 +202,38 @@ function Cart() {
                 <div className=''>
                   <div className='grid grid-cols-12 p-[22px] bg-white rounded font-semibold border-b-[1px] border-[#DDDDDD]'>
                     <div className='col-span-6 flex items-center'>
-                      <Radio
-                        value={cart?.branchId}
-                        checked={storeSelected === cart?.branchId}
+                      <CustomCheckbox
+                        checked={storeSelected.includes(cart?.branchId)}
                         onChange={() => {
-                          setStoreSelected(cart?.branchId)
+                          const updatedSelectedStores = storeSelected.includes(cart?.branchId)
+                            ? storeSelected.filter(id => id !== cart?.branchId)
+                            : [...storeSelected, cart?.branchId];
+
+                          setStoreSelected(updatedSelectedStores);
 
                           const newCartList = cartList.map((cartItem) => {
-                            if (cartItem?.branchId === cart?.branchId) {
+                            if (updatedSelectedStores.includes(cartItem?.branchId)) {
                               return {
                                 ...cartItem,
-                                products: cartItem?.products.map((product) => {
-                                  return {
-                                    ...product,
-                                    selected: true
-                                  }
-                                })
-                              }
+                                products: cartItem?.products.map((product) => ({
+                                  ...product,
+                                  selected: true
+                                }))
+                              };
                             } else {
                               return {
                                 ...cartItem,
-                                products: cartItem?.products.map((product) => {
-                                  return {
-                                    ...product,
-                                    selected: false
-                                  }
-                                })
-                              }
+                                products: cartItem?.products.map((product) => ({
+                                  ...product,
+                                  selected: false
+                                }))
+                              };
                             }
-                          })
-                          setCartList(newCartList)
+                          });
+                          setCartList(newCartList);
                         }}
                       />
+
                       <div className='ml-7 mr-2 grid place-items-center'>
                         <Image src={StoreIcon} />
                       </div>
@@ -230,7 +245,7 @@ function Cart() {
                       <div className={`grid grid-cols-12 p-[22px] bg-white rounded ${index === cart?.products?.length - 1 ? 'border-0' : 'border-b-[1px] border-[#DDDDDD]'}`} key={product?.id}>
                         <div className='col-span-6 flex items-center'>
                           <CustomCheckbox
-                            disabled={storeSelected !== cart?.branchId}
+                            // disabled={!storeSelected.includes(cart?.branchId)}
                             checked={product?.selected}
                             onChange={(e) => {
                               const newCartList = cartList.map((cartItem) => {
@@ -251,10 +266,21 @@ function Cart() {
                                 } else {
                                   return cartItem
                                 }
-                              })
-                              setCartList(newCartList)
+                              });
+
+                              setCartList(newCartList);
+
+                              // Check if all products in the store are unchecked
+                              const allProductsUnchecked = newCartList
+                                .find(cartItem => cartItem?.branchId === cart?.branchId)?.products
+                                .every(product => !product?.selected);
+
+                              if (allProductsUnchecked) {
+                                setStoreSelected(storeSelected.filter(id => id !== cart?.branchId));
+                              }
                             }}
                           />
+
                           <div className='ml-12 mr-5 w-20 h-20 flex-shrink-0 rounded overflow-hidden border-[#E4E4EB] border-[1px] grid place-items-center'>
                             <Image src={getImage(product?.marketProduct?.imageCenter?.path)} className='object-cover' width={80} height={80} />
                           </div>
@@ -340,20 +366,26 @@ function Cart() {
                 <div className='flex justify-end mt-5'>
                   <CustomButton
                     className='!w-[300px] !h-[46px]'
-                    disabled={!storeSelected}
+                    disabled={storeSelected.length === 0 || totalProductSelected === 0} // Disable if no stores or products are selected
                     onClick={() => {
-                      const paymentProduct = cartList?.filter((cart) => cart?.branchId === storeSelected)?.map((cart) => {
-                        return {
-                          branchId: cart?.branchId,
-                          products: cart?.products?.filter((product) => product?.selected)
-                        }
-                      })?.flat()
-                      if (paymentProduct?.length <= 0) {
-                        message.error('Vui lòng chọn sản phẩm')
-                        return
+                      // Filter the cartList to include only selected stores and their selected products
+                      const paymentProduct = cartList
+                        .filter((cart) => storeSelected.includes(cart.branchId))
+                        .map((cart) => ({
+                          branchId: cart.branchId,
+                          products: cart.products.filter((product) => product.selected)
+                        }))
+                        .filter(cart => cart.products.length > 0); // Ensure each store has at least one product
+
+                      if (paymentProduct.length <= 0) {
+                        message.error('Vui lòng chọn ít nhất một sản phẩm để mua.');
+                        return;
                       }
-                      setPaymentProduct(paymentProduct)
-                      router.push('/markets/payment')
+
+                      console.log('paymentProduct', paymentProduct);
+
+                      setPaymentProduct(paymentProduct);
+                      router.push('/markets/payment');
                     }}
                   >
                     Mua hàng

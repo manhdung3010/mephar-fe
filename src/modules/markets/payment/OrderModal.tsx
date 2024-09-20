@@ -14,6 +14,7 @@ function OrderModal({ isOpen, onCancel, orderInfo, totalMoney }) {
       onCancel={onCancel}
       width={432}
       closeIcon={false}
+      maskClosable={false}
       customFooter={true}
     >
       <div className='py-4'>

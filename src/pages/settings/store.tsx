@@ -6,7 +6,7 @@ const Index = () => {
   return (
     <Layout
       meta={
-        <Meta title="Pharm - Web dashboard" description="ThÔNG TIN CỬA HÀNG" />
+        <Meta title="Pharm - Web dashboard" description="THÔNG TIN CỬA HÀNG" />
       }
       title="ThÔNG TIN CỬA HÀNG"
     >
