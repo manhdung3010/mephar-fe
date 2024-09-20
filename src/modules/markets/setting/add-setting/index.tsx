@@ -192,6 +192,7 @@ export function AddMarketSetting() {
       message.error('Vui lòng chọn lô sản phẩm');
       return;
     }
+
     // check quantity with batch selected
     if (listBatchSelected?.length > 0) {
       const totalQuantity = listBatchSelected.reduce((total, item) => total + item.newInventory, 0);

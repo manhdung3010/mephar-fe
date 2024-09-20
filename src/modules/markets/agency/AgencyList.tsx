@@ -91,7 +91,7 @@ function AgencyList({ data, formFilter, setFormFilter, isLoading }) {
           <CustomButton outline onClick={() => {
             setOpenConfirmModal(true)
             setDeleteId(record?.id)
-          }}>Hủy quyền mua</CustomButton>
+          }}>Hủy đại lý</CustomButton>
         </div>
       ),
     },

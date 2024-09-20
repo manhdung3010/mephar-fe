@@ -138,7 +138,7 @@ function StoreDetail() {
                             followStore?.data?.status === EFollowStoreStatus.ACTIVE && (
                               <p className='flex items-center gap-2'>
                                 <Image src={CartHeartIcon} />
-                                <span className='text-base font-medium'>Đã đăng ký làm đại lý</span>
+                                <span className='text-base font-medium'>Đã là đại lý</span>
                               </p>
                             )
                           }

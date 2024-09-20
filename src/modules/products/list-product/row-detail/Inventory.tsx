@@ -48,15 +48,15 @@ const Inventory = ({ productId, branchId, record }: { productId: number, branchI
     },
     {
       title: 'Khách đặt hàng',
-      dataIndex: 'order',
-      key: 'order',
+      dataIndex: 'customerOrders',
+      key: 'customerOrders',
       render: (order) => formatNumber(order),
     },
     {
       title: 'Dự kiến hết hàng',
-      dataIndex: 'planSoldOff',
-      key: 'planSoldOff',
-      render: (order) => formatNumber(order),
+      dataIndex: 'stockout',
+      key: 'stockout',
+      render: (stockout) => formatNumber(stockout) + ' ngày',
     },
     // {
     //   title: 'Trạng thái',
