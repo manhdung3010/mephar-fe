@@ -34,8 +34,8 @@ function PaymentHistory({ id }) {
     },
     {
       title: 'Số tiền',
-      dataIndex: 'totalAmount',
-      key: 'totalAmount',
+      dataIndex: 'amount',
+      key: 'amount',
       render: (value, record) => formatMoney(value),
     },
     {

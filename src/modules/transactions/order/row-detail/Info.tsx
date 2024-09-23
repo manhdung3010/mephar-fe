@@ -315,7 +315,7 @@ export function Info({ record }: { record: any }) {
                 )
               }
               {
-                (record?.isPayment === false) && record?.status !== EOrderMarketStatus.CLOSED && record?.status !== EOrderMarketStatus.CANCEL && (
+                (record?.isPayment === false) && record?.status !== EOrderMarketStatus.CLOSED && record?.status !== EOrderMarketStatus.CANCEL && record?.status !== EOrderMarketStatus.PENDING && (
                   <CustomButton
                     type="primary"
                     outline={true}

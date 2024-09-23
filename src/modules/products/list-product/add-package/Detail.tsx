@@ -1,6 +1,7 @@
 import { CustomInput, CustomTextarea } from '@/components/CustomInput';
 
 import Label from '../../../../components/CustomLabel';
+import CustomEditor from '@/components/CustomEditor';
 
 const Detail = ({ useForm }: any) => {
   const { getValues, setValue } = useForm;
@@ -42,7 +43,7 @@ const Detail = ({ useForm }: any) => {
         </div>
         <div>
           <Label label="Mô tả" required={false} />
-          <CustomTextarea
+          {/* <CustomTextarea
             placeholder="Nhập mô tả"
             autoSize={{ minRows: 10 }}
             onChange={(e) =>
@@ -51,7 +52,10 @@ const Detail = ({ useForm }: any) => {
               })
             }
             value={getValues('description')}
-          />
+          /> */}
+          <CustomEditor value={getValues('description')} onChange={(value) => {
+            setValue('description', value, { shouldValidate: true })
+          }} />
         </div>
         <div>
           <Label label="Mẫu ghi chú (hóa đơn, đặt hàng)" required={false} />

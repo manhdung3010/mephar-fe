@@ -57,31 +57,56 @@ function Cart() {
         },
       }
     );
-  const { mutate: mutateUpdateCart, isLoading: isUpdateCart } =
-    useMutation(
-      (value: {
-        id: string;
-        quantity: number;
-      }) => {
-        return updateMarketCart(String(value?.id), Number(value?.quantity))
+  const { mutate: mutateUpdateCart, isLoading: isUpdateCart } = useMutation(
+    (value: { id: string; quantity: number; }) => {
+      return updateMarketCart(String(value?.id), Number(value?.quantity));
+    },
+    {
+      onSuccess: (res) => {
+        // Cập nhật số lượng sản phẩm mà không làm mất trạng thái "selected"
+        const updatedCartList = cartList.map((cartItem) => {
+          return {
+            ...cartItem,
+            products: cartItem.products.map((product) => {
+              if (product.id === res.data.id) {
+                return {
+                  ...product,
+                  quantity: res.data.quantity, // Cập nhật số lượng từ kết quả API
+                  // Giữ nguyên trạng thái selected
+                  selected: product.selected
+                };
+              }
+              return product;
+            }),
+          };
+        });
+        setCartList(updatedCartList);  // Cập nhật lại giỏ hàng với thông tin mới
       },
-      {
-        onSuccess: async (res) => {
-          setCartTemp(new Date().getTime())
-        },
-        onError: (err: any) => {
-          message.error(err?.message);
-        },
-      }
-    );
+      onError: (err: any) => {
+        message.error(err?.message);
+      },
+    }
+  );
 
   const { data: marketCartRes, isLoading: isLoadingMarketCart } = useQuery(
     ['MARKET_CART', cartTemp],
     () => getMarketCart({ branchId }),
     {
       onSuccess: (res) => {
-        setMarketCart(res?.data?.item)
-      }
+        const updatedCartList = res?.data?.item.map((cart) => {
+          return {
+            ...cart,
+            products: cart.products.map((product) => {
+              return {
+                ...product,
+                // Nếu sản phẩm đã được chọn trước đó, giữ trạng thái selected
+                selected: cartList.find(c => c.branchId === cart.branchId)?.products.find(p => p.id === product.id)?.selected || false
+              };
+            }),
+          };
+        });
+        setCartList(updatedCartList);
+      },
     }
   );
 
@@ -381,8 +406,6 @@ function Cart() {
                         message.error('Vui lòng chọn ít nhất một sản phẩm để mua.');
                         return;
                       }
-
-                      console.log('paymentProduct', paymentProduct);
 
                       setPaymentProduct(paymentProduct);
                       router.push('/markets/payment');

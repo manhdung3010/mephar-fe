@@ -195,7 +195,7 @@ export function RightContent({ getValues, setValue, errors, handleSubmit, reset,
                           </div>
                           <div>
                             <Image src={EditIcon} className='cursor-pointer' onClick={() => {
-                              setSelectedAddress(item);
+                              setSelectedAddress(item?.id);
                               setOpenAddAddress(true);
                             }} />
                           </div>
