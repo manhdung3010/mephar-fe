@@ -18,7 +18,6 @@ function AddressModal({ isOpen, onCancel, onSave }) {
   const [formFilter, setFormFilter] = React.useState({
     page: 1,
     limit: 10,
-    branchId
   });
   const [selectedAddress, setSelectedAddress] = React.useState<any>(null);
 

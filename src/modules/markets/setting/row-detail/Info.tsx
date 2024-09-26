@@ -41,7 +41,7 @@ export function Info({ record }: { record: any }) {
   const { mutate: mutateUpdaetConfigStatus, isLoading: isLoadingUpdateStatus } =
     useMutation(
       () => {
-        return updateConfigStatus(record?.id, record?.status === 'active' ? 'inactive' : 'active', branchId);
+        return updateConfigStatus(record?.id, record?.status === 'active' ? 'inactive' : 'active');
       },
       {
         onSuccess: async () => {

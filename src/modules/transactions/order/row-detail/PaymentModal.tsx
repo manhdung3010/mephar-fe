@@ -31,7 +31,6 @@ function PaymentModal({
   } = useMutation(() => {
     const payload = {
       paid: paymentValue,
-      branchId
     };
     return createPaymentOrder(id, payload);
   }, {

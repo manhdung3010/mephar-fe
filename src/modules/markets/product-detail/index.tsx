@@ -49,7 +49,7 @@ const ProductDetail = () => {
 
   const { data: configProduct, isLoading, isError } = useQuery(
     ['MARKET_PRODUCT_DETAIL', JSON.stringify(id), branchId],
-    () => getSaleProductDetail(String(id), branchId),
+    () => getSaleProductDetail(String(id)),
     {
       enabled: !!id && !!branchId,
     }
@@ -75,7 +75,7 @@ const ProductDetail = () => {
 
   const { data: configProductList, isLoading: isLoadingProductList } = useQuery(
     ['CONFIG_PRODUCT', JSON.stringify(formFilter), branchId],
-    () => getConfigProduct({ ...formFilter, branchId }),
+    () => getConfigProduct({ ...formFilter }),
   );
 
   const { mutate: mutateCreateCart, isLoading: isLoadingAddCart } =
@@ -83,7 +83,6 @@ const ProductDetail = () => {
       (marketProductId) => {
         const payload = {
           marketProductId,
-          branchId,
           quantity: productQuantity,
         }
         return createMarketCart(payload)
@@ -217,11 +216,15 @@ const ProductDetail = () => {
           <div className='col-span-9 '>
             <div className='bg-white rounded-2xl py-6 px-7'>
               <h5 className='bg-[#FAFAFA] text-xl font-semibold p-5 rounded-lg uppercase'>Thông tin sản phẩm</h5>
-              <div className='mt-6 custom-text-editor'>
-                <div className={isShowDetail ? '' : 'line-clamp-5'}>
-                  {parse(String(configProduct?.data?.item?.description))}
-                </div>
-              </div>
+              {
+                configProduct?.data?.item?.description ? <div className='mt-6 custom-text-editor'>
+                  <div className={isShowDetail ? '' : 'line-clamp-5'}>
+                    {parse(String(configProduct?.data?.item?.description))}
+                  </div>
+                </div> : <p className='text-gray-500 mt-5'>
+                  Không có mô tả sản phẩm
+                </p>
+              }
               {
                 configProduct?.data?.item?.description?.length > 200 && (
                   <div className='flex justify-center mt-3'>

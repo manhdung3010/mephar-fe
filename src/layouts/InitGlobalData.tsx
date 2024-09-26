@@ -12,6 +12,7 @@ import {
   orderActiveState,
   orderState,
   profileState,
+  storeState,
 } from '@/recoil/state';
 
 const excludePath = ['/auth/sign-in'];
@@ -20,6 +21,7 @@ export function InitGlobalData() {
   const router = useRouter();
 
   const [, setProfileState] = useRecoilState(profileState);
+  const [, setStoreState] = useRecoilState(storeState);
   const [branch, setBranch] = useRecoilState(branchState);
   const [isAgency, setIsAgency] = useRecoilState(agencyState);
   const orderObject = useRecoilValue(orderState);
@@ -45,6 +47,7 @@ export function InitGlobalData() {
   useEffect(() => {
     if (profile) {
       setProfileState(profile.data);
+      setStoreState(profile.data?.store?.id);
     }
   }, [profile]);
 

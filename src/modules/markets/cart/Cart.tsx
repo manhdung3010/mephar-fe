@@ -40,7 +40,7 @@ function Cart() {
   const [cartList, setCartList] = useState<any>([]);
   const { data: configProduct, isLoading } = useQuery(
     ['CONFIG_PRODUCT', JSON.stringify(formFilter), branchId],
-    () => getConfigProduct({ ...formFilter, branchId }),
+    () => getConfigProduct({ ...formFilter }),
   );
 
   const { mutate: mutateDeleteCart, isLoading: isLoadingDelete } =
@@ -90,7 +90,7 @@ function Cart() {
 
   const { data: marketCartRes, isLoading: isLoadingMarketCart } = useQuery(
     ['MARKET_CART', cartTemp],
-    () => getMarketCart({ branchId }),
+    () => getMarketCart({}),
     {
       onSuccess: (res) => {
         const updatedCartList = res?.data?.item.map((cart) => {
@@ -262,7 +262,7 @@ function Cart() {
                       <div className='ml-7 mr-2 grid place-items-center'>
                         <Image src={StoreIcon} />
                       </div>
-                      <span>{cart?.products[0]?.marketProduct?.store?.name} - {cart?.products[0]?.marketProduct?.branch?.name}</span>
+                      <span>{cart?.products[0]?.marketProduct?.store?.name}</span>
                     </div>
                   </div>
                   {

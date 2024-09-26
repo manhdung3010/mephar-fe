@@ -22,8 +22,8 @@ function CommonPage() {
   });
   const [tempKeyword, setTempKeyword] = useState("");
   const { data: stores, isLoading } = useQuery(
-    ['MARKET_STORE', JSON.stringify(formFilter), branchId],
-    () => getMarketStore({ ...formFilter, branchId }),
+    ['MARKET_STORE', JSON.stringify(formFilter)],
+    () => getMarketStore({ ...formFilter }),
   );
 
   const onSearch = useCallback(

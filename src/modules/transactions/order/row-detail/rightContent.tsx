@@ -44,7 +44,6 @@ export function RightContent({ getValues, setValue, errors, handleSubmit, reset,
   const [formFilter, setFormFilter] = useState({
     page: 1,
     limit: 10,
-    branchId: null
   });
 
   const { data: address, isLoading } = useQuery(
@@ -71,7 +70,6 @@ export function RightContent({ getValues, setValue, errors, handleSubmit, reset,
     if (detail) {
       setFormFilter({
         ...formFilter,
-        branchId: detail?.branch?.id,
       });
       setSelectedAddress(detail?.addressId);
     }
@@ -81,7 +79,6 @@ export function RightContent({ getValues, setValue, errors, handleSubmit, reset,
     useMutation(
       () => {
         const payload = {
-          branchId: branchId,
           addressId: selectedAddress,
           listProduct: getValues('listProduct')?.map((item) => ({
             marketProductId: item?.marketProductId,

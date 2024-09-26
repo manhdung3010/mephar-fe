@@ -20,7 +20,6 @@ function BuyOrder() {
     page: 1,
     limit: 20,
     type: 'buy',
-    branchId
   });
 
   const { data: buyOrder, isLoading } = useQuery(
@@ -52,9 +51,9 @@ function BuyOrder() {
     },
     {
       title: 'Người bán',
-      dataIndex: 'toBranch',
-      key: 'toBranch',
-      render: (data) => <span>{data?.store?.name + " - " + data?.name}</span>,
+      dataIndex: 'toStore',
+      key: 'toStore',
+      render: (data) => <span>{data?.name + " - " + data?.phone}</span>,
     },
     {
       title: 'Đơn vị vận chuyển',

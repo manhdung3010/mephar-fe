@@ -44,7 +44,6 @@ function ProductCard({ product }: { product: any }) {
       (marketProductId) => {
         const payload = {
           marketProductId,
-          branchId,
           quantity: 1,
         }
         return createMarketCart(payload)
@@ -61,7 +60,7 @@ function ProductCard({ product }: { product: any }) {
 
   const { data: marketCartRes, isLoading: isLoadingMarketCart } = useQuery(
     ['MARKET_CART', cartStatus],
-    () => getMarketCart({ branchId }),
+    () => getMarketCart({}),
     {
       onSuccess: (res) => {
         setMarketCart(res?.data?.item)

@@ -162,7 +162,7 @@ export function AddMarketSetting() {
           delete payload.batches;
         }
 
-        return id ? updateConfigProduct(id, { ...payload, branchId }) : createConfigProduct({ ...payload, branchId });
+        return id ? updateConfigProduct(id, { ...payload }) : createConfigProduct({ ...payload });
       },
       {
         onSuccess: async () => {

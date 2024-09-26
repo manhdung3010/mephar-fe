@@ -36,7 +36,6 @@ function StoreDetail() {
     "createdAt[end]": undefined,
     isConfig: true,
     type: 'common',
-    branchId
   });
   const { data: storeDetail, isLoading: isLoadingStoreDetail } = useQuery(
     ['MARKET_STORE_DETAIL', id],
@@ -47,21 +46,21 @@ function StoreDetail() {
   );
   const { data: configProduct, isLoading } = useQuery(
     ['CONFIG_PRODUCT', JSON.stringify(formFilter), id],
-    () => getConfigProduct({ ...formFilter, otherBranchId: id }),
+    () => getConfigProduct({ ...formFilter, otherStoreId: id }),
     {
       enabled: !!id && !storeDetail?.data?.isAgency
     }
   );
   const { data: configProductPrivate, isLoading: isLoadingConfigProductPrivate } = useQuery(
     ['CONFIG_PRODUCT_PRIVATE', formFilter?.page, formFilter?.limit, formFilter?.sortBy, formFilter?.productType, id],
-    () => getConfigProductPrivate(branchId, String(id), { page: formFilter?.page, limit: formFilter?.limit, sortBy: formFilter?.sortBy, productType: formFilter?.productType }),
+    () => getConfigProductPrivate(String(id), { page: formFilter?.page, limit: formFilter?.limit, sortBy: formFilter?.sortBy, productType: formFilter?.productType }),
     {
       enabled: !!id && storeDetail?.data?.isAgency
     }
   );
   const { data: followStore, isLoading: isLoadingFollowStore } = useQuery(
-    ['FOLLOW_STORE', id, branchId],
-    () => getFollowStore(String(id), branchId),
+    ['FOLLOW_STORE', id],
+    () => getFollowStore(String(id)),
     {
       enabled: !!id
     }
@@ -71,9 +70,7 @@ function StoreDetail() {
     useMutation(
       () => {
         const payload = {
-          listAgency: [id],
-          isFollow: true,
-          branchId
+          agencyId: id,
         }
         return createFollowStore(payload)
       },
@@ -111,8 +108,7 @@ function StoreDetail() {
                     <Image width={100} height={100} objectFit='scale-down' className='w-full h-full object-cover' src={getImage(storeDetail?.data?.logo?.path) || Logo} alt="" />
                   </div>
                   <div className='text-white flex flex-col gap-2'>
-                    <h4 className='text-xl font-semibold line-clamp-1'>{storeDetail?.data?.store?.name}</h4>
-                    <p className='text-gray-300'>{storeDetail?.data?.name}</p>
+                    <h4 className='text-xl font-semibold line-clamp-1'>{storeDetail?.data?.name}</h4>
                     {
                       storeDetail?.data?.isAgency && (
                         <button

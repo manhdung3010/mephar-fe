@@ -38,7 +38,7 @@ export function EditOrder() {
 
   const { data: details } = useQuery<{ data: any }>(
     ["MARKET_ORDER_DETAIL", id, branchId],
-    () => getMarketOrderDetail(String(id), branchId),
+    () => getMarketOrderDetail(String(id)),
     {
       enabled: !!id && !!branchId,
       onSuccess: (data) => {

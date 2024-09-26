@@ -38,7 +38,7 @@ export function ProcessOrder() {
 
   const { data: orderDetail, isLoading } = useQuery(
     ['MAKET_ORDER_ORDER_DETAIL', id],
-    () => getMarketOrderDetail(id as string, branchId as string),
+    () => getMarketOrderDetail(id as string),
     {
       enabled: !!id,
       onSuccess: (res) => {
@@ -116,7 +116,7 @@ export function ProcessOrder() {
             }
           })
         }
-        return updateSeri(payload, branchId)
+        return updateSeri(payload)
       },
       {
         onSuccess: async () => {
@@ -213,7 +213,7 @@ export function ProcessOrder() {
                         return;
                       }
 
-                      const isSeriValid: any = await checkSeriValid(e.target.value?.trim(), { branchId });
+                      const isSeriValid: any = await checkSeriValid(e.target.value?.trim(), {});
                       if (isSeriValid?.data?.isExists) {
                         message.error('Seri đã tồn tại trong hệ thống');
                         return;

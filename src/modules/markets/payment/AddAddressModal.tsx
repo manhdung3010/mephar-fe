@@ -38,9 +38,9 @@ function AddAddressModal({ isOpen, onCancel, addressId, newBranchId }: { isOpen:
     useMutation(
       () => {
         if (addressId) {
-          return updateShipAddress(addressId, branchId, getValues());
+          return updateShipAddress(addressId, getValues());
         }
-        return createShipAddress({ ...getValues(), branchId: newBranchId || branchId });
+        return createShipAddress({ ...getValues() });
       },
       {
         onSuccess: async () => {
@@ -62,7 +62,7 @@ function AddAddressModal({ isOpen, onCancel, addressId, newBranchId }: { isOpen:
 
   const { data: addressDetail, isLoading: isLoadingDetail } = useQuery(
     ['MARKET_PRODUCT_DETAIL', JSON.stringify(addressId)],
-    () => getShipAddressDetail(String(addressId), branchId),
+    () => getShipAddressDetail(String(addressId)),
     {
       enabled: !!addressId,
       onSuccess: (data) => {

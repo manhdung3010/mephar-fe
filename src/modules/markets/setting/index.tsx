@@ -38,7 +38,6 @@ const marketType = {
 export function MarketSetting() {
   const router = useRouter();
   const profile = useRecoilValue(profileState);
-  const branchId = useRecoilValue(branchState);
   const [formFilter, setFormFilter] = useState({
     page: 1,
     limit: 20,
@@ -55,8 +54,8 @@ export function MarketSetting() {
   >({});
 
   const { data: configProduct, isLoading } = useQuery(
-    ['CONFIG_PRODUCT', JSON.stringify(formFilter), branchId],
-    () => getConfigProduct({ ...formFilter, branchId }),
+    ['CONFIG_PRODUCT', JSON.stringify(formFilter)],
+    () => getConfigProduct({ ...formFilter }),
   );
   const columns: ColumnsType<any> = [
     {

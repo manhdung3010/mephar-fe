@@ -29,7 +29,7 @@ function Payment() {
 
   const { data: address } = useQuery(
     ['SHIP_ADDRESS', JSON.stringify({ page: 1, limit: 10, isDefaultAddress: 1, branchId })],
-    () => getShipAddress({ page: 1, limit: 10, isDefaultAddress: 1, branchId }),
+    () => getShipAddress({ page: 1, limit: 10, isDefaultAddress: 1 }),
     {
       onSuccess: (data) => {
         if (data?.data?.items) {
@@ -61,7 +61,6 @@ function Payment() {
     () => {
       const payload = {
         orders: paymentProduct.map((store) => ({
-          branchId: branchId,
           addressId: selectedAddress?.id,
           listProduct: store.products.map((product) => ({
             marketProductId: product?.marketProductId,
@@ -69,7 +68,7 @@ function Payment() {
             price: product?.marketProduct?.discountPrice > 0 ? product?.marketProduct?.discountPrice : product?.price,
           })),
           note: paymentNote,
-          toBranchId: store?.products[0]?.marketProduct?.branchId,
+          toStoreId: store?.products[0]?.marketProduct?.storeId,
         })),
       }
       return createMarketOrder(payload);

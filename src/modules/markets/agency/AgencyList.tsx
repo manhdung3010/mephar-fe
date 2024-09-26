@@ -27,7 +27,7 @@ function AgencyList({ data, formFilter, setFormFilter, isLoading }) {
     useMutation(
       (payload: any) => {
         console.log('payload', payload);
-        return updateStoreStatus(payload?.id, payload?.status, payload?.groupAgencyId ? { groupAgencyId: payload?.groupAgencyId } : null, branchId);
+        return updateStoreStatus(payload?.id, payload?.status, payload?.groupAgencyId ? { groupAgencyId: payload?.groupAgencyId } : null);
       },
       {
         onSuccess: async (data) => {
@@ -51,7 +51,7 @@ function AgencyList({ data, formFilter, setFormFilter, isLoading }) {
       title: "Tên cửa hàng",
       dataIndex: "agency",
       key: "agency",
-      render: (value) => <span>{value?.store?.name + " - " + value?.name}</span>,
+      render: (value) => <span>{value?.name}</span>,
     },
     {
       title: "Số điện thoại",

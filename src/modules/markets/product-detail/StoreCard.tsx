@@ -14,8 +14,7 @@ function StoreCard({ store, branch }: { store: any, branch: any }) {
           <Image className='object-contain w-full h-full' src={getImage(store?.logo?.path) || Logo} width={100} height={100} />
         </div>
         <div className='flex flex-col gap-2'>
-          <h4 className='text-xl font-semibold'>{store?.store?.name}</h4>
-          <p className='text-gray-400'>{branch}</p>
+          <h4 className='text-xl font-semibold'>{store?.name}</h4>
           <CustomButton className='!h-8 !rounded-lg !w-[100px]' outline onClick={() => router.push(`/markets/stores/${store?.id}`)}>Xem cửa hàng</CustomButton>
         </div>
       </div>

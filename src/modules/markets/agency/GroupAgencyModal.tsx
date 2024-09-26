@@ -37,7 +37,7 @@ const GroupAgencyModal = ({
 
   const { data: agencyGroup, isLoading: isLoadingGroup } = useQuery(
     ['GROUP_AGENCY_LIST', branchId],
-    () => getAgencyGroup({ page: 1, limit: 999, branchId }),
+    () => getAgencyGroup({ page: 1, limit: 999 }),
     {
       enabled: !!branchId && !!isOpen,
     }

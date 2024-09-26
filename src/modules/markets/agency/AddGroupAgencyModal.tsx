@@ -8,7 +8,7 @@ import Label from '@/components/CustomLabel';
 import { CustomSelect } from '@/components/CustomSelect';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRecoilValue } from 'recoil';
-import { branchState } from '@/recoil/state';
+import { branchState, storeState } from '@/recoil/state';
 import ArrowDownIcon from '@/assets/arrowDownIcon.svg';
 import PlusCircleIcon from '@/assets/plus-circle.svg';
 import { createAgencyGroup, getAgencyGroup } from '@/api/market.service';
@@ -30,6 +30,7 @@ const AddGroupAgencyModal = ({
   isLoading?: boolean;
 }) => {
   const branchId = useRecoilValue(branchState);
+  const storeId = useRecoilValue(storeState);
   const queryClient = useQueryClient();
   const [data, setData] = useState<any>({
     name: '',
@@ -39,7 +40,7 @@ const AddGroupAgencyModal = ({
   const { mutate: mutateCreateGroupAgency, isLoading: isLoadingCreate } =
     useMutation(
       () => {
-        return createAgencyGroup({ ...data, branchId });
+        return createAgencyGroup({ ...data, storeId });
       },
       {
         onSuccess: async (res) => {

@@ -36,8 +36,8 @@ export function OrderTransaction() {
   });
 
   const { data: orders, isLoading } = useQuery(
-    ['MAKET_ORDER', formFilter, branchId],
-    () => getMarketOrder({ ...formFilter, branchId })
+    ['MAKET_ORDER', formFilter],
+    () => getMarketOrder({ ...formFilter })
   );
 
   const filterData = (keyword: string) => {

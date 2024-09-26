@@ -20,7 +20,6 @@ function SaleOrder() {
     page: 1,
     limit: 20,
     type: 'sell',
-    branchId
   });
 
   const { data: saleOrder, isLoading } = useQuery(
@@ -54,7 +53,7 @@ function SaleOrder() {
       title: 'Người mua',
       dataIndex: 'branch',
       key: 'branch',
-      render: (data) => <span>{data?.store?.name ?? '' + " - " + data?.name}</span>,
+      render: (_, record) => <span>{record?.store?.name ?? '' + " - " + record?.name}</span>,
     },
     {
       title: 'Đơn vị vận chuyển',

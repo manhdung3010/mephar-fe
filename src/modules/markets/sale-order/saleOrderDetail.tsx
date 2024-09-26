@@ -19,7 +19,7 @@ function SaleOrderDetail() {
 
   const { data: orderDetail, isLoading } = useQuery(
     ['ORDER_DETAIL', id],
-    () => getMarketOrderDetail(id as string, branchId as string),
+    () => getMarketOrderDetail(id as string),
     {
       enabled: !!id
     }

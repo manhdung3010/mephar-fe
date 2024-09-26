@@ -24,8 +24,8 @@ function Agency() {
   }, [select]);
 
   const { data: agency, isLoading } = useQuery(
-    ['AGENCY_LIST', JSON.stringify(formFilter), branchId],
-    () => getAllFollowStore({ ...formFilter, branchId }),
+    ['AGENCY_LIST', JSON.stringify(formFilter)],
+    () => getAllFollowStore({ ...formFilter }),
   );
 
   const menu = ['Danh sách đại lý', 'Yêu cầu làm đại lý'];

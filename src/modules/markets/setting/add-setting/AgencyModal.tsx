@@ -34,15 +34,15 @@ function AgencyModal({
   const [agencyList, setAgencyList] = React.useState<any>([]);
 
   const { data: angency, isLoading: isLoadingAgency } = useQuery(
-    ['AGENCY_LIST', agencyKeyword, branchId],
-    () => getAgency({ keyword: agencyKeyword, branchId, status: 'active' }),
+    ['AGENCY_LIST', agencyKeyword],
+    () => getAgency({ keyword: agencyKeyword, status: 'active' }),
     {
       enabled: agencyType === 'agency',
     }
   );
   const { data: angencyGroup, isLoading: isLoadingAgencyGroup } = useQuery(
-    ['AGENCY_GROUP_LIST', agencyKeyword, branchId],
-    () => getAgencyGroup({ keyword: agencyKeyword, branchId }),
+    ['AGENCY_GROUP_LIST', agencyKeyword],
+    () => getAgencyGroup({ keyword: agencyKeyword }),
     {
       enabled: agencyType === 'agencyGroup',
     }
@@ -70,7 +70,7 @@ function AgencyModal({
         dataIndex: "groupProduct",
         key: "groupProduct",
         render: (_, record) => <span>
-          {record?.agency?.store?.name} - {record?.agency?.name}
+          {record?.agency?.name}
         </span>,
       },
       {
@@ -78,7 +78,7 @@ function AgencyModal({
         dataIndex: "phone",
         key: "phone",
         render: (_, record) => <span>
-          {record?.agency?.store?.phone}
+          {record?.agency?.phone}
         </span>,
       },
     ] : [{

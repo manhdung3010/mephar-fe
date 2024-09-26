@@ -34,7 +34,7 @@ function MarketSearch() {
 
   const { data: configProduct, isLoading } = useQuery(
     ['CONFIG_PRODUCT', JSON.stringify(formFilter), branchId],
-    () => getConfigProduct({ ...formFilter, branchId }),
+    () => getConfigProduct({ ...formFilter }),
   );
 
   return (
