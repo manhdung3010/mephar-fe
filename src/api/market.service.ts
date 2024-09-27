@@ -117,11 +117,8 @@ export function createPaymentOrder(id: string, payload) {
 }
 
 // update order status
-export function updateMarketOrderStatus(id: string, payload, branchId: string) {
-  return axiosClient.patch(
-    `market/sell/market-order/${id}?branchId=${branchId}`,
-    payload
-  );
+export function updateMarketOrderStatus(id: string, payload) {
+  return axiosClient.patch(`market/sell/market-order/${id}`, payload);
 }
 
 // store

@@ -21,11 +21,13 @@ import UpdateStatusModal from '@/components/CustomModal/ModalUpdateStatusItem';
 import CloseIconRed from '@/assets/closeIcon.svg';
 import EditIcon from '@/assets/editIcon.svg';
 import PaymentModal from './PaymentModal';
+import SelectBranchModal from './SelectBranchModal';
 
 export function Info({ record }: { record: any }) {
   const router = useRouter();
   const profile = useRecoilValue(profileState);
   const [isShowModal, setIsShowModal] = useState(false);
+  const [isShowSelectBranch, setIsShowSelectBranch] = useState(false);
   const [isShowPaymentModal, setIsShowPaymentModal] = useState(false);
   const [statusTemp, setStatusTemp] = useState<string>('');
 
@@ -43,7 +45,7 @@ export function Info({ record }: { record: any }) {
     isLoading: isLoadingCreateGroupProduct,
   } = useMutation((payload: any) => {
     if (payload?.status === EOrderMarketStatus.CONFIRM) {
-      return updateMarketOrderStatus(payload?.id, { status: payload?.status }, branchId);
+      return updateMarketOrderStatus(payload?.id, { status: payload?.status });
     }
     if (payload?.status === EOrderMarketStatus.SEND) {
       const newPayload = {
@@ -54,9 +56,9 @@ export function Info({ record }: { record: any }) {
           name: 'Giao hàng nhanh',
         }
       }
-      return updateMarketOrderStatus(payload?.id, newPayload, branchId);
+      return updateMarketOrderStatus(payload?.id, newPayload);
     }
-    return updateMarketOrderStatus(payload?.id, { status: payload?.status }, branchId);
+    return updateMarketOrderStatus(payload?.id, { status: payload?.status });
   }, {
     onSuccess: async (res) => {
       await queryClient.invalidateQueries(['MAKET_ORDER']);
@@ -261,7 +263,7 @@ export function Info({ record }: { record: any }) {
                     outline={true}
                     prefixIcon={<Image src={ReportIcon} alt="" />}
                     onClick={() => {
-                      setIsShowModal(true);
+                      setIsShowSelectBranch(true);
                       setStatusTemp(EOrderMarketStatus.CONFIRM)
                     }}
                   >
@@ -359,6 +361,7 @@ export function Info({ record }: { record: any }) {
         content="trạng thái đơn hàng"
       />
       <PaymentModal isOpen={isShowPaymentModal} onCancel={() => setIsShowPaymentModal(false)} id={record?.id} totalMoney={record?.totalPrice} />
+      <SelectBranchModal isOpen={isShowSelectBranch} onCancel={() => setIsShowSelectBranch(false)} id={record?.id} />
     </div>
   );
 }

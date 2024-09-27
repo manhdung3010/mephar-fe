@@ -48,6 +48,7 @@ export function InitGlobalData() {
     if (profile) {
       setProfileState(profile.data);
       setStoreState(profile.data?.store?.id);
+      setIsAgency(profile.data?.store?.isAgency);
     }
   }, [profile]);
 
@@ -60,7 +61,6 @@ export function InitGlobalData() {
       setBranch(
         defaultBranch ? defaultBranch.id : branches?.data?.items[0]?.id
       );
-      setIsAgency(defaultBranch ? defaultBranch.isAgency : branches?.data?.items[0]?.isAgency);
     }
   }, [branches, router.pathname]);
 

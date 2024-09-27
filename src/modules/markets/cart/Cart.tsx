@@ -100,7 +100,7 @@ function Cart() {
               return {
                 ...product,
                 // Nếu sản phẩm đã được chọn trước đó, giữ trạng thái selected
-                selected: cartList.find(c => c.branchId === cart.branchId)?.products.find(p => p.id === product.id)?.selected || false
+                selected: cartList.find(c => c.storeId === cart.storeId)?.products.find(p => p.id === product.id)?.selected || false
               };
             }),
           };
@@ -119,7 +119,7 @@ function Cart() {
             if (cart?.branchId === storeSelected) {
               return {
                 ...product,
-                selected: cartList?.find((cartItem) => cartItem?.branchId === storeSelected)?.products?.find((productItem) => productItem?.id === product?.id)?.selected || false
+                selected: cartList?.find((cartItem) => cartItem?.storeId === storeSelected)?.products?.find((productItem) => productItem?.id === product?.id)?.selected || false
               }
             } else {
               return {
@@ -152,14 +152,14 @@ function Cart() {
   }
 
   const totalProductSelected = useMemo(() => {
-    const selectedCart = cartList?.filter((item) => storeSelected.includes(item.branchId) && item?.products?.some((product) => product?.selected));
+    const selectedCart = cartList?.filter((item) => storeSelected.includes(item.storeId) && item?.products?.some((product) => product?.selected));
     return selectedCart?.reduce((total, cart) => {
       return total + cart?.products?.filter((product) => product?.selected)?.length;
     }, 0);
   }, [cartList, storeSelected]);
 
   const totalMoney = useMemo(() => {
-    const selectedCart = cartList?.filter((item) => storeSelected.includes(item.branchId) && item?.products?.some((product) => product?.selected));
+    const selectedCart = cartList?.filter((item) => storeSelected.includes(item.storeId) && item?.products?.some((product) => product?.selected));
     return selectedCart?.reduce((total, cart) => {
       return total + cart?.products?.reduce((totalProduct, product) => {
         return product?.selected ? totalProduct + caculateMoney(product) : totalProduct;
@@ -173,13 +173,13 @@ function Cart() {
 
       if (hasSelectedProduct) {
         // If the store has selected products, add it to the selected stores
-        if (!storeSelected.includes(cartItem.branchId)) {
-          return [...acc, cartItem.branchId];
+        if (!storeSelected.includes(cartItem.storeId)) {
+          return [...acc, cartItem.storeId];
         }
         return acc;
       } else {
         // If no products selected, ensure the store is not in the selected list
-        return acc.filter(id => id !== cartItem.branchId);
+        return acc.filter(id => id !== cartItem.storeId);
       }
     }, storeSelected);
 
@@ -223,21 +223,21 @@ function Cart() {
         <Radio.Group className='flex flex-col gap-3'>
           {
             cartList?.map((cart) => (
-              <div className='flex flex-col gap-3' key={cart?.branchId}>
+              <div className='flex flex-col gap-3' key={cart?.storeId}>
                 <div className=''>
                   <div className='grid grid-cols-12 p-[22px] bg-white rounded font-semibold border-b-[1px] border-[#DDDDDD]'>
                     <div className='col-span-6 flex items-center'>
                       <CustomCheckbox
-                        checked={storeSelected.includes(cart?.branchId)}
+                        checked={storeSelected.includes(cart?.storeId)}
                         onChange={() => {
-                          const updatedSelectedStores = storeSelected.includes(cart?.branchId)
-                            ? storeSelected.filter(id => id !== cart?.branchId)
-                            : [...storeSelected, cart?.branchId];
+                          const updatedSelectedStores = storeSelected.includes(cart?.storeId)
+                            ? storeSelected.filter(id => id !== cart?.storeId)
+                            : [...storeSelected, cart?.storeId];
 
                           setStoreSelected(updatedSelectedStores);
 
                           const newCartList = cartList.map((cartItem) => {
-                            if (updatedSelectedStores.includes(cartItem?.branchId)) {
+                            if (updatedSelectedStores.includes(cartItem?.storeId)) {
                               return {
                                 ...cartItem,
                                 products: cartItem?.products.map((product) => ({
@@ -274,7 +274,7 @@ function Cart() {
                             checked={product?.selected}
                             onChange={(e) => {
                               const newCartList = cartList.map((cartItem) => {
-                                if (cartItem?.branchId === cart?.branchId) {
+                                if (cartItem?.storeId === cart?.storeId) {
                                   return {
                                     ...cartItem,
                                     products: cartItem?.products.map((productItem) => {
@@ -297,11 +297,11 @@ function Cart() {
 
                               // Check if all products in the store are unchecked
                               const allProductsUnchecked = newCartList
-                                .find(cartItem => cartItem?.branchId === cart?.branchId)?.products
+                                .find(cartItem => cartItem?.storeId === cart?.storeId)?.products
                                 .every(product => !product?.selected);
 
                               if (allProductsUnchecked) {
-                                setStoreSelected(storeSelected.filter(id => id !== cart?.branchId));
+                                setStoreSelected(storeSelected.filter(id => id !== cart?.storeId));
                               }
                             }}
                           />
@@ -395,9 +395,9 @@ function Cart() {
                     onClick={() => {
                       // Filter the cartList to include only selected stores and their selected products
                       const paymentProduct = cartList
-                        .filter((cart) => storeSelected.includes(cart.branchId))
+                        .filter((cart) => storeSelected.includes(cart.storeId))
                         .map((cart) => ({
-                          branchId: cart.branchId,
+                          storeId: cart.storeId,
                           products: cart.products.filter((product) => product.selected)
                         }))
                         .filter(cart => cart.products.length > 0); // Ensure each store has at least one product
