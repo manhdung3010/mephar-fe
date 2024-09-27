@@ -86,7 +86,7 @@ export function ProcessOrder() {
             }
           })
         }
-        return updateMarketOrderStatus(String(id), payload, branchId)
+        return updateMarketOrderStatus(String(id), payload)
       },
       {
         onSuccess: async () => {
