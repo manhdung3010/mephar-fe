@@ -104,7 +104,7 @@ function SaleOrderDetail() {
                 </div>
                 <div className='col-span-2 flex items-center justify-center gap-1'>
                   {product?.marketProduct?.discountPrice > 0 && (
-                    <span className='text-[#999999] line-through'>{formatMoney(product?.price)}</span>
+                    <span className='text-[#999999] line-through'>{formatMoney(product?.marketProduct?.price)}</span>
                   )}
                   <span className='text-base text-[#28293D] font-medium'>{formatMoney(product?.marketProduct?.discountPrice > 0 ? product?.marketProduct?.discountPrice : product?.price)}</span>
                 </div>

@@ -76,14 +76,14 @@ const ProductExpire = ({
     },
   ];
 
-  const totalInventory = data?.reduce((sum, item) => sum + item.inventory, 0);
+  const totalInventory = data?.reduce((sum, item) => sum + Number(item.inventory), 0);
 
   return (
     <>
       {" "}
       <CustomTable dataSource={data} columns={columns} loading={isLoading} />
       <div className="text-start">
-        Tổng số lượng: <span className="font-bold">{totalInventory}</span>
+        Tổng số lượng: <span className="font-bold">{formatNumber(totalInventory)}</span>
       </div>
     </>
   );

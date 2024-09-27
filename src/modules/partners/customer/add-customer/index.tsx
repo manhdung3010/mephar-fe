@@ -264,6 +264,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
               <CustomInput
                 placeholder="Mã mặc định"
                 className="h-11"
+                disabled={customerId ? true : false}
                 onChange={(e) => setValue("code", e, { shouldValidate: true })}
                 value={getValues("code")}
               />

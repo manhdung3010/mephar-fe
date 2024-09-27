@@ -40,7 +40,7 @@ const AddGroupAgencyModal = ({
   const { mutate: mutateCreateGroupAgency, isLoading: isLoadingCreate } =
     useMutation(
       () => {
-        return createAgencyGroup({ ...data, storeId });
+        return createAgencyGroup({ ...data });
       },
       {
         onSuccess: async (res) => {
