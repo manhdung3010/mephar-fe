@@ -136,7 +136,7 @@ export function RightContent({ getValues, setValue, errors, handleSubmit, reset,
           className="h-[44px] rounded-[58px]"
           onChange={(value) => {
           }}
-          value={detail?.branch?.store?.name + " - " + detail?.branch?.phone}
+          value={detail?.store?.name + " - " + detail?.store?.phone}
           prefixIcon={<Image src={CustomerIcon} alt="" />}
         />
         <span className='flex justify-end mt-2'>Nguồn: <span className='text-red-main ml-2'>Chợ</span></span>

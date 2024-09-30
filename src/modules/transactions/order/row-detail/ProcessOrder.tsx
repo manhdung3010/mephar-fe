@@ -92,7 +92,7 @@ export function ProcessOrder() {
         onSuccess: async () => {
           await queryClient.invalidateQueries(["MAKET_ORDER_ORDER_DETAIL"]);
           await queryClient.invalidateQueries(["MAKET_ORDER"]);
-          router.push('/transactions/order');
+          router.push(`/transactions/order?keyword=${orderInfo?.code}`);
         },
         onError: (err: any) => {
           message.error(err?.message);
@@ -122,7 +122,7 @@ export function ProcessOrder() {
         onSuccess: async () => {
           await queryClient.invalidateQueries(["MAKET_ORDER_ORDER_DETAIL"]);
           await queryClient.invalidateQueries(["MAKET_ORDER"]);
-          router.push('/transactions/order');
+          router.push(`/transactions/order?keyword=${orderInfo?.code}`);
         },
         onError: (err: any) => {
           message.error(err?.message);

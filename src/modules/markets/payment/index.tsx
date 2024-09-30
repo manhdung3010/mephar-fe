@@ -118,7 +118,7 @@ function Payment() {
             </div>
             {selectedAddress && (
               <div className='mt-1 ml-7 text-[#28293D]'>
-                <p>{profile?.fullName} | {selectedAddress?.phone}</p>
+                <p>{selectedAddress?.fullName} | {selectedAddress?.phone}</p>
                 <p>{selectedAddress?.address}, {selectedAddress?.ward?.name}, {selectedAddress?.district?.name}, {selectedAddress?.province?.name}</p>
               </div>
             )}

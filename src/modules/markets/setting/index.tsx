@@ -101,7 +101,7 @@ export function MarketSetting() {
       title: "SL tồn",
       dataIndex: "quantity",
       key: "quantity",
-      render: (value) => formatNumber(value),
+      render: (value, record) => formatNumber(+value - +record?.quantitySold),
     },
     {
       title: "SL đã bán",

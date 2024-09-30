@@ -209,7 +209,7 @@ const ProductDetail = () => {
         </div>
 
         <div className='my-6'>
-          <StoreCard store={configProduct?.data?.item?.branch} branch={configProduct?.data?.item?.branch?.name} />
+          <StoreCard store={configProduct?.data?.item?.store} branch={configProduct?.data?.item?.store?.name} />
         </div>
 
         <div className='grid grid-cols-12  gap-10 '>

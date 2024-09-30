@@ -17,9 +17,12 @@ import { EOrderMarketStatus, EOrderMarketStatusLabel } from "@/modules/markets/t
 import OrderDetail from "./row-detail";
 import Search from "./Search";
 import { IOrder } from "./type";
+import { useRouter } from "next/router";
 
 export function OrderTransaction() {
   const branchId = useRecoilValue(branchState);
+  const router = useRouter();
+  const { keyword } = router.query;
 
   const [expandedRowKeys, setExpandedRowKeys] = useState<
     Record<string, boolean>
@@ -40,6 +43,16 @@ export function OrderTransaction() {
     () => getMarketOrder({ ...formFilter })
   );
 
+  useEffect(() => {
+    if (keyword) {
+      setFormFilter((prevValue) => ({
+        ...prevValue,
+        keyword: keyword as string,
+      }));
+      filterData(keyword as string);
+    }
+  }, [keyword]);
+
   const filterData = (keyword: string) => {
     if (!keyword) {
       setFilteredData([]);
@@ -49,7 +62,7 @@ export function OrderTransaction() {
 
     const filtered = orders?.data?.items?.filter((item: IOrder) => {
       const productCode = item.code.toLowerCase();
-      const productUserFullName = item.customer.fullName.toLowerCase();
+      const productUserFullName = item?.customer.fullName.toLowerCase();
       const productName = item.products
         ?.map((product) => product.product.name.toLowerCase())
         .join(", ");

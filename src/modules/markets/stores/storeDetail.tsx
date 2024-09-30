@@ -190,7 +190,6 @@ function StoreDetail() {
                       setSelect(index)
                       if (index === 1) {
                         setFormFilter({
-                          ...formFilter,
                           page: 1,
                           limit: 16,
                           sortBy: 'quantitySold'
@@ -199,29 +198,22 @@ function StoreDetail() {
                       else if (index === 2) {
                         // remove sortBy
                         setFormFilter({
-                          ...formFilter,
                           productType: 1,
                           page: 1,
                           limit: 16,
-                          sortBy: undefined
                         })
                       }
                       else if (index === 3) {
                         setFormFilter({
-                          ...formFilter,
                           page: 1,
                           limit: 16,
                           productType: 2,
-                          sortBy: undefined
                         })
                       }
                       else {
                         setFormFilter({
-                          ...formFilter,
                           page: 1,
                           limit: 16,
-                          sortBy: undefined,
-                          productType: undefined
                         })
                       }
                     }}

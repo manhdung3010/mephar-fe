@@ -84,6 +84,7 @@ function AddressModal({ isOpen, onCancel, onSave }) {
               message.error('Vui lòng chọn địa chỉ nhận hàng');
               return;
             }
+            console.log('newSelectedAddress', newSelectedAddress);
             onSave(newSelectedAddress);
             onCancel();
           }}>
