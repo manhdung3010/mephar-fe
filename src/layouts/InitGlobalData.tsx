@@ -1,21 +1,22 @@
-import { useQuery } from '@tanstack/react-query';
-import { useRouter } from 'next/router';
-import { useEffect } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/router";
+import { useEffect } from "react";
+import { useRecoilState, useRecoilValue } from "recoil";
 
-import { getBranch } from '@/api/branch.service';
-import { getProfile } from '@/api/user';
-import { getToken } from '@/helpers/storage';
+import { getBranch } from "@/api/branch.service";
+import { getProfile } from "@/api/user";
+import { getToken } from "@/helpers/storage";
 import {
   agencyState,
+  branchGenegalState,
   branchState,
   orderActiveState,
   orderState,
   profileState,
   storeState,
-} from '@/recoil/state';
+} from "@/recoil/state";
 
-const excludePath = ['/auth/sign-in'];
+const excludePath = ["/auth/sign-in"];
 
 export function InitGlobalData() {
   const router = useRouter();
@@ -23,19 +24,20 @@ export function InitGlobalData() {
   const [, setProfileState] = useRecoilState(profileState);
   const [, setStoreState] = useRecoilState(storeState);
   const [branch, setBranch] = useRecoilState(branchState);
+  const [branchGeneral, setBranchGeneral] = useRecoilState(branchGenegalState);
   const [isAgency, setIsAgency] = useRecoilState(agencyState);
   const orderObject = useRecoilValue(orderState);
   const orderActive = useRecoilValue(orderActiveState);
 
   const { data: profile } = useQuery(
-    ['PROFILE', getToken(), router.pathname],
+    ["PROFILE", getToken(), router.pathname],
     () => getProfile(),
     {
       enabled: !!getToken() && !excludePath.includes(router.pathname),
     }
   );
   const { data: branches } = useQuery(
-    ['SETTING_BRANCH', getToken()],
+    ["SETTING_BRANCH", getToken()],
     () => getBranch(),
     {
       enabled:
@@ -60,6 +62,9 @@ export function InitGlobalData() {
 
       setBranch(
         defaultBranch ? defaultBranch.id : branches?.data?.items[0]?.id
+      );
+      setBranchGeneral(
+        branches?.data?.items?.find((item) => item.isGeneral)?.id
       );
     }
   }, [branches, router.pathname]);

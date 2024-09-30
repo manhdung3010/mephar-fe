@@ -1,37 +1,50 @@
-import { useQuery } from '@tanstack/react-query';
-import type { MenuProps } from 'antd';
-import { Avatar, Dropdown, Space } from 'antd';
-import Image from 'next/image';
-import { useRouter } from 'next/router';
-import { type ReactNode } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useQuery } from "@tanstack/react-query";
+import type { MenuProps } from "antd";
+import { Avatar, Dropdown, Space } from "antd";
+import Image from "next/image";
+import { useRouter } from "next/router";
+import { useEffect, useState, type ReactNode } from "react";
+import { useRecoilState, useRecoilValue } from "recoil";
 
-import { getBranch } from '@/api/branch.service';
-import DropdownIcon from '@/assets/dropdownIcon.svg';
-import LocationIcon from '@/assets/locationIcon.svg';
-import { getImage, randomString } from '@/helpers';
-import { setItem, setToken } from '@/helpers/storage';
+import { getBranch } from "@/api/branch.service";
+import DropdownIcon from "@/assets/dropdownIcon.svg";
+import LocationIcon from "@/assets/locationIcon.svg";
+import { getImage, randomString } from "@/helpers";
+import { setItem, setToken } from "@/helpers/storage";
 import {
   agencyState,
   branchState,
   orderActiveState,
   orderState,
   profileState,
-} from '@/recoil/state';
-import { EStorageKey } from '@/enums';
+} from "@/recoil/state";
+import { EStorageKey } from "@/enums";
 
 export const Header = ({ title }: { title?: string | ReactNode }) => {
   const router = useRouter();
 
   const profile = useRecoilValue(profileState);
   const [branch, setBranch] = useRecoilState(branchState);
+  const [listBranch, setListBranch] = useState<any>([]);
   const [isAgency, setIsAgency] = useRecoilState(agencyState);
   const [, setOrderObject] = useRecoilState(orderState);
   const [, setOrderActive] = useRecoilState(orderActiveState);
 
-  const { data: branches } = useQuery(['SETTING_BRANCH'], () => getBranch());
+  const { data: branches } = useQuery(["SETTING_BRANCH"], () => getBranch());
 
-  const items: MenuProps['items'] = branches?.data?.items?.map((item) => ({
+  useEffect(() => {
+    if (branches?.data?.items?.length) {
+      // filter isGeneral = true
+      const generalBranch = branches.data.items.find((item) => item.isGeneral);
+      // sort by isGeneral is the last
+      const sortedBranches = branches.data.items.filter(
+        (item) => !item.isGeneral
+      );
+      setListBranch([...sortedBranches, generalBranch]);
+    }
+  }, [branches]);
+
+  const items: MenuProps["items"] = listBranch?.map((item) => ({
     key: item.id,
     label: (
       <span
@@ -49,14 +62,14 @@ export const Header = ({ title }: { title?: string | ReactNode }) => {
   }));
 
   const logout = () => {
-    setToken('');
-    setItem(EStorageKey.PRODUCT_RETURN_STATE, '');
-    router.push('/auth/sign-in');
+    setToken("");
+    setItem(EStorageKey.PRODUCT_RETURN_STATE, "");
+    router.push("/auth/sign-in");
   };
 
-  const profileItems: MenuProps['items'] = [
+  const profileItems: MenuProps["items"] = [
     {
-      key: 'logout',
+      key: "logout",
       label: <span onClick={logout}>Đăng xuất</span>,
     },
   ];
@@ -84,12 +97,12 @@ export const Header = ({ title }: { title?: string | ReactNode }) => {
         <div className="ml-5">
           {profile?.avatar?.path ? (
             <Avatar
-              style={{ background: '#4285F4' }}
+              style={{ background: "#4285F4" }}
               src={getImage(profile?.avatar?.path)}
               size={32}
             ></Avatar>
           ) : (
-            <Avatar style={{ background: '#4285F4' }} size={32}>
+            <Avatar style={{ background: "#4285F4" }} size={32}>
               {profile?.username[0]}
             </Avatar>
           )}

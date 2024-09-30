@@ -48,7 +48,6 @@ function SaleOrderDetail() {
             </li>
           </ul>
         </nav>
-
         <div className='flex justify-between items-center'>
           <div className='flex items-center gap-1 mt-6 text-lg'>
             <h4>Chi tiết đơn hàng <span className='text-lg'>#{orderDetail?.data?.item?.code}</span></h4 > - <span className='text-[#3E7BFA] text-lg'>{EOrderMarketStatusLabel[orderDetail?.data?.item?.status?.toUpperCase()]}</span>
@@ -63,7 +62,7 @@ function SaleOrderDetail() {
         </div>
         <div className='grid grid-cols-3 gap-10 mt-4'>
           <div className='p-4 rounded-2xl bg-white'>
-            <p className='text-[#1C1C28] font-medium'>{profile?.fullName}</p>
+            <p className='text-[#1C1C28] font-medium'>{orderDetail?.data?.item?.fullName}</p>
             <p className='text-[#555770] mt-4'>Địa chỉ: <span className='text-[#28293D]'>{orderDetail?.data?.item?.address}</span></p>
             <p className='text-[#555770]'>Số điện thoại: <span className='text-[#28293D]'>{orderDetail?.data?.item?.phone}</span></p>
           </div>

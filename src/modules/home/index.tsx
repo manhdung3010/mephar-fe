@@ -8,7 +8,7 @@ import DoubleBackIcon from "@/assets/doubleBackIcon.svg";
 import { BestSellerProductChart } from "./BestSellerProductChart";
 import { RevenueChart } from "./RevenueChart";
 import { useRecoilValue } from "recoil";
-import { branchState } from "@/recoil/state";
+import { branchGenegalState, branchState } from "@/recoil/state";
 import { useQuery } from "@tanstack/react-query";
 import { getSaleReport } from "@/api/report.service";
 import dayjs from "dayjs";
@@ -29,6 +29,7 @@ export enum ProductViewType {
 
 export function Home() {
   const branchId = useRecoilValue(branchState);
+  const branchGeneralId = useRecoilValue(branchGenegalState);
   const [totalReturn, setTotalReturn] = useState(0);
 
   const [formFilter, setFormFilter] = useState({
@@ -40,33 +41,42 @@ export function Home() {
       endDate: dayjs().format("YYYY-MM-DD"),
     }),
     status: undefined,
-    branchId,
   });
 
   const [userFilter, setUserFilter] = useState({
     page: 1,
     limit: 20,
-    branchId,
   });
   const [saleReturnFilter, setSaleReturnFilter] = useState({
     page: 1,
     limit: 9999,
     from: dayjs().startOf("month"),
     to: dayjs().endOf("month"),
-    branchId,
   });
 
   const { data: orders, isLoading } = useQuery(
     ["ORDER_LIST", JSON.stringify(formFilter), branchId],
-    () => getOrder({ ...formFilter, branchId })
+    () =>
+      getOrder({
+        ...formFilter,
+        branchId: branchId === branchGeneralId ? undefined : branchId,
+      })
   );
   const { data: saleReturn, isLoading: isLoadingSaleReturn } = useQuery(
     ["SALE_RETURN_LIST", JSON.stringify(saleReturnFilter), branchId],
-    () => getSaleReturn({ ...formFilter, branchId })
+    () =>
+      getSaleReturn({
+        ...formFilter,
+        branchId: branchId === branchGeneralId ? undefined : branchId,
+      })
   );
   const { data: userLog, isLoading: isLoadingUserLog } = useQuery(
     ["USER_LOG", JSON.stringify(userFilter), branchId],
-    () => getUserLog({ ...userFilter, branchId })
+    () =>
+      getUserLog({
+        ...userFilter,
+        branchId: branchId === branchGeneralId ? undefined : branchId,
+      })
   );
 
   const type = {

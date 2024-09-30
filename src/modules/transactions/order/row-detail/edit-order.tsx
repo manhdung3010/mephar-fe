@@ -138,8 +138,6 @@ export function EditOrder() {
     },
   ];
 
-  console.log('listProduct', getValues('listProduct'))
-
   return (
     <div className="-mx-8 flex">
       <div className="grow overflow-x-auto">

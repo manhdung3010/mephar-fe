@@ -63,7 +63,7 @@ function AgencyList({ data, formFilter, setFormFilter, isLoading }) {
       title: "Địa chỉ",
       dataIndex: "address",
       key: "address",
-      render: (value, record) => record?.agency?.address1,
+      render: (value, record) => record?.agency?.address,
     },
     {
       title: "Thao tác",

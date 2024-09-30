@@ -49,7 +49,13 @@ export function OrderTransaction() {
         ...prevValue,
         keyword: keyword as string,
       }));
-      filterData(keyword as string);
+      const expandedRowKeysClone = { ...expandedRowKeys };
+      orders?.data?.items?.forEach((_, index) => {
+        expandedRowKeysClone[index] = true;
+      });
+
+      setExpandedRowKeys(expandedRowKeysClone);
+      // filterData(keyword as string);
     }
   }, [keyword]);
 

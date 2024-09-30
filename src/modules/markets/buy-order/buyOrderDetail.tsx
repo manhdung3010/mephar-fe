@@ -60,7 +60,7 @@ function BuyOrderDetail() {
         </div>
         <div className='grid grid-cols-3 gap-10 mt-4'>
           <div className='p-4 rounded-2xl bg-white'>
-            <p className='text-[#1C1C28] font-medium'>{profile?.fullName}</p>
+            <p className='text-[#1C1C28] font-medium'>{orderDetail?.data?.item?.fullName}</p>
             <p className='text-[#555770] mt-4'>Địa chỉ: <span className='text-[#28293D]'>{orderDetail?.data?.item?.address}</span></p>
             <p className='text-[#555770]'>Số điện thoại: <span className='text-[#28293D]'>{orderDetail?.data?.item?.phone}</span></p>
           </div>

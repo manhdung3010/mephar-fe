@@ -33,6 +33,7 @@ const Search = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void,
             placeholder="Tìm kiếm theo mã nhập hàng"
             prefixIcon={<Image src={SearchIcon} alt="" />}
             className=""
+            value={formFilter?.keyword || ''}
             onChange={debounce((value) => {
               setFormFilter((preValue) => ({
                 ...preValue,

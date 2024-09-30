@@ -330,9 +330,9 @@ export function Info({ record }: { record: IOrder }) {
       )}
 
       <CustomTable
-        dataSource={record.products?.map((item, index) => ({
+        dataSource={record.products?.map((item: any, index) => ({
           ...item,
-          code: item.product.code,
+          code: JSON.parse(item.productUnitData)?.code,
           name: item.product.name,
           quantity: item.quantity,
           discount: item.discount,

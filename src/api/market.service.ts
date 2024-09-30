@@ -84,8 +84,8 @@ export function updateShipAddress(id: string, payload?: any) {
 export function getShipAddress(params) {
   return axiosClient.get(`market/sell/address`, { params });
 }
-export function getShipAddressDetail(id: string) {
-  return axiosClient.get(`market/sell/address/${id}`);
+export function getShipAddressDetail(id: string, params?: any) {
+  return axiosClient.get(`market/sell/address/${id}`, { params });
 }
 
 // order

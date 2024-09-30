@@ -44,6 +44,11 @@ export const branchState = atom<any>({
   default: null,
   effects: [localStorageEffect("BRANCH_STATE")],
 });
+export const branchGenegalState = atom<any>({
+  key: "BRANCH_GENEGEL_STATE",
+  default: null,
+  effects: [localStorageEffect("BRANCH_GENEGEL_STATE")],
+});
 export const agencyState = atom<any>({
   key: "AGENCY_STATE",
   default: null,
