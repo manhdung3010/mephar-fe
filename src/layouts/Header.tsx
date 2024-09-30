@@ -40,9 +40,14 @@ export const Header = ({ title }: { title?: string | ReactNode }) => {
       const sortedBranches = branches.data.items.filter(
         (item) => !item.isGeneral
       );
-      setListBranch([...sortedBranches, generalBranch]);
+      if (generalBranch) {
+        sortedBranches.push(generalBranch);
+      }
+      setListBranch(sortedBranches);
     }
   }, [branches]);
+
+  console.log("listBranch", listBranch);
 
   const items: MenuProps["items"] = listBranch?.map((item) => ({
     key: item.id,
