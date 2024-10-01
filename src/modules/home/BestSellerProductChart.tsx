@@ -1,5 +1,5 @@
 /* eslint-disable no-plusplus */
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from "@tanstack/react-query";
 import {
   BarElement,
   CategoryScale,
@@ -8,13 +8,14 @@ import {
   LinearScale,
   Title,
   Tooltip,
-} from 'chart.js';
-import dayjs from 'dayjs';
-import { useMemo, useState } from 'react';
-import { Bar } from 'react-chartjs-2';
+} from "chart.js";
+import dayjs from "dayjs";
+import { useMemo, useState } from "react";
+import { Bar } from "react-chartjs-2";
 
-import { getBestSellerProduct } from '@/api/report.service';
-import { CustomSelect } from '@/components/CustomSelect';
+import { getBestSellerProduct } from "@/api/report.service";
+import { CustomSelect } from "@/components/CustomSelect";
+import { generalId } from "@/layouts/Header";
 
 ChartJS.register(
   CategoryScale,
@@ -26,11 +27,11 @@ ChartJS.register(
 );
 
 export const options = {
-  indexAxis: 'y' as const,
+  indexAxis: "y" as const,
   responsive: true,
   plugins: {
     legend: {
-      position: 'top' as const,
+      position: "top" as const,
       display: false,
     },
     title: {
@@ -52,21 +53,21 @@ export enum FilterDateType {
 }
 
 export enum ViewType {
-  Revenue = 'revenue',
-  Quantity = 'quantity',
+  Revenue = "revenue",
+  Quantity = "quantity",
 }
 
 export const getDateRange = (dateRange) => {
   if (dateRange === FilterDateType.CURRENT_MONTH) {
     return {
-      startDate: dayjs().startOf('M').toISOString(),
-      endDate: dayjs().endOf('M').toISOString(),
+      startDate: dayjs().startOf("M").toISOString(),
+      endDate: dayjs().endOf("M").toISOString(),
     };
   }
   if (dateRange === FilterDateType.PRE_MONTH) {
     return {
-      startDate: dayjs().add(-1, 'M').startOf('M').toISOString(),
-      endDate: dayjs().add(-1, 'M').endOf('M').toISOString(),
+      startDate: dayjs().add(-1, "M").startOf("M").toISOString(),
+      endDate: dayjs().add(-1, "M").endOf("M").toISOString(),
     };
   }
 
@@ -81,7 +82,7 @@ export function BestSellerProductChart({ branchId }: { branchId: number }) {
 
   const { data } = useQuery(
     [
-      'BEST_SELLER_PRODUCT_CHART',
+      "BEST_SELLER_PRODUCT_CHART",
       productFilter.viewType,
       productFilter.dateRange,
       branchId,
@@ -90,7 +91,7 @@ export function BestSellerProductChart({ branchId }: { branchId: number }) {
       getBestSellerProduct({
         type: productFilter.viewType,
         dateRange: getDateRange(productFilter.dateRange),
-        branchId,
+        ...(String(branchId) === generalId ? {} : { branchId }),
       })
   );
 
@@ -105,14 +106,14 @@ export function BestSellerProductChart({ branchId }: { branchId: number }) {
         {
           label:
             productFilter.viewType === ViewType.Revenue
-              ? 'Doanh thu'
-              : 'Doanh số',
+              ? "Doanh thu"
+              : "Doanh số",
           data: data?.data?.items?.map((item) =>
             productFilter.viewType === ViewType.Revenue
               ? item.revenue
               : item.quantity
           ),
-          backgroundColor: '#0070F4',
+          backgroundColor: "#0070F4",
         },
       ],
     }),
@@ -158,10 +159,10 @@ export function BestSellerProductChart({ branchId }: { branchId: number }) {
             wrapClassName="!w-[200px] "
             options={[
               {
-                label: 'Tháng hiện tại',
+                label: "Tháng hiện tại",
                 value: FilterDateType.CURRENT_MONTH,
               },
-              { label: 'Tháng trước', value: FilterDateType.PRE_MONTH },
+              { label: "Tháng trước", value: FilterDateType.PRE_MONTH },
             ]}
             value={productFilter.dateRange}
           />

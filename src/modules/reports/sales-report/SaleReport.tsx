@@ -24,6 +24,7 @@ import {
   Title,
   Tooltip,
 } from "chart.js";
+import { generalId } from "@/layouts/Header";
 
 ChartJS.register(
   CategoryScale,
@@ -48,7 +49,6 @@ interface IRecord {
 export function SaleReport() {
   const router = useRouter();
   const [branch] = useRecoilState(branchState);
-  const branchGeneralId = useRecoilValue(branchGenegalState);
 
   const [expandedRowKeys, setExpandedRowKeys] = useState<
     Record<string, boolean>
@@ -57,27 +57,18 @@ export function SaleReport() {
   const [formFilter, setFormFilter] = useState({
     type: 1,
     concern: "TIME",
-    branchId: branch ? branch : undefined,
+    // branchId: branch ? branch : undefined,
     from: dayjs().format("YYYY-MM-DD"),
     to: dayjs().format("YYYY-MM-DD"),
   });
 
   const { data: saleReport, isLoading } = useQuery(
-    [
-      "SALE_REPORT",
-      formFilter.from,
-      formFilter.to,
-      formFilter.concern,
-      formFilter.branchId,
-    ],
+    ["SALE_REPORT", formFilter.from, formFilter.to, formFilter.concern, branch],
     () =>
       getSaleReport({
         from: formFilter.from,
         to: formFilter.to,
-        branchId:
-          formFilter?.branchId === branchGeneralId
-            ? undefined
-            : formFilter?.branchId,
+        ...(String(branch) === generalId ? {} : { branchId: branch }),
         concern: formFilter.concern,
       })
   );
@@ -391,9 +382,8 @@ export function SaleReport() {
                 <p>
                   Chi nhánh:{" "}
                   {
-                    branches?.data?.items?.find(
-                      (item) => item.id === formFilter.branchId
-                    )?.name
+                    branches?.data?.items?.find((item) => item.id === branch)
+                      ?.name
                   }
                 </p>
               </div>
@@ -424,9 +414,8 @@ export function SaleReport() {
                   <p>
                     Chi nhánh:{" "}
                     {
-                      branches?.data?.items?.find(
-                        (item) => item.id === formFilter.branchId
-                      )?.name
+                      branches?.data?.items?.find((item) => item.id === branch)
+                        ?.name
                     }
                   </p>
                 </div>

@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import { getOrder, getSaleReturn } from "@/api/order.service";
 import { formatMoney, formatNumber, timeAgo } from "@/helpers";
 import { getUserLog } from "@/api/user";
+import { generalId } from "@/layouts/Header";
 
 export enum FilterDateType {
   CURRENT_MONTH = 1,
@@ -29,7 +30,6 @@ export enum ProductViewType {
 
 export function Home() {
   const branchId = useRecoilValue(branchState);
-  const branchGeneralId = useRecoilValue(branchGenegalState);
   const [totalReturn, setTotalReturn] = useState(0);
 
   const [formFilter, setFormFilter] = useState({
@@ -55,30 +55,29 @@ export function Home() {
   });
 
   const { data: orders, isLoading } = useQuery(
-    ["ORDER_LIST", JSON.stringify(formFilter), branchId],
+    ["ORDER_LIST", JSON.stringify(formFilter), branchId, generalId],
     () =>
       getOrder({
         ...formFilter,
-        branchId: branchId === branchGeneralId ? undefined : branchId,
+        ...(branchId === generalId ? {} : { branchId }),
       })
   );
   const { data: saleReturn, isLoading: isLoadingSaleReturn } = useQuery(
-    ["SALE_RETURN_LIST", JSON.stringify(saleReturnFilter), branchId],
+    ["SALE_RETURN_LIST", JSON.stringify(saleReturnFilter), branchId, generalId],
     () =>
       getSaleReturn({
         ...formFilter,
-        branchId: branchId === branchGeneralId ? undefined : branchId,
+        ...(branchId === generalId ? {} : { branchId }),
       })
   );
   const { data: userLog, isLoading: isLoadingUserLog } = useQuery(
-    ["USER_LOG", JSON.stringify(userFilter), branchId],
+    ["USER_LOG", JSON.stringify(userFilter), branchId, generalId],
     () =>
       getUserLog({
         ...userFilter,
-        branchId: branchId === branchGeneralId ? undefined : branchId,
+        ...(branchId === generalId ? {} : { branchId }),
       })
   );
-
   const type = {
     order: "bán hàng",
     sale_return: "trả hàng",

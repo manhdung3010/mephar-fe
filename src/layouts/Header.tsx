@@ -19,9 +19,12 @@ import {
   profileState,
 } from "@/recoil/state";
 import { EStorageKey } from "@/enums";
+import _ from "lodash";
+export const generalId = "GENERAL_ID";
 
 export const Header = ({ title }: { title?: string | ReactNode }) => {
   const router = useRouter();
+  const routerList = ["/", "/reports/sale-report"];
 
   const profile = useRecoilValue(profileState);
   const [branch, setBranch] = useRecoilState(branchState);
@@ -35,25 +38,43 @@ export const Header = ({ title }: { title?: string | ReactNode }) => {
   useEffect(() => {
     if (branches?.data?.items?.length) {
       // filter isGeneral = true
-      const generalBranch = branches.data.items.find((item) => item.isGeneral);
+      const generalBranch = {
+        id: "GENERAL_ID",
+        name: "Tất cả chi nhánh",
+        isGeneral: true,
+      };
       // sort by isGeneral is the last
       const sortedBranches = branches.data.items.filter(
         (item) => !item.isGeneral
       );
-      if (generalBranch) {
-        sortedBranches.push(generalBranch);
-      }
+      sortedBranches.push(generalBranch);
       setListBranch(sortedBranches);
     }
   }, [branches]);
-
-  console.log("listBranch", listBranch);
+  useEffect(() => {
+    const isGeneral = listBranch?.find((item) => item.isGeneral);
+    if (!routerList.includes(router.pathname)) {
+      if (branch === isGeneral?.id) {
+        const defaultBrach = listBranch?.find((item) => item.isDefaultBranch);
+        if (defaultBrach) {
+          setBranch(defaultBrach.id);
+        } else {
+          setBranch(listBranch[0]?.id);
+        }
+      } else {
+        setBranch(branch);
+      }
+    }
+  }, [router.pathname, listBranch]);
 
   const items: MenuProps["items"] = listBranch?.map((item) => ({
     key: item.id,
     label: (
       <span
         onClick={() => {
+          if (item.isGeneral && !routerList.includes(router.pathname)) {
+            return;
+          }
           const key = randomString();
           setBranch(item.id);
           setIsAgency(item.isAgency);
@@ -64,6 +85,7 @@ export const Header = ({ title }: { title?: string | ReactNode }) => {
         {item.name}
       </span>
     ),
+    disabled: item.isGeneral && !routerList.includes(router.pathname),
   }));
 
   const logout = () => {
@@ -89,10 +111,8 @@ export const Header = ({ title }: { title?: string | ReactNode }) => {
             <div className="flex items-center">
               <Image src={LocationIcon} />
               <span className=" mx-2 cursor-pointer">
-                {
-                  branches?.data?.items?.find((item) => item.id === branch)
-                    ?.name
-                }
+                {branches?.data?.items?.find((item) => item.id === branch)
+                  ?.name || "Tất cả chi nhánh"}
               </span>
               <Image src={DropdownIcon} />
             </div>

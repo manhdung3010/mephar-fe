@@ -1,5 +1,5 @@
 /* eslint-disable no-plusplus */
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from "@tanstack/react-query";
 import {
   BarElement,
   CategoryScale,
@@ -8,18 +8,19 @@ import {
   LinearScale,
   Title,
   Tooltip,
-} from 'chart.js';
-import Image from 'next/image';
-import { useEffect, useMemo, useState } from 'react';
-import { Bar } from 'react-chartjs-2';
+} from "chart.js";
+import Image from "next/image";
+import { useEffect, useMemo, useState } from "react";
+import { Bar } from "react-chartjs-2";
 
-import { getRevenueReport, getSaleReport } from '@/api/report.service';
-import ArrowRight from '@/assets/arrow-right.svg';
-import { CustomSelect } from '@/components/CustomSelect';
+import { getRevenueReport, getSaleReport } from "@/api/report.service";
+import ArrowRight from "@/assets/arrow-right.svg";
+import { CustomSelect } from "@/components/CustomSelect";
 
-import { getDateRange } from './BestSellerProductChart';
-import dayjs from 'dayjs';
-import { formatMoney } from '@/helpers';
+import { getDateRange } from "./BestSellerProductChart";
+import dayjs from "dayjs";
+import { formatMoney } from "@/helpers";
+import { generalId } from "@/layouts/Header";
 
 ChartJS.register(
   CategoryScale,
@@ -36,15 +37,15 @@ export enum FilterDateType {
 }
 
 export enum ViewType {
-  Date = 'date',
-  Day = 'day',
+  Date = "date",
+  Day = "day",
 }
 
 export const options = {
   responsive: true,
   plugins: {
     legend: {
-      position: 'top' as const,
+      position: "top" as const,
       display: false,
     },
     title: {
@@ -68,14 +69,13 @@ export function RevenueChart({ branchId }: { branchId: number }) {
 
   const [formFilter, setFormFilter] = useState({
     type: 1,
-    concern: 'TIME',
+    concern: "TIME",
     branchId: branchId ? branchId : undefined,
-    from: dayjs().startOf('month').format("YYYY-MM-DD"),
+    from: dayjs().startOf("month").format("YYYY-MM-DD"),
     to: dayjs().format("YYYY-MM-DD"),
   });
 
   const [branchIdReady, setBranchIdReady] = useState(false);
-
 
   useEffect(() => {
     if (branchId) {
@@ -86,30 +86,39 @@ export function RevenueChart({ branchId }: { branchId: number }) {
       setBranchIdReady(true);
     }
   }, [branchId]);
-  
 
   const { data: saleReport, isLoading: isSaleReportLoading } = useQuery(
     [
-      'SALE_REPORT',
+      "SALE_REPORT",
       formFilter.from,
       formFilter.to,
       formFilter.concern,
       formFilter.branchId,
     ],
-    () => getSaleReport({ from: formFilter.from, to: formFilter.to, branchId: formFilter.branchId, concern: formFilter.concern }),
+    () =>
+      getSaleReport({
+        from: formFilter.from,
+        to: formFilter.to,
+        ...(String(formFilter.branchId) === generalId ? {} : { branchId }),
+        concern: formFilter.concern,
+      }),
     {
       enabled: branchIdReady,
     }
   );
 
-
   const { data } = useQuery(
-    ['REVENUE_CHART', revenueFilter.viewType, revenueFilter.dateRange, branchId],
+    [
+      "REVENUE_CHART",
+      revenueFilter.viewType,
+      revenueFilter.dateRange,
+      branchId,
+    ],
     () =>
       getRevenueReport({
         type: revenueFilter.viewType,
         dateRange: getDateRange(revenueFilter.dateRange),
-        branchId
+        ...(String(branchId) === generalId ? {} : { branchId }),
       })
   );
 
@@ -122,9 +131,9 @@ export function RevenueChart({ branchId }: { branchId: number }) {
       labels,
       datasets: [
         {
-          label: 'Doanh thu',
+          label: "Doanh thu",
           data: data?.data?.items?.map((item) => item.revenue),
-          backgroundColor: '#0070F4',
+          backgroundColor: "#0070F4",
         },
       ],
     }),
@@ -142,7 +151,9 @@ export function RevenueChart({ branchId }: { branchId: number }) {
               <Image src={ArrowRight} alt="" />
             </div>
 
-            <div className="text-red-main">{formatMoney(saleReport?.data?.summary?.realRevenue)}</div>
+            <div className="text-red-main">
+              {formatMoney(saleReport?.data?.summary?.realRevenue)}
+            </div>
           </div>
 
           <div className="mb-8 flex">
@@ -189,10 +200,10 @@ export function RevenueChart({ branchId }: { branchId: number }) {
           wrapClassName="!w-[200px] "
           options={[
             {
-              label: 'Tháng hiện tại',
+              label: "Tháng hiện tại",
               value: FilterDateType.CURRENT_MONTH,
             },
-            { label: 'Tháng trước', value: FilterDateType.PRE_MONTH },
+            { label: "Tháng trước", value: FilterDateType.PRE_MONTH },
           ]}
           value={revenueFilter.dateRange}
         />

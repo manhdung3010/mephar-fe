@@ -24,7 +24,6 @@ export function InitGlobalData() {
   const [, setProfileState] = useRecoilState(profileState);
   const [, setStoreState] = useRecoilState(storeState);
   const [branch, setBranch] = useRecoilState(branchState);
-  const [branchGeneral, setBranchGeneral] = useRecoilState(branchGenegalState);
   const [isAgency, setIsAgency] = useRecoilState(agencyState);
   const orderObject = useRecoilValue(orderState);
   const orderActive = useRecoilValue(orderActiveState);
@@ -62,9 +61,6 @@ export function InitGlobalData() {
 
       setBranch(
         defaultBranch ? defaultBranch.id : branches?.data?.items[0]?.id
-      );
-      setBranchGeneral(
-        branches?.data?.items?.find((item) => item.isGeneral)?.id
       );
     }
   }, [branches, router.pathname]);

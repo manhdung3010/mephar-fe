@@ -5,7 +5,7 @@ import axiosClient from "./index";
 export function getOrder(params: {
   page: number;
   limit: number;
-  branchId: number;
+  branchId?: number;
   status?: EOrderStatus;
   customerId?: number;
 }) {
@@ -16,7 +16,7 @@ export function getSaleReturn(params: {
   page: number;
   limit: number;
   keyword?: string;
-  branchId: number;
+  branchId?: number;
   storeId?: number;
   from?: string;
   to?: string;
