@@ -44,10 +44,10 @@ export const Header = ({ title }: { title?: string | ReactNode }) => {
         isGeneral: true,
       };
       // sort by isGeneral is the last
-      const sortedBranches = branches.data.items.filter(
-        (item) => !item.isGeneral
-      );
-      sortedBranches.push(generalBranch);
+      const sortedBranches = branches.data.items;
+      if (sortedBranches.length > 1) {
+        sortedBranches.push(generalBranch);
+      }
       setListBranch(sortedBranches);
     }
   }, [branches]);
