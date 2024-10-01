@@ -30,6 +30,7 @@ export function RightContent({
   reset,
   detail,
   id,
+  products,
 }: any) {
   const router = useRouter();
   const profile = useRecoilValue(profileState);
@@ -44,10 +45,10 @@ export function RightContent({
   );
 
   const totalMoney = useMemo(() => {
-    return detail?.products?.reduce((total: number, item: any) => {
+    return products?.reduce((total: number, item: any) => {
       return total + item.quantity * item.price;
     }, 0);
-  }, [detail?.products]);
+  }, [products]);
 
   const [formFilter, setFormFilter] = useState({
     page: 1,
@@ -55,7 +56,7 @@ export function RightContent({
   });
 
   const { data: address, isLoading } = useQuery(
-    ["SHIP_ADDRESS", JSON.stringify(formFilter)],
+    ["SHIP_ADDRESS", JSON.stringify(formFilter), detail?.storeId],
     () => getShipAddress({ ...formFilter, toStoreId: detail?.storeId }),
     {
       onSuccess: (data) => {

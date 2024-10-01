@@ -13,7 +13,10 @@ import CustomTable from "@/components/CustomTable";
 import { formatMoney, formatNumber } from "@/helpers";
 import { branchState } from "@/recoil/state";
 import { getMarketOrder } from "@/api/market.service";
-import { EOrderMarketStatus, EOrderMarketStatusLabel } from "@/modules/markets/type";
+import {
+  EOrderMarketStatus,
+  EOrderMarketStatusLabel,
+} from "@/modules/markets/type";
 import OrderDetail from "./row-detail";
 import Search from "./Search";
 import { IOrder } from "./type";
@@ -33,13 +36,13 @@ export function OrderTransaction() {
   const [formFilter, setFormFilter] = useState({
     page: 1,
     limit: 20,
-    keyword: '',
-    type: 'sell',
+    keyword: "",
+    type: "sell",
     dateNumber: 90,
   });
 
   const { data: orders, isLoading } = useQuery(
-    ['MAKET_ORDER', formFilter],
+    ["MAKET_ORDER", formFilter],
     () => getMarketOrder({ ...formFilter })
   );
 
@@ -143,13 +146,14 @@ export function OrderTransaction() {
               0
             )
           )}
-        </span>)
+        </span>
+      ),
     },
     {
       title: "Người mua",
       dataIndex: "fullName",
       key: "fullName",
-      render: (fullName) => fullName,
+      render: (fullName, record) => record?.store?.name,
     },
     // {
     //   title: "ĐVVC",
@@ -162,14 +166,27 @@ export function OrderTransaction() {
       key: "status",
       render: (_, { status }) => (
         <div
-          className={
-            `py-1 px-2 rounded-2xl border-[1px]  w-max
-          ${status === EOrderMarketStatus.PENDING && ' bg-[#fff2eb] border-[#FF8800] text-[#FF8800]'}
-          ${status === EOrderMarketStatus.CONFIRM || status === EOrderMarketStatus.PROCESSING || status === EOrderMarketStatus.SEND && ' bg-[#e5f0ff] border-[#0063F7] text-[#0063F7]'}
-          ${status === EOrderMarketStatus.DONE && ' bg-[#e3fff1] border-[#05A660] text-[#05A660]'}
-          ${status === EOrderMarketStatus.CANCEL || status === EOrderMarketStatus.CLOSED && ' bg-[#ffe5e5] border-[#FF3B3B] text-[#FF3B3B]'}
-          `
+          className={`py-1 px-2 rounded-2xl border-[1px]  w-max
+          ${
+            status === EOrderMarketStatus.PENDING &&
+            " bg-[#fff2eb] border-[#FF8800] text-[#FF8800]"
           }
+          ${
+            status === EOrderMarketStatus.CONFIRM ||
+            status === EOrderMarketStatus.PROCESSING ||
+            (status === EOrderMarketStatus.SEND &&
+              " bg-[#e5f0ff] border-[#0063F7] text-[#0063F7]")
+          }
+          ${
+            status === EOrderMarketStatus.DONE &&
+            " bg-[#e3fff1] border-[#05A660] text-[#05A660]"
+          }
+          ${
+            status === EOrderMarketStatus.CANCEL ||
+            (status === EOrderMarketStatus.CLOSED &&
+              " bg-[#ffe5e5] border-[#FF3B3B] text-[#FF3B3B]")
+          }
+          `}
         >
           {EOrderMarketStatusLabel[status?.toUpperCase()]}
         </div>
@@ -217,9 +234,11 @@ export function OrderTransaction() {
             options={[
               { label: "90 ngày gần nhất", value: 90 },
               { label: "60 ngày gần nhất", value: 60 },
-              { label: "30 ngày gần nhất", value: 30 }
+              { label: "30 ngày gần nhất", value: 30 },
             ]}
-            onChange={(value) => setFormFilter({ ...formFilter, dateNumber: value })}
+            onChange={(value) =>
+              setFormFilter({ ...formFilter, dateNumber: value })
+            }
             suffixIcon={<Image src={ArrowDownIcon} />}
           />
         </div>
@@ -232,7 +251,9 @@ export function OrderTransaction() {
                 {formatNumber(orders?.data?.filterOrderByStatus[0]?.count)}
               </span>
             </div>
-            <div className="text-xl font-medium text-[#182537]">{formatMoney(orders?.data?.filterOrderByStatus[0]?.sum)}</div>
+            <div className="text-xl font-medium text-[#182537]">
+              {formatMoney(orders?.data?.filterOrderByStatus[0]?.sum)}
+            </div>
           </div>
           <div className="mx-6 w-[1px] border-l border-dashed border-[#ABABAB]" />
           <div>
@@ -242,7 +263,9 @@ export function OrderTransaction() {
                 {formatNumber(orders?.data?.filterOrderByStatus[1]?.count)}
               </span>
             </div>
-            <div className="text-xl font-medium text-[#182537]">{formatMoney(orders?.data?.filterOrderByStatus[1]?.sum)}</div>
+            <div className="text-xl font-medium text-[#182537]">
+              {formatMoney(orders?.data?.filterOrderByStatus[1]?.sum)}
+            </div>
           </div>
           <div className="mx-6 w-[1px] border-l border-dashed border-[#ABABAB]" />
           <div>
@@ -252,7 +275,9 @@ export function OrderTransaction() {
                 {formatNumber(orders?.data?.filterOrderByStatus[2]?.count)}
               </span>
             </div>
-            <div className="text-xl font-medium text-[#182537]">{formatMoney(orders?.data?.filterOrderByStatus[2]?.sum)}</div>
+            <div className="text-xl font-medium text-[#182537]">
+              {formatMoney(orders?.data?.filterOrderByStatus[2]?.sum)}
+            </div>
           </div>
           <div className="mx-6 w-[1px] border-l border-dashed border-[#ABABAB]" />
           <div>
@@ -262,7 +287,9 @@ export function OrderTransaction() {
                 {formatNumber(orders?.data?.filterOrderByStatus[3]?.count)}
               </span>
             </div>
-            <div className="text-xl font-medium text-[#182537]">{formatMoney(orders?.data?.filterOrderByStatus[3]?.sum)}</div>
+            <div className="text-xl font-medium text-[#182537]">
+              {formatMoney(orders?.data?.filterOrderByStatus[3]?.sum)}
+            </div>
           </div>
 
           <div className="mx-6 w-[1px] border-l border-dashed border-[#ABABAB]" />
@@ -274,7 +301,9 @@ export function OrderTransaction() {
                 {formatNumber(orders?.data?.filterOrderByStatus[6]?.count)}
               </span>
             </div>
-            <div className="text-xl font-medium text-[#182537]">{formatMoney(orders?.data?.filterOrderByStatus[6]?.sum)}</div>
+            <div className="text-xl font-medium text-[#182537]">
+              {formatMoney(orders?.data?.filterOrderByStatus[6]?.sum)}
+            </div>
           </div>
 
           <div className="mx-6 w-[1px] border-l border-dashed border-[#ABABAB]" />
@@ -286,7 +315,9 @@ export function OrderTransaction() {
                 {formatNumber(orders?.data?.filterOrderByStatus[5]?.count)}
               </span>
             </div>
-            <div className="text-xl font-medium text-[#182537]">{formatMoney(orders?.data?.filterOrderByStatus[5]?.sum)}</div>
+            <div className="text-xl font-medium text-[#182537]">
+              {formatMoney(orders?.data?.filterOrderByStatus[5]?.sum)}
+            </div>
           </div>
           <div className="mx-6 w-[1px] border-l border-dashed border-[#ABABAB]" />
 
@@ -297,7 +328,9 @@ export function OrderTransaction() {
                 {formatNumber(orders?.data?.filterOrderByStatus[4]?.count)}
               </span>
             </div>
-            <div className="text-xl font-medium text-[#182537]">{formatMoney(orders?.data?.filterOrderByStatus[4]?.sum)}</div>
+            <div className="text-xl font-medium text-[#182537]">
+              {formatMoney(orders?.data?.filterOrderByStatus[4]?.sum)}
+            </div>
           </div>
         </div>
       </div>

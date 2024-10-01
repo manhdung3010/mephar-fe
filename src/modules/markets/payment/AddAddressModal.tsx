@@ -49,10 +49,14 @@ function AddAddressModal({
   const queryClient = useQueryClient();
   const { mutate: mutateCreateAddress, isLoading } = useMutation(
     () => {
+      const payload = {
+        ...getValues(),
+        ...(newBranchId && { toStoreId: newBranchId }),
+      };
       if (addressId) {
-        return updateShipAddress(addressId, getValues());
+        return updateShipAddress(addressId, payload);
       }
-      return createShipAddress({ ...getValues() });
+      return createShipAddress(payload);
     },
     {
       onSuccess: async () => {

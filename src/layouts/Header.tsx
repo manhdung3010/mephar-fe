@@ -39,7 +39,7 @@ export const Header = ({ title }: { title?: string | ReactNode }) => {
     if (branches?.data?.items?.length) {
       // filter isGeneral = true
       const generalBranch = {
-        id: "GENERAL_ID",
+        id: generalId,
         name: "Tất cả chi nhánh",
         isGeneral: true,
       };

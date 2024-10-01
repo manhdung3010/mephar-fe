@@ -36,7 +36,7 @@ export function EditOrder() {
   const router = useRouter();
   const { id } = router.query;
 
-  const { data: details } = useQuery<{ data: any }>(
+  const { data: details, isLoading } = useQuery<{ data: any }>(
     ["MARKET_ORDER_DETAIL", id, branchId],
     () => getMarketOrderDetail(String(id)),
     {
@@ -48,7 +48,7 @@ export function EditOrder() {
           });
         }
       },
-    },
+    }
   );
 
   const columns: any = [
@@ -73,7 +73,7 @@ export function EditOrder() {
       title: "ĐVT",
       dataIndex: "units",
       key: "units",
-      render: (_, record) => record?.marketProduct?.productUnit?.unitName
+      render: (_, record) => record?.marketProduct?.productUnit?.unitName,
     },
     {
       title: "Số lượng",
@@ -101,7 +101,6 @@ export function EditOrder() {
             );
             newListProduct[index].quantity = +value;
             setValue("listProduct", newListProduct, { shouldValidate: true });
-
           }}
           onMinus={(value) => {
             // update quantity of product
@@ -144,13 +143,13 @@ export function EditOrder() {
         <div className="p-5 overflow-x-auto">
           <div className="min-w-[1000px]">
             <CustomTable
-              dataSource={getValues('listProduct')?.map((item, index) => ({
+              dataSource={getValues("listProduct")?.map((item, index) => ({
                 ...item,
                 key: index + 1,
               }))}
               columns={columns}
               pagination={false}
-
+              loading={isLoading}
             />
           </div>
         </div>
@@ -164,6 +163,7 @@ export function EditOrder() {
         reset={reset}
         detail={details?.data?.item}
         id={id}
+        products={getValues("listProduct")}
       />
     </div>
   );
