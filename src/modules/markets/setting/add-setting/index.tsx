@@ -1,10 +1,6 @@
 import Image from "next/image";
 
-import {
-  createConfigProduct,
-  getConfigProductDetail,
-  updateConfigProduct,
-} from "@/api/market.service";
+import { createConfigProduct, getConfigProductDetail, updateConfigProduct } from "@/api/market.service";
 import { getSaleProducts } from "@/api/product.service";
 import ArrowDownIcon from "@/assets/arrowDownGray.svg";
 import PhotographIcon from "@/assets/photograph.svg";
@@ -82,15 +78,8 @@ export function AddMarketSetting() {
     isSuccess,
   } = useQuery<{
     data?: { items: ISaleProduct[] };
-  }>(
-    [
-      "LIST_SALE_PRODUCT",
-      formFilter.page,
-      formFilter.limit,
-      formFilter.keyword,
-      branchId,
-    ],
-    () => getSaleProducts({ ...formFilter, branchId })
+  }>(["LIST_SALE_PRODUCT", formFilter.page, formFilter.limit, formFilter.keyword], () =>
+    getSaleProducts({ ...formFilter }),
   );
 
   const { data: productDetail, isLoading: isLoadingProductDetail } = useQuery<{
@@ -107,8 +96,7 @@ export function AddMarketSetting() {
 
   useEffect(() => {
     if (productDetail?.data?.item) {
-      const { product, productUnit, productUnitId, batches, ...rest } =
-        productDetail?.data?.item;
+      const { product, productUnit, productUnitId, batches, ...rest } = productDetail?.data?.item;
       const productSelected = getSaleProducts({
         ...formFilter,
         productUnit: productUnitId,
@@ -116,9 +104,7 @@ export function AddMarketSetting() {
       }).then((res) => {
         onSelectedProduct(JSON.stringify(res.data.items[0]));
         const newBatches = batches.map((batch) => {
-          const nBatch = res.data.items[0].batches.find(
-            (item) => item.id === batch.batchId
-          );
+          const nBatch = res.data.items[0].batches.find((item) => item.id === batch.batchId);
           return {
             ...nBatch,
             originalQuantity: nBatch.quantity,
@@ -137,7 +123,7 @@ export function AddMarketSetting() {
       setValue(
         "images",
         rest.images?.map((item) => item.id),
-        { shouldValidate: true }
+        { shouldValidate: true },
       );
       setValue("isDefaultPrice", rest.isDefaultPrice, { shouldValidate: true });
       setProductSelected(productDetail?.data?.item);
@@ -149,7 +135,7 @@ export function AddMarketSetting() {
             isGroup: item.groupAgencyId ? true : false,
             id: item.groupAgencyId || item.agencyId,
           };
-        })
+        }),
       );
     }
   }, [productDetail]);
@@ -173,9 +159,7 @@ export function AddMarketSetting() {
         delete payload.batches;
       }
 
-      return id
-        ? updateConfigProduct(id, { ...payload })
-        : createConfigProduct({ ...payload });
+      return id ? updateConfigProduct(id, { ...payload }) : createConfigProduct({ ...payload });
     },
     {
       onSuccess: async () => {
@@ -187,7 +171,7 @@ export function AddMarketSetting() {
       onError: (err: any) => {
         message.error(err?.message);
       },
-    }
+    },
   );
 
   const onSearch = useCallback(
@@ -197,13 +181,11 @@ export function AddMarketSetting() {
         keyword: value,
       }));
     }, 300),
-    [formFilter]
+    [formFilter],
   );
 
   const validateDiscountPrice = () => {
-    const agency = listAgencySelected.find(
-      (item) => item.discountPrice > item.price
-    );
+    const agency = listAgencySelected.find((item) => item.discountPrice > item.price);
     if (agency) {
       return false;
     }
@@ -211,34 +193,24 @@ export function AddMarketSetting() {
   };
 
   const onSubmit = () => {
-    if (
-      productSelected?.batches?.length > 0 &&
-      listBatchSelected.length === 0
-    ) {
+    if (productSelected?.batches?.length > 0 && listBatchSelected.length === 0) {
       message.error("Vui lòng chọn lô sản phẩm");
       return;
     }
     if (!validateDiscountPrice()) {
-      message.error(
-        "Giá khuyến mãi của đại lý/nhóm đại lý không được lớn hơn giá bán"
-      );
+      message.error("Giá khuyến mãi của đại lý/nhóm đại lý không được lớn hơn giá bán");
       return;
     }
     // check quantity with batch selected
     if (listBatchSelected?.length > 0) {
-      const totalQuantity = listBatchSelected.reduce(
-        (total, item) => total + item.newInventory,
-        0
-      );
+      const totalQuantity = listBatchSelected.reduce((total, item) => total + item.newInventory, 0);
       if (getValues("quantity") > totalQuantity) {
         message.error("Số lượng tồn không được lớn hơn số lượng tồn của lô");
         return;
       }
     } else {
       if (getValues("quantity") > productSelected?.quantity) {
-        message.error(
-          "Số lượng tồn không được lớn hơn số lượng tồn của sản phẩm"
-        );
+        message.error("Số lượng tồn không được lớn hơn số lượng tồn của sản phẩm");
         return;
       }
     }
@@ -353,10 +325,7 @@ export function AddMarketSetting() {
               onClick={() => {
                 const newAgency = listAgencySelected
                   .map((item) => {
-                    if (
-                      item.id === record.id &&
-                      item.isGroup === record.isGroup
-                    ) {
+                    if (item.id === record.id && item.isGroup === record.isGroup) {
                       return null;
                     }
                     return item;
@@ -375,12 +344,9 @@ export function AddMarketSetting() {
 
   useEffect(() => {
     if (productSelected && getValues("productUnitId")) {
-      const productUnit = productSelected?.product?.productUnit?.find(
-        (item) => item.id === getValues("productUnitId")
-      );
+      const productUnit = productSelected?.product?.productUnit?.find((item) => item.id === getValues("productUnitId"));
       let inventory = 0;
-      const mainInventory =
-        productSelected?.quantity * productSelected?.exchangeValue;
+      const mainInventory = productSelected?.quantity * productSelected?.exchangeValue;
       if (productUnit?.isBaseUnit) {
         inventory = Math.floor(mainInventory / productUnit?.exchangeValue);
       } else {
@@ -394,21 +360,12 @@ export function AddMarketSetting() {
   return (
     <>
       <div className="my-6 flex items-center justify-between bg-white p-5">
-        <div className="text-2xl font-medium uppercase">
-          {id ? "Cập nhật" : "thêm mới"} CẤU HÌNH SẢN PHẨM LÊN CHỢ
-        </div>
+        <div className="text-2xl font-medium uppercase">{id ? "Cập nhật" : "thêm mới"} CẤU HÌNH SẢN PHẨM LÊN CHỢ</div>
         <div className="flex gap-4">
-          <CustomButton
-            outline={true}
-            onClick={() => router.push("/markets/setting")}
-          >
+          <CustomButton outline={true} onClick={() => router.push("/markets/setting")}>
             Hủy bỏ
           </CustomButton>
-          <CustomButton
-            onClick={handleSubmit(onSubmit)}
-            loading={isLoading}
-            disabled={isLoading}
-          >
+          <CustomButton onClick={handleSubmit(onSubmit)} loading={isLoading} disabled={isLoading}>
             Lưu
           </CustomButton>
         </div>
@@ -458,11 +415,7 @@ export function AddMarketSetting() {
                           <div className="rounded bg-red-main px-2 py-[2px] text-white">
                             {item.productUnit.unitName}
                           </div>
-                          {item.quantity <= 0 && (
-                            <div className="rounded text-red-main py-[2px] italic">
-                              Hết hàng
-                            </div>
-                          )}
+                          {item.quantity <= 0 && <div className="rounded text-red-main py-[2px] italic">Hết hàng</div>}
                         </div>
 
                         <div className="flex gap-x-3">
@@ -524,14 +477,8 @@ export function AddMarketSetting() {
                     outline
                     onClick={() => setOpenListBatchModal(true)}
                     className="!h-11 p-1"
-                    disabled={
-                      productSelected?.batches?.length > 0 ? false : true
-                    }
-                    type={
-                      productSelected?.batches?.length > 0
-                        ? "danger"
-                        : "disable"
-                    }
+                    disabled={productSelected?.batches?.length > 0 ? false : true}
+                    type={productSelected?.batches?.length > 0 ? "danger" : "disable"}
                   >
                     Chọn lô
                   </CustomButton>
@@ -545,8 +492,7 @@ export function AddMarketSetting() {
                         className="flex min-w-fit items-center rounded bg-red-main py-1 px-2 text-white"
                       >
                         <span className="mr-2">
-                          {batch?.name} - {batch?.expiryDate} - SL:{" "}
-                          {batch.quantity}
+                          {batch?.name} - {batch?.expiryDate} - SL: {batch.quantity}
                         </span>
                       </div>
                     ))}
@@ -557,9 +503,7 @@ export function AddMarketSetting() {
               <Label
                 infoText=""
                 label={`Số lượng tồn ${
-                  productSelected?.batches?.length < 1
-                    ? `(Tồn: ${formatNumber(noBatchInventory)})`
-                    : ""
+                  productSelected?.batches?.length < 1 ? `(Tồn: ${formatNumber(noBatchInventory)})` : ""
                 }`}
                 required
               />
@@ -582,7 +526,7 @@ export function AddMarketSetting() {
                       batchId: item?.id,
                       quantity: item?.quantity,
                     })),
-                    { shouldValidate: true }
+                    { shouldValidate: true },
                   );
                   setValue("quantity", value, { shouldValidate: true });
                 }}
@@ -621,9 +565,7 @@ export function AddMarketSetting() {
                 className="h-11"
                 value={getValues("discountPrice")}
                 type="number"
-                onChange={(value) =>
-                  setValue("discountPrice", value, { shouldValidate: true })
-                }
+                onChange={(value) => setValue("discountPrice", value, { shouldValidate: true })}
               />
               <InputError error={errors.discountPrice?.message} />
             </div>
@@ -635,9 +577,7 @@ export function AddMarketSetting() {
                 className="h-11"
                 type="number"
                 value={getValues("price")}
-                onChange={(value) =>
-                  setValue("price", value, { shouldValidate: true })
-                }
+                onChange={(value) => setValue("price", value, { shouldValidate: true })}
               />
               <InputError error={errors.price?.message} />
             </div>
@@ -707,9 +647,7 @@ export function AddMarketSetting() {
           }}
         >
           <div>
-            <div className="mb-2 font-medium text-[#15171A]">
-              Hình ảnh minh họa
-            </div>
+            <div className="mb-2 font-medium text-[#15171A]">Hình ảnh minh họa</div>
             <CustomUpload
               onChangeValue={(value) => {
                 // validate if value size > 2MB
@@ -722,9 +660,7 @@ export function AddMarketSetting() {
                 }
                 setValue("thumbnail", value, { shouldValidate: true });
               }}
-              values={[
-                productDetail?.data?.item?.imageCenter?.path || imageCenterPath,
-              ]}
+              values={[productDetail?.data?.item?.imageCenter?.path || imageCenterPath]}
             >
               <div
                 className={
@@ -736,9 +672,7 @@ export function AddMarketSetting() {
                   <span className="text-[#E03]">Tải ảnh lên</span>{" "}
                   <span className="text-[#6F727A]">hoặc kéo và thả</span>
                 </div>
-                <div className="font-thin text-[#6F727A]">
-                  PNG, JPG, GIF up to 2MB
-                </div>
+                <div className="font-thin text-[#6F727A]">PNG, JPG, GIF up to 2MB</div>
               </div>
             </CustomUpload>
             <InputError error={errors.thumbnail?.message} />
@@ -777,10 +711,7 @@ export function AddMarketSetting() {
               batchId: item.id,
               quantity: item.quantity,
             }));
-          const totalQuantity = newListBatch.reduce(
-            (total, item) => total + item.quantity,
-            0
-          );
+          const totalQuantity = newListBatch.reduce((total, item) => total + item.quantity, 0);
           setListBatchSelected(listBatch.filter((item) => item.isSelected));
           setValue("batches", newListBatch, { shouldValidate: true });
           setValue("quantity", totalQuantity, { shouldValidate: true });
@@ -804,16 +735,10 @@ export function AddMarketSetting() {
           // check agency exist
           const agencyExist = newData
             .filter((item) => item.isGroup === false)
-            .find((item) =>
-              listAgencySelected.some((agency) => agency.id === item.id)
-            );
+            .find((item) => listAgencySelected.some((agency) => agency.id === item.id));
           const agencyGroupExist = newData
             .filter((item) => item.isGroup === true)
-            .find((item) =>
-              listAgencySelected.some(
-                (agency) => agency.isGroup === true && agency.id === item.id
-              )
-            );
+            .find((item) => listAgencySelected.some((agency) => agency.isGroup === true && agency.id === item.id));
           if (agencyExist) {
             message.error(`Đại lý "${agencyExist?.agency?.name}" đã tồn tại`);
             return;

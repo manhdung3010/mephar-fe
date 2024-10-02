@@ -14,11 +14,7 @@ import { useAddress } from "@/hooks/useAddress";
 import { CustomSwitch } from "@/components/CustomSwitch";
 import { message } from "antd";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  createShipAddress,
-  getShipAddressDetail,
-  updateShipAddress,
-} from "@/api/market.service";
+import { createShipAddress, getShipAddressDetail, updateShipAddress } from "@/api/market.service";
 
 function AddAddressModal({
   isOpen,
@@ -67,22 +63,15 @@ function AddAddressModal({
       onError: (err: any) => {
         message.error(err?.message);
       },
-    }
+    },
   );
-
-  useEffect(() => {
-    if (isOpen && !getValues("fullName")) {
-      setValue("fullName", profile?.fullName, { shouldValidate: true });
-    }
-  }, [isOpen, getValues("fullName")]);
 
   const { data: addressDetail, isLoading: isLoadingDetail } = useQuery(
     ["MARKET_PRODUCT_DETAIL", JSON.stringify(addressId)],
-    () =>
-      getShipAddressDetail(String(addressId), { storeId: newBranchId || null }),
+    () => getShipAddressDetail(String(addressId), { storeId: newBranchId || null }),
     {
       enabled: !!addressId,
-    }
+    },
   );
 
   useEffect(() => {
@@ -106,10 +95,7 @@ function AddAddressModal({
     }
   }, [addressDetail]);
 
-  const { provinces, districts, wards } = useAddress(
-    getValues("provinceId"),
-    getValues("districtId")
-  );
+  const { provinces, districts, wards } = useAddress(getValues("provinceId"), getValues("districtId"));
 
   const onSubmit = () => {
     mutateCreateAddress();
@@ -129,9 +115,7 @@ function AddAddressModal({
             placeholder="Họ tên"
             className="border-0 py-2"
             value={getValues("fullName")}
-            onChange={(value) =>
-              setValue("fullName", value, { shouldValidate: true })
-            }
+            onChange={(value) => setValue("fullName", value, { shouldValidate: true })}
           />
           <InputError error={errors.fullName?.message} />
         </div>
@@ -140,17 +124,13 @@ function AddAddressModal({
             placeholder="Số điện thoại"
             className="border-0 py-2"
             value={getValues("phone")}
-            onChange={(value) =>
-              setValue("phone", value, { shouldValidate: true })
-            }
+            onChange={(value) => setValue("phone", value, { shouldValidate: true })}
           />
           <InputError error={errors.phone?.message} />
         </div>
         <div className="border-b-[1px] border-[#EBEBF0] py-2">
           <CustomSelect
-            onChange={(value) =>
-              setValue("provinceId", value, { shouldValidate: true })
-            }
+            onChange={(value) => setValue("provinceId", value, { shouldValidate: true })}
             options={provinces?.data?.items?.map((item) => ({
               value: item.id,
               label: item.name,
@@ -164,9 +144,7 @@ function AddAddressModal({
         </div>
         <div className="border-b-[1px] border-[#EBEBF0] py-2">
           <CustomSelect
-            onChange={(value) =>
-              setValue("districtId", value, { shouldValidate: true })
-            }
+            onChange={(value) => setValue("districtId", value, { shouldValidate: true })}
             options={districts?.data?.items?.map((item) => ({
               value: item.id,
               label: item.name,
@@ -180,9 +158,7 @@ function AddAddressModal({
         </div>
         <div className="border-b-[1px] border-[#EBEBF0] py-2">
           <CustomSelect
-            onChange={(value) =>
-              setValue("wardId", value, { shouldValidate: true })
-            }
+            onChange={(value) => setValue("wardId", value, { shouldValidate: true })}
             options={wards?.data?.items?.map((item) => ({
               value: item.id,
               label: item.name,
@@ -199,9 +175,7 @@ function AddAddressModal({
             placeholder="Địa chỉ chi tiết"
             className="border-0 py-2"
             value={getValues("address")}
-            onChange={(value) =>
-              setValue("address", value, { shouldValidate: true })
-            }
+            onChange={(value) => setValue("address", value, { shouldValidate: true })}
           />
         </div>
         <div className="flex justify-between items-center mt-8">
@@ -218,18 +192,10 @@ function AddAddressModal({
       </div>
 
       <div className="flex justify-end gap-2">
-        <CustomButton
-          outline
-          type="original"
-          className="!w-[180px] !h-11"
-          onClick={onCancel}
-        >
+        <CustomButton outline type="original" className="!w-[180px] !h-11" onClick={onCancel}>
           Hủy
         </CustomButton>
-        <CustomButton
-          className="!w-[180px] !h-11"
-          onClick={handleSubmit(onSubmit)}
-        >
+        <CustomButton className="!w-[180px] !h-11" onClick={handleSubmit(onSubmit)}>
           Lưu{" "}
         </CustomButton>
       </div>

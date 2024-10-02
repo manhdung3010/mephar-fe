@@ -4,7 +4,6 @@ import { cloneDeep, debounce } from "lodash";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-
 import { getCustomer } from "@/api/customer.service";
 import { getEmployee } from "@/api/employee.service";
 import { createOrderReturn } from "@/api/order.service";
@@ -18,14 +17,8 @@ import { CustomSelect } from "@/components/CustomSelect";
 import InputError from "@/components/InputError";
 import { EDiscountType, EPaymentMethod } from "@/enums";
 import { formatMoney } from "@/helpers";
-import {
-  branchState,
-  orderActiveState,
-  orderState,
-  profileState,
-} from "@/recoil/state";
+import { branchState, orderActiveState, orderState, profileState } from "@/recoil/state";
 import cx from "classnames";
-
 import Bank from "@/assets/images/bank.png";
 import Cash from "@/assets/images/cash.png";
 import Debt from "@/assets/images/debt.png";
@@ -34,6 +27,7 @@ import { OrderSuccessModal } from "./OrderSuccessModal";
 import type { ISaleProductLocal } from "./interface";
 import { RightContentStyled } from "./styled";
 import { checkTypeOrder } from "./checkTypeOrder";
+import { useRouter } from "next/router";
 
 export function RightContentReturn({
   useForm,
@@ -45,14 +39,9 @@ export function RightContentReturn({
   orderDetail: any;
 }) {
   const queryClient = useQueryClient();
+  const router = useRouter();
 
-  const {
-    getValuesReturn,
-    setValueReturn,
-    handleSubmitReturn,
-    errorsReturn,
-    resetReturn,
-  } = useForm;
+  const { getValuesReturn, setValueReturn, handleSubmitReturn, errorsReturn, resetReturn } = useForm;
 
   const [orderObject, setOrderObject] = useRecoilState(orderState);
   const [orderActive, setOrderActive] = useRecoilState(orderActiveState);
@@ -60,22 +49,17 @@ export function RightContentReturn({
   const branchId = useRecoilValue(branchState);
   const profile = useRecoilValue(profileState);
 
-  const [isOpenScanQrModal, setIsOpenScanQrModal] = useState(false);
   const [isOpenOrderSuccessModal, setIsOpenOrderSuccessModal] = useState(false);
-  const [isOpenPrescriptionModal, setIsOpenPrescriptionModal] = useState(false);
-  const [isOpenAddCustomerModal, setIsOpenAddCustomerModal] = useState(false);
   const [isOpenAddDiscountModal, setIsOpenAddDiscountModal] = useState(false);
   const [searchEmployeeText, setSearchEmployeeText] = useState("");
   const [searchCustomerText, setSearchCustomerText] = useState("");
   const [saleInvoice, setSaleInvoice] = useState();
 
-  const { data: employees } = useQuery(
-    ["EMPLOYEE_LIST", searchEmployeeText],
-    () => getEmployee({ page: 1, limit: 20, keyword: searchEmployeeText })
+  const { data: employees } = useQuery(["EMPLOYEE_LIST", searchEmployeeText], () =>
+    getEmployee({ page: 1, limit: 20, keyword: searchEmployeeText }),
   );
-  const { data: customers } = useQuery(
-    ["CUSTOMER_LIST", searchCustomerText],
-    () => getCustomer({ page: 1, limit: 99, keyword: searchCustomerText })
+  const { data: customers } = useQuery(["CUSTOMER_LIST", searchCustomerText], () =>
+    getCustomer({ page: 1, limit: 99, keyword: searchCustomerText }),
   );
 
   useEffect(() => {
@@ -104,7 +88,10 @@ export function RightContentReturn({
     //caculate total price
     orderObject[orderActive]?.forEach((product: any) => {
       const unit = product.productUnit;
-      price += checkTypeOrder(orderDetail?.order?.code) === 1 ? unit?.marketPrice * product?.quantity : Number(unit?.price ?? 0) * product.quantity;
+      price +=
+        checkTypeOrder(orderDetail?.order?.code) === 1
+          ? unit?.marketPrice * product?.quantity
+          : Number(unit?.price ?? 0) * product.quantity;
     });
 
     return price;
@@ -115,7 +102,10 @@ export function RightContentReturn({
     //caculate total return price
     orderObject[orderActive]?.forEach((product: any) => {
       const unit = product.productUnit;
-      price += checkTypeOrder(orderDetail?.order?.code) === 1 ? unit?.marketPrice * product?.quantity : Number(unit?.returnPrice ?? 0) * product.quantity;
+      price +=
+        checkTypeOrder(orderDetail?.order?.code) === 1
+          ? unit?.marketPrice * product?.quantity
+          : Number(unit?.returnPrice ?? 0) * product.quantity;
     });
 
     return price;
@@ -127,23 +117,18 @@ export function RightContentReturn({
     //caculate total return price
     orderObject[orderActive]?.forEach((product: any) => {
       const unit = product.productUnit;
-      price += checkTypeOrder(orderDetail?.order?.code) === 1 ? unit?.marketPrice * product?.quantity : Number(unit?.returnPrice ?? 0) * product.quantity;
+      price +=
+        checkTypeOrder(orderDetail?.order?.code) === 1
+          ? unit?.marketPrice * product?.quantity
+          : Number(unit?.returnPrice ?? 0) * product.quantity;
     });
 
-    price =
-      price -
-      (getValuesReturn("discount") ?? 0) -
-      (getValuesReturn("returnFee") ?? 0);
+    price = price - (getValuesReturn("discount") ?? 0) - (getValuesReturn("returnFee") ?? 0);
 
     setValueReturn("paid", price, { shouldValidate: true });
 
     return price;
-  }, [
-    orderObject,
-    orderActive,
-    getValuesReturn("discount"),
-    getValuesReturn("returnFee"),
-  ]);
+  }, [orderObject, orderActive, getValuesReturn("discount"), getValuesReturn("returnFee")]);
 
   // useEffect(() => {
   //   // get discount from customer when customer change
@@ -173,20 +158,13 @@ export function RightContentReturn({
       }
 
       if (getValuesReturn("discountType") === EDiscountType.PERCENT) {
-        const discountValue =
-          (totalPrice * Number(getValuesReturn("discount"))) / 100;
-        return totalPrice > discountValue
-          ? Math.round(totalPrice - discountValue)
-          : 0;
+        const discountValue = (totalPrice * Number(getValuesReturn("discount"))) / 100;
+        return totalPrice > discountValue ? Math.round(totalPrice - discountValue) : 0;
       }
     }
 
     return totalPrice;
-  }, [
-    totalPrice,
-    getValuesReturn("discount"),
-    getValuesReturn("discountType"),
-  ]);
+  }, [totalPrice, getValuesReturn("discount"), getValuesReturn("discountType")]);
 
   const returnPrice = useMemo(() => {
     if (getValuesReturn("cashOfCustomer")) {
@@ -196,52 +174,51 @@ export function RightContentReturn({
     return 0;
   }, [customerMustPay, getValuesReturn("cashOfCustomer")]);
 
-  const { mutate: mutateCreateOrder, isLoading: isLoadingCreateOrder } =
-    useMutation(
-      () => {
-        const formatProducts = getValuesReturn("products")?.map(
-          ({ isBatchExpireControl, ...product }) => ({
-            ...product,
-            batches: product.batches?.map((batch) => ({
-              id: batch.id,
-              quantity: batch.quantity,
-            })),
-          })
-        );
+  const { mutate: mutateCreateOrder, isLoading: isLoadingCreateOrder } = useMutation(
+    () => {
+      const formatProducts = getValuesReturn("products")?.map(({ isBatchExpireControl, ...product }) => ({
+        ...product,
+        batches: product.batches?.map((batch) => ({
+          id: batch.id,
+          quantity: batch.quantity,
+        })),
+      }));
 
-        return createOrderReturn({
-          ...getValuesReturn(),
-          ...(getValuesReturn("customerId") === -1 && { customerId: null }),
-          products: formatProducts,
-          orderId: orderDetail?.order?.id,
-          branchId,
-        });
+      return createOrderReturn({
+        ...getValuesReturn(),
+        ...(getValuesReturn("customerId") === -1 && { customerId: null }),
+        products: formatProducts,
+        orderId: orderDetail?.order?.id,
+        branchId,
+      });
+    },
+    {
+      onSuccess: async (res) => {
+        await queryClient.invalidateQueries(["LIST_SALE_PRODUCT"]);
+        if (res.data?.saleReturn) {
+          setSaleInvoice(res.data?.saleReturn);
+        }
+        const orderClone = cloneDeep(orderObject);
+        orderClone[orderActive] = [];
+        setOrderObject(orderClone);
+        // delete tab order object return
+        const orderKeys = Object.keys(orderObject);
+        const newOrderObject = { ...orderObject };
+        delete newOrderObject[orderActive];
+        setOrderObject(newOrderObject);
+        setOrderActive(String(orderKeys[0]));
+
+        setIsOpenOrderSuccessModal(true);
+        resetReturn();
+        setValueReturn("userId", profile.id, { shouldValidate: true });
+        // delete id of router
+        router.push(router.pathname);
       },
-      {
-        onSuccess: async (res) => {
-          await queryClient.invalidateQueries(["LIST_SALE_PRODUCT"]);
-          if (res.data?.saleReturn) {
-            setSaleInvoice(res.data?.saleReturn);
-          }
-          const orderClone = cloneDeep(orderObject);
-          orderClone[orderActive] = [];
-          setOrderObject(orderClone);
-          // delete tab order object return
-          const orderKeys = Object.keys(orderObject);
-          const newOrderObject = { ...orderObject };
-          delete newOrderObject[orderActive];
-          setOrderObject(newOrderObject);
-          setOrderActive(String(orderKeys[0]));
-
-          setIsOpenOrderSuccessModal(true);
-          resetReturn();
-          setValueReturn("userId", profile.id, { shouldValidate: true });
-        },
-        onError: (err: any) => {
-          message.error(err?.message);
-        },
-      }
-    );
+      onError: (err: any) => {
+        message.error(err?.message);
+      },
+    },
+  );
 
   const onSubmit = () => {
     mutateCreateOrder();
@@ -301,33 +278,19 @@ export function RightContentReturn({
           <div className="mb-5 border-b-2 border-dashed border-[#E4E4E4]">
             <div className="mb-3 flex justify-between">
               <div className="text-lg leading-normal text-[#828487]">
-                Tổng giá gốc hàng mua (
-                <span className="text-lg">
-                  {orderObject[orderActive]?.length ?? 0} sp
-                </span>
-                )
+                Tổng giá gốc hàng mua (<span className="text-lg">{orderObject[orderActive]?.length ?? 0} sp</span>)
               </div>
-              <div className="text-lg leading-normal text-[#19191C]">
-                {formatMoney(totalPrice)}
-              </div>
+              <div className="text-lg leading-normal text-[#19191C]">{formatMoney(totalPrice)}</div>
             </div>
             <div className="mb-3 flex justify-between">
               <div className="text-lg leading-normal text-[#828487]">
-                Tổng tiền hàng trả (
-                <span className="text-lg">
-                  {orderObject[orderActive]?.length ?? 0} sp
-                </span>
-                )
+                Tổng tiền hàng trả (<span className="text-lg">{orderObject[orderActive]?.length ?? 0} sp</span>)
               </div>
-              <div className="text-lg leading-normal text-[#19191C]">
-                {formatMoney(totalReturnPrice)}
-              </div>
+              <div className="text-lg leading-normal text-[#19191C]">{formatMoney(totalReturnPrice)}</div>
             </div>
 
             <div className="mb-3 flex justify-between">
-              <div className="text-lg leading-normal text-[#828487]">
-                Giảm giá
-              </div>
+              <div className="text-lg leading-normal text-[#828487]">Giảm giá</div>
               <div className="w-[120px] ">
                 <CustomInput
                   bordered={false}
@@ -342,9 +305,7 @@ export function RightContentReturn({
               </div>
             </div>
             <div className="mb-3 flex justify-between">
-              <div className="text-lg leading-normal text-[#828487]">
-                Phí trả hàng
-              </div>
+              <div className="text-lg leading-normal text-[#828487]">Phí trả hàng</div>
               <div className="w-[120px] ">
                 <CustomInput
                   bordered={false}
@@ -364,12 +325,8 @@ export function RightContentReturn({
 
           <div className="mb-5 border-b-2 border-dashed border-[#E4E4E4]">
             <div className="mb-5 flex justify-between">
-              <div className="text-lg leading-normal text-[#000] ">
-                CẦN TRẢ KHÁCH
-              </div>
-              <div className="text-lg leading-normal text-red-main">
-                {formatMoney(totalMustPay)}
-              </div>
+              <div className="text-lg leading-normal text-[#000] ">CẦN TRẢ KHÁCH</div>
+              <div className="text-lg leading-normal text-red-main">{formatMoney(totalMustPay)}</div>
             </div>
             <div className="flex flex-col mb-5">
               <div className="flex justify-between">
@@ -397,23 +354,20 @@ export function RightContentReturn({
             </div>
             <div className="mb-5">
               <div className="mb-5 flex justify-between">
-                <div className="text-lg leading-normal text-[#828487]">
-                  Phương thức thanh toán
-                </div>
+                <div className="text-lg leading-normal text-[#828487]">Phương thức thanh toán</div>
                 <div className="text-lg leading-normal text-[#19191C]">
                   {getValuesReturn("paymentType") === EPaymentMethod.CASH
                     ? "Tiền mặt"
                     : getValuesReturn("paymentType") === EPaymentMethod.BANKING
-                      ? "Chuyển khoản"
-                      : "Khách nợ"}
+                    ? "Chuyển khoản"
+                    : "Khách nợ"}
                 </div>
               </div>
 
               <div className="flex justify-between">
                 <div
                   className={cx(" rounded-[18px] w-[96px] h-[99px]", {
-                    "border-2 border-red-main":
-                      getValuesReturn("paymentType") === EPaymentMethod.CASH,
+                    "border-2 border-red-main": getValuesReturn("paymentType") === EPaymentMethod.CASH,
                   })}
                 >
                   <Image
@@ -430,8 +384,7 @@ export function RightContentReturn({
 
                 <div
                   className={cx(" rounded-[18px] w-[96px] h-[99px]", {
-                    "border-2 border-red-main":
-                      getValuesReturn("paymentType") === EPaymentMethod.BANKING,
+                    "border-2 border-red-main": getValuesReturn("paymentType") === EPaymentMethod.BANKING,
                   })}
                 >
                   <Image
@@ -448,8 +401,7 @@ export function RightContentReturn({
 
                 <div
                   className={cx(" rounded-[18px] w-[96px] h-[99px]", {
-                    "border-2 border-red-main":
-                      getValuesReturn("paymentType") === EPaymentMethod.DEBT,
+                    "border-2 border-red-main": getValuesReturn("paymentType") === EPaymentMethod.DEBT,
                   })}
                 >
                   <Image
@@ -474,9 +426,7 @@ export function RightContentReturn({
             prefixIcon={<Image src={EditIcon} />}
             placeholder="Thêm ghi chú"
             className="text-sm"
-            onChange={(value) =>
-              setValueReturn("description", value, { shouldValidate: true })
-            }
+            onChange={(value) => setValueReturn("description", value, { shouldValidate: true })}
             value={getValuesReturn("description")}
           />
         </div>
@@ -492,7 +442,10 @@ export function RightContentReturn({
               productId: product.productId,
               productUnitId: product.productUnitId,
               quantity: product.quantity,
-              price: checkTypeOrder(orderDetail?.order?.code) === 1 ? product?.productUnit?.marketPrice : product.productUnit.returnPrice,
+              price:
+                checkTypeOrder(orderDetail?.order?.code) === 1
+                  ? product?.productUnit?.marketPrice
+                  : product.productUnit.returnPrice,
               batches: product.batches
                 .filter((batch) => batch.isSelected)
                 .map((batch: any) => ({

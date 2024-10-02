@@ -40,8 +40,8 @@ export function updateOrder(id: number, payload) {
   return axiosClient.patch(`order/${id}`, payload);
 }
 
-export function getOrderDetail(id: number) {
-  return axiosClient.get(`order/${id}`);
+export function getOrderDetail(id: number, params?: any) {
+  return axiosClient.get(`order/${id}`, { params });
 }
 
 export function createOrder(payload) {

@@ -1,19 +1,19 @@
-import { getOrder } from '@/api/order.service';
-import { CustomModal } from '@/components/CustomModal'
-import CustomPagination from '@/components/CustomPagination';
-import CustomTable from '@/components/CustomTable';
-import { EOrderStatus, EOrderStatusLabel } from '@/enums';
-import { formatMoney } from '@/helpers';
-import { IOrder } from '@/modules/transactions/order/type';
-import { branchState, profileState } from '@/recoil/state';
-import { useQuery } from '@tanstack/react-query';
-import { ColumnsType } from 'antd/es/table';
-import { useRouter } from 'next/router';
+import { getOrder } from "@/api/order.service";
+import { CustomModal } from "@/components/CustomModal";
+import CustomPagination from "@/components/CustomPagination";
+import CustomTable from "@/components/CustomTable";
+import { EOrderStatus, EOrderStatusLabel } from "@/enums";
+import { formatMoney } from "@/helpers";
+import { IOrder } from "@/modules/transactions/order/type";
+import { branchState, profileState } from "@/recoil/state";
+import { useQuery } from "@tanstack/react-query";
+import { ColumnsType } from "antd/es/table";
+import { useRouter } from "next/router";
 import cx from "classnames";
-import React, { useState } from 'react'
-import { useRecoilValue } from 'recoil';
-import { CustomButton } from '@/components/CustomButton';
-import Search from './Search';
+import React, { useState } from "react";
+import { useRecoilValue } from "recoil";
+import { CustomButton } from "@/components/CustomButton";
+import Search from "./Search";
 
 function InvoiceModal({
   isOpen,
@@ -32,16 +32,17 @@ function InvoiceModal({
   const [formFilter, setFormFilter] = useState({
     page: 1,
     limit: 10,
-    keyword: '',
+    keyword: "",
     dateRange: { startDate: undefined, endDate: undefined },
     status: undefined,
     branchId,
     canReturn: true,
+    saleReturn: true,
   });
 
   const { data: orders, isLoading } = useQuery(
-    ['ORDER_LIST', JSON.stringify(formFilter), branchId, isOpen],
-    () => isOpen ? getOrder({ ...formFilter, branchId }) : {},
+    ["ORDER_LIST", JSON.stringify(formFilter), branchId, isOpen],
+    () => (isOpen ? getOrder({ ...formFilter, branchId }) : {}),
     {
       enabled: !!isOpen,
     }
@@ -54,10 +55,7 @@ function InvoiceModal({
   const onSelectInvoice = (record) => {
     router.push(`/sales?id=${record.id}`);
     onCancel();
-    
-  }
-
-  
+  };
 
   const columns: ColumnsType<IOrder> = [
     {
@@ -116,7 +114,9 @@ function InvoiceModal({
       dataIndex: "action",
       key: "action",
       render: (_, record) => (
-        <CustomButton outline onClick={() => onSelectInvoice(record)}>Chọn</CustomButton>
+        <CustomButton outline onClick={() => onSelectInvoice(record)}>
+          Chọn
+        </CustomButton>
       ),
     },
   ];
@@ -132,10 +132,12 @@ function InvoiceModal({
     >
       <Search formFilter={formFilter} setFormFilter={setFormFilter} />
       <CustomTable
-        dataSource={(orders as { data: { items: any[] } })?.data?.items?.map((item, index) => ({
-          ...item,
-          key: index + 1,
-        }))}
+        dataSource={(orders as { data: { items: any[] } })?.data?.items?.map(
+          (item, index) => ({
+            ...item,
+            key: index + 1,
+          })
+        )}
         columns={columns}
         loading={isLoading}
         onRow={(record, rowIndex) => {
@@ -164,7 +166,7 @@ function InvoiceModal({
         total={(orders as { data: { totalItem: number } })?.data?.totalItem}
       />
     </CustomModal>
-  )
+  );
 }
 
-export default InvoiceModal
+export default InvoiceModal;

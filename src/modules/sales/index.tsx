@@ -15,7 +15,7 @@ import FilterIcon from "@/assets/filterIcon.svg";
 import PlusIcon from "@/assets/plusIcon.svg";
 import SearchIcon from "@/assets/searchIcon.svg";
 import { CustomAutocomplete } from "@/components/CustomAutocomplete";
-import { EPaymentMethod } from "@/enums";
+import { EPaymentMethod, saleReturn } from "@/enums";
 import {
   formatMoney,
   formatNumber,
@@ -124,19 +124,10 @@ const Index = () => {
     () => getSaleProducts({ ...formFilter, branchId }),
     { enabled: !isSearchSampleMedicine }
   );
-  const {
-    data: products2,
-    isLoading: isLoadingProduct2,
-  } = useQuery<{
+  const { data: products2, isLoading: isLoadingProduct2 } = useQuery<{
     data?: { items: ISaleProduct[] };
   }>(
-    [
-      "LIST_SALE_PRODUCT2",
-      1,
-      9999,
-      '',
-      branchId,
-    ],
+    ["LIST_SALE_PRODUCT2", 1, 9999, "", branchId],
     () => getSaleProducts({ ...formFilter, branchId }),
     { enabled: !isSearchSampleMedicine }
   );
@@ -221,7 +212,9 @@ const Index = () => {
                   returnPrice: product.productUnit.price,
                   marketPrice: product?.price / product?.quantity,
                 },
-                quantity: product.quantity,
+                quantity: product?.quantityLast
+                  ? product?.quantity - product?.quantityLast
+                  : product?.quantity,
                 productUnitId: product.productUnit.id,
                 originProductUnitId: product.productUnit.id,
                 batches: product.batches?.map((batch) => {
@@ -238,8 +231,12 @@ const Index = () => {
                     expiryDate: batch.batch.expiryDate,
                     name: batch.batch.name,
                     originalInventory: batch.batch.quantity,
-                    saleQuantity: batch.quantity,
-                    quantity: batch.quantity,
+                    saleQuantity: product?.quantityLast
+                      ? product?.quantity - product?.quantityLast
+                      : product?.quantity,
+                    quantity: product?.quantityLast
+                      ? product?.quantity - product?.quantityLast
+                      : batch.quantity,
                     isSelected: true,
                   };
 
@@ -289,11 +286,15 @@ const Index = () => {
       discountObjectClone[orderActive]?.productDiscount?.length > 0 &&
       orderObject[orderActive]?.length > 0
     ) {
-      discountObjectClone[orderActive] = discountObjectClone[orderActive]?.productDiscount?.forEach((item) => {
+      discountObjectClone[orderActive] = discountObjectClone[
+        orderActive
+      ]?.productDiscount?.forEach((item) => {
         const list = item?.items[0]?.apply?.productUnitId;
         if (list?.length > 0) {
           for (const l of list) {
-            const productUnit: any = products2?.data?.items?.find((product) => product.id === l?.id);
+            const productUnit: any = products2?.data?.items?.find(
+              (product) => product.id === l?.id
+            );
             if (productUnit) {
               let discountValue = item?.items[0]?.apply?.discountValue;
               let discountType = item?.items[0]?.apply?.discountType;
@@ -311,7 +312,12 @@ const Index = () => {
                 }
               }
 
-              if (productUnit && !orderObject[orderActive]?.find((product) => product.productUnitId === l?.id)) {
+              if (
+                productUnit &&
+                !orderObject[orderActive]?.find(
+                  (product) => product.productUnitId === l?.id
+                )
+              ) {
                 onSelectedProduct(
                   JSON.stringify({
                     ...productUnit,
@@ -322,21 +328,20 @@ const Index = () => {
                     discountType: discountType,
                     discountValue: discountValue,
                     isGift: item?.items[0]?.apply?.isGift,
-                    discountCode: l?.discountCode
+                    discountCode: l?.discountCode,
                   })
                 );
               }
-            }
-            else {
+            } else {
               message.error("Không tìm thấy sản phẩm");
             }
           }
         } else {
           // remove product added by discount before
           const orderObjectClone = cloneDeep(orderObject);
-          orderObjectClone[orderActive] = orderObjectClone[
-            orderActive
-          ]?.filter((product) => !product.isDiscount);
+          orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter(
+            (product) => !product.isDiscount
+          );
           setOrderObject(orderObjectClone);
         }
       });
@@ -827,10 +832,11 @@ const Index = () => {
                           }
                         >
                           <div
-                            className={`flex cursor-pointer items-center ${isSearchSampleMedicine
-                              ? "rounded border border-blue-500"
-                              : ""
-                              }`}
+                            className={`flex cursor-pointer items-center ${
+                              isSearchSampleMedicine
+                                ? "rounded border border-blue-500"
+                                : ""
+                            }`}
                           >
                             <Image
                               src={FilterIcon}
@@ -847,77 +853,77 @@ const Index = () => {
                       options={
                         !isSearchSampleMedicine
                           ? products?.data?.items?.map((item) => ({
-                            value: JSON.stringify(item),
-                            label: (
-                              <div className="flex items-center gap-x-4 p-2">
-                                <div className=" flex h-12 w-[68px] flex-shrink-0 items-center rounded border border-gray-300 p-[2px]">
-                                  {item.product?.image?.path && (
-                                    <Image
-                                      src={getImage(
-                                        item.product?.image?.path
-                                      )}
-                                      height={40}
-                                      width={68}
-                                      alt=""
-                                      objectFit="cover"
-                                    />
-                                  )}
-                                </div>
-
-                                <div>
-                                  <div className="mb-2 flex gap-x-3">
-                                    <div>
-                                      <span>{item.code}</span> {" - "}
-                                      <span>{item.product.name}</span>
-                                    </div>
-                                    <div className="rounded bg-red-main px-2 py-[2px] text-white">
-                                      {item.productUnit.unitName}
-                                    </div>
-                                    {item.quantity <= 0 && (
-                                      <div className="rounded text-red-main py-[2px] italic">
-                                        Hết hàng
-                                      </div>
+                              value: JSON.stringify(item),
+                              label: (
+                                <div className="flex items-center gap-x-4 p-2">
+                                  <div className=" flex h-12 w-[68px] flex-shrink-0 items-center rounded border border-gray-300 p-[2px]">
+                                    {item.product?.image?.path && (
+                                      <Image
+                                        src={getImage(
+                                          item.product?.image?.path
+                                        )}
+                                        height={40}
+                                        width={68}
+                                        alt=""
+                                        objectFit="cover"
+                                      />
                                     )}
                                   </div>
 
-                                  <div className="flex gap-x-3">
-                                    <div>
-                                      Số lượng: {formatNumber(item.quantity)}
+                                  <div>
+                                    <div className="mb-2 flex gap-x-3">
+                                      <div>
+                                        <span>{item.code}</span> {" - "}
+                                        <span>{item.product.name}</span>
+                                      </div>
+                                      <div className="rounded bg-red-main px-2 py-[2px] text-white">
+                                        {item.productUnit.unitName}
+                                      </div>
+                                      {item.quantity <= 0 && (
+                                        <div className="rounded text-red-main py-[2px] italic">
+                                          Hết hàng
+                                        </div>
+                                      )}
                                     </div>
-                                    <div>|</div>
-                                    <div>
-                                      Giá:{" "}
-                                      {formatMoney(item.productUnit.price)}
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            ),
-                          }))
-                          : sampleMedicines?.data?.items?.map((item) => ({
-                            value: JSON.stringify(item),
-                            label: (
-                              <div className="flex items-center gap-x-4 p-2">
-                                <div className=" flex h-12 w-[68px] items-center rounded border border-gray-300 p-[2px]">
-                                  {item.image?.path && (
-                                    <Image
-                                      src={getImage(item.image?.path)}
-                                      height={40}
-                                      width={68}
-                                      alt=""
-                                      objectFit="cover"
-                                    />
-                                  )}
-                                </div>
 
-                                <div>
-                                  <div className="mb-2 flex gap-x-5">
-                                    <div>{item.name}</div>
+                                    <div className="flex gap-x-3">
+                                      <div>
+                                        Số lượng: {formatNumber(item.quantity)}
+                                      </div>
+                                      <div>|</div>
+                                      <div>
+                                        Giá:{" "}
+                                        {formatMoney(item.productUnit.price)}
+                                      </div>
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            ),
-                          }))
+                              ),
+                            }))
+                          : sampleMedicines?.data?.items?.map((item) => ({
+                              value: JSON.stringify(item),
+                              label: (
+                                <div className="flex items-center gap-x-4 p-2">
+                                  <div className=" flex h-12 w-[68px] items-center rounded border border-gray-300 p-[2px]">
+                                    {item.image?.path && (
+                                      <Image
+                                        src={getImage(item.image?.path)}
+                                        height={40}
+                                        width={68}
+                                        alt=""
+                                        objectFit="cover"
+                                      />
+                                    )}
+                                  </div>
+
+                                  <div>
+                                    <div className="mb-2 flex gap-x-5">
+                                      <div>{item.name}</div>
+                                    </div>
+                                  </div>
+                                </div>
+                              ),
+                            }))
                       }
                       value={searchKeyword}
                       isLoading={isLoadingProduct || isLoadingSampleMedicines}
@@ -947,8 +953,9 @@ const Index = () => {
                 >
                   <Popover content={"Quét mã vạch"}>
                     <div
-                      className={`flex cursor-pointer items-center ${isScanBarcode ? "rounded border border-blue-500" : ""
-                        }`}
+                      className={`flex cursor-pointer items-center ${
+                        isScanBarcode ? "rounded border border-blue-500" : ""
+                      }`}
                     >
                       <Image
                         src={BarcodeIcon}
@@ -1021,7 +1028,10 @@ const Index = () => {
 
                     setOrderObject(orderClone);
                     setOrderActive(key);
-                    setDiscountObject({ ...discountObject, [key]: { productDiscount: [], orderDiscount: [] } });
+                    setDiscountObject({
+                      ...discountObject,
+                      [key]: { productDiscount: [], orderDiscount: [] },
+                    });
                   }}
                   className="ml-4 flex min-w-fit rounded-full border border-[#fff] bg-[#fff] p-[10px]"
                 >
