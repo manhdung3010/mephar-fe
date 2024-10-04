@@ -535,29 +535,31 @@ export function AddMarketSetting() {
               <InputError error={errors.quantity?.message} />
             </div>
 
-            <div>
-              <Label infoText="" label="Loại chợ" required />
-              <CustomSelect
-                onChange={(value) => {
-                  setValue("marketType", value, { shouldValidate: true });
-                }}
-                className="suffix-icon h-11 !rounded"
-                suffixIcon={
-                  <div className="flex items-center">
-                    <Image src={ArrowDownIcon} />
-                  </div>
-                }
-                value={getValues("marketType")}
-                options={[
-                  { label: "Chợ chung", value: "common" },
-                  {
-                    label: "Chợ riêng",
-                    value: "private",
-                    disabled: isAgency ? false : true,
-                  },
-                ]}
-              />
-            </div>
+            {isAgency && (
+              <div>
+                <Label infoText="" label="Loại chợ" required />
+                <CustomSelect
+                  onChange={(value) => {
+                    setValue("marketType", value, { shouldValidate: true });
+                  }}
+                  className="suffix-icon h-11 !rounded"
+                  suffixIcon={
+                    <div className="flex items-center">
+                      <Image src={ArrowDownIcon} />
+                    </div>
+                  }
+                  value={getValues("marketType")}
+                  options={[
+                    { label: "Chợ", value: "common" },
+                    {
+                      label: "Chợ hàng điểm",
+                      value: "private",
+                      disabled: isAgency ? false : true,
+                    },
+                  ]}
+                />
+              </div>
+            )}
             <div>
               <Label infoText="" label="Giá khuyến mãi" />
               <CustomInput

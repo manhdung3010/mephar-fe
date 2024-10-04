@@ -16,13 +16,7 @@ import PlusIcon from "@/assets/plusIcon.svg";
 import SearchIcon from "@/assets/searchIcon.svg";
 import { CustomAutocomplete } from "@/components/CustomAutocomplete";
 import { EPaymentMethod, saleReturn } from "@/enums";
-import {
-  formatMoney,
-  formatNumber,
-  getImage,
-  randomString,
-  roundNumber,
-} from "@/helpers";
+import { formatMoney, formatNumber, getImage, randomString, roundNumber } from "@/helpers";
 import {
   branchState,
   discountState,
@@ -40,18 +34,11 @@ import { SaleHeader } from "./Header";
 import { LeftMenu } from "./LeftMenu";
 import { ProductList } from "./ProductList";
 import { RightContent } from "./RightContent";
-import type {
-  ISaleProduct,
-  ISaleProductLocal,
-  ISampleMedicine,
-} from "./interface";
+import type { ISaleProduct, ISaleProductLocal, ISampleMedicine } from "./interface";
 import { schema, schemaReturn } from "./schema";
 import { RightContentReturn } from "./RightContentReturn";
 import { CustomButton } from "@/components/CustomButton";
-import {
-  getOrderDiscountList,
-  getProductDiscountList,
-} from "@/api/discount.service";
+import { getOrderDiscountList, getProductDiscountList } from "@/api/discount.service";
 
 const Index = () => {
   const branchId = useRecoilValue(branchState);
@@ -103,9 +90,7 @@ const Index = () => {
 
   const [orderActive, setOrderActive] = useRecoilState(orderActiveState);
   const [orderObject, setOrderObject] = useRecoilState(orderState);
-  const [orderDiscount, setOrderDiscount] = useRecoilState(
-    orderDiscountSelected
-  );
+  const [orderDiscount, setOrderDiscount] = useRecoilState(orderDiscountSelected);
 
   const {
     data: products,
@@ -114,45 +99,28 @@ const Index = () => {
   } = useQuery<{
     data?: { items: ISaleProduct[] };
   }>(
-    [
-      "LIST_SALE_PRODUCT",
-      formFilter.page,
-      formFilter.limit,
-      formFilter.keyword,
-      branchId,
-    ],
+    ["LIST_SALE_PRODUCT", formFilter.page, formFilter.limit, formFilter.keyword, branchId],
     () => getSaleProducts({ ...formFilter, branchId }),
-    { enabled: !isSearchSampleMedicine }
+    { enabled: !isSearchSampleMedicine },
   );
   const { data: products2, isLoading: isLoadingProduct2 } = useQuery<{
     data?: { items: ISaleProduct[] };
-  }>(
-    ["LIST_SALE_PRODUCT2", 1, 9999, "", branchId],
-    () => getSaleProducts({ ...formFilter, branchId }),
-    { enabled: !isSearchSampleMedicine }
-  );
+  }>(["LIST_SALE_PRODUCT2", 1, 9999, "", branchId], () => getSaleProducts({ ...formFilter, branchId }), {
+    enabled: !isSearchSampleMedicine,
+  });
 
-  const { data: sampleMedicines, isLoading: isLoadingSampleMedicines } =
-    useQuery<{
-      data?: { items: ISampleMedicine[] };
-    }>(
-      [
-        "LIST_SAMPLE_MEDICINE",
-        formFilter.page,
-        formFilter.limit,
-        formFilter.keyword,
-        branchId,
-      ],
-      () => getSampleMedicines({ ...formFilter, branchId, status: 1 }),
-      { enabled: !!isSearchSampleMedicine }
-    );
+  const { data: sampleMedicines, isLoading: isLoadingSampleMedicines } = useQuery<{
+    data?: { items: ISampleMedicine[] };
+  }>(
+    ["LIST_SAMPLE_MEDICINE", formFilter.page, formFilter.limit, formFilter.keyword, branchId],
+    () => getSampleMedicines({ ...formFilter, branchId, status: 1 }),
+    { enabled: !!isSearchSampleMedicine },
+  );
   // caculate total price
   const totalPrice = useMemo(() => {
     let price = 0;
     orderObject[orderActive]?.forEach((product: ISaleProductLocal) => {
-      const unit = product.product.productUnit?.find(
-        (unit) => unit.id === product.productUnitId
-      );
+      const unit = product.product.productUnit?.find((unit) => unit.id === product.productUnitId);
 
       price += Number(unit?.price ?? 0) * product.quantity;
     });
@@ -160,12 +128,10 @@ const Index = () => {
     return price;
   }, [orderObject, orderActive]);
   const getDiscountPostData = () => {
-    const products = orderObject[orderActive]?.map(
-      (product: ISaleProductLocal) => ({
-        productUnitId: product.productUnitId,
-        quantity: product.quantity,
-      })
-    );
+    const products = orderObject[orderActive]?.map((product: ISaleProductLocal) => ({
+      productUnitId: product.productUnitId,
+      quantity: product.quantity,
+    }));
     return {
       products,
       totalPrice: totalPrice,
@@ -181,7 +147,7 @@ const Index = () => {
     () => getOrderDiscountList(data),
     {
       enabled: totalPrice > 0,
-    }
+    },
   );
 
   const [searchKeyword, setSearchKeyword] = useState("");
@@ -190,7 +156,9 @@ const Index = () => {
   useEffect(() => {
     const getDataDetail = async () => {
       if (id) {
-        const orderDetail: any = await getOrderDetail(Number(id));
+        const orderDetail: any = await getOrderDetail(Number(id), {
+          saleReturn: true,
+        });
         if (orderDetail?.data?.products) {
           setOrderDetail(orderDetail?.data);
           setValue("customerId", orderDetail?.order?.customerId, {
@@ -199,51 +167,43 @@ const Index = () => {
           // add order detail to order object when order detail is loaded
           const orderObjectClone = cloneDeep(orderObject);
 
-          orderObjectClone[orderActive + "-RETURN"] =
-            orderDetail?.data?.products.map((product) => {
-              const productKey = `${product?.productId}-${product.productUnit?.id}`;
+          orderObjectClone[orderActive + "-RETURN"] = orderDetail?.data?.products.map((product) => {
+            const productKey = `${product?.productId}-${product.productUnit?.id}`;
 
-              return {
-                ...product,
-                productKey,
-                productUnit: {
-                  ...product.productUnit,
-                  code: product.product?.code,
-                  returnPrice: product.productUnit.price,
-                  marketPrice: product?.price / product?.quantity,
-                },
-                quantity: product?.quantityLast
-                  ? product?.quantity - product?.quantityLast
-                  : product?.quantity,
-                productUnitId: product.productUnit.id,
-                originProductUnitId: product.productUnit.id,
-                batches: product.batches?.map((batch) => {
-                  const inventory =
-                    batch.batch.quantity / product.productUnit.exchangeValue;
+            return {
+              ...product,
+              productKey,
+              productUnit: {
+                ...product.productUnit,
+                code: product.product?.code,
+                returnPrice: product.productUnit.price,
+                marketPrice: product?.price / product?.quantity,
+              },
+              quantity: product?.quantityLast ? product?.quantity - product?.quantityLast : product?.quantity,
+              productUnitId: product.productUnit.id,
+              originProductUnitId: product.productUnit.id,
+              batches: product.batches?.map((batch) => {
+                const inventory = batch.batch.quantity / product.productUnit.exchangeValue;
 
-                  const newBatch = {
-                    ...batch,
-                    inventory,
-                    productKey,
-                    productId: product.productId,
-                    id: batch.batch.id,
-                    batchId: batch.batch.id,
-                    expiryDate: batch.batch.expiryDate,
-                    name: batch.batch.name,
-                    originalInventory: batch.batch.quantity,
-                    saleQuantity: product?.quantityLast
-                      ? product?.quantity - product?.quantityLast
-                      : product?.quantity,
-                    quantity: product?.quantityLast
-                      ? product?.quantity - product?.quantityLast
-                      : batch.quantity,
-                    isSelected: true,
-                  };
+                const newBatch = {
+                  ...batch,
+                  inventory,
+                  productKey,
+                  productId: product.productId,
+                  id: batch.batch.id,
+                  batchId: batch.batch.id,
+                  expiryDate: batch.batch.expiryDate,
+                  name: batch.batch.name,
+                  originalInventory: batch.batch.quantity,
+                  saleQuantity: product?.quantityLast ? product?.quantity - product?.quantityLast : product?.quantity,
+                  quantity: product?.quantityLast ? product?.quantity - product?.quantityLast : batch.quantity,
+                  isSelected: true,
+                };
 
-                  return newBatch;
-                }),
-              };
-            });
+                return newBatch;
+              }),
+            };
+          });
           setOrderActive(orderActive + "-RETURN");
           setOrderObject({ ...orderObject, ...orderObjectClone });
         }
@@ -265,9 +225,7 @@ const Index = () => {
         });
         let product;
         if (productsScan?.data?.items?.length > 0 && !isSearchSampleMedicine) {
-          product = productsScan?.data?.items?.find(
-            (item) => item.barCode === scannedData
-          );
+          product = productsScan?.data?.items?.find((item) => item.barCode === scannedData);
         }
 
         if (product) {
@@ -282,19 +240,12 @@ const Index = () => {
   useEffect(() => {
     const discountObjectClone = cloneDeep(discountObject);
 
-    if (
-      discountObjectClone[orderActive]?.productDiscount?.length > 0 &&
-      orderObject[orderActive]?.length > 0
-    ) {
-      discountObjectClone[orderActive] = discountObjectClone[
-        orderActive
-      ]?.productDiscount?.forEach((item) => {
+    if (discountObjectClone[orderActive]?.productDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
+      discountObjectClone[orderActive] = discountObjectClone[orderActive]?.productDiscount?.forEach((item) => {
         const list = item?.items[0]?.apply?.productUnitId;
         if (list?.length > 0) {
           for (const l of list) {
-            const productUnit: any = products2?.data?.items?.find(
-              (product) => product.id === l?.id
-            );
+            const productUnit: any = products2?.data?.items?.find((product) => product.id === l?.id);
             if (productUnit) {
               let discountValue = item?.items[0]?.apply?.discountValue;
               let discountType = item?.items[0]?.apply?.discountType;
@@ -304,20 +255,12 @@ const Index = () => {
               } else {
                 if (discountType === "percent" && discountValue > 100) {
                   discountValue = 100;
-                } else if (
-                  discountType === "amount" &&
-                  +discountValue > +productUnit?.price
-                ) {
+                } else if (discountType === "amount" && +discountValue > +productUnit?.price) {
                   discountValue = productUnit?.price;
                 }
               }
 
-              if (
-                productUnit &&
-                !orderObject[orderActive]?.find(
-                  (product) => product.productUnitId === l?.id
-                )
-              ) {
+              if (productUnit && !orderObject[orderActive]?.find((product) => product.productUnitId === l?.id)) {
                 onSelectedProduct(
                   JSON.stringify({
                     ...productUnit,
@@ -329,7 +272,7 @@ const Index = () => {
                     discountValue: discountValue,
                     isGift: item?.items[0]?.apply?.isGift,
                     discountCode: l?.discountCode,
-                  })
+                  }),
                 );
               }
             } else {
@@ -339,9 +282,7 @@ const Index = () => {
         } else {
           // remove product added by discount before
           const orderObjectClone = cloneDeep(orderObject);
-          orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter(
-            (product) => !product.isDiscount
-          );
+          orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
           setOrderObject(orderObjectClone);
         }
       });
@@ -544,18 +485,12 @@ const Index = () => {
     // update product when order discount is changed
     if (orderDiscount?.length <= 0) {
       const orderObjectClone = cloneDeep(orderObject);
-      orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter(
-        (product) => !product.isDiscount
-      );
+      orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
       setOrderObject(orderObjectClone);
     }
   }, [orderDiscount]);
 
-  const onExpandMoreBatches = async (
-    productKey,
-    quantity: number,
-    product?: any
-  ) => {
+  const onExpandMoreBatches = async (productKey, quantity: number, product?: any) => {
     const orderObjectClone = cloneDeep(orderObject);
 
     const res = await getProductDiscountList({
@@ -565,59 +500,51 @@ const Index = () => {
     });
     let itemDiscountProduct = res?.data?.data?.items;
 
-    orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map(
-      (product: ISaleProductLocal) => {
-        if (product.productKey === productKey) {
-          return {
-            ...product,
-            itemDiscountProduct,
-            quantity,
-          };
-        }
-
-        return product;
+    orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map((product: ISaleProductLocal) => {
+      if (product.productKey === productKey) {
+        return {
+          ...product,
+          itemDiscountProduct,
+          quantity,
+        };
       }
-    );
 
-    orderObjectClone[orderActive] = orderObjectClone[orderActive].map(
-      (product: ISaleProductLocal) => {
-        if (product.productKey === productKey) {
-          let sumQuantity = 0;
+      return product;
+    });
 
-          let batches = cloneDeep(product.batches);
-          batches = orderBy(batches, ["isSelected"], ["desc"]);
+    orderObjectClone[orderActive] = orderObjectClone[orderActive].map((product: ISaleProductLocal) => {
+      if (product.productKey === productKey) {
+        let sumQuantity = 0;
 
-          batches = batches.map((batch) => {
-            const remainQuantity =
-              roundNumber(quantity) - roundNumber(sumQuantity);
+        let batches = cloneDeep(product.batches);
+        batches = orderBy(batches, ["isSelected"], ["desc"]);
 
-            if (remainQuantity && batch.inventory) {
-              const tempQuantity =
-                batch.inventory <= remainQuantity
-                  ? batch.inventory
-                  : roundNumber(remainQuantity);
+        batches = batches.map((batch) => {
+          const remainQuantity = roundNumber(quantity) - roundNumber(sumQuantity);
 
-              sumQuantity += tempQuantity;
+          if (remainQuantity && batch.inventory) {
+            const tempQuantity = batch.inventory <= remainQuantity ? batch.inventory : roundNumber(remainQuantity);
 
-              return {
-                ...batch,
-                quantity: tempQuantity,
-                isSelected: true,
-              };
-            }
+            sumQuantity += tempQuantity;
 
-            return { ...batch, quantity: 0, isSelected: false };
-          });
+            return {
+              ...batch,
+              quantity: tempQuantity,
+              isSelected: true,
+            };
+          }
 
-          return {
-            ...product,
-            batches,
-          };
-        }
+          return { ...batch, quantity: 0, isSelected: false };
+        });
 
-        return product;
+        return {
+          ...product,
+          batches,
+        };
       }
-    );
+
+      return product;
+    });
 
     setOrderObject(orderObjectClone);
   };
@@ -629,38 +556,29 @@ const Index = () => {
 
     const orderObjectClone = cloneDeep(orderObject);
 
-    if (
-      orderObjectClone[orderActive]?.find(
-        (item) => item.productKey === productKey && !product?.isDiscount
-      )
-    ) {
-      orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map(
-        (p: ISaleProductLocal) => {
-          if (p.productKey === productKey && !product.isDiscount) {
-            return {
-              ...p,
-              quantity: p.quantity + 1,
-              // update batches
-              batches: p.batches.map((batch) => {
-                const inventory =
-                  batch.quantity / product.productUnit.exchangeValue;
-                const newBatch = {
-                  ...batch,
-                  // inventory,
-                  // originalInventory: batch.quantity,
-                  quantity: batch.isSelected
-                    ? batch.quantity + 1
-                    : batch.quantity,
-                };
+    if (orderObjectClone[orderActive]?.find((item) => item.productKey === productKey && !product?.isDiscount)) {
+      orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map((p: ISaleProductLocal) => {
+        if (p.productKey === productKey && !product.isDiscount) {
+          return {
+            ...p,
+            quantity: p.quantity + 1,
+            // update batches
+            batches: p.batches.map((batch) => {
+              const inventory = batch.quantity / product.productUnit.exchangeValue;
+              const newBatch = {
+                ...batch,
+                // inventory,
+                // originalInventory: batch.quantity,
+                quantity: batch.isSelected ? batch.quantity + 1 : batch.quantity,
+              };
 
-                return newBatch;
-              }),
-            };
-          }
-
-          return p;
+              return newBatch;
+            }),
+          };
         }
-      );
+
+        return p;
+      });
       setOrderObject((pre) => ({ ...pre, ...orderObjectClone }));
     } else {
       let isSelectedUnit = true;
@@ -684,8 +602,7 @@ const Index = () => {
             itemDiscountProduct: itemDiscountProduct,
             originProductUnitId: product.id,
             batches: product.batches?.map((batch) => {
-              const inventory =
-                batch.quantity / product.productUnit.exchangeValue;
+              const inventory = batch.quantity / product.productUnit.exchangeValue;
 
               const newBatch = {
                 ...batch,
@@ -724,23 +641,17 @@ const Index = () => {
     sampleMedicines.products.forEach((product) => {
       const productKey = `${product.product.id}-${product.productUnit.id}`;
 
-      if (
-        orderObjectClone[orderActive]?.find(
-          (item) => item.productKey === productKey
-        )
-      ) {
-        orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map(
-          (product: ISaleProductLocal) => {
-            if (product.productKey === productKey) {
-              return {
-                ...product,
-                quantity: product.quantity + 1,
-              };
-            }
-
-            return product;
+      if (orderObjectClone[orderActive]?.find((item) => item.productKey === productKey)) {
+        orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map((product: ISaleProductLocal) => {
+          if (product.productKey === productKey) {
+            return {
+              ...product,
+              quantity: product.quantity + 1,
+            };
           }
-        );
+
+          return product;
+        });
       } else {
         let isSelectedUnit = true;
 
@@ -752,8 +663,7 @@ const Index = () => {
           productUnitId: product.productUnitId,
           originProductUnitId: product.productUnitId,
           batches: product.batches?.map((batch) => {
-            const inventory =
-              batch.quantity / product.productUnit.exchangeValue;
+            const inventory = batch.quantity / product.productUnit.exchangeValue;
             const newBatch = {
               ...batch,
               inventory,
@@ -785,7 +695,7 @@ const Index = () => {
         keyword: value,
       }));
     }, 300),
-    [formFilter]
+    [formFilter],
   );
 
   return (
@@ -826,16 +736,12 @@ const Index = () => {
                       suffixIcon={
                         <Popover
                           content={
-                            isSearchSampleMedicine
-                              ? "Tìm kiếm theo đơn thuốc mẫu"
-                              : "Tìm kiếm theo thuốc, hàng hóa"
+                            isSearchSampleMedicine ? "Tìm kiếm theo đơn thuốc mẫu" : "Tìm kiếm theo thuốc, hàng hóa"
                           }
                         >
                           <div
                             className={`flex cursor-pointer items-center ${
-                              isSearchSampleMedicine
-                                ? "rounded border border-blue-500"
-                                : ""
+                              isSearchSampleMedicine ? "rounded border border-blue-500" : ""
                             }`}
                           >
                             <Image
@@ -859,9 +765,7 @@ const Index = () => {
                                   <div className=" flex h-12 w-[68px] flex-shrink-0 items-center rounded border border-gray-300 p-[2px]">
                                     {item.product?.image?.path && (
                                       <Image
-                                        src={getImage(
-                                          item.product?.image?.path
-                                        )}
+                                        src={getImage(item.product?.image?.path)}
                                         height={40}
                                         width={68}
                                         alt=""
@@ -880,21 +784,14 @@ const Index = () => {
                                         {item.productUnit.unitName}
                                       </div>
                                       {item.quantity <= 0 && (
-                                        <div className="rounded text-red-main py-[2px] italic">
-                                          Hết hàng
-                                        </div>
+                                        <div className="rounded text-red-main py-[2px] italic">Hết hàng</div>
                                       )}
                                     </div>
 
                                     <div className="flex gap-x-3">
-                                      <div>
-                                        Số lượng: {formatNumber(item.quantity)}
-                                      </div>
+                                      <div>Số lượng: {formatNumber(item.quantity)}</div>
                                       <div>|</div>
-                                      <div>
-                                        Giá:{" "}
-                                        {formatMoney(item.productUnit.price)}
-                                      </div>
+                                      <div>Giá: {formatMoney(item.productUnit.price)}</div>
                                     </div>
                                   </div>
                                 </div>
@@ -947,10 +844,7 @@ const Index = () => {
                   )}
                 </div>
 
-                <CustomButton
-                  outline
-                  disabled={orderActive.split("-")[1] === "RETURN"}
-                >
+                <CustomButton outline disabled={orderActive.split("-")[1] === "RETURN"}>
                   <Popover content={"Quét mã vạch"}>
                     <div
                       className={`flex cursor-pointer items-center ${
@@ -981,12 +875,11 @@ const Index = () => {
                         }}
                         className={cx(
                           "w-max mr-2  flex items-center rounded-[40px] border border-[#fff]  py-2 px-4 text-[#D64457]",
-                          order === orderActive ? "bg-[#F7DADD]" : "bg-[#fff]"
+                          order === orderActive ? "bg-[#F7DADD]" : "bg-[#fff]",
                         )}
                       >
                         <span className={cx("mr-1 text-base font-medium")}>
-                          Đơn {order.split("-")[1] === "RETURN" ? "trả" : "bán"}{" "}
-                          {index + 1}
+                          Đơn {order.split("-")[1] === "RETURN" ? "trả" : "bán"} {index + 1}
                         </span>
 
                         <Image
@@ -1001,9 +894,7 @@ const Index = () => {
                             const orderClone = cloneDeep(orderObject);
                             delete orderClone[order];
                             setOrderObject(orderClone);
-                            setOrderActive(
-                              Object.keys(orderClone)[0] as string
-                            );
+                            setOrderActive(Object.keys(orderClone)[0] as string);
 
                             setDiscountObject((pre) => {
                               const preClone = { ...pre };
@@ -1041,11 +932,7 @@ const Index = () => {
             </div>
           </div>
 
-          <ProductList
-            useForm={{ errors, setError }}
-            orderDetail={orderDetail}
-            listDiscount={discountList}
-          />
+          <ProductList useForm={{ errors, setError }} orderDetail={orderDetail} listDiscount={discountList} />
         </div>
 
         {orderActive.split("-")[1] === "RETURN" ? (
@@ -1061,10 +948,7 @@ const Index = () => {
             orderDetail={orderDetail}
           />
         ) : (
-          <RightContent
-            useForm={{ getValues, setValue, handleSubmit, errors, reset }}
-            discountList={discountList}
-          />
+          <RightContent useForm={{ getValues, setValue, handleSubmit, errors, reset }} discountList={discountList} />
         )}
       </div>
     </div>

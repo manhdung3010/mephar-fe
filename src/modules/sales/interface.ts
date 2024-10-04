@@ -175,6 +175,7 @@ export interface ISaleProductLocal extends Omit<ISaleProduct, "batches"> {
   itemPrice?: number;
   discountCode?: string;
   saleQuantity?: number;
+  quantityLast?: number;
   batches: {
     batchId: number;
     productUnitId: number;
