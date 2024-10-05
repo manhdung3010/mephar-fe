@@ -13,10 +13,7 @@ import { CustomAutocomplete } from "@/components/CustomAutocomplete";
 import InputError from "@/components/InputError";
 import { EProductType } from "@/enums";
 import { formatMoney, formatNumber, getImage, hasPermission } from "@/helpers";
-import {
-  IImportProduct,
-  IImportProductLocal,
-} from "@/modules/products/import-product/coupon/interface";
+import { IImportProduct, IImportProductLocal } from "@/modules/products/import-product/coupon/interface";
 import { branchState, productMoveState, profileState } from "@/recoil/state";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useQuery } from "@tanstack/react-query";
@@ -47,9 +44,7 @@ interface IRecord {
 }
 
 export function DeliveryCoupon() {
-  const [expandedRowKeys, setExpandedRowKeys] = useState<
-    Record<string, boolean>
-  >({});
+  const [expandedRowKeys, setExpandedRowKeys] = useState<Record<string, boolean>>({});
 
   const [importProducts, setImportProducts] = useRecoilState(productMoveState);
   const router = useRouter();
@@ -77,23 +72,17 @@ export function DeliveryCoupon() {
     mode: "onChange",
     defaultValues: moveId
       ? {
-        branchId,
-      }
+          branchId,
+        }
       : {
-        fromBranchId: branchId,
-      },
+          fromBranchId: branchId,
+        },
   });
   const profile = useRecoilValue(profileState);
 
   useEffect(() => {
     if (profile?.role?.permissions) {
-      if (
-        !hasPermission(
-          profile?.role?.permissions,
-          RoleModel.delivery,
-          RoleAction.create
-        )
-      ) {
+      if (!hasPermission(profile?.role?.permissions, RoleModel.delivery, RoleAction.create)) {
         message.error("Bạn không có quyền truy cập vào trang này");
         router.push("/transactions/delivery");
       }
@@ -101,16 +90,8 @@ export function DeliveryCoupon() {
   }, [profile?.role?.permissions]);
   const { data: products, isLoading: isLoadingProduct } = useQuery<{
     data?: { items: ISaleProduct[] };
-  }>(
-    [
-      "LIST_SALE_PRODUCT",
-      formFilter.page,
-      formFilter.limit,
-      formFilter.keyword,
-      formFilter.isSale,
-      branchId,
-    ],
-    () => getSaleProducts({ ...formFilter, branchId })
+  }>(["LIST_SALE_PRODUCT", formFilter.page, formFilter.limit, formFilter.keyword, formFilter.isSale, branchId], () =>
+    getSaleProducts({ ...formFilter, branchId }),
   );
 
   const { data: moveDetail } = useQuery(
@@ -118,7 +99,7 @@ export function DeliveryCoupon() {
     () => (moveId ? getMoveDetail(moveId) : Promise.resolve(null)),
     {
       enabled: !!moveId, // Only run the query if `id` is truthy
-    }
+    },
   );
 
   useEffect(() => {
@@ -132,8 +113,7 @@ export function DeliveryCoupon() {
         };
         const localProduct: IImportProductLocal = {
           ...newProduct,
-          productKey: `${product.product.id || product.productId}-${product.id
-            }`,
+          productKey: `${product.product.id || product.productId}-${product.id}`,
           code: product.product.code,
           // inventory: product.quantity,
           productId: product.id,
@@ -143,9 +123,7 @@ export function DeliveryCoupon() {
           // batches: id ? product.productBatchHistories : [],
         };
 
-        if (
-          importProducts.find((p) => p.productKey === localProduct.productKey)
-        ) {
+        if (importProducts.find((p) => p.productKey === localProduct.productKey)) {
           cloneImportProducts = cloneImportProducts.map((product) => {
             if (product.productKey === localProduct.productKey) {
               return {
@@ -181,7 +159,7 @@ export function DeliveryCoupon() {
   const onChangeValueProduct = (productKey, field, newValue) => {
     let productImportClone = cloneDeep(importProducts);
 
-    productImportClone = productImportClone.map((product) => {
+    productImportClone = productImportClone.map((product: any) => {
       if (product.productKey === productKey) {
         if (field === "quantity" && product.batches?.length > 0) {
           return {
@@ -217,9 +195,7 @@ export function DeliveryCoupon() {
           className=" cursor-pointer"
           onClick={() => {
             const productImportClone = cloneDeep(importProducts);
-            const index = productImportClone.findIndex(
-              (product) => product.id === id
-            );
+            const index = productImportClone.findIndex((product) => product.id === id);
             productImportClone.splice(index, 1);
             setImportProducts(productImportClone);
           }}
@@ -236,17 +212,13 @@ export function DeliveryCoupon() {
       title: "Mã hàng",
       dataIndex: "code",
       key: "code",
-      render: (value) => (
-        <span className="cursor-pointer text-[#0070F4]">{value}</span>
-      ),
+      render: (value) => <span className="cursor-pointer text-[#0070F4]">{value}</span>,
     },
     {
       title: "Tên hàng",
       dataIndex: "name",
       key: "name",
-      render: (_, { product }) => (
-        <span className="font-medium">{product.name}</span>
-      ),
+      render: (_, { product }) => <span className="font-medium">{product.name}</span>,
     },
     {
       title: "ĐVT",
@@ -255,9 +227,7 @@ export function DeliveryCoupon() {
       render: (_, { productKey, product, id, productUnit }) => (
         <CustomUnitSelect
           options={(() => {
-            const productUnitKeysSelected = importProducts.map((product) =>
-              Number(product.productKey.split("-")[1])
-            );
+            const productUnitKeysSelected = importProducts.map((product) => Number(product.productKey.split("-")[1]));
 
             return product.productUnit.map((unit) => ({
               value: unit.id,
@@ -271,28 +241,20 @@ export function DeliveryCoupon() {
             let importProductsClone = cloneDeep(importProducts);
             importProductsClone = importProductsClone.map((product: any) => {
               if (product.productKey === productKey) {
-                const productUnit = product.product.productUnit.find(
-                  (unit) => unit.id === value
-                );
+                const productUnit = product.product.productUnit.find((unit) => unit.id === value);
 
                 return {
                   ...product,
                   code: productUnit?.code || "", // Assign an empty string if productUnit.code is undefined
                   productKey: `${product.product.id}-${value}`,
-                  primePrice:
-                    product.product.primePrice * productUnit.exchangeValue,
+                  primePrice: product.product.primePrice * productUnit.exchangeValue,
                   ...productUnit,
                   productUnitId: value,
-                  newInventory: Math.floor(
-                    product.product.quantity / productUnit.exchangeValue
-                  ),
+                  newInventory: Math.floor(product.product.quantity / productUnit.exchangeValue),
                   batches: product.batches?.map((batch) => ({
                     ...batch,
-                    inventory:
-                      batch.originalInventory / productUnit.exchangeValue,
-                    newInventory: Math.floor(
-                      batch.originalInventory / productUnit.exchangeValue
-                    ),
+                    inventory: batch.originalInventory / productUnit.exchangeValue,
+                    newInventory: Math.floor(batch.originalInventory / productUnit.exchangeValue),
                   })),
                 };
               }
@@ -314,14 +276,13 @@ export function DeliveryCoupon() {
 
     ...(moveDetail
       ? [
-        {
-          title: "SL chuyển",
-          dataIndex: "totalQuantity",
-          key: "totalQuantity",
-          render: (totalQuantity, { productKey }) =>
-            formatNumber(totalQuantity),
-        },
-      ]
+          {
+            title: "SL chuyển",
+            dataIndex: "totalQuantity",
+            key: "totalQuantity",
+            render: (totalQuantity, { productKey }) => formatNumber(totalQuantity),
+          },
+        ]
       : []),
     {
       title: `SL ${moveDetail ? "nhận" : "chuyển"}`,
@@ -337,64 +298,55 @@ export function DeliveryCoupon() {
             defaultValue={quantity > newInventory ? newInventory : quantity}
             value={quantity > newInventory ? newInventory : quantity}
             type="number"
-            onChange={(value) =>
-              onChangeValueProduct(productKey, "quantity", value)
-            }
-            onMinus={(value) =>
-              onChangeValueProduct(productKey, "quantity", value)
-            }
-            onPlus={(value) =>
-              onChangeValueProduct(productKey, "quantity", value)
-            }
+            onChange={(value) => {
+              onChangeValueProduct(productKey, "quantity", value);
+            }}
+            onMinus={(value) => onChangeValueProduct(productKey, "quantity", value)}
+            onPlus={(value) => onChangeValueProduct(productKey, "quantity", value)}
           />
         );
       },
     },
     ...(moveDetail
       ? [
-        {
-          title: "Giá chuyển",
-          dataIndex: "price",
-          key: "price",
-          render: (price, { productKey }) => (
-            <CustomInput
-              className="!w-[110px]"
-              disabled={true}
-              type="number"
-              onChange={(value) =>
-                onChangeValueProduct(productKey, "price", value)
-              }
-              value={price}
-              defaultValue={price}
-            />
-          ),
-        },
-      ]
+          {
+            title: "Giá chuyển",
+            dataIndex: "price",
+            key: "price",
+            render: (price, { productKey }) => (
+              <CustomInput
+                className="!w-[110px]"
+                disabled={true}
+                type="number"
+                onChange={(value) => onChangeValueProduct(productKey, "price", value)}
+                value={price}
+                defaultValue={price}
+              />
+            ),
+          },
+        ]
       : [
-        {
-          title: "Giá chuyển",
-          dataIndex: "primePrice",
-          key: "primePrice",
-          render: (price, { productKey }) => (
-            <CustomInput
-              className="!w-[110px]"
-              type="number"
-              onChange={(value) =>
-                onChangeValueProduct(productKey, "primePrice", value)
-              }
-              value={price}
-              defaultValue={price}
-            />
-          ),
-        },
-      ]),
+          {
+            title: "Giá chuyển",
+            dataIndex: "primePrice",
+            key: "primePrice",
+            render: (price, { productKey }) => (
+              <CustomInput
+                className="!w-[110px]"
+                type="number"
+                onChange={(value) => onChangeValueProduct(productKey, "primePrice", value)}
+                value={price}
+                defaultValue={price}
+              />
+            ),
+          },
+        ]),
   ];
 
   const checkDisplayListBatch = (product: IImportProductLocal) => {
     return (
       product.product.type === EProductType.MEDICINE ||
-      (product.product.type === EProductType.PACKAGE &&
-        product.product.isBatchExpireControl)
+      (product.product.type === EProductType.PACKAGE && product.product.isBatchExpireControl)
     );
   };
 
@@ -412,6 +364,8 @@ export function DeliveryCoupon() {
     });
     setImportProducts(products);
   };
+
+  console.log("importProducts", importProducts);
 
   return (
     <div className="-mx-8 flex">
@@ -434,20 +388,13 @@ export function DeliveryCoupon() {
                   price: product.product.price * product.exchangeValue,
                   primePrice:
                     product.product.primePrice *
-                    Number(
-                      product.product.productUnit?.find(
-                        (unit) => unit.id === product.id
-                      )?.exchangeValue
-                    ),
+                    Number(product.product.productUnit?.find((unit) => unit.id === product.id)?.exchangeValue),
                   inventory: product.quantity,
-                  newInventory: Math.floor(
-                    (product.product.quantity ?? 0) / product.exchangeValue
-                  ),
+                  newInventory: Math.floor((product.product.quantity ?? 0) / product.exchangeValue),
                   quantity: 1,
                   discountValue: 0,
                   batches: product.batches?.map((batch) => {
-                    const inventory =
-                      batch.quantity / product.productUnit.exchangeValue;
+                    const inventory = batch.quantity / product.productUnit.exchangeValue;
 
                     const newBatch = {
                       ...batch,
@@ -467,35 +414,27 @@ export function DeliveryCoupon() {
 
                 let cloneImportProducts = cloneDeep(importProducts);
 
-                if (
-                  importProducts.find(
-                    (p) => p.productKey === localProduct.productKey
-                  )
-                ) {
-                  cloneImportProducts = cloneImportProducts.map(
-                    (product: any) => {
-                      if (product.productKey === localProduct.productKey) {
-                        return {
-                          ...product,
-                          realQuantity: product.realQuantity + 1,
-                          batches: product.batches.map((batch) => {
-                            const newBatch = {
-                              ...batch,
-                              // inventory,
-                              // originalInventory: batch.quantity,
-                              quantity: batch.isSelected
-                                ? batch.quantity + 1
-                                : batch.quantity,
-                            };
+                if (importProducts.find((p) => p.productKey === localProduct.productKey)) {
+                  cloneImportProducts = cloneImportProducts.map((product: any) => {
+                    if (product.productKey === localProduct.productKey) {
+                      return {
+                        ...product,
+                        realQuantity: product.realQuantity + 1,
+                        batches: product.batches.map((batch) => {
+                          const newBatch = {
+                            ...batch,
+                            // inventory,
+                            // originalInventory: batch.quantity,
+                            quantity: batch.isSelected ? batch.quantity + 1 : batch.quantity,
+                          };
 
-                            return newBatch;
-                          }),
-                        };
-                      }
-
-                      return product;
+                          return newBatch;
+                        }),
+                      };
                     }
-                  );
+
+                    return product;
+                  });
                   setImportProducts(cloneImportProducts);
                 } else {
                   // cloneImportProducts.push(localProduct);
@@ -532,9 +471,7 @@ export function DeliveryCoupon() {
                         <div>
                           {item.code} - {item.product.name}
                         </div>
-                        <div className="rounded bg-red-main px-2 py-[2px] text-white">
-                          {item.unitName}
-                        </div>
+                        <div className="rounded bg-red-main px-2 py-[2px] text-white">{item.unitName}</div>
                       </div>
                       <div>Số lượng - {item.quantity}</div>
                     </div>
@@ -561,18 +498,17 @@ export function DeliveryCoupon() {
                     <>
                       {moveDetail
                         ? record?.toBatches?.map((batch, index) => (
-                          <div className="bg-[#FFF3E6] px-6 py-2 ">
-                            <div className="flex items-center gap-x-3">
-                              <div
-                                key={batch.id}
-                                className="flex items-center rounded bg-red-main py-1 px-2 text-white"
-                              >
-                                <span className="mr-2">
-                                  {batch.batch.name} -{" "}
-                                  {batch.batch.expiryDate} - SL:{" "}
-                                  {record.fromBatches[index].quantity}
-                                </span>{" "}
-                                {/* <Image
+                            <div className="bg-[#FFF3E6] px-6 py-2 ">
+                              <div className="flex items-center gap-x-3">
+                                <div
+                                  key={batch.id}
+                                  className="flex items-center rounded bg-red-main py-1 px-2 text-white"
+                                >
+                                  <span className="mr-2">
+                                    {batch.batch.name} - {batch.batch.expiryDate} - SL:{" "}
+                                    {record.fromBatches[index].quantity}
+                                  </span>{" "}
+                                  {/* <Image
                         className=" cursor-pointer"
                         src={CloseIcon}
                         onClick={() => {
@@ -583,65 +519,55 @@ export function DeliveryCoupon() {
                         }}
                         alt=""
                       /> */}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        ))
+                          ))
                         : checkDisplayListBatch(record) && (
-                          <div className="bg-[#FFF3E6] px-6 py-2 ">
-                            <div className="flex items-center gap-x-3">
-                              <div
-                                className="ml-1 cursor-pointer font-medium text-[#0070F4]"
-                                onClick={() => {
-                                  setProductKeyAddBatch(record.productKey);
-                                  setOpenListBatchModal(true);
-                                }}
-                              >
-                                Chọn lô
-                              </div>
+                            <div className="bg-[#FFF3E6] px-6 py-2 ">
+                              <div className="flex items-center gap-x-3">
+                                <div
+                                  className="ml-1 cursor-pointer font-medium text-[#0070F4]"
+                                  onClick={() => {
+                                    setProductKeyAddBatch(record.productKey);
+                                    setOpenListBatchModal(true);
+                                  }}
+                                >
+                                  Chọn lô
+                                </div>
 
-                              {record.batches?.map(
-                                (batch) =>
-                                  batch.isSelected && (
-                                    <div
-                                      key={batch.id}
-                                      className="flex items-center rounded bg-red-main py-1 px-2 text-white"
-                                    >
-                                      <span className="mr-2">
-                                        {batch.name} - {batch.expiryDate} -
-                                        SL: {batch.quantity}
-                                      </span>{" "}
-                                      <Image
-                                        className=" cursor-pointer"
-                                        src={CloseIcon}
-                                        onClick={() => {
-                                          handleRemoveBatch(
-                                            record.productKey,
-                                            batch.id
-                                          );
-                                        }}
-                                        alt=""
-                                      />
-                                    </div>
-                                  )
-                              )}
+                                {record.batches?.map(
+                                  (batch) =>
+                                    batch.isSelected && (
+                                      <div
+                                        key={batch.id}
+                                        className="flex items-center rounded bg-red-main py-1 px-2 text-white"
+                                      >
+                                        <span className="mr-2">
+                                          {batch.name} - {batch.expiryDate} - SL: {batch.quantity}
+                                        </span>{" "}
+                                        <Image
+                                          className=" cursor-pointer"
+                                          src={CloseIcon}
+                                          onClick={() => {
+                                            handleRemoveBatch(record.productKey, batch.id);
+                                          }}
+                                          alt=""
+                                        />
+                                      </div>
+                                    ),
+                                )}
+                              </div>
+                              <InputError
+                                error={errors?.products && errors?.products[Number(record.key) - 1]?.batches?.message}
+                              />
                             </div>
-                            <InputError
-                              error={
-                                errors?.products &&
-                                errors?.products[Number(record.key) - 1]
-                                  ?.batches?.message
-                              }
-                            />
-                          </div>
-                        )}
+                          )}
                     </>
                   );
                 },
                 expandIcon: () => <></>,
-                expandedRowKeys: Object.keys(expandedRowKeys).map(
-                  (key) => +key + 1
-                ),
+                expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key + 1),
               }}
             />
 
@@ -657,10 +583,7 @@ export function DeliveryCoupon() {
                   if (product.productKey === productKeyAddBatch) {
                     return {
                       ...product,
-                      quantity: listBatch.reduce(
-                        (acc, obj) => acc + obj.quantity,
-                        0
-                      ),
+                      quantity: listBatch.reduce((acc, obj) => acc + obj.quantity, 0),
                       batches: listBatch,
                     };
                   }

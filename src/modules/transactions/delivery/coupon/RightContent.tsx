@@ -37,31 +37,25 @@ export function RightContent({
   const [productsImport, setProductsImport] = useRecoilState(productMoveState);
   const profile = useRecoilValue(profileState);
 
-  const { data: employees } = useQuery(
-    ["EMPLOYEE_LIST", searchEmployeeText],
-    () => getEmployee({ page: 1, limit: 20, keyword: searchEmployeeText })
+  const { data: employees } = useQuery(["EMPLOYEE_LIST", searchEmployeeText], () =>
+    getEmployee({ page: 1, limit: 20, keyword: searchEmployeeText }),
   );
 
-  const { data: branches } = useQuery(["SETTING_BRANCH"], () => getBranch());
+  const { data: branches } = useQuery(["SETTING_BRANCH_DELIVERY"], () => getBranch());
 
-  const {
-    mutate: mutateCreateProductImport,
-    isLoading: isLoadingCreateProductImport,
-  } = useMutation(
+  const { mutate: mutateCreateProductImport, isLoading: isLoadingCreateProductImport } = useMutation(
     () => {
-      const products = getValues("products").map(
-        ({ isBatchExpireControl, ...product }) => ({
-          ...product,
-          price: product.primePrice,
-          productUnitId: product.id,
-          batches: product.batches
-            ?.filter((item) => item.isSelected)
-            ?.map((batch) => ({
-              id: batch.id,
-              quantity: batch.quantity,
-            })),
-        })
-      );
+      const products = getValues("products").map(({ isBatchExpireControl, ...product }) => ({
+        ...product,
+        price: product.primePrice,
+        productUnitId: product.id,
+        batches: product.batches
+          ?.filter((item) => item.isSelected)
+          ?.map((batch) => ({
+            id: batch.id,
+            quantity: batch.quantity,
+          })),
+      }));
 
       return createMoveProduct({ ...getValues(), products, totalItem });
     },
@@ -75,16 +69,11 @@ export function RightContent({
       onError: (err: any) => {
         message.error(err?.message);
       },
-    }
+    },
   );
-  const {
-    mutate: mutateReceiveProductImport,
-    isLoading: isLoadingReceiveProductImport,
-  } = useMutation(
+  const { mutate: mutateReceiveProductImport, isLoading: isLoadingReceiveProductImport } = useMutation(
     () => {
-      const products = getValues("items").map(
-        ({ isBatchExpireControl, ...product }) => product
-      );
+      const products = getValues("items").map(({ isBatchExpireControl, ...product }) => product);
 
       return createReceiveMoveProduct({ ...getValues() }, moveId);
     },
@@ -100,14 +89,12 @@ export function RightContent({
       onError: (err: any) => {
         message.error(err?.message);
       },
-    }
+    },
   );
 
   useEffect(() => {
     if (profile) {
-      moveId
-        ? setValue("receivedBy", profile.id)
-        : setValue("movedBy", profile.id);
+      moveId ? setValue("receivedBy", profile.id) : setValue("movedBy", profile.id);
     }
   }, [profile]);
 
@@ -115,11 +102,9 @@ export function RightContent({
     let price = 0;
 
     if (productsImport?.length) {
-      productsImport.forEach(
-        ({ price: unitPrice, quantity, discountValue }) => {
-          price += unitPrice * quantity - discountValue;
-        }
-      );
+      productsImport.forEach(({ price: unitPrice, quantity, discountValue }) => {
+        price += unitPrice * quantity - discountValue;
+      });
     }
 
     return price;
@@ -149,17 +134,7 @@ export function RightContent({
 
   const changePayload = () => {
     const products = cloneDeep(productsImport).map(
-      ({
-        id,
-        price,
-        product,
-        quantity,
-        batches,
-        toBatches,
-        fromBatches,
-        productUnitId,
-        primePrice,
-      }: any) => ({
+      ({ id, price, product, quantity, batches, toBatches, fromBatches, productUnitId, primePrice }: any) => ({
         productId: product.id,
         price: price,
         primePrice: primePrice,
@@ -180,7 +155,7 @@ export function RightContent({
               expiryDate,
               isSelected,
             })),
-      })
+      }),
     );
     moveId ? setValue("items", products) : setValue("products", products);
   };
@@ -239,9 +214,7 @@ export function RightContent({
           <div className="mb-5 border-b-2 border-dashed border-[#E4E4E4]">
             {!moveId && (
               <div className="mb-5 grid grid-cols-2">
-                <div className=" leading-normal text-[#828487]">
-                  Mã chuyển hàng
-                </div>
+                <div className=" leading-normal text-[#828487]">Mã chuyển hàng</div>
                 <CustomInput
                   bordered={false}
                   placeholder="Mã phiếu tự động"
@@ -255,38 +228,24 @@ export function RightContent({
             )}
             {moveId && (
               <div className="mb-5 flex justify-between">
-                <div className=" leading-normal text-[#828487]">
-                  Mã chuyển hàng
-                </div>
-                <div className=" leading-normal text-[#19191C]">
-                  {moveDetail?.code}
-                </div>
+                <div className=" leading-normal text-[#828487]">Mã chuyển hàng</div>
+                <div className=" leading-normal text-[#19191C]">{moveDetail?.code}</div>
               </div>
             )}
 
             <div className="mb-5 flex justify-between">
               <div className=" leading-normal text-[#828487]">Trạng thái</div>
-              <div className=" leading-normal text-[#19191C]">
-                {moveId ? "Nhận hàng" : "Phiếu tạm"}
-              </div>
+              <div className=" leading-normal text-[#19191C]">{moveId ? "Nhận hàng" : "Phiếu tạm"}</div>
             </div>
             {moveId && (
               <>
                 <div className="mb-5 flex justify-between">
-                  <div className=" leading-normal text-[#828487]">
-                    Chi nhánh gửi
-                  </div>
-                  <div className=" leading-normal text-[#19191C]">
-                    {moveDetail?.fromBranch?.name}
-                  </div>
+                  <div className=" leading-normal text-[#828487]">Chi nhánh gửi</div>
+                  <div className=" leading-normal text-[#19191C]">{moveDetail?.fromBranch?.name}</div>
                 </div>
                 <div className="mb-5 flex justify-between">
-                  <div className=" leading-normal text-[#828487]">
-                    Ngày chuyển
-                  </div>
-                  <div className=" leading-normal text-[#19191C]">
-                    {formatDate(moveDetail?.movedAt)}
-                  </div>
+                  <div className=" leading-normal text-[#828487]">Ngày chuyển</div>
+                  <div className=" leading-normal text-[#19191C]">{formatDate(moveDetail?.movedAt)}</div>
                 </div>
               </>
             )}
@@ -295,29 +254,19 @@ export function RightContent({
           <div className="mb-5">
             {moveId && (
               <div className="mb-5 flex justify-between">
-                <div className=" leading-normal text-[#828487]">
-                  Tổng số lượng chuyển
-                </div>
-                <div className=" leading-normal text-[#19191C]">
-                  {formatNumber(totalItemMove)}
-                </div>
+                <div className=" leading-normal text-[#828487]">Tổng số lượng chuyển</div>
+                <div className=" leading-normal text-[#19191C]">{formatNumber(totalItemMove)}</div>
               </div>
             )}
             <div className="mb-5 flex justify-between">
-              <div className=" leading-normal text-[#828487]">
-                Tổng số lượng {moveId ? "nhận" : ""}
-              </div>
-              <div className=" leading-normal text-[#19191C]">
-                {formatNumber(totalItem)}
-              </div>
+              <div className=" leading-normal text-[#828487]">Tổng số lượng {moveId ? "nhận" : ""}</div>
+              <div className=" leading-normal text-[#19191C]">{formatNumber(totalItem)}</div>
             </div>
 
             {!moveId && (
               <div className="mb-5 flex flex-col">
                 <div className="flex items-center">
-                  <div className=" leading-normal text-[#828487] flex-shrink-0 w-28">
-                    Tới chi nhánh
-                  </div>
+                  <div className=" leading-normal text-[#828487] flex-shrink-0 w-28">Tới chi nhánh</div>
                   <CustomSelect
                     options={branches?.data?.items
                       ?.filter((br) => br.id !== branchId)
@@ -373,12 +322,8 @@ export function RightContent({
             changePayload();
             handleSubmit(onSubmit)();
           }}
-          loading={
-            isLoadingCreateProductImport || isLoadingReceiveProductImport
-          }
-          disabled={
-            isLoadingCreateProductImport || isLoadingReceiveProductImport
-          }
+          loading={isLoadingCreateProductImport || isLoadingReceiveProductImport}
+          disabled={isLoadingCreateProductImport || isLoadingReceiveProductImport}
         >
           Hoàn thành
         </CustomButton>

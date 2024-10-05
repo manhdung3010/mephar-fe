@@ -88,28 +88,27 @@ export function RightContentReturn({
     //caculate total price
     orderObject[orderActive]?.forEach((product: any) => {
       const unit = product.productUnit;
-      price +=
-        checkTypeOrder(orderDetail?.order?.code) === 1
-          ? unit?.marketPrice * product?.quantity
-          : Number(unit?.price ?? 0) * product.quantity;
+      price += checkTypeOrder(orderDetail?.order?.code)
+        ? unit?.marketOriginalPrice * product?.quantity
+        : Number(unit?.price ?? 0) * product.quantity;
     });
 
     return price;
-  }, [orderObject, orderActive]);
+  }, [orderObject, orderActive, orderDetail]);
+  console.log("orderObject[orderActive]", orderObject[orderActive]);
   const totalReturnPrice = useMemo(() => {
     let price = 0;
 
     //caculate total return price
     orderObject[orderActive]?.forEach((product: any) => {
       const unit = product.productUnit;
-      price +=
-        checkTypeOrder(orderDetail?.order?.code) === 1
-          ? unit?.marketPrice * product?.quantity
-          : Number(unit?.returnPrice ?? 0) * product.quantity;
+      price += checkTypeOrder(orderDetail?.order?.code)
+        ? unit?.marketPrice * product?.quantity
+        : Number(unit?.returnPrice ?? 0) * product.quantity;
     });
 
     return price;
-  }, [orderObject, orderActive]);
+  }, [orderObject, orderActive, orderDetail]);
 
   const totalMustPay = useMemo(() => {
     let price = 0;
@@ -117,10 +116,9 @@ export function RightContentReturn({
     //caculate total return price
     orderObject[orderActive]?.forEach((product: any) => {
       const unit = product.productUnit;
-      price +=
-        checkTypeOrder(orderDetail?.order?.code) === 1
-          ? unit?.marketPrice * product?.quantity
-          : Number(unit?.returnPrice ?? 0) * product.quantity;
+      price += checkTypeOrder(orderDetail?.order?.code)
+        ? unit?.marketPrice * product?.quantity
+        : Number(unit?.returnPrice ?? 0) * product.quantity;
     });
 
     price = price - (getValuesReturn("discount") ?? 0) - (getValuesReturn("returnFee") ?? 0);
@@ -128,7 +126,7 @@ export function RightContentReturn({
     setValueReturn("paid", price, { shouldValidate: true });
 
     return price;
-  }, [orderObject, orderActive, getValuesReturn("discount"), getValuesReturn("returnFee")]);
+  }, [orderObject, orderActive, getValuesReturn("discount"), getValuesReturn("returnFee"), orderDetail]);
 
   // useEffect(() => {
   //   // get discount from customer when customer change
@@ -442,10 +440,9 @@ export function RightContentReturn({
               productId: product.productId,
               productUnitId: product.productUnitId,
               quantity: product.quantity,
-              price:
-                checkTypeOrder(orderDetail?.order?.code) === 1
-                  ? product?.productUnit?.marketPrice
-                  : product.productUnit.returnPrice,
+              price: checkTypeOrder(orderDetail?.order?.code)
+                ? product?.productUnit?.marketPrice
+                : product.productUnit.returnPrice,
               batches: product.batches
                 .filter((batch) => batch.isSelected)
                 .map((batch: any) => ({
@@ -453,7 +450,6 @@ export function RightContentReturn({
                   quantity: batch.quantity,
                 })),
             }));
-
             setValueReturn("products", formatProducts, {
               shouldValidate: true,
             });

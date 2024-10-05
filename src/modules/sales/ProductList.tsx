@@ -107,18 +107,18 @@ export function ProductList({
   const onChangeQuantity = async (productKey, newValue, product?: any) => {
     const orderObjectClone = cloneDeep(orderObject);
 
-    const res = await getProductDiscountList({
-      productUnitId: product?.id,
-      branchId: branchId,
-      quantity: newValue,
-    });
-    let itemDiscountProduct = res?.data?.data?.items;
+    // const res = await getProductDiscountList({
+    //   productUnitId: product?.id,
+    //   branchId: branchId,
+    //   quantity: newValue,
+    // });
+    // let itemDiscountProduct = res?.data?.data?.items;
 
     orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map((product: ISaleProductLocal) => {
       if (product.productKey === productKey) {
         return {
           ...product,
-          itemDiscountProduct,
+          // itemDiscountProduct,
           quantity: newValue,
         };
       }
@@ -362,7 +362,7 @@ export function ProductList({
       title: "SỐ LƯỢNG",
       dataIndex: "quantity",
       key: "quantity",
-      render: (quantity, record) => (
+      render: (quantity, record: any) => (
         <CustomInput
           wrapClassName="!w-[110px]"
           className="!h-6 !w-[80px] text-center"
@@ -390,12 +390,14 @@ export function ProductList({
                   onChangeQuantity(record?.productKey, +record?.quantityLast, record);
                   return;
                 }
+                onChangeQuantity(record?.productKey, value, record);
               } else {
-                if (value > record?.quantity) {
+                if (value > +record?.originalQuantity) {
                   message.error("Số lượng trả vượt quá số lượng đã mua");
                   onChangeQuantity(record?.productKey, +record?.quantity, record);
                   return;
                 }
+                onChangeQuantity(record?.productKey, value, record);
               }
             }
 
@@ -454,6 +456,23 @@ export function ProductList({
               setOpenListBatchModal(true);
               return;
             }
+            if (isSaleReturn && record?.batches?.length <= 0) {
+              if (record?.quantityLast) {
+                if (e.target.value > record?.quantityLast) {
+                  message.error("Số lượng trả vượt quá số lượng đã mua");
+                  onChangeQuantity(record?.productKey, +record?.quantityLast, record);
+                  return;
+                }
+                onChangeQuantity(record?.productKey, e.target.value, record);
+              } else {
+                if (+e.target.value > +record?.originalQuantity) {
+                  message.error("Số lượng trả vượt quá số lượng đã mua");
+                  onChangeQuantity(record?.productKey, +record?.quantity, record);
+                  return;
+                }
+                onChangeQuantity(record?.productKey, e.target.value, record);
+              }
+            }
             // remove productDiscount if this product is in productDiscount
             const productDiscountClone = cloneDeep(productDiscount);
             productDiscountClone.forEach((item, index) => {
@@ -484,9 +503,7 @@ export function ProductList({
                 className="!h-6 !w-[80px] text-center"
                 hasMinus={false}
                 hasPlus={false}
-                value={
-                  checkTypeOrder(orderDetail?.order?.code) === 1 ? productUnit?.marketPrice : productUnit.returnPrice
-                }
+                value={checkTypeOrder(orderDetail?.order?.code) ? productUnit?.marketPrice : productUnit.returnPrice}
                 type="number"
                 onChange={(value) => {
                   const orderObjectClone = cloneDeep(orderObject);
@@ -497,7 +514,7 @@ export function ProductList({
                         ...product,
                         productUnit: {
                           ...product.productUnit,
-                          ...(checkTypeOrder(orderDetail?.order?.code) === 1
+                          ...(checkTypeOrder(orderDetail?.order?.code)
                             ? { marketPrice: value }
                             : { returnPrice: value }),
                         },
@@ -520,7 +537,7 @@ export function ProductList({
       key: "price",
       render: (_, { productUnit, buyNumberType }) => (
         <span>
-          {formatMoney(checkTypeOrder(orderDetail?.order?.code) === 1 ? productUnit?.marketPrice : productUnit.price)}
+          {formatMoney(checkTypeOrder(orderDetail?.order?.code) ? productUnit?.marketPrice : productUnit.price)}
           {productUnit?.oldPrice && buyNumberType === 1 && (
             <span className="text-[#828487] line-through ml-2">
               {"("}Giá cũ: {formatMoney(productUnit.oldPrice)}
@@ -555,7 +572,7 @@ export function ProductList({
       ) =>
         orderDetail ? (
           formatMoney(
-            checkTypeOrder(orderDetail?.order?.code) === 1
+            checkTypeOrder(orderDetail?.order?.code)
               ? productUnit?.marketPrice * quantity
               : Number(productUnit.returnPrice) * quantity,
           )
@@ -610,8 +627,6 @@ export function ProductList({
     });
     setOrderObject(orderObjectClone);
   };
-
-  console.log("orderObject[orderActive]", orderObject[orderActive]);
   return (
     <ProductTableStyled className="p-4">
       <CustomTable

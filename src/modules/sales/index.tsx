@@ -178,8 +178,10 @@ const Index = () => {
                 code: product.product?.code,
                 returnPrice: product.productUnit.price,
                 marketPrice: product?.price / product?.quantity,
+                marketOriginalPrice: product?.price / product?.quantity,
               },
               quantity: product?.quantityLast ? product?.quantity - product?.quantityLast : product?.quantity,
+              originalQuantity: product?.quantity,
               productUnitId: product.productUnit.id,
               originProductUnitId: product.productUnit.id,
               batches: product.batches?.map((batch) => {

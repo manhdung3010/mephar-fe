@@ -20,10 +20,7 @@ import { useQuery } from "@tanstack/react-query";
 import { cloneDeep, debounce } from "lodash";
 import { useForm } from "react-hook-form";
 import { useRecoilState, useRecoilValue } from "recoil";
-import {
-  IImportProduct,
-  IImportProductLocal,
-} from "../../import-product/coupon/interface";
+import { IImportProduct, IImportProductLocal } from "../../import-product/coupon/interface";
 import { ListBatchModal } from "./ListBatchModal";
 import { RightContent } from "./RightContent";
 import { schema } from "./schema";
@@ -44,12 +41,9 @@ export function CheckInventoryCoupon() {
     mode: "onChange",
     defaultValues: {},
   });
-  const [expandedRowKeys, setExpandedRowKeys] = useState<
-    Record<string, boolean>
-  >({});
+  const [expandedRowKeys, setExpandedRowKeys] = useState<Record<string, boolean>>({});
   const branchId = useRecoilValue(branchState);
-  const [importProducts, setImportProducts] =
-    useRecoilState(checkInventoryState);
+  const [importProducts, setImportProducts] = useRecoilState(checkInventoryState);
   const [openListBatchModal, setOpenListBatchModal] = useState(false);
   const [productKeyAddBatch, setProductKeyAddBatch] = useState<string>();
 
@@ -64,29 +58,20 @@ export function CheckInventoryCoupon() {
   });
 
   const { data: products, isSuccess } = useQuery<{ data: { items: any[] } }>(
-    [
-      "LIST_IMPORT_PRODUCT",
-      formFilter.page,
-      formFilter.limit,
-      formFilter.keyword,
-      branchId,
-    ],
-    () => getSaleProducts({ ...formFilter, branchId })
+    ["LIST_IMPORT_PRODUCT", formFilter.page, formFilter.limit, formFilter.keyword, branchId],
+    () => getSaleProducts({ ...formFilter, branchId }),
   );
   const { data: details } = useQuery<{ data: any }>(
     ["INVENTORY_DETAIL", id, branchId],
     () => getInventoryDetail(Number(id), branchId),
     {
       enabled: !!id,
-    }
+    },
   );
 
   useEffect(() => {
     setImportProducts([]);
-    if (
-      details?.data?.inventoryCheckingProduct?.length > 0 &&
-      importProducts.length === 0
-    ) {
+    if (details?.data?.inventoryCheckingProduct?.length > 0 && importProducts.length === 0) {
       // find product same in products and add to importProducts
       details?.data?.inventoryCheckingProduct.forEach((p, index) => {
         const productCode = p.productUnit?.product?.code;
@@ -160,9 +145,7 @@ export function CheckInventoryCoupon() {
           className=" cursor-pointer"
           onClick={() => {
             const productImportClone = cloneDeep(importProducts);
-            const index = productImportClone.findIndex(
-              (product) => product.id === id
-            );
+            const index = productImportClone.findIndex((product) => product.id === id);
             productImportClone.splice(index, 1);
             setImportProducts(productImportClone);
           }}
@@ -209,9 +192,7 @@ export function CheckInventoryCoupon() {
       render: (_, { productKey, product, id, exchangeValue }) => (
         <CustomUnitSelect
           options={(() => {
-            const productUnitKeysSelected = importProducts.map((product) =>
-              Number(product.productKey.split("-")[1])
-            );
+            const productUnitKeysSelected = importProducts.map((product) => Number(product.productKey.split("-")[1]));
 
             return product.productUnit.map((unit) => ({
               value: unit.id,
@@ -224,27 +205,20 @@ export function CheckInventoryCoupon() {
             let importProductsClone = cloneDeep(importProducts);
             importProductsClone = importProductsClone.map((p) => {
               if (p.productKey === productKey) {
-                const productUnit = p.product.productUnit.find(
-                  (unit) => unit.id === value
-                );
+                const productUnit = p.product.productUnit.find((unit) => unit.id === value);
 
                 return {
                   ...p,
                   code: productUnit?.code || "", // Assign an empty string if productUnit.code is undefined
-                  price:
-                    p.product.primePrice * Number(productUnit?.exchangeValue),
-                  primePrice:
-                    p.product.primePrice * Number(productUnit?.exchangeValue),
+                  price: p.product.primePrice * Number(productUnit?.exchangeValue),
+                  primePrice: p.product.primePrice * Number(productUnit?.exchangeValue),
                   productKey: `${p.product.id}-${value}`,
                   ...productUnit,
                   batches: p.batches?.map((batch) => ({
                     ...batch,
-                    inventory:
-                      batch.originalInventory / productUnit!.exchangeValue,
+                    inventory: batch.originalInventory / productUnit!.exchangeValue,
                   })),
-                  newInventory: Math.floor(
-                    product.quantity / productUnit!.exchangeValue
-                  ),
+                  newInventory: Math.floor(product.quantity / productUnit!.exchangeValue),
                 };
               }
               return p;
@@ -274,21 +248,34 @@ export function CheckInventoryCoupon() {
           defaultValue={realQuantity}
           value={realQuantity}
           type="text"
-          disabled={product?.isBatchExpireControl ? true : false}
+          // disabled={product?.isBatchExpireControl ? true : false}
           onChange={(value) => {
             // validate if value is not a number
             if (isNaN(value)) {
               message.error("Vui lòng nhập số");
               return;
             }
+            if (product?.isBatchExpireControl) {
+              setProductKeyAddBatch(productKey);
+              setOpenListBatchModal(true);
+              return;
+            }
             onChangeValueProduct(productKey, "realQuantity", +value);
           }}
           onMinus={(value) => {
-            if (product?.isBatchExpireControl) return;
+            if (product?.isBatchExpireControl) {
+              setProductKeyAddBatch(productKey);
+              setOpenListBatchModal(true);
+              return;
+            }
             onChangeValueProduct(productKey, "realQuantity", +value);
           }}
           onPlus={(value) => {
-            if (product?.isBatchExpireControl) return;
+            if (product?.isBatchExpireControl) {
+              setProductKeyAddBatch(productKey);
+              setOpenListBatchModal(true);
+              return;
+            }
             onChangeValueProduct(productKey, "realQuantity", +value);
           }}
         />
@@ -298,8 +285,7 @@ export function CheckInventoryCoupon() {
       title: "SL lệch",
       dataIndex: "diffQuantity",
       key: "diffQuantity",
-      render: (_, { realQuantity, newInventory }) =>
-        formatNumber(Math.floor(realQuantity - newInventory)),
+      render: (_, { realQuantity, newInventory }) => formatNumber(Math.floor(realQuantity - newInventory)),
     },
     {
       title: "Giá trị lệch",
@@ -320,14 +306,9 @@ export function CheckInventoryCoupon() {
       price: product.product.price * product.exchangeValue,
       primePrice:
         product.product.primePrice *
-        Number(
-          product.product.productUnit?.find((unit) => unit.id === product.id)
-            ?.exchangeValue
-        ),
+        Number(product.product.productUnit?.find((unit) => unit.id === product.id)?.exchangeValue),
       inventory: product.quantity,
-      newInventory: Math.floor(
-        (product.product.quantity ?? 0) / product.exchangeValue
-      ),
+      newInventory: Math.floor((product.product.quantity ?? 0) / product.exchangeValue),
       realQuantity: 1,
       discountValue: 0,
       batches: product.batches?.map((batch) => {
@@ -362,9 +343,7 @@ export function CheckInventoryCoupon() {
                 ...batch,
                 // inventory,
                 // originalInventory: batch.quantity,
-                quantity: batch.isSelected
-                  ? batch.quantity + 1
-                  : batch.quantity,
+                quantity: batch.isSelected ? batch.quantity + 1 : batch.quantity,
               };
 
               return newBatch;
@@ -386,8 +365,7 @@ export function CheckInventoryCoupon() {
   const checkDisplayListBatch = (product: IImportProductLocal) => {
     return (
       product.product.type === EProductType.MEDICINE ||
-      (product.product.type === EProductType.PACKAGE &&
-        product.product.isBatchExpireControl)
+      (product.product.type === EProductType.PACKAGE && product.product.isBatchExpireControl)
     );
   };
 
@@ -431,10 +409,7 @@ export function CheckInventoryCoupon() {
       if (product.productKey === productKey) {
         return {
           ...product,
-          realQuantity: product.batches.reduce(
-            (acc, obj) => acc + (obj.isSelected ? obj.quantity : 0),
-            0
-          ),
+          realQuantity: product.batches.reduce((acc, obj) => acc + (obj.isSelected ? obj.quantity : 0), 0),
         };
       }
 
@@ -484,9 +459,7 @@ export function CheckInventoryCoupon() {
                         <div>
                           {item.code} - {item.product.name}
                         </div>
-                        <div className="rounded bg-red-main px-2 py-[2px] text-white">
-                          {item.unitName}
-                        </div>
+                        <div className="rounded bg-red-main px-2 py-[2px] text-white">{item.unitName}</div>
                       </div>
                       <div>Số lượng - {item.quantity}</div>
                     </div>
@@ -531,29 +504,24 @@ export function CheckInventoryCoupon() {
                                   className="flex items-center rounded bg-red-main py-1 px-2 text-white"
                                 >
                                   <span className="mr-2">
-                                    {batch.name} - {batch.expiryDate} - SL:{" "}
-                                    {batch.quantity}
+                                    {batch.name} - {batch.expiryDate} - SL: {batch.quantity}
                                   </span>{" "}
                                   <Image
                                     className=" cursor-pointer"
                                     src={CloseIcon}
                                     onClick={() => {
-                                      handleRemoveBatch(
-                                        record.productKey,
-                                        batch.id
-                                      );
+                                      handleRemoveBatch(record.productKey, batch.id);
                                     }}
                                     alt=""
                                   />
                                 </div>
-                              )
+                              ),
                           )}
                         </div>
                         <InputError
                           error={
                             errors?.products &&
-                            errors?.products[Number(record.key) - 1]
-                              ?.inventoryCheckingBatch?.message
+                            errors?.products[Number(record.key) - 1]?.inventoryCheckingBatch?.message
                           }
                         />
                       </div>
@@ -561,9 +529,7 @@ export function CheckInventoryCoupon() {
                   </>
                 ),
                 expandIcon: () => <></>,
-                expandedRowKeys: Object.keys(expandedRowKeys).map(
-                  (key) => +key + 1
-                ),
+                expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key + 1),
               }}
             />
           </div>
@@ -589,10 +555,7 @@ export function CheckInventoryCoupon() {
             if (product.productKey === productKeyAddBatch) {
               return {
                 ...product,
-                realQuantity: listBatch.reduce(
-                  (acc, obj) => acc + obj.quantity,
-                  0
-                ),
+                realQuantity: listBatch.reduce((acc, obj) => acc + obj.quantity, 0),
                 batches: listBatch,
               };
             }

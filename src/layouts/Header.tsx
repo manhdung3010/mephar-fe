@@ -11,13 +11,7 @@ import DropdownIcon from "@/assets/dropdownIcon.svg";
 import LocationIcon from "@/assets/locationIcon.svg";
 import { getImage, randomString } from "@/helpers";
 import { setItem, setToken } from "@/helpers/storage";
-import {
-  agencyState,
-  branchState,
-  orderActiveState,
-  orderState,
-  profileState,
-} from "@/recoil/state";
+import { agencyState, branchState, orderActiveState, orderState, profileState } from "@/recoil/state";
 import { EStorageKey } from "@/enums";
 import _ from "lodash";
 export const generalId = "GENERAL_ID";
@@ -33,7 +27,7 @@ export const Header = ({ title }: { title?: string | ReactNode }) => {
   const [, setOrderObject] = useRecoilState(orderState);
   const [, setOrderActive] = useRecoilState(orderActiveState);
 
-  const { data: branches } = useQuery(["SETTING_BRANCH"], () => getBranch());
+  const { data: branches } = useQuery(["SETTING_BRANCH_HEADER"], () => getBranch());
 
   useEffect(() => {
     if (branches?.data?.items?.length) {
@@ -111,8 +105,7 @@ export const Header = ({ title }: { title?: string | ReactNode }) => {
             <div className="flex items-center">
               <Image src={LocationIcon} />
               <span className=" mx-2 cursor-pointer">
-                {branches?.data?.items?.find((item) => item.id === branch)
-                  ?.name || "Tất cả chi nhánh"}
+                {branches?.data?.items?.find((item) => item.id === branch)?.name || "Tất cả chi nhánh"}
               </span>
               <Image src={DropdownIcon} />
             </div>
@@ -121,11 +114,7 @@ export const Header = ({ title }: { title?: string | ReactNode }) => {
 
         <div className="ml-5">
           {profile?.avatar?.path ? (
-            <Avatar
-              style={{ background: "#4285F4" }}
-              src={getImage(profile?.avatar?.path)}
-              size={32}
-            ></Avatar>
+            <Avatar style={{ background: "#4285F4" }} src={getImage(profile?.avatar?.path)} size={32}></Avatar>
           ) : (
             <Avatar style={{ background: "#4285F4" }} size={32}>
               {profile?.username[0]}
@@ -135,9 +124,7 @@ export const Header = ({ title }: { title?: string | ReactNode }) => {
           <Dropdown menu={{ items: profileItems }}>
             <Space>
               <div className="flex items-center">
-                <span className=" mx-2 cursor-pointer">
-                  {profile?.fullName}
-                </span>
+                <span className=" mx-2 cursor-pointer">{profile?.fullName}</span>
                 <Image className=" cursor-pointer" src={DropdownIcon} />
               </div>
             </Space>

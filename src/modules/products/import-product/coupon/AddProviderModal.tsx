@@ -43,21 +43,17 @@ export function AddProviderModal({
   });
 
   const [groupProviderKeyword, setGroupProviderKeyword] = useState();
-   const [isOpenAddGroupProvider, setIsOpenAddGroupProvider] = useState(false);
+  const [isOpenAddGroupProvider, setIsOpenAddGroupProvider] = useState(false);
 
   const { data: branches } = useQuery(["SETTING_BRANCH"], () => getBranch());
-  const { data: groupProviders } = useQuery(
-    ["GROUP_PROVIDER", groupProviderKeyword],
-    () =>
-      getGroupProvider({ page: 1, limit: 20, keyword: groupProviderKeyword })
+  const { data: groupProviders } = useQuery(["GROUP_PROVIDER", groupProviderKeyword], () =>
+    getGroupProvider({ page: 1, limit: 20, keyword: groupProviderKeyword }),
   );
-  const { provinces, districts, wards } = useAddress(
-    getValues("provinceId"),
-    getValues("districtId")
-  );
+  const { provinces, districts, wards } = useAddress(getValues("provinceId"), getValues("districtId"));
 
-  const { mutate: mutateCreateProvider, isLoading: isLoadingCreateProvider } =
-    useMutation(() => createProvider(getValues()), {
+  const { mutate: mutateCreateProvider, isLoading: isLoadingCreateProvider } = useMutation(
+    () => createProvider(getValues()),
+    {
       onSuccess: async (res) => {
         setProductImportValue("supplierId", res.data.id, {
           shouldValidate: true,
@@ -69,7 +65,8 @@ export function AddProviderModal({
       onError: (err: any) => {
         message.error(err?.message);
       },
-    });
+    },
+  );
 
   const onSubmit = () => {
     mutateCreateProvider();
@@ -96,24 +93,6 @@ export function AddProviderModal({
             value={getValues("code")}
           />
         </div>
-
-        <div>
-          <Label infoText="" label="Chi nhánh" />
-          <CustomSelect
-            onChange={(value) =>
-              setValue("branchId", value, { shouldValidate: true })
-            }
-            className="h-11 !rounded"
-            placeholder="Chi nhánh mặc định"
-            options={branches?.data?.items?.map((item) => ({
-              value: item.id,
-              label: item.name,
-            }))}
-            value={getValues("branchId")}
-          />
-          <InputError error={errors.branchId?.message} />
-        </div>
-
         <div>
           <Label infoText="" label="Tên nhà cung cấp" required />
           <CustomInput
@@ -173,9 +152,7 @@ export function AddProviderModal({
         <div>
           <Label infoText="" label="Nhóm NCC" required />
           <CustomSelect
-            onChange={(value) =>
-              setValue("groupSupplierId", value, { shouldValidate: true })
-            }
+            onChange={(value) => setValue("groupSupplierId", value, { shouldValidate: true })}
             className="h-11 !rounded"
             placeholder="Chọn nhóm NCC"
             options={groupProviders?.data?.items?.map((item) => ({
@@ -190,11 +167,7 @@ export function AddProviderModal({
             suffixIcon={
               <div>
                 <Image src={ArrowDownIcon} alt="" />
-                <Image
-                  src={PlusCircleIcon}
-                  alt=""
-                  onClick={() => setIsOpenAddGroupProvider(true)}
-                />
+                <Image src={PlusCircleIcon} alt="" onClick={() => setIsOpenAddGroupProvider(true)} />
               </div>
             }
           />
@@ -214,9 +187,7 @@ export function AddProviderModal({
         <div>
           <Label infoText="" label="Tỉnh/Thành" />
           <CustomSelect
-            onChange={(value) =>
-              setValue("provinceId", value, { shouldValidate: true })
-            }
+            onChange={(value) => setValue("provinceId", value, { shouldValidate: true })}
             options={provinces?.data?.items?.map((item) => ({
               value: item.id,
               label: item.name,
@@ -232,9 +203,7 @@ export function AddProviderModal({
         <div>
           <Label infoText="" label="Quận/Huyện" />
           <CustomSelect
-            onChange={(value) =>
-              setValue("districtId", value, { shouldValidate: true })
-            }
+            onChange={(value) => setValue("districtId", value, { shouldValidate: true })}
             options={districts?.data?.items?.map((item) => ({
               value: item.id,
               label: item.name,
@@ -250,9 +219,7 @@ export function AddProviderModal({
         <div>
           <Label infoText="" label="Phường/xã" />
           <CustomSelect
-            onChange={(value) =>
-              setValue("wardId", value, { shouldValidate: true })
-            }
+            onChange={(value) => setValue("wardId", value, { shouldValidate: true })}
             options={wards?.data?.items?.map((item) => ({
               value: item.id,
               label: item.name,
@@ -271,27 +238,23 @@ export function AddProviderModal({
         <CustomTextarea
           rows={10}
           placeholder="Nhập ghi chú"
-          onChange={(e) =>
-            setValue("note", e.target.value, { shouldValidate: true })
-          }
+          onChange={(e) => setValue("note", e.target.value, { shouldValidate: true })}
           value={getValues("note")}
         />
       </div>
 
-
-<AddGroupProviderModal
+      <AddGroupProviderModal
         isOpen={isOpenAddGroupProvider}
         onCancel={() => {
           setIsOpenAddGroupProvider(false);
         }}
         onSuccess={({ groupProviderId, groupProviderName }) => {
           setGroupProviderKeyword(groupProviderName);
-          setValue('groupSupplierId', groupProviderId, {
+          setValue("groupSupplierId", groupProviderId, {
             shouldValidate: true,
           });
         }}
       />
-      
     </CustomModal>
   );
 }
