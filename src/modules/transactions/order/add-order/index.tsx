@@ -24,6 +24,7 @@ import { schema } from "./schema";
 import RightContent from "./RightContent";
 import { ISaleProduct } from "@/modules/sales/interface";
 import CustomPagination from "@/components/CustomPagination";
+import { getConfigProduct } from "@/api/market.service";
 
 export default function AddOrder() {
   const {
@@ -41,26 +42,20 @@ export default function AddOrder() {
   const [expandedRowKeys, setExpandedRowKeys] = useState<Record<string, boolean>>({});
   const branchId = useRecoilValue(branchState);
   const [importProducts, setImportProducts] = useRecoilState(marketOrderState);
-  const [openListBatchModal, setOpenListBatchModal] = useState(false);
-  const [productKeyAddBatch, setProductKeyAddBatch] = useState<string>();
-
-  const router = useRouter();
 
   const [formFilter, setFormFilter] = useState({
     page: 1,
     limit: 20,
-    isSale: true,
     keyword: "",
+    type: "",
+    status: "",
+    "createdAt[start]": undefined,
+    "createdAt[end]": undefined,
+    isConfig: true,
   });
 
-  const {
-    data: products,
-    isLoading: isLoadingProduct,
-    isSuccess,
-  } = useQuery<{
-    data?: { items: ISaleProduct[] };
-  }>(["LIST_SALE_PRODUCT", formFilter.page, formFilter.limit, formFilter.keyword, branchId], () =>
-    getSaleProducts({ ...formFilter, branchId }),
+  const { data: products, isLoading } = useQuery(["CONFIG_PRODUCT", JSON.stringify(formFilter)], () =>
+    getConfigProduct({ ...formFilter }),
   );
   useEffect(() => {
     if (importProducts.length) {
@@ -128,23 +123,7 @@ export default function AddOrder() {
       title: "Mã hàng",
       dataIndex: "code",
       key: "code",
-      render: (value, _, index) => (
-        <span
-          className="cursor-pointer text-[#0070F4]"
-          onClick={() => {
-            const currentState = expandedRowKeys[`${index}`];
-            const temp = { ...expandedRowKeys };
-            if (currentState) {
-              delete temp[`${index}`];
-            } else {
-              temp[`${index}`] = true;
-            }
-            setExpandedRowKeys({ ...temp });
-          }}
-        >
-          {value}
-        </span>
-      ),
+      render: (value, record, index) => <span className=" text-[#0070F4]">{record?.product?.code}</span>,
     },
     {
       title: "Tên hàng",
@@ -156,45 +135,7 @@ export default function AddOrder() {
       title: "ĐVT",
       dataIndex: "units",
       key: "units",
-      render: (_, { productKey, product, id, exchangeValue }) => (
-        <CustomUnitSelect
-          options={(() => {
-            const productUnitKeysSelected = importProducts.map((product) => Number(product.productKey.split("-")[1]));
-
-            return product.productUnit.map((unit) => ({
-              value: unit.id,
-              label: unit.unitName,
-              disabled: productUnitKeysSelected.includes(unit.id),
-            }));
-          })()}
-          value={id}
-          onChange={(value) => {
-            let importProductsClone = cloneDeep(importProducts);
-            importProductsClone = importProductsClone.map((p) => {
-              if (p.productKey === productKey) {
-                const productUnit = p.product.productUnit.find((unit) => unit.id === value);
-
-                return {
-                  ...p,
-                  code: productUnit?.code || "", // Assign an empty string if productUnit.code is undefined
-                  price: p.product.primePrice * Number(productUnit?.exchangeValue),
-                  primePrice: p.product.primePrice * Number(productUnit?.exchangeValue),
-                  productKey: `${p.product.id}-${value}`,
-                  ...productUnit,
-                  batches: p.batches?.map((batch) => ({
-                    ...batch,
-                    inventory: batch.originalInventory / productUnit!.exchangeValue,
-                  })),
-                  newInventory: Math.floor(product.quantity / productUnit!.exchangeValue),
-                };
-              }
-              return p;
-            });
-            console.log("importProductsClone", importProductsClone);
-            setImportProducts(importProductsClone);
-          }}
-        />
-      ),
+      render: (_, record) => <span>{record?.productUnit?.unitName}</span>,
     },
     {
       title: "Số lượng",
@@ -253,16 +194,11 @@ export default function AddOrder() {
   const handleSelectProduct = (value) => {
     const product = JSON.parse(value);
     let isSelectedUnit = true;
-
     const localProduct: any = {
       ...product,
       productKey: `${product.product.id}-${product.id}`,
-      price: product.product.price * product.exchangeValue,
-      primePrice:
-        product.product.primePrice *
-        Number(product.product.productUnit?.find((unit) => unit.id === product.id)?.exchangeValue),
+      price: product.price,
       inventory: product.quantity,
-      newInventory: Math.floor((product.product.quantity ?? 0) / product.exchangeValue),
       realQuantity: 1,
       discountValue: 0,
       batches: product.batches?.map((batch) => {
@@ -309,69 +245,9 @@ export default function AddOrder() {
       });
       setImportProducts(cloneImportProducts);
     } else {
-      // cloneImportProducts.push(localProduct);
       setImportProducts((prev) => [...prev, localProduct]);
     }
-
-    // setImportProducts((prev) => [...cloneImportProducts]);
   };
-
-  const checkDisplayListBatch = (product) => {
-    return (
-      product.product.type === EProductType.MEDICINE ||
-      (product.product.type === EProductType.PACKAGE && product.product.isBatchExpireControl)
-    );
-  };
-
-  const handleRemoveBatch = (productKey: string, batchId: number) => {
-    // let products = cloneDeep(importProducts);
-
-    // products = products.map((product) => {
-    //   if (product.productKey === productKey) {
-    //     return {
-    //       ...product,
-    //       batches: product.batches?.filter((batch) => batch.id !== batchId),
-    //     };
-    //   }
-    //   return product;
-    // });
-    // setImportProducts(products);
-
-    let productClone = cloneDeep(importProducts);
-
-    productClone = productClone?.map((product: any) => {
-      if (product.productKey === productKey) {
-        return {
-          ...product,
-          batches: product.batches?.map((batch) => {
-            if (batch.batchId === batchId) {
-              return {
-                ...batch,
-                quantity: 0,
-                isSelected: false,
-              };
-            }
-
-            return batch;
-          }),
-        };
-      }
-      return product;
-    });
-    // caculate quantity
-    productClone = productClone?.map((product: any) => {
-      if (product.productKey === productKey) {
-        return {
-          ...product,
-          realQuantity: product.batches.reduce((acc, obj) => acc + (obj.isSelected ? obj.quantity : 0), 0),
-        };
-      }
-
-      return product;
-    });
-    setImportProducts(productClone);
-  };
-
   return (
     <div className="-mx-8 flex">
       <div className="grow overflow-x-auto">
@@ -421,7 +297,7 @@ export default function AddOrder() {
                       <div className="flex gap-x-3">
                         <div>Số lượng: {formatNumber(item.quantity)}</div>
                         <div>|</div>
-                        <div>Giá: {formatMoney(item.productUnit.price)}</div>
+                        <div>Giá: {formatMoney(item.price)}</div>
                       </div>
                     </div>
                   </div>
@@ -440,58 +316,6 @@ export default function AddOrder() {
               }))}
               columns={columns}
               pagination={false}
-              // expandable={{
-              //   defaultExpandAllRows: true,
-              //   expandedRowRender: (record) => (
-              //     <>
-              //       {checkDisplayListBatch(record) && (
-              //         <div className="bg-[#FFF3E6] px-6 py-2 ">
-              //           <div className="flex items-center gap-x-3">
-              //             <div
-              //               className="ml-1 cursor-pointer font-medium text-[#0070F4]"
-              //               onClick={() => {
-              //                 setProductKeyAddBatch(record.productKey);
-              //                 setOpenListBatchModal(true);
-              //               }}
-              //             >
-              //               Chọn lô
-              //             </div>
-
-              //             {record.batches?.map(
-              //               (batch: any) =>
-              //                 batch.isSelected && (
-              //                   <div
-              //                     key={batch.id}
-              //                     className="flex items-center rounded bg-red-main py-1 px-2 text-white"
-              //                   >
-              //                     <span className="mr-2">
-              //                       {batch.name} - {batch.expiryDate} - SL: {batch.quantity}
-              //                     </span>{" "}
-              //                     <Image
-              //                       className=" cursor-pointer"
-              //                       src={CloseIcon}
-              //                       onClick={() => {
-              //                         handleRemoveBatch(record.productKey, batch.id);
-              //                       }}
-              //                       alt=""
-              //                     />
-              //                   </div>
-              //                 ),
-              //             )}
-              //           </div>
-              //           {/* <InputError
-              //             error={
-              //               errors?.products &&
-              //               errors?.products[Number(record.key) - 1]?.inventoryCheckingBatch?.message
-              //             }
-              //           /> */}
-              //         </div>
-              //       )}
-              //     </>
-              //   ),
-              //   expandIcon: () => <></>,
-              //   expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key + 1),
-              // }}
             />
           </div>
         </div>

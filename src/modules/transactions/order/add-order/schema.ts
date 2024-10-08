@@ -5,8 +5,8 @@ export const schema = yup.object().shape({
   listProduct: yup.array().of(
     yup.object({
       marketProductId: yup.number(),
-      quantity: yup.number().required("Đây là trường bắt buộc!"),
-      price: yup.number().required("Đây là trường bắt buộc!"),
+      quantity: yup.number(),
+      price: yup.number(),
     }),
   ),
   customerId: yup.number().required("Đây là trường bắt buộc!"),

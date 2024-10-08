@@ -23,6 +23,8 @@ function AddressModal({ isOpen, onCancel, onSave, address }) {
     }
   }, [address]);
 
+  console.log("selectedAddress", selectedAddress);
+
   return (
     <CustomModal isOpen={isOpen} onCancel={onCancel} title={`Địa chỉ nhận hàng`} width={900} customFooter={true}>
       <div className="my-8">
@@ -31,7 +33,7 @@ function AddressModal({ isOpen, onCancel, onSave, address }) {
           value={selectedAddress}
           onChange={(e) => setSelectedAddress(e.target.value)}
         >
-          {address?.data?.items?.map((item, index) => (
+          {address?.map((item, index) => (
             <div className="pb-6 border-b-[1px] border-[#EBEBF0] flex items-center" key={item?.id}>
               <Radio value={item?.id}></Radio>
               <div className="w-full flex justify-between items-center ml-2">
@@ -82,12 +84,11 @@ function AddressModal({ isOpen, onCancel, onSave, address }) {
         <CustomButton
           className="!w-[180px] !h-11"
           onClick={() => {
-            const newSelectedAddress = address?.data?.items?.find((item) => item?.id === selectedAddress);
+            const newSelectedAddress = address?.find((item) => item?.id === selectedAddress);
             if (!newSelectedAddress) {
               message.error("Vui lòng chọn địa chỉ nhận hàng");
               return;
             }
-            console.log("newSelectedAddress", newSelectedAddress);
             onSave(newSelectedAddress);
             onCancel();
           }}

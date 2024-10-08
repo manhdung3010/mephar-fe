@@ -1,4 +1,4 @@
-import { getConfigProduct } from "@/api/market.service";
+import { getConfigProduct, getMarketStore } from "@/api/market.service";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
@@ -26,16 +26,28 @@ function MarketSearch() {
     sortBy: "quantitySold",
     type: "common",
   });
+  const [formFilterStore, setFormFilterStore] = useState<any>({
+    page: 1,
+    limit: 10,
+    keyword: "",
+  });
 
   useEffect(() => {
     setFormFilter({
       ...formFilter,
       keyword,
     });
+    setFormFilterStore({
+      ...formFilterStore,
+      keyword,
+    });
   }, [keyword]);
 
   const { data: configProduct, isLoading } = useQuery(["CONFIG_PRODUCT", JSON.stringify(formFilter), branchId], () =>
     getConfigProduct({ ...formFilter }),
+  );
+  const { data: stores, isLoading: isLoadingStore } = useQuery(["MARKET_STORE", JSON.stringify(formFilterStore)], () =>
+    getMarketStore({ ...formFilter }),
   );
 
   return (
@@ -74,19 +86,17 @@ function MarketSearch() {
               </div>
             </div>
           </div>
-          <div className="mt-5">
+          <div className="mt-10">
             <h4 className="text-2xl font-medium">Cửa hàng</h4>
             <div className="grid grid-cols-1 gap-5 mt-6">
-              {configProduct?.data?.stores?.length <= 0 ? (
+              {stores?.data?.items?.length <= 0 ? (
                 <div className="flex justify-center py-28">
                   <p className="text-lg">Không tìm thấy cửa hàng hợp lệ!</p>
                 </div>
-              ) : isLoading ? (
+              ) : isLoadingStore ? (
                 Array.from({ length: 10 }).map((_, index) => <StoreCardSkeleton key={index} />)
               ) : (
-                configProduct?.data?.stores?.map((item, index) => (
-                  <StoreCard key={index} store={item} branch={item?.name} />
-                ))
+                stores?.data?.items?.map((item, index) => <StoreCard key={index} store={item} branch={item?.name} />)
               )}
             </div>
           </div>
