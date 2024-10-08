@@ -17,9 +17,7 @@ export const localStorageEffect: (key: string) => AtomEffect<any> =
         }
 
         onSet((newValue, _, isReset) => {
-          isReset
-            ? store.removeItem(key)
-            : store.setItem(key, JSON.stringify(newValue));
+          isReset ? store.removeItem(key) : store.setItem(key, JSON.stringify(newValue));
         });
       }
     } catch (e) {
@@ -81,6 +79,11 @@ export const checkInventoryState = atom<IImportProductLocal[]>({
   key: "CHECK_INVENTORY_STATE",
   default: [],
   effects: [localStorageEffect("CHECK_INVENTORY_STATE")],
+});
+export const marketOrderState = atom<any[]>({
+  key: "MARKET_ORDER_STATE",
+  default: [],
+  effects: [localStorageEffect("MARKET_ORDER_STATE")],
 });
 
 export const productReturnState = atom<IImportProductLocal[]>({

@@ -1,19 +1,20 @@
-import { updateStoreStatus } from '@/api/market.service';
-import SearchIcon from '@/assets/searchIcon.svg';
-import { CustomButton } from '@/components/CustomButton';
-import { CustomInput } from '@/components/CustomInput';
-import CustomPagination from '@/components/CustomPagination';
-import CustomTable from '@/components/CustomTable';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { message } from 'antd';
-import { debounce } from 'lodash';
-import Image from 'next/image';
-import React from 'react';
-import { EAcceptFollowStoreStatus, EFollowStoreStatus } from '../type';
-import ConfirmStatusModal from './ConfirmStatusModal';
-import GroupAgencyModal from './GroupAgencyModal';
-import { useRecoilValue } from 'recoil';
-import { branchState } from '@/recoil/state';
+import { updateStoreStatus } from "@/api/market.service";
+import SearchIcon from "@/assets/searchIcon.svg";
+import { CustomButton } from "@/components/CustomButton";
+import { CustomInput } from "@/components/CustomInput";
+import CustomPagination from "@/components/CustomPagination";
+import CustomTable from "@/components/CustomTable";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { message } from "antd";
+import { debounce } from "lodash";
+import Image from "next/image";
+import React, { useState } from "react";
+import { EAcceptFollowStoreStatus, EFollowStoreStatus } from "../type";
+import ConfirmStatusModal from "./ConfirmStatusModal";
+import GroupAgencyModal from "./GroupAgencyModal";
+import { useRecoilValue } from "recoil";
+import { branchState } from "@/recoil/state";
+import RowDetail from "./RowDetail";
 
 function AgencyList({ data, formFilter, setFormFilter, isLoading }) {
   const queryClient = useQueryClient();
@@ -22,23 +23,27 @@ function AgencyList({ data, formFilter, setFormFilter, isLoading }) {
   const [openGroupModal, setOpenGroupModal] = React.useState(false);
   const [deleteId, setDeleteId] = React.useState(null);
   const [recordId, setRecordId] = React.useState(null);
+  const [expandedRowKeys, setExpandedRowKeys] = useState<any>({});
 
-  const { mutate: mutateUpdateStoreStatus, isLoading: isLoadingCreateOrder } =
-    useMutation(
-      (payload: any) => {
-        console.log('payload', payload);
-        return updateStoreStatus(payload?.id, payload?.status, payload?.groupAgencyId ? { groupAgencyId: payload?.groupAgencyId } : null);
+  const { mutate: mutateUpdateStoreStatus, isLoading: isLoadingCreateOrder } = useMutation(
+    (payload: any) => {
+      console.log("payload", payload);
+      return updateStoreStatus(
+        payload?.id,
+        payload?.status,
+        payload?.groupAgencyId ? { groupAgencyId: payload?.groupAgencyId } : null,
+      );
+    },
+    {
+      onSuccess: async (data) => {
+        await queryClient.invalidateQueries(["AGENCY_LIST"]);
+        setOpenGroupModal(false);
       },
-      {
-        onSuccess: async (data) => {
-          await queryClient.invalidateQueries(["AGENCY_LIST"]);
-          setOpenGroupModal(false)
-        },
-        onError: (err: any) => {
-          message.error(err?.message);
-        },
-      }
-    );
+      onError: (err: any) => {
+        message.error(err?.message);
+      },
+    },
+  );
 
   const columns: any = [
     {
@@ -63,39 +68,61 @@ function AgencyList({ data, formFilter, setFormFilter, isLoading }) {
       title: "Địa chỉ",
       dataIndex: "address",
       key: "address",
-      render: (value, record) => record?.agency?.address,
+      render: (value, record) =>
+        record?.agency?.address +
+        ", " +
+        record?.agency?.ward?.name +
+        ", " +
+        record?.agency?.district?.name +
+        ", " +
+        record?.agency?.province?.name,
     },
     {
       title: "Thao tác",
       dataIndex: "createdAt",
       key: "createdAt",
-      classNames: 'w-[280px]',
-      render: (value, record) => formFilter?.status === EFollowStoreStatus.PENDING ? (
-        <div className='flex items-center gap-2'>
-          <CustomButton outline
-            onClick={() => {
-              const newPayload = {
-                id: record?.id,
-                status: EAcceptFollowStoreStatus.CANCEL,
-              }
-              mutateUpdateStoreStatus(newPayload)
-            }}
-          >Từ chối</CustomButton>
-          <CustomButton onClick={() => {
-            setRecordId(record?.id)
-            setOpenGroupModal(true)
-          }}>Chấp nhận</CustomButton>
-        </div>
-      ) : (
-        <div className='flex items-center gap-2'>
-          <CustomButton outline onClick={() => {
-            setOpenConfirmModal(true)
-            setDeleteId(record?.id)
-          }}>Hủy đại lý</CustomButton>
-        </div>
-      ),
+      classNames: "w-[280px]",
+      render: (value, record) =>
+        formFilter?.status === EFollowStoreStatus.PENDING ? (
+          <div className="flex items-center gap-2">
+            <CustomButton
+              outline
+              onClick={() => {
+                const newPayload = {
+                  id: record?.id,
+                  status: EAcceptFollowStoreStatus.CANCEL,
+                };
+                mutateUpdateStoreStatus(newPayload);
+              }}
+            >
+              Từ chối
+            </CustomButton>
+            <CustomButton
+              onClick={() => {
+                setRecordId(record?.id);
+                setOpenGroupModal(true);
+              }}
+            >
+              Chấp nhận
+            </CustomButton>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <CustomButton
+              outline
+              onClick={() => {
+                setOpenConfirmModal(true);
+                setDeleteId(record?.id);
+              }}
+            >
+              Hủy đại lý
+            </CustomButton>
+          </div>
+        ),
     },
   ];
+
+  console.log("data", data?.items);
 
   return (
     <div>
@@ -111,16 +138,12 @@ function AgencyList({ data, formFilter, setFormFilter, isLoading }) {
           }));
         }, 300)}
       />
-      {
-        formFilter?.status === EFollowStoreStatus.PENDING && (
-          <p className='italic font-medium text-[#8F90A6] my-6'>Số lượng yêu cầu: {data?.totalItem}</p>
-        )
-      }
-      {
-        formFilter?.status === EFollowStoreStatus.ACTIVE && (
-          <p className='italic font-medium text-[#8F90A6] my-6'>Số lượng đại lý: {data?.totalItem}</p>
-        )
-      }
+      {formFilter?.status === EFollowStoreStatus.PENDING && (
+        <p className="italic font-medium text-[#8F90A6] my-6">Số lượng yêu cầu: {data?.totalItem}</p>
+      )}
+      {formFilter?.status === EFollowStoreStatus.ACTIVE && (
+        <p className="italic font-medium text-[#8F90A6] my-6">Số lượng đại lý: {data?.totalItem}</p>
+      )}
 
       <CustomTable
         dataSource={data?.items?.map((item, index) => ({
@@ -129,6 +152,25 @@ function AgencyList({ data, formFilter, setFormFilter, isLoading }) {
         }))}
         loading={isLoading}
         columns={columns}
+        onRow={(record, rowIndex) => {
+          return {
+            onClick: (event) => {
+              // Toggle expandedRowKeys state here
+              if (expandedRowKeys[record.key]) {
+                const { [record.key]: value, ...remainingKeys } = expandedRowKeys;
+                setExpandedRowKeys(remainingKeys);
+              } else {
+                setExpandedRowKeys({ [record.key]: true });
+              }
+            },
+          };
+        }}
+        expandable={{
+          // eslint-disable-next-line @typescript-eslint/no-shadow
+          expandedRowRender: (record) => <RowDetail record={record} />,
+          expandIcon: () => <></>,
+          expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key),
+        }}
       />
 
       <CustomPagination
@@ -146,11 +188,11 @@ function AgencyList({ data, formFilter, setFormFilter, isLoading }) {
           const newPayload = {
             id: deleteId,
             status: EAcceptFollowStoreStatus.CANCEL,
-          }
-          mutateUpdateStoreStatus(newPayload)
-          setOpenConfirmModal(false)
+          };
+          mutateUpdateStoreStatus(newPayload);
+          setOpenConfirmModal(false);
         }}
-        content={''}
+        content={""}
       />
       <GroupAgencyModal
         isOpen={openGroupModal}
@@ -158,23 +200,22 @@ function AgencyList({ data, formFilter, setFormFilter, isLoading }) {
           const newPayload = {
             id: recordId,
             status: EAcceptFollowStoreStatus.ACTIVE,
-          }
-          mutateUpdateStoreStatus(newPayload)
-
+          };
+          mutateUpdateStoreStatus(newPayload);
         }}
         onSuccess={({ agencyId }) => {
           const newPayload = {
             id: recordId,
             status: EAcceptFollowStoreStatus.ACTIVE,
-            groupAgencyId: agencyId
-          }
-          mutateUpdateStoreStatus(newPayload)
+            groupAgencyId: agencyId,
+          };
+          mutateUpdateStoreStatus(newPayload);
         }}
         onClose={() => setOpenGroupModal(false)}
-        content={''}
+        content={""}
       />
     </div>
-  )
+  );
 }
 
-export default AgencyList
+export default AgencyList;

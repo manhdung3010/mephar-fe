@@ -13,26 +13,19 @@ import CustomTable from "@/components/CustomTable";
 import { formatMoney, formatNumber } from "@/helpers";
 import { branchState } from "@/recoil/state";
 import { getMarketOrder } from "@/api/market.service";
-import {
-  EOrderMarketStatus,
-  EOrderMarketStatusLabel,
-} from "@/modules/markets/type";
+import { EOrderMarketStatus, EOrderMarketStatusLabel } from "@/modules/markets/type";
 import OrderDetail from "./row-detail";
 import Search from "./Search";
 import { IOrder } from "./type";
 import { useRouter } from "next/router";
+import { CustomButton } from "@/components/CustomButton";
+import PlusIcon from "@/assets/plusWhiteIcon.svg";
 
 export function OrderTransaction() {
-  const branchId = useRecoilValue(branchState);
   const router = useRouter();
   const { keyword } = router.query;
-
-  const [expandedRowKeys, setExpandedRowKeys] = useState<
-    Record<string, boolean>
-  >({});
-
+  const [expandedRowKeys, setExpandedRowKeys] = useState<Record<string, boolean>>({});
   const [filteredData, setFilteredData] = useState<IOrder[]>([]);
-
   const [formFilter, setFormFilter] = useState({
     page: 1,
     limit: 20,
@@ -41,10 +34,7 @@ export function OrderTransaction() {
     dateNumber: 90,
   });
 
-  const { data: orders, isLoading } = useQuery(
-    ["MAKET_ORDER", formFilter],
-    () => getMarketOrder({ ...formFilter })
-  );
+  const { data: orders, isLoading } = useQuery(["MAKET_ORDER", formFilter], () => getMarketOrder({ ...formFilter }));
 
   useEffect(() => {
     if (keyword) {
@@ -72,9 +62,7 @@ export function OrderTransaction() {
     const filtered = orders?.data?.items?.filter((item: IOrder) => {
       const productCode = item.code.toLowerCase();
       const productUserFullName = item?.customer.fullName.toLowerCase();
-      const productName = item.products
-        ?.map((product) => product.product.name.toLowerCase())
-        .join(", ");
+      const productName = item.products?.map((product) => product.product.name.toLowerCase()).join(", ");
 
       return (
         productName.includes(searchKeyword) ||
@@ -140,12 +128,7 @@ export function OrderTransaction() {
       key: "cashOfCustomer",
       render: (value, record) => (
         <span className="text-red-main font-medium">
-          {formatMoney(
-            record?.products?.reduce(
-              (acc, cur) => acc + cur.price * cur.quantity,
-              0
-            )
-          )}
+          {formatMoney(record?.products?.reduce((acc, cur) => acc + cur.price * cur.quantity, 0))}
         </span>
       ),
     },
@@ -167,24 +150,16 @@ export function OrderTransaction() {
       render: (_, { status }) => (
         <div
           className={`py-1 px-2 rounded-2xl border-[1px]  w-max
-          ${
-            status === EOrderMarketStatus.PENDING &&
-            " bg-[#fff2eb] border-[#FF8800] text-[#FF8800]"
-          }
+          ${status === EOrderMarketStatus.PENDING && " bg-[#fff2eb] border-[#FF8800] text-[#FF8800]"}
           ${
             status === EOrderMarketStatus.CONFIRM ||
             status === EOrderMarketStatus.PROCESSING ||
-            (status === EOrderMarketStatus.SEND &&
-              " bg-[#e5f0ff] border-[#0063F7] text-[#0063F7]")
+            (status === EOrderMarketStatus.SEND && " bg-[#e5f0ff] border-[#0063F7] text-[#0063F7]")
           }
-          ${
-            status === EOrderMarketStatus.DONE &&
-            " bg-[#e3fff1] border-[#05A660] text-[#05A660]"
-          }
+          ${status === EOrderMarketStatus.DONE && " bg-[#e3fff1] border-[#05A660] text-[#05A660]"}
           ${
             status === EOrderMarketStatus.CANCEL ||
-            (status === EOrderMarketStatus.CLOSED &&
-              " bg-[#ffe5e5] border-[#FF3B3B] text-[#FF3B3B]")
+            (status === EOrderMarketStatus.CLOSED && " bg-[#ffe5e5] border-[#FF3B3B] text-[#FF3B3B]")
           }
           `}
         >
@@ -217,16 +192,18 @@ export function OrderTransaction() {
           <Image src={ImportIcon} /> Nhập hàng
         </div>
 
-        {/* <CustomButton type="success" prefixIcon={<Image src={PlusIcon} />}>
+        <CustomButton
+          onClick={() => router.push("/transactions/order/add-order")}
+          type="success"
+          prefixIcon={<Image src={PlusIcon} />}
+        >
           Tạo đơn hàng
-        </CustomButton> */}
+        </CustomButton>
       </div>
 
       <div className="mb-2 bg-white">
         <div className="flex items-center border-b border-[#C7C9D9] p-5">
-          <span className="mr-6 font-bold text-[#15171A]">
-            ĐƠN HÀNG CẦN XỬ LÝ
-          </span>
+          <span className="mr-6 font-bold text-[#15171A]">ĐƠN HÀNG CẦN XỬ LÝ</span>
           <Select
             bordered={false}
             defaultValue={formFilter.dateNumber}
@@ -236,9 +213,7 @@ export function OrderTransaction() {
               { label: "60 ngày gần nhất", value: 60 },
               { label: "30 ngày gần nhất", value: 30 },
             ]}
-            onChange={(value) =>
-              setFormFilter({ ...formFilter, dateNumber: value })
-            }
+            onChange={(value) => setFormFilter({ ...formFilter, dateNumber: value })}
             suffixIcon={<Image src={ArrowDownIcon} />}
           />
         </div>
@@ -341,10 +316,7 @@ export function OrderTransaction() {
         rowSelection={{
           type: "checkbox",
         }}
-        dataSource={(filteredData.length > 0
-          ? filteredData
-          : orders?.data?.items
-        )?.map((item, index) => ({
+        dataSource={(filteredData.length > 0 ? filteredData : orders?.data?.items)?.map((item, index) => ({
           ...item,
           key: index + 1,
         }))}
@@ -355,8 +327,7 @@ export function OrderTransaction() {
             onClick: (event) => {
               // Toggle expandedRowKeys state here
               if (expandedRowKeys[record.key - 1]) {
-                const { [record.key - 1]: value, ...remainingKeys } =
-                  expandedRowKeys;
+                const { [record.key - 1]: value, ...remainingKeys } = expandedRowKeys;
                 setExpandedRowKeys(remainingKeys);
               } else {
                 setExpandedRowKeys({
@@ -368,9 +339,7 @@ export function OrderTransaction() {
         }}
         expandable={{
           // eslint-disable-next-line @typescript-eslint/no-shadow
-          expandedRowRender: (record: IOrder) => (
-            <OrderDetail record={record} />
-          ),
+          expandedRowRender: (record: IOrder) => <OrderDetail record={record} />,
           expandIcon: () => <></>,
           expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key + 1),
         }}
