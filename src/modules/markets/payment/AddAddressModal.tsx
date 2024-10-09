@@ -21,11 +21,13 @@ function AddAddressModal({
   onCancel,
   addressId = "",
   newBranchId,
+  newCustomerId,
 }: {
   isOpen: boolean;
   onCancel: any;
   addressId: string;
-  newBranchId?: string;
+  newBranchId?: string; // thêm mới địa chỉ cho cửa hàng khác
+  newCustomerId?: string; // thêm mới địa chỉ cho khách hàng khác
 }) {
   const {
     getValues,
@@ -48,6 +50,7 @@ function AddAddressModal({
       const payload = {
         ...getValues(),
         ...(newBranchId && { toStoreId: newBranchId }),
+        ...(newCustomerId && { customerId: newCustomerId }),
       };
       if (addressId) {
         return updateShipAddress(addressId, payload);

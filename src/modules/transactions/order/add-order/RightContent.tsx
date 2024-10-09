@@ -354,6 +354,7 @@ export default function RightContent({ getValues, setValue, errors, handleSubmit
         }}
         addressId={!openAddNewAddress ? selectedAddress : null}
         newBranchId={customers?.data?.items?.find((item) => item?.id === getValues("customerId"))?.customerStoreId}
+        newCustomerId={getValues("customerId")}
       />
     </div>
   );
