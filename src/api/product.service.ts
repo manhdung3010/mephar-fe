@@ -5,6 +5,7 @@ export function getProduct(params: {
   limit: number;
   keyword?: string;
   branchId?: number;
+  listProductId?: string;
 }) {
   return axiosClient.get("product", { params });
 }
@@ -29,11 +30,7 @@ export function deleteProduct(id: number) {
   return axiosClient.delete(`product/${id}`);
 }
 
-export function getDosage(params: {
-  page: number;
-  limit: number;
-  keyword?: string;
-}) {
+export function getDosage(params: { page: number; limit: number; keyword?: string }) {
   return axiosClient.get("dosage", { params });
 }
 
@@ -49,11 +46,7 @@ export function deleteDosage(id: number) {
   return axiosClient.delete(`dosage/${id}`);
 }
 
-export function getProductCategory(params: {
-  page: number;
-  limit: number;
-  keyword?: string;
-}) {
+export function getProductCategory(params: { page: number; limit: number; keyword?: string }) {
   return axiosClient.get("product-category/list", { params });
 }
 
@@ -69,11 +62,7 @@ export function deleteProductCategory(id: number) {
   return axiosClient.delete(`product-category/delete/${id}`);
 }
 
-export function getPosition(params: {
-  page: number;
-  limit: number;
-  keyword?: string;
-}) {
+export function getPosition(params: { page: number; limit: number; keyword?: string }) {
   return axiosClient.get("position", { params });
 }
 
@@ -89,11 +78,7 @@ export function deletePosition(id: number) {
   return axiosClient.delete(`position/${id}`);
 }
 
-export function getManufacture(params: {
-  page: number;
-  limit: number;
-  keyword?: string;
-}) {
+export function getManufacture(params: { page: number; limit: number; keyword?: string }) {
   return axiosClient.get("manufacture", { params });
 }
 
@@ -109,11 +94,7 @@ export function deleteManufacture(id: number) {
   return axiosClient.delete(`manufacture/${id}`);
 }
 
-export function getGroupProduct(params: {
-  page: number;
-  limit: number;
-  keyword?: string;
-}) {
+export function getGroupProduct(params: { page: number; limit: number; keyword?: string }) {
   return axiosClient.get("group-product", { params });
 }
 
@@ -129,12 +110,7 @@ export function deleteGroupProduct(id: number) {
   return axiosClient.delete(`group-product/${id}`);
 }
 
-export function getInboundProducts(params: {
-  page: number;
-  limit: number;
-  keyword?: string;
-  branchId?: number;
-}) {
+export function getInboundProducts(params: { page: number; limit: number; keyword?: string; branchId?: number }) {
   return axiosClient.get("product/inbound/master", { params });
 }
 
@@ -180,30 +156,15 @@ export function updateSampleMedicineStatus(id: number, payload) {
 }
 
 // warehouse card
-export function getWareHouseCard(params: {
-  productId: number;
-  page: number;
-  limit: number;
-  branchId?: number;
-}) {
+export function getWareHouseCard(params: { productId: number; page: number; limit: number; branchId?: number }) {
   return axiosClient.get("warehouse/card", { params });
 }
 // product expire
-export function getProductExpired(params: {
-  productId: number;
-  page: number;
-  limit: number;
-  branchId?: number;
-}) {
+export function getProductExpired(params: { productId: number; page: number; limit: number; branchId?: number }) {
   return axiosClient.get("batch", { params });
 }
 
-export function getProductExpiredBatch(params: {
-  productId: number;
-  page: number;
-  limit: number;
-  branchId?: number;
-}) {
+export function getProductExpiredBatch(params: { productId: number; page: number; limit: number; branchId?: number }) {
   return axiosClient.get("batch", { params });
 }
 
