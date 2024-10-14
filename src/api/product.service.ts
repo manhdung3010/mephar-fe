@@ -5,7 +5,7 @@ export function getProduct(params: {
   limit: number;
   keyword?: string;
   branchId?: number;
-  listProductId?: string;
+  listProductUnitId?: string;
 }) {
   return axiosClient.get("product", { params });
 }

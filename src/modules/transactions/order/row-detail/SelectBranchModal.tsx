@@ -53,8 +53,8 @@ function SelectBranchModal({
   const { data: productStore, isLoading: isLoadingProduct } = useQuery(
     ["LIST_PRODUCT", formFilter.page, formFilter.limit, formFilter.keyword, branchId, products],
     () => {
-      const listProductId = products.map((item) => item?.marketProduct?.product?.id).join(",");
-      return getProduct({ ...formFilter, branchId: branchId, listProductId });
+      const listProductUnitId = products.map((item) => item?.marketProduct?.productUnit?.id).join(",");
+      return getProduct({ ...formFilter, branchId: branchId, listProductUnitId });
     },
     {
       enabled: !!isOpen,

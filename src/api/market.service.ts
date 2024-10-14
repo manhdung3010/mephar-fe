@@ -27,17 +27,15 @@ export function deleteConfigProduct(id: string) {
   return axiosClient.delete(`market/config/product/${id}`);
 }
 export function updateConfigStatus(id: string, status: string) {
-  return axiosClient.patch(
-    `market/config/product/changeStatus/${id}/${status}`
-  );
+  return axiosClient.patch(`market/config/product/changeStatus/${id}/${status}`);
 }
 export function getConfigProductDetail(id: string) {
   return axiosClient.get(`market/config/product/${id}`);
 }
 
 // product privite
-export function getConfigProductPrivate(toStoreId: string, params) {
-  return axiosClient.get(`market/sell/product-private?toStoreId=${toStoreId}`, {
+export function getConfigProductPrivate(params) {
+  return axiosClient.get(`market/sell/product-private`, {
     params,
   });
 }
@@ -69,10 +67,7 @@ export function deletMarketCart(id: string) {
 export function updateMarketCart(id: string, quantity: number) {
   return axiosClient.patch(`market/sell/cart/${id}/${quantity}`);
 }
-export function updateMarketCartSelect(payload: {
-  branchId: string;
-  ids: string[];
-}) {
+export function updateMarketCartSelect(payload: { branchId: string; ids: string[] }) {
   return axiosClient.patch(`market/sell/cart`, payload);
 }
 export function createShipAddress(payload) {
@@ -102,10 +97,7 @@ export function updateSeri(payload) {
   return axiosClient.patch(`market/sell/seri`, payload);
 }
 export function updateMarketOrder(id: string, payload) {
-  return axiosClient.patch(
-    `market/sell/market-order/update-order/${id}`,
-    payload
-  );
+  return axiosClient.patch(`market/sell/market-order/update-order/${id}`, payload);
 }
 export function checkSeriValid(seri: string, params) {
   return axiosClient.get(`market/sell/seri/check/${seri}`, { params });

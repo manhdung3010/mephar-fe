@@ -24,7 +24,7 @@ import { schema } from "./schema";
 import RightContent from "./RightContent";
 import { ISaleProduct } from "@/modules/sales/interface";
 import CustomPagination from "@/components/CustomPagination";
-import { getConfigProduct } from "@/api/market.service";
+import { getConfigProduct, getConfigProductPrivate } from "@/api/market.service";
 
 export default function AddOrder() {
   const {
@@ -43,20 +43,19 @@ export default function AddOrder() {
   const branchId = useRecoilValue(branchState);
   const [importProducts, setImportProducts] = useRecoilState(marketOrderState);
 
-  const [formFilter, setFormFilter] = useState({
+  const [formFilter, setFormFilter] = useState<any>({
     page: 1,
-    limit: 20,
+    limit: 16,
     keyword: "",
-    type: "",
-    status: "",
+    status: "active",
     "createdAt[start]": undefined,
     "createdAt[end]": undefined,
-    isConfig: true,
+    type: "common",
   });
 
-  const { data: products, isLoading } = useQuery(["CONFIG_PRODUCT", JSON.stringify(formFilter)], () =>
-    getConfigProduct({ ...formFilter }),
-  );
+  // const { data: products, isLoading } = useQuery(["CONFIG_PRODUCT", JSON.stringify(formFilter)], () =>
+  //   getConfigProduct({ ...formFilter }),
+  // );
   useEffect(() => {
     if (importProducts.length) {
       const expandedRowKeysClone = { ...expandedRowKeys };
@@ -67,6 +66,20 @@ export default function AddOrder() {
       setExpandedRowKeys(expandedRowKeysClone);
     }
   }, [importProducts.length]);
+
+  const { data: products, isLoading: isLoadingConfigProductPrivate } = useQuery(
+    ["CONFIG_PRODUCT_PRIVATE", JSON.stringify(formFilter), getValues("customerId")],
+    () =>
+      getConfigProductPrivate({
+        page: formFilter?.page,
+        limit: formFilter?.limit,
+        sortBy: formFilter?.sortBy,
+        productType: formFilter?.productType,
+        customerId: getValues("customerId") ?? -1,
+      }),
+  );
+
+  console.log("products", products);
 
   const onChangeValueProduct = (productKey, field, newValue) => {
     let productImportClone = cloneDeep(importProducts);

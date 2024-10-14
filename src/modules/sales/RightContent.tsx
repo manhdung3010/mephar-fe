@@ -23,12 +23,7 @@ import { CustomCheckbox } from "@/components/CustomCheckbox";
 import { CustomInput } from "@/components/CustomInput";
 import { CustomSelect } from "@/components/CustomSelect";
 import InputError from "@/components/InputError";
-import {
-  EDiscountLabel,
-  EDiscountType,
-  EPaymentMethod,
-  getEnumKeyByValue,
-} from "@/enums";
+import { EDiscountLabel, EDiscountType, EPaymentMethod, getEnumKeyByValue } from "@/enums";
 import { formatMoney, formatNumber, hasPermission } from "@/helpers";
 import {
   branchState,
@@ -54,28 +49,16 @@ import type { ISaleProductLocal } from "./interface";
 import { RightContentStyled } from "./styled";
 import { getDiscountConfig } from "@/api/discount.service";
 
-export function RightContent({
-  useForm,
-  discountList,
-}: {
-  useForm: any;
-  discountList: any;
-}) {
+export function RightContent({ useForm, discountList }: { useForm: any; discountList: any }) {
   const queryClient = useQueryClient();
 
   const { getValues, setValue, handleSubmit, errors, reset } = useForm;
 
   const [orderObject, setOrderObject] = useRecoilState(orderState);
   const [orderActive, setOrderActive] = useRecoilState(orderActiveState);
-  const [orderDiscount, setOrderDiscount] = useRecoilState(
-    orderDiscountSelected
-  );
-  const [discountObject, setDiscountObject] = useRecoilState(
-    discountState
-  );
-  const [productDiscount, setProductDiscount] = useRecoilState(
-    productDiscountSelected
-  );
+  const [orderDiscount, setOrderDiscount] = useRecoilState(orderDiscountSelected);
+  const [discountObject, setDiscountObject] = useRecoilState(discountState);
+  const [productDiscount, setProductDiscount] = useRecoilState(productDiscountSelected);
   const [discountType, setDiscountType] = useRecoilState(discountTypeState);
 
   const branchId = useRecoilValue(branchState);
@@ -93,31 +76,22 @@ export function RightContent({
   const [oldTotal, setOldTotal] = useState(0);
   const [checkPoint, setCheckPoint] = useState(false);
 
-  const { data: employees } = useQuery(
-    ["EMPLOYEE_LIST", searchEmployeeText],
-    () => getEmployee({ page: 1, limit: 20, keyword: searchEmployeeText })
+  const { data: employees } = useQuery(["EMPLOYEE_LIST", searchEmployeeText], () =>
+    getEmployee({ page: 1, limit: 20, keyword: searchEmployeeText }),
   );
 
-  const { data: customers } = useQuery(
-    ["CUSTOMER_LIST", searchCustomerText],
-    () =>
-      getCustomer({
-        page: 1,
-        limit: 99,
-        keyword: searchCustomerText,
-        status: "active",
-      })
+  const { data: customers } = useQuery(["CUSTOMER_LIST", searchCustomerText], () =>
+    getCustomer({
+      page: 1,
+      limit: 99,
+      keyword: searchCustomerText,
+      status: "active",
+    }),
   );
 
-  const { data: pointStatus, isLoading: isLoadingPointDetail } = useQuery(
-    ["POINT_STATUS"],
-    () => getPointStatus()
-  );
+  const { data: pointStatus, isLoading: isLoadingPointDetail } = useQuery(["POINT_STATUS"], () => getPointStatus());
 
-  const { data: discountConfigDetail, isLoading } = useQuery(
-    ["DISCOUNT_CONFIG"],
-    () => getDiscountConfig()
-  );
+  const { data: discountConfigDetail, isLoading } = useQuery(["DISCOUNT_CONFIG"], () => getDiscountConfig());
 
   useEffect(() => {
     if (profile) {
@@ -138,20 +112,15 @@ export function RightContent({
     let price = 0;
     let discount = 0;
     orderObject[orderActive]?.forEach((product: ISaleProductLocal) => {
-      const unit = product.product.productUnit?.find(
-        (unit) => unit.id === product.productUnitId
-      );
+      const unit = product.product.productUnit?.find((unit) => unit.id === product.productUnitId);
 
       const discountVal =
-        (product?.discountType === "amount"
-          ? product?.discountValue
-          : (unit?.price * product?.discountValue) / 100) || 0;
+        (product?.discountType === "amount" ? product?.discountValue : (unit?.price * product?.discountValue) / 100) ||
+        0;
       if (product?.buyNumberType === 1) {
         price += Number(product?.productUnit?.price ?? 0) * product.quantity;
       } else {
-        price +=
-          (Number(product?.productUnit?.price ?? 0) - discountVal) *
-          product.quantity;
+        price += (Number(product?.productUnit?.price ?? 0) - discountVal) * product.quantity;
       }
 
       oldTotal += Number(product?.productUnit?.price ?? 0) * product.quantity;
@@ -177,13 +146,8 @@ export function RightContent({
   // caculate discount
   const discount = useMemo(() => {
     if (getValues("discount")) {
-      const discountValue = Number(getValues("discount")).toLocaleString(
-        "en-US"
-      );
-      const discountType =
-        EDiscountLabel[
-        getEnumKeyByValue(EDiscountType, getValues("discountType"))
-        ];
+      const discountValue = Number(getValues("discount")).toLocaleString("en-US");
+      const discountType = EDiscountLabel[getEnumKeyByValue(EDiscountType, getValues("discountType"))];
 
       return `${discountValue}${discountType}`;
     }
@@ -194,9 +158,7 @@ export function RightContent({
   useEffect(() => {
     // get discount from customer when customer change
     if (getValues("customerId")) {
-      const customer = customers?.data?.items?.find(
-        (item) => item.id === getValues("customerId")
-      );
+      const customer = customers?.data?.items?.find((item) => item.id === getValues("customerId"));
 
       if (customer && customer?.groupCustomer?.discount) {
         setValue("discount", customer?.groupCustomer.discount ?? 0, {
@@ -225,8 +187,7 @@ export function RightContent({
         discountObject[orderActive]?.orderDiscount?.forEach((item) => {
           if (item.type === "order_price") {
             if (item?.items[0]?.apply?.discountType === "percent") {
-              discount +=
-                (totalPrice * item?.items[0]?.apply?.discountValue) / 100;
+              discount += (totalPrice * item?.items[0]?.apply?.discountValue) / 100;
             } else {
               discount += item?.items[0]?.apply?.discountValue;
             }
@@ -237,43 +198,36 @@ export function RightContent({
         if (getValues("discountType") === EDiscountType.MONEY) {
           return totalPrice > Number(getValues("discount"))
             ? Math.round(
-              totalPrice -
-              discount -
-              Number(getValues("discount")) -
-              (pointStatus?.data?.convertMoneyPayment / convertPoint) *
-              getValues("paymentPoint")
-            )
+                totalPrice -
+                  discount -
+                  Number(getValues("discount")) -
+                  (pointStatus?.data?.convertMoneyPayment / convertPoint) * getValues("paymentPoint"),
+              )
             : 0;
         }
 
         if (getValues("discountType") === EDiscountType.PERCENT) {
-          const discountValue =
-            (totalPrice * Number(getValues("discount"))) / 100;
+          const discountValue = (totalPrice * Number(getValues("discount"))) / 100;
           return totalPrice > discountValue
             ? Math.round(
-              totalPrice -
-              discount -
-              discountValue -
-              (pointStatus?.data?.convertMoneyPayment / convertPoint) *
-              getValues("paymentPoint")
-            )
+                totalPrice -
+                  discount -
+                  discountValue -
+                  (pointStatus?.data?.convertMoneyPayment / convertPoint) * getValues("paymentPoint"),
+              )
             : 0;
         }
       }
 
       return (
-        totalPrice -
-        discount -
-        (pointStatus?.data?.convertMoneyPayment / convertPoint) *
-        getValues("paymentPoint")
+        totalPrice - discount - (pointStatus?.data?.convertMoneyPayment / convertPoint) * getValues("paymentPoint")
       );
     } else {
       if (discountObject[orderActive]?.orderDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
         discountObject[orderActive]?.orderDiscount?.forEach((item) => {
           if (item.type === "order_price") {
             if (item?.items[0]?.apply?.discountType === "percent") {
-              discount +=
-                (totalPrice * item?.items[0]?.apply?.discountValue) / 100;
+              discount += (totalPrice * item?.items[0]?.apply?.discountValue) / 100;
             } else {
               discount += item?.items[0]?.apply?.discountValue;
             }
@@ -288,11 +242,8 @@ export function RightContent({
         }
 
         if (getValues("discountType") === EDiscountType.PERCENT) {
-          const discountValue =
-            (totalPrice * Number(getValues("discount"))) / 100;
-          return totalPrice > discountValue
-            ? Math.round(totalPrice - discount - discountValue)
-            : 0;
+          const discountValue = (totalPrice * Number(getValues("discount"))) / 100;
+          return totalPrice > discountValue ? Math.round(totalPrice - discount - discountValue) : 0;
         }
       }
 
@@ -325,134 +276,116 @@ export function RightContent({
   }, [customerMustPay, orderObject[orderActive]]);
 
   // create order
-  const { mutate: mutateCreateOrder, isLoading: isLoadingCreateOrder } =
-    useMutation(
-      () => {
-        if (
-          orderDiscount?.length > 0 &&
-          productDiscount?.length > 0 &&
-          discountConfigDetail?.data?.data?.isMergeDiscount
-        ) {
-          const formatProducts = getValues("products")?.map(
-            ({ isBatchExpireControl, ...product }) => ({
-              ...product,
-              batches: product.batches?.map((batch) => ({
-                id: batch.id,
-                quantity: batch.quantity,
-              })),
-              isDiscount: product?.isDiscount || false,
-              ...(product?.itemPrice > 0 && {
-                itemPrice: product?.itemPrice,
-              }),
-            })
-          );
-          return createOrder({
-            ...getValues(),
-            discountOrder: oldTotal,
-            listDiscountId: [
-              ...orderDiscount?.map((item) => item.id),
-              ...productDiscount?.map((item) => item.id),
-            ],
-            ...(getValues("customerId") === -1 && { customerId: null }),
-            products: formatProducts,
-            branchId,
-          });
-        }
-
-        if (
-          discountType === "order" &&
-          orderDiscount?.length > 0 &&
-          orderObject[orderActive]?.length > 0
-        ) {
-          const formatProducts = getValues("products")?.map(
-            ({ isBatchExpireControl, ...product }) => ({
-              ...product,
-              batches: product.batches?.map((batch) => ({
-                id: batch.id,
-                quantity: batch.quantity,
-              })),
-              isDiscount: product?.isDiscount || false,
-            })
-          );
-          return createOrder({
-            ...getValues(),
-            discountOrder: oldTotal,
-            listDiscountId: orderDiscount?.map((item) => item.id),
-            ...(getValues("customerId") === -1 && { customerId: null }),
-            products: formatProducts,
-            branchId,
-          });
-        }
-        if (
-          discountType === "product" &&
-          productDiscount?.length > 0 &&
-          orderObject[orderActive]?.length > 0
-        ) {
-          const formatProducts = getValues("products")?.map(
-            ({ isBatchExpireControl, ...product }) => ({
-              ...product,
-              batches: product.batches?.map((batch) => ({
-                id: batch.id,
-                quantity: batch.quantity,
-              })),
-              isDiscount: product?.isDiscount || false,
-              ...(product?.itemPrice > 0 && {
-                itemPrice: product?.itemPrice,
-              }),
-            })
-          );
-          return createOrder({
-            ...getValues(),
-            discountOrder: oldTotal,
-            listDiscountId: productDiscount?.map((item) => item.id),
-            ...(getValues("customerId") === -1 && { customerId: null }),
-            products: formatProducts,
-            branchId,
-          });
-        }
-        const formatProducts = getValues("products")?.map(
-          ({ isBatchExpireControl, ...product }) => ({
-            ...product,
-            batches: product.batches?.map((batch) => ({
-              id: batch.id,
-              quantity: batch.quantity,
-            })),
-          })
-        );
-
+  const { mutate: mutateCreateOrder, isLoading: isLoadingCreateOrder } = useMutation(
+    () => {
+      if (
+        orderDiscount?.length > 0 &&
+        productDiscount?.length > 0 &&
+        discountConfigDetail?.data?.data?.isMergeDiscount
+      ) {
+        const formatProducts = getValues("products")?.map(({ isBatchExpireControl, ...product }) => ({
+          ...product,
+          batches: product.batches?.map((batch) => ({
+            id: batch.id,
+            quantity: batch.quantity,
+          })),
+          isDiscount: product?.isDiscount || false,
+          ...(product?.itemPrice > 0 && {
+            itemPrice: product?.itemPrice,
+          }),
+        }));
         return createOrder({
           ...getValues(),
+          discountOrder: oldTotal,
+          listDiscountId: [...orderDiscount?.map((item) => item.id), ...productDiscount?.map((item) => item.id)],
           ...(getValues("customerId") === -1 && { customerId: null }),
           products: formatProducts,
           branchId,
         });
-      },
-      {
-        onSuccess: async (res) => {
-          await queryClient.invalidateQueries(["LIST_SALE_PRODUCT"]);
-          await queryClient.invalidateQueries(["CUSTOMER_LIST"]);
-          if (res.data) {
-            setSaleInvoice(res.data);
-          }
-          const orderClone = cloneDeep(orderObject);
-          orderClone[orderActive] = [];
-          setOrderObject(orderClone);
-          setOrderDiscount([]);
-          setProductDiscount([]);
-          setDiscountType("");
-          setIsOpenOrderSuccessModal(true);
-          reset();
-          setValue("userId", profile.id, { shouldValidate: true });
-        },
-        onError: (err: any) => {
-          message.error(err?.message);
-        },
       }
-    );
+
+      if (discountType === "order" && orderDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
+        const formatProducts = getValues("products")?.map(({ isBatchExpireControl, ...product }) => ({
+          ...product,
+          batches: product.batches?.map((batch) => ({
+            id: batch.id,
+            quantity: batch.quantity,
+          })),
+          isDiscount: product?.isDiscount || false,
+        }));
+        return createOrder({
+          ...getValues(),
+          discountOrder: oldTotal,
+          listDiscountId: orderDiscount?.map((item) => item.id),
+          ...(getValues("customerId") === -1 && { customerId: null }),
+          products: formatProducts,
+          branchId,
+        });
+      }
+      if (discountType === "product" && productDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
+        const formatProducts = getValues("products")?.map(({ isBatchExpireControl, ...product }) => ({
+          ...product,
+          batches: product.batches?.map((batch) => ({
+            id: batch.id,
+            quantity: batch.quantity,
+          })),
+          isDiscount: product?.isDiscount || false,
+          ...(product?.itemPrice > 0 && {
+            itemPrice: product?.itemPrice,
+          }),
+        }));
+        return createOrder({
+          ...getValues(),
+          discountOrder: oldTotal,
+          listDiscountId: productDiscount?.map((item) => item.id),
+          ...(getValues("customerId") === -1 && { customerId: null }),
+          products: formatProducts,
+          branchId,
+        });
+      }
+      const formatProducts = getValues("products")?.map(({ isBatchExpireControl, ...product }) => ({
+        ...product,
+        batches: product.batches?.map((batch) => ({
+          id: batch.id,
+          quantity: batch.quantity,
+        })),
+      }));
+
+      return createOrder({
+        ...getValues(),
+        ...(getValues("customerId") === -1 && { customerId: null }),
+        products: formatProducts,
+        branchId,
+      });
+    },
+    {
+      onSuccess: async (res) => {
+        await queryClient.invalidateQueries(["LIST_SALE_PRODUCT"]);
+        await queryClient.invalidateQueries(["CUSTOMER_LIST"]);
+        if (res.data) {
+          setSaleInvoice(res.data);
+        }
+        const orderClone = cloneDeep(orderObject);
+        orderClone[orderActive] = [];
+        setOrderObject(orderClone);
+        setOrderDiscount([]);
+        setProductDiscount([]);
+        setDiscountType("");
+        setIsOpenOrderSuccessModal(true);
+        reset();
+        setValue("userId", profile.id, { shouldValidate: true });
+      },
+      onError: (err: any) => {
+        message.error(err?.message);
+      },
+    },
+  );
 
   const onSubmit = () => {
     mutateCreateOrder();
   };
+
+  console.log("discountObject[orderActive]", discountObject[orderActive]);
   return (
     <RightContentStyled className="flex w-[360px] min-w-[360px] flex-col">
       <div className="px-6 pt-5 ">
@@ -496,20 +429,16 @@ export function RightContent({
           placeholder="Thêm khách vào đơn F4"
           suffixIcon={
             <>
-              {hasPermission(
-                profile?.role?.permissions,
-                RoleModel.customer,
-                RoleAction.create
-              ) && (
-                  <Image
-                    src={PlusIcon}
-                    onClick={(e) => {
-                      setIsOpenAddCustomerModal(true);
-                      e.stopPropagation();
-                    }}
-                    alt=""
-                  />
-                )}
+              {hasPermission(profile?.role?.permissions, RoleModel.customer, RoleAction.create) && (
+                <Image
+                  src={PlusIcon}
+                  onClick={(e) => {
+                    setIsOpenAddCustomerModal(true);
+                    e.stopPropagation();
+                  }}
+                  alt=""
+                />
+              )}
             </>
           }
           prefixIcon={<Image src={CustomerIcon} alt="" />}
@@ -519,19 +448,10 @@ export function RightContent({
           <div className="flex gap-2 mt-3">
             <span className="bg-[#F7DADD] text-red-main px-2 font-medium rounded-sm">
               Nợ:{" "}
-              {formatMoney(
-                +customers?.data?.items?.find(
-                  (item) => item?.id === getValues("customerId")
-                )?.totalDebt
-              )}
+              {formatMoney(+customers?.data?.items?.find((item) => item?.id === getValues("customerId"))?.totalDebt)}
             </span>
             <span className="bg-[#e6f8ec] text-[#00B63E] px-2 font-medium rounded-sm">
-              Điểm:{" "}
-              {formatNumber(
-                customers?.data?.items?.find(
-                  (item) => item?.id === getValues("customerId")
-                )?.point
-              )}
+              Điểm: {formatNumber(customers?.data?.items?.find((item) => item?.id === getValues("customerId"))?.point)}
             </span>
           </div>
         )}
@@ -558,11 +478,7 @@ export function RightContent({
             <div className="mb-3 flex justify-between items-start">
               <div className="text-lg leading-normal text-[#828487] flex items-center gap-2">
                 <span className="text-lg">
-                  Tổng tiền (
-                  <span className="text-lg">
-                    {orderObject[orderActive]?.length ?? 0} sp
-                  </span>
-                  )
+                  Tổng tiền (<span className="text-lg">{orderObject[orderActive]?.length ?? 0} sp</span>)
                 </span>
                 {orderObject[orderActive]?.length > 0 && (
                   <Tooltip title="KM hóa đơn" className="cursor-pointer">
@@ -589,13 +505,17 @@ export function RightContent({
                   if (item.type === "order_price") {
                     return (
                       <div key={item.id} className="text-[#828487] text-base">
-                        <span className="text-red-500 px-2  bg-[#fde6f8] rounded">
-                          KM
-                        </span>{" "}
+                        <span className="text-red-500 px-2  bg-[#fde6f8] rounded">KM</span>{" "}
                         {formatNumber(item?.items[0]?.apply?.discountValue)}
-                        {item?.items[0]?.apply?.discountType === "percent"
-                          ? "%"
-                          : "đ"}
+                        {item?.items[0]?.apply?.discountType === "percent" ? "%" : "đ"}
+                      </div>
+                    );
+                  }
+                  if (item.type === "loyalty") {
+                    return (
+                      <div key={item.id} className="text-[#828487] text-base">
+                        <span className="text-red-500 px-2  bg-[#fde6f8] rounded">KM</span>{" "}
+                        {formatNumber(item?.items[0]?.apply?.pointValue)} điểm
                       </div>
                     );
                   }
@@ -605,9 +525,7 @@ export function RightContent({
             </div>
 
             <div className="mb-3 flex justify-between">
-              <div className="text-lg leading-normal text-[#828487]">
-                Chiết khấu
-              </div>
+              <div className="text-lg leading-normal text-[#828487]">Chiết khấu</div>
               <div className="w-[120px] ">
                 <CustomInput
                   bordered={false}
@@ -627,40 +545,29 @@ export function RightContent({
 
           <div className="mb-5 border-b-2 border-dashed border-[#E4E4E4]">
             <div className="mb-5 flex justify-between">
-              <div className="text-lg leading-normal text-[#000] ">
-                KHÁCH PHẢI TRẢ
-              </div>
-              <div className="text-lg leading-normal text-red-main">
-                {formatMoney(customerMustPay)}
-              </div>
+              <div className="text-lg leading-normal text-[#000] ">KHÁCH PHẢI TRẢ</div>
+              <div className="text-lg leading-normal text-red-main">{formatMoney(customerMustPay)}</div>
             </div>
             {pointStatus?.data?.isPointPayment &&
               getValues("customerId") &&
-              customers?.data?.items?.find(
-                (item) =>
-                  item.id === getValues("customerId") && item.isPointPayment
-              ) && (
+              customers?.data?.items?.find((item) => item.id === getValues("customerId") && item.isPointPayment) && (
                 <div className="mb-5 flex justify-between">
                   <div className="text-lg leading-normal text-[#828487] flex items-center gap-2">
                     Điểm
                     <div className="text-lg leading-normal text-red-main flex items-center gap-2">
-                      {formatNumber(
-                        customers?.data?.items?.find(
-                          (item) => item.id === getValues("customerId")
-                        )?.point
-                      )}
+                      {formatNumber(customers?.data?.items?.find((item) => item.id === getValues("customerId"))?.point)}
                       <CustomSwitch
                         size="small"
                         checked={checkPoint}
                         onChange={(e) => {
                           const customerPoint = customers?.data?.items?.find(
-                            (item) => item.id === getValues("customerId")
+                            (item) => item.id === getValues("customerId"),
                           )?.point;
                           if (customerPoint < pointStatus?.data?.convertPoint) {
                             message.error(
                               "Khách hàng không đủ điểm để thanh toán. Điểm thanh toán tối thiểu là " +
-                              pointStatus?.data?.convertPoint +
-                              " điểm"
+                                pointStatus?.data?.convertPoint +
+                                " điểm",
                             );
                             return;
                           }
@@ -722,34 +629,27 @@ export function RightContent({
             </div>
 
             <div className="mb-5 flex justify-between">
-              <div className="text-lg leading-normal text-[#828487]">
-                Tiền thừa trả khách
-              </div>
-              <div className="text-lg leading-normal text-[#19191C]">
-                {formatMoney(returnPrice)}
-              </div>
+              <div className="text-lg leading-normal text-[#828487]">Tiền thừa trả khách</div>
+              <div className="text-lg leading-normal text-[#19191C]">{formatMoney(returnPrice)}</div>
             </div>
           </div>
 
           <div className="mb-5">
             <div className="mb-5 flex justify-between">
-              <div className="text-lg leading-normal text-[#828487]">
-                Phương thức thanh toán
-              </div>
+              <div className="text-lg leading-normal text-[#828487]">Phương thức thanh toán</div>
               <div className="text-lg leading-normal text-[#19191C]">
                 {getValues("paymentType") === EPaymentMethod.CASH
                   ? "Tiền mặt"
                   : getValues("paymentType") === EPaymentMethod.BANKING
-                    ? "Chuyển khoản"
-                    : "Khách nợ"}
+                  ? "Chuyển khoản"
+                  : "Khách nợ"}
               </div>
             </div>
 
             <div className="flex justify-between">
               <div
                 className={cx(" rounded-[18px] w-[96px] h-[99px]", {
-                  "border-2 border-red-main":
-                    getValues("paymentType") === EPaymentMethod.CASH,
+                  "border-2 border-red-main": getValues("paymentType") === EPaymentMethod.CASH,
                 })}
               >
                 <Image
@@ -766,8 +666,7 @@ export function RightContent({
 
               <div
                 className={cx(" rounded-[18px] w-[96px] h-[99px]", {
-                  "border-2 border-red-main":
-                    getValues("paymentType") === EPaymentMethod.BANKING,
+                  "border-2 border-red-main": getValues("paymentType") === EPaymentMethod.BANKING,
                 })}
               >
                 <Image
@@ -784,8 +683,7 @@ export function RightContent({
 
               <div
                 className={cx(" rounded-[18px] w-[96px] h-[99px]", {
-                  "border-2 border-red-main":
-                    getValues("paymentType") === EPaymentMethod.DEBT,
+                  "border-2 border-red-main": getValues("paymentType") === EPaymentMethod.DEBT,
                 })}
               >
                 <Image
@@ -809,9 +707,7 @@ export function RightContent({
             prefixIcon={<Image src={EditIcon} />}
             placeholder="Thêm ghi chú"
             className="text-sm"
-            onChange={(value) =>
-              setValue("description", value, { shouldValidate: true })
-            }
+            onChange={(value) => setValue("description", value, { shouldValidate: true })}
             value={getValues("description")}
           />
         </div>
@@ -820,24 +716,17 @@ export function RightContent({
       <div className="my-4 h-[1px] w-full bg-[#E4E4E4]"></div>
 
       <div className="px-6 pb-6">
-        <div className="mb-4 text-center text-red-main">
-          Liên thông dược quốc gia
-        </div>
+        <div className="mb-4 text-center text-red-main">Liên thông dược quốc gia</div>
 
         <CustomButton
           onClick={() => {
-            if (
-              !getValues("customerId") &&
-              getValues("paymentType") === EPaymentMethod.DEBT
-            ) {
+            if (!getValues("customerId") && getValues("paymentType") === EPaymentMethod.DEBT) {
               message.error("Vui lòng chọn khách hàng trước khi thanh toán nợ");
               return;
             }
             const products: ISaleProductLocal[] = orderObject[orderActive];
             const formatProducts = products.map((product) => {
-              const unit = product.product.productUnit?.find(
-                (unit) => unit.id === product.productUnitId
-              );
+              const unit = product.product.productUnit?.find((unit) => unit.id === product.productUnitId);
 
               const discountVal =
                 (product?.discountType === "amount"
@@ -852,12 +741,12 @@ export function RightContent({
                 isDiscount: product.isDiscount,
                 ...(product.isDiscount &&
                   !product?.buyNumberType && {
-                  itemPrice: Number(product.price - discountVal),
-                }),
+                    itemPrice: Number(product.price - discountVal),
+                  }),
                 ...(product.isDiscount &&
                   product?.buyNumberType && {
-                  itemPrice: Number(product.itemPrice),
-                }),
+                    itemPrice: Number(product.itemPrice),
+                  }),
                 isBatchExpireControl: product.product.isBatchExpireControl,
                 batches: product.batches
                   .filter((batch) => batch.isSelected)

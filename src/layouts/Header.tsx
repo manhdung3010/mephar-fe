@@ -83,15 +83,16 @@ export const Header = ({ title }: { title?: string | ReactNode }) => {
   }));
 
   const logout = () => {
-    setToken("");
-    setItem(EStorageKey.PRODUCT_RETURN_STATE, "");
-    setItem(EStorageKey.PRODUCT_IMPORT_STATE, "");
-    setItem(EStorageKey.PRODUCT_MOVE_STATE, "");
-    setItem(EStorageKey.ORDER_ACTIVE_STATE, "");
-    setItem(EStorageKey.CHECK_INVENTORY_STATE, "");
-    setItem(EStorageKey.MARKET_ORDER_STATE, "");
-    setItem(EStorageKey.PRODUCT_RECEIVE_STATE, "");
-    setItem(EStorageKey.MARKET_CART_STATE, "");
+    // setToken("");
+    // setItem(EStorageKey.PRODUCT_RETURN_STATE, "");
+    // setItem(EStorageKey.PRODUCT_IMPORT_STATE, "");
+    // setItem(EStorageKey.PRODUCT_MOVE_STATE, "");
+    // setItem(EStorageKey.ORDER_ACTIVE_STATE, "");
+    // setItem(EStorageKey.CHECK_INVENTORY_STATE, "");
+    // setItem(EStorageKey.MARKET_ORDER_STATE, "");
+    // setItem(EStorageKey.PRODUCT_RECEIVE_STATE, "");
+    // setItem(EStorageKey.MARKET_CART_STATE, "");
+    localStorage.clear();
     router.push("/auth/sign-in");
   };
 
