@@ -133,7 +133,7 @@ export function OrderDiscountModal({
                   setDiscountItem(record);
                 }}
               >
-                Chọn quà tặng 123
+                Chọn quà tặng
               </CustomButton>
             </div>
           )}
