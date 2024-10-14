@@ -384,8 +384,6 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
   const onSubmit = () => {
     mutateCreateOrder();
   };
-
-  console.log("discountObject[orderActive]", discountObject[orderActive]);
   return (
     <RightContentStyled className="flex w-[360px] min-w-[360px] flex-col">
       <div className="px-6 pt-5 ">

@@ -49,14 +49,12 @@ export function OrderDiscountModal({
     { enabled: discountList?.data?.data?.items?.length > 0 },
   );
 
-  console.log("giftProduct", giftProduct);
-
   useEffect(() => {
-    if (discountList?.data?.data?.items) {
+    if (discountList?.data?.data?.items && orderDiscount) {
       const listBatchClone = cloneDeep(discountList?.data?.data?.items);
       setListDiscount(listBatchClone);
     }
-  }, [discountList?.data?.data?.items]);
+  }, [discountList?.data?.data?.items, orderDiscount]);
 
   const findProduct = (productUnitId: any) => {
     return productUnitId
@@ -120,7 +118,7 @@ export function OrderDiscountModal({
           {record?.type === "gift" && (
             <div className="flex items-center gap-2 flex-wrap">
               {giftProduct &&
-                discountItem?.code === record?.code &&
+                record?.isSelected &&
                 giftProduct.map((item, index) => (
                   <div key={index} className="h-auto px-1 py-[2px] rounded bg-gray-200">
                     {item?.name} x {item?.discountQuantity}
@@ -135,7 +133,7 @@ export function OrderDiscountModal({
                   setDiscountItem(record);
                 }}
               >
-                Chọn quà tặng
+                Chọn quà tặng 123
               </CustomButton>
             </div>
           )}
@@ -163,6 +161,8 @@ export function OrderDiscountModal({
     setOrderDiscount(selectedDiscount);
     setDiscountType("order");
   }, []);
+
+  console.log("discountObject", discountObject[orderActive]);
 
   return (
     <CustomModal
@@ -202,6 +202,9 @@ export function OrderDiscountModal({
 
               return { ...batch, isSelected: false };
             });
+            if (selectedRowKeys) {
+              setGiftProduct([]);
+            }
             setListDiscount(listBatchClone);
           },
         }}
@@ -220,12 +223,7 @@ export function OrderDiscountModal({
                 ...i,
                 apply: {
                   ...i.apply,
-                  productUnitId: i.apply.productUnitId.map((unit) => {
-                    return {
-                      id: unit,
-                      isSelected: false,
-                    };
-                  }),
+                  productUnitSelected: giftProduct,
                 },
               })),
             }));

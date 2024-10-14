@@ -4,7 +4,7 @@ import { CustomInput } from "@/components/CustomInput";
 import { CustomModal } from "@/components/CustomModal";
 import CustomTable from "@/components/CustomTable";
 import { formatMoney, formatNumber } from "@/helpers";
-import { branchState, productDiscountSelected } from "@/recoil/state";
+import { branchState, orderActiveState, orderDiscountSelected, productDiscountSelected } from "@/recoil/state";
 import { useQuery } from "@tanstack/react-query";
 import { message } from "antd";
 import { cloneDeep } from "lodash";
@@ -14,7 +14,8 @@ import { ISaleProduct } from "./interface";
 
 function SelectProductOrderModal({ isOpen, onCancel, onSave, discountItem }) {
   const [listProduct, setListProduct] = useState<any[]>([]);
-  const [productDiscount, setProductDiscount] = useRecoilState(productDiscountSelected);
+  const [orderDiscount, setOrderDiscount] = useRecoilState(orderDiscountSelected);
+  const [orderActive, setOrderActive] = useRecoilState(orderActiveState);
   const [productCode, setProductCode] = useState("");
   const branchId = useRecoilValue(branchState);
 
@@ -63,9 +64,6 @@ function SelectProductOrderModal({ isOpen, onCancel, onSave, discountItem }) {
       },
     },
   );
-
-  console.log("productStore", productStore);
-  console.log("discountItem", discountItem);
 
   useEffect(() => {
     if (discountItem?.items) {
@@ -173,8 +171,6 @@ function SelectProductOrderModal({ isOpen, onCancel, onSave, discountItem }) {
             // }
             onSave(selectedProducts);
             // onCancel();
-
-            console.log("selectedProducts", selectedProducts);
           }}
           className="h-[46px] min-w-[150px] py-2 px-4"
         >
