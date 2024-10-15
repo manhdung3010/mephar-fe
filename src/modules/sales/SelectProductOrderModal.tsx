@@ -4,7 +4,13 @@ import { CustomInput } from "@/components/CustomInput";
 import { CustomModal } from "@/components/CustomModal";
 import CustomTable from "@/components/CustomTable";
 import { formatMoney, formatNumber } from "@/helpers";
-import { branchState, orderActiveState, orderDiscountSelected, productDiscountSelected } from "@/recoil/state";
+import {
+  branchState,
+  discountState,
+  orderActiveState,
+  orderDiscountSelected,
+  productDiscountSelected,
+} from "@/recoil/state";
 import { useQuery } from "@tanstack/react-query";
 import { message } from "antd";
 import { cloneDeep } from "lodash";
@@ -14,7 +20,7 @@ import { ISaleProduct } from "./interface";
 
 function SelectProductOrderModal({ isOpen, onCancel, onSave, discountItem }) {
   const [listProduct, setListProduct] = useState<any[]>([]);
-  const [orderDiscount, setOrderDiscount] = useRecoilState(orderDiscountSelected);
+  const [discountObject, setDiscountObject] = useRecoilState(discountState);
   const [orderActive, setOrderActive] = useRecoilState(orderActiveState);
   const [productCode, setProductCode] = useState("");
   const branchId = useRecoilValue(branchState);
@@ -56,8 +62,16 @@ function SelectProductOrderModal({ isOpen, onCancel, onSave, discountItem }) {
           return {
             ...item,
             key: item.id,
-            isSelected: false,
-            discountQuantity: 0,
+            // check if product is selected in discountObject[orderActive] or not to set isSelected
+            isSelected: discountObject[orderActive]?.orderDiscount[0]?.items[0]?.apply?.productUnitSelected?.find(
+              (product) => product.id === item.id,
+            )
+              ? true
+              : false,
+            discountQuantity:
+              discountObject[orderActive]?.orderDiscount[0]?.items[0]?.apply?.productUnitSelected?.find(
+                (product) => product.id === item.id,
+              )?.discountQuantity || 0,
           };
         });
         setListProduct(newData);

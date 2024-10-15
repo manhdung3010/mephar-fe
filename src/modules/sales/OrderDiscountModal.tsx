@@ -46,16 +46,22 @@ export function OrderDiscountModal({
   }>(
     ["LIST_SALE_PRODUCT", 1, 9999, "", branchId],
     () => getSaleProducts({ page: 1, limit: 9999, keyword: "", branchId }),
-    { enabled: discountList?.data?.data?.items?.length > 0 },
+    { enabled: discountList?.data?.data?.items?.length > 0 && isOpen },
   );
 
   useEffect(() => {
-    if (discountList?.data?.data?.items && orderDiscount) {
+    if (discountList?.data?.data?.items && discountObject[orderActive]?.orderDiscount) {
       const listBatchClone = cloneDeep(discountList?.data?.data?.items);
+      listBatchClone.forEach((batch) => {
+        if (discountObject[orderActive]?.orderDiscount[0]?.code === batch.code) {
+          batch.isSelected = true;
+        } else {
+          batch.isSelected = false;
+        }
+      });
       setListDiscount(listBatchClone);
     }
-  }, [discountList?.data?.data?.items, orderDiscount]);
-
+  }, [discountList?.data?.data?.items, discountObject[orderActive]?.orderDiscount, isOpen]);
   const findProduct = (productUnitId: any) => {
     return productUnitId
       .map((item) => {
@@ -117,13 +123,20 @@ export function OrderDiscountModal({
           )}
           {record?.type === "gift" && (
             <div className="flex items-center gap-2 flex-wrap">
-              {giftProduct &&
-                record?.isSelected &&
-                giftProduct.map((item, index) => (
-                  <div key={index} className="h-auto px-1 py-[2px] rounded bg-gray-200">
-                    {item?.name} x {item?.discountQuantity}
-                  </div>
-                ))}
+              {giftProduct?.length > 0 && record?.isSelected
+                ? giftProduct.map((item, index) => (
+                    <div key={index} className="h-auto px-1 py-[2px] rounded bg-gray-200">
+                      {item?.name} x {item?.discountQuantity}
+                    </div>
+                  ))
+                : record?.isSelected &&
+                  discountObject[orderActive]?.orderDiscount[0]?.items[0]?.apply?.productUnitSelected?.map(
+                    (item, index) => (
+                      <div key={index} className="h-auto px-1 py-[2px] rounded bg-gray-200">
+                        {item?.name} x {item?.discountQuantity}
+                      </div>
+                    ),
+                  )}
               <CustomButton
                 className="h-[46px] py-2 px-4"
                 disabled={record?.isSelected ? false : true}
@@ -138,17 +151,31 @@ export function OrderDiscountModal({
             </div>
           )}
           {record?.type === "product_price" && (
-            <div className="flex flex-col">
-              {items.map((item, index) => (
-                <div key={index}>
-                  Hóa đơn từ <span className="text-[#d64457]">{formatMoney(item?.condition?.order?.from)}</span>, sản
-                  phẩm <span className="text-[#d64457]">{findProduct(item?.apply?.productUnitId)}</span> được giảm giá{" "}
-                  <span className="text-[#d64457]">
-                    {formatNumber(item?.apply?.discountValue)}
-                    {item?.apply?.discountType === "amount" ? "đ" : "%"}
-                  </span>
-                </div>
-              ))}
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* {giftProduct?.length > 0
+                ? giftProduct.map((item, index) => (
+                    <div key={index} className="h-auto px-1 py-[2px] rounded bg-gray-200">
+                      {item?.name} x {item?.discountQuantity}
+                    </div>
+                  ))
+                : discountObject[orderActive]?.orderDiscount[0]?.items[0]?.apply?.productUnitSelected?.map(
+                    (item, index) => (
+                      <div key={index} className="h-auto px-1 py-[2px] rounded bg-gray-200">
+                        {item?.name} x {item?.discountQuantity}
+                      </div>
+                    ),
+                  )} */}
+              <CustomButton
+                className="h-[46px] py-2 px-4"
+                disabled={record?.isSelected ? false : true}
+                type={record?.isSelected ? "danger" : "disable"}
+                onClick={() => {
+                  setOpenSelectProduct(true);
+                  setDiscountItem(record);
+                }}
+              >
+                Chọn quà tặng
+              </CustomButton>
             </div>
           )}
         </div>
@@ -211,7 +238,14 @@ export function OrderDiscountModal({
       />
 
       <div className="mt-5 flex justify-end gap-x-4">
-        <CustomButton onClick={onCancel} outline={true} className="h-[46px] min-w-[150px] py-2 px-4">
+        <CustomButton
+          onClick={() => {
+            onCancel();
+            setGiftProduct([]);
+          }}
+          outline={true}
+          className="h-[46px] min-w-[150px] py-2 px-4"
+        >
           Đóng
         </CustomButton>
         <CustomButton
