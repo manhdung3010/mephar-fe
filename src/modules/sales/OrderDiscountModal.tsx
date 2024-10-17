@@ -35,6 +35,7 @@ export function OrderDiscountModal({
   const [openSelectProduct, setOpenSelectProduct] = useState(false);
   const [discountItem, setDiscountItem] = useState<any>(null);
   const [giftProduct, setGiftProduct] = useState<any>(null);
+  const [discountProduct, setDiscountProduct] = useState<any>(null);
 
   const branchId = useRecoilValue(branchState);
   const {
@@ -84,6 +85,7 @@ export function OrderDiscountModal({
     {
       title: "Chương trình khuyến mại",
       dataIndex: "name",
+      className: "w-[200px]",
       key: "name",
       // render: (_, { batch }) => batch.name,
     },
@@ -91,6 +93,7 @@ export function OrderDiscountModal({
       title: "Hình thức khuyến mại",
       dataIndex: "type",
       key: "type",
+      className: "w-[200px]",
       render: (type, { target }) => (
         <span>
           {target === "order"
@@ -123,7 +126,7 @@ export function OrderDiscountModal({
           )}
           {record?.type === "gift" && (
             <div className="flex items-center gap-2 flex-wrap">
-              {giftProduct?.length > 0 && record?.isSelected
+              {/* {giftProduct?.length > 0 && record?.isSelected
                 ? giftProduct.map((item, index) => (
                     <div key={index} className="h-auto px-1 py-[2px] rounded bg-gray-200">
                       {item?.name} x {item?.discountQuantity}
@@ -131,34 +134,6 @@ export function OrderDiscountModal({
                   ))
                 : record?.isSelected &&
                   discountObject[orderActive]?.orderDiscount[0]?.items[0]?.apply?.productUnitSelected?.map(
-                    (item, index) => (
-                      <div key={index} className="h-auto px-1 py-[2px] rounded bg-gray-200">
-                        {item?.name} x {item?.discountQuantity}
-                      </div>
-                    ),
-                  )}
-              <CustomButton
-                className="h-[46px] py-2 px-4"
-                disabled={record?.isSelected ? false : true}
-                type={record?.isSelected ? "danger" : "disable"}
-                onClick={() => {
-                  setOpenSelectProduct(true);
-                  setDiscountItem(record);
-                }}
-              >
-                Chọn quà tặng
-              </CustomButton>
-            </div>
-          )}
-          {record?.type === "product_price" && (
-            <div className="flex items-center gap-2 flex-wrap">
-              {/* {giftProduct?.length > 0
-                ? giftProduct.map((item, index) => (
-                    <div key={index} className="h-auto px-1 py-[2px] rounded bg-gray-200">
-                      {item?.name} x {item?.discountQuantity}
-                    </div>
-                  ))
-                : discountObject[orderActive]?.orderDiscount[0]?.items[0]?.apply?.productUnitSelected?.map(
                     (item, index) => (
                       <div key={index} className="h-auto px-1 py-[2px] rounded bg-gray-200">
                         {item?.name} x {item?.discountQuantity}
@@ -175,6 +150,35 @@ export function OrderDiscountModal({
                 }}
               >
                 Chọn quà tặng
+              </CustomButton>
+            </div>
+          )}
+          {record?.type === "product_price" && (
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* {discountProduct?.length > 0 && discountItem?.isSelected
+                ? discountProduct.map((item, index) => (
+                    <div key={index} className="h-auto px-1 py-[2px] rounded bg-gray-200">
+                      {item?.name} x {item?.discountQuantity}
+                    </div>
+                  ))
+                : discountObject[orderActive]?.orderDiscount[0]?.code === discountItem?.code &&
+                  discountObject[orderActive]?.orderDiscount[0]?.items[0]?.apply?.productUnitSelected?.map(
+                    (item, index) => (
+                      <div key={index} className="h-auto px-1 py-[2px] rounded bg-gray-200">
+                        {item?.name} x {item?.discountQuantity}
+                      </div>
+                    ),
+                  )} */}
+              <CustomButton
+                className="h-[46px] py-2 px-4"
+                disabled={record?.isSelected ? false : true}
+                type={record?.isSelected ? "danger" : "disable"}
+                onClick={() => {
+                  setOpenSelectProduct(true);
+                  setDiscountItem(record);
+                }}
+              >
+                Chọn hàng giảm giá
               </CustomButton>
             </div>
           )}
@@ -257,7 +261,7 @@ export function OrderDiscountModal({
                 ...i,
                 apply: {
                   ...i.apply,
-                  productUnitSelected: giftProduct,
+                  productUnitSelected: item?.type === "gift" ? giftProduct : discountProduct,
                 },
               })),
             }));
@@ -277,9 +281,11 @@ export function OrderDiscountModal({
       <SelectProductOrderModal
         isOpen={openSelectProduct}
         onCancel={() => setOpenSelectProduct(false)}
-        onSave={(selectedGiftProduct) => {
-          if (selectedGiftProduct.length > 0) {
+        onSave={(selectedGiftProduct, type) => {
+          if (selectedGiftProduct.length > 0 && type === "gift") {
             setGiftProduct(selectedGiftProduct);
+          } else if (selectedGiftProduct.length > 0 && type === "product_price") {
+            setDiscountProduct(selectedGiftProduct);
           }
           setOpenSelectProduct(false);
         }}

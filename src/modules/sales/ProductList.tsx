@@ -537,13 +537,10 @@ export function ProductList({
       key: "price",
       render: (_, { productUnit, buyNumberType }) => (
         <span>
-          {formatMoney(checkTypeOrder(orderDetail?.order?.code) ? productUnit?.marketPrice : productUnit.price)}
-          {productUnit?.oldPrice && buyNumberType === 1 && (
-            <span className="text-[#828487] line-through ml-2">
-              {"("}Giá cũ: {formatMoney(productUnit.oldPrice)}
-              {")"}
-            </span>
+          {productUnit?.oldPrice && (
+            <span className="text-[#828487] line-through mr-2">{formatMoney(productUnit.oldPrice)}</span>
           )}
+          {formatMoney(checkTypeOrder(orderDetail?.order?.code) ? productUnit?.marketPrice : productUnit.price)}
         </span>
       ),
     },
@@ -576,16 +573,8 @@ export function ProductList({
               ? productUnit?.marketPrice * quantity
               : Number(productUnit.returnPrice) * quantity,
           )
-        ) : isDiscount && !buyNumberType ? (
-          <div className="flex flex-col">
-            {discountType === "percent"
-              ? `${formatMoney(Number(price - (discountValue * price) / 100) * quantity)}`
-              : formatMoney(Number((price - discountValue) * quantity))}
-          </div>
-        ) : buyNumberType === 1 ? (
-          formatMoney(productUnit.price * quantity)
-        ) : buyNumberType === 2 ? (
-          formatMoney((productUnit?.price - discountValue) * quantity)
+        ) : isDiscount ? (
+          <div className="flex flex-col">{formatMoney(price * quantity)}</div>
         ) : (
           formatMoney(productUnit.price * quantity)
         ),
@@ -735,38 +724,40 @@ export function ProductList({
           expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key + 1),
         }}
       />
-      {discountType === "order" && orderObject[orderActive]?.length > 0 && orderDiscount?.length > 0 && (
-        <div className="bg-[#fbecee] rounded-lg shadow-sm p-5 mt-5">
-          <h3 className="text-lg font-medium mb-2">Khuyến mại hóa đơn</h3>
-          <div className="grid grid-cols-1 gap-2">
-            {orderDiscount?.map((item, index) => (
-              <div key={index} className="flex items-center gap-x-2">
-                <div className="text-base text-[#d64457]">{item?.name}:</div>
-                {item?.type === "product_price" && (
-                  <div className="text-base">
-                    Giảm giá hàng {formatNumber(item?.items[0]?.apply?.discountValue)}{" "}
-                    {item?.items[0]?.apply?.discountType === "percent" ? "%" : "đ"}
-                  </div>
-                )}
-                {item?.type === "order_price" && (
-                  <div className="text-base">
-                    Giảm giá hóa đơn {formatNumber(item?.items[0]?.apply?.discountValue)}{" "}
-                    {item?.items[0]?.apply?.discountType === "percent" ? "%" : "đ"}
-                  </div>
-                )}
+      {discountType === "order" &&
+        orderObject[orderActive]?.length > 0 &&
+        discountObject[orderActive]?.orderDiscount?.length > 0 && (
+          <div className="bg-[#fbecee] rounded-lg shadow-sm p-5 mt-5">
+            <h3 className="text-lg font-medium mb-2">Khuyến mại hóa đơn</h3>
+            <div className="grid grid-cols-1 gap-2">
+              {discountObject[orderActive]?.orderDiscount?.map((item, index) => (
+                <div key={index} className="flex items-center gap-x-2">
+                  <div className="text-base text-[#d64457]">{item?.name}:</div>
+                  {item?.type === "product_price" && (
+                    <div className="text-base">
+                      Giảm giá hàng {formatNumber(item?.items[0]?.apply?.discountValue)}{" "}
+                      {item?.items[0]?.apply?.discountType === "percent" ? "%" : "đ"}
+                    </div>
+                  )}
+                  {item?.type === "order_price" && (
+                    <div className="text-base">
+                      Giảm giá hóa đơn {formatNumber(item?.items[0]?.apply?.discountValue)}{" "}
+                      {item?.items[0]?.apply?.discountType === "percent" ? "%" : "đ"}
+                    </div>
+                  )}
 
-                {item?.type === "gift" && <div className="text-base">Tặng hàng</div>}
-                {item?.type === "loyalty" && (
-                  <div className="text-base">
-                    Tặng điểm: {formatNumber(item?.items[0]?.apply?.pointValue)}
-                    {item?.items[0]?.apply?.discountType === "percent" ? "% điểm" : "điểm"} trên tổng hóa đơn
-                  </div>
-                )}
-              </div>
-            ))}
+                  {item?.type === "gift" && <div className="text-base">Tặng hàng</div>}
+                  {item?.type === "loyalty" && (
+                    <div className="text-base">
+                      Tặng điểm: {formatNumber(item?.items[0]?.apply?.pointValue)}
+                      {item?.items[0]?.apply?.discountType === "percent" ? "% điểm" : "điểm"} trên tổng hóa đơn
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       <ListBatchModal
         key={openListBatchModal ? 1 : 0}

@@ -56,8 +56,6 @@ const Index = () => {
   const [orderDetail, setOrderDetail] = useState<any>(null);
   const [valueScanBarcode, setValueScanBarcode] = useState("");
 
-  const [discountObject, setDiscountObject] = useRecoilState(discountState);
-
   const {
     getValues,
     setValue,
@@ -91,6 +89,7 @@ const Index = () => {
   const [orderActive, setOrderActive] = useRecoilState(orderActiveState);
   const [orderObject, setOrderObject] = useRecoilState(orderState);
   const [orderDiscount, setOrderDiscount] = useRecoilState(orderDiscountSelected);
+  const [discountObject, setDiscountObject] = useRecoilState(discountState);
 
   const {
     data: products,
@@ -291,206 +290,96 @@ const Index = () => {
     }
   }, [discountObject, orderActive]);
 
-  // get product discount
-  // useEffect(() => {
-  //   function handleGetProductDiscount() {
-  //     if (
-  //       discountList &&
-  //       orderDiscount?.length > 0 &&
-  //       orderObject[orderActive]?.length > 0
-  //     ) {
-  //       let orderDiscountClone: any = cloneDeep(orderDiscount);
-  //       orderDiscountClone = orderDiscountClone?.forEach((item) => {
-  //         const list = item?.items[0]?.apply?.productUnitId;
-  //         if (list?.length > 0) {
-  //           for (const l of list) {
-  //             const productsScan = getSaleProducts({
-  //               ...formFilter,
-  //               keyword: "",
-  //               branchId,
-  //               productUnit: l,
-  //             }).then((res) => {
-  //               if (res?.data?.items?.length > 0) {
-  //                 let discountValue = item?.items[0]?.apply?.discountValue;
-  //                 let discountType = item?.items[0]?.apply?.discountType;
-  //                 if (item?.items[0]?.apply?.isGift) {
-  //                   discountType = "amount";
-  //                   discountValue = res?.data?.items[0]?.price;
-  //                 } else {
-  //                   if (discountType === "percent" && discountValue > 100) {
-  //                     discountValue = 100;
-  //                   } else if (
-  //                     discountType === "amount" &&
-  //                     +discountValue > +res?.data?.items[0]?.price
-  //                   ) {
-  //                     discountValue = res?.data?.items[0]?.price;
-  //                   }
-  //                 }
-
-  //                 if (res) {
-  //                   onSelectedProduct(
-  //                     JSON.stringify({
-  //                       ...res?.data?.items[0],
-  //                       maxQuantity: item.items[0].apply.maxQuantity,
-  //                       isDiscount: true,
-  //                       discountType: discountType,
-  //                       discountValue: discountValue,
-  //                       isGift: item?.items[0]?.apply?.isGift,
-  //                     })
-  //                   );
-  //                 }
-  //               }
-  //             });
-  //           }
-  //         } else {
-  //           // remove product added by discount before
-  //           const orderObjectClone = cloneDeep(orderObject);
-  //           orderObjectClone[orderActive] = orderObjectClone[
-  //             orderActive
-  //           ]?.filter((product) => !product.isDiscount);
-  //           setOrderObject(orderObjectClone);
-  //         }
-  //       });
-  //     }
-  //   }
-  //   handleGetProductDiscount();
-  // }, [orderDiscount]);
-
-  // // product discount
-  // useEffect(() => {
-  //   function handleGetProductDiscount() {
-  //     // if (productDiscount) {
-  //     let productDiscountClone: any = cloneDeep(productDiscount);
-  //     if (productDiscountClone?.length > 0) {
-  //       productDiscountClone = productDiscountClone?.forEach((item) => {
-  //         const list = item?.items[0]?.apply?.productUnitId;
-  //         let fixedPrice = item?.items[0]?.apply?.fixedPrice;
-  //         let changeType = item?.items[0]?.apply?.changeType;
-  //         if (list?.length > 0) {
-  //           for (const l of list) {
-  //             getSaleProducts({
-  //               ...formFilter,
-  //               keyword: "",
-  //               branchId,
-  //               productUnit: l?.id ?? l,
-  //             }).then((res) => {
-  //               if (res?.data?.items?.length > 0) {
-  //                 let discountValue = item?.items[0]?.apply?.discountValue;
-  //                 let discountType = item?.items[0]?.apply?.discountType;
-
-  //                 if (item?.items[0]?.apply?.isGift) {
-  //                   discountType = "amount";
-  //                   discountValue = res?.data?.items[0]?.price;
-  //                 } else {
-  //                   if (discountType === "percent" && discountValue > 100) {
-  //                     discountValue = 100;
-  //                   } else if (
-  //                     discountType === "amount" &&
-  //                     +discountValue > +res?.data?.items[0]?.price
-  //                   ) {
-  //                     discountValue = res?.data?.items[0]?.price;
-  //                   }
-  //                 }
-
-  //                 return onSelectedProduct(
-  //                   JSON.stringify({
-  //                     ...res?.data?.items[0],
-  //                     discountQuantity: l.discountQuantity || 1,
-  //                     isDiscount: true,
-  //                     discountType: discountType,
-  //                     discountValue: discountValue,
-  //                     isGift: item?.items[0]?.apply?.isGift,
-  //                   })
-  //                 );
-  //               }
-  //             });
-  //           }
-  //         } else {
-  //           if (fixedPrice > 0 && changeType === "type_price") {
-  //             // update price of product same productUnitId
-  //             const orderObjectClone = cloneDeep(orderObject);
-  //             orderObjectClone[orderActive] = orderObjectClone[
-  //               orderActive
-  //             ]?.map((product: ISaleProductLocal) => {
-  //               if (
-  //                 product.productUnitId ===
-  //                 item?.items[0]?.condition?.productUnitId[0]
-  //               ) {
-  //                 return {
-  //                   ...product,
-  //                   isDiscount: true,
-  //                   itemPrice: fixedPrice,
-  //                   productUnit: {
-  //                     ...product.productUnit,
-  //                     oldPrice: product.productUnit.price,
-  //                     price: fixedPrice,
-  //                   },
-  //                   buyNumberType: 1,
-  //                 };
-  //               }
-  //               return product;
-  //             });
-  //             setOrderObject(orderObjectClone);
-  //           } else if (fixedPrice > 0 && changeType === "type_discount") {
-  //             // update price of product same productUnitId
-  //             const orderObjectClone = cloneDeep(orderObject);
-  //             orderObjectClone[orderActive] = orderObjectClone[
-  //               orderActive
-  //             ]?.map((product: ISaleProductLocal) => {
-  //               if (
-  //                 product.productUnitId ===
-  //                 item?.items[0]?.condition?.productUnitId[0]
-  //               ) {
-  //                 return {
-  //                   ...product,
-  //                   discountValue: fixedPrice,
-  //                   isDiscount: true,
-  //                   discountType: "amount",
-  //                   itemPrice: product.productUnit.oldPrice
-  //                     ? product.productUnit.oldPrice - fixedPrice
-  //                     : product.productUnit.price - fixedPrice,
-  //                   ...(product.productUnit?.oldPrice && {
-  //                     productUnit: {
-  //                       ...product.productUnit,
-  //                       price: product.productUnit.oldPrice,
-  //                     },
-  //                   }),
-  //                   buyNumberType: 2,
-  //                 };
-  //               }
-  //               return product;
-  //             });
-  //             setOrderObject(orderObjectClone);
-  //           } else {
-  //             // remove product added by discount before
-  //             const orderObjectClone = cloneDeep(orderObject);
-  //             orderObjectClone[orderActive] = orderObjectClone[
-  //               orderActive
-  //             ]?.filter((product) => !product.isDiscount);
-  //             return setOrderObject(orderObjectClone);
-  //           }
-  //         }
-  //       });
-  //     } else {
-  //       // remove product added by discount before
-  //       const orderObjectClone = cloneDeep(orderObject);
-  //       orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter(
-  //         (product) => !product.isDiscount
-  //       );
-  //       return setOrderObject(orderObjectClone);
-  //     }
-  //     // }
-  //   }
-  //   handleGetProductDiscount();
-  // }, [productDiscount]);
+  // update orderObject when discountObject is changed
   useEffect(() => {
-    // update product when order discount is changed
-    if (orderDiscount?.length <= 0) {
+    if (discountObject[orderActive]?.orderDiscount?.length > 0) {
+      // update orderObject
       const orderObjectClone = cloneDeep(orderObject);
-      orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
-      setOrderObject(orderObjectClone);
+      orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map((product) => {
+        const productKey = `${product.product.id}-${product.productUnit.id}`;
+        const productDiscount = discountObject[
+          orderActive
+        ]?.orderDiscount[0]?.items[0]?.apply?.productUnitSelected?.find((product) => product.id === productKey);
+
+        if (productDiscount) {
+          return {
+            ...product,
+            discountQuantity: productDiscount.discountQuantity,
+          };
+        }
+
+        return product;
+      });
     }
-  }, [orderDiscount]);
+  }, [discountObject]);
+
+  console.log("orderObject", orderObject[orderActive]);
+
+  // giam gia hoa don
+  useEffect(() => {
+    // update product when discountObject is changed
+    if (discountObject[orderActive]?.orderDiscount?.length > 0) {
+      const orderObjectClone = cloneDeep(orderObject);
+      const productDiscountSelected =
+        discountObject[orderActive]?.orderDiscount[0]?.items[0]?.apply?.productUnitSelected;
+      const haveProductDiscount = orderObjectClone[orderActive]?.some((product) => product.isDiscount);
+      const orderDiscountType = discountObject[orderActive]?.orderDiscount[0]?.type;
+      const discountType = discountObject[orderActive]?.orderDiscount[0]?.items[0]?.apply?.discountType;
+      const discountValue = discountObject[orderActive]?.orderDiscount[0]?.items[0]?.apply?.discountValue;
+      // reset product discount
+      if (haveProductDiscount) {
+        orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
+        setOrderObject(orderObjectClone);
+      }
+      // type = gift
+      if (orderDiscountType === "gift" && productDiscountSelected?.length > 0) {
+        productDiscountSelected.forEach((product) => {
+          return onSelectedProduct(
+            JSON.stringify({
+              ...product,
+              product: product,
+              productUnit: {
+                ...product?.productUnit[0],
+                oldPrice: product?.productUnit[0]?.price,
+                price: 0,
+              },
+              isDiscount: true,
+              isGift: true,
+              price: 0,
+              discountQuantity: product.discountQuantity,
+            }),
+          );
+        });
+      }
+      // type = product_price
+      if (orderDiscountType === "product_price" && productDiscountSelected?.length > 0) {
+        productDiscountSelected.forEach((product) => {
+          console.log("product", product);
+          return onSelectedProduct(
+            JSON.stringify({
+              ...product,
+              product: product,
+              productUnit: {
+                ...product?.productUnit[0],
+                oldPrice: product?.productUnit[0]?.price,
+                price:
+                  discountType === "amount"
+                    ? product?.productUnit[0]?.price - discountValue
+                    : product?.productUnit[0]?.price * (1 - discountValue / 100),
+              },
+              isDiscount: true,
+              isGift: false,
+              price:
+                discountType === "amount"
+                  ? product.productUnit[0]?.price - discountValue
+                  : product.productUnit[0]?.price * (1 - discountValue / 100),
+              discountQuantity: product.discountQuantity,
+            }),
+          );
+        });
+      }
+    }
+  }, [discountObject[orderActive]?.orderDiscount]);
 
   const onExpandMoreBatches = async (productKey, quantity: number, product?: any) => {
     const orderObjectClone = cloneDeep(orderObject);
@@ -553,6 +442,7 @@ const Index = () => {
 
   // select product
   const onSelectedProduct = (value) => {
+    console.log("value", value);
     const product: ISaleProduct = JSON.parse(value);
     const productKey = `${product.product.id}-${product.productUnit.id}`;
 

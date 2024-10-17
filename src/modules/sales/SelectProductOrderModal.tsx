@@ -17,6 +17,7 @@ import { cloneDeep } from "lodash";
 import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { ISaleProduct } from "./interface";
+import classNames from "classnames";
 
 function SelectProductOrderModal({ isOpen, onCancel, onSave, discountItem }) {
   const [listProduct, setListProduct] = useState<any[]>([]);
@@ -31,16 +32,7 @@ function SelectProductOrderModal({ isOpen, onCancel, onSave, discountItem }) {
     keyword: "",
   });
 
-  // const { data: productStore, isLoading: isLoadingProduct } = useQuery(
-  //   ["LIST_PRODUCT", formFilter.page, formFilter.limit, formFilter.keyword, branchId, products],
-  //   () => {
-  //     const listProductUnitId = products.map((item) => item?.marketProduct?.productUnit?.id).join(",");
-  //     return getProduct({ ...formFilter, branchId: branchId, listProductUnitId });
-  //   },
-  //   {
-  //     enabled: !!isOpen,
-  //   },
-  // );
+  console.log("discountItem", discountItem);
 
   const { data: productStore, isLoading: isLoadingProduct } = useQuery(
     [
@@ -89,7 +81,7 @@ function SelectProductOrderModal({ isOpen, onCancel, onSave, discountItem }) {
       title: "Tên",
       dataIndex: "name",
       key: "name",
-      render: (name, { product, productUnit }) => <span>{name}</span>,
+      render: (name, { product, productUnit }) => <span className="line-clamp-1">{name}</span>,
     },
     {
       title: "Số lượng",
@@ -106,6 +98,7 @@ function SelectProductOrderModal({ isOpen, onCancel, onSave, discountItem }) {
           }}
           value={discountQuantity}
           type="number"
+          className="w-20"
         />
       ),
     },
@@ -127,14 +120,15 @@ function SelectProductOrderModal({ isOpen, onCancel, onSave, discountItem }) {
     <CustomModal
       isOpen={isOpen}
       onCancel={onCancel}
-      title="Chọn hàng giảm giá"
+      title={discountItem?.type === "product_price" ? "Chọn hàng giảm giá" : "Chọn hàng tặng"}
       width={730}
       onSubmit={onCancel}
       customFooter={true}
       forceRender={true}
     >
       <h4 className="text-base mb-3">
-        Tổng số lượng: <span className="text-red-main">{listProduct[0]?.maxQuantity}</span>
+        Tổng số lượng tối đa:{" "}
+        <span className="text-red-main">{formatNumber(discountItem?.items[0]?.apply?.maxQuantity)}</span>
       </h4>
       <CustomTable
         dataSource={listProduct?.map((batch: any) => ({
@@ -176,14 +170,14 @@ function SelectProductOrderModal({ isOpen, onCancel, onSave, discountItem }) {
           onClick={() => {
             const selectedProducts = listProduct.filter((product) => product.isSelected);
             // check total quantity of productUnitId
-            // const totalQuantity = selectedProducts.reduce((acc, product) => {
-            //   return acc + product.discountQuantity;
-            // }, 0);
-            // if (totalQuantity > listProduct[0]?.maxQuantity) {
-            //   message.error("Tổng số lượng không được lớn hơn " + listProduct[0]?.maxQuantity);
-            //   return;
-            // }
-            onSave(selectedProducts);
+            const totalQuantity = selectedProducts.reduce((acc, product) => {
+              return acc + product.discountQuantity;
+            }, 0);
+            if (totalQuantity > discountItem?.items[0]?.apply?.maxQuantity) {
+              message.error("Tổng số lượng không được lớn hơn " + discountItem?.items[0]?.apply?.maxQuantity);
+              return;
+            }
+            onSave(selectedProducts, discountItem?.type);
             // onCancel();
           }}
           className="h-[46px] min-w-[150px] py-2 px-4"
