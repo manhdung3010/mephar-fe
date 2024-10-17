@@ -343,6 +343,7 @@ const Index = () => {
                 oldPrice: product?.productUnit[0]?.price,
                 price: 0,
               },
+              productUnitId: product.productUnit[0]?.id,
               isDiscount: true,
               isGift: true,
               price: 0,
@@ -354,11 +355,11 @@ const Index = () => {
       // type = product_price
       if (orderDiscountType === "product_price" && productDiscountSelected?.length > 0) {
         productDiscountSelected.forEach((product) => {
-          console.log("product", product);
           return onSelectedProduct(
             JSON.stringify({
               ...product,
               product: product,
+              productUnitId: product.productUnit[0]?.id,
               productUnit: {
                 ...product?.productUnit[0],
                 oldPrice: product?.productUnit[0]?.price,
@@ -490,7 +491,7 @@ const Index = () => {
             inventory: product.quantity,
             productKey,
             quantity: product?.isDiscount ? product?.discountQuantity : 1,
-            productUnitId: product.id,
+            productUnitId: product.productUnitId,
             itemDiscountProduct: itemDiscountProduct,
             originProductUnitId: product.id,
             batches: product.batches?.map((batch) => {
