@@ -1,16 +1,16 @@
-import { Input } from 'antd';
-import Image from 'next/image';
+import { Input } from "antd";
+import Image from "next/image";
 
-import DeleteIcon from '@/assets/deleteRed.svg';
-import { CustomButton } from '@/components/CustomButton';
-import { formatDate, formatDateTime, hasPermission } from '@/helpers';
-import cx from 'classnames';
-import { EDiscountStatus, EDiscountStatusLabel } from '@/enums';
-import { useRecoilValue } from 'recoil';
-import { profileState } from '@/recoil/state';
-import { RoleAction, RoleModel } from '../../role/role.enum';
-import CopyBlueIcon from '@/assets/copyBlue.svg';
-import { useRouter } from 'next/router';
+import DeleteIcon from "@/assets/deleteRed.svg";
+import { CustomButton } from "@/components/CustomButton";
+import { formatDate, formatDateTime, hasPermission } from "@/helpers";
+import cx from "classnames";
+import { EDiscountStatus, EDiscountStatusLabel } from "@/enums";
+import { useRecoilValue } from "recoil";
+import { profileState } from "@/recoil/state";
+import { RoleAction, RoleModel } from "../../role/role.enum";
+import CopyBlueIcon from "@/assets/copyBlue.svg";
+import { useRouter } from "next/router";
 
 export function Info({ record }: { record: any }) {
   const router = useRouter();
@@ -37,21 +37,19 @@ export function Info({ record }: { record: any }) {
 
         <div className="grid grid-cols-3 gap-5">
           <div className="col-span-1 text-gray-main">Trạng thái:</div>
-          <div
-            className={cx(
-              record?.status === EDiscountStatus.active
-                ? 'text-[#00B63E]'
-                : 'text-[#6D6D6D]',
-              'w-max'
-            )}
-          >
+          <div className={cx(record?.status === EDiscountStatus.active ? "text-[#00B63E]" : "text-[#6D6D6D]", "w-max")}>
             {record?.status === EDiscountStatus.active ? EDiscountStatusLabel.active : EDiscountStatusLabel.inactive}
           </div>
         </div>
 
         <div className="grid grid-cols-3 gap-5">
           <div className="col-span-1 text-gray-main">Theo tháng:</div>
-          <div className="text-black-main">{record?.discountTime[0].byMonth?.split("//").filter(element => element !== "").join()}</div>
+          <div className="text-black-main">
+            {record?.discountTime[0].byMonth
+              ?.split("//")
+              .filter((element) => element !== "")
+              .join()}
+          </div>
         </div>
 
         <div className="grid grid-cols-3 gap-5">
@@ -61,49 +59,50 @@ export function Info({ record }: { record: any }) {
 
         <div className="grid grid-cols-3 gap-5">
           <div className="col-span-1 text-gray-main">Theo ngày:</div>
-          <div className="text-black-main">{record?.discountTime[0].byDay?.split("//").filter(element => element !== "").join()}</div>
+          <div className="text-black-main">
+            {record?.discountTime[0].byDay
+              ?.split("//")
+              .filter((element) => element !== "")
+              .join()}
+          </div>
         </div>
 
         <div className="grid grid-cols-3 gap-5"></div>
 
         <div className="grid grid-cols-3 gap-5">
           <div className="col-span-1 text-gray-main">Theo thứ:</div>
-          <div className="text-black-main">{record?.discountTime[0].byWeekDay?.split("//").filter(element => element !== "").join()}</div>
+          <div className="text-black-main">
+            {record?.discountTime[0].byWeekDay
+              ?.split("//")
+              .filter((element) => element !== "")
+              .join()}
+          </div>
         </div>
 
         <div className="grid grid-cols-3 gap-5"></div>
 
         <div className="grid grid-cols-3 gap-5">
           <div className="col-span-1 text-gray-main">Theo giờ:</div>
-          <div className="text-black-main">{record?.discountTime[0].byHour?.split("//").filter(element => element !== "").join()}</div>
+          <div className="text-black-main">
+            {record?.discountTime[0].byHour
+              ?.split("//")
+              .filter((element) => element !== "")
+              .join()}
+          </div>
         </div>
       </div>
 
       <div className="flex justify-end gap-2">
-        {
-          hasPermission(profile?.role?.permissions, RoleModel.discount, RoleAction.create) && (
-            <CustomButton
-              type="primary"
-              outline={true}
-              prefixIcon={<Image src={CopyBlueIcon} alt="" />}
-              onClick={() => router.push(`/settings/discount/add-discount?id=${record?.id}&copy=true`)}
-            >
-              Sao chép
-            </CustomButton>
-          )
-        }
-        {
-
-          hasPermission(profile?.role?.permissions, RoleModel.discount, RoleAction.delete) && (
-            <CustomButton
-              type="danger"
-              outline={true}
-              prefixIcon={<Image src={DeleteIcon} alt="" />}
-            >
-              Xóa
-            </CustomButton>
-          )
-        }
+        {hasPermission(profile?.role?.permissions, RoleModel.discount, RoleAction.create) && (
+          <CustomButton
+            type="primary"
+            outline={true}
+            prefixIcon={<Image src={CopyBlueIcon} alt="" />}
+            onClick={() => router.push(`/settings/discount/add-discount?id=${record?.id}&copy=true`)}
+          >
+            Sao chép
+          </CustomButton>
+        )}
       </div>
     </div>
   );

@@ -49,6 +49,8 @@ export function OrderTransaction() {
 
       setExpandedRowKeys(expandedRowKeysClone);
       // filterData(keyword as string);
+    } else {
+      setExpandedRowKeys({});
     }
   }, [keyword]);
 
@@ -83,7 +85,7 @@ export function OrderTransaction() {
   }, 300);
 
   useEffect(() => {
-    if (!formFilter.keyword.trim()) {
+    if (!formFilter.keyword?.trim()) {
       setFilteredData([]);
     }
   }, [formFilter.keyword]);
@@ -174,7 +176,7 @@ export function OrderTransaction() {
       render: (value) => <span>Tạo: {value}</span>,
     },
     {
-      title: "Lý do hủy",
+      title: "Ghi chú",
       dataIndex: "note",
       key: "note",
     },

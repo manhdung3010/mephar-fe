@@ -17,6 +17,7 @@ export interface IOrder {
   note: string;
   totalPrice: number;
   canReturn?: boolean;
+  discountOrder?: number;
   store?: any;
   products: {
     productId: number;

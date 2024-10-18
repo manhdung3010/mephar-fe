@@ -7,12 +7,7 @@ import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
-import {
-  createCustomer,
-  getCustomerDetail,
-  updateCustomer,
-  updateStatusCustomer,
-} from "@/api/customer.service";
+import { createCustomer, getCustomerDetail, updateCustomer, updateStatusCustomer } from "@/api/customer.service";
 import { getGroupCustomer } from "@/api/group-customer";
 import ArrowDownIcon from "@/assets/arrowDownGray.svg";
 import DateIcon from "@/assets/dateIcon.svg";
@@ -66,7 +61,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
   const { data: customerDetail } = useQuery(
     ["CUSTOMER_DETAIL", customerId],
     () => getCustomerDetail(Number(customerId)),
-    { enabled: !!customerId }
+    { enabled: !!customerId },
   );
 
   const { data: places, isLoading: isLoadingPlace } = useQuery(
@@ -74,7 +69,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
     () => searchPlace({ keyword: placeKeyword }),
     {
       enabled: placeKeyword.length > 0,
-    }
+    },
   );
 
   const { data: latLng, isLoading: isLoadingLatLng } = useQuery(
@@ -82,7 +77,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
     () => getLatLng({ refId: refId }),
     {
       enabled: refId.length > 0,
-    }
+    },
   );
   const { data: address, isLoading: isLoadingAddress } = useQuery(
     ["ADDRESS", getValues("point")],
@@ -93,7 +88,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
       }),
     {
       enabled: !!getValues("point"),
-    }
+    },
   );
 
   useEffect(() => {
@@ -124,58 +119,49 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
     }
   }, [getValues("point")]);
 
-  const { provinces, districts, wards } = useAddress(
-    getValues("provinceId"),
-    getValues("districtId")
-  );
+  const { provinces, districts, wards } = useAddress(getValues("provinceId"), getValues("districtId"));
 
   const [groupCustomerKeyword, setGroupCustomerKeyword] = useState();
-  const [openAddGroupCustomerModal, setOpenAddGroupCustomerModal] =
-    useState(false);
+  const [openAddGroupCustomerModal, setOpenAddGroupCustomerModal] = useState(false);
 
-  const { data: groupCustomers } = useQuery(
-    ["GROUP_CUSTOMER", groupCustomerKeyword],
-    () =>
-      getGroupCustomer({ page: 1, limit: 9999, keyword: groupCustomerKeyword })
+  const { data: groupCustomers } = useQuery(["GROUP_CUSTOMER", groupCustomerKeyword], () =>
+    getGroupCustomer({ page: 1, limit: 9999, keyword: groupCustomerKeyword }),
   );
 
-  const { mutate: mutateCreateCustomer, isLoading: isLoadingCreateCustomer } =
-    useMutation(
-      () => {
-        const customerData = getValues();
-        if (customerData.point) {
-          const [lat, lng]: any = customerData.point.split(",");
-          customerData.lat = lat;
-          customerData.lng = lng;
-        }
-        if (customerData?.lat?.length === 0 || customerData?.lng?.length === 0) {
-          delete customerData.lat;
-          delete customerData.lng;
-        }
-        delete customerData.point;
-        const customerId = customerDetail?.data?.id;
-
-        const customerMutation = customerId
-          ? updateCustomer(customerId, customerData)
-          : createCustomer(customerData);
-
-        const statusMutation = customerId
-          ? updateStatusCustomer(customerId, { status: customerData.status })
-          : Promise.resolve();
-
-        return Promise.all([customerMutation, statusMutation]);
-      },
-
-      {
-        onSuccess: async () => {
-          await queryClient.invalidateQueries(["CUSTOMER_LIST"]);
-          router.push("/partners/customer");
-        },
-        onError: (err: any) => {
-          message.error(err?.message);
-        },
+  const { mutate: mutateCreateCustomer, isLoading: isLoadingCreateCustomer } = useMutation(
+    () => {
+      const customerData = getValues();
+      if (customerData.point) {
+        const [lat, lng]: any = customerData.point.split(",");
+        customerData.lat = lat;
+        customerData.lng = lng;
       }
-    );
+      if (customerData?.lat?.length === 0 || customerData?.lng?.length === 0) {
+        delete customerData.lat;
+        delete customerData.lng;
+      }
+      delete customerData.point;
+      const customerId = customerDetail?.data?.id;
+
+      const customerMutation = customerId ? updateCustomer(customerId, customerData) : createCustomer(customerData);
+
+      const statusMutation = customerId
+        ? updateStatusCustomer(customerId, { status: customerData.status })
+        : Promise.resolve();
+
+      return Promise.all([customerMutation, statusMutation]);
+    },
+
+    {
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(["CUSTOMER_LIST"]);
+        router.push("/partners/customer");
+      },
+      onError: (err: any) => {
+        message.error(err?.message);
+      },
+    },
+  );
 
   const onSubmit = () => {
     mutateCreateCustomer();
@@ -184,13 +170,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
   const profile = useRecoilValue(profileState);
   useEffect(() => {
     if (profile?.role?.permissions) {
-      if (
-        !hasPermission(
-          profile?.role?.permissions,
-          RoleModel.customer,
-          RoleAction.create
-        )
-      ) {
+      if (!hasPermission(profile?.role?.permissions, RoleModel.customer, RoleAction.create)) {
         message.error("Bạn không có quyền truy cập vào trang này");
         router.push("/partners/customer");
       }
@@ -214,14 +194,17 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
         setValue("point", `${customerDetail?.data?.lat},${customerDetail?.data?.lng}`, {
           shouldValidate: true,
         });
-      }
-      else {
+      } else {
         setValue("point", "", {
           shouldValidate: true,
         });
       }
       setGroupCustomerKeyword(customerDetail.data?.groupCustomer?.name);
-      setValue('groupCustomerId', customerDetail.data?.listGroupCustomer?.map((item) => item?.groupCustomer?.id), { shouldValidate: true });
+      setValue(
+        "groupCustomerId",
+        customerDetail.data?.listGroupCustomer?.map((item) => item?.groupCustomer?.id),
+        { shouldValidate: true },
+      );
     }
   }, [customerDetail]);
 
@@ -229,7 +212,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
     debounce((value) => {
       setPlaceKeyword(value);
     }, 300),
-    [placeKeyword]
+    [placeKeyword],
   );
 
   return (
@@ -239,18 +222,10 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
           {customerDetail ? "Cập nhật khách hàng" : "Thêm mới KHÁCH HÀNG"}
         </div>
         <div className="flex gap-4">
-          <CustomButton
-            outline={true}
-            type="danger"
-            onClick={() => router.push("/partners/customer")}
-          >
+          <CustomButton outline={true} type="danger" onClick={() => router.push("/partners/customer")}>
             Hủy bỏ
           </CustomButton>
-          <CustomButton
-            disabled={isLoadingCreateCustomer}
-            onClick={handleSubmit(onSubmit)}
-            type="danger"
-          >
+          <CustomButton disabled={isLoadingCreateCustomer} onClick={handleSubmit(onSubmit)} type="danger">
             Lưu
           </CustomButton>
         </div>
@@ -286,9 +261,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
               <CustomInput
                 placeholder="Nhập tên khách hàng"
                 className="h-11"
-                onChange={(e) =>
-                  setValue("fullName", e, { shouldValidate: true })
-                }
+                onChange={(e) => setValue("fullName", e, { shouldValidate: true })}
                 value={getValues("fullName")}
               />
               <InputError error={errors.fullName?.message} />
@@ -313,9 +286,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
                   value: item.id,
                   label: item.name,
                 }))}
-                onChange={(value) =>
-                  setValue("groupCustomerId", value, { shouldValidate: true })
-                }
+                onChange={(value) => setValue("groupCustomerId", value, { shouldValidate: true })}
                 value={getValues("groupCustomerId")}
                 showSearch={true}
                 onSearch={debounce((value) => {
@@ -326,20 +297,12 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
                 size="small"
                 suffixIcon={
                   <>
-                    {hasPermission(
-                      profile?.role?.permissions,
-                      RoleModel.group_customer,
-                      RoleAction.create
-                    ) && (
-                        <div className="flex items-center">
-                          <Image src={ArrowDownIcon} alt="" />
-                          <Image
-                            src={PlusCircleIcon}
-                            alt=""
-                            onClick={() => setOpenAddGroupCustomerModal(true)}
-                          />
-                        </div>
-                      )}
+                    {hasPermission(profile?.role?.permissions, RoleModel.group_customer, RoleAction.create) && (
+                      <div className="flex items-center">
+                        <Image src={ArrowDownIcon} alt="" />
+                        <Image src={PlusCircleIcon} alt="" onClick={() => setOpenAddGroupCustomerModal(true)} />
+                      </div>
+                    )}
                   </>
                 }
               />
@@ -365,9 +328,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
                     { value: ECustomerType.PERSONAL, label: "Cá nhân" },
                     { value: ECustomerType.COMPANY, label: "Công ty" },
                   ]}
-                  onChange={(value) =>
-                    setValue("type", value, { shouldValidate: true })
-                  }
+                  onChange={(value) => setValue("type", value, { shouldValidate: true })}
                   value={getValues("type")}
                 />
                 <InputError error={errors.type?.message} />
@@ -398,9 +359,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
                     { value: EGender.male, label: "Nam" },
                     { value: EGender.female, label: "Nữ" },
                   ]}
-                  onChange={(value) =>
-                    setValue("gender", value, { shouldValidate: true })
-                  }
+                  onChange={(value) => setValue("gender", value, { shouldValidate: true })}
                   value={getValues("gender")}
                 />
                 <InputError error={errors.gender?.message} />
@@ -408,18 +367,28 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
             </div>
 
             {getValues("type") === ECustomerType.COMPANY && (
-              <div>
-                <Label infoText="" label="Mã số thuế" />
-                <CustomInput
-                  placeholder="Mã số thuế"
-                  className="h-11"
-                  onChange={(e) =>
-                    setValue("taxCode", e, { shouldValidate: true })
-                  }
-                  value={getValues("taxCode")}
-                />
-                <InputError error={errors.taxCode?.message} />
-              </div>
+              <>
+                <div>
+                  <Label infoText="" label="Tên công ty" />
+                  <CustomInput
+                    placeholder="Tên công ty"
+                    className="h-11"
+                    onChange={(e) => setValue("companyName", e, { shouldValidate: true })}
+                    value={getValues("companyName")}
+                  />
+                  <InputError error={errors.companyName?.message} />
+                </div>
+                <div>
+                  <Label infoText="" label="Mã số thuế" />
+                  <CustomInput
+                    placeholder="Mã số thuế"
+                    className="h-11"
+                    onChange={(e) => setValue("taxCode", e, { shouldValidate: true })}
+                    value={getValues("taxCode")}
+                  />
+                  <InputError error={errors.taxCode?.message} />
+                </div>
+              </>
             )}
 
             <div>
@@ -430,9 +399,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
                 // prefixIcon={<Image src={SearchIcon} alt="" />}
                 wrapClassName="w-full !rounded bg-white"
                 onSelect={(value) => {
-                  setTempKeyword(
-                    places?.data?.find((item) => item.ref_id === value)?.display
-                  );
+                  setTempKeyword(places?.data?.find((item) => item.ref_id === value)?.display);
                   setRefId(value);
                 }}
                 showSearch={true}
@@ -457,9 +424,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
             <div>
               <Label infoText="" label="Tỉnh/Thành" />
               <CustomSelect
-                onChange={(value) =>
-                  setValue("provinceId", value, { shouldValidate: true })
-                }
+                onChange={(value) => setValue("provinceId", value, { shouldValidate: true })}
                 options={provinces?.data?.items?.map((item) => ({
                   value: item.id,
                   label: item.name,
@@ -475,9 +440,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
             <div>
               <Label infoText="" label="Quận/Huyện" />
               <CustomSelect
-                onChange={(value) =>
-                  setValue("districtId", value, { shouldValidate: true })
-                }
+                onChange={(value) => setValue("districtId", value, { shouldValidate: true })}
                 options={districts?.data?.items?.map((item) => ({
                   value: item.id,
                   label: item.name,
@@ -493,9 +456,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
             <div>
               <Label infoText="" label="Phường/xã" />
               <CustomSelect
-                onChange={(value) =>
-                  setValue("wardId", value, { shouldValidate: true })
-                }
+                onChange={(value) => setValue("wardId", value, { shouldValidate: true })}
                 options={wards?.data?.items?.map((item) => ({
                   value: item.id,
                   label: item.name,
@@ -535,9 +496,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
                     },
                   ]}
                   value={getValues("status")}
-                  onChange={(value) =>
-                    setValue("status", value, { shouldValidate: true })
-                  }
+                  onChange={(value) => setValue("status", value, { shouldValidate: true })}
                 />
                 <InputError error={errors.status?.message} />
               </div>
@@ -549,9 +508,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
             <CustomTextarea
               rows={10}
               placeholder="Nhập ghi chú"
-              onChange={(e) =>
-                setValue("note", e.target.value, { shouldValidate: true })
-              }
+              onChange={(e) => setValue("note", e.target.value, { shouldValidate: true })}
               value={getValues("note")}
             />
             <InputError error={errors.note?.message} />
@@ -565,13 +522,9 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
           }}
         >
           <div>
-            <div className="mb-2 font-medium text-[#15171A]">
-              Ảnh khách hàng
-            </div>
+            <div className="mb-2 font-medium text-[#15171A]">Ảnh khách hàng</div>
             <CustomUpload
-              onChangeValue={(value) =>
-                setValue("avatarId", value, { shouldValidate: true })
-              }
+              onChangeValue={(value) => setValue("avatarId", value, { shouldValidate: true })}
               values={[customerDetail?.data?.avatar?.path]}
             >
               <div
@@ -584,9 +537,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
                   <span className="text-[#E03]">Tải ảnh lên</span>{" "}
                   <span className="text-[#6F727A]">hoặc kéo và thả</span>
                 </div>
-                <div className="font-thin text-[#6F727A]">
-                  PNG, JPG, GIF up to 2MB
-                </div>
+                <div className="font-thin text-[#6F727A]">PNG, JPG, GIF up to 2MB</div>
               </div>
             </CustomUpload>
           </div>

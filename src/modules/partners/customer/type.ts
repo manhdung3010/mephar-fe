@@ -16,6 +16,7 @@ export interface ICustomer {
   listGroupCustomer?: any;
   position?: EUserPositions;
   taxCode?: string;
+  companyName?: string;
   type: 1;
   status: ECommonStatus;
   createdAt: string;

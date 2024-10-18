@@ -164,7 +164,7 @@ export default function AddOrder() {
       title: "Mã hàng",
       dataIndex: "code",
       key: "code",
-      render: (value, record, index) => <span className=" text-[#0070F4]">{record?.product?.code}</span>,
+      render: (value, record, index) => <span className=" text-[#0070F4]">{record?.productUnit?.code}</span>,
     },
     {
       title: "Tên hàng",

@@ -4,11 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
-import {
-  deleteCustomer,
-  updateCustomer,
-  updateStatusCustomer,
-} from "@/api/customer.service";
+import { deleteCustomer, updateCustomer, updateStatusCustomer } from "@/api/customer.service";
 import DeleteIcon from "@/assets/deleteRed.svg";
 import EditIcon from "@/assets/editWhite.svg";
 import LockIcon from "@/assets/lockGray.svg";
@@ -32,11 +28,10 @@ export function Info({ record }: { record: ICustomer }) {
 
   const [deletedId, setDeletedId] = useState<number>();
   const [openStatus, setOpenStatus] = useState<boolean>(false);
-  const [statusId, setStatusId] = useState<number>();
-  const [status, setStatus] = useState<ECustomerStatus>();
 
-  const { mutate: mutateDeleteCustomer, isLoading: isLoadingDeleteCustomer } =
-    useMutation(() => deleteCustomer(Number(deletedId)), {
+  const { mutate: mutateDeleteCustomer, isLoading: isLoadingDeleteCustomer } = useMutation(
+    () => deleteCustomer(Number(deletedId)),
+    {
       onSuccess: async () => {
         await queryClient.invalidateQueries(["CUSTOMER_LIST"]);
         setDeletedId(undefined);
@@ -44,20 +39,19 @@ export function Info({ record }: { record: ICustomer }) {
       onError: (err: any) => {
         message.error(err?.message);
       },
-    });
-  const { mutate: mutateUpdateCustomer, isLoading: isLoadingUpdateCustomer } =
-    useMutation(
-      (data: { id: number; status: ECustomerStatus }) =>
-        updateStatusCustomer(Number(data.id), { status: data?.status }),
-      {
-        onSuccess: async () => {
-          await queryClient.invalidateQueries(["CUSTOMER_LIST"]);
-        },
-        onError: (err: any) => {
-          message.error(err?.message);
-        },
-      }
-    );
+    },
+  );
+  const { mutate: mutateUpdateCustomer, isLoading: isLoadingUpdateCustomer } = useMutation(
+    (data: { id: number; status: ECustomerStatus }) => updateStatusCustomer(Number(data.id), { status: data?.status }),
+    {
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(["CUSTOMER_LIST"]);
+      },
+      onError: (err: any) => {
+        message.error(err?.message);
+      },
+    },
+  );
 
   const onSubmit = () => {
     mutateDeleteCustomer();
@@ -114,14 +108,21 @@ export function Info({ record }: { record: ICustomer }) {
 
           <div className="grid grid-cols-3 gap-5">
             <div className="col-span-1 text-gray-main">Nhóm KH:</div>
-            <div className="text-black-main">{record?.listGroupCustomer?.map((item, index) => {
-              return item?.groupCustomer?.name + (index < record?.listGroupCustomer?.length - 1 ? ', ' : '');
-            })}</div>
+            <div className="text-black-main">
+              {record?.listGroupCustomer?.map((item, index) => {
+                return item?.groupCustomer?.name + (index < record?.listGroupCustomer?.length - 1 ? ", " : "");
+              })}
+            </div>
           </div>
 
           <div className="grid grid-cols-3 gap-5">
             <div className="col-span-1 text-gray-main">Quận/huyện:</div>
             <div className="text-black-main">{record.district?.name}</div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-5">
+            <div className="col-span-1 text-gray-main">Tên công ty:</div>
+            <div className="text-black-main">{record.companyName}</div>
           </div>
 
           <div className="grid grid-cols-3 gap-5">
@@ -141,9 +142,7 @@ export function Info({ record }: { record: ICustomer }) {
 
           <div className="grid grid-cols-3 gap-5">
             <div className="col-span-1 text-gray-main">Người tạo:</div>
-            <div className="text-black-main">
-              {record?.created_by?.username}
-            </div>
+            <div className="text-black-main">{record?.created_by?.username}</div>
           </div>
 
           <div className="grid grid-cols-3 gap-5"></div>
@@ -155,74 +154,49 @@ export function Info({ record }: { record: ICustomer }) {
         </div>
 
         <div className="grow">
-          <TextArea
-            rows={8}
-            placeholder="Ghi chú:"
-            value={record?.note}
-            disabled
-          />
+          <TextArea rows={8} placeholder="Ghi chú:" value={record?.note} disabled />
         </div>
       </div>
 
       <div className="flex justify-end gap-4">
-        {hasPermission(
-          profile?.role?.permissions,
-          RoleModel.customer,
-          RoleAction.update
-        ) && (
-            <CustomButton
-              type={
-                String(record?.status) === ECustomerStatus.active
-                  ? `disable`
-                  : "success"
-              }
-              outline={true}
-              // prefixIcon={<Image src={LockIcon} alt="" />}
-              loading={isLoadingUpdateCustomer}
-              disabled={isLoadingUpdateCustomer}
-              onClick={() =>
-                handleUpdateStatus(
-                  record.id as any,
-                  String(record?.status) === ECustomerStatus.active
-                    ? ECustomerStatus.inactive
-                    : ECustomerStatus.active
-                )
-              }
-            >
-              {String(record?.status) === ECustomerStatus.active
-                ? ECustomerStatusLabel.inactive
-                : ECustomerStatusLabel.active}
-            </CustomButton>
-          )}
-        {hasPermission(
-          profile?.role?.permissions,
-          RoleModel.customer,
-          RoleAction.delete
-        ) && (
-            <CustomButton
-              type="danger"
-              outline={true}
-              prefixIcon={<Image src={DeleteIcon} alt="" />}
-              onClick={() => setDeletedId(record.id)}
-            >
-              Xóa
-            </CustomButton>
-          )}
-        {hasPermission(
-          profile?.role?.permissions,
-          RoleModel.customer,
-          RoleAction.update
-        ) && (
-            <CustomButton
-              type="success"
-              prefixIcon={<Image src={EditIcon} alt="" />}
-              onClick={() =>
-                router.push(`/partners/customer/add-customer?id=${record.id}`)
-              }
-            >
-              Cập nhật
-            </CustomButton>
-          )}
+        {hasPermission(profile?.role?.permissions, RoleModel.customer, RoleAction.update) && (
+          <CustomButton
+            type={String(record?.status) === ECustomerStatus.active ? `disable` : "success"}
+            outline={true}
+            // prefixIcon={<Image src={LockIcon} alt="" />}
+            loading={isLoadingUpdateCustomer}
+            disabled={isLoadingUpdateCustomer}
+            onClick={() =>
+              handleUpdateStatus(
+                record.id as any,
+                String(record?.status) === ECustomerStatus.active ? ECustomerStatus.inactive : ECustomerStatus.active,
+              )
+            }
+          >
+            {String(record?.status) === ECustomerStatus.active
+              ? ECustomerStatusLabel.inactive
+              : ECustomerStatusLabel.active}
+          </CustomButton>
+        )}
+        {hasPermission(profile?.role?.permissions, RoleModel.customer, RoleAction.delete) && (
+          <CustomButton
+            type="danger"
+            outline={true}
+            prefixIcon={<Image src={DeleteIcon} alt="" />}
+            onClick={() => setDeletedId(record.id)}
+          >
+            Xóa
+          </CustomButton>
+        )}
+        {hasPermission(profile?.role?.permissions, RoleModel.customer, RoleAction.update) && (
+          <CustomButton
+            type="success"
+            prefixIcon={<Image src={EditIcon} alt="" />}
+            onClick={() => router.push(`/partners/customer/add-customer?id=${record.id}`)}
+          >
+            Cập nhật
+          </CustomButton>
+        )}
       </div>
 
       <DeleteModal
@@ -239,9 +213,7 @@ export function Info({ record }: { record: ICustomer }) {
           mutateUpdateCustomer({
             id: record.id,
             status:
-              String(record?.status) === ECustomerStatus.active
-                ? ECustomerStatus.inactive
-                : ECustomerStatus.active,
+              String(record?.status) === ECustomerStatus.active ? ECustomerStatus.inactive : ECustomerStatus.active,
           });
           setOpenStatus(false);
         }}

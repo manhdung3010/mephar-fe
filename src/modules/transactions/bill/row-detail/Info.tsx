@@ -10,12 +10,7 @@ import PrintOrderIcon from "@/assets/printOrder.svg";
 import { CustomButton } from "@/components/CustomButton";
 import CustomTable from "@/components/CustomTable";
 import { EGenderLabel, EOrderStatusLabel } from "@/enums";
-import {
-  formatDate,
-  formatMoney,
-  formatNumber,
-  hasPermission,
-} from "@/helpers";
+import { formatDate, formatMoney, formatNumber, hasPermission } from "@/helpers";
 import { message } from "antd";
 
 import { deleteOrder } from "@/api/order.service";
@@ -45,13 +40,11 @@ interface IRecord {
   refund: number;
   unitName: string;
   batches?: any[];
-  itemPrice?: number
+  itemPrice?: number;
 }
 
 export function Info({ record }: { record: IOrder }) {
-  const [expandedRowKeys, setExpandedRowKeys] = useState<
-    Record<string, boolean>
-  >({});
+  const [expandedRowKeys, setExpandedRowKeys] = useState<Record<string, boolean>>({});
   const [openCancelBill, setOpenCancelBill] = useState(false);
   const profile = useRecoilValue(profileState);
 
@@ -61,23 +54,23 @@ export function Info({ record }: { record: IOrder }) {
   const { data: discountDetail } = useQuery(
     ["DISCOUNT_ORDER_DETAIL", record?.id],
     () => getDiscountByIdOrder(Number(record?.id)),
-    { enabled: !!record?.id }
+    { enabled: !!record?.id },
   );
 
   console.log(record);
 
-  const {
-    mutate: mutateCancelImportProduct,
-    isLoading: isLoadingDeleteProduct,
-  } = useMutation(() => deleteOrder(Number(record.id)), {
-    onSuccess: async () => {
-      await queryClient.invalidateQueries(["ORDER_LIST"]);
-      setOpenCancelBill(false);
+  const { mutate: mutateCancelImportProduct, isLoading: isLoadingDeleteProduct } = useMutation(
+    () => deleteOrder(Number(record.id)),
+    {
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(["ORDER_LIST"]);
+        setOpenCancelBill(false);
+      },
+      onError: (err: any) => {
+        message.error(err?.message);
+      },
     },
-    onError: (err: any) => {
-      message.error(err?.message);
-    },
-  });
+  );
 
   const onSubmit = () => {
     mutateCancelImportProduct();
@@ -144,8 +137,7 @@ export function Info({ record }: { record: IOrder }) {
       title: "Giảm giá",
       dataIndex: "discount",
       key: "discount",
-      render: (_, { quantity, price, itemPrice }) =>
-        formatMoney(price - Number(itemPrice ?? 0)),
+      render: (_, { quantity, price, itemPrice }) => formatMoney(price - Number(itemPrice ?? 0)),
     },
     // {
     //   title: "Giá bán",
@@ -188,9 +180,7 @@ export function Info({ record }: { record: IOrder }) {
 
           <div className="grid grid-cols-2 gap-5">
             <div className="text-gray-main">Trạng thái:</div>
-            <div className="text-[#00B63E]">
-              {EOrderStatusLabel[record.status]}
-            </div>
+            <div className="text-[#00B63E]">{EOrderStatusLabel[record.status]}</div>
           </div>
 
           <div className="grid grid-cols-2 gap-5">
@@ -230,20 +220,13 @@ export function Info({ record }: { record: IOrder }) {
         </div>
 
         <div className="grow">
-          <TextArea
-            rows={8}
-            placeholder="Ghi chú:"
-            value={record.description}
-            readOnly
-          />
+          <TextArea rows={8} placeholder="Ghi chú:" value={record.description} readOnly />
         </div>
       </div>
 
       {record?.prescription && (
         <div className=" mb-4 rounded bg-[#F2F4F5] p-4">
-          <div className="#0F1824 mb-4 text-base font-medium">
-            Thông tin đơn thuốc
-          </div>
+          <div className="#0F1824 mb-4 text-base font-medium">Thông tin đơn thuốc</div>
 
           <div className="grid grid-cols-3 gap-5">
             <div className="grid grid-cols-2 gap-5">
@@ -253,58 +236,42 @@ export function Info({ record }: { record: IOrder }) {
 
             <div className="grid grid-cols-2 gap-5">
               <div className="text-gray-main">Giới tính:</div>
-              <div className="text-black-main">
-                {EGenderLabel[record.prescription?.gender]}
-              </div>
+              <div className="text-black-main">{EGenderLabel[record.prescription?.gender]}</div>
             </div>
 
             <div className="grid grid-cols-2 gap-5">
               <div className="text-gray-main">Địa chỉ:</div>
-              <div className="text-black-main">
-                {record.prescription?.address}
-              </div>
+              <div className="text-black-main">{record.prescription?.address}</div>
             </div>
 
             <div className="grid grid-cols-2 gap-5">
               <div className="text-gray-main">Bác sĩ kê đơn:</div>
-              <div className="text-[#0070F4]">
-                {record.prescription?.doctor?.name}
-              </div>
+              <div className="text-[#0070F4]">{record.prescription?.doctor?.name}</div>
             </div>
 
             <div className="grid grid-cols-2 gap-5">
               <div className="text-gray-main">Cân nặng:</div>
-              <div className="text-black-main">
-                {record.prescription?.weight}
-              </div>
+              <div className="text-black-main">{record.prescription?.weight}</div>
             </div>
 
             <div className="grid grid-cols-2 gap-5">
               <div className="text-gray-main">Người giám hộ:</div>
-              <div className="text-black-main">
-                {record.prescription?.supervisor}
-              </div>
+              <div className="text-black-main">{record.prescription?.supervisor}</div>
             </div>
 
             <div className="grid grid-cols-2 gap-5">
               <div className="text-gray-main">CS khám bệnh:</div>
-              <div className="text-black-main">
-                {record.prescription?.healthFacility?.name}
-              </div>
+              <div className="text-black-main">{record.prescription?.healthFacility?.name}</div>
             </div>
 
             <div className="grid grid-cols-2 gap-5">
               <div className="text-gray-main">CMND/Căn cước:</div>
-              <div className="text-black-main">
-                {record.prescription?.identificationCard}
-              </div>
+              <div className="text-black-main">{record.prescription?.identificationCard}</div>
             </div>
 
             <div className="grid grid-cols-2 gap-5">
               <div className="text-gray-main">Số điện thoại:</div>
-              <div className="text-black-main">
-                {record.prescription?.phone}
-              </div>
+              <div className="text-black-main">{record.prescription?.phone}</div>
             </div>
 
             <div className="grid grid-cols-2 gap-5">
@@ -314,16 +281,12 @@ export function Info({ record }: { record: IOrder }) {
 
             <div className="grid grid-cols-2 gap-5">
               <div className="text-gray-main">Thẻ bảo hiểm y tế:</div>
-              <div className="text-black-main">
-                {record?.prescription?.healthInsuranceCard}
-              </div>
+              <div className="text-black-main">{record?.prescription?.healthInsuranceCard}</div>
             </div>
 
             <div className="grid grid-cols-2 gap-5">
               <div className="text-gray-main">Chẩn đoán:</div>
-              <div className="text-black-main">
-                {record.prescription?.diagnostic}
-              </div>
+              <div className="text-black-main">{record.prescription?.diagnostic}</div>
             </div>
           </div>
         </div>
@@ -353,8 +316,7 @@ export function Info({ record }: { record: IOrder }) {
                 {record?.batches?.map((b, index) => (
                   <div className="flex items-center rounded bg-red-main py-1 px-2 text-white">
                     <span className="mr-2">
-                      {b.batch?.name} - {formatDate(b?.batch?.expiryDate)} - SL:{" "}
-                      {formatNumber(b?.quantity)}
+                      {b.batch?.name} - {formatDate(b?.batch?.expiryDate)} - SL: {formatNumber(b?.quantity)}
                     </span>
                   </div>
                 ))}
@@ -391,25 +353,17 @@ export function Info({ record }: { record: IOrder }) {
 
           <div className=" mb-3 grid grid-cols-2">
             <div className="text-gray-main">Giảm giá hóa đơn:</div>
-            <div className="text-black-main">
-              {record?.discountType === 1
-                ? record?.discount + "%"
-                : formatMoney(record?.discount)}
-            </div>
+            <div className="text-black-main">{formatMoney(record?.discountOrder)}</div>
           </div>
 
           <div className=" mb-3 grid grid-cols-2">
             <div className="text-gray-main">Khách cần trả:</div>
-            <div className="text-black-main">
-              {formatMoney(record?.totalPrice)}
-            </div>
+            <div className="text-black-main">{formatMoney(record?.totalPrice)}</div>
           </div>
 
           <div className=" mb-3 grid grid-cols-2">
             <div className="text-gray-main">Khách đã trả:</div>
-            <div className="text-black-main">
-              {formatMoney(record?.cashOfCustomer)}
-            </div>
+            <div className="text-black-main">{formatMoney(record?.cashOfCustomer)}</div>
           </div>
         </div>
       </div>
@@ -423,19 +377,15 @@ export function Info({ record }: { record: IOrder }) {
         >
           In phiếu
         </CustomButton>
-        {hasPermission(
-          profile?.role?.permissions,
-          RoleModel.bill,
-          RoleAction.delete
-        ) && (
-            <CustomButton
-              outline={true}
-              prefixIcon={<Image src={CloseIcon} alt="" />}
-              onClick={() => setOpenCancelBill(true)}
-            >
-              Hủy bỏ
-            </CustomButton>
-          )}
+        {hasPermission(profile?.role?.permissions, RoleModel.bill, RoleAction.delete) && (
+          <CustomButton
+            outline={true}
+            prefixIcon={<Image src={CloseIcon} alt="" />}
+            onClick={() => setOpenCancelBill(true)}
+          >
+            Hủy bỏ
+          </CustomButton>
+        )}
         {record?.canReturn && (
           <CustomButton
             type="success"
