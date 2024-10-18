@@ -195,6 +195,7 @@ export interface ISaleProductLocal extends Omit<ISaleProduct, "batches"> {
     };
   }[];
   isDiscount?: boolean;
+  isGift?: boolean;
   price?: any;
   discountValue?: any;
   discountType?: string;

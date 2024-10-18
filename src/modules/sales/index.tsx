@@ -148,7 +148,6 @@ const Index = () => {
       enabled: totalPrice > 0,
     },
   );
-
   const [searchKeyword, setSearchKeyword] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -443,7 +442,6 @@ const Index = () => {
 
   // select product
   const onSelectedProduct = (value) => {
-    console.log("value", value);
     const product: ISaleProduct = JSON.parse(value);
     const productKey = `${product.product.id}-${product.productUnit.id}`;
 
@@ -475,9 +473,7 @@ const Index = () => {
       setOrderObject((pre) => ({ ...pre, ...orderObjectClone }));
     } else {
       let isSelectedUnit = true;
-
       let itemDiscountProduct;
-
       const res = getProductDiscountList({
         productUnitId: product?.id,
         branchId: branchId,
@@ -488,10 +484,10 @@ const Index = () => {
           itemDiscountProduct = res?.data?.data?.items;
           const productLocal: any = {
             ...product,
-            inventory: product.quantity,
+            inventory: product?.isDiscount ? product?.product?.inventory : product.quantity,
             productKey,
             quantity: product?.isDiscount ? product?.discountQuantity : 1,
-            productUnitId: product.productUnitId,
+            productUnitId: product.productUnitId || product?.productUnit?.id,
             itemDiscountProduct: itemDiscountProduct,
             originProductUnitId: product.id,
             batches: product.batches?.map((batch) => {

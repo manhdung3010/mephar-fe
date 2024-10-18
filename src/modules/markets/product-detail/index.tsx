@@ -116,6 +116,8 @@ const ProductDetail = () => {
     );
   }
 
+  console.log("configProduct", configProduct);
+
   return (
     <div className="bg-[#fafafc]">
       <div className="fluid-container">
@@ -203,7 +205,17 @@ const ProductDetail = () => {
                 outline
                 className="!h-[46px]"
                 prefixIcon={<Image src={CartIcon} />}
-                onClick={() => mutateCreateCart(configProduct?.data?.item?.id)}
+                onClick={() => {
+                  if (configProduct?.data?.item?.quantity - configProduct?.data?.item?.quantitySold <= 0) {
+                    message.error("Sản phẩm đã hết hàng");
+                    return;
+                  }
+                  if (productQuantity > configProduct?.data?.item?.quantity - configProduct?.data?.item?.quantitySold) {
+                    message.error("Số lượng sản phẩm trong giỏ hàng không được vượt quá số lượng tồn kho");
+                    return;
+                  }
+                  mutateCreateCart(configProduct?.data?.item?.id);
+                }}
               >
                 Thêm vào giỏ hàng
               </CustomButton>

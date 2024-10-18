@@ -1,10 +1,8 @@
 import type { ColumnsType } from "antd/es/table";
-
 import { CustomButton } from "@/components/CustomButton";
 import { CustomModal } from "@/components/CustomModal";
 import CustomTable from "@/components/CustomTable";
 import { formatMoney, formatNumber } from "@/helpers";
-
 import { branchState, discountState, discountTypeState, orderActiveState, orderDiscountSelected } from "@/recoil/state";
 import { cloneDeep, set } from "lodash";
 import { useEffect, useState } from "react";
@@ -27,10 +25,8 @@ export function OrderDiscountModal({
   discountList: any;
 }) {
   const [listDiscount, setListDiscount] = useState<any[]>([]);
-  const [orderDiscount, setOrderDiscount] = useRecoilState(orderDiscountSelected);
   const [discountObject, setDiscountObject] = useRecoilState(discountState);
   const [orderActive, setOrderActive] = useRecoilState(orderActiveState);
-  const [discountType, setDiscountType] = useRecoilState(discountTypeState);
 
   const [openSelectProduct, setOpenSelectProduct] = useState(false);
   const [discountItem, setDiscountItem] = useState<any>(null);
@@ -51,7 +47,7 @@ export function OrderDiscountModal({
   );
 
   useEffect(() => {
-    if (discountList?.data?.data?.items && discountObject[orderActive]?.orderDiscount) {
+    if (discountList?.data?.data?.items) {
       const listBatchClone = cloneDeep(discountList?.data?.data?.items);
       listBatchClone.forEach((batch) => {
         if (discountObject[orderActive]?.orderDiscount[0]?.code === batch.code) {
@@ -63,23 +59,6 @@ export function OrderDiscountModal({
       setListDiscount(listBatchClone);
     }
   }, [discountList?.data?.data?.items, discountObject[orderActive]?.orderDiscount, isOpen]);
-  const findProduct = (productUnitId: any) => {
-    return productUnitId
-      .map((item) => {
-        return products?.data?.items?.find((product) => product.id === item);
-      })
-      .map((i, index) => {
-        return (
-          <span>
-            {i?.product?.name}
-            {"("}
-            {i?.productUnit?.unitName}
-            {")"}
-            {index < productUnitId.length - 1 ? ", " : ""}
-          </span>
-        );
-      });
-  };
 
   const columns: ColumnsType<any> = [
     {
@@ -186,15 +165,6 @@ export function OrderDiscountModal({
       ),
     },
   ];
-
-  useEffect(() => {
-    const selectedDiscount = listDiscount.filter((batch) => batch.isSelected);
-    setOrderDiscount(selectedDiscount);
-    setDiscountType("order");
-  }, []);
-
-  console.log("discountObject", discountObject[orderActive]);
-
   return (
     <CustomModal
       isOpen={isOpen}

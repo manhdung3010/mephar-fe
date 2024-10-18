@@ -126,6 +126,13 @@ export function ProductList({
       return product;
     });
 
+    // reset khuyến mại
+    setDiscountObject({
+      [orderActive]: {
+        productDiscount: [],
+        orderDiscount: [],
+      },
+    });
     setOrderObject(orderObjectClone);
   };
   const onExpandMoreBatches = async (productKey, quantity: number, product?: any) => {
@@ -210,20 +217,13 @@ export function ProductList({
               });
               setOrderObject(orderObjectClone);
 
-              // // remove discount from discountObject
-              // const discountObjectClone = cloneDeep(discountObject);
-              // const productDiscountClone = discountObjectClone[
-              //   orderActive
-              // ]?.productDiscount?.filter((item) => item.code === discountCode)?.filter((a) => a.id !== productUnitId);
-
-              // const newDiscountObject = {
-              //   ...discountObjectClone[orderActive],
-              //   productDiscount: [
-
-              //   ],
-              // };
-
-              // setDiscountObject(newDiscountObject);
+              // reset khuyến mại
+              setDiscountObject({
+                [orderActive]: {
+                  productDiscount: [],
+                  orderDiscount: [],
+                },
+              });
             }}
             alt=""
           />

@@ -24,7 +24,7 @@ import { CustomInput } from "@/components/CustomInput";
 import { CustomSelect } from "@/components/CustomSelect";
 import InputError from "@/components/InputError";
 import { EDiscountLabel, EDiscountType, EPaymentMethod, getEnumKeyByValue } from "@/enums";
-import { formatMoney, formatNumber, hasPermission } from "@/helpers";
+import { formatMoney, formatNumber, hasPermission, randomString } from "@/helpers";
 import {
   branchState,
   discountState,
@@ -48,6 +48,7 @@ import { ScanQrModal } from "./ScanQrModal";
 import type { ISaleProductLocal } from "./interface";
 import { RightContentStyled } from "./styled";
 import { getDiscountConfig } from "@/api/discount.service";
+const defaultOrder = randomString();
 
 export function RightContent({ useForm, discountList }: { useForm: any; discountList: any }) {
   const queryClient = useQueryClient();
@@ -56,7 +57,6 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
 
   const [orderObject, setOrderObject] = useRecoilState(orderState);
   const [orderActive, setOrderActive] = useRecoilState(orderActiveState);
-  const [orderDiscount, setOrderDiscount] = useRecoilState(orderDiscountSelected);
   const [discountObject, setDiscountObject] = useRecoilState(discountState);
   const [productDiscount, setProductDiscount] = useRecoilState(productDiscountSelected);
   const [discountType, setDiscountType] = useRecoilState(discountTypeState);
@@ -75,6 +75,8 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
   const [saleInvoice, setSaleInvoice] = useState();
   const [oldTotal, setOldTotal] = useState(0);
   const [checkPoint, setCheckPoint] = useState(false);
+
+  const [discountOrder, setDiscountOrder] = useState(0); // tổng tiền được giảm giá
 
   const { data: employees } = useQuery(["EMPLOYEE_LIST", searchEmployeeText], () =>
     getEmployee({ page: 1, limit: 20, keyword: searchEmployeeText }),
@@ -109,39 +111,25 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
 
   // caculate total price
   const totalPrice = useMemo(() => {
-    let price = 0;
+    let price = 0; // tổng tiền sản phẩm
     let discount = 0;
+    let oldTotal = 0; // tổng tiền được giảm giá
     orderObject[orderActive]?.forEach((product: ISaleProductLocal) => {
       const unit = product.product.productUnit?.find((unit) => unit.id === product.productUnitId);
+      // price +=
+      //   Number(product?.isDiscount ? product?.product?.productUnit[0]?.price : product?.productUnit?.price) *
+      //   product.quantity;
+      price += Number(product?.productUnit?.price) * product.quantity;
+      discount += product?.productUnit?.price * product?.quantity;
 
-      const discountVal =
-        (product?.discountType === "amount" ? product?.discountValue : (unit?.price * product?.discountValue) / 100) ||
-        0;
-      if (product?.buyNumberType === 1) {
-        price += Number(product?.productUnit?.price ?? 0) * product.quantity;
-      } else {
-        price += (Number(product?.productUnit?.price ?? 0) - discountVal) * product.quantity;
-      }
-
-      oldTotal += Number(product?.productUnit?.price ?? 0) * product.quantity;
+      oldTotal +=
+        Number(product?.isDiscount ? product?.product?.productUnit[0]?.price : product.productUnit?.price) *
+        product.quantity;
     });
-    if (orderDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
-      orderDiscount?.forEach((item) => {
-        if (item.type === "order_price") {
-          if (item?.items[0]?.apply?.discountType === "percent") {
-            discount += (price * item?.items[0]?.apply?.discountValue) / 100;
-          } else {
-            discount += item?.items[0]?.apply?.discountValue;
-          }
-        }
-      });
-    }
-    let oldTotal = price;
-    price = price;
-    oldTotal = oldTotal - (price - discount);
+    oldTotal = oldTotal - discount;
     setOldTotal(oldTotal);
     return price;
-  }, [orderObject, orderActive, orderDiscount]);
+  }, [orderObject, orderActive, discountObject[orderActive]]);
 
   // caculate discount
   const discount = useMemo(() => {
@@ -179,7 +167,7 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
   // caculate customer must pay
   const customerMustPay = useMemo(() => {
     let discount = 0;
-    const convertMoneyPayment = pointStatus?.data?.convertMoneyPayment;
+    const convertMoneyPayment = pointStatus?.data?.convertMoneyPayment; // tích điểm
     const convertPoint = pointStatus?.data?.convertPoint;
 
     if (convertMoneyPayment && getValues("paymentPoint") > 0) {
@@ -205,7 +193,6 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
               )
             : 0;
         }
-
         if (getValues("discountType") === EDiscountType.PERCENT) {
           const discountValue = (totalPrice * Number(getValues("discount"))) / 100;
           return totalPrice > discountValue
@@ -218,7 +205,6 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
             : 0;
         }
       }
-
       return (
         totalPrice - discount - (pointStatus?.data?.convertMoneyPayment / convertPoint) * getValues("paymentPoint")
       );
@@ -232,6 +218,7 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
               discount += item?.items[0]?.apply?.discountValue;
             }
           }
+          setDiscountOrder(discount);
         });
       }
       if (getValues("discount")) {
@@ -278,33 +265,33 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
   // create order
   const { mutate: mutateCreateOrder, isLoading: isLoadingCreateOrder } = useMutation(
     () => {
-      if (
-        orderDiscount?.length > 0 &&
-        productDiscount?.length > 0 &&
-        discountConfigDetail?.data?.data?.isMergeDiscount
-      ) {
-        const formatProducts = getValues("products")?.map(({ isBatchExpireControl, ...product }) => ({
-          ...product,
-          batches: product.batches?.map((batch) => ({
-            id: batch.id,
-            quantity: batch.quantity,
-          })),
-          isDiscount: product?.isDiscount || false,
-          ...(product?.itemPrice > 0 && {
-            itemPrice: product?.itemPrice,
-          }),
-        }));
-        return createOrder({
-          ...getValues(),
-          discountOrder: oldTotal,
-          listDiscountId: [...orderDiscount?.map((item) => item.id), ...productDiscount?.map((item) => item.id)],
-          ...(getValues("customerId") === -1 && { customerId: null }),
-          products: formatProducts,
-          branchId,
-        });
-      }
+      // if (
+      //   orderDiscount?.length > 0 &&
+      //   productDiscount?.length > 0 &&
+      //   discountConfigDetail?.data?.data?.isMergeDiscount
+      // ) {
+      //   const formatProducts = getValues("products")?.map(({ isBatchExpireControl, ...product }) => ({
+      //     ...product,
+      //     batches: product.batches?.map((batch) => ({
+      //       id: batch.id,
+      //       quantity: batch.quantity,
+      //     })),
+      //     isDiscount: product?.isDiscount || false,
+      //     ...(product?.itemPrice > 0 && {
+      //       itemPrice: product?.itemPrice,
+      //     }),
+      //   }));
+      //   return createOrder({
+      //     ...getValues(),
+      //     discountOrder: oldTotal,
+      //     listDiscountId: [...orderDiscount?.map((item) => item.id), ...productDiscount?.map((item) => item.id)],
+      //     ...(getValues("customerId") === -1 && { customerId: null }),
+      //     products: formatProducts,
+      //     branchId,
+      //   });
+      // }
 
-      if (discountType === "order" && orderDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
+      if (discountObject[orderActive]?.orderDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
         const formatProducts = getValues("products")?.map(({ isBatchExpireControl, ...product }) => ({
           ...product,
           batches: product.batches?.map((batch) => ({
@@ -315,34 +302,34 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
         }));
         return createOrder({
           ...getValues(),
-          discountOrder: oldTotal,
-          listDiscountId: orderDiscount?.map((item) => item.id),
+          discountOrder: discountOrder,
+          listDiscountId: discountObject[orderActive]?.orderDiscount?.map((item) => item.id),
           ...(getValues("customerId") === -1 && { customerId: null }),
           products: formatProducts,
           branchId,
         });
       }
-      if (discountType === "product" && productDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
-        const formatProducts = getValues("products")?.map(({ isBatchExpireControl, ...product }) => ({
-          ...product,
-          batches: product.batches?.map((batch) => ({
-            id: batch.id,
-            quantity: batch.quantity,
-          })),
-          isDiscount: product?.isDiscount || false,
-          ...(product?.itemPrice > 0 && {
-            itemPrice: product?.itemPrice,
-          }),
-        }));
-        return createOrder({
-          ...getValues(),
-          discountOrder: oldTotal,
-          listDiscountId: productDiscount?.map((item) => item.id),
-          ...(getValues("customerId") === -1 && { customerId: null }),
-          products: formatProducts,
-          branchId,
-        });
-      }
+      // if (discountType === "product" && productDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
+      //   const formatProducts = getValues("products")?.map(({ isBatchExpireControl, ...product }) => ({
+      //     ...product,
+      //     batches: product.batches?.map((batch) => ({
+      //       id: batch.id,
+      //       quantity: batch.quantity,
+      //     })),
+      //     isDiscount: product?.isDiscount || false,
+      //     ...(product?.itemPrice > 0 && {
+      //       itemPrice: product?.itemPrice,
+      //     }),
+      //   }));
+      //   return createOrder({
+      //     ...getValues(),
+      //     discountOrder: oldTotal,
+      //     listDiscountId: productDiscount?.map((item) => item.id),
+      //     ...(getValues("customerId") === -1 && { customerId: null }),
+      //     products: formatProducts,
+      //     branchId,
+      //   });
+      // }
       const formatProducts = getValues("products")?.map(({ isBatchExpireControl, ...product }) => ({
         ...product,
         batches: product.batches?.map((batch) => ({
@@ -368,10 +355,15 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
         const orderClone = cloneDeep(orderObject);
         orderClone[orderActive] = [];
         setOrderObject(orderClone);
-        setOrderDiscount([]);
-        setProductDiscount([]);
         setDiscountType("");
         setIsOpenOrderSuccessModal(true);
+        setOldTotal(0);
+        setDiscountObject({
+          [orderActive]: {
+            productDiscount: [],
+            orderDiscount: [],
+          },
+        });
         reset();
         setValue("userId", profile.id, { shouldValidate: true });
       },
@@ -725,26 +717,16 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
             const products: ISaleProductLocal[] = orderObject[orderActive];
             const formatProducts = products.map((product) => {
               const unit = product.product.productUnit?.find((unit) => unit.id === product.productUnitId);
-
-              const discountVal =
-                (product?.discountType === "amount"
-                  ? product?.discountValue
-                  : (unit?.price * product?.discountValue) / 100) || 0;
               return {
-                productId: product.productId,
+                productId: product.productId || product?.product?.id,
                 productUnitId: product.productUnitId,
                 originProductUnitId: product.originProductUnitId,
                 productType: product.product.type,
                 quantity: product.quantity,
                 isDiscount: product.isDiscount,
-                ...(product.isDiscount &&
-                  !product?.buyNumberType && {
-                    itemPrice: Number(product.price - discountVal),
-                  }),
-                ...(product.isDiscount &&
-                  product?.buyNumberType && {
-                    itemPrice: Number(product.itemPrice),
-                  }),
+                ...(product.isDiscount && {
+                  itemPrice: Number(product?.productUnit?.price),
+                }),
                 isBatchExpireControl: product.product.isBatchExpireControl,
                 batches: product.batches
                   .filter((batch) => batch.isSelected)
