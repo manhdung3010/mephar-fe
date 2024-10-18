@@ -195,7 +195,7 @@ export function Info({ record }: { record: any }) {
                 {formatMoney(product?.price)}/ {product?.marketProduct?.productUnit?.unitName}
               </div>
               <div className="flex gap-x-40">
-                <div className="w-5 flex-shrink-0">x{product.quantity}</div>
+                <div className="w-10 flex-shrink-0">x{product.quantity}</div>
                 <div className="text-[#00B63E]">Tổng tiền: {formatMoney(product.price * product.quantity)}</div>
               </div>
             </div>
@@ -211,7 +211,7 @@ export function Info({ record }: { record: any }) {
                 type="danger"
                 outline={true}
                 onClick={() => {
-                  router.push("/transactions/order/edit-order?id=" + record.id);
+                  router.push("/transactions/order/add-order?id=" + record.id);
                 }}
                 prefixIcon={<Image src={EditIcon} alt="" />}
               >

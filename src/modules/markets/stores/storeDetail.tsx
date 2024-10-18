@@ -145,19 +145,19 @@ function StoreDetail() {
                         {(followStore?.data?.status === EFollowStoreStatus.FALSE ||
                           followStore?.data?.status === EFollowStoreStatus.CANCEL) &&
                           hasPermission(profile?.role?.permissions, RoleModel.market_common, RoleAction.create) && (
-                            <p className="flex items-center gap-2" onClick={() => muateCreateFollow()}>
+                            <p className="flex items-center gap-2 w-fit" onClick={() => muateCreateFollow()}>
                               <Image src={CartPlusIcon} />
                               <span className="text-base font-medium text-red-main">Đăng ký làm đại lý</span>
                             </p>
                           )}
                         {followStore?.data?.status === EFollowStoreStatus.PENDING && (
-                          <p className="flex items-center gap-2">
+                          <p className="flex items-center gap-2 w-fit">
                             {/* <LoadingIcon /> */}
                             <span className="text-base font-medium">Đang chờ duyệt</span>
                           </p>
                         )}
                         {followStore?.data?.status === EFollowStoreStatus.ACTIVE && (
-                          <p className="flex items-center gap-2">
+                          <p className="flex items-center gap-2 w-fit">
                             <Image src={CartHeartIcon} />
                             <span className="text-base font-medium">Đã là đại lý</span>
                           </p>

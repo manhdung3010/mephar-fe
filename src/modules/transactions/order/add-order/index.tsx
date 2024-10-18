@@ -1,30 +1,24 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
-import CloseIcon from "@/assets/closeWhiteIcon.svg";
 import RemoveIcon from "@/assets/removeIcon.svg";
 import SearchIcon from "@/assets/searchIcon.svg";
 import { CustomInput } from "@/components/CustomInput";
 import CustomTable from "@/components/CustomTable";
-import { CustomUnitSelect } from "@/components/CustomUnitSelect";
 
-import { getSaleProducts } from "@/api/product.service";
+import { getConfigProductPrivate, getMarketOrderDetail } from "@/api/market.service";
 import { CustomAutocomplete } from "@/components/CustomAutocomplete";
-import { EProductType } from "@/enums";
 import { formatMoney, formatNumber, getImage } from "@/helpers";
 import { branchState, marketOrderState } from "@/recoil/state";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useQuery } from "@tanstack/react-query";
 import { message } from "antd";
 import { cloneDeep, debounce } from "lodash";
-import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { schema } from "./schema";
 import RightContent from "./RightContent";
-import { ISaleProduct } from "@/modules/sales/interface";
-import CustomPagination from "@/components/CustomPagination";
-import { getConfigProduct, getConfigProductPrivate } from "@/api/market.service";
+import { schema } from "./schema";
+import { useRouter } from "next/router";
 
 export default function AddOrder() {
   const {
@@ -39,6 +33,8 @@ export default function AddOrder() {
     mode: "onChange",
     defaultValues: {},
   });
+  const router = useRouter();
+  const { id } = router.query;
   const [expandedRowKeys, setExpandedRowKeys] = useState<Record<string, boolean>>({});
   const branchId = useRecoilValue(branchState);
   const [importProducts, setImportProducts] = useRecoilState(marketOrderState);
@@ -52,10 +48,6 @@ export default function AddOrder() {
     "createdAt[end]": undefined,
     type: "common",
   });
-
-  // const { data: products, isLoading } = useQuery(["CONFIG_PRODUCT", JSON.stringify(formFilter)], () =>
-  //   getConfigProduct({ ...formFilter }),
-  // );
   useEffect(() => {
     if (importProducts.length) {
       const expandedRowKeysClone = { ...expandedRowKeys };
@@ -66,6 +58,45 @@ export default function AddOrder() {
       setExpandedRowKeys(expandedRowKeysClone);
     }
   }, [importProducts.length]);
+
+  const { data: details, isLoading } = useQuery<{ data: any }>(
+    ["MARKET_ORDER_DETAIL", id, branchId],
+    () => getMarketOrderDetail(String(id)),
+    {
+      enabled: !!id && !!branchId,
+      onSuccess: (data) => {
+        // if (data?.data?.item) {
+        //   setValue("listProduct", data?.data?.item?.products, {
+        //     shouldValidate: true,
+        //   });
+        // }
+      },
+    },
+  );
+
+  console.log("details", details);
+
+  useEffect(() => {
+    if (details?.data?.item) {
+      const listProduct = details?.data?.item?.products?.map((product) => {
+        return {
+          ...product.marketProduct,
+          productKey: `${product.marketProduct.product.id}-${product.id}`,
+          inventory: product.quantity,
+          realQuantity: product.quantity,
+          price: product.price,
+          discountValue: 0,
+          marketProductId: product?.marketProductId,
+          marketOrderProductId: product?.id,
+        };
+      });
+
+      setImportProducts(listProduct);
+      setValue("listProduct", listProduct);
+      setValue("customerId", details?.data?.item?.customerId);
+      setValue("note", details?.data?.item?.note);
+    }
+  }, [details?.data?.item]);
 
   const { data: products, isLoading: isLoadingConfigProductPrivate } = useQuery(
     ["CONFIG_PRODUCT_PRIVATE", JSON.stringify(formFilter), getValues("customerId")],
@@ -78,8 +109,6 @@ export default function AddOrder() {
         customerId: getValues("customerId") ?? -1,
       }),
   );
-
-  console.log("products", products);
 
   const onChangeValueProduct = (productKey, field, newValue) => {
     let productImportClone = cloneDeep(importProducts);
@@ -107,7 +136,6 @@ export default function AddOrder() {
 
     setImportProducts(productImportClone);
   };
-  console.log("importProducts", importProducts);
 
   const columns: any = [
     {
@@ -192,6 +220,7 @@ export default function AddOrder() {
             onChangeValueProduct(record.productKey, "price", value);
           }}
           value={value}
+          disabled={!!details?.data?.item}
           type="number"
         />
       ),
@@ -340,6 +369,7 @@ export default function AddOrder() {
         errors={errors}
         handleSubmit={handleSubmit}
         reset={reset}
+        orderDetail={details?.data?.item}
       />
     </div>
   );

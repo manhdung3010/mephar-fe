@@ -21,10 +21,10 @@ import InputError from "@/components/InputError";
 import { getCustomer } from "@/api/customer.service";
 import CustomerIcon from "@/assets/customerIcon.svg";
 import { CreateCustomerModal } from "@/modules/sales/CreateCustomerModal";
-import { createMarketOrder, getShipAddress } from "@/api/market.service";
+import { createMarketOrder, getShipAddress, updateMarketOrder } from "@/api/market.service";
 import AddAddressModal from "@/modules/markets/payment/AddAddressModal";
 
-export default function RightContent({ getValues, setValue, errors, handleSubmit, reset }: any) {
+export default function RightContent({ getValues, setValue, errors, handleSubmit, reset, orderDetail }: any) {
   const router = useRouter();
   const profile = useRecoilValue(profileState);
   const [importProducts, setImportProducts] = useRecoilState(marketOrderState);
@@ -67,13 +67,15 @@ export default function RightContent({ getValues, setValue, errors, handleSubmit
   );
 
   useEffect(() => {
-    if (address?.data?.items) {
+    if (orderDetail?.id) {
+      setSelectedAddress(orderDetail?.addressId);
+    } else {
       const defaultAddress = address?.data?.items?.find((item) => item?.isDefaultAddress);
       if (defaultAddress) {
         setSelectedAddress(defaultAddress?.id);
       }
     }
-  }, [address]);
+  }, [orderDetail, address]);
 
   useEffect(() => {
     if (profile) {
@@ -101,6 +103,18 @@ export default function RightContent({ getValues, setValue, errors, handleSubmit
           },
         ],
       };
+      if (orderDetail?.id) {
+        const payload = {
+          addressId: selectedAddress,
+          listProduct: importProducts?.map((item) => ({
+            marketProductId: item?.marketProductId,
+            marketOrderProductId: item?.marketOrderProductId,
+            quantity: item?.realQuantity,
+            price: item?.price,
+          })),
+        };
+        return updateMarketOrder(orderDetail?.id, payload);
+      }
       return createMarketOrder(payload);
     },
     {
@@ -170,15 +184,18 @@ export default function RightContent({ getValues, setValue, errors, handleSubmit
           wrapClassName="mt-3"
           className="h-[44px]"
           placeholder="Thêm khách vào đơn F4"
+          disabled={orderDetail?.id}
           suffixIcon={
             <>
               {/* {hasPermission(profile?.role?.permissions, RoleModel.customer, RoleAction.create) && ( */}
               <Image
                 src={PlusIcon}
                 onClick={(e) => {
+                  if (orderDetail?.id) return;
                   setIsOpenAddCustomerModal(true);
                   e.stopPropagation();
                 }}
+                className={`cursor-pointer ${orderDetail?.id ? "cursor-not-allowed" : ""}`}
                 alt=""
               />
               {/* )} */}
