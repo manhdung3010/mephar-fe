@@ -19,7 +19,7 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import { ISaleProduct } from "./interface";
 import classNames from "classnames";
 
-function SelectProductOrderModal({ isOpen, onCancel, onSave, discountItem }) {
+function SelectProductOrderModal({ isOpen, onCancel, onSave, discountItem, type = "order" }) {
   const [listProduct, setListProduct] = useState<any[]>([]);
   const [discountObject, setDiscountObject] = useRecoilState(discountState);
   const [orderActive, setOrderActive] = useRecoilState(orderActiveState);
@@ -30,13 +30,12 @@ function SelectProductOrderModal({ isOpen, onCancel, onSave, discountItem }) {
     page: 1,
     limit: 20,
     keyword: "",
+    isSale: true,
   });
-
-  console.log("discountItem", discountItem);
 
   const { data: productStore, isLoading: isLoadingProduct } = useQuery(
     [
-      "LIST_PRODUCT",
+      "LIST_PRODUCT_SALE_STORE",
       formFilter.page,
       formFilter.limit,
       formFilter.keyword,
@@ -45,7 +44,7 @@ function SelectProductOrderModal({ isOpen, onCancel, onSave, discountItem }) {
     ],
     () => {
       const listProductUnitId = discountItem?.items[0]?.apply?.productUnitId.map((item) => item).join(",");
-      return getProduct({ ...formFilter, branchId: branchId, listProductUnitId });
+      return getSaleProducts({ ...formFilter, branchId: branchId, listProductUnitId });
     },
     {
       enabled: !!isOpen && discountItem?.items[0]?.apply?.productUnitId?.length > 0,
@@ -55,15 +54,22 @@ function SelectProductOrderModal({ isOpen, onCancel, onSave, discountItem }) {
             ...item,
             key: item.id,
             // check if product is selected in discountObject[orderActive] or not to set isSelected
-            isSelected: discountObject[orderActive]?.orderDiscount[0]?.items[0]?.apply?.productUnitSelected?.find(
-              (product) => product.id === item.id,
-            )
-              ? true
-              : false,
+            isSelected:
+              type === "order"
+                ? discountObject[orderActive]?.orderDiscount[0]?.items[0]?.apply?.productUnitSelected?.some(
+                    (product) => product.id === item.id,
+                  )
+                : discountObject[orderActive]?.productDiscount
+                    .find((d) => d.isSelected)
+                    ?.items[0]?.apply?.productUnitSelected?.some((product) => product.id === item.id),
             discountQuantity:
-              discountObject[orderActive]?.orderDiscount[0]?.items[0]?.apply?.productUnitSelected?.find(
-                (product) => product.id === item.id,
-              )?.discountQuantity || 0,
+              type === "order"
+                ? discountObject[orderActive]?.orderDiscount[0]?.items[0]?.apply?.productUnitSelected?.find(
+                    (product) => product.id === item.id,
+                  )?.discountQuantity
+                : discountObject[orderActive]?.productDiscount
+                    .find((d) => d.isSelected)
+                    ?.items[0]?.apply?.productUnitSelected?.find((product) => product.id === item.id)?.discountQuantity,
           };
         });
         setListProduct(newData);
@@ -81,7 +87,7 @@ function SelectProductOrderModal({ isOpen, onCancel, onSave, discountItem }) {
       title: "Tên",
       dataIndex: "name",
       key: "name",
-      render: (name, { product, productUnit }) => <span className="line-clamp-1">{name}</span>,
+      render: (name, { product, productUnit }) => <span className="line-clamp-1">{product?.name}</span>,
     },
     {
       title: "Số lượng",
@@ -110,9 +116,9 @@ function SelectProductOrderModal({ isOpen, onCancel, onSave, discountItem }) {
     },
     {
       title: "Tồn kho",
-      dataIndex: "inventory",
-      key: "inventory",
-      render: (inventory) => formatNumber(inventory),
+      dataIndex: "quantity",
+      key: "quantity",
+      render: (quantity) => formatNumber(quantity),
     },
   ];
 
@@ -148,13 +154,12 @@ function SelectProductOrderModal({ isOpen, onCancel, onSave, discountItem }) {
               if (selectedRowKeys.includes(batch.id)) {
                 return {
                   ...batch,
-                  quantity: batch.quantity || 1,
                   discountQuantity: 1,
                   isSelected: true,
                 };
               }
 
-              return { ...batch, isSelected: false, quantity: 0, discountQuantity: 0 };
+              return { ...batch, isSelected: false, discountQuantity: 0 };
             });
 
             setListProduct(listBatchClone);

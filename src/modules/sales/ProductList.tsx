@@ -82,7 +82,7 @@ export function ProductList({
           batches: product.batches?.map((batch) => ({
             ...batch,
             inventory: Math.floor(batch.inventory),
-            newInventory: Math.floor(batch.originalInventory / product.productUnit.exchangeValue),
+            newInventory: Math.floor(+batch.originalInventory / +product.productUnit.exchangeValue),
           })),
         };
 
@@ -244,30 +244,28 @@ export function ProductList({
         return (
           <div>
             <div className=" font-medium flex gap-2 items-center">
-              {product.name}
+              <span>{product.name}</span>
               {isDiscount && <span className="text-red-500 px-2  bg-[#fde6f8] rounded">KM</span>}
               {itemDiscountProduct?.length > 0 && (
                 <Tooltip title="KM hàng hóa" className="cursor-pointer w-5">
-                  <div>
-                    <Image
-                      src={DiscountIcon}
-                      className="block"
-                      onClick={() => {
-                        // if (
-                        //   orderDiscount?.length > 0 &&
-                        //   !discountConfigDetail?.data?.data?.isMergeDiscount
-                        // ) {
-                        //   message.error(
-                        //     "Bạn đã chọn khuyến mại hóa đơn. Mỗi hóa đơn chỉ được chọn 1 loại khuyến mại"
-                        //   );
-                        // } else {
-                        setOpenProductDiscountList(!openProductDiscountList);
-                        setItemDiscount(itemDiscountProduct);
-                        // }
-                      }}
-                      alt="discount-icon"
-                    />
-                  </div>
+                  <Image
+                    src={DiscountIcon}
+                    className="block"
+                    onClick={() => {
+                      // if (
+                      //   orderDiscount?.length > 0 &&
+                      //   !discountConfigDetail?.data?.data?.isMergeDiscount
+                      // ) {
+                      //   message.error(
+                      //     "Bạn đã chọn khuyến mại hóa đơn. Mỗi hóa đơn chỉ được chọn 1 loại khuyến mại"
+                      //   );
+                      // } else {
+                      setOpenProductDiscountList(!openProductDiscountList);
+                      setItemDiscount(itemDiscountProduct);
+                      // }
+                    }}
+                    alt="discount-icon"
+                  />
                 </Tooltip>
               )}
             </div>
@@ -288,7 +286,6 @@ export function ProductList({
         );
       },
     },
-
     {
       title: "ĐƠN VỊ",
       dataIndex: "units",

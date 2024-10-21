@@ -7,7 +7,6 @@ import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useRecoilState, useRecoilValue } from "recoil";
-
 import { getSaleProducts, getSampleMedicines } from "@/api/product.service";
 import BarcodeIcon from "@/assets/barcode.svg";
 import CloseIcon from "@/assets/closeIcon.svg";
@@ -25,7 +24,6 @@ import {
   orderState,
   productDiscountSelected,
 } from "@/recoil/state";
-
 import { getOrderDetail } from "@/api/order.service";
 import { CustomInput } from "@/components/CustomInput";
 import useBarcodeScanner from "@/hooks/useBarcodeScanner";
@@ -44,7 +42,6 @@ const Index = () => {
   const branchId = useRecoilValue(branchState);
   const router = useRouter();
   const { id } = router.query;
-
   const [formFilter, setFormFilter] = useState({
     page: 1,
     limit: 20,
@@ -55,7 +52,6 @@ const Index = () => {
   const [isScanBarcode, setIsScanBarcode] = useState(false);
   const [orderDetail, setOrderDetail] = useState<any>(null);
   const [valueScanBarcode, setValueScanBarcode] = useState("");
-
   const {
     getValues,
     setValue,
@@ -237,57 +233,57 @@ const Index = () => {
     handleScannedData();
   }, [scannedData, products?.data?.items, isSuccess, isSearchSampleMedicine]);
 
-  useEffect(() => {
-    const discountObjectClone = cloneDeep(discountObject);
+  // useEffect(() => {
+  //   const discountObjectClone = cloneDeep(discountObject);
 
-    if (discountObjectClone[orderActive]?.productDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
-      discountObjectClone[orderActive] = discountObjectClone[orderActive]?.productDiscount?.forEach((item) => {
-        const list = item?.items[0]?.apply?.productUnitId;
-        if (list?.length > 0) {
-          for (const l of list) {
-            const productUnit: any = products2?.data?.items?.find((product) => product.id === l?.id);
-            if (productUnit) {
-              let discountValue = item?.items[0]?.apply?.discountValue;
-              let discountType = item?.items[0]?.apply?.discountType;
-              if (item?.items[0]?.apply?.isGift) {
-                discountType = "amount";
-                discountValue = productUnit?.price;
-              } else {
-                if (discountType === "percent" && discountValue > 100) {
-                  discountValue = 100;
-                } else if (discountType === "amount" && +discountValue > +productUnit?.price) {
-                  discountValue = productUnit?.price;
-                }
-              }
+  //   if (discountObjectClone[orderActive]?.productDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
+  //     discountObjectClone[orderActive] = discountObjectClone[orderActive]?.productDiscount?.forEach((item) => {
+  //       const list = item?.items[0]?.apply?.productUnitId;
+  //       if (list?.length > 0) {
+  //         for (const l of list) {
+  //           const productUnit: any = products2?.data?.items?.find((product) => product.id === l?.id);
+  //           if (productUnit) {
+  //             let discountValue = item?.items[0]?.apply?.discountValue;
+  //             let discountType = item?.items[0]?.apply?.discountType;
+  //             if (item?.items[0]?.apply?.isGift) {
+  //               discountType = "amount";
+  //               discountValue = productUnit?.price;
+  //             } else {
+  //               if (discountType === "percent" && discountValue > 100) {
+  //                 discountValue = 100;
+  //               } else if (discountType === "amount" && +discountValue > +productUnit?.price) {
+  //                 discountValue = productUnit?.price;
+  //               }
+  //             }
 
-              if (productUnit && !orderObject[orderActive]?.find((product) => product.productUnitId === l?.id)) {
-                onSelectedProduct(
-                  JSON.stringify({
-                    ...productUnit,
-                    maxQuantity: item.items[0].apply.maxQuantity,
-                    discountQuantity: l?.discountQuantity,
-                    // quantity: l?.discountQuantity,
-                    isDiscount: true,
-                    discountType: discountType,
-                    discountValue: discountValue,
-                    isGift: item?.items[0]?.apply?.isGift,
-                    discountCode: l?.discountCode,
-                  }),
-                );
-              }
-            } else {
-              message.error("Không tìm thấy sản phẩm");
-            }
-          }
-        } else {
-          // remove product added by discount before
-          const orderObjectClone = cloneDeep(orderObject);
-          orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
-          setOrderObject(orderObjectClone);
-        }
-      });
-    }
-  }, [discountObject, orderActive]);
+  //             if (productUnit && !orderObject[orderActive]?.find((product) => product.productUnitId === l?.id)) {
+  //               onSelectedProduct(
+  //                 JSON.stringify({
+  //                   ...productUnit,
+  //                   maxQuantity: item.items[0].apply.maxQuantity,
+  //                   discountQuantity: l?.discountQuantity,
+  //                   // quantity: l?.discountQuantity,
+  //                   isDiscount: true,
+  //                   discountType: discountType,
+  //                   discountValue: discountValue,
+  //                   isGift: item?.items[0]?.apply?.isGift,
+  //                   discountCode: l?.discountCode,
+  //                 }),
+  //               );
+  //             }
+  //           } else {
+  //             message.error("Không tìm thấy sản phẩm");
+  //           }
+  //         }
+  //       } else {
+  //         // remove product added by discount before
+  //         const orderObjectClone = cloneDeep(orderObject);
+  //         orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
+  //         setOrderObject(orderObjectClone);
+  //       }
+  //     });
+  //   }
+  // }, [discountObject, orderActive]);
 
   // update orderObject when discountObject is changed
   useEffect(() => {
@@ -336,17 +332,17 @@ const Index = () => {
           return onSelectedProduct(
             JSON.stringify({
               ...product,
-              product: product,
               productUnit: {
-                ...product?.productUnit[0],
-                oldPrice: product?.productUnit[0]?.price,
+                ...product?.productUnit,
+                oldPrice: product?.productUnit?.price,
                 price: 0,
               },
-              productUnitId: product.productUnit[0]?.id,
+              productUnitId: product.productUnitId,
               isDiscount: true,
               isGift: true,
               price: 0,
               discountQuantity: product.discountQuantity,
+              inventory: product.quantity,
             }),
           );
         });
@@ -360,26 +356,70 @@ const Index = () => {
               product: product,
               productUnitId: product.productUnit[0]?.id,
               productUnit: {
-                ...product?.productUnit[0],
-                oldPrice: product?.productUnit[0]?.price,
+                ...product?.productUnit,
+                oldPrice: product?.productUnit?.price,
                 price:
                   discountType === "amount"
-                    ? product?.productUnit[0]?.price - discountValue
-                    : product?.productUnit[0]?.price * (1 - discountValue / 100),
+                    ? product?.productUnit?.price - discountValue
+                    : product?.productUnit?.price * (1 - discountValue / 100),
               },
               isDiscount: true,
               isGift: false,
               price:
                 discountType === "amount"
-                  ? product.productUnit[0]?.price - discountValue
-                  : product.productUnit[0]?.price * (1 - discountValue / 100),
+                  ? product.productUnit?.price - discountValue
+                  : product.productUnit?.price * (1 - discountValue / 100),
               discountQuantity: product.discountQuantity,
             }),
           );
         });
       }
+    } else {
+      // reset product discount
+      const orderObjectClone = cloneDeep(orderObject);
+      orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
+      setOrderObject(orderObjectClone);
     }
   }, [discountObject[orderActive]?.orderDiscount]);
+
+  // khuyen mai hang hoa
+  useEffect(() => {
+    if (discountObject[orderActive]?.productDiscount?.length > 0) {
+      const orderObjectClone = cloneDeep(orderObject);
+      const haveProductDiscount = orderObjectClone[orderActive]?.some((product) => product.isDiscount);
+      // reset product discount
+      if (haveProductDiscount) {
+        orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
+        setOrderObject(orderObjectClone);
+      }
+      // type = gift
+      // add all product discount to orderObject
+      discountObject[orderActive]?.productDiscount?.forEach((discount) => {
+        const productDiscountSelected = discount?.items[0]?.apply?.productUnitSelected;
+        const discountType = discount?.items[0]?.apply?.discountType;
+        if (productDiscountSelected?.length > 0 && discount?.type === "gift") {
+          productDiscountSelected.forEach((product) => {
+            return onSelectedProduct(
+              JSON.stringify({
+                ...product,
+                productUnit: {
+                  ...product?.productUnit,
+                  oldPrice: product?.productUnit?.price,
+                  price: 0,
+                },
+                productUnitId: product.productUnitId,
+                isDiscount: true,
+                isGift: true,
+                price: 0,
+                discountQuantity: product.discountQuantity,
+                inventory: product.quantity,
+              }),
+            );
+          });
+        }
+      });
+    }
+  }, [discountObject[orderActive]?.productDiscount]);
 
   const onExpandMoreBatches = async (productKey, quantity: number, product?: any) => {
     const orderObjectClone = cloneDeep(orderObject);
@@ -484,7 +524,7 @@ const Index = () => {
           itemDiscountProduct = res?.data?.data?.items;
           const productLocal: any = {
             ...product,
-            inventory: product?.isDiscount ? product?.product?.inventory : product.quantity,
+            inventory: product.quantity,
             productKey,
             quantity: product?.isDiscount ? product?.discountQuantity : 1,
             productUnitId: product.productUnitId || product?.productUnit?.id,

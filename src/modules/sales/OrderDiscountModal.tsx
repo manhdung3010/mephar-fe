@@ -33,19 +33,6 @@ export function OrderDiscountModal({
   const [giftProduct, setGiftProduct] = useState<any>(null);
   const [discountProduct, setDiscountProduct] = useState<any>(null);
 
-  const branchId = useRecoilValue(branchState);
-  const {
-    data: products,
-    isLoading: isLoadingProduct,
-    isSuccess,
-  } = useQuery<{
-    data?: { items: ISaleProduct[] };
-  }>(
-    ["LIST_SALE_PRODUCT", 1, 9999, "", branchId],
-    () => getSaleProducts({ page: 1, limit: 9999, keyword: "", branchId }),
-    { enabled: discountList?.data?.data?.items?.length > 0 && isOpen },
-  );
-
   useEffect(() => {
     if (discountList?.data?.data?.items) {
       const listBatchClone = cloneDeep(discountList?.data?.data?.items);

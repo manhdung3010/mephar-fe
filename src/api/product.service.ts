@@ -120,6 +120,7 @@ export function getSaleProducts(params: {
   keyword?: string;
   branchId?: number;
   productUnit?: number;
+  listProductUnitId?: string;
 }) {
   return axiosClient.get("product/sale/master", { params });
 }
