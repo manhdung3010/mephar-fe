@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled from "styled-components";
 
 export const ComponentStyled = styled.div`
   width: 100%;
@@ -15,6 +15,14 @@ export const ComponentStyled = styled.div`
       padding: 12px 16px;
       border-radius: 58px;
     }
+  }
+
+  .ant-select-selector {
+    border-radius: unset !important;
+  }
+
+  .ant-select {
+    overflow: hidden;
   }
 
   .border-underline {

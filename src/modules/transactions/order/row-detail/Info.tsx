@@ -83,7 +83,7 @@ export function Info({ record }: { record: any }) {
             <div className="col-span-2 text-black-main">{record.code}</div>
           </div>
           <div className="mb-4 grid grid-cols-3 gap-5">
-            <div className="text-gray-main ">Người mua:</div>
+            <div className="text-gray-main ">Đại lý phân phối:</div>
             <div className="col-span-2 text-black-main">{record?.store?.name}</div>
           </div>
           <div className="mb-4 grid grid-cols-3 gap-5">
