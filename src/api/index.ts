@@ -1,12 +1,7 @@
 import { message } from "antd";
 import type { AxiosRequestConfig } from "axios";
 import axios from "axios";
-import {
-  getRefreshToken,
-  getToken,
-  setRefreshToken,
-  setToken,
-} from "src/helpers/storage";
+import { getRefreshToken, getToken, setRefreshToken, setToken } from "src/helpers/storage";
 
 // config axios
 const axiosClient = axios.create({
@@ -54,15 +49,13 @@ axiosClient.interceptors.response.use(
         "discount/config",
         "trip/geofencing?page=1&limit=999",
         "trip/map-routing",
+        "sale-return",
       ];
 
       if (!excludeUrl.includes(response.config?.url as string)) {
         message.success("Thêm mới thành công!");
       }
-    } else if (
-      response.config.method === "put" ||
-      response.config.method === "patch"
-    ) {
+    } else if (response.config.method === "put" || response.config.method === "patch") {
       message.success("Cập nhật thành công!");
     } else if (response.config.method === "delete") {
       message.success("Xóa thành công!");
@@ -90,7 +83,7 @@ axiosClient.interceptors.response.use(
       }
     }
     throw error;
-  }
+  },
 );
 
 export default axiosClient;

@@ -102,6 +102,7 @@ export function DeliveryCoupon() {
     },
   );
 
+  // lỗi quantity + 1 mỗi khi F5
   useEffect(() => {
     if (moveDetail) {
       let cloneImportProducts = cloneDeep(importProducts);
@@ -128,7 +129,7 @@ export function DeliveryCoupon() {
             if (product.productKey === localProduct.productKey) {
               return {
                 ...product,
-                quantity: product.quantity + 1,
+                quantity: product.quantity,
               };
             }
 

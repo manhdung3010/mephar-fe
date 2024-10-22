@@ -231,9 +231,9 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
         </div>
       </div>
 
-      <div className="my-6 flex gap-6">
+      <div className="my-6 flex ">
         <div className="grow  bg-white p-5">
-          <div className="mb-5 grid grid-cols-2 gap-x-[42px] gap-y-5">
+          <div className="mb-5 grid grid-cols-2 md:gap-x-[20px] lg:gap-x-[42px] gap-y-5">
             <div>
               <Label infoText="" label="Mã khách hàng" />
               <CustomInput
@@ -322,7 +322,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
 
             <div>
               <Label infoText="" label="Loại khách" />
-              <div className="h-11 rounded-md border border-[#d9d9d9] px-4 py-[2px]">
+              <div className="h-11 rounded-md border border-[#d9d9d9] sm:px-2 lg:px-4 py-[2px]">
                 <CustomRadio
                   options={[
                     { value: ECustomerType.PERSONAL, label: "Cá nhân" },
@@ -480,7 +480,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
               />
             </div>
 
-            <div>
+            <div className="col-span-2">
               <Label infoText="" label="Trạng thái" />
               <div className="h-11 rounded-md border border-[#d9d9d9] px-4 py-[2px]">
                 <CustomRadio

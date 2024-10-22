@@ -211,6 +211,7 @@ export function RightContentReturn({
         setValueReturn("userId", profile.id, { shouldValidate: true });
         // delete id of router
         router.push(router.pathname);
+        message.success("Trả hàng thành công!");
       },
       onError: (err: any) => {
         message.error(err?.message);

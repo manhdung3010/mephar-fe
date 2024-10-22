@@ -103,6 +103,7 @@ export default function AddOrder() {
     () =>
       getConfigProductPrivate({
         page: formFilter?.page,
+        keyword: formFilter?.keyword,
         limit: formFilter?.limit,
         sortBy: formFilter?.sortBy,
         productType: formFilter?.productType,
@@ -303,26 +304,20 @@ export default function AddOrder() {
               onSelect={(value) => handleSelectProduct(value)}
               showSearch={true}
               listHeight={512}
-              onSearch={debounce((value) => {
-                setFormFilter((preValue) => ({
-                  ...preValue,
+              onSearch={(value) => {
+                setFormFilter((prev) => ({
+                  ...prev,
                   keyword: value,
                 }));
-              })}
+              }}
               value={formFilter.keyword}
               options={products?.data?.items.map((item) => ({
                 value: JSON.stringify(item),
                 label: (
                   <div className="flex items-center gap-x-4 p-2">
                     <div className=" flex h-12 w-[68px] flex-shrink-0 items-center rounded border border-gray-300 p-[2px]">
-                      {item.product?.image?.path && (
-                        <Image
-                          src={getImage(item.product?.image?.path)}
-                          height={40}
-                          width={68}
-                          alt=""
-                          objectFit="cover"
-                        />
+                      {item.imageCenter && (
+                        <Image src={getImage(item.imageCenter?.path)} height={40} width={68} alt="" objectFit="cover" />
                       )}
                     </div>
 
