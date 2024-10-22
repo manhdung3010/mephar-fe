@@ -119,7 +119,7 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
       // price +=
       //   Number(product?.isDiscount ? product?.product?.productUnit[0]?.price : product?.productUnit?.price) *
       //   product.quantity;
-      price += Number(product?.productUnit?.price) * product.quantity;
+      price += (product?.productUnit?.price - (product.discountValue || 0)) * product.quantity;
       discount += product?.productUnit?.price * product?.quantity;
 
       oldTotal +=
@@ -309,27 +309,24 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
           branchId,
         });
       }
-      // if (discountType === "product" && productDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
-      //   const formatProducts = getValues("products")?.map(({ isBatchExpireControl, ...product }) => ({
-      //     ...product,
-      //     batches: product.batches?.map((batch) => ({
-      //       id: batch.id,
-      //       quantity: batch.quantity,
-      //     })),
-      //     isDiscount: product?.isDiscount || false,
-      //     ...(product?.itemPrice > 0 && {
-      //       itemPrice: product?.itemPrice,
-      //     }),
-      //   }));
-      //   return createOrder({
-      //     ...getValues(),
-      //     discountOrder: oldTotal,
-      //     listDiscountId: productDiscount?.map((item) => item.id),
-      //     ...(getValues("customerId") === -1 && { customerId: null }),
-      //     products: formatProducts,
-      //     branchId,
-      //   });
-      // }
+      if (discountObject[orderActive]?.productDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
+        const formatProducts = getValues("products")?.map(({ isBatchExpireControl, ...product }) => ({
+          ...product,
+          batches: product.batches?.map((batch) => ({
+            id: batch.id,
+            quantity: batch.quantity,
+          })),
+          isDiscount: product?.isDiscount || false,
+          products: formatProducts,
+        }));
+        return createOrder({
+          ...getValues(),
+          listDiscountId: discountObject[orderActive]?.productDiscount?.map((item) => item.id),
+          ...(getValues("customerId") === -1 && { customerId: null }),
+          products: formatProducts,
+          branchId,
+        });
+      }
       const formatProducts = getValues("products")?.map(({ isBatchExpireControl, ...product }) => ({
         ...product,
         batches: product.batches?.map((batch) => ({
@@ -725,7 +722,7 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
                 quantity: product.quantity,
                 isDiscount: product.isDiscount,
                 ...(product.isDiscount && {
-                  itemPrice: Number(product?.productUnit?.price),
+                  itemPrice: Number(product?.productUnit?.price - (product.discountValue ?? 0)),
                 }),
                 isBatchExpireControl: product.product.isBatchExpireControl,
                 batches: product.batches

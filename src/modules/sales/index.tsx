@@ -335,8 +335,9 @@ const Index = () => {
               productUnit: {
                 ...product?.productUnit,
                 oldPrice: product?.productUnit?.price,
-                price: 0,
+                price: product?.productUnit?.price,
               },
+              discountValue: product?.productUnit?.price, // giá KM
               productUnitId: product.productUnitId,
               isDiscount: true,
               isGift: true,
@@ -358,11 +359,12 @@ const Index = () => {
               productUnit: {
                 ...product?.productUnit,
                 oldPrice: product?.productUnit?.price,
-                price:
-                  discountType === "amount"
-                    ? product?.productUnit?.price - discountValue
-                    : product?.productUnit?.price * (1 - discountValue / 100),
+                price: product?.productUnit?.price,
               },
+              discountValue:
+                discountType === "amount"
+                  ? discountValue
+                  : product?.productUnit?.price - product?.productUnit?.price * (1 - discountValue / 100),
               isDiscount: true,
               isGift: false,
               price:
@@ -407,6 +409,7 @@ const Index = () => {
                   oldPrice: product?.productUnit?.price,
                   price: 0,
                 },
+                discountValue: product?.productUnit?.price, // giá KM
                 productUnitId: product.productUnitId,
                 isDiscount: true,
                 isGift: true,
@@ -417,7 +420,39 @@ const Index = () => {
             );
           });
         }
+        if (productDiscountSelected?.length > 0 && discount?.type === "product_price") {
+          productDiscountSelected.forEach((product) => {
+            return onSelectedProduct(
+              JSON.stringify({
+                ...product,
+                productUnitId: product.productUnit[0]?.id,
+                productUnit: {
+                  ...product?.productUnit,
+                  oldPrice: product?.productUnit?.price,
+                  price: product?.productUnit?.price,
+                },
+                discountValue:
+                  discountType === "amount"
+                    ? discount?.items[0]?.apply?.discountValue
+                    : product?.productUnit?.price -
+                      product?.productUnit?.price * (1 - discount?.items[0]?.apply?.discountValue / 100),
+                isDiscount: true,
+                isGift: false,
+                price:
+                  discountType === "amount"
+                    ? product.productUnit?.price - discount?.items[0]?.apply?.discountValue
+                    : product.productUnit?.price * (1 - discount?.items[0]?.apply?.discountValue / 100),
+                discountQuantity: product.discountQuantity,
+              }),
+            );
+          });
+        }
       });
+    } else {
+      // reset product discount
+      const orderObjectClone = cloneDeep(orderObject);
+      orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
+      setOrderObject(orderObjectClone);
     }
   }, [discountObject[orderActive]?.productDiscount]);
 
@@ -533,7 +568,7 @@ const Index = () => {
             batches: product.batches?.map((batch) => {
               const inventory = batch.quantity / product.productUnit.exchangeValue;
 
-              const newBatch = {
+              const newBatch: any = {
                 ...batch,
                 inventory,
                 originalInventory: batch.quantity,
@@ -543,7 +578,7 @@ const Index = () => {
 
               if (inventory >= 1 && isSelectedUnit) {
                 isSelectedUnit = false;
-                newBatch.quantity = 1;
+                newBatch.quantity = product?.isDiscount ? product?.discountQuantity : 1;
               }
               return newBatch;
             }),

@@ -239,7 +239,7 @@ export default function AddOrder() {
     const localProduct: any = {
       ...product,
       productKey: `${product.product.id}-${product.id}`,
-      price: product.price,
+      price: product?.discountPrice > 0 ? product?.discountPrice : product.price,
       inventory: product.quantity,
       realQuantity: 1,
       discountValue: 0,
@@ -339,7 +339,7 @@ export default function AddOrder() {
                       <div className="flex gap-x-3">
                         <div>Số lượng: {formatNumber(item.quantity)}</div>
                         <div>|</div>
-                        <div>Giá: {formatMoney(item.price)}</div>
+                        <div>Giá: {formatMoney(item?.discountPrice > 0 ? item?.discountPrice : item.price)}</div>
                       </div>
                     </div>
                   </div>

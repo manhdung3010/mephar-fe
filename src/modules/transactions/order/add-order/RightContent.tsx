@@ -112,6 +112,7 @@ export default function RightContent({ getValues, setValue, errors, handleSubmit
             quantity: item?.realQuantity,
             price: item?.price,
           })),
+          note: getValues("note"),
         };
         return updateMarketOrder(orderDetail?.id, payload);
       }

@@ -191,7 +191,16 @@ export function ProductDiscountModal({
                 ...i,
                 apply: {
                   ...i.apply,
-                  productUnitSelected: selectedDiscount?.type === "gift" ? giftProduct : discountProduct,
+                  productUnitSelected:
+                    selectedDiscount?.type === "gift"
+                      ? giftProduct.map((item) => ({
+                          ...item,
+                          discountCode: selectedDiscount.code,
+                        }))
+                      : discountProduct.map((item) => ({
+                          ...item,
+                          discountCode: selectedDiscount.code,
+                        })),
                 },
               })),
             };

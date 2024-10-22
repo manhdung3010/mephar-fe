@@ -246,7 +246,7 @@ export function ProductList({
             <div className=" font-medium flex gap-2 items-center">
               <span>{product.name}</span>
               {isDiscount && <span className="text-red-500 px-2  bg-[#fde6f8] rounded">KM</span>}
-              {itemDiscountProduct?.length > 0 && (
+              {itemDiscountProduct?.length > 0 && !isDiscount && (
                 <Tooltip title="KM hàng hóa" className="cursor-pointer w-5">
                   <Image
                     src={DiscountIcon}
@@ -534,9 +534,9 @@ export function ProductList({
       key: "price",
       render: (_, { productUnit, buyNumberType }) => (
         <span>
-          {productUnit?.oldPrice && (
+          {/* {productUnit?.oldPrice && (
             <span className="text-[#828487] line-through mr-2">{formatMoney(productUnit.oldPrice)}</span>
-          )}
+          )} */}
           {formatMoney(checkTypeOrder(orderDetail?.order?.code) ? productUnit?.marketPrice : productUnit.price)}
         </span>
       ),
@@ -546,13 +546,9 @@ export function ProductList({
       dataIndex: "price",
       key: "price",
       render: (_, { price, discountValue, discountType, isDiscount, buyNumberType }) =>
-        discountValue > 0 &&
-        buyNumberType !== 1 && (
+        discountValue > 0 && (
           <div className="flex flex-col">
-            <span className="text-[#ef4444]">
-              {formatNumber(discountValue)}
-              {discountType === "amount" ? "đ" : "%"}
-            </span>
+            <span className="text-[#ef4444]">{formatMoney(discountValue)}</span>
           </div>
         ),
     },
