@@ -14,11 +14,7 @@ import { Select, Spin, Tooltip } from "antd";
 import { ISaleProduct } from "@/modules/sales/interface";
 import { useRecoilValue } from "recoil";
 import { branchState } from "@/recoil/state";
-import {
-  getGroupProduct,
-  getProduct,
-  getSaleProducts,
-} from "@/api/product.service";
+import { getGroupProduct, getProduct, getSaleProducts } from "@/api/product.service";
 import { useQuery } from "@tanstack/react-query";
 import { debounce, get, set } from "lodash";
 const { Option } = Select;
@@ -50,28 +46,14 @@ export const ProductDiscountProduct = ({
     isSuccess,
   } = useQuery<{
     data?: { items: ISaleProduct[] };
-  }>(
-    [
-      "LIST_PRODUCT_DISCOUNT",
-      formFilter.page,
-      formFilter.limit,
-      formFilter.keyword,
-      branchId,
-    ],
-    () => getSaleProducts(formFilter)
+  }>(["LIST_PRODUCT_DISCOUNT", formFilter.page, formFilter.limit, formFilter.keyword, branchId], () =>
+    getSaleProducts(formFilter),
   );
 
   const { data: groupProduct, isLoading: isLoadingGroup } = useQuery<{
     data?: any;
-  }>(
-    [
-      "LIST_GROUP_PRODUCT_DISCOUNT",
-      formFilter.page,
-      formFilter.limit,
-      formFilter.keyword,
-      branchId,
-    ],
-    () => getGroupProduct(formFilter)
+  }>(["LIST_GROUP_PRODUCT_DISCOUNT", formFilter.page, formFilter.limit, formFilter.keyword, branchId], () =>
+    getGroupProduct(formFilter),
   );
 
   const [rows, setRows] = useState([
@@ -140,9 +122,7 @@ export const ProductDiscountProduct = ({
     // setValue('items', newRowFormat);
 
     // delete row items by index
-    const newRowFormat = getValues("items").filter(
-      (_, index) => index !== indexToDelete
-    );
+    const newRowFormat = getValues("items").filter((_, index) => index !== indexToDelete);
     // Update value items
 
     setValue("items", newRowFormat, { shouldValidate: true });
@@ -161,8 +141,7 @@ export const ProductDiscountProduct = ({
               ...row.condition.product,
               ...(key === "from" ? { from: value } : {}),
             },
-            productUnitId:
-              key === "productId" ? value : row?.condition?.productUnitId,
+            productUnitId: key === "productId" ? value : row?.condition?.productUnitId,
             groupId: key === "groupId" ? value : row?.condition?.groupId,
           },
           apply: {
@@ -182,9 +161,7 @@ export const ProductDiscountProduct = ({
         <div className="flex bg-[#FBECEE]">
           <div className="flex-[3] p-4 font-semibold">Hàng/Nhóm hàng mua</div>
           <div className="flex-[2] p-4 font-semibold">Giá trị khuyến mại</div>
-          <div className="flex-[3] p-4 font-semibold">
-            Hàng/nhóm hàng được giảm giá
-          </div>
+          <div className="flex-[3] p-4 font-semibold">Hàng/nhóm hàng được giảm giá</div>
           <div className="flex-1 p-4"></div>
         </div>
 
@@ -200,12 +177,7 @@ export const ProductDiscountProduct = ({
                     onChange={(value) => handleChangeRow(index, "from", value)}
                   />
                   {errors?.items && (
-                    <InputError
-                      className=""
-                      error={
-                        errors?.items[index]?.condition?.product?.from?.message
-                      }
-                    />
+                    <InputError className="" error={errors?.items[index]?.condition?.product?.from?.message} />
                   )}
                 </div>
                 <div className="w-full">
@@ -213,11 +185,7 @@ export const ProductDiscountProduct = ({
                     <Select
                       mode="multiple"
                       className="!rounded w-full"
-                      placeholder={
-                        isProduct
-                          ? "Nhập tên hàng, sản phẩm..."
-                          : "Nhập tên nhóm hàng..."
-                      }
+                      placeholder={isProduct ? "Nhập tên hàng, sản phẩm..." : "Nhập tên nhóm hàng..."}
                       optionFilterProp="children"
                       showSearch
                       onSearch={debounce((value) => {
@@ -227,53 +195,36 @@ export const ProductDiscountProduct = ({
                         });
                       }, 300)}
                       onChange={(value) => {
-                        handleChangeRow(
-                          index,
-                          isProduct ? "productId" : "groupId",
-                          value
-                        );
+                        handleChangeRow(index, isProduct ? "productId" : "groupId", value);
                       }}
                       loading={isLoadingProduct}
                       defaultValue={row?.condition?.productUnitId}
-                      value={
-                        isProduct
-                          ? row?.apply?.productUnitId
-                          : row?.apply?.groupId
-                      }
+                      value={isProduct ? row?.apply?.productUnitId : row?.apply?.groupId}
                       notFoundContent={
-                        isLoadingProduct ? (
-                          <Spin
-                            size="small"
-                            className="flex justify-center p-4 w-full"
-                          />
-                        ) : null
+                        isLoadingProduct ? <Spin size="small" className="flex justify-center p-4 w-full" /> : null
                       }
                       size="large"
                     >
                       {isProduct
                         ? products?.data?.items?.map((product) => (
-                            <Option
-                              key={product.id}
-                              value={product.productUnit?.id}
-                            >
-                              {product?.productUnit?.code} -{" "}
-                              {product?.product?.name} -{" "}
-                              {product?.productUnit?.unitName}
+                            <Option key={product.id} value={product.productUnit?.id}>
+                              {product?.productUnit?.code} - {product?.product?.name} - {product?.productUnit?.unitName}
                             </Option>
                           ))
                         : groupProduct?.data?.items?.map((product) => (
                             <Option key={product.id} value={product?.id}>
                               {product?.name}
                             </Option>
-                          ))}pó
+                          ))}
+                      pó
                     </Select>
-                    <Tooltip title="Nhóm hàng">
+                    {/* <Tooltip title="Nhóm hàng">
                       <Image
                         onClick={() => setIsProduct(!isProduct)}
                         src={DocumentIcon}
                         className="cursor-pointer"
                       />
-                    </Tooltip>
+                    </Tooltip> */}
                   </div>
                 </div>
               </div>
@@ -285,26 +236,17 @@ export const ProductDiscountProduct = ({
                   wrapClassName="w-full"
                   type="number"
                   value={row?.apply?.discountValue || 0}
-                  onChange={(value) =>
-                    handleChangeRow(index, "discountValue", value)
-                  }
+                  onChange={(value) => handleChangeRow(index, "discountValue", value)}
                 />
                 <div className="flex h-10 w-fit items-center rounded border border-[#E8EAEB]">
                   <div
                     className={cx(
                       "h-full w-[50px] text-center rounded-tl rounded-bl flex items-center justify-center cursor-pointer",
                       {
-                        "bg-[#3E7BFA] text-white":
-                          row?.apply?.discountType === EDiscountUnit.MONEY,
-                      }
+                        "bg-[#3E7BFA] text-white": row?.apply?.discountType === EDiscountUnit.MONEY,
+                      },
                     )}
-                    onClick={() =>
-                      handleChangeRow(
-                        index,
-                        "discountType",
-                        EDiscountUnit.MONEY
-                      )
-                    }
+                    onClick={() => handleChangeRow(index, "discountType", EDiscountUnit.MONEY)}
                   >
                     VND
                   </div>
@@ -312,57 +254,34 @@ export const ProductDiscountProduct = ({
                     className={cx(
                       "h-full w-[50px] text-center rounded-tr rounded-br flex items-center justify-center cursor-pointer",
                       {
-                        "bg-[#3E7BFA] text-white":
-                          row?.apply?.discountType === EDiscountUnit.PERCENT,
-                      }
+                        "bg-[#3E7BFA] text-white": row?.apply?.discountType === EDiscountUnit.PERCENT,
+                      },
                     )}
-                    onClick={() =>
-                      handleChangeRow(
-                        index,
-                        "discountType",
-                        EDiscountUnit.PERCENT
-                      )
-                    }
+                    onClick={() => handleChangeRow(index, "discountType", EDiscountUnit.PERCENT)}
                   >
                     %
                   </div>
                 </div>
               </div>
-              {errors?.items && (
-                <InputError
-                  className=""
-                  error={errors?.items[index]?.apply?.discountValue?.message}
-                />
-              )}
+              {errors?.items && <InputError className="" error={errors?.items[index]?.apply?.discountValue?.message} />}
             </div>
             <div className="flex-[3] px-4 flex gap-2">
               <div className="w-24">
                 <CustomInput
                   className="h-10"
-                  onChange={(value) =>
-                    handleChangeRow(index, "maxQuantity", value)
-                  }
+                  onChange={(value) => handleChangeRow(index, "maxQuantity", value)}
                   placeholder="Số lượng"
                   value={row?.apply?.maxQuantity}
                   type="number"
                 />
-                {errors?.items && (
-                  <InputError
-                    className=""
-                    error={errors?.items[index]?.apply?.maxQuantity?.message}
-                  />
-                )}
+                {errors?.items && <InputError className="" error={errors?.items[index]?.apply?.maxQuantity?.message} />}
               </div>
               <div className="w-full">
                 <div className="flex gap-2">
                   <Select
                     mode="multiple"
                     className="!rounded w-full"
-                    placeholder={
-                      isProductDiscount
-                        ? "Nhập tên hàng, sản phẩm, nhóm hàng..."
-                        : "Nhập tên nhóm hàng..."
-                    }
+                    placeholder={isProductDiscount ? "Nhập tên hàng, sản phẩm, nhóm hàng..." : "Nhập tên nhóm hàng..."}
                     optionFilterProp="children"
                     showSearch
                     onSearch={debounce((value) => {
@@ -372,42 +291,22 @@ export const ProductDiscountProduct = ({
                       });
                     }, 300)}
                     onChange={(value) => {
-                      handleChangeRow(
-                        index,
-                        isProductDiscount ? "productUnitId" : "groupIdDiscount",
-                        value
-                      );
+                      handleChangeRow(index, isProductDiscount ? "productUnitId" : "groupIdDiscount", value);
                     }}
                     loading={isLoadingProduct || isLoadingGroup}
-                    defaultValue={
-                      isProductDiscount
-                        ? row?.apply?.productUnitId
-                        : row?.apply?.groupId
-                    }
-                    value={
-                      isProductDiscount
-                        ? row?.apply?.productUnitId
-                        : row?.apply?.groupId
-                    }
+                    defaultValue={isProductDiscount ? row?.apply?.productUnitId : row?.apply?.groupId}
+                    value={isProductDiscount ? row?.apply?.productUnitId : row?.apply?.groupId}
                     notFoundContent={
                       isLoadingProduct || isLoadingGroup ? (
-                        <Spin
-                          size="small"
-                          className="flex justify-center p-4 w-full"
-                        />
+                        <Spin size="small" className="flex justify-center p-4 w-full" />
                       ) : null
                     }
                     size="large"
                   >
                     {isProduct
                       ? products?.data?.items?.map((product) => (
-                          <Option
-                            key={product.id}
-                            value={product.productUnit?.id}
-                          >
-                            {product?.productUnit?.code} -{" "}
-                            {product?.product?.name} -{" "}
-                            {product?.productUnit?.unitName}
+                          <Option key={product.id} value={product.productUnit?.id}>
+                            {product?.productUnit?.code} - {product?.product?.name} - {product?.productUnit?.unitName}
                           </Option>
                         ))
                       : groupProduct?.data?.items?.map((product) => (
@@ -425,10 +324,7 @@ export const ProductDiscountProduct = ({
                   </Tooltip>
                 </div>
                 {errors?.items && (
-                  <InputError
-                    className=""
-                    error={errors?.items[index]?.apply?.productUnitId?.message}
-                  />
+                  <InputError className="" error={errors?.items[index]?.apply?.productUnitId?.message} />
                 )}
               </div>
             </div>
@@ -442,10 +338,7 @@ export const ProductDiscountProduct = ({
         ))}
       </div>
 
-      <div
-        onClick={handleAddRow}
-        className="flex gap-3 text-[16px] font-semibold text-[#D64457] cursor-pointer w-40"
-      >
+      <div onClick={handleAddRow} className="flex gap-3 text-[16px] font-semibold text-[#D64457] cursor-pointer w-40">
         <Image src={PlusCircleIcon} alt="" />
         <div>Thêm điều kiện</div>
       </div>

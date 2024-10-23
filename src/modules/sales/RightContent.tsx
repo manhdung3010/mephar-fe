@@ -726,6 +726,9 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
                 ...(product.isDiscount && {
                   itemPrice: Number(product?.productUnit?.price - (product.discountValue ?? 0)),
                 }),
+                ...(product?.isDiscountPrice && {
+                  itemPrice: product?.price,
+                }),
                 isBatchExpireControl: product.product.isBatchExpireControl,
                 batches: product.batches
                   .filter((batch) => batch.isSelected)
@@ -734,6 +737,7 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
                     quantity: batch.quantity,
                     inventory: batch.inventory,
                   })),
+                pointProduct: product?.pointValue,
               };
             });
 

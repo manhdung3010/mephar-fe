@@ -18,11 +18,13 @@ export function ProductDiscountModal({
   onCancel,
   onSave,
   discountList,
+  productUnitSelected,
 }: {
   isOpen: boolean;
   onCancel: () => void;
   onSave: (value) => void;
   discountList?: any;
+  productUnitSelected: any;
 }) {
   const branchId = useRecoilValue(branchState);
   const orderActive = useRecoilValue(orderActiveState);
@@ -41,6 +43,7 @@ export function ProductDiscountModal({
         const isSelected = productDiscount?.some((item) => item.code === discount?.code);
         return {
           ...discount,
+          productUnitSelected,
           isSelected,
         };
       });
@@ -85,6 +88,7 @@ export function ProductDiscountModal({
                 setIsOpenSelectProduct(true);
                 setDiscountItem(record);
               }}
+              className="max-w-fit !h-11"
             >
               Chọn quà khuyến mại
             </CustomButton>
@@ -101,22 +105,14 @@ export function ProductDiscountModal({
               Chọn quà tặng
             </CustomButton>
           )}
-          {/* {
-            type === "gift" && (
-              <div>
-                Mua {formatNumber(items[0]?.condition?.product?.from)} x {findProduct(items[0]?.condition?.productUnitId)} được tặng {" "}
-                {items[0]?.apply?.maxQuantity} x {findProduct(items[0]?.apply?.productUnitId)}
-              </div>
-            )
-          } */}
-          {/* {type === "loyalty" && (
+          {record?.type === "loyalty" && (
             <div>
               Mua {formatNumber(items[0]?.condition?.product?.from)} được tặng{" "}
               <span className="text-[#d64457]">{" " + formatNumber(items[0]?.apply?.pointValue)}</span>
               {(items[0]?.apply?.pointType === "amount" ? "" : "%") + " điểm"}
             </div>
           )}
-          {type === "price_by_buy_number" && (
+          {record?.type === "price_by_buy_number" && (
             <div>
               {items[0]?.apply?.changeType === "type_price" ? (
                 <div>
@@ -130,7 +126,7 @@ export function ProductDiscountModal({
                 </div>
               )}
             </div>
-          )} */}
+          )}
         </div>
       ),
     },
@@ -197,16 +193,18 @@ export function ProductDiscountModal({
                           ...item,
                           discountCode: selectedDiscount.code,
                         }))
-                      : discountProduct.map((item) => ({
+                      : selectedDiscount?.type === "product_price"
+                      ? discountProduct.map((item) => ({
                           ...item,
                           discountCode: selectedDiscount.code,
-                        })),
+                        }))
+                      : [],
                 },
               })),
             };
             const discountObjectClone = cloneDeep(discountObject);
             const index = discountObjectClone[orderActive]?.productDiscount?.findIndex(
-              (item) => item?.code === selectedDiscount.code,
+              (item) => item?.productUnitSelected === selectedDiscount.productUnitSelected,
             );
 
             if (index !== -1) {

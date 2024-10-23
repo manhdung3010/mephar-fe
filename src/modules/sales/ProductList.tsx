@@ -54,6 +54,7 @@ export function ProductList({
   const [openProductDiscountList, setOpenProductDiscountList] = useState(false);
   const [itemDiscount, setItemDiscount] = useState();
   const [productKeyAddBatch, setProductKeyAddBatch] = useState<string>();
+  const [productUnitSelected, setProductUnitSelected] = useState<number>();
 
   const [orderList, setOrderList] = useState([]);
 
@@ -240,7 +241,7 @@ export function ProductList({
       title: "TÊN SẢN PHẨM",
       dataIndex: "name",
       key: "name",
-      render: (_, { product, batches, isDiscount, itemDiscountProduct }) => {
+      render: (_, { product, batches, isDiscount, itemDiscountProduct, productUnitId }) => {
         return (
           <div>
             <div className=" font-medium flex gap-2 items-center">
@@ -262,6 +263,7 @@ export function ProductList({
                       // } else {
                       setOpenProductDiscountList(!openProductDiscountList);
                       setItemDiscount(itemDiscountProduct);
+                      setProductUnitSelected(productUnitId);
                       // }
                     }}
                     alt="discount-icon"
@@ -517,10 +519,8 @@ export function ProductList({
                         },
                       };
                     }
-
                     return product;
                   });
-
                   setOrderObject(orderObjectClone);
                 }}
               />
@@ -545,12 +545,20 @@ export function ProductList({
       title: "KM",
       dataIndex: "price",
       key: "price",
-      render: (_, { price, discountValue, discountType, isDiscount, buyNumberType }) =>
-        discountValue > 0 && (
-          <div className="flex flex-col">
-            <span className="text-[#ef4444]">{formatMoney(discountValue)}</span>
-          </div>
-        ),
+      render: (_, { price, discountValue, discountType, isDiscount, buyNumberType, pointValue }) => (
+        <div>
+          {discountValue > 0 && (
+            <div className="flex flex-col">
+              <span className="text-[#ef4444]">{formatMoney(discountValue)}</span>
+            </div>
+          )}
+          {Number(pointValue) > 0 && (
+            <div className="flex flex-col">
+              <span className="text-[#ef4444]">{formatNumber(pointValue)} điểm</span>
+            </div>
+          )}
+        </div>
+      ),
     },
     {
       title: "THÀNH TIỀN",
@@ -558,7 +566,17 @@ export function ProductList({
       key: "totalPrice",
       render: (
         totalPrice,
-        { quantity, productUnit, isDiscount, discountType, price, discountValue, isBuyByNumber, buyNumberType },
+        {
+          quantity,
+          productUnit,
+          isDiscount,
+          discountType,
+          price,
+          discountValue,
+          isBuyByNumber,
+          buyNumberType,
+          isDiscountPrice,
+        },
       ) =>
         orderDetail ? (
           formatMoney(
@@ -566,7 +584,7 @@ export function ProductList({
               ? productUnit?.marketPrice * quantity
               : Number(productUnit.returnPrice) * quantity,
           )
-        ) : isDiscount ? (
+        ) : isDiscount || isDiscountPrice ? (
           <div className="flex flex-col">{formatMoney(price * quantity)}</div>
         ) : (
           formatMoney(productUnit.price * quantity)
@@ -778,28 +796,9 @@ export function ProductList({
       <ProductDiscountModal
         isOpen={openProductDiscountList}
         onCancel={() => setOpenProductDiscountList(false)}
-        onSave={(selectedDiscount) => {
-          // set selected discount to setValue products
-          // const orderObjectClone = cloneDeep(orderObject);
-          // orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map(
-          //   (product: ISaleProductLocal) => {
-          //     if (
-          //       selectedDiscount[0]?.items[0]?.condition?.productUnitId.includes(
-          //         product.productUnitId
-          //       )
-          //     ) {
-          //       return {
-          //         ...product,
-          //         discountSelected: selectedDiscount,
-          //       };
-          //     }
-          //     return product;
-          //   }
-          // );
-          // setOrderObject(orderObjectClone);
-          // setOpenProductDiscountList(false);
-        }}
+        onSave={(selectedDiscount) => {}}
         discountList={itemDiscount}
+        productUnitSelected={productUnitSelected}
       />
     </ProductTableStyled>
   );

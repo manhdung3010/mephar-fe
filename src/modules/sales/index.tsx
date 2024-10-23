@@ -233,58 +233,6 @@ const Index = () => {
     handleScannedData();
   }, [scannedData, products?.data?.items, isSuccess, isSearchSampleMedicine]);
 
-  // useEffect(() => {
-  //   const discountObjectClone = cloneDeep(discountObject);
-
-  //   if (discountObjectClone[orderActive]?.productDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
-  //     discountObjectClone[orderActive] = discountObjectClone[orderActive]?.productDiscount?.forEach((item) => {
-  //       const list = item?.items[0]?.apply?.productUnitId;
-  //       if (list?.length > 0) {
-  //         for (const l of list) {
-  //           const productUnit: any = products2?.data?.items?.find((product) => product.id === l?.id);
-  //           if (productUnit) {
-  //             let discountValue = item?.items[0]?.apply?.discountValue;
-  //             let discountType = item?.items[0]?.apply?.discountType;
-  //             if (item?.items[0]?.apply?.isGift) {
-  //               discountType = "amount";
-  //               discountValue = productUnit?.price;
-  //             } else {
-  //               if (discountType === "percent" && discountValue > 100) {
-  //                 discountValue = 100;
-  //               } else if (discountType === "amount" && +discountValue > +productUnit?.price) {
-  //                 discountValue = productUnit?.price;
-  //               }
-  //             }
-
-  //             if (productUnit && !orderObject[orderActive]?.find((product) => product.productUnitId === l?.id)) {
-  //               onSelectedProduct(
-  //                 JSON.stringify({
-  //                   ...productUnit,
-  //                   maxQuantity: item.items[0].apply.maxQuantity,
-  //                   discountQuantity: l?.discountQuantity,
-  //                   // quantity: l?.discountQuantity,
-  //                   isDiscount: true,
-  //                   discountType: discountType,
-  //                   discountValue: discountValue,
-  //                   isGift: item?.items[0]?.apply?.isGift,
-  //                   discountCode: l?.discountCode,
-  //                 }),
-  //               );
-  //             }
-  //           } else {
-  //             message.error("Không tìm thấy sản phẩm");
-  //           }
-  //         }
-  //       } else {
-  //         // remove product added by discount before
-  //         const orderObjectClone = cloneDeep(orderObject);
-  //         orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
-  //         setOrderObject(orderObjectClone);
-  //       }
-  //     });
-  //   }
-  // }, [discountObject, orderActive]);
-
   // update orderObject when discountObject is changed
   useEffect(() => {
     if (discountObject[orderActive]?.orderDiscount?.length > 0) {
@@ -295,14 +243,12 @@ const Index = () => {
         const productDiscount = discountObject[
           orderActive
         ]?.orderDiscount[0]?.items[0]?.apply?.productUnitSelected?.find((product) => product.id === productKey);
-
         if (productDiscount) {
           return {
             ...product,
             discountQuantity: productDiscount.discountQuantity,
           };
         }
-
         return product;
       });
     }
@@ -399,6 +345,7 @@ const Index = () => {
       discountObject[orderActive]?.productDiscount?.forEach((discount) => {
         const productDiscountSelected = discount?.items[0]?.apply?.productUnitSelected;
         const discountType = discount?.items[0]?.apply?.discountType;
+
         if (productDiscountSelected?.length > 0 && discount?.type === "gift") {
           productDiscountSelected.forEach((product) => {
             return onSelectedProduct(
@@ -419,8 +366,7 @@ const Index = () => {
               }),
             );
           });
-        }
-        if (productDiscountSelected?.length > 0 && discount?.type === "product_price") {
+        } else if (productDiscountSelected?.length > 0 && discount?.type === "product_price") {
           productDiscountSelected.forEach((product) => {
             return onSelectedProduct(
               JSON.stringify({
@@ -446,6 +392,43 @@ const Index = () => {
               }),
             );
           });
+        } else if (discount?.type === "loyalty") {
+          const orderObjectClone2 = cloneDeep(orderObject);
+          // add pointDiscount to product
+          const pointValue = discount?.items[0]?.apply?.pointValue;
+          console.log("pointValue", pointValue);
+          // set pointValue to this product in orderObject
+          orderObjectClone2[orderActive] = orderObjectClone[orderActive]?.map((product: ISaleProductLocal) => {
+            if (product.productUnitId === discount?.productUnitSelected) {
+              return {
+                ...product,
+                discountValue: 0,
+                price: product?.productUnit?.price,
+                pointValue: pointValue,
+              };
+            }
+            return product;
+          });
+          setOrderObject(orderObjectClone2);
+        } else {
+          const orderObjectClone = cloneDeep(orderObject);
+          // add pointDiscount to product
+          const changeType = discount?.items[0]?.apply?.changeType;
+          const fixedPrice = discount?.items[0]?.apply?.fixedPrice;
+          // set pointValue to this product in orderObject
+          orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map((product: ISaleProductLocal) => {
+            if (product.productUnitId === discount?.productUnitSelected) {
+              return {
+                ...product,
+                pointValue: 0,
+                discountValue: changeType === "type_discount" ? fixedPrice : product.productUnit?.price - fixedPrice,
+                price: changeType === "type_discount" ? product?.productUnit?.price - fixedPrice : fixedPrice,
+                isDiscountPrice: true,
+              };
+            }
+            return product;
+          });
+          setOrderObject(orderObjectClone);
         }
       });
     } else {

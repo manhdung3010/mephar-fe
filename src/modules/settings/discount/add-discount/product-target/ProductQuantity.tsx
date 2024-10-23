@@ -51,20 +51,12 @@ export const ProductQuantity = ({
     isSuccess,
   } = useQuery<{
     data?: { items: ISaleProduct[] };
-  }>(
-    [
-      "LIST_PRODUCT_DISCOUNT",
-      formFilter.page,
-      formFilter.limit,
-      formFilter.keyword,
-      branchId,
-    ],
-    () => getSaleProducts(formFilter)
+  }>(["LIST_PRODUCT_DISCOUNT", formFilter.page, formFilter.limit, formFilter.keyword, branchId], () =>
+    getSaleProducts(formFilter),
   );
 
   useEffect(() => {
-    const itemsConditionProductUnitId =
-      getValues("items")?.condition?.productUnitId;
+    const itemsConditionProductUnitId = getValues("items")?.condition?.productUnitId;
 
     setValue(itemsConditionProductUnitId);
   }, [getValues]);
@@ -124,9 +116,7 @@ export const ProductQuantity = ({
 
   const handleDeleteRow = (indexToDelete) => {
     if (rows.length === 1) return; // Prevent deleting the last row
-    setRows((prevRows) =>
-      prevRows.filter((_, index) => index !== indexToDelete)
-    );
+    setRows((prevRows) => prevRows.filter((_, index) => index !== indexToDelete));
 
     // Update value items
     const newRowFormat = rows
@@ -166,9 +156,7 @@ export const ProductQuantity = ({
       <div className="my-5 flex flex-col gap-2">
         {getValues("items")?.map((row, index) => (
           <div className="flex items-baseline gap-2 border-[1px] border-[#d9d9d9] rounded shadow-lg p-8">
-            <div className="flex flex-[1] flex-col px-4 font-semibold">
-              Khi mua
-            </div>
+            <div className="flex flex-[1] flex-col px-4 font-semibold">Khi mua</div>
             <div className="flex flex-[5] flex-col px-4 gap-5">
               <div className="w-full flex items-baseline gap-x-2">
                 <div className="w-full">
@@ -193,26 +181,20 @@ export const ProductQuantity = ({
                     }}
                     loading={isLoadingProduct}
                     defaultValue={row?.apply?.productUnitId}
-                    suffixIcon={<Image src={DocumentIcon} />}
+                    // suffixIcon={<Image src={DocumentIcon} />}
                     value={
                       getValues("items")?.condition?.productUnitId
                         ? getValues("items")?.condition?.productUnitId
                         : getValues("times")?.byWeekDay
                     }
                     notFoundContent={
-                      isLoadingProduct ? (
-                        <Spin
-                          size="small"
-                          className="flex justify-center p-4 w-full"
-                        />
-                      ) : null
+                      isLoadingProduct ? <Spin size="small" className="flex justify-center p-4 w-full" /> : null
                     }
                     size="large"
                   >
                     {products?.data?.items?.map((product) => (
                       <Option key={product.id} value={product.productUnit?.id}>
-                        {product?.productUnit?.code} - {product?.product?.name}{" "}
-                        - {product?.productUnit?.unitName}
+                        {product?.productUnit?.code} - {product?.product?.name} - {product?.productUnit?.unitName}
                       </Option>
                     ))}
                   </Select>
@@ -228,9 +210,7 @@ export const ProductQuantity = ({
                     onChange={(value) => {
                       // change row of childItems
                       const newRows: any = [...getValues("items")];
-                      newRows[index].childItems[
-                        childIndex
-                      ].condition.product.from = value;
+                      newRows[index].childItems[childIndex].condition.product.from = value;
                       setRows(newRows);
                       setValue("items", newRows);
                     }}
@@ -243,8 +223,7 @@ export const ProductQuantity = ({
                       // change row of childItems
                       console.log("value", value);
                       const newRows: any = [...getValues("items")];
-                      newRows[index].childItems[childIndex].apply.changeType =
-                        value;
+                      newRows[index].childItems[childIndex].apply.changeType = value;
                       setRows(newRows);
                       console.log("newRows", newRows);
                       setValue("items", newRows);
@@ -263,8 +242,7 @@ export const ProductQuantity = ({
                     onChange={(value) => {
                       // change row of childItems
                       const newRows: any = [...getValues("items")];
-                      newRows[index].childItems[childIndex].apply.fixedPrice =
-                        value;
+                      newRows[index].childItems[childIndex].apply.fixedPrice = value;
                       setRows(newRows);
                       setValue("items", newRows);
                     }}
@@ -276,7 +254,7 @@ export const ProductQuantity = ({
                           "h-full w-[50px] text-center rounded-tl rounded-bl flex items-center justify-center cursor-pointer",
                           {
                             "bg-[#3E7BFA] text-white": typePrice === 1,
-                          }
+                          },
                         )}
                         onClick={() => {
                           // change row of childItems
@@ -311,18 +289,14 @@ export const ProductQuantity = ({
                     </div>
                   )}
                   <div
-                    className={`${
-                      id ? "cursor-not-allowed" : "cursor-pointer"
-                    } ml-5`}
+                    className={`${id ? "cursor-not-allowed" : "cursor-pointer"} ml-5`}
                     onClick={() => {
                       // remove row from childItems
                       if (id) return;
                       const newRows: any = [...getValues("items")];
                       // check if childItems have more than 1 item then remove
                       if (newRows[index].childItems.length > 1) {
-                        newRows[index].childItems = newRows[
-                          index
-                        ].childItems.filter((_, i) => i !== childIndex);
+                        newRows[index].childItems = newRows[index].childItems.filter((_, i) => i !== childIndex);
                         setRows(newRows);
                         setValue("items", newRows);
                       }
@@ -332,11 +306,7 @@ export const ProductQuantity = ({
                   </div>
                 </div>
               ))}
-              <div
-                className={`w-fit ${
-                  id ? "cursor-not-allowed" : "cursor-pointer"
-                }`}
-              >
+              <div className={`w-fit ${id ? "cursor-not-allowed" : "cursor-pointer"}`}>
                 <div
                   onClick={() => {
                     // add new row to childItems
@@ -386,9 +356,7 @@ export const ProductQuantity = ({
                 if (id) return;
                 handleDeleteRow(index);
               }}
-              className={`flex flex-1 items-center justify-center px-4 ${
-                id ? "cursor-not-allowed" : "cursor-pointer"
-              }`}
+              className={`flex flex-1 items-center justify-center px-4 ${id ? "cursor-not-allowed" : "cursor-pointer"}`}
             >
               <Image src={DeleteRedIcon} alt="" />
             </div>
