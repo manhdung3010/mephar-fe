@@ -328,11 +328,13 @@ export default function AddOrder() {
                           <span>{item.product.name}</span>
                         </div>
                         <div className="rounded bg-red-main px-2 py-[2px] text-white">{item.productUnit.unitName}</div>
-                        {item.quantity <= 0 && <div className="rounded text-red-main py-[2px] italic">Hết hàng</div>}
+                        {item.quantity - item.quantitySold <= 0 && (
+                          <div className="rounded text-red-main py-[2px] italic">Hết hàng</div>
+                        )}
                       </div>
 
                       <div className="flex gap-x-3">
-                        <div>Số lượng: {formatNumber(item.quantity)}</div>
+                        <div>Số lượng: {formatNumber(item.quantity - item.quantitySold)}</div>
                         <div>|</div>
                         <div>Giá: {formatMoney(item?.discountPrice > 0 ? item?.discountPrice : item.price)}</div>
                       </div>
