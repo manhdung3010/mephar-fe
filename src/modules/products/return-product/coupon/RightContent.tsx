@@ -24,43 +24,32 @@ import { productReturnState } from "@/recoil/state";
 import { AddProviderModal } from "./AddProviderModal";
 import { useRouter } from "next/router";
 
-export function RightContent({
-  useForm,
-  importId,
-}: {
-  useForm: any;
-  importId: string;
-}) {
+export function RightContent({ useForm, importId }: { useForm: any; importId: string }) {
   const queryClient = useQueryClient();
   const router = useRouter();
 
   const { getValues, setValue, handleSubmit, reset, errors } = useForm;
-  const [productsReturn, setProductsReturn] =
-    useRecoilState(productReturnState);
+  const [productsReturn, setProductsReturn] = useRecoilState(productReturnState);
 
   const [isOpenAddProviderModal, setIsOpenAddProviderModal] = useState(false);
 
   const [searchEmployeeText, setSearchEmployeeText] = useState("");
   const [searchProviderText, setSearchProviderText] = useState("");
 
-  const { data: employees } = useQuery(
-    ["EMPLOYEE_LIST", searchEmployeeText],
-    () => getEmployee({ page: 1, limit: 20, keyword: searchEmployeeText })
+  const { data: employees } = useQuery(["EMPLOYEE_LIST", searchEmployeeText], () =>
+    getEmployee({ page: 1, limit: 20, keyword: searchEmployeeText }),
   );
-  const { data: providers } = useQuery(
-    ["PROVIDER_LIST", searchProviderText],
-    () => getProvider({ page: 1, limit: 20, keyword: searchProviderText })
+  const { data: providers } = useQuery(["PROVIDER_LIST", searchProviderText], () =>
+    getProvider({ page: 1, limit: 20, keyword: searchProviderText }),
   );
 
   const totalPrice = useMemo(() => {
     let priceTotal = 0;
 
     if (productsReturn?.length > 0) {
-      productsReturn.forEach(
-        ({ product, quantity, discountValue, productUnit, price }) => {
-          priceTotal += price * quantity;
-        }
-      );
+      productsReturn.forEach(({ product, quantity, discountValue, productUnit, price }) => {
+        priceTotal += price * quantity;
+      });
       setValue("paid", priceTotal, { shouldValidate: true });
     } else {
       setValue("paid", 0, { shouldValidate: true });
@@ -76,32 +65,23 @@ export function RightContent({
   }, [totalPrice, getValues("discount")]);
 
   const debtPrice = useMemo(() => {
-    return (
-      Number(totalPrice) -
-      Number(getValues("discount") ?? 0) -
-      Number(getValues("paid") ?? 0)
-    );
+    return Number(totalPrice) - Number(getValues("discount") ?? 0) - Number(getValues("paid") ?? 0);
   }, [getValues("discount"), getValues("paid"), totalPrice]);
 
-  const {
-    mutate: mutateCreateProductReturn,
-    isLoading: isLoadingCreateProductReturn,
-  } = useMutation(
+  const { mutate: mutateCreateProductReturn, isLoading: isLoadingCreateProductReturn } = useMutation(
     () => {
-      const products = getValues("products").map(
-        ({ isBatchExpireControl, ...product }) => {
-          return {
-            ...product,
-            batches:
-              product?.batches?.length > 0
-                ? product.batches.map((batch: any) => ({
+      const products = getValues("products").map(({ isBatchExpireControl, ...product }) => {
+        return {
+          ...product,
+          batches:
+            product?.batches?.length > 0
+              ? product.batches.map((batch: any) => ({
                   id: batch?.batch?.id || batch.id,
                   quantity: batch?.quantity,
                 }))
-                : [],
-          };
-        }
-      );
+              : [],
+        };
+      });
       return createReturnProduct({ ...getValues(), products });
     },
     {
@@ -116,22 +96,13 @@ export function RightContent({
       onError: (err: any) => {
         message.error(err?.message);
       },
-    }
+    },
   );
 
   console.log("errors", errors);
   const changePayload = (status: EImportProductStatus) => {
     const products = cloneDeep(productsReturn).map(
-      ({
-        id,
-        price,
-        product,
-        quantity,
-        discountValue,
-        productUnitId,
-        batches,
-        productId,
-      }: any) => ({
+      ({ id, price, product, quantity, discountValue, productUnitId, batches, productId }: any) => ({
         productId: product.id || productId,
         importPrice: price,
         totalQuantity: quantity,
@@ -142,19 +113,19 @@ export function RightContent({
         ...(!product.isBatchExpireControl
           ? null
           : {
-            batches: importId
-              ? batches?.map((batch: any) => ({
-                id: batch.batch?.id,
-                quantity: batch.quantity,
-                expiryDate: batch?.expiryDate,
-              }))
-              : batches?.map(({ id, quantity, expiryDate }) => ({
-                id,
-                quantity,
-                expiryDate,
-              })),
-          }),
-      })
+              batches: importId
+                ? batches?.map((batch: any) => ({
+                    id: batch.batch?.id,
+                    quantity: batch.quantity,
+                    expiryDate: batch?.expiryDate,
+                  }))
+                : batches?.map(({ id, quantity, expiryDate }) => ({
+                    id,
+                    quantity,
+                    expiryDate,
+                  })),
+            }),
+      }),
     );
     setValue("products", products);
     setValue("totalPrice", totalPriceAfterDiscount);
@@ -163,6 +134,15 @@ export function RightContent({
   };
 
   const onSubmit = () => {
+    const invalidProducts = productsReturn.filter(
+      (product) => product.quantity <= 0 || product.quantity > product.inventory,
+    );
+
+    if (invalidProducts.length > 0) {
+      message.error("Số lượng sản phẩm không hợp lệ. Vui lòng kiểm tra lại!");
+      return;
+    }
+
     mutateCreateProductReturn();
   };
 
@@ -231,9 +211,7 @@ export function RightContent({
         <div className="grow">
           <div className="mb-5 border-b-2 border-dashed border-[#E4E4E4]">
             <div className="mb-5 grid grid-cols-2">
-              <div className=" leading-normal text-[#828487]">
-                Mã đặt hàng nhập
-              </div>
+              <div className=" leading-normal text-[#828487]">Mã đặt hàng nhập</div>
               <CustomInput
                 bordered={false}
                 placeholder="Mã phiếu tự động"
@@ -251,12 +229,8 @@ export function RightContent({
 
           <div className="mb-5">
             <div className="mb-5 flex justify-between">
-              <div className=" leading-normal text-[#828487] ">
-                Tổng tiền hàng
-              </div>
-              <div className=" leading-normal text-black-main">
-                {formatMoney(totalPrice)}
-              </div>
+              <div className=" leading-normal text-[#828487] ">Tổng tiền hàng</div>
+              <div className=" leading-normal text-black-main">{formatMoney(totalPrice)}</div>
             </div>
             {!importId && (
               <div className="mb-5 flex justify-between">
@@ -267,11 +241,7 @@ export function RightContent({
                     className="h-6 pr-0 text-end "
                     onChange={(value) => {
                       setValue("discount", value, { shouldValidate: true });
-                      setValue(
-                        "paid",
-                        totalPrice - (+getValues("discount") ?? 0),
-                        { shouldValidate: true }
-                      );
+                      setValue("paid", totalPrice - +getValues("discount"), { shouldValidate: true });
                     }}
                     type="number"
                     value={getValues("discount")}
@@ -280,27 +250,19 @@ export function RightContent({
               </div>
             )}
             <div className="mb-5 flex justify-between">
-              <div className="text-lg leading-normal text-[#000000]">
-                NCC CẦN TRẢ
-              </div>
+              <div className="text-lg leading-normal text-[#000000]">NCC CẦN TRẢ</div>
               <div className="text-lg leading-normal text-red-main">
-                {formatMoney(
-                  Number(totalPrice) - Number(getValues("discount") ?? 0)
-                )}
+                {formatMoney(Number(totalPrice) - Number(getValues("discount") ?? 0))}
               </div>
             </div>
             <div className="mb-5 ">
               <div className="flex justify-between">
-                <div className=" leading-normal text-[#828487]">
-                  Tiền nhà cung cấp trả (F8)
-                </div>
+                <div className=" leading-normal text-[#828487]">Tiền nhà cung cấp trả (F8)</div>
                 <div className="w-[90px]">
                   <CustomInput
                     bordered={false}
                     className="h-6 pr-0 text-end "
-                    onChange={(value) =>
-                      setValue("paid", value, { shouldValidate: true })
-                    }
+                    onChange={(value) => setValue("paid", value, { shouldValidate: true })}
                     type="number"
                     value={getValues("paid")}
                   />
@@ -309,12 +271,8 @@ export function RightContent({
               <InputError error={errors.paid?.message} />
             </div>
             <div className="mb-5 flex justify-between">
-              <div className=" leading-normal text-[#828487] ">
-                Tính vào công nợ
-              </div>
-              <div className=" leading-normal text-black-main">
-                {formatMoney(debtPrice)}
-              </div>
+              <div className=" leading-normal text-[#828487] ">Tính vào công nợ</div>
+              <div className=" leading-normal text-black-main">{formatMoney(debtPrice)}</div>
             </div>
           </div>
         </div>
