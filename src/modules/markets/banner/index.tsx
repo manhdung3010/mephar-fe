@@ -1,9 +1,8 @@
 import { Carousel } from "antd";
 import React from "react";
 import Banner1 from "@/assets/images/Banner 1.png";
-import Banner2 from "@/assets/images/Banner 2.jpg";
 import Banner3 from "@/assets/images/Banner 3.png";
-import BannerTop from "@/assets/images/bannerTop.jpg";
+import BannerTop from "@/assets/images/bannerTop.png";
 import Image from "next/image";
 import "swiper/css";
 
@@ -30,7 +29,7 @@ function MarketBanner() {
       </div>
       <div className="col-span-1 flex flex-col gap-5">
         <Image src={Banner1} alt="" />
-        <Image src={Banner2} alt="" />
+        <Image src={Banner1} alt="" />
       </div>
     </div>
   );
