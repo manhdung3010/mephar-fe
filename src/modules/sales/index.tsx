@@ -407,7 +407,7 @@ const Index = () => {
                 productUnit: {
                   ...product?.productUnit,
                   oldPrice: product?.productUnit?.price,
-                  price: 0,
+                  price: product?.productUnit?.price,
                 },
                 discountValue: product?.productUnit?.price, // giá KM
                 productUnitId: product.productUnitId,

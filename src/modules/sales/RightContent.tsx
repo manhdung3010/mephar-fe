@@ -302,6 +302,8 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
         }));
         return createOrder({
           ...getValues(),
+          pointOrder: discountObject[orderActive]?.orderDiscount?.find((item) => item.type === "loyalty")?.items[0]
+            .apply.pointValue,
           discountOrder: discountOrder,
           listDiscountId: discountObject[orderActive]?.orderDiscount?.map((item) => item.id),
           ...(getValues("customerId") === -1 && { customerId: null }),

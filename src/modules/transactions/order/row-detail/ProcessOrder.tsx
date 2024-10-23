@@ -138,7 +138,10 @@ export function ProcessOrder() {
   const onSubmit = () => {
     // validate if all seri = quantity
     const products: any = getValues("products");
-    const isAllSeriValid = products.every((product) => product.listSeri.length === product.quantity);
+    const isAllSeriValid =
+      select === 1
+        ? products.every((p) => p.importQuantity === p.quantity)
+        : products.every((product) => product.listSeri.length === product.quantity);
     if (!isAllSeriValid) {
       message.error("Vui lòng nhập đủ seri cho sản phẩm");
       return;
@@ -149,7 +152,7 @@ export function ProcessOrder() {
     mutateUpdateSeri();
   };
 
-  const menu = ["Nhập số lượng", "Nhập seri"];
+  const menu = ["Nhập seri", "Nhập số lượng"];
 
   return (
     <>
@@ -219,24 +222,30 @@ export function ProcessOrder() {
               </div>
               <div
                 className={`font-medium ${
-                  product?.listSeri?.length === product?.quantity ? "text-[#05A660]" : "text-[#FF8800]"
+                  product?.listSeri?.length === product?.quantity || product.importQuantity === product?.quantity
+                    ? "text-[#05A660]"
+                    : "text-[#FF8800]"
                 }`}
               >
-                Đã thêm: {product?.listSeri?.length}/{product?.quantity}
+                Đã thêm: {select === 1 ? product?.importQuantity ?? 0 : product?.listSeri?.length}/{product?.quantity}
               </div>
             </div>
-            {select === 0 ? (
+            {select === 1 ? (
               <div>
                 <CustomInput
                   className="h-12"
                   type="number"
                   onChange={(value) => {
+                    if (value > product?.quantity) {
+                      message.error("Số lượng nhập không được lớn hơn số lượng sản phẩm");
+                      return;
+                    }
                     const products: any = cloneDeep(getValues("products"));
                     const productIndex = products.findIndex((p: any) => p.marketOrderProductId === product.id);
-                    products[productIndex].quantity = value;
+                    products[productIndex].importQuantity = value;
                     setValue("products", products, { shouldValidate: true });
                   }}
-                  value={product?.quantity}
+                  value={product?.importQuantity}
                 />
               </div>
             ) : (
@@ -303,6 +312,7 @@ export function ProcessOrder() {
         seriInfo={seriInfo}
         getValues={getValues}
         setValue={setValue}
+        select={select}
       />
     </>
   );

@@ -1,6 +1,6 @@
 import { getBranch } from "@/api/branch.service";
 import { updateMarketOrderStatus } from "@/api/market.service";
-import { getProduct } from "@/api/product.service";
+import { getProduct, getSaleProducts } from "@/api/product.service";
 import { CustomButton } from "@/components/CustomButton";
 import { CustomModal } from "@/components/CustomModal";
 import { CustomSelect } from "@/components/CustomSelect";
@@ -54,18 +54,18 @@ function SelectBranchModal({
     ["LIST_PRODUCT", formFilter.page, formFilter.limit, formFilter.keyword, branchId, products],
     () => {
       const listProductUnitId = products.map((item) => item?.marketProduct?.productUnit?.id).join(",");
-      return getProduct({ ...formFilter, branchId: branchId, listProductUnitId });
+      return getSaleProducts({ ...formFilter, branchId: branchId, listProductUnitId });
     },
     {
       enabled: !!isOpen,
       onSuccess: (data) => {
         const newData = data?.data?.items.map((item) => {
-          const product = products.find((product) => product?.marketProduct?.product?.id === item.id);
+          const product = products.find((product) => product?.marketProduct?.product?.id === item?.product?.id);
           return {
             ...product,
-            image: item?.image,
-            name: item?.name,
-            realQuantity: item?.inventory,
+            image: item?.product?.image,
+            name: item?.product?.name,
+            realQuantity: item?.quantity,
           };
         });
         setFilterProduct(newData);

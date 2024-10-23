@@ -7,7 +7,7 @@ export const schema = yup.object().shape({
       marketProductId: yup.string(),
       marketOrderProductId: yup.string(),
       listSeri: yup.array(),
-    })
+    }),
   ),
 });
 export const updateOrderSchema = yup.object().shape({
