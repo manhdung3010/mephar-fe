@@ -8,6 +8,28 @@ import ArrowDownIcon from "@/assets/arrowDownIcon.svg";
 
 import { ComponentStyled } from "./styled";
 
+/**
+ * CustomSelect component renders a styled select input with various customization options.
+ *
+ * @param {Object} props - The properties object.
+ * @param {(value: any) => void} props.onChange - Callback function triggered when the selected value changes.
+ * @param {any} [props.defaultValue] - The default value of the select input.
+ * @param {any} [props.value] - The current value of the select input.
+ * @param {Array<{ value: any; label: any; disabled?: boolean }>} [props.options=[]] - Array of options to be displayed in the select input.
+ * @param {ReactNode} [props.prefixIcon] - Icon to be displayed at the beginning of the select input.
+ * @param {ReactNode} [props.suffixIcon] - Icon to be displayed at the end of the select input.
+ * @param {"border-underline" | "suffix-icon" | string} [props.className] - Additional class names for the select input.
+ * @param {string} [props.wrapClassName] - Additional class names for the wrapper element.
+ * @param {boolean} [props.showSearch] - Whether to show the search input in the select dropdown.
+ * @param {string} [props.placeholder] - Placeholder text for the select input.
+ * @param {(value: string) => void} [props.onSearch] - Callback function triggered when the search input value changes.
+ * @param {boolean} [props.isLoading] - Whether the select input is in a loading state.
+ * @param {number} [props.listHeight=256] - Height of the dropdown list.
+ * @param {boolean} [props.disabled] - Whether the select input is disabled.
+ * @param {"multiple" | "tags"} [props.mode] - Mode of the select input, can be "multiple" or "tags".
+ * @param {"large" | "middle" | "small"} [props.size] - Size of the select input.
+ * @returns {JSX.Element} The rendered CustomSelect component.
+ */
 export function CustomSelect({
   onChange,
   options = [],
@@ -23,7 +45,7 @@ export function CustomSelect({
   listHeight = 256,
   disabled,
   mode,
-  size
+  size,
 }: {
   onChange: (value: any) => void;
   defaultValue?: any;
@@ -42,7 +64,6 @@ export function CustomSelect({
   mode?: "multiple" | "tags";
   size?: "large" | "middle" | "small";
 }) {
-
   // const filterOption = (input, option) => {
   //   return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
   // };
@@ -60,9 +81,7 @@ export function CustomSelect({
         relative: !!prefixIcon,
       })}
     >
-      {prefixIcon && (
-        <div className="absolute top-3 left-4 z-[1]">{prefixIcon}</div>
-      )}
+      {prefixIcon && <div className="absolute top-3 left-4 z-[1]">{prefixIcon}</div>}
       <Select
         showSearch={!!showSearch}
         filterOption={filterOption}
@@ -75,11 +94,7 @@ export function CustomSelect({
         listHeight={listHeight}
         suffixIcon={
           suffixIcon ??
-          (className?.includes("border-underline") ? (
-            <Image src={ArrowDownIcon} />
-          ) : (
-            <Image src={ArrowDownGrayIcon} />
-          ))
+          (className?.includes("border-underline") ? <Image src={ArrowDownIcon} /> : <Image src={ArrowDownGrayIcon} />)
         }
         className={cx("normal-select", className, {
           "suffix-icon": !!suffixIcon,

@@ -1,18 +1,31 @@
-import type { ColumnsType } from "antd/es/table";
 import { CustomButton } from "@/components/CustomButton";
 import { CustomModal } from "@/components/CustomModal";
 import CustomTable from "@/components/CustomTable";
 import { formatMoney, formatNumber } from "@/helpers";
-import { branchState, discountState, discountTypeState, orderActiveState, orderDiscountSelected } from "@/recoil/state";
-import { cloneDeep, set } from "lodash";
+import { discountState, orderActiveState } from "@/recoil/state";
+import type { ColumnsType } from "antd/es/table";
+import { cloneDeep } from "lodash";
 import { useEffect, useState } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { useRecoilState } from "recoil";
 import { EDiscountBillMethodLabel, EDiscountGoodsMethodLabel } from "../settings/discount/add-discount/Info";
-import { ISaleProduct } from "./interface";
-import { useQuery } from "@tanstack/react-query";
-import { getSaleProducts } from "@/api/product.service";
 import SelectProductOrderModal from "./SelectProductOrderModal";
 
+/**
+ * OrderDiscountModal component renders a modal for applying discounts to an order.
+ *
+ * @param {Object} props - The properties object.
+ * @param {boolean} props.isOpen - Indicates if the modal is open.
+ * @param {() => void} props.onCancel - Function to call when the modal is cancelled.
+ * @param {(value: any) => void} props.onSave - Function to call when the discount is saved.
+ * @param {any} props.discountList - List of available discounts.
+ *
+ * @returns {JSX.Element} The rendered OrderDiscountModal component.
+ *
+ * @remarks
+ * This component uses Recoil for state management and Ant Design for UI components.
+ * It allows users to select and apply discounts to an order, including promotional gifts and price reductions.
+ * The component also includes a nested modal for selecting products associated with the discounts.
+ */
 export function OrderDiscountModal({
   isOpen,
   onCancel,

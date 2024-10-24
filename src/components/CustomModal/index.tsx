@@ -1,9 +1,29 @@
-import { Button, Modal } from 'antd';
-import cx from 'classnames';
-import type { ComponentProps, ReactNode } from 'react';
+import { Button, Modal } from "antd";
+import cx from "classnames";
+import type { ComponentProps, ReactNode } from "react";
 
 type SelectProps = ComponentProps<typeof Modal>;
 
+/**
+ * CustomModal component renders a modal dialog with customizable properties.
+ *
+ * @param {Object} props - The properties object.
+ * @param {string | ReactNode} [props.title] - The title of the modal.
+ * @param {boolean} props.isOpen - Determines if the modal is open.
+ * @param {() => void} props.onCancel - Callback function to handle modal cancellation.
+ * @param {() => void} [props.onSubmit] - Callback function to handle modal submission.
+ * @param {any} props.children - The content to be displayed inside the modal.
+ * @param {number} [props.width] - The width of the modal.
+ * @param {boolean} [props.customFooter] - Flag to determine if a custom footer should be used.
+ * @param {string} [props.textCancel] - Text for the cancel button.
+ * @param {string} [props.textOk] - Text for the submit button.
+ * @param {string} [props.className] - Additional class names for the modal.
+ * @param {boolean} [props.isLoading] - Flag to indicate if the submit button should be disabled.
+ * @param {boolean} [props.forceRender] - Flag to force render the modal.
+ * @param {SelectProps} rest - Additional properties passed to the modal component.
+ *
+ * @returns {JSX.Element} The rendered CustomModal component.
+ */
 export function CustomModal({
   title,
   isOpen,
@@ -37,7 +57,7 @@ export function CustomModal({
       title={title}
       width={width}
       open={isOpen}
-      className={cx('custom-modal', className)}
+      className={cx("custom-modal", className)}
       onCancel={onCancel}
       centered
       forceRender={forceRender}
@@ -45,14 +65,8 @@ export function CustomModal({
         customFooter
           ? null
           : [
-              <Button
-                key="back"
-                onClick={onCancel}
-                danger
-                ghost
-                className="h-[46px] min-w-[150px] py-2 px-4"
-              >
-                {textCancel || 'Hủy bỏ'}
+              <Button key="back" onClick={onCancel} danger ghost className="h-[46px] min-w-[150px] py-2 px-4">
+                {textCancel || "Hủy bỏ"}
               </Button>,
               <Button
                 key="submit"
@@ -62,7 +76,7 @@ export function CustomModal({
                 disabled={isLoading}
                 className="h-[46px] min-w-[150px] py-2 px-4"
               >
-                {textOk || 'Xong'}
+                {textOk || "Xong"}
               </Button>,
             ]
       }

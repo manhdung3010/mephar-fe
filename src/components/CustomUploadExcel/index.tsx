@@ -5,10 +5,7 @@ import { message, Spin } from "antd";
 import RemoveIcon from "@/assets/removeIcon.svg";
 
 import { UploadStyled } from "./styled";
-import {
-  uploadProductExcel,
-  uploadProductExcelKiot,
-} from "@/api/import.service";
+import { uploadProductExcel, uploadProductExcelKiot } from "@/api/import.service";
 import { branchState } from "@/recoil/state";
 import { useRecoilValue } from "recoil";
 import { useQueryClient } from "@tanstack/react-query";
@@ -21,12 +18,19 @@ interface CustomUploadExcelProps {
   typeImport?: any;
 }
 
-export function CustomUploadExcel({
-  children,
-  className,
-  onCancel,
-  typeImport = "default",
-}: CustomUploadExcelProps) {
+/**
+ * CustomUploadExcel component allows users to upload Excel files by either
+ * clicking to open a file dialog or dragging and dropping files into the component.
+ * It supports two types of imports: "default" and "kiot".
+ *
+ * @param {React.ReactNode} children - The content to be displayed inside the component.
+ * @param {string} className - Additional CSS classes to apply to the component.
+ * @param {() => void} [onCancel] - Optional callback function to be called when the upload is cancelled.
+ * @param {"default" | "kiot"} [typeImport="default"] - The type of import to be performed.
+ *
+ * @returns {JSX.Element} The rendered CustomUploadExcel component.
+ */
+export function CustomUploadExcel({ children, className, onCancel, typeImport = "default" }: CustomUploadExcelProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -103,12 +107,7 @@ export function CustomUploadExcel({
   };
 
   return (
-    <div
-      className={className}
-      onDrop={handleDrop}
-      onDragOver={handleDragOver}
-      onClick={handleImportClick}
-    >
+    <div className={className} onDrop={handleDrop} onDragOver={handleDragOver} onClick={handleImportClick}>
       <input
         type="file"
         accept=".xlsx, .xls"

@@ -1,12 +1,5 @@
-import { yupResolver } from "@hookform/resolvers/yup";
-import { useQuery } from "@tanstack/react-query";
-import { message, Popover } from "antd";
-import cx from "classnames";
-import { cloneDeep, debounce, orderBy } from "lodash";
-import Image from "next/image";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useForm } from "react-hook-form";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { getOrderDiscountList, getProductDiscountList } from "@/api/discount.service";
+import { getOrderDetail } from "@/api/order.service";
 import { getSaleProducts, getSampleMedicines } from "@/api/product.service";
 import BarcodeIcon from "@/assets/barcode.svg";
 import CloseIcon from "@/assets/closeIcon.svg";
@@ -14,29 +7,29 @@ import FilterIcon from "@/assets/filterIcon.svg";
 import PlusIcon from "@/assets/plusIcon.svg";
 import SearchIcon from "@/assets/searchIcon.svg";
 import { CustomAutocomplete } from "@/components/CustomAutocomplete";
-import { EPaymentMethod, saleReturn } from "@/enums";
-import { formatMoney, formatNumber, getImage, randomString, roundNumber } from "@/helpers";
-import {
-  branchState,
-  discountState,
-  orderActiveState,
-  orderDiscountSelected,
-  orderState,
-  productDiscountSelected,
-} from "@/recoil/state";
-import { getOrderDetail } from "@/api/order.service";
+import { CustomButton } from "@/components/CustomButton";
 import { CustomInput } from "@/components/CustomInput";
+import { EPaymentMethod } from "@/enums";
+import { formatMoney, formatNumber, getImage, randomString } from "@/helpers";
 import useBarcodeScanner from "@/hooks/useBarcodeScanner";
+import { branchState, discountState, orderActiveState, orderState } from "@/recoil/state";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useQuery } from "@tanstack/react-query";
+import { Popover } from "antd";
+import cx from "classnames";
+import { cloneDeep, debounce } from "lodash";
+import Image from "next/image";
 import { useRouter } from "next/router";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { SaleHeader } from "./Header";
 import { LeftMenu } from "./LeftMenu";
 import { ProductList } from "./ProductList";
 import { RightContent } from "./RightContent";
+import { RightContentReturn } from "./RightContentReturn";
 import type { ISaleProduct, ISaleProductLocal, ISampleMedicine } from "./interface";
 import { schema, schemaReturn } from "./schema";
-import { RightContentReturn } from "./RightContentReturn";
-import { CustomButton } from "@/components/CustomButton";
-import { getOrderDiscountList, getProductDiscountList } from "@/api/discount.service";
 
 const Index = () => {
   const branchId = useRecoilValue(branchState);
@@ -84,7 +77,6 @@ const Index = () => {
 
   const [orderActive, setOrderActive] = useRecoilState(orderActiveState);
   const [orderObject, setOrderObject] = useRecoilState(orderState);
-  const [orderDiscount, setOrderDiscount] = useRecoilState(orderDiscountSelected);
   const [discountObject, setDiscountObject] = useRecoilState(discountState);
 
   const {
@@ -103,7 +95,6 @@ const Index = () => {
   }>(["LIST_SALE_PRODUCT2", 1, 9999, "", branchId], () => getSaleProducts({ ...formFilter, branchId }), {
     enabled: !isSearchSampleMedicine,
   });
-
   const { data: sampleMedicines, isLoading: isLoadingSampleMedicines } = useQuery<{
     data?: { items: ISampleMedicine[] };
   }>(
@@ -160,10 +151,8 @@ const Index = () => {
           });
           // add order detail to order object when order detail is loaded
           const orderObjectClone = cloneDeep(orderObject);
-
           orderObjectClone[orderActive + "-RETURN"] = orderDetail?.data?.products.map((product) => {
             const productKey = `${product?.productId}-${product.productUnit?.id}`;
-
             return {
               ...product,
               productKey,
@@ -180,7 +169,6 @@ const Index = () => {
               originProductUnitId: product.productUnit.id,
               batches: product.batches?.map((batch) => {
                 const inventory = batch.batch.quantity / product.productUnit.exchangeValue;
-
                 const newBatch = {
                   ...batch,
                   inventory,
@@ -195,7 +183,6 @@ const Index = () => {
                   quantity: product?.quantityLast ? product?.quantity - product?.quantityLast : batch.quantity,
                   isSelected: true,
                 };
-
                 return newBatch;
               }),
             };
@@ -223,7 +210,6 @@ const Index = () => {
         if (productsScan?.data?.items?.length > 0 && !isSearchSampleMedicine) {
           product = productsScan?.data?.items?.find((item) => item.barCode === scannedData);
         }
-
         if (product) {
           onSelectedProduct(JSON.stringify(product));
           return;
@@ -438,65 +424,6 @@ const Index = () => {
     }
   }, [discountObject[orderActive]?.productDiscount]);
 
-  const onExpandMoreBatches = async (productKey, quantity: number, product?: any) => {
-    const orderObjectClone = cloneDeep(orderObject);
-
-    const res = await getProductDiscountList({
-      productUnitId: product?.id,
-      branchId: branchId,
-      quantity: quantity,
-    });
-    let itemDiscountProduct = res?.data?.data?.items;
-
-    orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map((product: ISaleProductLocal) => {
-      if (product.productKey === productKey) {
-        return {
-          ...product,
-          itemDiscountProduct,
-          quantity,
-        };
-      }
-
-      return product;
-    });
-
-    orderObjectClone[orderActive] = orderObjectClone[orderActive].map((product: ISaleProductLocal) => {
-      if (product.productKey === productKey) {
-        let sumQuantity = 0;
-
-        let batches = cloneDeep(product.batches);
-        batches = orderBy(batches, ["isSelected"], ["desc"]);
-
-        batches = batches.map((batch) => {
-          const remainQuantity = roundNumber(quantity) - roundNumber(sumQuantity);
-
-          if (remainQuantity && batch.inventory) {
-            const tempQuantity = batch.inventory <= remainQuantity ? batch.inventory : roundNumber(remainQuantity);
-
-            sumQuantity += tempQuantity;
-
-            return {
-              ...batch,
-              quantity: tempQuantity,
-              isSelected: true,
-            };
-          }
-
-          return { ...batch, quantity: 0, isSelected: false };
-        });
-
-        return {
-          ...product,
-          batches,
-        };
-      }
-
-      return product;
-    });
-
-    setOrderObject(orderObjectClone);
-  };
-
   // select product
   const onSelectedProduct = (value) => {
     const product: ISaleProduct = JSON.parse(value);
@@ -524,7 +451,6 @@ const Index = () => {
             }),
           };
         }
-
         return p;
       });
       setOrderObject((pre) => ({ ...pre, ...orderObjectClone }));
@@ -549,7 +475,6 @@ const Index = () => {
             originProductUnitId: product.id,
             batches: product.batches?.map((batch) => {
               const inventory = batch.quantity / product.productUnit.exchangeValue;
-
               const newBatch: any = {
                 ...batch,
                 inventory,
@@ -557,7 +482,6 @@ const Index = () => {
                 quantity: 0,
                 isSelected: inventory >= 1 ? isSelectedUnit : false,
               };
-
               if (inventory >= 1 && isSelectedUnit) {
                 isSelectedUnit = false;
                 newBatch.quantity = product?.isDiscount ? product?.discountQuantity : 1;
@@ -573,20 +497,15 @@ const Index = () => {
         }
       });
     }
-    // setOrderObject((pre) => ({ ...pre, ...orderObjectClone }));
     inputRef.current?.select();
-    // setOrderObject(orderObjectClone);
     setFormFilter((pre) => ({ ...pre, keyword: "" }));
   };
 
   const onSelectedSampleMedicine = (value) => {
     const sampleMedicines: ISampleMedicine = JSON.parse(value);
-
     const orderObjectClone = cloneDeep(orderObject);
-
     sampleMedicines.products.forEach((product) => {
       const productKey = `${product.product.id}-${product.productUnit.id}`;
-
       if (orderObjectClone[orderActive]?.find((item) => item.productKey === productKey)) {
         orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map((product: ISaleProductLocal) => {
           if (product.productKey === productKey) {
@@ -595,12 +514,10 @@ const Index = () => {
               quantity: product.quantity + 1,
             };
           }
-
           return product;
         });
       } else {
         let isSelectedUnit = true;
-
         const productLocal: any = {
           ...product,
           ...product.productUnit,
@@ -625,11 +542,9 @@ const Index = () => {
             return newBatch;
           }),
         };
-
         orderObjectClone[orderActive]?.push(productLocal);
       }
     });
-
     setOrderObject(orderObjectClone);
   };
 

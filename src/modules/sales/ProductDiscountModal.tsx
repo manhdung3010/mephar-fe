@@ -1,18 +1,37 @@
 import type { ColumnsType } from "antd/es/table";
-
 import { CustomButton } from "@/components/CustomButton";
 import { CustomModal } from "@/components/CustomModal";
 import CustomTable from "@/components/CustomTable";
 import { formatMoney, formatNumber } from "@/helpers";
-
 import { branchState, discountState, orderActiveState } from "@/recoil/state";
 import { cloneDeep } from "lodash";
 import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { EDiscountBillMethodLabel, EDiscountGoodsMethodLabel } from "../settings/discount/add-discount/Info";
-import SelectProductDiscount from "./SelectProductDiscount";
 import SelectProductOrderModal from "./SelectProductOrderModal";
 
+/**
+ * Component for displaying and managing product discounts within a modal.
+ *
+ * @component
+ * @param {Object} props - The properties object.
+ * @param {boolean} props.isOpen - Indicates whether the modal is open.
+ * @param {() => void} props.onCancel - Function to call when the modal is cancelled.
+ * @param {(value: any) => void} props.onSave - Function to call when the discount is saved.
+ * @param {any[]} [props.discountList] - List of available discounts.
+ * @param {any} props.productUnitSelected - The selected product unit.
+ *
+ * @returns {JSX.Element} The rendered component.
+ *
+ * @example
+ * <ProductDiscountModal
+ *   isOpen={true}
+ *   onCancel={handleCancel}
+ *   onSave={handleSave}
+ *   discountList={discounts}
+ *   productUnitSelected={selectedProductUnit}
+ * />
+ */
 export function ProductDiscountModal({
   isOpen,
   onCancel,
@@ -26,7 +45,6 @@ export function ProductDiscountModal({
   discountList?: any;
   productUnitSelected: any;
 }) {
-  const branchId = useRecoilValue(branchState);
   const orderActive = useRecoilValue(orderActiveState);
   const [discountObject, setDiscountObject] = useRecoilState(discountState);
   const [listDiscount, setListDiscount] = useState<any[]>([]);

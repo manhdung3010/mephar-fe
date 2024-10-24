@@ -5,7 +5,6 @@ import { cloneDeep, debounce } from "lodash";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-
 import { getCustomer } from "@/api/customer.service";
 import { getEmployee } from "@/api/employee.service";
 import { createOrder } from "@/api/order.service";
@@ -25,17 +24,8 @@ import { CustomSelect } from "@/components/CustomSelect";
 import InputError from "@/components/InputError";
 import { EDiscountLabel, EDiscountType, EPaymentMethod, getEnumKeyByValue } from "@/enums";
 import { formatMoney, formatNumber, hasPermission, randomString } from "@/helpers";
-import {
-  branchState,
-  discountState,
-  discountTypeState,
-  orderActiveState,
-  orderDiscountSelected,
-  orderState,
-  productDiscountSelected,
-  profileState,
-} from "@/recoil/state";
-
+import { branchState, discountState, orderActiveState, orderState, profileState } from "@/recoil/state";
+import { getDiscountConfig } from "@/api/discount.service";
 import { getPointStatus } from "@/api/point.service";
 import { CustomSwitch } from "@/components/CustomSwitch";
 import { RoleAction, RoleModel } from "../settings/role/role.enum";
@@ -47,9 +37,26 @@ import { OrderSuccessModal } from "./OrderSuccessModal";
 import { ScanQrModal } from "./ScanQrModal";
 import type { ISaleProductLocal } from "./interface";
 import { RightContentStyled } from "./styled";
-import { getDiscountConfig } from "@/api/discount.service";
-const defaultOrder = randomString();
 
+/**
+ * Component for rendering the right content of the sales module.
+ *
+ * @param {Object} props - The component props.
+ * @param {Function} props.useForm - The useForm hook from react-hook-form.
+ * @param {Array} props.discountList - The list of available discounts.
+ *
+ * @returns {JSX.Element} The rendered component.
+ *
+ * @example
+ * <RightContent useForm={useForm} discountList={discountList} />
+ *
+ * @remarks
+ * This component handles the calculation of total price, discounts, and customer payments.
+ * It also manages various modals for scanning QR codes, order success, adding customers, and applying discounts.
+ *
+ * @component
+ * @category Sales
+ */
 export function RightContent({ useForm, discountList }: { useForm: any; discountList: any }) {
   const queryClient = useQueryClient();
 
@@ -58,8 +65,6 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
   const [orderObject, setOrderObject] = useRecoilState(orderState);
   const [orderActive, setOrderActive] = useRecoilState(orderActiveState);
   const [discountObject, setDiscountObject] = useRecoilState(discountState);
-  const [productDiscount, setProductDiscount] = useRecoilState(productDiscountSelected);
-  const [discountType, setDiscountType] = useRecoilState(discountTypeState);
 
   const branchId = useRecoilValue(branchState);
   const profile = useRecoilValue(profileState);
@@ -75,7 +80,6 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
   const [saleInvoice, setSaleInvoice] = useState();
   const [oldTotal, setOldTotal] = useState(0);
   const [checkPoint, setCheckPoint] = useState(false);
-
   const [discountOrder, setDiscountOrder] = useState(0); // tổng tiền được giảm giá
 
   const { data: employees } = useQuery(["EMPLOYEE_LIST", searchEmployeeText], () =>
@@ -90,9 +94,7 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
       status: "active",
     }),
   );
-
   const { data: pointStatus, isLoading: isLoadingPointDetail } = useQuery(["POINT_STATUS"], () => getPointStatus());
-
   const { data: discountConfigDetail, isLoading } = useQuery(["DISCOUNT_CONFIG"], () => getDiscountConfig());
 
   useEffect(() => {
@@ -233,7 +235,6 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
           return totalPrice > discountValue ? Math.round(totalPrice - discount - discountValue) : 0;
         }
       }
-
       return totalPrice - discount;
     }
   }, [
@@ -265,33 +266,44 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
   // create order
   const { mutate: mutateCreateOrder, isLoading: isLoadingCreateOrder } = useMutation(
     () => {
-      // if (
-      //   orderDiscount?.length > 0 &&
-      //   productDiscount?.length > 0 &&
-      //   discountConfigDetail?.data?.data?.isMergeDiscount
-      // ) {
-      //   const formatProducts = getValues("products")?.map(({ isBatchExpireControl, ...product }) => ({
-      //     ...product,
-      //     batches: product.batches?.map((batch) => ({
-      //       id: batch.id,
-      //       quantity: batch.quantity,
-      //     })),
-      //     isDiscount: product?.isDiscount || false,
-      //     ...(product?.itemPrice > 0 && {
-      //       itemPrice: product?.itemPrice,
-      //     }),
-      //   }));
-      //   return createOrder({
-      //     ...getValues(),
-      //     discountOrder: oldTotal,
-      //     listDiscountId: [...orderDiscount?.map((item) => item.id), ...productDiscount?.map((item) => item.id)],
-      //     ...(getValues("customerId") === -1 && { customerId: null }),
-      //     products: formatProducts,
-      //     branchId,
-      //   });
-      // }
-
-      if (discountObject[orderActive]?.orderDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
+      // áp dụng KM gộp
+      if (
+        discountObject[orderActive]?.orderDiscount?.length > 0 &&
+        discountObject[orderActive]?.productDiscount?.length > 0 &&
+        orderObject[orderActive]?.length > 0
+      ) {
+        const formatProducts = getValues("products")?.map(({ isBatchExpireControl, ...product }) => ({
+          ...product,
+          batches: product.batches?.map((batch) => ({
+            id: batch.id,
+            quantity: batch.quantity,
+          })),
+          isDiscount: product?.isDiscount || false,
+          ...(product?.itemPrice > 0 && {
+            itemPrice: product?.itemPrice,
+          }),
+        }));
+        return createOrder({
+          ...getValues(),
+          pointOrder:
+            discountObject[orderActive]?.orderDiscount?.find((item) => item.type === "loyalty")?.items[0].apply
+              .pointValue || 0,
+          discountOrder: oldTotal || 0,
+          listDiscountId: [
+            ...discountObject[orderActive]?.orderDiscount?.map((item) => item.id),
+            ...discountObject[orderActive]?.productDiscount?.map((item) => item.id),
+          ],
+          ...(getValues("customerId") === -1 && { customerId: null }),
+          products: formatProducts,
+          branchId,
+        });
+      }
+      // áp dụng KM hóa đơn
+      if (
+        discountObject[orderActive]?.orderDiscount?.length > 0 &&
+        discountObject[orderActive]?.productDiscount?.length <= 0 &&
+        orderObject[orderActive]?.length > 0
+      ) {
         const formatProducts = getValues("products")?.map(({ isBatchExpireControl, ...product }) => ({
           ...product,
           batches: product.batches?.map((batch) => ({
@@ -311,7 +323,12 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
           branchId,
         });
       }
-      if (discountObject[orderActive]?.productDiscount?.length > 0 && orderObject[orderActive]?.length > 0) {
+      // áp dụng KM hàng hóa
+      if (
+        discountObject[orderActive]?.productDiscount?.length > 0 &&
+        discountObject[orderActive]?.orderDiscount?.length <= 0 &&
+        orderObject[orderActive]?.length > 0
+      ) {
         const formatProducts = getValues("products")?.map(({ isBatchExpireControl, ...product }) => ({
           ...product,
           batches: product.batches?.map((batch) => ({
@@ -336,7 +353,6 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
           quantity: batch.quantity,
         })),
       }));
-
       return createOrder({
         ...getValues(),
         ...(getValues("customerId") === -1 && { customerId: null }),
@@ -354,7 +370,6 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
         const orderClone = cloneDeep(orderObject);
         orderClone[orderActive] = [];
         setOrderObject(orderClone);
-        setDiscountType("");
         setIsOpenOrderSuccessModal(true);
         setOldTotal(0);
         setDiscountObject({
@@ -371,7 +386,6 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
       },
     },
   );
-
   const onSubmit = () => {
     mutateCreateOrder();
   };

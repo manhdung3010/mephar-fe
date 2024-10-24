@@ -9,6 +9,38 @@ import { getRouting } from "../../api/trip.service.ts"
 import { useRecoilState } from "recoil";
 import { vehicalState } from '@/recoil/state';
 
+/**
+ * CustomMap component that renders a map with various markers and routes.
+ * 
+ * @component
+ * @param {Object} props - The properties passed to the component.
+ * @param {boolean} props.isMapFull - Flag to determine if the map should be displayed in full screen.
+ * @param {Array} props.tripCustomer - Array of customer trip data.
+ * @param {Array} props.nowLocation - Array containing the current location coordinates.
+ * @param {number} props.radiusCircle - Radius for the circle around the start marker.
+ * @param {React.Ref} ref - Reference to the component.
+ * 
+ * @returns {JSX.Element} The rendered map component.
+ * 
+ * @example
+ * <CustomMap
+ *   isMapFull={true}
+ *   tripCustomer={[{ lng: 105.8542, lat: 21.0285, status: 'pending', customer: { code: 'C001', fullName: 'John Doe', phone: '123456789', address: '123 Main St' } }]}
+ *   nowLocation={[105.8542, 21.0285]}
+ *   radiusCircle={500}
+ *   ref={mapRef}
+ * />
+ * 
+ * @function
+ * @name CustomMap
+ * 
+ * @description
+ * This component uses the Vietmap GL library to render a map with various markers and routes.
+ * It supports adding, updating, and deleting markers, as well as drawing a route based on customer trip data.
+ * The map is initialized with a specific style and controls, and it updates dynamically based on the provided props.
+ * 
+ * @see {@link https://vietmap.vn/} for more information on Vietmap GL.
+ */
 const CustomMap = forwardRef((props, ref) => {
   const { isMapFull, tripCustomer, nowLocation, radiusCircle } = props;
 

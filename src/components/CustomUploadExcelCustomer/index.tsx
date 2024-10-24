@@ -22,12 +22,19 @@ interface CustomUploadExcelProps {
   typeImport?: any;
 }
 
-export function CustomUploadExcelCustomer({
-  children,
-  className,
-  onCancel,
-  typeImport,
-}: CustomUploadExcelProps) {
+/**
+ * CustomUploadExcelCustomer component allows users to upload Excel files by either
+ * clicking to select a file or dragging and dropping a file into the designated area.
+ * It handles file uploads, displays loading states, and manages file input reset.
+ *
+ * @param {React.ReactNode} children - The content to be displayed inside the upload area.
+ * @param {string} className - Additional CSS classes to apply to the component.
+ * @param {() => void} onCancel - Callback function to be called when the upload is cancelled.
+ * @param {string} typeImport - The type of import, which determines the upload function to use.
+ *
+ * @returns {JSX.Element} The rendered CustomUploadExcelCustomer component.
+ */
+export function CustomUploadExcelCustomer({ children, className, onCancel, typeImport }: CustomUploadExcelProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -107,12 +114,7 @@ export function CustomUploadExcelCustomer({
   };
 
   return (
-    <div
-      className={className}
-      onDrop={handleDrop}
-      onDragOver={handleDragOver}
-      onClick={handleImportClick}
-    >
+    <div className={className} onDrop={handleDrop} onDragOver={handleDragOver} onClick={handleImportClick}>
       <input
         type="file"
         accept=".xlsx, .xls"

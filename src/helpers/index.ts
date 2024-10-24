@@ -4,6 +4,13 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 // Sử dụng plugin
 dayjs.extend(customParseFormat);
 
+/**
+ * Formats a given date into a specified string format.
+ *
+ * @param date - The date to format. Can be a Date object or a string.
+ * @param format - The format string to use. Defaults to "DD/MM/YYYY" if not provided.
+ * @returns The formatted date string.
+ */
 export function formatDate(date?: Date | string, format?: string): string {
   return dayjs(date).format(format ?? "DD/MM/YYYY");
 }
@@ -12,14 +19,28 @@ export function formatDateTime(date?: Date | string, format?: string) {
   return dayjs(date).format(format ?? "DD/MM/YYYY HH:mm:ss");
 }
 
+/**
+ * Constructs a full image URL based on the provided relative URL.
+ *
+ * @param url - The relative URL of the image. If not provided, an empty string is returned.
+ * @returns The full URL of the image if the relative URL is provided; otherwise, an empty string.
+ */
 export function getImage(url?: string) {
   return url ? `${process.env.NEXT_PUBLIC_BASE_API_URL}/${url}` : "";
 }
 
+/**
+ * Checks if there are multiple permissions that match the given models and optional action.
+ *
+ * @param permissions - An array of permission objects, each containing a model and an action.
+ * @param models - An array of model names to check against the permissions.
+ * @param action - (Optional) The action to check against the permissions.
+ * @returns A boolean indicating whether there are matching permissions.
+ */
 export function hasMultiplePermission(
   permissions: { model: string; action: string }[],
   models: string[],
-  action?: string
+  action?: string,
 ) {
   return permissions?.find((permission) => {
     if (action) {
@@ -28,14 +49,17 @@ export function hasMultiplePermission(
 
     return models.includes(permission.model);
   });
-  // return true;
 }
 
-export function hasPermission(
-  permissions: { model: string; action: string }[],
-  model: string,
-  action?: string
-) {
+/**
+ * Checks if a given set of permissions includes a specific model and optionally an action.
+ *
+ * @param permissions - An array of permission objects, each containing a model and an action.
+ * @param model - The model to check for in the permissions.
+ * @param action - (Optional) The action to check for in the permissions.
+ * @returns A boolean indicating whether the specified model and action (if provided) exist in the permissions.
+ */
+export function hasPermission(permissions: { model: string; action: string }[], model: string, action?: string) {
   return permissions?.find((permission) => {
     if (action) {
       return permission.model === model && permission.action === action;
@@ -43,26 +67,49 @@ export function hasPermission(
 
     return permission.model === model;
   });
-
-  // return true;
 }
 
+/**
+ * Formats a given value as a string representing money in Vietnamese Dong (VND).
+ *
+ * @param value - The value to be formatted, which can be a string or a number.
+ *                If the value is undefined or null, it defaults to 0.
+ * @returns A string representing the formatted money value in VND,
+ *          with commas as thousand separators and "đ" as the currency symbol.
+ */
 export function formatMoney(value?: string | number) {
   return value ? `${Number(value || 0).toLocaleString("en-US")}đ` : "0đ";
 }
 
+/**
+ * Formats a given number or string to a locale-specific string representation.
+ *
+ * @param value - The number or string to format. If the value is undefined, it defaults to 0.
+ * @returns The formatted string representation of the number in "en-US" locale.
+ */
 export function formatNumber(value?: string | number) {
   return Number(value || 0)?.toLocaleString("en-US");
 }
 
+/**
+ * Rounds a number to three decimal places.
+ *
+ * @param value - The number to be rounded.
+ * @returns The number rounded to three decimal places.
+ */
 export function roundNumber(value: number) {
   return Math.round(value * 1000) / 1000;
 }
 
+/**
+ * Generates a random string of a specified length.
+ *
+ * @param {number} [length=6] - The length of the random string to generate. Defaults to 6 if not provided.
+ * @returns {string} A random string consisting of uppercase and lowercase letters and digits.
+ */
 export function randomString(length = 6) {
   let result = "";
-  const characters =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   const charactersLength = characters.length;
   let counter = 0;
   while (counter < length) {
@@ -72,6 +119,13 @@ export function randomString(length = 6) {
   return result;
 }
 
+/**
+ * Clones an object by serializing it to JSON and then parsing it back.
+ * This method creates a deep copy of the object.
+ *
+ * @param object - The object to be cloned.
+ * @returns A deep copy of the provided object. If an error occurs during cloning, the original object is returned.
+ */
 export function cloneObject(object) {
   try {
     return JSON.parse(JSON.stringify(object));
@@ -81,6 +135,12 @@ export function cloneObject(object) {
   }
 }
 
+/**
+ * Converts a string representation of a boolean to its corresponding boolean value.
+ *
+ * @param value - The string to be converted. Expected values are "true" or "false".
+ * @returns `true` if the input is "true", `false` if the input is "false", or `null` if the input is neither.
+ */
 export function formatBoolean(value: string) {
   if (value === "false") return false;
   if (value === "true") return true;
@@ -88,6 +148,16 @@ export function formatBoolean(value: string) {
   return null;
 }
 
+/**
+ * Checks if the given phone number is a valid Vietnamese phone number.
+ *
+ * A valid Vietnamese phone number starts with +84, 84, or 0 followed by
+ * one of the digits 3, 5, 7, 8, 9, or 1 (with sub-ranges 2, 6, 8, 9),
+ * and then contains 8 more digits.
+ *
+ * @param number - The phone number to validate.
+ * @returns `true` if the phone number is valid, `false` otherwise.
+ */
 export function isVietnamesePhoneNumber(number) {
   // eslint-disable-next-line no-useless-escape
   return /^([\+84|84|0]+(3|5|7|8|9|1[2|6|8|9]))+([0-9]{8})\b/.test(number);
@@ -124,18 +194,7 @@ export const removeAccents = (str: string) => {
 
 export const convertMoneyToString = (amount: number) => {
   // Mảng các chữ số
-  var units = [
-    "",
-    "một",
-    "hai",
-    "ba",
-    "bốn",
-    "năm",
-    "sáu",
-    "bảy",
-    "tám",
-    "chín",
-  ];
+  var units = ["", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín"];
   // Mảng các đơn vị
   var places = ["", "nghìn", "triệu", "tỷ"];
 
@@ -184,6 +243,18 @@ export const convertMoneyToString = (amount: number) => {
   return readAmount.trim();
 };
 
+/**
+ * Converts a number to its Vietnamese textual representation.
+ *
+ * @param number - The number to be converted.
+ * @returns The Vietnamese textual representation of the number.
+ *
+ * @example
+ * ```typescript
+ * const result = to_vietnamese(123);
+ * console.log(result); // "một trăm hai mươi ba"
+ * ```
+ */
 export const to_vietnamese = (number) => {
   const defaultNumbers = " hai ba bốn năm sáu bảy tám chín";
 
@@ -272,6 +343,18 @@ export const to_vietnamese = (number) => {
   // Trả về kết quả kèm xóa những ký tự thừa
   return rsString.replace(/[0-9]/g, "").replace(/ /g, " ").replace(/ $/, "");
 };
+/**
+ * Calculates the time elapsed since a given date and returns it as a human-readable string.
+ *
+ * @param dateString - The date string to calculate the time elapsed from. The string should be in a format that can be converted to ISO 8601.
+ * @returns A string representing the time elapsed since the given date in Vietnamese.
+ *
+ * @example
+ * ```typescript
+ * const result = timeAgo("2022-01-01 12:00:00");
+ * console.log(result); // "x tháng trước" or "x ngày trước" etc.
+ * ```
+ */
 export const timeAgo = (dateString: string): string => {
   const now = new Date();
   const past = new Date(dateString.replace(" ", "T")); // Chuyển đổi định dạng thành ISO 8601
@@ -301,6 +384,12 @@ export const timeAgo = (dateString: string): string => {
   return Math.floor(seconds) + " giây trước";
 };
 
+/**
+ * Converts a distance from meters to kilometers and formats it to one decimal place.
+ *
+ * @param distance - The distance in meters to be converted.
+ * @returns A string representing the distance in kilometers followed by 'km'.
+ */
 export const formatDistance = (distance: number) => {
   // Chuyển đổi khoảng cách từ mét sang kilômét và làm tròn đến 1 chữ số sau dấu phẩy
   const kilometers = (distance / 1000).toFixed(1);

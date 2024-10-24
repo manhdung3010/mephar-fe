@@ -12,25 +12,34 @@ import CustomTable from "@/components/CustomTable";
 import { CustomUnitSelect } from "@/components/CustomUnitSelect";
 import InputError from "@/components/InputError";
 import { formatMoney, formatNumber, roundNumber } from "@/helpers";
-import {
-  branchState,
-  discountState,
-  discountTypeState,
-  orderActiveState,
-  orderDiscountSelected,
-  orderState,
-  productDiscountSelected,
-} from "@/recoil/state";
+import { branchState, discountState, orderActiveState, orderState, productDiscountSelected } from "@/recoil/state";
 
+import { getDiscountConfig, getProductDiscountList } from "@/api/discount.service";
+import { useQuery } from "@tanstack/react-query";
 import { Tooltip, message } from "antd";
 import { ListBatchModal } from "./ListBatchModal";
 import { ProductDiscountModal } from "./ProductDiscountModal";
+import { checkTypeOrder } from "./checkTypeOrder";
 import type { IBatch, IProductUnit, ISaleProductLocal } from "./interface";
 import { ProductTableStyled } from "./styled";
-import { getDiscountConfig, getProductDiscountList } from "@/api/discount.service";
-import { useQuery } from "@tanstack/react-query";
-import { checkTypeOrder } from "./checkTypeOrder";
 
+/**
+ * Component for displaying and managing a list of products in a sales order.
+ *
+ * @param {Object} props - The component props.
+ * @param {any} props.useForm - The form handling object.
+ * @param {any} props.orderDetail - The details of the current order.
+ * @param {any} props.listDiscount - The list of available discounts.
+ *
+ * @returns {JSX.Element} The rendered component.
+ *
+ * @component
+ * @example
+ * const useForm = ...;
+ * const orderDetail = ...;
+ * const listDiscount = ...;
+ * return <ProductList useForm={useForm} orderDetail={orderDetail} listDiscount={listDiscount} />;
+ */
 export function ProductList({
   useForm,
   orderDetail,
@@ -41,14 +50,11 @@ export function ProductList({
   listDiscount: any;
 }) {
   const { errors, setError } = useForm;
-
+  const branchId = useRecoilValue(branchState);
   const [orderObject, setOrderObject] = useRecoilState(orderState);
   const [discountObject, setDiscountObject] = useRecoilState(discountState);
   const orderActive = useRecoilValue(orderActiveState);
-  const [orderDiscount, setOrderDiscount] = useRecoilState(orderDiscountSelected);
   const [productDiscount, setProductDiscount] = useRecoilState(productDiscountSelected);
-  const [discountType, setDiscountType] = useRecoilState(discountTypeState);
-
   const [expandedRowKeys, setExpandedRowKeys] = useState<Record<string, boolean>>({});
   const [openListBatchModal, setOpenListBatchModal] = useState(false);
   const [openProductDiscountList, setOpenProductDiscountList] = useState(false);
@@ -56,22 +62,15 @@ export function ProductList({
   const [productKeyAddBatch, setProductKeyAddBatch] = useState<string>();
   const [productUnitSelected, setProductUnitSelected] = useState<number>();
 
-  const [orderList, setOrderList] = useState([]);
-
   const checkDisplayListBatch = (product: ISaleProductLocal) => {
     return product.product.isBatchExpireControl;
   };
-
-  const branchId = useRecoilValue(branchState);
-
   const isSaleReturn = orderActive.split("-")[1] === "RETURN";
-
   const { data: discountConfigDetail, isLoading } = useQuery(["DISCOUNT_CONFIG"], () => getDiscountConfig());
 
   useEffect(() => {
     if (orderObject[orderActive]) {
       const expandedRowKeysClone = { ...expandedRowKeys };
-
       const orderObjectClone = cloneDeep(orderObject);
       orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map((product: ISaleProductLocal, index) => {
         let newProduct;
@@ -86,7 +85,6 @@ export function ProductList({
             newInventory: Math.floor(+batch.originalInventory / +product.productUnit.exchangeValue),
           })),
         };
-
         return newProduct;
       });
       setExpandedRowKeys(expandedRowKeysClone);
@@ -100,21 +98,18 @@ export function ProductList({
           expandedRowKeysClone[index] = true;
         }
       });
-
       setExpandedRowKeys(expandedRowKeysClone);
     }
   }, [orderObject, orderActive]);
 
   const onChangeQuantity = async (productKey, newValue, product?: any) => {
     const orderObjectClone = cloneDeep(orderObject);
-
     // const res = await getProductDiscountList({
     //   productUnitId: product?.id,
     //   branchId: branchId,
     //   quantity: newValue,
     // });
     // let itemDiscountProduct = res?.data?.data?.items;
-
     orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map((product: ISaleProductLocal) => {
       if (product.productKey === productKey) {
         return {
@@ -123,7 +118,6 @@ export function ProductList({
           quantity: newValue,
         };
       }
-
       return product;
     });
 
@@ -138,14 +132,12 @@ export function ProductList({
   };
   const onExpandMoreBatches = async (productKey, quantity: number, product?: any) => {
     const orderObjectClone = cloneDeep(orderObject);
-
     const res = await getProductDiscountList({
       productUnitId: product?.id,
       branchId: branchId,
       quantity: quantity,
     });
     let itemDiscountProduct = res?.data?.data?.items;
-
     orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map((product: ISaleProductLocal) => {
       if (product.productKey === productKey) {
         return {
@@ -154,44 +146,33 @@ export function ProductList({
           quantity,
         };
       }
-
       return product;
     });
-
     orderObjectClone[orderActive] = orderObjectClone[orderActive].map((product: ISaleProductLocal) => {
       if (product.productKey === productKey) {
         let sumQuantity = 0;
-
         let batches = cloneDeep(product.batches);
         batches = orderBy(batches, ["isSelected"], ["desc"]);
-
         batches = batches.map((batch) => {
           const remainQuantity = roundNumber(quantity) - roundNumber(sumQuantity);
-
           if (remainQuantity && batch.inventory) {
             const tempQuantity = batch.inventory <= remainQuantity ? batch.inventory : roundNumber(remainQuantity);
-
             sumQuantity += tempQuantity;
-
             return {
               ...batch,
               quantity: tempQuantity,
               isSelected: true,
             };
           }
-
           return { ...batch, quantity: 0, isSelected: false };
         });
-
         return {
           ...product,
           batches,
         };
       }
-
       return product;
     });
-
     setOrderObject(orderObjectClone);
   };
   const columns: ColumnsType<ISaleProductLocal> = [
@@ -271,16 +252,6 @@ export function ProductList({
                 </Tooltip>
               )}
             </div>
-            {/* <div className="cursor-pointer font-medium text-[#0070F4]">
-          {batches?.length ? 'Lô sản xuất' : ''}
-        </div> */}
-            {/* <div>
-          test2 - {' '}
-          <span className="font-medium italic text-[#828487]">
-            {warningExpiryDate}
-          </span>{' '}
-          - (tồn {inventory})
-        </div> */}
             {product?.productDosage && (
               <div className="font-medium italic text-[#0070F4]">Liều dùng: {product?.productDosage?.name}</div>
             )}
@@ -564,20 +535,7 @@ export function ProductList({
       title: "THÀNH TIỀN",
       dataIndex: "totalPrice",
       key: "totalPrice",
-      render: (
-        totalPrice,
-        {
-          quantity,
-          productUnit,
-          isDiscount,
-          discountType,
-          price,
-          discountValue,
-          isBuyByNumber,
-          buyNumberType,
-          isDiscountPrice,
-        },
-      ) =>
+      render: (totalPrice, { quantity, productUnit, isDiscount, price, isDiscountPrice }) =>
         orderDetail ? (
           formatMoney(
             checkTypeOrder(orderDetail?.order?.code)
@@ -591,10 +549,8 @@ export function ProductList({
         ),
     },
   ];
-
   const handleRemoveBatch = (productKey: string, batchId: number) => {
     const orderObjectClone = cloneDeep(orderObject);
-
     orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map((product: ISaleProductLocal) => {
       if (product.productKey === productKey) {
         return {
@@ -607,7 +563,6 @@ export function ProductList({
                 isSelected: false,
               };
             }
-
             return batch;
           }),
         };
@@ -622,7 +577,6 @@ export function ProductList({
           quantity: product.batches.reduce((acc, obj) => acc + (obj.isSelected ? obj.quantity : 0), 0),
         };
       }
-
       return product;
     });
     setOrderObject(orderObjectClone);
@@ -735,7 +689,7 @@ export function ProductList({
           expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key + 1),
         }}
       />
-      {discountType === "order" &&
+      {/* {discountType === "order" &&
         orderObject[orderActive]?.length > 0 &&
         discountObject[orderActive]?.orderDiscount?.length > 0 && (
           <div className="bg-[#fbecee] rounded-lg shadow-sm p-5 mt-5">
@@ -768,8 +722,7 @@ export function ProductList({
               ))}
             </div>
           </div>
-        )}
-
+        )} */}
       <ListBatchModal
         key={openListBatchModal ? 1 : 0}
         isOpen={!!openListBatchModal}
@@ -788,7 +741,6 @@ export function ProductList({
 
             return product;
           });
-
           setOrderObject(orderObjectClone);
           setError("products", { message: undefined });
         }}

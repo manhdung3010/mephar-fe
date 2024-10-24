@@ -1,13 +1,25 @@
-import Image from 'next/image';
+import Image from "next/image";
 
-import InfoIcon from '@/assets/info-circle.svg';
+import InfoIcon from "@/assets/info-circle.svg";
 
+/**
+ * A custom label component that displays a label with optional required indicator and info icon.
+ *
+ * @param {Object} props - The properties object.
+ * @param {boolean} [props.required] - Indicates if the label is for a required field.
+ * @param {string} [props.infoText] - The text for the info icon's alt attribute.
+ * @param {string} props.label - The text to display as the label.
+ * @param {boolean} [props.hasInfoIcon] - Determines if an info icon should be displayed.
+ * @param {string} [props.className] - Additional CSS classes to apply to the label.
+ *
+ * @returns {JSX.Element} The rendered label component.
+ */
 const Label = ({
   required,
   infoText,
   label,
   hasInfoIcon = false,
-  className
+  className,
 }: {
   required?: boolean;
   infoText?: string;
