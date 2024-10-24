@@ -267,6 +267,7 @@ export default function AddOrder() {
 
     if (importProducts.find((p) => p.productKey === localProduct.productKey)) {
       cloneImportProducts = cloneImportProducts.map((product: any) => {
+        console.log("product", product);
         if (product.productKey === localProduct.productKey) {
           return {
             ...product,

@@ -38,6 +38,8 @@ export function ProcessOrder() {
     }));
   };
 
+  console.log("inputValues", inputValues);
+
   const { data: orderDetail, isLoading } = useQuery(
     ["MAKET_ORDER_ORDER_DETAIL", id],
     () => getMarketOrderDetail(id as string),
@@ -260,19 +262,29 @@ export function ProcessOrder() {
                   value={inputValues[product?.id]}
                   onKeyDown={async (e) => {
                     if (e.key === "Enter") {
+                      const defaultLink = ["http", "https", "www"];
+                      // example: https://mephar.com/code
+                      const isLink = defaultLink.some((link) => e.target.value.includes(link));
+                      // if is link, split by / and get code
+                      const code = isLink
+                        ? e.target.value
+                            .split("/")
+                            .filter((item) => item?.length > 0)
+                            .pop()
+                        : e.target.value;
                       // validate if seri is existed
-                      if (product?.listSeri?.includes(e.target.value)) {
+                      if (product?.listSeri?.includes(code ?? e.target.value)) {
                         message.error("Seri đã tồn tại trong sản phẩm này");
                         return;
                       }
                       // validate if seri is existed in other product
                       const allProduct: any = getValues("products");
-                      const isSeriExisted = allProduct.some((p: any) => p.listSeri.includes(e.target.value));
+                      const isSeriExisted = allProduct.some((p: any) => p.listSeri.includes(code ?? e.target.value));
                       if (isSeriExisted) {
                         message.error("Seri đã tồn tại trong sản phẩm khác");
                         return;
                       }
-                      const isSeriValid: any = await checkSeriValid(e.target.value?.trim(), {});
+                      const isSeriValid: any = await checkSeriValid(code || e.target.value?.trim(), {});
                       if (isSeriValid?.data?.isExists) {
                         message.error("Seri đã tồn tại trong hệ thống");
                         return;
@@ -289,7 +301,7 @@ export function ProcessOrder() {
                       // update seri list of product
                       const products: any = cloneDeep(getValues("products"));
                       const productIndex = products.findIndex((p: any) => p.marketOrderProductId === product.id);
-                      products[productIndex].listSeri.push(e.target.value);
+                      products[productIndex].listSeri.push(code || e.target.value);
                       setValue("products", products, { shouldValidate: true });
 
                       // clear value

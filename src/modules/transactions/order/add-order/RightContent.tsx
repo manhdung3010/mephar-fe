@@ -107,7 +107,7 @@ export default function RightContent({ getValues, setValue, errors, handleSubmit
         const payload = {
           addressId: selectedAddress,
           listProduct: importProducts?.map((item) => ({
-            marketProductId: item?.marketProductId,
+            marketProductId: item?.marketProductId || item?.id,
             marketOrderProductId: item?.marketOrderProductId,
             quantity: item?.realQuantity,
             price: item?.price,
@@ -140,10 +140,7 @@ export default function RightContent({ getValues, setValue, errors, handleSubmit
 
   const onSubmit = () => {
     mutateCreateOrder();
-    // console.log("value", getValues());
   };
-
-  console.log("errors", errors);
 
   return (
     <div className="flex h-[calc(100vh-52px)] w-[360px] min-w-[360px] flex-col border-l border-[#E4E4E4] bg-white">
