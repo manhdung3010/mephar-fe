@@ -348,12 +348,7 @@ const TimeApplication = ({ setValue, getValues, errors }: any) => {
                 showTime
                 placeholder="Chọn ngày"
                 className="h-10"
-                onChange={(value) =>
-                  handleChange(
-                    "dateFrom",
-                    dayjs(value).format("YYYY-MM-DD HH:mm:ss")
-                  )
-                }
+                onChange={(value) => handleChange("dateFrom", dayjs(value).format("YYYY-MM-DD HH:mm:ss"))}
                 value={getValues("time")?.dateFrom}
               />
               <InputError error={errors?.time?.dateFrom?.message} />
@@ -363,12 +358,7 @@ const TimeApplication = ({ setValue, getValues, errors }: any) => {
                 showTime
                 placeholder="Chọn ngày"
                 className="h-10"
-                onChange={(value) =>
-                  handleChange(
-                    "dateTo",
-                    dayjs(value).format("YYYY-MM-DD HH:mm:ss")
-                  )
-                }
+                onChange={(value) => handleChange("dateTo", dayjs(value).format("YYYY-MM-DD HH:mm:ss"))}
                 value={getValues("time")?.dateTo}
               />
               <InputError error={errors?.time?.dateTo?.message} />
@@ -460,9 +450,7 @@ const TimeApplication = ({ setValue, getValues, errors }: any) => {
               wrapClassName="!w-[120px]"
               placeholder="Cảnh báo"
             />
-            <div className="text-[#8F90A6]">
-              (Nếu khách hàng đã được hưởng khuyến mại này)
-            </div>
+            <div className="text-[#8F90A6]">(Nếu khách hàng đã được hưởng khuyến mại này)</div>
           </div>
         </div>
       </div>

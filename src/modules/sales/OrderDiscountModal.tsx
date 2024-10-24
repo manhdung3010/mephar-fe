@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 import { EDiscountBillMethodLabel, EDiscountGoodsMethodLabel } from "../settings/discount/add-discount/Info";
 import SelectProductOrderModal from "./SelectProductOrderModal";
+import { message } from "antd";
 
 /**
  * OrderDiscountModal component renders a modal for applying discounts to an order.
@@ -40,12 +41,10 @@ export function OrderDiscountModal({
   const [listDiscount, setListDiscount] = useState<any[]>([]);
   const [discountObject, setDiscountObject] = useRecoilState(discountState);
   const [orderActive, setOrderActive] = useRecoilState(orderActiveState);
-
   const [openSelectProduct, setOpenSelectProduct] = useState(false);
   const [discountItem, setDiscountItem] = useState<any>(null);
-  const [giftProduct, setGiftProduct] = useState<any>(null);
-  const [discountProduct, setDiscountProduct] = useState<any>(null);
-
+  const [giftProduct, setGiftProduct] = useState<any>([]);
+  const [discountProduct, setDiscountProduct] = useState<any>([]);
   useEffect(() => {
     if (discountList?.data?.data?.items) {
       const listBatchClone = cloneDeep(discountList?.data?.data?.items);
@@ -59,7 +58,6 @@ export function OrderDiscountModal({
       setListDiscount(listBatchClone);
     }
   }, [discountList?.data?.data?.items, discountObject[orderActive]?.orderDiscount, isOpen]);
-
   const columns: ColumnsType<any> = [
     {
       title: "Chương trình khuyến mại",
@@ -99,8 +97,7 @@ export function OrderDiscountModal({
           {record?.type === "loyalty" && (
             <div>
               Tặng
-              <span className="text-[#d64457]">{" " + formatNumber(items[0]?.apply?.pointValue)}</span>
-              {(items[0]?.apply?.pointType === "amount" ? "" : "%") + " điểm"}
+              <span className="text-[#d64457]">{" " + formatNumber(items[0]?.apply?.pointValue)}điểm</span>
             </div>
           )}
           {record?.type === "gift" && (
@@ -176,7 +173,6 @@ export function OrderDiscountModal({
       forceRender={true}
     >
       <div className="my-5 h-[1px] w-full bg-[#C7C9D9]" />
-
       <CustomTable
         dataSource={
           listDiscount &&
@@ -210,7 +206,6 @@ export function OrderDiscountModal({
           },
         }}
       />
-
       <div className="mt-5 flex justify-end gap-x-4">
         <CustomButton
           onClick={() => {
@@ -235,10 +230,21 @@ export function OrderDiscountModal({
                 },
               })),
             }));
+            if (selectedDiscount[0]?.type === "gift" && giftProduct?.length === 0) {
+              message.error("Vui lòng chọn quà tặng");
+              return;
+            }
+            console.log("discountProduct", discountProduct);
+            if (selectedDiscount[0]?.type === "product_price" && discountProduct?.length === 0) {
+              message.error("Vui lòng chọn quà khuyến mại");
+              return;
+            }
             const discountObjectClone = cloneDeep(discountObject);
             discountObjectClone[orderActive].orderDiscount = selectedDiscount;
             setDiscountObject(discountObjectClone);
             onSave(selectedDiscount);
+            setGiftProduct([]);
+            setDiscountProduct([]);
           }}
           className="h-[46px] min-w-[150px] py-2 px-4"
           // type={isSaleReturn && batchErr.length > 0 ? 'disable' : 'danger'}
@@ -247,10 +253,13 @@ export function OrderDiscountModal({
           Áp dụng
         </CustomButton>
       </div>
-
       <SelectProductOrderModal
         isOpen={openSelectProduct}
-        onCancel={() => setOpenSelectProduct(false)}
+        onCancel={() => {
+          setOpenSelectProduct(false);
+          setGiftProduct([]);
+          setDiscountProduct([]);
+        }}
         onSave={(selectedGiftProduct, type) => {
           if (selectedGiftProduct.length > 0 && type === "gift") {
             setGiftProduct(selectedGiftProduct);

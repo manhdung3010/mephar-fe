@@ -134,7 +134,7 @@ export const BillDiscountProduct = ({
         </div>
 
         {getValues("items")?.map((row, index) => (
-          <div className="flex items-baseline gap-3">
+          <div className="flex items-center gap-3 border-b border-gray-100 py-3">
             <div className="flex flex-[2] flex-col px-4">
               <div className="w-full flex items-center gap-x-2">
                 Từ
@@ -189,7 +189,7 @@ export const BillDiscountProduct = ({
                 <InputError className="ml-10" error={errors?.items[index]?.apply?.discountValue?.message} />
               )}
             </div>
-            <div className="flex-[4] px-4 flex items-baseline gap-2">
+            <div className="flex-[4] px-4 flex items-center gap-2">
               <div className="w-24">
                 <CustomInput
                   className="h-10 "

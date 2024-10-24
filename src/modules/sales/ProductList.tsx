@@ -194,18 +194,21 @@ export function ProductList({
               const orderObjectClone = cloneDeep(orderObject);
               const productsClone = orderObjectClone[orderActive] || [];
               orderObjectClone[orderActive] = productsClone.filter((product) => {
-                if (isDiscount) return product.id !== id;
+                if (isDiscount) {
+                  return product.id !== id;
+                }
                 return product.productUnitId !== productUnitId;
               });
               setOrderObject(orderObjectClone);
 
-              // reset khuyến mại
-              setDiscountObject({
-                [orderActive]: {
-                  productDiscount: [],
-                  orderDiscount: [],
-                },
-              });
+              // remove productDiscount if this product is in productDiscount
+              const discountObjectClone = cloneDeep(discountObject);
+              discountObjectClone[orderActive].productDiscount = discountObjectClone[
+                orderActive
+              ].productDiscount.filter((item) => item.productUnitSelected !== productUnitId);
+              // reset orderDiscount
+              discountObjectClone[orderActive].orderDiscount = [];
+              setDiscountObject(discountObjectClone);
             }}
             alt=""
           />
@@ -222,17 +225,17 @@ export function ProductList({
       title: "TÊN SẢN PHẨM",
       dataIndex: "name",
       key: "name",
+      className: "min-w-[200px]",
       render: (_, { product, batches, isDiscount, itemDiscountProduct, productUnitId }) => {
         return (
-          <div>
-            <div className=" font-medium flex gap-2 items-center">
+          <div className="flex flex-col">
+            <div className=" font-medium flex gap-2 items-center w-full">
               <span>{product.name}</span>
               {isDiscount && <span className="text-red-500 px-2  bg-[#fde6f8] rounded">KM</span>}
               {itemDiscountProduct?.length > 0 && !isDiscount && (
-                <Tooltip title="KM hàng hóa" className="cursor-pointer w-5">
+                <div className="cursor-pointer w-5 h-5 flex-shrink-0 block">
                   <Image
                     src={DiscountIcon}
-                    className="block"
                     onClick={() => {
                       // if (
                       //   orderDiscount?.length > 0 &&
@@ -249,7 +252,7 @@ export function ProductList({
                     }}
                     alt="discount-icon"
                   />
-                </Tooltip>
+                </div>
               )}
             </div>
             {product?.productDosage && (

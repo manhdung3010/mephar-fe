@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { EDiscountBillMethodLabel, EDiscountGoodsMethodLabel } from "../settings/discount/add-discount/Info";
 import SelectProductOrderModal from "./SelectProductOrderModal";
+import { message } from "antd";
 
 /**
  * Component for displaying and managing product discounts within a modal.
@@ -50,8 +51,8 @@ export function ProductDiscountModal({
   const [listDiscount, setListDiscount] = useState<any[]>([]);
   const [isOpenSelectProduct, setIsOpenSelectProduct] = useState(false);
   const [discountItem, setDiscountItem] = useState(null);
-  const [giftProduct, setGiftProduct] = useState<any>(null);
-  const [discountProduct, setDiscountProduct] = useState<any>(null);
+  const [giftProduct, setGiftProduct] = useState<any>([]);
+  const [discountProduct, setDiscountProduct] = useState<any>([]);
   useEffect(() => {
     if (discountList) {
       // show old selected discount from productDiscount list, if same productUnitId then set isSelected to true
@@ -70,8 +71,6 @@ export function ProductDiscountModal({
   }, [discountList]);
 
   console.log("discountObject", discountObject[orderActive]);
-
-  console.log("discountList", discountList);
 
   const columns: ColumnsType<any> = [
     {
@@ -198,7 +197,6 @@ export function ProductDiscountModal({
         <CustomButton
           onClick={() => {
             let selectedDiscount: any = listDiscount.find((batch) => batch.isSelected);
-            console.log("selectedDiscount", selectedDiscount);
             selectedDiscount = {
               ...selectedDiscount,
               items: selectedDiscount.items.map((i) => ({
@@ -220,11 +218,18 @@ export function ProductDiscountModal({
                 },
               })),
             };
+            if (selectedDiscount?.type === "gift" && giftProduct.length === 0) {
+              message.error("Vui lòng chọn quà tặng");
+              return;
+            }
+            if (selectedDiscount?.type === "product_price" && discountProduct.length === 0) {
+              message.error("Vui lòng chọn quà khuyến mại");
+              return;
+            }
             const discountObjectClone = cloneDeep(discountObject);
             const index = discountObjectClone[orderActive]?.productDiscount?.findIndex(
               (item) => item?.productUnitSelected === selectedDiscount.productUnitSelected,
             );
-
             if (index !== -1) {
               discountObjectClone[orderActive].productDiscount[index] = selectedDiscount;
             } else {
@@ -232,6 +237,8 @@ export function ProductDiscountModal({
             }
             setDiscountObject(discountObjectClone);
             onSave(selectedDiscount);
+            setGiftProduct([]);
+            setDiscountProduct([]);
             onCancel();
           }}
           className="h-[46px] min-w-[150px] py-2 px-4"
@@ -243,7 +250,11 @@ export function ProductDiscountModal({
 
       <SelectProductOrderModal
         isOpen={isOpenSelectProduct}
-        onCancel={() => setIsOpenSelectProduct(false)}
+        onCancel={() => {
+          setIsOpenSelectProduct(false);
+          setGiftProduct([]);
+          setDiscountProduct([]);
+        }}
         onSave={(selectedGiftProduct, type) => {
           if (selectedGiftProduct.length > 0 && type === "gift") {
             setGiftProduct(selectedGiftProduct);

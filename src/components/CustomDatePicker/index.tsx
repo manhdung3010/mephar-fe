@@ -50,7 +50,7 @@ export function CustomDatePicker({
       placeholder={placeholder}
       format={
         format || {
-          format: showTime ? "DD/MM/YYYY hh:mm:ss" : "DD/MM/YYYY",
+          format: showTime ? "DD/MM/YYYY HH:mm:ss" : "DD/MM/YYYY",
           type: "mask",
         }
       }

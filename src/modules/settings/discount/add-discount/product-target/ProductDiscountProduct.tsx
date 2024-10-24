@@ -166,9 +166,9 @@ export const ProductDiscountProduct = ({
         </div>
 
         {getValues("items")?.map((row, index) => (
-          <div key={index} className="flex items-baseline gap-2">
+          <div key={index} className="flex items-center gap-2 border-b border-gray-100 py-3">
             <div className="flex flex-[3] flex-col px-4">
-              <div className="w-full flex items-baseline gap-x-2">
+              <div className="w-full flex items-center gap-x-2">
                 <div className="w-52">
                   <CustomInput
                     className="mt-0 h-10"
@@ -198,8 +198,8 @@ export const ProductDiscountProduct = ({
                         handleChangeRow(index, isProduct ? "productId" : "groupId", value);
                       }}
                       loading={isLoadingProduct}
-                      defaultValue={row?.condition?.productUnitId}
-                      value={isProduct ? row?.apply?.productUnitId : row?.apply?.groupId}
+                      defaultValue={row?.condition?.productId}
+                      value={isProduct ? row?.apply?.productId : row?.apply?.groupId}
                       notFoundContent={
                         isLoadingProduct ? <Spin size="small" className="flex justify-center p-4 w-full" /> : null
                       }
@@ -216,7 +216,6 @@ export const ProductDiscountProduct = ({
                               {product?.name}
                             </Option>
                           ))}
-                      pó
                     </Select>
                     {/* <Tooltip title="Nhóm hàng">
                       <Image

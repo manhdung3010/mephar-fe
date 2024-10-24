@@ -183,7 +183,6 @@ function SelectProductOrderModal({ isOpen, onCancel, onSave, discountItem, type 
               return;
             }
             onSave(selectedProducts, discountItem?.type);
-            // onCancel();
           }}
           className="h-[46px] min-w-[150px] py-2 px-4"
         >

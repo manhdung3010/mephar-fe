@@ -161,9 +161,9 @@ export const ProductGiftProduct = ({
         </div>
 
         {getValues("items")?.map((row, index) => (
-          <div className="flex items-baseline gap-2">
+          <div className="flex items-center gap-2 border-b border-gray-100 py-3">
             <div className="flex flex-[3] flex-col px-4">
-              <div className="w-full flex items-baseline gap-x-2">
+              <div className="w-full flex items-center gap-x-2">
                 <div className="w-40">
                   <CustomInput
                     className="mt-0 h-10"
@@ -209,7 +209,7 @@ export const ProductGiftProduct = ({
                 </div>
               </div>
             </div>
-            <div className="flex-[3] px-4 flex items-baseline gap-2">
+            <div className="flex-[3] px-4 flex items-center gap-2">
               <div className="w-24">
                 <CustomInput
                   className="h-10"

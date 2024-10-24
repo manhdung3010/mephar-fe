@@ -390,7 +390,6 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
                 </div>
               </>
             )}
-
             <div>
               <Label infoText="" label="Địa chỉ" />
               <CustomAutocomplete

@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRecoilValue } from "recoil";
 import { branchState } from "@/recoil/state";
 import { getGroupProduct, getSaleProducts } from "@/api/product.service";
+import { EDiscountBillMethod, EDiscountGoodsMethod, EDiscountType } from "../add-discount/Info";
 
 interface IRecord {
   key: number;
@@ -27,13 +28,11 @@ export function DiscountInfo({ record }: any) {
   } = useQuery<{
     data?: { items: ISaleProduct[] };
   }>(["LIST_PRODUCT_DISCOUNT", 1, 999, "", branchId], () =>
-    getSaleProducts({ page: 1, limit: 999, keyword: "", branchId })
+    getSaleProducts({ page: 1, limit: 999, keyword: "", branchId }),
   );
   const { data: groupProduct, isLoading: isLoadingGroup } = useQuery<{
     data?: any;
-  }>(["LIST_GROUP_PRODUCT_DISCOUNT", 1, 999, ""], () =>
-    getGroupProduct({ page: 1, limit: 999, keyword: "" })
-  );
+  }>(["LIST_GROUP_PRODUCT_DISCOUNT", 1, 999, ""], () => getGroupProduct({ page: 1, limit: 999, keyword: "" }));
 
   const columns: ColumnsType<IRecord> = [
     {
@@ -48,11 +47,7 @@ export function DiscountInfo({ record }: any) {
       dataIndex: "discountValue",
       key: "discountValue",
       className: "max-w-[50%] w-1/2",
-      render: (text, { discountType }) => (
-        <span>
-          {discountType === "percent" ? text + "%" : formatMoney(text)}
-        </span>
-      ),
+      render: (text, { discountType }) => <span>{discountType === "percent" ? text + "%" : formatMoney(text)}</span>,
     },
   ];
   const columns2: ColumnsType<IRecord> = [
@@ -62,6 +57,18 @@ export function DiscountInfo({ record }: any) {
       key: "orderFrom",
       className: "max-w-[50%] w-1/2",
       render: (text) => <span>{formatMoney(text)}</span>,
+    },
+    {
+      title: "Giá trị KM",
+      dataIndex: "discountValue",
+      key: "discountValue",
+      // className: "max-w-[50%] w-1/2",
+      render: (discountValue, { discountType }) => (
+        <span>
+          {formatNumber(discountValue)}
+          {discountType === "amount" ? "đ" : "%"}
+        </span>
+      ),
     },
     {
       title: "Hàng/Nhóm hàng tặng",
@@ -75,32 +82,23 @@ export function DiscountInfo({ record }: any) {
             productDiscount[0]?.groupId
               ? productDiscount
                   .map((item) => {
-                    const product = groupProduct?.data?.items.find(
-                      (product) => product?.id === item.groupId
-                    );
+                    const product = groupProduct?.data?.items.find((product) => product?.id === item.groupId);
                     return product;
                   })
                   .map((product, index) => (
-                    <span
-                      className="bg-[#f0f0f0] rounded px-2 py-1"
-                      key={index}
-                    >
+                    <span className="bg-[#f0f0f0] rounded px-2 py-1" key={index}>
                       {product?.name}
                     </span>
                   ))
               : productDiscount
                   .map((item) => {
                     const product = products?.data?.items.find(
-                      (product) =>
-                        product.productUnit?.id === item.productUnitId
+                      (product) => product.productUnit?.id === item.productUnitId,
                     );
                     return product;
                   })
                   .map((product, index) => (
-                    <span
-                      className="bg-[#f0f0f0] rounded px-2 py-1"
-                      key={index}
-                    >
+                    <span className="bg-[#f0f0f0] rounded px-2 py-1" key={index}>
                       {product?.productUnit?.code +
                         " - " +
                         product?.product?.name +
@@ -140,32 +138,23 @@ export function DiscountInfo({ record }: any) {
             productDiscount[0]?.groupId
               ? productDiscount
                   .map((item) => {
-                    const product = groupProduct?.data?.items.find(
-                      (product) => product?.id === item.groupId
-                    );
+                    const product = groupProduct?.data?.items.find((product) => product?.id === item.groupId);
                     return product;
                   })
                   .map((product, index) => (
-                    <span
-                      className="bg-[#f0f0f0] rounded px-2 py-1"
-                      key={index}
-                    >
+                    <span className="bg-[#f0f0f0] rounded px-2 py-1" key={index}>
                       {product?.name}
                     </span>
                   ))
               : productDiscount
                   .map((item) => {
                     const product = products?.data?.items.find(
-                      (product) =>
-                        product.productUnit?.id === item.productUnitId
+                      (product) => product.productUnit?.id === item.productUnitId,
                     );
                     return product;
                   })
                   .map((product, index) => (
-                    <span
-                      className="bg-[#f0f0f0] rounded px-2 py-1"
-                      key={index}
-                    >
+                    <span className="bg-[#f0f0f0] rounded px-2 py-1" key={index}>
                       {product?.productUnit?.code +
                         " - " +
                         product?.product?.name +
@@ -219,18 +208,12 @@ export function DiscountInfo({ record }: any) {
             productDiscount
               .filter((item) => item.isCondition)
               .map((item) => {
-                const product = products?.data?.items.find(
-                  (product) => product.productUnit?.id === item.productUnitId
-                );
+                const product = products?.data?.items.find((product) => product.productUnit?.id === item.productUnitId);
                 return product;
               })
               .map((product, index) => (
                 <span className="bg-[#f0f0f0] rounded px-2 py-1" key={index}>
-                  {product?.productUnit?.code +
-                    " - " +
-                    product?.product?.name +
-                    " - " +
-                    product?.productUnit?.unitName}
+                  {product?.productUnit?.code + " - " + product?.product?.name + " - " + product?.productUnit?.unitName}
                 </span>
               ))
           }
@@ -248,7 +231,7 @@ export function DiscountInfo({ record }: any) {
       title: "Giảm giá",
       dataIndex: "discountValue",
       key: "discountValue",
-      className: "",
+      className: "min-w-[100px]",
       render: (discountValue, { discountType }) => (
         <span>
           {formatNumber(discountValue)} {discountType === "amount" ? "đ" : "%"}
@@ -267,18 +250,12 @@ export function DiscountInfo({ record }: any) {
             productDiscount
               .filter((item) => !item.isCondition)
               .map((item) => {
-                const product = products?.data?.items.find(
-                  (product) => product.productUnit?.id === item.productUnitId
-                );
+                const product = products?.data?.items.find((product) => product.productUnit?.id === item.productUnitId);
                 return product;
               })
               .map((product, index) => (
                 <span className="bg-[#f0f0f0] rounded px-2 py-1" key={index}>
-                  {product?.productUnit?.code +
-                    " - " +
-                    product?.product?.name +
-                    " - " +
-                    product?.productUnit?.unitName}
+                  {product?.productUnit?.code + " - " + product?.product?.name + " - " + product?.productUnit?.unitName}
                 </span>
               ))
           }
@@ -306,18 +283,12 @@ export function DiscountInfo({ record }: any) {
             productDiscount
               .filter((item) => item.isCondition)
               .map((item) => {
-                const product = products?.data?.items.find(
-                  (product) => product.productUnit?.id === item.productUnitId
-                );
+                const product = products?.data?.items.find((product) => product.productUnit?.id === item.productUnitId);
                 return product;
               })
               .map((product, index) => (
                 <span className="bg-[#f0f0f0] rounded px-2 py-1" key={index}>
-                  {product?.productUnit?.code +
-                    " - " +
-                    product?.product?.name +
-                    " - " +
-                    product?.productUnit?.unitName}
+                  {product?.productUnit?.code + " - " + product?.product?.name + " - " + product?.productUnit?.unitName}
                 </span>
               ))
           }
@@ -343,18 +314,12 @@ export function DiscountInfo({ record }: any) {
             productDiscount
               .filter((item) => !item.isCondition)
               .map((item) => {
-                const product = products?.data?.items.find(
-                  (product) => product.productUnit?.id === item.productUnitId
-                );
+                const product = products?.data?.items.find((product) => product.productUnit?.id === item.productUnitId);
                 return product;
               })
               .map((product, index) => (
                 <span className="bg-[#f0f0f0] rounded px-2 py-1" key={index}>
-                  {product?.productUnit?.code +
-                    " - " +
-                    product?.product?.name +
-                    " - " +
-                    product?.productUnit?.unitName}
+                  {product?.productUnit?.code + " - " + product?.product?.name + " - " + product?.productUnit?.unitName}
                 </span>
               ))
           }
@@ -382,18 +347,12 @@ export function DiscountInfo({ record }: any) {
             productDiscount
               .filter((item) => item.isCondition)
               .map((item) => {
-                const product = products?.data?.items.find(
-                  (product) => product.productUnit?.id === item.productUnitId
-                );
+                const product = products?.data?.items.find((product) => product.productUnit?.id === item.productUnitId);
                 return product;
               })
               .map((product, index) => (
                 <span className="bg-[#f0f0f0] rounded px-2 py-1" key={index}>
-                  {product?.productUnit?.code +
-                    " - " +
-                    product?.product?.name +
-                    " - " +
-                    product?.productUnit?.unitName}
+                  {product?.productUnit?.code + " - " + product?.product?.name + " - " + product?.productUnit?.unitName}
                 </span>
               ))
           }
@@ -447,32 +406,23 @@ export function DiscountInfo({ record }: any) {
             productDiscount[0]?.groupId
               ? productDiscount
                   .map((item) => {
-                    const product = groupProduct?.data?.items.find(
-                      (product) => product?.id === item.groupId
-                    );
+                    const product = groupProduct?.data?.items.find((product) => product?.id === item.groupId);
                     return product;
                   })
                   .map((product, index) => (
-                    <span
-                      className="bg-[#f0f0f0] rounded px-2 py-1"
-                      key={index}
-                    >
+                    <span className="bg-[#f0f0f0] rounded px-2 py-1" key={index}>
                       {product?.name}
                     </span>
                   ))
               : productDiscount
                   .map((item) => {
                     const product = products?.data?.items.find(
-                      (product) =>
-                        product.productUnit?.id === item.productUnitId
+                      (product) => product.productUnit?.id === item.productUnitId,
                     );
                     return product;
                   })
                   .map((product, index) => (
-                    <span
-                      className="bg-[#f0f0f0] rounded px-2 py-1"
-                      key={index}
-                    >
+                    <span className="bg-[#f0f0f0] rounded px-2 py-1" key={index}>
                       {product?.productUnit?.code +
                         " - " +
                         product?.product?.name +
@@ -513,32 +463,23 @@ export function DiscountInfo({ record }: any) {
             productDiscount[0]?.groupId
               ? productDiscount
                   .map((item) => {
-                    const product = groupProduct?.data?.items.find(
-                      (product) => product?.id === item.groupId
-                    );
+                    const product = groupProduct?.data?.items.find((product) => product?.id === item.groupId);
                     return product;
                   })
                   .map((product, index) => (
-                    <span
-                      className="bg-[#f0f0f0] rounded px-2 py-1"
-                      key={index}
-                    >
+                    <span className="bg-[#f0f0f0] rounded px-2 py-1" key={index}>
                       {product?.name}
                     </span>
                   ))
               : productDiscount
                   .map((item) => {
                     const product = products?.data?.items.find(
-                      (product) =>
-                        product.productUnit?.id === item.productUnitId
+                      (product) => product.productUnit?.id === item.productUnitId,
                     );
                     return product;
                   })
                   .map((product, index) => (
-                    <span
-                      className="bg-[#f0f0f0] rounded px-2 py-1"
-                      key={index}
-                    >
+                    <span className="bg-[#f0f0f0] rounded px-2 py-1" key={index}>
                       {product?.productUnit?.code +
                         " - " +
                         product?.product?.name +
@@ -552,32 +493,28 @@ export function DiscountInfo({ record }: any) {
     },
     {
       title: "Số lượng",
-      dataIndex: "fromQuantity",
-      key: "fromQuantity",
+      dataIndex: "maxQuantity",
+      key: "maxQuantity",
       className: "",
       render: (text) => <span>{formatNumber(text)}</span>,
     },
   ];
-  const checkType = (target: string, type: string) => {
-    if (target === "order" && type === "order_price") {
-      return columns;
-    } else if (target === "order" && type === "product_price") {
-      return columns2;
-    } else if (target === "order" && type === "loyalty") {
-      return columns4;
-    } else if (target === "product" && type === "product_price") {
-      return columns5;
-    } else if (target === "product" && type === "gift") {
-      return columns6;
-    } else if (target === "product" && type === "loyalty") {
-      return columns7;
-    } else if (target === "product" && type === "price_by_buy_number") {
-      return columns8;
-    } else if (target === "order" && type === "gift") {
-      return columns9;
-    } else {
-      return columns3;
-    }
+
+  // Define the columns mapping for each combination of target and type
+  const columnMap: Record<string, any> = {
+    [`${EDiscountType.ORDER}_${EDiscountBillMethod.ORDER_PRICE}`]: columns,
+    [`${EDiscountType.ORDER}_${EDiscountBillMethod.PRODUCT_PRICE}`]: columns2,
+    [`${EDiscountType.ORDER}_${EDiscountBillMethod.LOYALTY}`]: columns4,
+    [`${EDiscountType.ORDER}_${EDiscountBillMethod.GIFT}`]: columns9,
+    [`${EDiscountType.PRODUCT}_${EDiscountGoodsMethod.PRODUCT_PRICE}`]: columns5,
+    [`${EDiscountType.PRODUCT}_${EDiscountGoodsMethod.GIFT}`]: columns6,
+    [`${EDiscountType.PRODUCT}_${EDiscountGoodsMethod.LOYALTY}`]: columns7,
+    [`${EDiscountType.PRODUCT}_${EDiscountGoodsMethod.PRICE_BY_BUY_NUMBER}`]: columns8,
+  };
+
+  const checkType = (target: EDiscountType, type: string) => {
+    const key = `${target}_${type}`;
+    return columnMap[key?.toUpperCase()] || columns3;
   };
 
   return (

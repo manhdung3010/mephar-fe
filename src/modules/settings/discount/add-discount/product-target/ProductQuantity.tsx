@@ -155,10 +155,10 @@ export const ProductQuantity = ({
     <>
       <div className="my-5 flex flex-col gap-2">
         {getValues("items")?.map((row, index) => (
-          <div className="flex items-baseline gap-2 border-[1px] border-[#d9d9d9] rounded shadow-lg p-8">
+          <div className="flex items-center gap-2 border-[1px] border-[#d9d9d9] rounded shadow-lg p-8">
             <div className="flex flex-[1] flex-col px-4 font-semibold">Khi mua</div>
             <div className="flex flex-[5] flex-col px-4 gap-5">
-              <div className="w-full flex items-baseline gap-x-2">
+              <div className="w-full flex items-center gap-x-2">
                 <div className="w-full">
                   <Select
                     mode="multiple"
