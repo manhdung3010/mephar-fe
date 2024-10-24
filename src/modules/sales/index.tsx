@@ -115,7 +115,7 @@ const Index = () => {
   const totalPrice = useMemo(() => {
     let price = 0;
     orderObject[orderActive]?.forEach((product: ISaleProductLocal) => {
-      const unit = product.product.productUnit?.find((unit) => unit.id === product.productUnitId);
+      const unit = product?.product?.productUnit?.find((unit) => unit.id === product.productUnitId);
 
       price += Number(unit?.price ?? 0) * product.quantity;
     });
@@ -300,7 +300,6 @@ const Index = () => {
           return onSelectedProduct(
             JSON.stringify({
               ...product,
-              product: product,
               productUnitId: product.productUnit[0]?.id,
               productUnit: {
                 ...product?.productUnit,
