@@ -74,14 +74,13 @@ export default function AddOrder() {
     },
   );
 
-  console.log("details", details);
-
   useEffect(() => {
     if (details?.data?.item) {
       const listProduct = details?.data?.item?.products?.map((product) => {
+        console.log("product", product);
         return {
           ...product.marketProduct,
-          productKey: `${product.marketProduct.product.id}-${product.id}`,
+          productKey: `${product.marketProduct.product.id}-${product.marketProduct.id}`,
           inventory: product.quantity,
           realQuantity: product.quantity,
           price: product.price,
@@ -90,13 +89,14 @@ export default function AddOrder() {
           marketOrderProductId: product?.id,
         };
       });
-
       setImportProducts(listProduct);
       setValue("listProduct", listProduct);
       setValue("customerId", details?.data?.item?.customerId);
       setValue("note", details?.data?.item?.note);
     }
   }, [details?.data?.item]);
+
+  console.log("importProducts", importProducts);
 
   const { data: products, isLoading: isLoadingConfigProductPrivate } = useQuery(
     ["CONFIG_PRODUCT_PRIVATE", JSON.stringify(formFilter), getValues("customerId")],
@@ -267,21 +267,20 @@ export default function AddOrder() {
 
     if (importProducts.find((p) => p.productKey === localProduct.productKey)) {
       cloneImportProducts = cloneImportProducts.map((product: any) => {
-        console.log("product", product);
         if (product.productKey === localProduct.productKey) {
           return {
             ...product,
             realQuantity: product.realQuantity + 1,
-            batches: product.batches.map((batch) => {
-              const newBatch = {
-                ...batch,
-                // inventory,
-                // originalInventory: batch.quantity,
-                quantity: batch.isSelected ? batch.quantity + 1 : batch.quantity,
-              };
+            // batches: product.batches.map((batch) => {
+            //   const newBatch = {
+            //     ...batch,
+            //     // inventory,
+            //     // originalInventory: batch.quantity,
+            //     quantity: batch.isSelected ? batch.quantity + 1 : batch.quantity,
+            //   };
 
-              return newBatch;
-            }),
+            //   return newBatch;
+            // }),
           };
         }
 

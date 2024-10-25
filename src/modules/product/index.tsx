@@ -59,7 +59,7 @@ function CheckSeri() {
                 <span className="">{product?.data?.marketOrder?.phone}</span>
               </div>
               <div className="border-b border-gray-200 p-3">
-                {parse(product?.data?.item?.description)}
+                {parse(product?.data?.item?.description ?? "")}
 
                 <div className="text-center mt-5">
                   <p className="text-gray-500">Đơn vị sản xuất và cung cấp sản phẩm</p>
