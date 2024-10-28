@@ -31,18 +31,13 @@ export function RightContent({
 }) {
   const [searchEmployeeText, setSearchEmployeeText] = useState("");
   const router = useRouter();
-
   const { getValues, setValue, handleSubmit, errors, reset } = useForm;
-
   const [productsImport, setProductsImport] = useRecoilState(productMoveState);
   const profile = useRecoilValue(profileState);
-
   const { data: employees } = useQuery(["EMPLOYEE_LIST", searchEmployeeText], () =>
     getEmployee({ page: 1, limit: 20, keyword: searchEmployeeText }),
   );
-
   const { data: branches } = useQuery(["SETTING_BRANCH_DELIVERY"], () => getBranch());
-
   const { mutate: mutateCreateProductImport, isLoading: isLoadingCreateProductImport } = useMutation(
     () => {
       const products = getValues("products").map(({ isBatchExpireControl, ...product }) => ({
@@ -74,7 +69,6 @@ export function RightContent({
   const { mutate: mutateReceiveProductImport, isLoading: isLoadingReceiveProductImport } = useMutation(
     () => {
       const products = getValues("items").map(({ isBatchExpireControl, ...product }) => product);
-
       return createReceiveMoveProduct({ ...getValues() }, moveId);
     },
     {
@@ -91,13 +85,11 @@ export function RightContent({
       },
     },
   );
-
   useEffect(() => {
     if (profile) {
       moveId ? setValue("receivedBy", profile.id) : setValue("movedBy", profile.id);
     }
   }, [profile]);
-
   const totalPrice = useMemo(() => {
     let price = 0;
 
@@ -163,7 +155,7 @@ export function RightContent({
   const onSubmit = () => {
     if (moveId) {
       let errorTxt;
-      productsImport.forEach((item) => {
+      productsImport.forEach((item: any) => {
         if (item.quantity > item.totalQuantity) {
           errorTxt = "Số lượng nhận không được lớn hơn số lượng chuyển";
           return;
@@ -173,8 +165,6 @@ export function RightContent({
         message.error(errorTxt);
         return;
       }
-      console.log(getValues());
-
       return mutateReceiveProductImport();
     } else {
       mutateCreateProductImport();
@@ -206,9 +196,7 @@ export function RightContent({
         />
         <InputError error={errors.userId?.message} />
       </div>
-
       <div className="my-6 h-[1px] w-full bg-[#E4E4E4]"></div>
-
       <div className="flex grow flex-col px-6">
         <div className="grow">
           <div className="mb-5 border-b-2 border-dashed border-[#E4E4E4]">

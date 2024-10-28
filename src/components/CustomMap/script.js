@@ -26,17 +26,4 @@ map.on("load", function () {
       },
     },
   });
-  // map.addLayer({
-  //   id: "route",
-  //   type: "line",
-  //   source: "route",
-  //   layout: {
-  //     "line-join": "round",
-  //     "line-cap": "round",
-  //   },
-  //   paint: {
-  //     "line-color": "red",
-  //     "line-width": 8,
-  //   },
-  // });
 });

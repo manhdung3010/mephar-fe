@@ -30,19 +30,6 @@ import { ISaleProduct } from "@/modules/sales/interface";
 import { RoleAction, RoleModel } from "@/modules/settings/role/role.enum";
 import { message } from "antd";
 
-interface IRecord {
-  key: number;
-  id: string;
-  name: string;
-  product: {
-    id: string;
-    name: string;
-  };
-  units: { name: string }[];
-  inventoryQuantity: number;
-  deliveryQuantity: number;
-}
-
 export function DeliveryCoupon() {
   const [expandedRowKeys, setExpandedRowKeys] = useState<Record<string, boolean>>({});
 
@@ -104,7 +91,7 @@ export function DeliveryCoupon() {
 
   // lỗi quantity + 1 mỗi khi F5
   useEffect(() => {
-    if (moveDetail) {
+    if (moveDetail?.data?.items) {
       let cloneImportProducts = cloneDeep(importProducts);
       moveDetail?.data?.items?.forEach((product) => {
         const newProduct = {
@@ -118,8 +105,8 @@ export function DeliveryCoupon() {
           code: product.product.code,
           // inventory: product.quantity,
           productId: product.id,
-          quantity: product.quantity,
-          totalQuantity: product.quantity,
+          quantity: product.quantity - product.toQuantity,
+          totalQuantity: product.quantity - product.toQuantity,
           price: product.price,
           // batches: id ? product.productBatchHistories : [],
         };
@@ -129,7 +116,7 @@ export function DeliveryCoupon() {
             if (product.productKey === localProduct.productKey) {
               return {
                 ...product,
-                quantity: product.quantity,
+                quantity: localProduct.quantity,
               };
             }
 
@@ -213,7 +200,7 @@ export function DeliveryCoupon() {
       title: "Mã hàng",
       dataIndex: "code",
       key: "code",
-      render: (value) => <span className="cursor-pointer text-[#0070F4]">{value}</span>,
+      render: (value, { productUnit }) => <span className="cursor-pointer text-[#0070F4]">{productUnit?.code}</span>,
     },
     {
       title: "Tên hàng",
@@ -365,8 +352,6 @@ export function DeliveryCoupon() {
     });
     setImportProducts(products);
   };
-
-  console.log("importProducts", importProducts);
 
   return (
     <div className="-mx-8 flex">

@@ -42,7 +42,7 @@ import { vehicalState } from '@/recoil/state';
  * @see {@link https://vietmap.vn/} for more information on Vietmap GL.
  */
 const CustomMap = forwardRef((props, ref) => {
-  const { isMapFull, tripCustomer, nowLocation, radiusCircle } = props;
+  const { isMapFull, tripCustomer, nowLocation, radiusCircle, isCheck } = props;
 
   const [vehical, setVehical] = useRecoilState(vehicalState);
 
@@ -63,6 +63,7 @@ const CustomMap = forwardRef((props, ref) => {
     }
     if (tripCustomer?.length > 0) {
       tripCustomer.forEach((customer, index) => {
+        console.log('customer', customer)
         const coordinates = [+customer?.lng, +customer?.lat];
         createMarker(coordinates, customPopup(customer), customer?.stt || index + 1, customer?.status);
       });
@@ -122,6 +123,7 @@ const CustomMap = forwardRef((props, ref) => {
     });
 
     mapRef.current.addControl(new vietmapgl.NavigationControl(), 'bottom-right');
+    mapRef.current.addControl(new vietmapgl.FullscreenControl(), 'bottom-right');
 
     mapRef.current.on('load', () => {
       if (fromMarkerRef.current) {
@@ -147,12 +149,17 @@ const CustomMap = forwardRef((props, ref) => {
     customMarker.className = "customer-marker";
     customMarker.style.width = "45px";
     customMarker.style.height = "56px";
-    if (customerStatus === 'visited') {
-      customMarker.style.backgroundImage = 'url("https://res.cloudinary.com/dvrqupkgg/image/upload/v1720695045/markBgSuccessIcon_kf8zj7.svg")'; // Green color
+    if (isCheck) {
+      customerStatus === 'active' ? customMarker.style.backgroundImage = 'url("https://res.cloudinary.com/dvrqupkgg/image/upload/v1720695045/markBgSuccessIcon_kf8zj7.svg")' : customerStatus === 'inactive' ? customMarker.style.backgroundImage = 'url("https://res.cloudinary.com/dvrqupkgg/image/upload/v1730108581/Pinlet_Marker_with_Number_mkszqv.svg")' : customMarker.style.backgroundImage = 'url("https://res.cloudinary.com/dvrqupkgg/image/upload/v1730108715/Pinlet_Marker_with_Number_eyk3yr.svg")';
     }
     else {
-      customMarker.style.backgroundImage = 'url("https://res.cloudinary.com/dvrqupkgg/image/upload/v1720693956/markBgIcon_ummkoy.svg")';
-      customMarker.textContent = customerIndex; // Set the number inside the marker
+      if (customerStatus === 'visited') {
+        customMarker.style.backgroundImage = 'url("https://res.cloudinary.com/dvrqupkgg/image/upload/v1720695045/markBgSuccessIcon_kf8zj7.svg")'; // Green color
+      }
+      else {
+        customMarker.style.backgroundImage = 'url("https://res.cloudinary.com/dvrqupkgg/image/upload/v1720693956/markBgIcon_ummkoy.svg")';
+        customMarker.textContent = customerIndex; // Set the number inside the marker
+      }
     }
     customMarker.style.lineHeight = "56px";
     customMarker.style.backgroundSize = "cover"; // White border
