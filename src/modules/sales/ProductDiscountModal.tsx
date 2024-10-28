@@ -70,7 +70,7 @@ export function ProductDiscountModal({
     }
   }, [discountList]);
 
-  console.log("discountObject", discountObject[orderActive]);
+  console.log("discountObject", discountObject);
 
   const columns: ColumnsType<any> = [
     {

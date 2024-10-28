@@ -10,6 +10,7 @@ import {
   agencyState,
   branchGenegalState,
   branchState,
+  discountState,
   orderActiveState,
   orderState,
   profileState,
@@ -27,23 +28,15 @@ export function InitGlobalData() {
   const [isAgency, setIsAgency] = useRecoilState(agencyState);
   const orderObject = useRecoilValue(orderState);
   const orderActive = useRecoilValue(orderActiveState);
+  const [discountObject, setDiscountObject] = useRecoilState(discountState);
 
-  const { data: profile } = useQuery(
-    ["PROFILE", getToken(), router.pathname],
-    () => getProfile(),
-    {
-      enabled: !!getToken() && !excludePath.includes(router.pathname),
-    }
-  );
-  const { data: branches } = useQuery(
-    ["SETTING_BRANCH", getToken()],
-    () => getBranch(),
-    {
-      enabled:
-        !branch && !!getToken() && !excludePath.includes(router.pathname),
-      cacheTime: 0,
-    }
-  );
+  const { data: profile } = useQuery(["PROFILE", getToken(), router.pathname], () => getProfile(), {
+    enabled: !!getToken() && !excludePath.includes(router.pathname),
+  });
+  const { data: branches } = useQuery(["SETTING_BRANCH", getToken()], () => getBranch(), {
+    enabled: !branch && !!getToken() && !excludePath.includes(router.pathname),
+    cacheTime: 0,
+  });
 
   useEffect(() => {
     if (profile) {
@@ -54,14 +47,24 @@ export function InitGlobalData() {
   }, [profile]);
 
   useEffect(() => {
-    if (branches?.data?.items?.length && !branch) {
-      const defaultBranch = branches?.data?.items?.find(
-        (item) => item.isDefaultBranch
-      );
+    if (orderActive) {
+      // change default orderActive of discountObject
+      if (!discountObject[orderActive]) {
+        setDiscountObject((old) => ({
+          [orderActive]: {
+            productDiscount: [],
+            orderDiscount: [],
+          },
+        }));
+      }
+    }
+  }, [orderActive]);
 
-      setBranch(
-        defaultBranch ? defaultBranch.id : branches?.data?.items[0]?.id
-      );
+  useEffect(() => {
+    if (branches?.data?.items?.length && !branch) {
+      const defaultBranch = branches?.data?.items?.find((item) => item.isDefaultBranch);
+
+      setBranch(defaultBranch ? defaultBranch.id : branches?.data?.items[0]?.id);
     }
   }, [branches, router.pathname]);
 

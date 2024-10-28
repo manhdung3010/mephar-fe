@@ -129,7 +129,7 @@ const Index = () => {
   };
   const data: any = getDiscountPostData();
   const { data: discountList, isLoading } = useQuery(
-    ["ORDER_DISCOUNT_LIST", orderObject[orderActive]],
+    ["ORDER_DISCOUNT_LIST", orderObject[orderActive], getValues("customerId"), totalPrice],
     () => getOrderDiscountList(data),
     {
       enabled: totalPrice > 0,
@@ -239,8 +239,6 @@ const Index = () => {
       });
     }
   }, [discountObject]);
-
-  console.log("orderObject", orderObject[orderActive]);
 
   // giam gia hoa don
   useEffect(() => {
@@ -381,7 +379,6 @@ const Index = () => {
           const orderObjectClone2 = cloneDeep(orderObject);
           // add pointDiscount to product
           const pointValue = discount?.items[0]?.apply?.pointValue;
-          console.log("pointValue", pointValue);
           // set pointValue to this product in orderObject
           orderObjectClone2[orderActive] = orderObjectClone[orderActive]?.map((product: ISaleProductLocal) => {
             if (product.productUnitId === discount?.productUnitSelected) {
