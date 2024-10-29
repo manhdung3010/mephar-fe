@@ -1,4 +1,4 @@
-import { getGeo, getLatLng, searchPlace } from "@/api/trip.service";
+import { getGeo, getLatLng, searchPlace, searchPlaceByLatLng } from "@/api/trip.service";
 import ArrowLeftIcon from "@/assets/arrowLeftIcon2.svg";
 import MarkIcon from "@/assets/markIcon.svg";
 import PhoneIcon from "@/assets/phoneIcon.svg";
@@ -6,13 +6,13 @@ import DistanceIcon from "@/assets/distanceIcon.svg";
 import { CustomButton } from "@/components/CustomButton";
 import Label from "@/components/CustomLabel";
 import CustomMap from "@/components/CustomMap";
-import { formatDistance } from "@/helpers";
+import { formatDistance, isCoordinates } from "@/helpers";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { message, Select, Spin } from "antd";
-import { debounce } from "lodash";
+import { debounce, isArray } from "lodash";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { schema } from "./schema";
 import { useRouter } from "next/router";
@@ -25,6 +25,7 @@ function Check() {
   const [isMapFull, setIsMapFull] = useState<boolean>(false);
   const [refId, setRefId] = useState("");
   const [placeKeyword, setPlaceKeyword] = useState("");
+  const [tempSearch, setTempSearch] = useState("");
 
   const [searchResult, setSearchResult] = useState<any[]>([]);
 
@@ -47,7 +48,15 @@ function Check() {
 
   const { data: places, isLoading: isLoadingPlace } = useQuery(
     ["SEARCH_PLACE", placeKeyword],
-    () => searchPlace({ keyword: placeKeyword }),
+    () => {
+      if (isCoordinates(placeKeyword)) {
+        return searchPlaceByLatLng({
+          lat: String(placeKeyword.split(",")[0]),
+          lng: String(placeKeyword.split(",")[1]),
+        });
+      }
+      return searchPlace({ keyword: placeKeyword });
+    },
     {
       enabled: placeKeyword.length > 0,
     },
@@ -69,14 +78,15 @@ function Check() {
       onSuccess: async (res) => {
         setCustomerList(res?.data);
         setSearchResult(res?.data);
-        handleAddMarker(latLng?.data?.lng, latLng?.data?.lat);
+        if (latLng?.data?.lng && latLng?.data?.lat) {
+          handleAddMarker(latLng?.data?.lng, latLng?.data?.lat);
+        }
       },
       onError: (err: any) => {
         message.error(err?.message);
       },
     },
   );
-
   useEffect(() => {
     if (latLng) {
       setValue("lat", latLng?.data?.lat, { shouldValidate: true });
@@ -99,6 +109,13 @@ function Check() {
     mutateGetGeo();
   };
 
+  const onSearch = useCallback(
+    debounce((value) => {
+      setPlaceKeyword(value);
+    }, 300),
+    [],
+  );
+
   return (
     <>
       <div className="my-6 flex gap-6">
@@ -115,25 +132,45 @@ function Check() {
                       // prefixIcon={<Image src={SearchIcon} alt="" />}
                       wrapClassName="w-full !rounded bg-white"
                       onSelect={(value) => {
-                        setRefId(value);
+                        if (isCoordinates(placeKeyword)) {
+                          setValue("lat", placeKeyword.split(",")[0]?.trim(), { shouldValidate: true });
+                          setValue("lng", placeKeyword.split(",")[1]?.trim(), { shouldValidate: true });
+                          handleAddMarker(placeKeyword.split(",")[1]?.trim(), placeKeyword.split(",")[0]?.trim());
+                          setTempSearch(placeKeyword);
+                          return;
+                        }
+                        const parseValue = value ? JSON?.parse(value) : null;
+                        setRefId(parseValue?.ref_id);
+                        setTempSearch(parseValue?.display);
                       }}
+                      isLoading={isLoadingPlace}
                       showSearch={true}
                       listHeight={300}
-                      onSearch={debounce((value) => {
-                        setPlaceKeyword(value);
-                      }, 300)}
-                      value={places?.data?.find((item) => item.ref_id === refId)?.display}
-                      options={places?.data.map((item) => ({
-                        value: item?.ref_id,
-                        label: (
-                          <div className="!flex !items-center gap-1 py-2 line-clamp-1">
-                            <div className="w-5 h-5 flex-shrink-0 flex items-center justify-center">
-                              <Image src={MarkIcon} className="" />
-                            </div>
-                            <span className="display">{item?.display}</span>
-                          </div>
-                        ),
-                      }))}
+                      onSearch={(value) => {
+                        onSearch(value);
+                        setTempSearch(value);
+                      }}
+                      value={tempSearch}
+                      options={
+                        isArray(places?.data)
+                          ? places?.data.map((item) => ({
+                              value: JSON.stringify(item),
+                              label: (
+                                <div className="!flex !items-center gap-1 py-2 line-clamp-1">
+                                  <div className="w-5 h-5 flex-shrink-0 flex items-center justify-center">
+                                    <Image src={MarkIcon} className="" />
+                                  </div>
+                                  <span className="display">{item?.display}</span>
+                                </div>
+                              ),
+                            }))
+                          : [
+                              {
+                                value: places?.data?.address,
+                                label: places?.data?.address,
+                              },
+                            ]
+                      }
                     />
                   </div>
                   <div>

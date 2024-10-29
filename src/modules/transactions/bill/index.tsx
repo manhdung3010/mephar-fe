@@ -38,14 +38,11 @@ export function BillTransaction() {
     branchId,
   });
 
-  const { data: orders, isLoading } = useQuery(
-    ["ORDER_LIST", JSON.stringify(formFilter), branchId],
-    () => getOrder({ ...formFilter, branchId })
+  const { data: orders, isLoading } = useQuery(["ORDER_LIST", JSON.stringify(formFilter), branchId], () =>
+    getOrder({ ...formFilter, branchId }),
   );
 
-  const [expandedRowKeys, setExpandedRowKeys] = useState<
-    Record<string, boolean>
-  >({});
+  const [expandedRowKeys, setExpandedRowKeys] = useState<Record<string, boolean>>({});
 
   const columns: ColumnsType<IOrder> = [
     {
@@ -108,8 +105,13 @@ export function BillTransaction() {
       title: "Giảm giá",
       dataIndex: "discount",
       key: "discount",
-      render: (_, { discount, discountType }) =>
-        discountType === 1 ? `${discount}%` : formatMoney(discount),
+      render: (_, record) => {
+        let total = 0;
+        record.products?.forEach((item) => {
+          total += item.price;
+        });
+        return formatMoney(total - record.totalPrice);
+      },
     },
     {
       title: "Tổng tiền sau giảm giá",
@@ -133,7 +135,7 @@ export function BillTransaction() {
             status === EOrderStatus.SUCCEED
               ? "text-[#00B63E] border border-[#00B63E] bg-[#DEFCEC]"
               : "text-[#6D6D6D] border border-[#6D6D6D] bg-[#F0F1F1]",
-            "px-2 py-1 rounded-2xl w-max"
+            "px-2 py-1 rounded-2xl w-max",
           )}
         >
           {EOrderStatusLabel[status]}
@@ -159,21 +161,14 @@ export function BillTransaction() {
     createdAt: item.createdAt,
     saleReturn: item.saleReturn[0]?.code || "",
     customer: item.customer.fullName,
-    totalPrice: item.products.reduce(
-      (total, product) => total + product.price,
-      0
-    ),
+    totalPrice: item.products.reduce((total, product) => total + product.price, 0),
     discount: item.discountType === 1 ? `${item.discount}%` : item.discount,
     finalTotalPrice: item.totalPrice,
     cashOfCustomer: item.cashOfCustomer,
     status: EOrderStatusLabel[item.status],
   }));
 
-  const { exported, exportToExcel } = useExportToExcel(
-    transformedOrders,
-    columnMapping,
-    `HOADON_${Date.now()}.xlsx`
-  );
+  const { exported, exportToExcel } = useExportToExcel(transformedOrders, columnMapping, `HOADON_${Date.now()}.xlsx`);
 
   const transformedOrdersDetail = orders?.data?.items.map((item) => ({
     branch: item.branch.name,
@@ -245,21 +240,17 @@ export function BillTransaction() {
     userId: "ID Người dùng",
   };
 
-  const { exported: exportedDetail, exportToExcel: exportToExcelDetail } =
-    useExportToExcel(
-      transformedOrdersDetail,
-      columnMappingDetail,
-      `HOADONCHITIET_${Date.now()}.xlsx`
-    );
+  const { exported: exportedDetail, exportToExcel: exportToExcelDetail } = useExportToExcel(
+    transformedOrdersDetail,
+    columnMappingDetail,
+    `HOADONCHITIET_${Date.now()}.xlsx`,
+  );
 
   const items: MenuProps["items"] = [
     {
       key: "0",
       label: (
-        <CustomButton
-          onClick={exportToExcel}
-          prefixIcon={<Image src={ExportIcon} />}
-        >
+        <CustomButton onClick={exportToExcel} prefixIcon={<Image src={ExportIcon} />}>
           Xuất file
         </CustomButton>
       ),
@@ -267,10 +258,7 @@ export function BillTransaction() {
     {
       key: "1",
       label: (
-        <CustomButton
-          onClick={exportToExcelDetail}
-          prefixIcon={<Image src={ExportIcon} />}
-        >
+        <CustomButton onClick={exportToExcelDetail} prefixIcon={<Image src={ExportIcon} />}>
           Xuất file chi tiết
         </CustomButton>
       ),
@@ -280,11 +268,7 @@ export function BillTransaction() {
   return (
     <div>
       <div className="my-3 flex justify-end gap-4">
-        {hasPermission(
-          profile?.role?.permissions,
-          RoleModel.sale,
-          RoleAction.read
-        ) && (
+        {hasPermission(profile?.role?.permissions, RoleModel.sale, RoleAction.read) && (
           <CustomButton
             onClick={() => router.push("/sales/")}
             type="success"
@@ -295,9 +279,7 @@ export function BillTransaction() {
         )}
 
         <Dropdown menu={{ items }} trigger={["click"]}>
-          <CustomButton prefixIcon={<Image src={ExportIcon} />}>
-            File
-          </CustomButton>
+          <CustomButton prefixIcon={<Image src={ExportIcon} />}>File</CustomButton>
         </Dropdown>
       </div>
 
@@ -318,8 +300,7 @@ export function BillTransaction() {
             onClick: (event) => {
               // Toggle expandedRowKeys state here
               if (expandedRowKeys[record.key - 1]) {
-                const { [record.key - 1]: value, ...remainingKeys } =
-                  expandedRowKeys;
+                const { [record.key - 1]: value, ...remainingKeys } = expandedRowKeys;
                 setExpandedRowKeys(remainingKeys);
               } else {
                 setExpandedRowKeys({

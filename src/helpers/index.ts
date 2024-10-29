@@ -401,3 +401,15 @@ export const formatDistance = (distance: number) => {
 export const sliceString = (str: string, maxLength: number) => {
   return str?.length > maxLength ? str?.slice(0, maxLength) + "..." : str;
 };
+
+/**
+ * Checks if the input string is in the format of "number, number".
+ *
+ * @param input - The string to be checked.
+ * @returns `true` if the input string matches the coordinates format, otherwise `false`.
+ */
+export const isCoordinates = (input) => {
+  // Kiểm tra xem chuỗi có dạng "số, số" hay không
+  const regex = /^-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?$/;
+  return regex.test(input.trim());
+};

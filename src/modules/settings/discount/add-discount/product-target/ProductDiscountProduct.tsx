@@ -264,7 +264,7 @@ export const ProductDiscountProduct = ({
               </div>
               {errors?.items && <InputError className="" error={errors?.items[index]?.apply?.discountValue?.message} />}
             </div>
-            <div className="flex-[3] px-4 flex gap-2">
+            <div className="flex-[3] px-4 flex items-center gap-2">
               <div className="w-24">
                 <CustomInput
                   className="h-10"

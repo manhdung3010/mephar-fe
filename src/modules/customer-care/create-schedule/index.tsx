@@ -1,5 +1,5 @@
 import { getCustomer } from "@/api/customer.service";
-import { createTrip, getLatLng, getTripDetail, searchPlace, updateTrip } from "@/api/trip.service";
+import { createTrip, getLatLng, getTripDetail, searchPlace, searchPlaceByLatLng, updateTrip } from "@/api/trip.service";
 import LineIcon from "@/assets/LineDotLargeIcon.svg";
 import ArrowLeftIcon from "@/assets/arrowLeftIcon2.svg";
 import DeleteIcon from "@/assets/deleteRed.svg";
@@ -21,13 +21,14 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { message, Select } from "antd";
 import cx from "classnames";
 import dayjs from "dayjs";
-import { debounce } from "lodash";
+import { debounce, isArray } from "lodash";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useRecoilValue } from "recoil";
 import { schema } from "./schema";
+import { isCoordinates } from "@/helpers";
 const { Option } = Select;
 
 function CreateSchedule() {
@@ -73,7 +74,15 @@ function CreateSchedule() {
   );
   const { data: places, isLoading: isLoadingPlace } = useQuery(
     ["SEARCH_PLACE", placeKeyword],
-    () => searchPlace({ keyword: placeKeyword }),
+    () => {
+      if (isCoordinates(placeKeyword)) {
+        return searchPlaceByLatLng({
+          lat: String(placeKeyword.split(",")[0]),
+          lng: String(placeKeyword.split(",")[1]),
+        });
+      }
+      return searchPlace({ keyword: placeKeyword });
+    },
     {
       enabled: placeKeyword.length > 0,
     },
@@ -280,7 +289,17 @@ function CreateSchedule() {
                           disabled={isEdit ? true : false}
                           onSelect={(value) => {
                             setIsEnd(false);
-                            setTempKeyword(places?.data?.find((item) => item.ref_id === value)?.display);
+                            setTempKeyword(
+                              isCoordinates(placeKeyword)
+                                ? placeKeyword
+                                : places?.data?.find((item) => item.ref_id === value)?.display,
+                            );
+                            if (isCoordinates(placeKeyword)) {
+                              setValue("lat", placeKeyword.split(",")[0]?.trim(), { shouldValidate: true });
+                              setValue("lng", placeKeyword.split(",")[1]?.trim(), { shouldValidate: true });
+                              handleAddMarker(placeKeyword.split(",")[1]?.trim(), placeKeyword.split(",")[0]?.trim());
+                              return;
+                            }
                             setRefId(value);
                           }}
                           showSearch={true}
@@ -290,17 +309,26 @@ function CreateSchedule() {
                             onSearch(value);
                           }}
                           value={tempKeyword || startAddress || null}
-                          options={places?.data.map((item) => ({
-                            value: item?.ref_id,
-                            label: (
-                              <div className="!flex items-center gap-1 py-2">
-                                <div className="w-5 h-5 flex-shrink-0">
-                                  <Image src={MarkIcon} />
-                                </div>
-                                <span className="display">{item?.display}</span>
-                              </div>
-                            ),
-                          }))}
+                          options={
+                            isArray(places?.data)
+                              ? places?.data.map((item) => ({
+                                  value: item?.ref_id,
+                                  label: (
+                                    <div className="!flex items-center gap-1 py-2">
+                                      <div className="w-5 h-5 flex-shrink-0">
+                                        <Image src={MarkIcon} />
+                                      </div>
+                                      <span className="display">{item?.display}</span>
+                                    </div>
+                                  ),
+                                }))
+                              : [
+                                  {
+                                    value: places?.data?.address,
+                                    label: places?.data?.address,
+                                  },
+                                ]
+                          }
                         />
                       </div>
                     </div>
@@ -350,7 +378,17 @@ function CreateSchedule() {
                           wrapClassName="w-full !rounded bg-white"
                           onSelect={(value) => {
                             setIsEnd(true);
-                            setTempKeywordEnd(places?.data?.find((item) => item.ref_id === value)?.display);
+                            setTempKeyword(
+                              isCoordinates(placeKeyword)
+                                ? placeKeyword
+                                : places?.data?.find((item) => item.ref_id === value)?.display,
+                            );
+                            if (isCoordinates(placeKeyword)) {
+                              setValue("latEnd", placeKeyword.split(",")[0]?.trim(), { shouldValidate: true });
+                              setValue("lngEnd", placeKeyword.split(",")[1]?.trim(), { shouldValidate: true });
+                              // handleAddMarker(placeKeyword.split(",")[1]?.trim(), placeKeyword.split(",")[0]?.trim());
+                              return;
+                            }
                             setRefId(value);
                           }}
                           showSearch={true}
@@ -360,17 +398,26 @@ function CreateSchedule() {
                             onSearch(value);
                           }}
                           value={tempKeywordEnd || null}
-                          options={places?.data.map((item) => ({
-                            value: item?.ref_id,
-                            label: (
-                              <div className="!flex items-center gap-1 py-2">
-                                <div className="w-5 h-5 flex-shrink-0">
-                                  <Image src={MarkIcon} />
-                                </div>
-                                <span className="display">{item?.display}</span>
-                              </div>
-                            ),
-                          }))}
+                          options={
+                            isArray(places?.data)
+                              ? places?.data.map((item) => ({
+                                  value: item?.ref_id,
+                                  label: (
+                                    <div className="!flex items-center gap-1 py-2">
+                                      <div className="w-5 h-5 flex-shrink-0">
+                                        <Image src={MarkIcon} />
+                                      </div>
+                                      <span className="display">{item?.display}</span>
+                                    </div>
+                                  ),
+                                }))
+                              : [
+                                  {
+                                    value: places?.data?.address,
+                                    label: places?.data?.address,
+                                  },
+                                ]
+                          }
                         />
                       </div>
                     </div>
@@ -401,7 +448,15 @@ const CustomerRowAddress = ({ row, index, setValue, getValues, handleUpdateMarke
   const [placeKeyword, setPlaceKeyword] = useState("");
   const { data: places, isLoading: isLoadingPlace } = useQuery(
     ["SEARCH_PLACE", placeKeyword],
-    () => searchPlace({ keyword: placeKeyword }),
+    () => {
+      if (isCoordinates(placeKeyword)) {
+        return searchPlaceByLatLng({
+          lat: String(placeKeyword.split(",")[0])?.trim(),
+          lng: String(placeKeyword.split(",")[1])?.trim(),
+        });
+      }
+      return searchPlace({ keyword: placeKeyword });
+    },
     {
       enabled: placeKeyword.length > 0,
     },
@@ -421,6 +476,18 @@ const CustomerRowAddress = ({ row, index, setValue, getValues, handleUpdateMarke
       // onSelect={(value) => handleSelectProduct(value)}
       onSelect={async (value) => {
         // setRefId(value);
+        if (isCoordinates(placeKeyword)) {
+          const listCustomer = getValues("listCustomer");
+          listCustomer[index] = {
+            ...listCustomer[index],
+            address: value,
+            lat: placeKeyword.split(",")[0]?.trim(),
+            lng: placeKeyword.split(",")[1]?.trim(),
+          };
+          setValue("listCustomer", listCustomer, { shouldValidate: true });
+          handleUpdateMarker(placeKeyword.split(",")[1], placeKeyword.split(",")[0], null, index + 1);
+          return;
+        }
         const res = await getLatLng({ refId: value });
         if (res?.data) {
           const listCustomer = getValues("listCustomer");
@@ -441,17 +508,26 @@ const CustomerRowAddress = ({ row, index, setValue, getValues, handleUpdateMarke
         // onSearch(value);
       }}
       value={placeKeyword || null}
-      options={places?.data.map((item) => ({
-        value: item?.ref_id,
-        label: (
-          <div className="!flex items-center gap-1 py-2">
-            <div className="w-5 h-5 flex-shrink-0">
-              <Image src={MarkIcon} />
-            </div>
-            <span className="display">{item?.display}</span>
-          </div>
-        ),
-      }))}
+      options={
+        isArray(places?.data)
+          ? places?.data.map((item) => ({
+              value: item?.ref_id,
+              label: (
+                <div className="!flex items-center gap-1 py-2">
+                  <div className="w-5 h-5 flex-shrink-0">
+                    <Image src={MarkIcon} />
+                  </div>
+                  <span className="display">{item?.display}</span>
+                </div>
+              ),
+            }))
+          : [
+              {
+                value: places?.data?.address,
+                label: places?.data?.address,
+              },
+            ]
+      }
     />
   );
 };
