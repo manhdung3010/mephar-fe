@@ -266,6 +266,8 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
   // create order
   const { mutate: mutateCreateOrder, isLoading: isLoadingCreateOrder } = useMutation(
     () => {
+      // const orderPriceType = discountObject[orderActive]?.orderDiscount?.find((item) => item.type === "order_price")
+      // const orderDiscountValue = orderPriceType?.items[0]?.apply?.discountType === 'amount' ? orderPriceType?.items[0]?.apply?.discountValue : (totalPrice * orderPriceType?.items[0]?.apply?.discountValue) / 100;
       // áp dụng KM gộp
       if (
         discountObject[orderActive]?.orderDiscount?.length > 0 &&
@@ -288,7 +290,7 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
           pointOrder:
             discountObject[orderActive]?.orderDiscount?.find((item) => item.type === "loyalty")?.items[0].apply
               .pointValue || 0,
-          discountOrder: oldTotal || 0,
+          discountOrder: discountOrder || 0,
           listDiscountId: [
             ...discountObject[orderActive]?.orderDiscount?.map((item) => item.id),
             ...discountObject[orderActive]?.productDiscount?.map((item) => item.id),

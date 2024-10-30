@@ -110,9 +110,7 @@ const Info = ({ setValue, getValues, errors }: any) => {
           <CustomInput
             placeholder="Mã tự động"
             className="h-11"
-            onChange={(value) =>
-              setValue("code", value, { shouldValidate: true })
-            }
+            onChange={(value) => setValue("code", value, { shouldValidate: true })}
             value={getValues("code")}
           />
           <InputError error={errors.code?.message} />
@@ -126,9 +124,7 @@ const Info = ({ setValue, getValues, errors }: any) => {
                 { value: "active", label: "Kích hoạt" },
                 { value: "inactive", label: "Chưa áp dụng" },
               ]}
-              onChange={(value) =>
-                setValue("status", value, { shouldValidate: true })
-              }
+              onChange={(value) => setValue("status", value, { shouldValidate: true })}
               value={getValues("status")}
             />
           </div>
@@ -139,9 +135,7 @@ const Info = ({ setValue, getValues, errors }: any) => {
           <CustomInput
             placeholder="Tên chương trình khuyến mại"
             className="h-11"
-            onChange={(value) =>
-              setValue("name", value, { shouldValidate: true })
-            }
+            onChange={(value) => setValue("name", value, { shouldValidate: true })}
             value={getValues("name")}
           />
           <InputError error={errors.name?.message} />
@@ -152,25 +146,19 @@ const Info = ({ setValue, getValues, errors }: any) => {
           <CustomInput
             placeholder="Ghi chú"
             className="h-11"
-            onChange={(value) =>
-              setValue("note", value, { shouldValidate: true })
-            }
+            onChange={(value) => setValue("note", value, { shouldValidate: true })}
             value={getValues("note")}
           />
         </div>
       </div>
 
-      <h2 className="mb-4 text-xl font-medium uppercase text-[#999]">
-        hình thức khuyến mại
-      </h2>
+      <h2 className="mb-4 text-xl font-medium uppercase text-[#999]">hình thức khuyến mại</h2>
 
       <div
         className="grid grid-cols-2 gap-x-[42px] gap-y-5"
         style={{
           gridTemplateColumns:
-            getValues("target") === EDiscountType.ORDER
-              ? "repeat(2, minmax(0, 1fr))"
-              : "repeat(3, minmax(0, 1fr))",
+            getValues("target") === EDiscountType.ORDER ? "repeat(2, minmax(0, 1fr))" : "repeat(3, minmax(0, 1fr))",
         }}
       >
         <div>
@@ -267,72 +255,33 @@ const Info = ({ setValue, getValues, errors }: any) => {
       </div>
 
       {/* Bill */}
-      {getValues("target") === EDiscountType.ORDER &&
-        getValues("type") === EDiscountBillMethod.ORDER_PRICE && (
-          <BillDiscount
-            setValue={setValue}
-            getValues={getValues}
-            errors={errors}
-          />
-        )}
+      {getValues("target") === EDiscountType.ORDER && getValues("type") === EDiscountBillMethod.ORDER_PRICE && (
+        <BillDiscount setValue={setValue} getValues={getValues} errors={errors} />
+      )}
 
-      {getValues("target") === EDiscountType.ORDER &&
-        getValues("type") === EDiscountBillMethod.PRODUCT_PRICE && (
-          <BillDiscountProduct
-            setValue={setValue}
-            getValues={getValues}
-            errors={errors}
-          />
-        )}
-      {getValues("target") === EDiscountType.ORDER &&
-        getValues("type") === EDiscountBillMethod.GIFT && (
-          <BillGiftProduct
-            setValue={setValue}
-            getValues={getValues}
-            errors={errors}
-          />
-        )}
-      {getValues("target") === EDiscountType.ORDER &&
-        getValues("type") === EDiscountBillMethod.LOYALTY && (
-          <BillGiftPoint
-            setValue={setValue}
-            getValues={getValues}
-            errors={errors}
-          />
-        )}
+      {getValues("target") === EDiscountType.ORDER && getValues("type") === EDiscountBillMethod.PRODUCT_PRICE && (
+        <BillDiscountProduct setValue={setValue} getValues={getValues} errors={errors} />
+      )}
+      {getValues("target") === EDiscountType.ORDER && getValues("type") === EDiscountBillMethod.GIFT && (
+        <BillGiftProduct setValue={setValue} getValues={getValues} errors={errors} />
+      )}
+      {getValues("target") === EDiscountType.ORDER && getValues("type") === EDiscountBillMethod.LOYALTY && (
+        <BillGiftPoint setValue={setValue} getValues={getValues} errors={errors} />
+      )}
 
       {/* Product */}
-      {getValues("target") === EDiscountType.PRODUCT &&
-        getValues("type") === EDiscountGoodsMethod.PRODUCT_PRICE && (
-          <ProductDiscountProduct
-            setValue={setValue}
-            getValues={getValues}
-            errors={errors}
-          />
-        )}
-      {getValues("target") === EDiscountType.PRODUCT &&
-        getValues("type") === EDiscountGoodsMethod.GIFT && (
-          <ProductGiftProduct
-            setValue={setValue}
-            getValues={getValues}
-            errors={errors}
-          />
-        )}
-      {getValues("target") === EDiscountType.PRODUCT &&
-        getValues("type") === EDiscountGoodsMethod.LOYALTY && (
-          <ProductGiftPoint
-            setValue={setValue}
-            getValues={getValues}
-            errors={errors}
-          />
-        )}
+      {getValues("target") === EDiscountType.PRODUCT && getValues("type") === EDiscountGoodsMethod.PRODUCT_PRICE && (
+        <ProductDiscountProduct setValue={setValue} getValues={getValues} errors={errors} />
+      )}
+      {getValues("target") === EDiscountType.PRODUCT && getValues("type") === EDiscountGoodsMethod.GIFT && (
+        <ProductGiftProduct setValue={setValue} getValues={getValues} errors={errors} />
+      )}
+      {getValues("target") === EDiscountType.PRODUCT && getValues("type") === EDiscountGoodsMethod.LOYALTY && (
+        <ProductGiftPoint setValue={setValue} getValues={getValues} errors={errors} />
+      )}
       {getValues("target") === EDiscountType.PRODUCT &&
         getValues("type") === EDiscountGoodsMethod.PRICE_BY_BUY_NUMBER && (
-          <ProductQuantity
-            setValue={setValue}
-            getValues={getValues}
-            errors={errors}
-          />
+          <ProductQuantity setValue={setValue} getValues={getValues} errors={errors} />
         )}
     </div>
   );

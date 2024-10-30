@@ -8,11 +8,7 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { productSchema, schema } from "./schema";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  createDiscount,
-  getDiscountDetail,
-  updateDiscount,
-} from "@/api/discount.service";
+import { createDiscount, getDiscountDetail, updateDiscount } from "@/api/discount.service";
 import { message } from "antd";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -22,19 +18,15 @@ const AddDiscount = () => {
   const [target, setTarget] = useState("ORDER");
   const currentDate = dayjs();
   const dateFromDefault = currentDate.format("YYYY-MM-DD HH:mm:ss");
-  const dateToDefault = currentDate
-    .add(6, "month")
-    .format("YYYY-MM-DD HH:mm:ss");
+  const dateToDefault = currentDate.add(6, "month").format("YYYY-MM-DD HH:mm:ss");
 
   const router = useRouter();
   const { id, copy } = router.query;
   const queryClient = useQueryClient();
 
-  const { data: discountDetail } = useQuery(
-    ["DISCOUNT_DETAIL", id],
-    () => getDiscountDetail(Number(id)),
-    { enabled: !!id || !!copy }
-  );
+  const { data: discountDetail } = useQuery(["DISCOUNT_DETAIL", id], () => getDiscountDetail(Number(id)), {
+    enabled: !!id || !!copy,
+  });
   const dcDetail = discountDetail?.data?.data;
   const {
     getValues,
@@ -117,10 +109,7 @@ const AddDiscount = () => {
           };
         });
         setValue("items", formatItem);
-      } else if (
-        dcDetail.target === "order" &&
-        dcDetail.type === "product_price"
-      ) {
+      } else if (dcDetail.target === "order" && dcDetail.type === "product_price") {
         const formatItem = dcDetail.discountItem.map((item: any) => {
           return {
             id: item?.id,
@@ -132,9 +121,7 @@ const AddDiscount = () => {
             apply: {
               discountValue: item.discountValue,
               discountType: item.discountType?.toUpperCase(),
-              productUnitId: item.productDiscount?.map(
-                (product: any) => product.productUnitId
-              ),
+              productUnitId: item.productDiscount?.map((product: any) => product.productUnitId),
               maxQuantity: item.maxQuantity,
             },
           };
@@ -152,9 +139,7 @@ const AddDiscount = () => {
             apply: {
               discountValue: 1,
               discountType: item.discountType?.toUpperCase(),
-              productUnitId: item.productDiscount?.map(
-                (product: any) => product.productUnitId
-              ),
+              productUnitId: item.productDiscount?.map((product: any) => product.productUnitId),
               maxQuantity: item.maxQuantity,
               isGift: item.isGift,
             },
@@ -178,10 +163,7 @@ const AddDiscount = () => {
           };
         });
         setValue("items", formatItem);
-      } else if (
-        dcDetail.target === "product" &&
-        dcDetail.type === "product_price"
-      ) {
+      } else if (dcDetail.target === "product" && dcDetail.type === "product_price") {
         const formatItem = dcDetail.discountItem.map((item: any) => {
           return {
             id: item?.id,
@@ -245,9 +227,7 @@ const AddDiscount = () => {
               order: {
                 from: 1,
               },
-              productUnitId: item.productDiscount?.map(
-                (product: any) => product.productUnitId
-              ),
+              productUnitId: item.productDiscount?.map((product: any) => product.productUnitId),
             },
             apply: {
               pointValue: item.pointValue,
@@ -268,17 +248,13 @@ const AddDiscount = () => {
               product: {
                 from: item.fromQuantity,
               },
-              productUnitId: item.productDiscount?.map(
-                (product: any) => product.productUnitId
-              ),
+              productUnitId: item.productDiscount?.map((product: any) => product.productUnitId),
             },
             apply: {
               discountValue: item?.discountValue,
               discountType: item?.discountType?.toUpperCase(),
               maxQuantity: item?.maxQuantity,
-              productUnitId: item?.productDiscount?.map(
-                (product: any) => product.productUnitId
-              ),
+              productUnitId: item?.productDiscount?.map((product: any) => product.productUnitId),
               fixedPrice: item?.fixedPrice,
               changeType: item?.changeType?.toUpperCase(),
               type: dcDetail?.type?.toUpperCase(),
@@ -288,10 +264,7 @@ const AddDiscount = () => {
         // Combine items with the same productUnitId into 1 item, that item is push in key childItems
 
         const items = formatItem.reduce((acc: any, item: any) => {
-          const existingItem = acc.find(
-            (i: any) =>
-              i.condition.productUnitId[0] === item.condition.productUnitId[0]
-          );
+          const existingItem = acc.find((i: any) => i.condition.productUnitId[0] === item.condition.productUnitId[0]);
           if (existingItem) {
             existingItem.childItems.push(item);
           } else {
@@ -328,18 +301,14 @@ const AddDiscount = () => {
           isAll: dcDetail.discountCustomer?.length > 0 ? false : true,
           ids:
             dcDetail.discountCustomer?.length > 0
-              ? dcDetail.discountCustomer.map(
-                  (customer: any) => customer.groupCustomerId
-                )
+              ? dcDetail.discountCustomer.map((customer: any) => customer.groupCustomerId)
               : [],
         },
         branch: {
           isAll: dcDetail.discountBranch?.length > 0 ? false : true,
           ids:
             dcDetail.discountBranch?.length > 0
-              ? dcDetail.discountBranch.map(
-                  (customer: any) => customer.branchId
-                )
+              ? dcDetail.discountBranch.map((customer: any) => customer.branchId)
               : [],
         },
       });
@@ -367,7 +336,7 @@ const AddDiscount = () => {
           isWarning: dcDetail.discountTime[0].isWarning,
           isBirthday: dcDetail.discountTime[0].isBirthday,
         },
-        { shouldValidate: true }
+        { shouldValidate: true },
       );
     }
   }, [dcDetail]);
@@ -377,7 +346,6 @@ const AddDiscount = () => {
       if (getValues("type") === "PRICE_BY_BUY_NUMBER") {
         // Combine all childItems of each item into 1 array
         const items: any = getValues("items");
-
         const childItems = items
           .map((item: any) => {
             return item.childItems.map((childItem: any) => {
@@ -403,7 +371,7 @@ const AddDiscount = () => {
                 ...getValues(),
                 items: childItems,
               },
-              Number(id)
+              Number(id),
             )
           : createDiscount({
               ...getValues(),
@@ -416,9 +384,7 @@ const AddDiscount = () => {
           return {
             ...item,
             apply: {
-              ...(item.apply.isGift || item.apply.pointValue > 0
-                ? {}
-                : { discountValue: item.apply.discountValue }),
+              ...(item.apply.isGift || item.apply.pointValue > 0 ? {} : { discountValue: item.apply.discountValue }),
               pointValue: item.apply.pointValue,
               pointType: item.apply.pointType,
               discountType: item.apply.discountType,
@@ -431,9 +397,7 @@ const AddDiscount = () => {
         });
         discountData.items = items;
 
-        return id && !copy
-          ? updateDiscount(discountData, Number(id))
-          : createDiscount(discountData);
+        return id && !copy ? updateDiscount(discountData, Number(id)) : createDiscount(discountData);
       }
     },
     {
@@ -444,32 +408,22 @@ const AddDiscount = () => {
       onError: (err: any) => {
         message.error(err?.message);
       },
-    }
+    },
   );
 
   const onSubmit = () => {
     mutateCreateDiscount();
   };
-  console.log(getValues());
 
   return (
     <>
       <div className="mt-6 flex items-center justify-between bg-white p-5">
-        <div className="text-2xl font-medium uppercase">
-          {id && !copy ? "CẬP NHẬT" : "THÊM MỚI"} KHUYẾN MẠI
-        </div>
+        <div className="text-2xl font-medium uppercase">{id && !copy ? "CẬP NHẬT" : "THÊM MỚI"} KHUYẾN MẠI</div>
         <div className="flex gap-4">
-          <CustomButton
-            outline={true}
-            onClick={() => router.push("/settings/discount")}
-          >
+          <CustomButton outline={true} onClick={() => router.push("/settings/discount")}>
             Hủy bỏ
           </CustomButton>
-          <CustomButton
-            onClick={handleSubmit(onSubmit)}
-            loading={isLoading}
-            disabled={isLoading}
-          >
+          <CustomButton onClick={handleSubmit(onSubmit)} loading={isLoading} disabled={isLoading}>
             Lưu
           </CustomButton>
         </div>
@@ -485,24 +439,9 @@ const AddDiscount = () => {
           <Tab
             menu={["Thông tin", "Thời gian áp dụng", "Phạm vi áp dụng"]}
             components={[
-              <Info
-                key="0"
-                setValue={setValue}
-                getValues={getValues}
-                errors={errors}
-                useForm={useForm}
-              />,
-              <TimeApplication
-                key="1"
-                setValue={setValue}
-                getValues={getValues}
-                errors={errors}
-              />,
-              <ScopeApplication
-                key="2"
-                setValue={setValue}
-                getValues={getValues}
-              />,
+              <Info key="0" setValue={setValue} getValues={getValues} errors={errors} useForm={useForm} />,
+              <TimeApplication key="1" setValue={setValue} getValues={getValues} errors={errors} />,
+              <ScopeApplication key="2" setValue={setValue} getValues={getValues} />,
             ]}
           />
         </div>

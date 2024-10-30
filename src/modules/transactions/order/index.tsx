@@ -180,6 +180,12 @@ export function OrderTransaction() {
       dataIndex: "note",
       key: "note",
     },
+    {
+      title: "Lý do hủy",
+      dataIndex: "closedNote",
+      key: "closedNote",
+      render: (value, record: any) => <p>{value || record?.cancelNote}</p>,
+    },
   ];
   return (
     <div className="mb-2">

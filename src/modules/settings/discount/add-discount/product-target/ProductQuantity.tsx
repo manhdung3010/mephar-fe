@@ -151,6 +151,8 @@ export const ProductQuantity = ({
     setValue("items", newRows);
   };
 
+  console.log("getValues", getValues());
+
   return (
     <>
       <div className="my-5 flex flex-col gap-2">
@@ -176,6 +178,7 @@ export const ProductQuantity = ({
                       // change row of items
                       const newRows: any = [...getValues("items")];
                       newRows[index].condition.productUnitId = value;
+                      newRows[index].apply.productUnitId = value;
                       setRows(newRows);
                       setValue("items", newRows);
                     }}
@@ -185,7 +188,7 @@ export const ProductQuantity = ({
                     value={
                       getValues("items")?.condition?.productUnitId
                         ? getValues("items")?.condition?.productUnitId
-                        : getValues("times")?.byWeekDay
+                        : row?.condition?.productUnitId
                     }
                     notFoundContent={
                       isLoadingProduct ? <Spin size="small" className="flex justify-center p-4 w-full" /> : null

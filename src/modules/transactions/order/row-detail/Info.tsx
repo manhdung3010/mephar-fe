@@ -22,11 +22,13 @@ import CloseIconRed from "@/assets/closeIcon.svg";
 import EditIcon from "@/assets/editIcon.svg";
 import PaymentModal from "./PaymentModal";
 import SelectBranchModal from "./SelectBranchModal";
+import CancleModal from "./CancleModal";
 
 export function Info({ record }: { record: any }) {
   const router = useRouter();
   const profile = useRecoilValue(profileState);
   const [isShowModal, setIsShowModal] = useState(false);
+  const [isShowCancleModal, setIsShowCancleModal] = useState(false);
   const [isShowSelectBranch, setIsShowSelectBranch] = useState(false);
   const [isShowPaymentModal, setIsShowPaymentModal] = useState(false);
   const [statusTemp, setStatusTemp] = useState<string>("");
@@ -42,8 +44,8 @@ export function Info({ record }: { record: any }) {
 
   const { mutate: mutateCreateGroupProduct, isLoading: isLoadingCreateGroupProduct } = useMutation(
     (payload: any) => {
-      if (payload?.status === EOrderMarketStatus.CONFIRM) {
-        return updateMarketOrderStatus(payload?.id, { status: payload?.status });
+      if (payload?.status === EOrderMarketStatus.CLOSED || payload?.status === EOrderMarketStatus.CANCEL) {
+        return updateMarketOrderStatus(payload?.id, { status: payload?.status, note: payload?.note });
       }
       if (payload?.status === EOrderMarketStatus.SEND) {
         const newPayload = {
@@ -69,8 +71,8 @@ export function Info({ record }: { record: any }) {
     },
   );
 
-  const updateOrderStatus = (id: string, status: string) => {
-    mutateCreateGroupProduct({ id, status: status });
+  const updateOrderStatus = (id: string, status: string, note?: string) => {
+    mutateCreateGroupProduct({ id, status: status, note });
   };
 
   return (
@@ -275,7 +277,7 @@ export function Info({ record }: { record: any }) {
                 outline={true}
                 prefixIcon={<Image src={CloseIconRed} alt="" />}
                 onClick={() => {
-                  setIsShowModal(true);
+                  setIsShowCancleModal(true);
                   setStatusTemp(EOrderMarketStatus.CANCEL);
                 }}
               >
@@ -303,7 +305,7 @@ export function Info({ record }: { record: any }) {
               outline={true}
               prefixIcon={<Image src={CloseIcon} alt="" />}
               onClick={() => {
-                setIsShowModal(true);
+                setIsShowCancleModal(true);
                 setStatusTemp(EOrderMarketStatus.CLOSED);
               }}
             >
@@ -324,6 +326,15 @@ export function Info({ record }: { record: any }) {
           setIsShowModal(false);
         }}
         content="trạng thái đơn hàng"
+      />
+      <CancleModal
+        isOpen={isShowCancleModal}
+        onCancel={() => setIsShowCancleModal(false)}
+        onSuccess={(note) => {
+          updateOrderStatus(record.id, statusTemp, note);
+          setIsShowCancleModal(false);
+        }}
+        content="đơn hàng"
       />
       <PaymentModal
         isOpen={isShowPaymentModal}

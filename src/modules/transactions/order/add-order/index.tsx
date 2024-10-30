@@ -8,7 +8,7 @@ import CustomTable from "@/components/CustomTable";
 
 import { getConfigProductPrivate, getMarketOrderDetail } from "@/api/market.service";
 import { CustomAutocomplete } from "@/components/CustomAutocomplete";
-import { formatMoney, formatNumber, getImage } from "@/helpers";
+import { formatMoney, formatNumber, getImage, sliceString } from "@/helpers";
 import { branchState, marketOrderState } from "@/recoil/state";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useQuery } from "@tanstack/react-query";
@@ -77,7 +77,6 @@ export default function AddOrder() {
   useEffect(() => {
     if (details?.data?.item) {
       const listProduct = details?.data?.item?.products?.map((product) => {
-        console.log("product", product);
         return {
           ...product.marketProduct,
           productKey: `${product.marketProduct.product.id}-${product.marketProduct.id}`,
@@ -95,8 +94,6 @@ export default function AddOrder() {
       setValue("note", details?.data?.item?.note);
     }
   }, [details?.data?.item]);
-
-  console.log("importProducts", importProducts);
 
   const { data: products, isLoading: isLoadingConfigProductPrivate } = useQuery(
     ["CONFIG_PRODUCT_PRIVATE", JSON.stringify(formFilter), getValues("customerId")],
@@ -138,6 +135,13 @@ export default function AddOrder() {
     setImportProducts(productImportClone);
   };
 
+  useEffect(() => {
+    if (getValues("customerId")) {
+      const filterPrivate = importProducts.filter((item) => item?.marketType !== "private");
+      setImportProducts(filterPrivate);
+    }
+  }, [getValues("customerId")]);
+
   const columns: any = [
     {
       title: "",
@@ -146,7 +150,7 @@ export default function AddOrder() {
       render: (_, { id }) => (
         <Image
           src={RemoveIcon}
-          className=" cursor-pointer"
+          className=" cursor-pointer w-5 h-5 flex-shrink-0"
           onClick={() => {
             const productImportClone = cloneDeep(importProducts);
             const index = productImportClone.findIndex((product) => product.id === id);
@@ -171,7 +175,7 @@ export default function AddOrder() {
       title: "Tên hàng",
       dataIndex: "product",
       key: "product",
-      render: (product) => product.name,
+      render: (product) => <div className="line-clamp-1">{sliceString(product.name, 70)}</div>,
     },
     {
       title: "ĐVT",

@@ -84,7 +84,7 @@ function SaleInvoicePrint({ saleInvoice }: any) {
                   </tr>
                   <div className="flex items-center py-2 gap-2">
                     {product?.batches?.map((b, index) => (
-                      <div className="flex items-center rounded  py-1 px-2 border-[1px] ">
+                      <div className="flex items-center rounded  py-1 px-2 border-[1px] " key={index}>
                         <span className="mr-2">
                           {b.batch?.name} - {formatDate(b?.batch?.expiryDate)} - SL: {formatNumber(b?.quantity)}
                         </span>

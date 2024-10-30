@@ -150,7 +150,7 @@ export const ProductGiftPoint = ({
       <div className="my-5 flex flex-col gap-2">
         <div className="flex bg-[#FBECEE]">
           <div className="flex-[3] p-4 font-semibold">Hàng/Nhóm hàng mua</div>
-          <div className="flex-[3] p-4 font-semibold">Điểm cộng</div>
+          <div className="flex-[1] p-4 font-semibold">Điểm cộng</div>
           <div className="flex-1 p-4"></div>
         </div>
 
@@ -204,7 +204,7 @@ export const ProductGiftPoint = ({
                 </div>
               </div>
             </div>
-            <div className="flex flex-[3] flex-col px-4">
+            <div className="flex flex-[1] flex-col px-4">
               <div className="w-full flex items-center gap-x-2">
                 <div className="w-full">
                   <CustomInput
