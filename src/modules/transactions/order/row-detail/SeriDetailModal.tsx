@@ -59,7 +59,7 @@ export function SeriDetailModal({
                   className="flex items-center justify-between rounded bg-[#F2F2F5] p-3 text-base font-medium text-black"
                   key={index}
                 >
-                  <span>{sliceString(seri, 11)}</span>
+                  <span>{seri}</span>
                   <Image
                     src={CloseIcon}
                     className="cursor-pointer w-6 h-6 flex-shrink-0"
