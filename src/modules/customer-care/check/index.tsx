@@ -80,6 +80,8 @@ function Check() {
         setSearchResult(res?.data);
         if (latLng?.data?.lng && latLng?.data?.lat) {
           handleAddMarker(latLng?.data?.lng, latLng?.data?.lat);
+        } else {
+          handleAddMarker(getValues("lng"), getValues("lat"));
         }
       },
       onError: (err: any) => {
@@ -135,7 +137,12 @@ function Check() {
                         if (isCoordinates(placeKeyword)) {
                           setValue("lat", placeKeyword.split(",")[0]?.trim(), { shouldValidate: true });
                           setValue("lng", placeKeyword.split(",")[1]?.trim(), { shouldValidate: true });
-                          handleAddMarker(placeKeyword.split(",")[1]?.trim(), placeKeyword.split(",")[0]?.trim());
+                          handleAddMarker(
+                            placeKeyword.split(",")[1]?.trim(),
+                            placeKeyword.split(",")[0]?.trim(),
+                            null,
+                            undefined,
+                          );
                           setTempSearch(placeKeyword);
                           return;
                         }
@@ -265,7 +272,13 @@ function Check() {
                 ref={mapRef}
                 isMapFull={isMapFull}
                 tripCustomer={customerList}
-                nowLocation={latLng?.data ? [latLng?.data?.lng, latLng?.data?.lat] : []}
+                nowLocation={
+                  latLng?.data
+                    ? [latLng?.data?.lng, latLng?.data?.lat]
+                    : getValues("lng") && getValues("lat")
+                    ? [getValues("lng"), getValues("lat")]
+                    : []
+                }
                 radiusCircle={getValues("radius")}
                 isCheck={true}
               />

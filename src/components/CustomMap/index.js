@@ -63,7 +63,6 @@ const CustomMap = forwardRef((props, ref) => {
     }
     if (tripCustomer?.length > 0) {
       tripCustomer.forEach((customer, index) => {
-        console.log('customer', customer)
         const coordinates = [+customer?.lng, +customer?.lat];
         createMarker(coordinates, customPopup(customer), customer?.stt || index + 1, customer?.status);
       });
@@ -75,7 +74,7 @@ const CustomMap = forwardRef((props, ref) => {
       try {
         if (tripCustomer && fromMarkerRef.current && vehical) {
           const currentPoint1 = fromMarkerRef.current.getLngLat();
-          const endPoint = endMarkerRef.current.getLngLat();
+          const endPoint = endMarkerRef?.current?.getLngLat();
           const markers = markersRef.current.filter((d) => d.status !== "visited").map((item) => item.coordinates)
           const newMarkers = markers?.map((item) => {
             return {
