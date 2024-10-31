@@ -153,7 +153,6 @@ export const ProductGiftPoint = ({
           <div className="flex-[1] p-4 font-semibold">Điểm cộng</div>
           <div className="flex-1 p-4"></div>
         </div>
-
         {getValues("items")?.map((row, index) => (
           <div className="flex items-center gap-2 border-b border-gray-100 py-3">
             <div className="flex flex-[3] flex-col px-4">
@@ -254,7 +253,6 @@ export const ProductGiftPoint = ({
           </div>
         ))}
       </div>
-
       <div onClick={handleAddRow} className="flex gap-3 text-[16px] font-semibold text-[#D64457] cursor-pointer w-40">
         <Image src={PlusCircleIcon} alt="" />
         <div>Thêm điều kiện</div>

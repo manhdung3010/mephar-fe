@@ -37,7 +37,7 @@ const Meta = (props: IMetaProps) => {
           site_name: appConfig.site_name,
           images: [
             {
-              url: `${router.basePath}/logo.png`,
+              url: "https://pos.mephar.com/_next/image/?url=%2F_next%2Fstatic%2Fmedia%2Fapple-touch-icon.d080ddd2.png&w=128&q=75",
               width: 1200,
               height: 630,
               alt: "Logo or image description",
