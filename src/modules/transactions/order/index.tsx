@@ -226,7 +226,7 @@ export function OrderTransaction() {
           />
         </div>
 
-        <div className="flex justify-between p-4">
+        <div className="flex justify-between p-4 w-full overflow-x-auto">
           <div>
             <div className="mb-2 text-[#15171A]">
               Chờ xác nhận

@@ -139,3 +139,9 @@ export function updateStoreStatus(id: string, status: string, payload?: any) {
 export function checkProduct(seri: string) {
   return axiosClient.get(`market/sell/seri/getMarketOrder/${seri}`);
 }
+
+
+// banner
+export function getBanner() {
+  return axiosClient.get(`banner`);
+}

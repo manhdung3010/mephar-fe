@@ -15,25 +15,10 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import Search from "./Search";
 import RowDetail from "./row-detail";
 import { Bar } from "react-chartjs-2";
-import {
-  BarElement,
-  CategoryScale,
-  Chart as ChartJS,
-  Legend,
-  LinearScale,
-  Title,
-  Tooltip,
-} from "chart.js";
+import { BarElement, CategoryScale, Chart as ChartJS, Legend, LinearScale, Title, Tooltip } from "chart.js";
 import { generalId } from "@/layouts/Header";
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 interface IRecord {
   key: number;
@@ -50,9 +35,7 @@ export function SaleReport() {
   const router = useRouter();
   const [branch] = useRecoilState(branchState);
 
-  const [expandedRowKeys, setExpandedRowKeys] = useState<
-    Record<string, boolean>
-  >({});
+  const [expandedRowKeys, setExpandedRowKeys] = useState<Record<string, boolean>>({});
 
   const [formFilter, setFormFilter] = useState({
     type: 1,
@@ -70,7 +53,7 @@ export function SaleReport() {
         to: formFilter.to,
         ...(String(branch) === generalId ? {} : { branchId: branch }),
         concern: formFilter.concern,
-      })
+      }),
   );
 
   const { data: branches } = useQuery(["SETTING_BRANCH"], () => getBranch());
@@ -221,12 +204,8 @@ export function SaleReport() {
               {formatMoney(saleReport?.data?.summary?.totalRevenue)}
             </Table.Summary.Cell>{" "}
             {/* Empty cell */}
-            <Table.Summary.Cell index={2}>
-              {formatMoney(saleReport?.data?.summary?.saleReturn)}
-            </Table.Summary.Cell>
-            <Table.Summary.Cell index={3}>
-              {formatMoney(saleReport?.data?.summary?.realRevenue)}
-            </Table.Summary.Cell>
+            <Table.Summary.Cell index={2}>{formatMoney(saleReport?.data?.summary?.saleReturn)}</Table.Summary.Cell>
+            <Table.Summary.Cell index={3}>{formatMoney(saleReport?.data?.summary?.realRevenue)}</Table.Summary.Cell>
           </Table.Summary.Row>
         );
       case ESaleReportConcerns.REVENUE:
@@ -234,22 +213,12 @@ export function SaleReport() {
           <Table.Summary.Row className="bg-[#e6fff6] font-semibold text-base">
             <Table.Summary.Cell index={0}>{null}</Table.Summary.Cell>
             <Table.Summary.Cell index={1}>{null}</Table.Summary.Cell>
-            <Table.Summary.Cell index={2}>
-              {formatMoney(saleReport?.data?.summary?.totalPrice)}
-            </Table.Summary.Cell>{" "}
+            <Table.Summary.Cell index={2}>{formatMoney(saleReport?.data?.summary?.totalPrice)}</Table.Summary.Cell>{" "}
             {/* Empty cell */}
-            <Table.Summary.Cell index={3}>
-              {formatMoney(saleReport?.data?.summary?.totalDiscount)}
-            </Table.Summary.Cell>
-            <Table.Summary.Cell index={4}>
-              {formatMoney(saleReport?.data?.summary?.totalRevenue)}
-            </Table.Summary.Cell>
-            <Table.Summary.Cell index={4}>
-              {formatMoney(saleReport?.data?.summary?.totalPrime)}
-            </Table.Summary.Cell>
-            <Table.Summary.Cell index={4}>
-              {formatMoney(saleReport?.data?.summary?.profit)}
-            </Table.Summary.Cell>
+            <Table.Summary.Cell index={3}>{formatMoney(saleReport?.data?.summary?.totalDiscount)}</Table.Summary.Cell>
+            <Table.Summary.Cell index={4}>{formatMoney(saleReport?.data?.summary?.totalRevenue)}</Table.Summary.Cell>
+            <Table.Summary.Cell index={4}>{formatMoney(saleReport?.data?.summary?.totalPrime)}</Table.Summary.Cell>
+            <Table.Summary.Cell index={4}>{formatMoney(saleReport?.data?.summary?.profit)}</Table.Summary.Cell>
           </Table.Summary.Row>
         );
       case ESaleReportConcerns.DISCOUNT:
@@ -261,12 +230,8 @@ export function SaleReport() {
               {formatNumber(saleReport?.data?.summary?.totalOrder)}
             </Table.Summary.Cell>{" "}
             {/* Empty cell */}
-            <Table.Summary.Cell index={3}>
-              {formatMoney(saleReport?.data?.summary?.totalDiscount)}
-            </Table.Summary.Cell>
-            <Table.Summary.Cell index={4}>
-              {formatMoney(saleReport?.data?.summary?.totalPrice)}
-            </Table.Summary.Cell>
+            <Table.Summary.Cell index={3}>{formatMoney(saleReport?.data?.summary?.totalDiscount)}</Table.Summary.Cell>
+            <Table.Summary.Cell index={4}>{formatMoney(saleReport?.data?.summary?.totalPrice)}</Table.Summary.Cell>
           </Table.Summary.Row>
         );
       case ESaleReportConcerns.EMPLOYEE:
@@ -278,12 +243,21 @@ export function SaleReport() {
               {formatMoney(saleReport?.data?.summary?.totalRevenue)}
             </Table.Summary.Cell>{" "}
             {/* Empty cell */}
-            <Table.Summary.Cell index={3}>
-              {formatMoney(saleReport?.data?.summary?.saleReturn)}
-            </Table.Summary.Cell>
-            <Table.Summary.Cell index={4}>
-              {formatMoney(saleReport?.data?.summary?.realRevenue)}
-            </Table.Summary.Cell>
+            <Table.Summary.Cell index={3}>{formatMoney(saleReport?.data?.summary?.saleReturn)}</Table.Summary.Cell>
+            <Table.Summary.Cell index={4}>{formatMoney(saleReport?.data?.summary?.realRevenue)}</Table.Summary.Cell>
+          </Table.Summary.Row>
+        );
+      case ESaleReportConcerns.SALE_RETURN:
+        return (
+          <Table.Summary.Row className="bg-[#e6fff6] font-semibold text-base">
+            <Table.Summary.Cell index={0}>{null}</Table.Summary.Cell>
+            <Table.Summary.Cell index={1}>{null}</Table.Summary.Cell>
+            <Table.Summary.Cell index={2}>
+              {formatMoney(saleReport?.data?.summary?.totalRevenue)}
+            </Table.Summary.Cell>{" "}
+            {/* Empty cell */}
+            <Table.Summary.Cell index={3}>{formatMoney(saleReport?.data?.summary?.saleReturn)}</Table.Summary.Cell>
+            <Table.Summary.Cell index={4}>{formatMoney(saleReport?.data?.summary?.numberOfReturn)}</Table.Summary.Cell>
           </Table.Summary.Row>
         );
       default:
@@ -301,14 +275,12 @@ export function SaleReport() {
       datasets: [
         {
           label: "Doanh thu thuần",
-          data: saleReport?.data?.items?.map((item) =>
-            Number(item.realRevenue)
-          ),
+          data: saleReport?.data?.items?.map((item) => Number(item.realRevenue)),
           backgroundColor: "#0070F4",
         },
       ],
     }),
-    [saleReport]
+    [saleReport],
   );
   const revenueDataSource = useMemo(
     () => ({
@@ -321,9 +293,7 @@ export function SaleReport() {
         },
         {
           label: "Doanh thu",
-          data: saleReport?.data?.items?.map((item) =>
-            Number(item.totalRevenue)
-          ),
+          data: saleReport?.data?.items?.map((item) => Number(item.totalRevenue)),
           backgroundColor: "#00B63E",
         },
         {
@@ -333,7 +303,7 @@ export function SaleReport() {
         },
       ],
     }),
-    [saleReport]
+    [saleReport],
   );
   const discountDataSource = useMemo(
     () => ({
@@ -346,14 +316,12 @@ export function SaleReport() {
         },
         {
           label: "Giảm giá hóa đơn",
-          data: saleReport?.data?.items?.map((item) =>
-            Number(item.totalDiscount)
-          ),
+          data: saleReport?.data?.items?.map((item) => Number(item.totalDiscount)),
           backgroundColor: "#00B63E",
         },
       ],
     }),
-    [saleReport]
+    [saleReport],
   );
 
   return (
@@ -361,31 +329,20 @@ export function SaleReport() {
       <div className="my-3 flex justify-end gap-4"></div>
       <div className="grid grid-cols-12 gap-6 ">
         <div className="col-span-2">
-          <Search
-            formFilter={formFilter}
-            setFormFilter={setFormFilter}
-            branches={branches}
-          />
+          <Search formFilter={formFilter} setFormFilter={setFormFilter} branches={branches} />
         </div>
         <div className="col-span-10">
           {formFilter.type === 1 ? (
             <div className="bg-white h-full p-5 rounded">
               <div className="text-center mb-5 flex flex-col gap-[10px]">
                 <h4 className="text-2xl font-semibold">
-                  Báo cáo lợi nhuận theo{" "}
-                  {saleReportLabels[formFilter.concern]?.toLowerCase()}
+                  Báo cáo lợi nhuận theo {saleReportLabels[formFilter.concern]?.toLowerCase()}
                 </h4>
                 <p>
                   Từ ngày {dayjs(formFilter.from).format("DD/MM/YYYY")} đến ngày{" "}
                   {dayjs(formFilter.to).format("DD/MM/YYYY")}
                 </p>
-                <p>
-                  Chi nhánh:{" "}
-                  {
-                    branches?.data?.items?.find((item) => item.id === branch)
-                      ?.name
-                  }
-                </p>
+                <p>Chi nhánh: {branches?.data?.items?.find((item) => item.id === branch)?.name}</p>
               </div>
               <Bar
                 options={options}
@@ -404,20 +361,13 @@ export function SaleReport() {
                 <div>Ngày lập: {dayjs().format("DD/MM/YYYY HH:mm")}</div>
                 <div className="text-center mb-5 flex flex-col gap-[10px]">
                   <h4 className="text-2xl font-semibold">
-                    Báo cáo lợi nhuận theo{" "}
-                    {saleReportLabels[formFilter.concern]?.toLowerCase()}
+                    Báo cáo lợi nhuận theo {saleReportLabels[formFilter.concern]?.toLowerCase()}
                   </h4>
                   <p>
-                    Từ ngày {dayjs(formFilter.from).format("DD/MM/YYYY")} đến
-                    ngày {dayjs(formFilter.to).format("DD/MM/YYYY")}
+                    Từ ngày {dayjs(formFilter.from).format("DD/MM/YYYY")} đến ngày{" "}
+                    {dayjs(formFilter.to).format("DD/MM/YYYY")}
                   </p>
-                  <p>
-                    Chi nhánh:{" "}
-                    {
-                      branches?.data?.items?.find((item) => item.id === branch)
-                        ?.name
-                    }
-                  </p>
+                  <p>Chi nhánh: {branches?.data?.items?.find((item) => item.id === branch)?.name}</p>
                 </div>
                 <CustomTable
                   dataSource={saleReport?.data?.items.map((item, index) => ({
@@ -442,13 +392,7 @@ export function SaleReport() {
                       if (title?.length === 3) {
                         const newDate = `${title[2]}-${title[1]}-${title[0]}`;
                         return (
-                          <RowDetail
-                            record={record}
-                            branchId={branch}
-                            from={newDate}
-                            to={newDate}
-                            fromTime={null}
-                          />
+                          <RowDetail record={record} branchId={branch} from={newDate} to={newDate} fromTime={null} />
                         );
                       } else {
                         let toTime = record.title.split(":");
@@ -466,17 +410,14 @@ export function SaleReport() {
                       }
                     },
                     expandIcon: () => <></>,
-                    expandedRowKeys: Object.keys(expandedRowKeys).map(
-                      (key) => Number(key) + 1
-                    ),
+                    expandedRowKeys: Object.keys(expandedRowKeys).map((key) => Number(key) + 1),
                   }}
                   onRow={(record, rowIndex) => {
                     return {
                       onClick: (event) => {
                         // Toggle expandedRowKeys state here
                         if (expandedRowKeys[record.key - 1]) {
-                          const { [record.key - 1]: value, ...remainingKeys } =
-                            expandedRowKeys;
+                          const { [record.key - 1]: value, ...remainingKeys } = expandedRowKeys;
                           setExpandedRowKeys(remainingKeys);
                         } else {
                           setExpandedRowKeys({
