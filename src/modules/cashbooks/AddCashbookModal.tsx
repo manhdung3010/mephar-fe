@@ -31,7 +31,7 @@ import { branchState, profileState } from "@/recoil/state";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { debounce } from "lodash";
+import { cloneDeep, debounce } from "lodash";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useRecoilValue } from "recoil";
@@ -121,8 +121,6 @@ export function AddCashbookModal({
       enabled: !!id,
     },
   );
-
-  console.log("orderList", orderList);
 
   useEffect(() => {
     if (customerDebt?.data) {
@@ -295,11 +293,17 @@ export function AddCashbookModal({
   const [totalAmount, setTotalAmount] = useState(0);
   useEffect(() => {
     let value = getValues("value");
-    if (value > 0 && orderList?.length > 0) {
+    const newOrderList: any = cloneDeep(orderList);
+    if (value === 0) {
+      newOrderList.forEach((item: any) => {
+        item.amount = 0;
+      });
+      setOrderList(newOrderList);
+    }
+    if (value && orderList?.length > 0) {
       const totalAmount = orderList.reduce((acc, item: any) => {
         return acc + Number(item.debtAmount);
       }, 0);
-      const newOrderList: any = [...orderList];
 
       if (value > totalAmount) {
         newOrderList.forEach((item: any) => {
@@ -340,7 +344,6 @@ export function AddCashbookModal({
           key: index,
         };
       });
-      console.log("newOrderList", newOrderList);
       setOrderList(newOrderList);
       setValue("code", data.code, { shouldValidate: true });
       setValue("target", data.target, { shouldValidate: true });
@@ -363,7 +366,7 @@ export function AddCashbookModal({
       isOpen={isOpen}
       onCancel={onCancel}
       title={`Lập phiếu ${type === "income" ? "thu" : "chi"} (Tiền mặt)`}
-      width={950}
+      width={1200}
       customFooter={true}
     >
       <div className="my-5 h-[1px] w-full bg-[#C7C9D9]" />
@@ -554,7 +557,7 @@ export function AddCashbookModal({
         </div>
 
         {getValues("target") === "customer" && getValues("targetId") !== undefined && (
-          <div className="mb-5 flex items-end">
+          <div className="mb-5 flex items-center">
             <Checkbox
               className="mr-3"
               disabled={id && transactionDetail?.data?.isPaymentOrder}

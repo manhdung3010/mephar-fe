@@ -9,12 +9,7 @@ import { useForm } from "react-hook-form";
 import { useRecoilValue } from "recoil";
 
 import { getCountries } from "@/api/address.service";
-import {
-  createProduct,
-  getManufacture,
-  getProductDetail,
-  updateProduct,
-} from "@/api/product.service";
+import { createProduct, getManufacture, getProductDetail, updateProduct } from "@/api/product.service";
 import ArrowDownIcon from "@/assets/arrowDownGray.svg";
 import PlusCircleIcon from "@/assets/plus-circle.svg";
 import { CustomButton } from "@/components/CustomButton";
@@ -33,13 +28,7 @@ import { schema } from "./schema";
 import { hasPermission } from "@/helpers";
 import { RoleAction, RoleModel } from "@/modules/settings/role/role.enum";
 
-const AddMedicine = ({
-  productId,
-  isCopy,
-}: {
-  productId?: string;
-  isCopy?: boolean;
-}) => {
+const AddMedicine = ({ productId, isCopy }: { productId?: string; isCopy?: boolean }) => {
   const queryClient = useQueryClient();
   const router = useRouter();
   const { id } = router.query;
@@ -69,33 +58,23 @@ const AddMedicine = ({
   const [isOpenManufactureModal, setIsOpenManufactureModal] = useState(false);
   const [manufactureKeyword, setManufactureKeyword] = useState();
   const [countryKeyword, setCountryKeyword] = useState();
-  const [selectedMedicineCategory, setSelectedMedicineCategory] =
-    useState<any>();
+  const [selectedMedicineCategory, setSelectedMedicineCategory] = useState<any>();
 
-  const { data: manufactures } = useQuery(
-    ["MANUFACTURE", manufactureKeyword],
-    () => getManufacture({ page: 1, limit: 20, keyword: manufactureKeyword })
+  const { data: manufactures } = useQuery(["MANUFACTURE", manufactureKeyword], () =>
+    getManufacture({ page: 1, limit: 20, keyword: manufactureKeyword }),
   );
 
   const { data: countries } = useQuery(["COUNTRIES", countryKeyword], () =>
-    getCountries({ page: 1, limit: 20, keyword: countryKeyword })
+    getCountries({ page: 1, limit: 20, keyword: countryKeyword }),
   );
 
-  const { data: productDetail } = useQuery(
-    ["DETAIL_PRODUCT", productId],
-    () => getProductDetail(Number(productId)),
-    { enabled: !!productId }
-  );
+  const { data: productDetail } = useQuery(["DETAIL_PRODUCT", productId], () => getProductDetail(Number(productId)), {
+    enabled: !!productId,
+  });
 
   useEffect(() => {
     if (profile?.role?.permissions) {
-      if (
-        !hasPermission(
-          profile?.role?.permissions,
-          RoleModel.list_product,
-          RoleAction.create
-        )
-      ) {
+      if (!hasPermission(profile?.role?.permissions, RoleModel.list_product, RoleAction.create)) {
         message.error("Bạn không có quyền truy cập vào trang này");
         router.push("/products/list");
       }
@@ -130,40 +109,33 @@ const AddMedicine = ({
   useEffect(() => {
     if (productDetail?.data) {
       Object.keys(schema.fields).forEach((key: any) => {
-        if (
-          ![undefined, null].includes(productDetail.data[key]) &&
-          key !== "productUnits"
-        ) {
+        if (![undefined, null].includes(productDetail.data[key]) && key !== "productUnits") {
           if (isCopy && ["code", "barCode"].includes(key)) {
             // nothing
           } else {
             setValue(key, productDetail.data[key], {
               shouldValidate: true,
             });
-            setValue("point", productDetail.data?.productUnit[0]?.point, {
+            setValue("point", productDetail.data?.productUnit?.find((item) => item.isBaseUnit)?.point, {
               shouldValidate: true,
             });
           }
         }
       });
       if (isCopy) {
-        const productUnits = productDetail.data.productUnit?.filter(
-          (unit) => !unit.isBaseUnit
-        )?.map((unit) => {
-          return {
-            ...unit,
-            code: "",
-            barCode: "",
-          };
-        });
-        setValue('productUnits', productUnits, { shouldValidate: true });
-
-      }
-      else {
-        const productUnits = productDetail.data.productUnit?.filter(
-          (unit) => !unit.isBaseUnit
-        );
-        setValue('productUnits', productUnits, { shouldValidate: true });
+        const productUnits = productDetail.data.productUnit
+          ?.filter((unit) => !unit.isBaseUnit)
+          ?.map((unit) => {
+            return {
+              ...unit,
+              code: "",
+              barCode: "",
+            };
+          });
+        setValue("productUnits", productUnits, { shouldValidate: true });
+      } else {
+        const productUnits = productDetail.data.productUnit?.filter((unit) => !unit.isBaseUnit);
+        setValue("productUnits", productUnits, { shouldValidate: true });
       }
 
       setManufactureKeyword(productDetail?.data?.productManufacture?.name);
@@ -171,52 +143,43 @@ const AddMedicine = ({
     }
   }, [productDetail]);
 
-  const { mutate: mutateCreateMedicine, isLoading: isLoadingCreateMedicine } =
-    useMutation(
-      () => {
-        const payload: any = {
-          ...Object.fromEntries(
-            Object.entries(getValues()).filter(([key]) => key !== "point")
-          ),
-          branchId,
-          drugCode: selectedMedicineCategory
-            ? JSON.parse(selectedMedicineCategory)?.code
-            : productDetail?.data?.drugCode,
-          productUnits: [
-            ...(getValues("productUnits") || []),
-            {
-              id: productDetail?.data?.productUnit?.find(
-                (unit) => unit.isBaseUnit
-              )?.id,
-              unitName: getValues("baseUnit"),
-              code: "",
-              price: getValues("price"),
-              barCode: "",
-              point: getValues("point"),
-              exchangeValue: 1,
-              isDirectSale: getValues("isDirectSale"),
-              isBaseUnit: true,
-            },
-          ],
-        };
-        delete payload.isDirectSale;
+  const { mutate: mutateCreateMedicine, isLoading: isLoadingCreateMedicine } = useMutation(
+    () => {
+      const payload: any = {
+        ...Object.fromEntries(Object.entries(getValues()).filter(([key]) => key !== "point")),
+        branchId,
+        drugCode: selectedMedicineCategory ? JSON.parse(selectedMedicineCategory)?.code : productDetail?.data?.drugCode,
+        productUnits: [
+          ...(getValues("productUnits") || []),
+          {
+            id: productDetail?.data?.productUnit?.find((unit) => unit.isBaseUnit)?.id,
+            unitName: getValues("baseUnit"),
+            code: "",
+            price: getValues("price"),
+            barCode: "",
+            point: getValues("point"),
+            exchangeValue: 1,
+            isDirectSale: getValues("isDirectSale"),
+            isBaseUnit: true,
+          },
+        ],
+      };
+      delete payload.isDirectSale;
 
-        return productDetail && !isCopy
-          ? updateProduct(productDetail?.data?.id, payload)
-          : createProduct(payload);
+      return productDetail && !isCopy ? updateProduct(productDetail?.data?.id, payload) : createProduct(payload);
+    },
+    {
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(["LIST_PRODUCT"]);
+        reset();
+
+        router.push("/products/list");
       },
-      {
-        onSuccess: async () => {
-          await queryClient.invalidateQueries(["LIST_PRODUCT"]);
-          reset();
-
-          router.push("/products/list");
-        },
-        onError: (err: any) => {
-          message.error(err?.message);
-        },
-      }
-    );
+      onError: (err: any) => {
+        message.error(err?.message);
+      },
+    },
+  );
 
   const onSubmit = () => {
     mutateCreateMedicine();
@@ -233,24 +196,17 @@ const AddMedicine = ({
       <div className="mt-6 flex items-center justify-between bg-white p-5">
         <div className="text-2xl font-medium uppercase">{title}</div>
         <div className="flex gap-4">
-          <CustomButton
-            outline={true}
-            onClick={() => router.push("/products/list")}
-          >
+          <CustomButton outline={true} onClick={() => router.push("/products/list")}>
             Hủy bỏ
           </CustomButton>
-          <CustomButton outline={true}>
-            Lưu và đưa sản phẩm lên chợ
-          </CustomButton>
+          <CustomButton outline={true}>Lưu và đưa sản phẩm lên chợ</CustomButton>
           <CustomButton
             disabled={isLoadingCreateMedicine}
             onClick={() => {
               const productUnits = getValues("productUnits")?.map((unit) => {
                 return {
                   ...unit,
-                  price: !unit.price
-                    ? Number(unit.exchangeValue) * Number(getValues("price"))
-                    : unit.price,
+                  price: !unit.price ? Number(unit.exchangeValue) * Number(getValues("price")) : unit.price,
                 };
               });
 
@@ -283,10 +239,7 @@ const AddMedicine = ({
                   setError,
                 }}
                 key="0"
-                selectedMedicineCategory={
-                  selectedMedicineCategory &&
-                  JSON.parse(selectedMedicineCategory)
-                }
+                selectedMedicineCategory={selectedMedicineCategory && JSON.parse(selectedMedicineCategory)}
                 setSelectedMedicineCategory={setSelectedMedicineCategory}
                 groupProductName={productDetail?.data?.groupProduct?.name}
                 dosageName={productDetail?.data?.productDosage?.name}
@@ -313,13 +266,9 @@ const AddMedicine = ({
           }}
         >
           <div>
-            <div className="mb-2 font-medium text-[#15171A]">
-              Hình ảnh minh họa
-            </div>
+            <div className="mb-2 font-medium text-[#15171A]">Hình ảnh minh họa</div>
             <CustomUpload
-              onChangeValue={(value) =>
-                setValue("imageId", value, { shouldValidate: true })
-              }
+              onChangeValue={(value) => setValue("imageId", value, { shouldValidate: true })}
               values={[productDetail?.data?.image?.path]}
               fileUrl={productDetail?.data?.imageUrl || ""}
             >
@@ -369,9 +318,7 @@ const AddMedicine = ({
             />
           </div>
           <div>
-            <div className="mb-2 font-medium text-[#15171A]">
-              Quy cách đóng gói
-            </div>
+            <div className="mb-2 font-medium text-[#15171A]">Quy cách đóng gói</div>
             <CustomInput
               className=" h-11"
               placeholder="Quy cách đóng gói"
@@ -387,9 +334,7 @@ const AddMedicine = ({
           <div>
             <div className="mb-2 font-medium text-[#15171A]">Hãng sản xuất</div>
             <CustomSelect
-              onChange={(value) =>
-                setValue("manufactureId", value, { shouldValidate: true })
-              }
+              onChange={(value) => setValue("manufactureId", value, { shouldValidate: true })}
               showSearch={true}
               onSearch={debounce((value) => {
                 setManufactureKeyword(value);
@@ -403,11 +348,7 @@ const AddMedicine = ({
               suffixIcon={
                 <div className="flex items-center">
                   <Image src={ArrowDownIcon} alt="" />
-                  <Image
-                    src={PlusCircleIcon}
-                    alt=""
-                    onClick={() => setIsOpenManufactureModal(true)}
-                  />
+                  <Image src={PlusCircleIcon} alt="" onClick={() => setIsOpenManufactureModal(true)} />
                 </div>
               }
               value={getValues("manufactureId")}
@@ -417,9 +358,7 @@ const AddMedicine = ({
           <div>
             <div className="mb-2 font-medium text-[#15171A]">Nước sản xuất</div>
             <CustomSelect
-              onChange={(value) =>
-                setValue("countryId", value, { shouldValidate: true })
-              }
+              onChange={(value) => setValue("countryId", value, { shouldValidate: true })}
               options={countries?.data?.items?.map((item) => ({
                 value: item.id,
                 label: item.name,

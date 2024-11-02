@@ -64,13 +64,6 @@ export default function AddOrder() {
     () => getMarketOrderDetail(String(id)),
     {
       enabled: !!id && !!branchId,
-      onSuccess: (data) => {
-        // if (data?.data?.item) {
-        //   setValue("listProduct", data?.data?.item?.products, {
-        //     shouldValidate: true,
-        //   });
-        // }
-      },
     },
   );
 

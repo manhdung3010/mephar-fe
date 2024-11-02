@@ -136,6 +136,8 @@ function CreateSchedule() {
     }
   }, [latLng, isEnd]);
 
+  console.log("getValues", getValues());
+
   const { mutate: mutateCreateTrip, isLoading: isLoadinCreateTrip } = useMutation(
     () => {
       let payload = {
@@ -378,7 +380,7 @@ function CreateSchedule() {
                           wrapClassName="w-full !rounded bg-white"
                           onSelect={(value) => {
                             setIsEnd(true);
-                            setTempKeyword(
+                            setTempKeywordEnd(
                               isCoordinates(placeKeyword)
                                 ? placeKeyword
                                 : places?.data?.find((item) => item.ref_id === value)?.display,

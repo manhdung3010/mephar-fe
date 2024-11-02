@@ -39,12 +39,10 @@ export function ImportProduct() {
 
   const { data: importProducts, isLoading } = useQuery(
     ["LIST_IMPORT_PRODUCT", JSON.stringify(formFilter), branchId],
-    () => getImportProduct({ ...formFilter, branchId })
+    () => getImportProduct({ ...formFilter, branchId }),
   );
 
-  const [expandedRowKeys, setExpandedRowKeys] = useState<
-    Record<string, boolean>
-  >({});
+  const [expandedRowKeys, setExpandedRowKeys] = useState<Record<string, boolean>>({});
 
   const [isHeaderVisible, setIsHeaderVisible] = useState(false);
 
@@ -100,7 +98,7 @@ export function ImportProduct() {
       title: "Cần trả nhà cung cấp",
       dataIndex: "totalPrice",
       key: "totalPrice",
-      render: (value) => formatMoney(value),
+      render: (value, record) => formatMoney(+value - record?.discount),
     },
     {
       title: "Trạng thái",
@@ -112,7 +110,7 @@ export function ImportProduct() {
             status === EImportProductStatus.SUCCEED
               ? "text-[#00B63E] border border-[#00B63E] bg-[#DEFCEC]"
               : "text-[#6D6D6D] border border-[#6D6D6D] bg-[#F0F1F1]",
-            "px-2 py-1 rounded-2xl w-max"
+            "px-2 py-1 rounded-2xl w-max",
           )}
         >
           {EImportProductStatusLabel[status]}
@@ -142,7 +140,7 @@ export function ImportProduct() {
   const { exported, exportToExcel } = useExportToExcel(
     importProducts?.data.items,
     columnMapping,
-    `DANHSACHNHAPSANPHAM_${Date.now()}.xlsx`
+    `DANHSACHNHAPSANPHAM_${Date.now()}.xlsx`,
   );
 
   return (
@@ -150,22 +148,17 @@ export function ImportProduct() {
       <div className="my-3 flex justify-end gap-4">
         {isHeaderVisible && <Header />}
 
-        {
-          hasPermission(profile?.role?.permissions, RoleModel.import_product, RoleAction.create) && (
-            <CustomButton
-              onClick={() => router.push("/products/import/coupon")}
-              type="success"
-              prefixIcon={<Image src={ImportIcon} />}
-            >
-              Nhập hàng
-            </CustomButton>
-          )
-        }
+        {hasPermission(profile?.role?.permissions, RoleModel.import_product, RoleAction.create) && (
+          <CustomButton
+            onClick={() => router.push("/products/import/coupon")}
+            type="success"
+            prefixIcon={<Image src={ImportIcon} />}
+          >
+            Nhập hàng
+          </CustomButton>
+        )}
 
-        <CustomButton
-          prefixIcon={<Image src={ExportIcon} />}
-          onClick={exportToExcel}
-        >
+        <CustomButton prefixIcon={<Image src={ExportIcon} />} onClick={exportToExcel}>
           Xuất file
         </CustomButton>
       </div>
@@ -188,8 +181,7 @@ export function ImportProduct() {
             onClick: (event) => {
               // Toggle expandedRowKeys state here
               if (expandedRowKeys[record.key - 1]) {
-                const { [record.key - 1]: value, ...remainingKeys } =
-                  expandedRowKeys;
+                const { [record.key - 1]: value, ...remainingKeys } = expandedRowKeys;
                 setExpandedRowKeys(remainingKeys);
               } else {
                 setExpandedRowKeys({
@@ -201,9 +193,7 @@ export function ImportProduct() {
         }}
         expandable={{
           // eslint-disable-next-line @typescript-eslint/no-shadow
-          expandedRowRender: (record: IRecord) => (
-            <ProductDetail record={record} />
-          ),
+          expandedRowRender: (record: IRecord) => <ProductDetail record={record} />,
           expandIcon: () => <></>,
           expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key + 1),
         }}

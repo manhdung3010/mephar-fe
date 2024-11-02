@@ -1,16 +1,16 @@
-import { message } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
-import { cloneDeep, set } from 'lodash';
-import { useEffect, useState } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { message } from "antd";
+import type { ColumnsType } from "antd/es/table";
+import { cloneDeep, set } from "lodash";
+import { useEffect, useState } from "react";
+import { useRecoilState, useRecoilValue } from "recoil";
 
-import { CustomButton } from '@/components/CustomButton';
-import { CustomInput } from '@/components/CustomInput';
-import { CustomModal } from '@/components/CustomModal';
-import CustomTable from '@/components/CustomTable';
-import { formatNumber } from '@/helpers';
-import { checkInventoryState, orderActiveState, orderState } from '@/recoil/state';
-import { IBatch } from '@/modules/sales/interface';
+import { CustomButton } from "@/components/CustomButton";
+import { CustomInput } from "@/components/CustomInput";
+import { CustomModal } from "@/components/CustomModal";
+import CustomTable from "@/components/CustomTable";
+import { formatNumber } from "@/helpers";
+import { checkInventoryState, orderActiveState, orderState } from "@/recoil/state";
+import { IBatch } from "@/modules/sales/interface";
 
 // import type { IBatch, ISaleProductLocal } from './interface';
 
@@ -25,9 +25,7 @@ export function ListBatchModal({
   productKeyAddBatch?: string;
   onSave: (value) => void;
 }) {
-
-  const [importProducts, setImportProducts] =
-    useRecoilState(checkInventoryState);
+  const [importProducts, setImportProducts] = useRecoilState(checkInventoryState);
 
   const [batchErr, setBatchErr] = useState<any[]>([]);
 
@@ -43,30 +41,30 @@ export function ListBatchModal({
             productKey: product.productKey,
             productId: product.productId,
             newInventory: Math.floor(batch.originalInventory / product.productUnit.exchangeValue),
-          }))
+          })),
         );
       }
     });
-  }, [productKeyAddBatch]);
+  }, [productKeyAddBatch, isOpen]);
 
   const columns: ColumnsType<IBatch> = [
     {
-      title: 'Tên',
-      dataIndex: 'name',
-      key: 'name',
+      title: "Tên",
+      dataIndex: "name",
+      key: "name",
       // render: (_, { batch }) => batch.name,
     },
     {
-      title: 'Hạn sử dụng',
-      dataIndex: 'expiryDate',
-      key: 'expiryDate',
+      title: "Hạn sử dụng",
+      dataIndex: "expiryDate",
+      key: "expiryDate",
     },
     {
-      title: 'Số lượng',
-      dataIndex: 'quantity',
-      key: 'quantity',
+      title: "Số lượng",
+      dataIndex: "quantity",
+      key: "quantity",
       render: (quantity, { batchId, saleQuantity }) => (
-        <div className='flex items-center gap-2'>
+        <div className="flex items-center gap-2">
           <CustomInput
             bordered={false}
             onChange={(value) => {
@@ -99,9 +97,9 @@ export function ListBatchModal({
       ),
     },
     {
-      title: 'Số lượng tồn',
-      dataIndex: 'newInventory',
-      key: 'newInventory',
+      title: "Số lượng tồn",
+      dataIndex: "newInventory",
+      key: "newInventory",
       render: (value) => formatNumber(Math.floor(value || 0)),
     },
   ];
@@ -110,7 +108,7 @@ export function ListBatchModal({
     // eslint-disable-next-line no-restricted-syntax
     for (const batch of listBatch) {
       if (batch.isSelected && batch.quantity === 0) {
-        message.error('Số lượng sản phẩm chọn phải lớn hơn hoặc bằng 1');
+        message.error("Số lượng sản phẩm chọn phải lớn hơn hoặc bằng 1");
         return false;
       }
     }
@@ -137,11 +135,9 @@ export function ListBatchModal({
         columns={columns}
         scroll={{ x: 600 }}
         rowSelection={{
-          type: 'checkbox',
+          type: "checkbox",
           selectedRowKeys: [
-            ...listBatch
-              .filter((batch) => batch.isSelected)
-              .map((batch: any) => batch.batchId || batch.id),
+            ...listBatch.filter((batch) => batch.isSelected).map((batch: any) => batch.batchId || batch.id),
           ],
           onChange(selectedRowKeys) {
             let listBatchClone = cloneDeep(listBatch);
@@ -164,11 +160,7 @@ export function ListBatchModal({
       />
 
       <div className="mt-5 flex justify-end gap-x-4">
-        <CustomButton
-          onClick={onCancel}
-          outline={true}
-          className="h-[46px] min-w-[150px] py-2 px-4"
-        >
+        <CustomButton onClick={onCancel} outline={true} className="h-[46px] min-w-[150px] py-2 px-4">
           Đóng
         </CustomButton>
         <CustomButton
@@ -179,8 +171,8 @@ export function ListBatchModal({
             }
           }}
           className="h-[46px] min-w-[150px] py-2 px-4"
-        // type={isSaleReturn && batchErr.length > 0 ? 'disable' : 'danger'}
-        // disabled={isSaleReturn && batchErr.length > 0 ? true : false}
+          // type={isSaleReturn && batchErr.length > 0 ? 'disable' : 'danger'}
+          // disabled={isSaleReturn && batchErr.length > 0 ? true : false}
         >
           Lưu
         </CustomButton>

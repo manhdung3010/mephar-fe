@@ -323,6 +323,24 @@ export function SaleReport() {
     }),
     [saleReport],
   );
+  const saleReturnDataSource = useMemo(
+    () => ({
+      labels,
+      datasets: [
+        {
+          label: "Giá trị hóa đơn trả",
+          data: saleReport?.data?.items?.map((item) => Number(item.saleReturn)),
+          backgroundColor: "#0070F4",
+        },
+        // {
+        //   label: "Số lượng trả",
+        //   data: saleReport?.data?.items?.map((item) => Number(item.numberOfReturn)),
+        //   backgroundColor: "#00B63E",
+        // },
+      ],
+    }),
+    [saleReport],
+  );
 
   return (
     <div>
@@ -351,6 +369,8 @@ export function SaleReport() {
                     ? revenueDataSource
                     : formFilter.concern === ESaleReportConcerns.DISCOUNT
                     ? discountDataSource
+                    : formFilter.concern === ESaleReportConcerns.SALE_RETURN
+                    ? saleReturnDataSource
                     : timeDataSource
                 }
               />

@@ -75,7 +75,6 @@ export function CheckInventoryCoupon() {
       // find product same in products and add to importProducts
       details?.data?.inventoryCheckingProduct.forEach((p, index) => {
         const productCode = p.productUnit?.product?.code;
-        console.log("index", index);
         getSaleProducts({
           page: 1,
           limit: 1,
@@ -140,16 +139,18 @@ export function CheckInventoryCoupon() {
       dataIndex: "action",
       key: "action",
       render: (_, { id }) => (
-        <Image
-          src={RemoveIcon}
-          className=" cursor-pointer"
-          onClick={() => {
-            const productImportClone = cloneDeep(importProducts);
-            const index = productImportClone.findIndex((product) => product.id === id);
-            productImportClone.splice(index, 1);
-            setImportProducts(productImportClone);
-          }}
-        />
+        <div className="w-5 h-5 flex-shrink-0">
+          <Image
+            src={RemoveIcon}
+            className=" cursor-pointer"
+            onClick={() => {
+              const productImportClone = cloneDeep(importProducts);
+              const index = productImportClone.findIndex((product) => product.id === id);
+              productImportClone.splice(index, 1);
+              setImportProducts(productImportClone);
+            }}
+          />
+        </div>
       ),
     },
     {
@@ -183,7 +184,7 @@ export function CheckInventoryCoupon() {
       title: "Tên hàng",
       dataIndex: "product",
       key: "product",
-      render: (product) => product.name,
+      render: (product) => <div className="line-clamp-1">{product.name}</div>,
     },
     {
       title: "ĐVT",
@@ -218,12 +219,12 @@ export function CheckInventoryCoupon() {
                     ...batch,
                     inventory: batch.originalInventory / productUnit!.exchangeValue,
                   })),
+                  productUnit: productUnit,
                   newInventory: Math.floor(product.quantity / productUnit!.exchangeValue),
                 };
               }
               return p;
             });
-            console.log("importProductsClone", importProductsClone);
             setImportProducts(importProductsClone);
           }}
         />

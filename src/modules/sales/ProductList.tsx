@@ -432,8 +432,11 @@ export function ProductList({
             if (isSaleReturn && record?.batches?.length <= 0) {
               if (record?.quantityLast) {
                 if (e.target.value > record?.quantityLast) {
-                  message.error("Số lượng trả vượt quá số lượng đã mua");
-                  onChangeQuantity(record?.productKey, +record?.quantityLast, record);
+                  // message.error("Số lượng trả vượt quá số lượng đã mua");
+                  // onChangeQuantity(record?.productKey, +record?.quantityLast, record);
+                  setError("products", {
+                    message: "Số lượng trả vượt quá số lượng đã mua",
+                  });
                   return;
                 }
                 onChangeQuantity(record?.productKey, e.target.value, record);
