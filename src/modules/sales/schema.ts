@@ -12,6 +12,7 @@ export const schema = yup.object().shape({
       originProductUnitId: yup.number().required("Đây là trường bắt buộc!"),
       productType: yup.number().required("Đây là trường bắt buộc!"),
       quantity: yup.number().required("Đây là trường bắt buộc!"),
+      quantityValidate: yup.number(),
       isBatchExpireControl: yup.boolean(),
       batches: yup
         .array(
@@ -28,51 +29,35 @@ export const schema = yup.object().shape({
                   }
 
                   return true;
-                }
+                },
               ),
             inventory: yup.number(),
-          })
+          }),
         )
-        .test(
-          "sum-quantity",
-          "Số lượng sản phẩm khác với số lượng sản phẩm trong từng lô",
-          (batches, context) => {
-            if (!batches?.length) return true;
+        .test("sum-quantity", "Số lượng sản phẩm khác với số lượng sản phẩm trong từng lô", (batches, context) => {
+          if (!batches?.length) return true;
 
-            const totalQuantity = batches?.reduce?.(
-              (acc, obj) => acc + (obj?.quantity || 0),
-              0
-            );
+          const totalQuantity = batches?.reduce?.((acc, obj) => acc + (obj?.quantity || 0), 0);
 
-            if (roundNumber(totalQuantity || 0) !== context.parent.quantity)
-              return false;
+          if (roundNumber(totalQuantity || 0) !== context.parent.quantity) return false;
 
-            return true;
-          }
-        )
-        .test(
-          "is-required",
-          "Vui lòng nhập lô cho sản phẩm",
-          (value, context) => {
-            if (context.parent.isBatchExpireControl && !value?.length)
-              return false;
+          return true;
+        })
+        .test("is-required", "Vui lòng nhập lô cho sản phẩm", (value, context) => {
+          if (context.parent.isBatchExpireControl && !value?.length) return false;
 
-            return true;
-          }
-        ),
-    })
+          return true;
+        }),
+    }),
   ),
   totalPrice: yup.number().required("Đây là trường bắt buộc!"),
   discount: yup.number(),
   discountType: yup.number(),
   paymentPoint: yup.number(),
-  cashOfCustomer: yup
-    .string()
-    .test("isRequire", "Đây là trường bắt buộc!", (value, context) => {
-      if (context.parent.paymentType === EPaymentMethod.CASH && !value?.length)
-        return false;
-      return true;
-    }),
+  cashOfCustomer: yup.string().test("isRequire", "Đây là trường bắt buộc!", (value, context) => {
+    if (context.parent.paymentType === EPaymentMethod.CASH && !value?.length) return false;
+    return true;
+  }),
   paymentType: yup.string().required("Đây là trường bắt buộc!"),
   description: yup.string(),
   userId: yup.number().required("Đây là trường bắt buộc!"),
@@ -88,7 +73,7 @@ export const schemaReturn = yup.object().shape({
       // productType: yup.number().required("Đây là trường bắt buộc!"),
       quantity: yup.number().required("Đây là trường bắt buộc!"),
       // returnPrice: yup.number().required("Đây là trường bắt buộc!"),
-    })
+    }),
   ),
   paymentType: yup.string().required("Đây là trường bắt buộc!"),
   paid: yup.number().required("Đây là trường bắt buộc!"),
@@ -108,23 +93,18 @@ export const prescriptionSchema = yup.object().shape({
   gender: yup.string(),
   age: yup.string(),
   weight: yup.string(),
-  identificationCard: yup
-    .mixed()
-    .test("is-number", "CMTND/CCCD phải là số", function (value: any) {
-      // Nếu giá trị là null hoặc undefined, trả về luôn là true (không có lỗi)
-      if (value === null || value === undefined) {
-        return true;
-      }
-      // Kiểm tra xem giá trị có phải là một số không
-      return !isNaN(value);
-    }),
+  identificationCard: yup.mixed().test("is-number", "CMTND/CCCD phải là số", function (value: any) {
+    // Nếu giá trị là null hoặc undefined, trả về luôn là true (không có lỗi)
+    if (value === null || value === undefined) {
+      return true;
+    }
+    // Kiểm tra xem giá trị có phải là một số không
+    return !isNaN(value);
+  }),
   healthInsuranceCard: yup.string(),
   address: yup.string(),
   supervisor: yup.string(),
-  phone: yup
-    .string()
-    .nullable()
-    .matches(regexPhoneNumber, "Vui lòng nhập đúng định dạng số điện thoại"),
+  phone: yup.string().nullable().matches(regexPhoneNumber, "Vui lòng nhập đúng định dạng số điện thoại"),
   diagnostic: yup.string(),
   healthFacilityId: yup.number(),
 });

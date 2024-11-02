@@ -81,12 +81,15 @@ export default function AddOrder() {
           marketOrderProductId: product?.id,
         };
       });
+      console.log("listProduct", listProduct);
       setImportProducts(listProduct);
       setValue("listProduct", listProduct);
       setValue("customerId", details?.data?.item?.customerId);
       setValue("note", details?.data?.item?.note);
     }
   }, [details?.data?.item]);
+
+  console.log("importProducts", importProducts);
 
   const { data: products, isLoading: isLoadingConfigProductPrivate } = useQuery(
     ["CONFIG_PRODUCT_PRIVATE", JSON.stringify(formFilter), getValues("customerId")],
@@ -127,13 +130,6 @@ export default function AddOrder() {
 
     setImportProducts(productImportClone);
   };
-
-  useEffect(() => {
-    if (getValues("customerId")) {
-      const filterPrivate = importProducts.filter((item) => item?.marketType !== "private");
-      setImportProducts(filterPrivate);
-    }
-  }, [getValues("customerId")]);
 
   const columns: any = [
     {

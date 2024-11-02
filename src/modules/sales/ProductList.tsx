@@ -54,7 +54,6 @@ export function ProductList({
   const [orderObject, setOrderObject] = useRecoilState(orderState);
   const [discountObject, setDiscountObject] = useRecoilState(discountState);
   const orderActive = useRecoilValue(orderActiveState);
-  const [productDiscount, setProductDiscount] = useRecoilState(productDiscountSelected);
   const [expandedRowKeys, setExpandedRowKeys] = useState<Record<string, boolean>>({});
   const [openListBatchModal, setOpenListBatchModal] = useState(false);
   const [openProductDiscountList, setOpenProductDiscountList] = useState(false);
@@ -132,22 +131,22 @@ export function ProductList({
   };
   const onExpandMoreBatches = async (productKey, quantity: number, product?: any) => {
     const orderObjectClone = cloneDeep(orderObject);
-    const res = await getProductDiscountList({
-      productUnitId: product?.id,
-      branchId: branchId,
-      quantity: quantity,
-    });
-    let itemDiscountProduct = res?.data?.data?.items;
-    orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map((product: ISaleProductLocal) => {
-      if (product.productKey === productKey) {
-        return {
-          ...product,
-          itemDiscountProduct,
-          quantity,
-        };
-      }
-      return product;
-    });
+    // const res = await getProductDiscountList({
+    //   productUnitId: product?.id,
+    //   branchId: branchId,
+    //   quantity: quantity,
+    // });
+    // let itemDiscountProduct = res?.data?.data?.items;
+    // orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map((product: ISaleProductLocal) => {
+    //   if (product.productKey === productKey) {
+    //     return {
+    //       ...product,
+    //       itemDiscountProduct,
+    //       quantity,
+    //     };
+    //   }
+    //   return product;
+    // });
     orderObjectClone[orderActive] = orderObjectClone[orderActive].map((product: ISaleProductLocal) => {
       if (product.productKey === productKey) {
         let sumQuantity = 0;
@@ -168,6 +167,7 @@ export function ProductList({
         });
         return {
           ...product,
+          quantity: quantity,
           batches,
         };
       }
@@ -335,135 +335,190 @@ export function ProductList({
       title: "SỐ LƯỢNG",
       dataIndex: "quantity",
       key: "quantity",
-      render: (quantity, record: any) => (
-        <CustomInput
-          wrapClassName="!w-[110px]"
-          className="!h-6 !w-[80px] text-center"
-          hasMinus={true}
-          hasPlus={true}
-          value={isNaN(quantity) ? 0 : quantity}
-          type="number"
-          disabled={
-            // (isSaleReturn && record?.batches?.length > 0) ||
-            record?.isDiscount && !record?.buyNumberType ? true : false
-          }
-          onChange={(value) => {
-            // validate discount
-            if (record?.isDiscount && !record?.buyNumberType) return;
-            // validate trả hàng
-            if (isSaleReturn && record?.batches?.length > 0) {
-              setProductKeyAddBatch(record?.productKey);
-              setOpenListBatchModal(true);
-              return;
+      render: (quantity, record: any, index) => (
+        <div>
+          <CustomInput
+            wrapClassName="!w-[110px]"
+            className="!h-6 !w-[80px] text-center"
+            hasMinus={true}
+            hasPlus={true}
+            value={isNaN(quantity) ? 0 : quantity}
+            type="number"
+            disabled={
+              // (isSaleReturn && record?.batches?.length > 0) ||
+              record?.isDiscount && !record?.buyNumberType ? true : false
             }
-            if (isSaleReturn && record?.batches?.length <= 0) {
-              if (record?.quantityLast) {
-                if (value > record?.quantityLast) {
-                  message.error("Số lượng trả vượt quá số lượng đã mua");
-                  onChangeQuantity(record?.productKey, +record?.quantityLast, record);
-                  return;
-                }
-                onChangeQuantity(record?.productKey, value, record);
-              } else {
-                if (value > +record?.originalQuantity) {
-                  message.error("Số lượng trả vượt quá số lượng đã mua");
-                  onChangeQuantity(record?.productKey, +record?.quantity, record);
-                  return;
-                }
-                onChangeQuantity(record?.productKey, value, record);
+            onChange={(value) => {
+              // validate discount
+              if (record?.isDiscount && !record?.buyNumberType) return;
+              // validate trả hàng
+              if (isSaleReturn && record?.batches?.length > 0) {
+                setProductKeyAddBatch(record?.productKey);
+                setOpenListBatchModal(true);
+                return;
               }
-            }
-
-            // logic update quantity
-            const orderObjectClone = cloneDeep(orderObject);
-            orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
-            setOrderObject(orderObjectClone);
-            onChangeQuantity(record?.productKey, value, record);
-          }}
-          onMinus={async (value) => {
-            if (record?.isDiscount && !record?.buyNumberType) return;
-            if (isSaleReturn && record?.batches?.length > 0) {
-              setProductKeyAddBatch(record?.productKey);
-              setOpenListBatchModal(true);
-              return;
-            }
-            // remove productDiscount if this product is in productDiscount
-            const productDiscountClone = cloneDeep(productDiscount);
-            productDiscountClone.forEach((item, index) => {
-              if (item.productUnitId === record?.productUnitId) {
-                // remove this item from productDiscount
-                productDiscountClone.splice(index, 1);
-              }
-            });
-            setProductDiscount(productDiscountClone);
-            const orderObjectClone = cloneDeep(orderObject);
-            orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
-            setOrderObject(orderObjectClone);
-            await onExpandMoreBatches(record?.productKey, value, record);
-          }}
-          onPlus={async (value) => {
-            if (record?.isDiscount && !record?.buyNumberType) return;
-            if (isSaleReturn && record?.batches?.length > 0) {
-              setProductKeyAddBatch(record?.productKey);
-              setOpenListBatchModal(true);
-              return;
-            }
-            // remove productDiscount if this product is in productDiscount
-            const productDiscountClone = cloneDeep(productDiscount);
-            productDiscountClone.forEach((item, index) => {
-              if (item.productUnitId === record?.productUnitId) {
-                // remove this item from productDiscount
-                productDiscountClone.splice(index, 1);
-              }
-            });
-            setProductDiscount(productDiscountClone);
-            const orderObjectClone = cloneDeep(orderObject);
-            orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
-            setOrderObject(orderObjectClone);
-            await onExpandMoreBatches(record?.productKey, value, record);
-          }}
-          onBlur={(e) => {
-            if (record?.isDiscount && !record?.buyNumberType) return;
-            if (isSaleReturn && record?.batches?.length > 0) {
-              setProductKeyAddBatch(record?.productKey);
-              setOpenListBatchModal(true);
-              return;
-            }
-            if (isSaleReturn && record?.batches?.length <= 0) {
-              if (record?.quantityLast) {
-                if (e.target.value > record?.quantityLast) {
-                  // message.error("Số lượng trả vượt quá số lượng đã mua");
-                  // onChangeQuantity(record?.productKey, +record?.quantityLast, record);
-                  setError("products", {
-                    message: "Số lượng trả vượt quá số lượng đã mua",
+              if (isSaleReturn && record?.batches?.length <= 0) {
+                if (record?.quantityLast) {
+                  if (value > record?.quantityLast) {
+                    setError(`products.${index}.quantity`, {
+                      type: "manual",
+                      message: "Số lượng trả vượt quá số lượng đã mua",
+                    });
+                    return;
+                  }
+                  setError(`products.${index}.quantity`, {
+                    type: "manual",
+                    message: undefined,
                   });
-                  return;
+                  onChangeQuantity(record?.productKey, value, record);
+                } else {
+                  if (value > +record?.originalQuantity) {
+                    setError(`products.${index}.quantity`, {
+                      type: "manual",
+                      message: "Số lượng trả vượt quá số lượng đã mua",
+                    });
+                    return;
+                  }
+                  setError(`products.${index}.quantity`, {
+                    type: "manual",
+                    message: undefined,
+                  });
+                  onChangeQuantity(record?.productKey, value, record);
                 }
-                onChangeQuantity(record?.productKey, e.target.value, record);
-              } else {
-                if (+e.target.value > +record?.originalQuantity) {
-                  message.error("Số lượng trả vượt quá số lượng đã mua");
-                  onChangeQuantity(record?.productKey, +record?.quantity, record);
-                  return;
+              }
+              // logic update quantity
+              const orderObjectClone = cloneDeep(orderObject);
+              orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
+              setOrderObject(orderObjectClone);
+              onChangeQuantity(record?.productKey, value, record);
+            }}
+            onMinus={async (value) => {
+              if (record?.isDiscount && !record?.buyNumberType) return;
+              if (isSaleReturn && record?.batches?.length > 0) {
+                setProductKeyAddBatch(record?.productKey);
+                setOpenListBatchModal(true);
+                return;
+              }
+              // if (isSaleReturn && record?.batches?.length <= 0) {
+              //   if (record?.quantityLast) {
+              //     if (value > record?.quantityLast) {
+              //       setError(`products.${index}.quantity`, {
+              //         type: "manual",
+              //         message: "Số lượng trả vượt quá số lượng đã mua",
+              //       });
+              //       return;
+              //     }
+              //     setError(`products.${index}.quantity`, {
+              //       type: "manual",
+              //       message: undefined,
+              //     });
+              //     onChangeQuantity(record?.productKey, value, record);
+              //   } else {
+              //     if (value > +record?.originalQuantity) {
+              //       setError(`products.${index}.quantity`, {
+              //         type: "manual",
+              //         message: "Số lượng trả vượt quá số lượng đã mua",
+              //       });
+              //       return;
+              //     }
+              //     setError(`products.${index}.quantity`, {
+              //       type: "manual",
+              //       message: undefined,
+              //     });
+              //     onChangeQuantity(record?.productKey, value, record);
+              //   }
+              // }
+              await onExpandMoreBatches(record?.productKey, value, record);
+              const orderObjectClone = cloneDeep(orderObject);
+              orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
+              setOrderObject(orderObjectClone);
+            }}
+            onPlus={async (value) => {
+              if (record?.isDiscount && !record?.buyNumberType) return;
+              if (isSaleReturn && record?.batches?.length > 0) {
+                setProductKeyAddBatch(record?.productKey);
+                setOpenListBatchModal(true);
+                return;
+              }
+              // if (isSaleReturn && record?.batches?.length <= 0) {
+              //   if (record?.quantityLast) {
+              //     if (value > record?.quantityLast) {
+              //       setError(`products.${index}.quantity`, {
+              //         type: "manual",
+              //         message: "Số lượng trả vượt quá số lượng đã mua",
+              //       });
+              //       return;
+              //     }
+              //     setError(`products.${index}.quantity`, {
+              //       type: "manual",
+              //       message: undefined,
+              //     });
+              //     onChangeQuantity(record?.productKey, value, record);
+              //   } else {
+              //     if (value > +record?.originalQuantity) {
+              //       setError(`products.${index}.quantity`, {
+              //         type: "manual",
+              //         message: "Số lượng trả vượt quá số lượng đã mua",
+              //       });
+              //       return;
+              //     }
+              //     setError(`products.${index}.quantity`, {
+              //       type: "manual",
+              //       message: undefined,
+              //     });
+              //     onChangeQuantity(record?.productKey, value, record);
+              //   }
+              // }
+              await onExpandMoreBatches(record?.productKey, value, record);
+              const orderObjectClone = cloneDeep(orderObject);
+              orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
+              setOrderObject(orderObjectClone);
+            }}
+            onBlur={(e: any) => {
+              if (record?.isDiscount && !record?.buyNumberType) return;
+              if (isSaleReturn && record?.batches?.length > 0) {
+                setProductKeyAddBatch(record?.productKey);
+                setOpenListBatchModal(true);
+                return;
+              }
+              if (isSaleReturn && record?.batches?.length <= 0) {
+                if (record?.quantityLast) {
+                  if (+e.target.value > record?.quantityLast) {
+                    setError(`products.${index}.quantity`, {
+                      type: "manual",
+                      message: "Số lượng trả vượt quá số lượng đã mua",
+                    });
+                    return;
+                  }
+                  setError(`products.${index}.quantity`, {
+                    type: "manual",
+                    message: undefined,
+                  });
+                  onChangeQuantity(record?.productKey, +e.target.value, record);
+                } else {
+                  if (+e.target.value > +record?.originalQuantity) {
+                    setError(`products.${index}.quantity`, {
+                      type: "manual",
+                      message: "Số lượng trả vượt quá số lượng đã mua",
+                    });
+                    return;
+                  }
+                  setError(`products.${index}.quantity`, {
+                    type: "manual",
+                    message: undefined,
+                  });
+                  onChangeQuantity(record?.productKey, +e.target.value, record);
                 }
-                onChangeQuantity(record?.productKey, e.target.value, record);
               }
-            }
-            // remove productDiscount if this product is in productDiscount
-            const productDiscountClone = cloneDeep(productDiscount);
-            productDiscountClone.forEach((item, index) => {
-              if (item.productUnitId === record?.productUnitId) {
-                // remove this item from productDiscount
-                productDiscountClone.splice(index, 1);
-              }
-            });
-            setProductDiscount(productDiscountClone);
-            const orderObjectClone = cloneDeep(orderObject);
-            orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
-            setOrderObject(orderObjectClone);
-            onExpandMoreBatches(record?.productKey, Number(e.target.value), record);
-          }}
-        />
+              // clear productDiscount if this product is in productDiscount
+              const orderObjectClone = cloneDeep(orderObject);
+              orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
+              setOrderObject(orderObjectClone);
+              onExpandMoreBatches(record?.productKey, Number(e.target.value), record);
+            }}
+          />
+          {errors?.products && <InputError error={errors.products[index]?.quantity?.message} />}
+        </div>
       ),
     },
     ...(isSaleReturn
@@ -587,6 +642,8 @@ export function ProductList({
     });
     setOrderObject(orderObjectClone);
   };
+  console.log("errors", errors);
+  console.log("orderObject", orderObject[orderActive]);
   return (
     <ProductTableStyled className="p-4">
       <CustomTable

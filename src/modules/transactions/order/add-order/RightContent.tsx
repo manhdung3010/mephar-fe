@@ -178,6 +178,8 @@ export default function RightContent({ getValues, setValue, errors, handleSubmit
           showSearch={true}
           onChange={(value) => {
             setValue("customerId", value, { shouldValidate: true });
+            const filterPrivate = importProducts.filter((item) => item?.marketType !== "private");
+            setImportProducts(filterPrivate);
           }}
           wrapClassName="mt-3"
           className="h-[44px]"
