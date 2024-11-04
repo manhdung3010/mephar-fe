@@ -752,40 +752,6 @@ export function ProductList({
           expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key + 1),
         }}
       />
-      {/* {discountType === "order" &&
-        orderObject[orderActive]?.length > 0 &&
-        discountObject[orderActive]?.orderDiscount?.length > 0 && (
-          <div className="bg-[#fbecee] rounded-lg shadow-sm p-5 mt-5">
-            <h3 className="text-lg font-medium mb-2">Khuyến mại hóa đơn</h3>
-            <div className="grid grid-cols-1 gap-2">
-              {discountObject[orderActive]?.orderDiscount?.map((item, index) => (
-                <div key={index} className="flex items-center gap-x-2">
-                  <div className="text-base text-[#d64457]">{item?.name}:</div>
-                  {item?.type === "product_price" && (
-                    <div className="text-base">
-                      Giảm giá hàng {formatNumber(item?.items[0]?.apply?.discountValue)}{" "}
-                      {item?.items[0]?.apply?.discountType === "percent" ? "%" : "đ"}
-                    </div>
-                  )}
-                  {item?.type === "order_price" && (
-                    <div className="text-base">
-                      Giảm giá hóa đơn {formatNumber(item?.items[0]?.apply?.discountValue)}{" "}
-                      {item?.items[0]?.apply?.discountType === "percent" ? "%" : "đ"}
-                    </div>
-                  )}
-
-                  {item?.type === "gift" && <div className="text-base">Tặng hàng</div>}
-                  {item?.type === "loyalty" && (
-                    <div className="text-base">
-                      Tặng điểm: {formatNumber(item?.items[0]?.apply?.pointValue)}
-                      {item?.items[0]?.apply?.discountType === "percent" ? "% điểm" : "điểm"} trên tổng hóa đơn
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )} */}
       <ListBatchModal
         key={openListBatchModal ? 1 : 0}
         isOpen={!!openListBatchModal}

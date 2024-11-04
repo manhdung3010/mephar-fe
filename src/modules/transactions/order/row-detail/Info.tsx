@@ -23,6 +23,7 @@ import EditIcon from "@/assets/editIcon.svg";
 import PaymentModal from "./PaymentModal";
 import SelectBranchModal from "./SelectBranchModal";
 import CancleModal from "./CancleModal";
+import { SeriModal } from "./SeriModal";
 
 export function Info({ record }: { record: any }) {
   const router = useRouter();
@@ -32,6 +33,8 @@ export function Info({ record }: { record: any }) {
   const [isShowSelectBranch, setIsShowSelectBranch] = useState(false);
   const [isShowPaymentModal, setIsShowPaymentModal] = useState(false);
   const [statusTemp, setStatusTemp] = useState<string>("");
+  const [isShowSeriModal, setIsShowSeriModal] = useState(false);
+  const [seriList, setSeriList] = useState<any>([]);
 
   const totalPrice = useMemo(() => {
     return record.products.reduce((total, product) => {
@@ -75,6 +78,8 @@ export function Info({ record }: { record: any }) {
     mutateCreateGroupProduct({ id, status: status, note });
   };
 
+  console.log("record", record);
+
   return (
     <div className="gap-12 ">
       <div className="mb-4 grid grid-cols-2 border-b border-[#E8EAEB]">
@@ -112,10 +117,10 @@ export function Info({ record }: { record: any }) {
             <div className="text-gray-main ">Ghi chú:</div>
             <div className="col-span-2 text-black-main">{record?.note}</div>
           </div>
-          {/* <div className="mb-4 grid grid-cols-3 gap-5">
+          <div className="mb-4 grid grid-cols-3 gap-5">
             <div className="text-gray-main ">Lý do huỷ:</div>
-            <div className="col-span-2 text-black-main">---</div>
-          </div> */}
+            <div className="col-span-2 text-black-main">{record?.closedNote || record?.cancelNote}</div>
+          </div>
         </div>
 
         <div>
@@ -199,6 +204,17 @@ export function Info({ record }: { record: any }) {
               <div className="flex gap-x-40">
                 <div className="w-10 flex-shrink-0">x{product.quantity}</div>
                 <div className="text-[#00B63E]">Tổng tiền: {formatMoney(product.price * product.quantity)}</div>
+                {product?.series?.length > 0 && (
+                  <button
+                    className="cursor-pointer text-red-main underline"
+                    onClick={() => {
+                      setIsShowSeriModal(true);
+                      setSeriList(product?.series);
+                    }}
+                  >
+                    Seri đã nhập
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -317,6 +333,14 @@ export function Info({ record }: { record: any }) {
         isOpen={openHistoryModal}
         onCancel={() => setOpenHistoryModal(false)}
         historyPurchase={record?.historyPurchase}
+      />
+      <SeriModal
+        isOpen={isShowSeriModal}
+        onCancel={() => {
+          setIsShowSeriModal(false);
+          setSeriList([]);
+        }}
+        record={seriList}
       />
       <UpdateStatusModal
         isOpen={isShowModal}
