@@ -44,12 +44,15 @@ export function ProductList({
   useForm,
   orderDetail,
   listDiscount,
+  useFormReturn,
 }: {
   useForm: any;
   orderDetail: any;
   listDiscount: any;
+  useFormReturn: any;
 }) {
   const { errors, setError } = useForm;
+  const { errorsReturn, setErrorReturn } = useFormReturn;
   const branchId = useRecoilValue(branchState);
   const [orderObject, setOrderObject] = useRecoilState(orderState);
   const [discountObject, setDiscountObject] = useRecoilState(discountState);
@@ -175,6 +178,9 @@ export function ProductList({
     });
     setOrderObject(orderObjectClone);
   };
+  useEffect(() => {
+    setErrorReturn("products", { message: undefined });
+  }, [orderActive]);
   const columns: ColumnsType<ISaleProductLocal> = [
     {
       title: "STT",
@@ -185,7 +191,7 @@ export function ProductList({
       title: "",
       dataIndex: "action",
       key: "action",
-      render: (_, { id, isDiscount, productUnitId, discountCode }) => (
+      render: (_, { id, isDiscount, productUnitId, discountCode }, index) => (
         <div className="w-10 flex-shrink-0">
           <Image
             src={RemoveIcon}
@@ -209,6 +215,9 @@ export function ProductList({
               // reset orderDiscount
               discountObjectClone[orderActive].orderDiscount = [];
               setDiscountObject(discountObjectClone);
+              if (errorsReturn?.products[index]?.quantity) {
+                setErrorReturn(`products.${index}.quantity`, undefined);
+              }
             }}
             alt=""
           />
@@ -237,18 +246,16 @@ export function ProductList({
                   <Image
                     src={DiscountIcon}
                     onClick={() => {
-                      // if (
-                      //   orderDiscount?.length > 0 &&
-                      //   !discountConfigDetail?.data?.data?.isMergeDiscount
-                      // ) {
-                      //   message.error(
-                      //     "Bạn đã chọn khuyến mại hóa đơn. Mỗi hóa đơn chỉ được chọn 1 loại khuyến mại"
-                      //   );
-                      // } else {
+                      if (
+                        discountObject[orderActive]?.orderDiscount?.length > 0 &&
+                        !discountConfigDetail?.data?.data?.isMergeDiscount
+                      ) {
+                        message.error("Bạn đã chọn khuyến mại hóa đơn. Mỗi hóa đơn chỉ được chọn 1 loại khuyến mại");
+                        return;
+                      }
                       setOpenProductDiscountList(!openProductDiscountList);
                       setItemDiscount(itemDiscountProduct);
                       setProductUnitSelected(productUnitId);
-                      // }
                     }}
                     alt="discount-icon"
                   />
@@ -360,31 +367,27 @@ export function ProductList({
               if (isSaleReturn && record?.batches?.length <= 0) {
                 if (record?.quantityLast) {
                   if (value > record?.quantityLast) {
-                    setError(`products.${index}.quantity`, {
+                    setErrorReturn(`products.${index}.quantity`, {
                       type: "manual",
                       message: "Số lượng trả vượt quá số lượng đã mua",
                     });
+                    onChangeQuantity(record?.productKey, value, record);
                     return;
                   }
-                  setError(`products.${index}.quantity`, {
-                    type: "manual",
-                    message: undefined,
-                  });
-                  onChangeQuantity(record?.productKey, value, record);
+                  setErrorReturn(`products.${index}.quantity`, undefined);
                 } else {
                   if (value > +record?.originalQuantity) {
-                    setError(`products.${index}.quantity`, {
+                    setErrorReturn(`products.${index}.quantity`, {
                       type: "manual",
                       message: "Số lượng trả vượt quá số lượng đã mua",
                     });
+                    onChangeQuantity(record?.productKey, value, record);
                     return;
                   }
-                  setError(`products.${index}.quantity`, {
-                    type: "manual",
-                    message: undefined,
-                  });
-                  onChangeQuantity(record?.productKey, value, record);
+                  setErrorReturn(`products.${index}.quantity`, undefined);
                 }
+              } else {
+                setErrorReturn(`products.${index}.quantity`, undefined);
               }
               // logic update quantity
               const orderObjectClone = cloneDeep(orderObject);
@@ -399,35 +402,31 @@ export function ProductList({
                 setOpenListBatchModal(true);
                 return;
               }
-              // if (isSaleReturn && record?.batches?.length <= 0) {
-              //   if (record?.quantityLast) {
-              //     if (value > record?.quantityLast) {
-              //       setError(`products.${index}.quantity`, {
-              //         type: "manual",
-              //         message: "Số lượng trả vượt quá số lượng đã mua",
-              //       });
-              //       return;
-              //     }
-              //     setError(`products.${index}.quantity`, {
-              //       type: "manual",
-              //       message: undefined,
-              //     });
-              //     onChangeQuantity(record?.productKey, value, record);
-              //   } else {
-              //     if (value > +record?.originalQuantity) {
-              //       setError(`products.${index}.quantity`, {
-              //         type: "manual",
-              //         message: "Số lượng trả vượt quá số lượng đã mua",
-              //       });
-              //       return;
-              //     }
-              //     setError(`products.${index}.quantity`, {
-              //       type: "manual",
-              //       message: undefined,
-              //     });
-              //     onChangeQuantity(record?.productKey, value, record);
-              //   }
-              // }
+              if (isSaleReturn && record?.batches?.length <= 0) {
+                if (record?.quantityLast) {
+                  if (value > record?.quantityLast) {
+                    setErrorReturn(`products.${index}.quantity`, {
+                      type: "manual",
+                      message: "Số lượng trả vượt quá số lượng đã mua",
+                    });
+                    onChangeQuantity(record?.productKey, value, record);
+                    return;
+                  }
+                  setErrorReturn(`products.${index}.quantity`, undefined);
+                } else {
+                  if (value > +record?.originalQuantity) {
+                    setErrorReturn(`products.${index}.quantity`, {
+                      type: "manual",
+                      message: "Số lượng trả vượt quá số lượng đã mua",
+                    });
+                    onChangeQuantity(record?.productKey, value, record);
+                    return;
+                  }
+                  setErrorReturn(`products.${index}.quantity`, undefined);
+                }
+              } else {
+                setErrorReturn(`products.${index}.quantity`, undefined);
+              }
               await onExpandMoreBatches(record?.productKey, value, record);
               const orderObjectClone = cloneDeep(orderObject);
               orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
@@ -440,35 +439,31 @@ export function ProductList({
                 setOpenListBatchModal(true);
                 return;
               }
-              // if (isSaleReturn && record?.batches?.length <= 0) {
-              //   if (record?.quantityLast) {
-              //     if (value > record?.quantityLast) {
-              //       setError(`products.${index}.quantity`, {
-              //         type: "manual",
-              //         message: "Số lượng trả vượt quá số lượng đã mua",
-              //       });
-              //       return;
-              //     }
-              //     setError(`products.${index}.quantity`, {
-              //       type: "manual",
-              //       message: undefined,
-              //     });
-              //     onChangeQuantity(record?.productKey, value, record);
-              //   } else {
-              //     if (value > +record?.originalQuantity) {
-              //       setError(`products.${index}.quantity`, {
-              //         type: "manual",
-              //         message: "Số lượng trả vượt quá số lượng đã mua",
-              //       });
-              //       return;
-              //     }
-              //     setError(`products.${index}.quantity`, {
-              //       type: "manual",
-              //       message: undefined,
-              //     });
-              //     onChangeQuantity(record?.productKey, value, record);
-              //   }
-              // }
+              if (isSaleReturn && record?.batches?.length <= 0) {
+                if (record?.quantityLast) {
+                  if (value > record?.quantityLast) {
+                    setErrorReturn(`products.${index}.quantity`, {
+                      type: "manual",
+                      message: "Số lượng trả vượt quá số lượng đã mua",
+                    });
+                    onChangeQuantity(record?.productKey, value, record);
+                    return;
+                  }
+                  setErrorReturn(`products.${index}.quantity`, undefined);
+                } else {
+                  if (value > +record?.originalQuantity) {
+                    setErrorReturn(`products.${index}.quantity`, {
+                      type: "manual",
+                      message: "Số lượng trả vượt quá số lượng đã mua",
+                    });
+                    onChangeQuantity(record?.productKey, value, record);
+                    return;
+                  }
+                  setErrorReturn(`products.${index}.quantity`, undefined);
+                }
+              } else {
+                setErrorReturn(`products.${index}.quantity`, undefined);
+              }
               await onExpandMoreBatches(record?.productKey, value, record);
               const orderObjectClone = cloneDeep(orderObject);
               orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
@@ -517,7 +512,9 @@ export function ProductList({
               onExpandMoreBatches(record?.productKey, Number(e.target.value), record);
             }}
           />
-          {errors?.products && <InputError error={errors.products[index]?.quantity?.message} />}
+          {isSaleReturn && errorsReturn?.products && (
+            <InputError error={errorsReturn.products[index]?.quantity?.message || ""} />
+          )}
         </div>
       ),
     },
@@ -642,7 +639,6 @@ export function ProductList({
     });
     setOrderObject(orderObjectClone);
   };
-  console.log("errors", errors);
   console.log("orderObject", orderObject[orderActive]);
   return (
     <ProductTableStyled className="p-4">

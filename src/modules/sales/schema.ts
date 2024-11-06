@@ -12,7 +12,6 @@ export const schema = yup.object().shape({
       originProductUnitId: yup.number().required("Đây là trường bắt buộc!"),
       productType: yup.number().required("Đây là trường bắt buộc!"),
       quantity: yup.number().required("Đây là trường bắt buộc!"),
-      quantityValidate: yup.number(),
       isBatchExpireControl: yup.boolean(),
       batches: yup
         .array(
@@ -72,6 +71,7 @@ export const schemaReturn = yup.object().shape({
       productUnitId: yup.number().required("Đây là trường bắt buộc!"),
       // productType: yup.number().required("Đây là trường bắt buộc!"),
       quantity: yup.number().required("Đây là trường bắt buộc!"),
+      quantityValidate: yup.number(),
       // returnPrice: yup.number().required("Đây là trường bắt buộc!"),
     }),
   ),

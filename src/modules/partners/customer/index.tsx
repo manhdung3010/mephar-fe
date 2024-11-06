@@ -27,11 +27,7 @@ import { useRecoilValue } from "recoil";
 import { branchState, profileState } from "@/recoil/state";
 import { RoleAction, RoleModel } from "@/modules/settings/role/role.enum";
 import Filter from "./Filter";
-import {
-  getCustomerExample,
-  getCustomerExampleKiot,
-  getCustomerExcel,
-} from "@/api/export.service";
+import { getCustomerExample, getCustomerExampleKiot, getCustomerExcel } from "@/api/export.service";
 import { uploadCustomerExcel } from "@/api/import.service";
 import { ImportFileCustomerModal } from "./ImportFileCustomerModal";
 
@@ -68,7 +64,7 @@ export function Customer() {
     [`birthdayRange[birthdayEnd]`]: null,
     groupCustomerId: null,
     gender: null,
-    status: "active",
+    status: undefined,
     [`totalDebtRange[totalDebtStart]`]: null,
     [`totalDebtRange[totalDebtEnd]`]: null,
     [`totalOrderPayRange[totalOrderPayStart]`]: null,
@@ -77,16 +73,11 @@ export function Customer() {
     [`pointRange[pointEnd]`]: null,
     branchId: null,
   });
-  const { data: customers, isLoading } = useQuery(
-    ["CUSTOMER_LIST", formFilter],
-    () => getCustomer(formFilter)
-  );
+  const { data: customers, isLoading } = useQuery(["CUSTOMER_LIST", formFilter], () => getCustomer(formFilter));
 
   const [isOpenModal, setIsOpenModal] = useState(false);
 
-  const [expandedRowKeys, setExpandedRowKeys] = useState<
-    Record<string, boolean>
-  >({});
+  const [expandedRowKeys, setExpandedRowKeys] = useState<Record<string, boolean>>({});
 
   const columns: ColumnsType<IRecord> = [
     {
@@ -162,12 +153,12 @@ export function Customer() {
         <div
           className={cx(
             {
-              "text-[#00B63E] border border-[#00B63E] bg-[#DEFCEC]":
-                status === ECustomerStatus.active,
-              "text-[##666666] border border-[##666666] bg-[#F5F5F5]":
-                status === ECustomerStatus.inactive,
+              "text-[#00B63E] border border-[#00B63E] bg-[#DEFCEC]": status === ECustomerStatus.active,
+              "text-[##666666] border border-[##666666] bg-[#F5F5F5]": status === ECustomerStatus.inactive,
+              "text-[##666666] border bg-[#f0e5fa] text-[#6600CC] border-[#6600CC]":
+                status === ECustomerStatus.potential,
             },
-            "px-2 py-1 rounded-2xl w-max"
+            "px-2 py-1 rounded-2xl w-max",
           )}
         >
           {ECustomerStatusLabel[status]}
@@ -180,27 +171,14 @@ export function Customer() {
       key: "action",
       render: (_, { id }) => (
         <div className="flex gap-3">
-          {hasPermission(
-            profile?.role?.permissions,
-            RoleModel.customer,
-            RoleAction.delete
-          ) && (
+          {hasPermission(profile?.role?.permissions, RoleModel.customer, RoleAction.delete) && (
             <div className=" cursor-pointer" onClick={() => setDeletedId(id)}>
               <Image src={DeleteIcon} />
             </div>
           )}
 
-          {hasPermission(
-            profile?.role?.permissions,
-            RoleModel.customer,
-            RoleAction.update
-          ) && (
-            <div
-              className=" cursor-pointer"
-              onClick={() =>
-                router.push(`/partners/customer/add-customer?id=${id}`)
-              }
-            >
+          {hasPermission(profile?.role?.permissions, RoleModel.customer, RoleAction.update) && (
+            <div className=" cursor-pointer" onClick={() => router.push(`/partners/customer/add-customer?id=${id}`)}>
               <Image src={EditIcon} />
             </div>
           )}
@@ -209,8 +187,9 @@ export function Customer() {
     },
   ];
 
-  const { mutate: mutateDeleteCustomer, isLoading: isLoadingDeleteCustomer } =
-    useMutation(() => deleteCustomer(Number(deletedId)), {
+  const { mutate: mutateDeleteCustomer, isLoading: isLoadingDeleteCustomer } = useMutation(
+    () => deleteCustomer(Number(deletedId)),
+    {
       onSuccess: async () => {
         await queryClient.invalidateQueries(["CUSTOMER_LIST"]);
         setDeletedId(undefined);
@@ -218,7 +197,8 @@ export function Customer() {
       onError: (err: any) => {
         message.error(err?.message);
       },
-    });
+    },
+  );
 
   const onSubmit = () => {
     mutateDeleteCustomer();
@@ -290,10 +270,7 @@ export function Customer() {
     {
       key: "0",
       label: (
-        <div
-          className="flex items-center gap-2 cursor-pointer"
-          onClick={downloadExamExcel}
-        >
+        <div className="flex items-center gap-2 cursor-pointer" onClick={downloadExamExcel}>
           <Image src={ExportIcon} /> Xuất file mẫu
         </div>
       ),
@@ -301,10 +278,7 @@ export function Customer() {
     {
       key: "1",
       label: (
-        <div
-          className="flex items-center gap-2 cursor-pointer"
-          onClick={downloadExamExcelKiot}
-        >
+        <div className="flex items-center gap-2 cursor-pointer" onClick={downloadExamExcelKiot}>
           <Image src={ExportIcon} /> Xuất file mẫu KiotViet
         </div>
       ),
@@ -314,10 +288,7 @@ export function Customer() {
   return (
     <div className="mb-2 ">
       <div className="my-3 flex items-center justify-end gap-4">
-        <div
-          className="flex items-center gap-2 cursor-pointer"
-          onClick={downloadExcel}
-        >
+        <div className="flex items-center gap-2 cursor-pointer" onClick={downloadExcel}>
           <Image src={ExportIcon} /> Xuất file
         </div>
 
@@ -327,18 +298,11 @@ export function Customer() {
           </div>
         </Dropdown>
 
-        <div
-          className="flex items-center gap-2 cursor-pointer"
-          onClick={() => setIsOpenModal(true)}
-        >
+        <div className="flex items-center gap-2 cursor-pointer" onClick={() => setIsOpenModal(true)}>
           <Image src={ImportIcon} alt="Import Icon" />
           Nhập file
         </div>
-        {hasPermission(
-          profile?.role?.permissions,
-          RoleModel.customer,
-          RoleAction.create
-        ) && (
+        {hasPermission(profile?.role?.permissions, RoleModel.customer, RoleAction.create) && (
           <CustomButton
             prefixIcon={<Image src={PlusIcon} />}
             onClick={() => router.push("/partners/customer/add-customer")}
@@ -370,18 +334,13 @@ export function Customer() {
                 return {
                   onClick: (event) => {
                     // Check if the click came from the action column
-                    if (
-                      (event.target as Element).closest(
-                        ".ant-table-cell:last-child"
-                      )
-                    ) {
+                    if ((event.target as Element).closest(".ant-table-cell:last-child")) {
                       return;
                     }
 
                     // Toggle expandedRowKeys state here
                     if (expandedRowKeys[record.key - 1]) {
-                      const { [record.key - 1]: value, ...remainingKeys } =
-                        expandedRowKeys;
+                      const { [record.key - 1]: value, ...remainingKeys } = expandedRowKeys;
                       setExpandedRowKeys(remainingKeys);
                     } else {
                       setExpandedRowKeys({ [record.key - 1]: true });
@@ -391,22 +350,16 @@ export function Customer() {
               }}
               expandable={{
                 // eslint-disable-next-line @typescript-eslint/no-shadow
-                expandedRowRender: (record: ICustomer) => (
-                  <RowDetail record={record} branchId={branchId} />
-                ),
+                expandedRowRender: (record: ICustomer) => <RowDetail record={record} branchId={branchId} />,
                 expandIcon: () => <></>,
-                expandedRowKeys: Object.keys(expandedRowKeys).map(
-                  (key) => Number(key) + 1
-                ),
+                expandedRowKeys: Object.keys(expandedRowKeys).map((key) => Number(key) + 1),
               }}
             />
             <CustomPagination
               page={formFilter.page}
               pageSize={formFilter.limit}
               setPage={(value) => setFormFilter({ ...formFilter, page: value })}
-              setPerPage={(value) =>
-                setFormFilter({ ...formFilter, limit: value })
-              }
+              setPerPage={(value) => setFormFilter({ ...formFilter, limit: value })}
               total={customers?.data?.totalItem}
             />
           </div>

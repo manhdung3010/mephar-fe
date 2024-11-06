@@ -790,7 +790,12 @@ const Index = () => {
             </div>
           </div>
 
-          <ProductList useForm={{ errors, setError }} orderDetail={orderDetail} listDiscount={discountList} />
+          <ProductList
+            useForm={{ errors, setError }}
+            useFormReturn={{ errorsReturn, setErrorReturn }}
+            orderDetail={orderDetail}
+            listDiscount={discountList}
+          />
         </div>
 
         {orderActive.split("-")[1] === "RETURN" ? (
@@ -801,6 +806,7 @@ const Index = () => {
               handleSubmitReturn,
               errorsReturn,
               resetReturn,
+              setErrorReturn,
             }}
             customerId={orderObject[orderActive]?.[0]?.customerId}
             orderDetail={orderDetail}

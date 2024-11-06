@@ -95,7 +95,6 @@ export function RightContentReturn({
 
     return price;
   }, [orderObject, orderActive, orderDetail]);
-  console.log("orderObject[orderActive]", orderObject[orderActive]);
   const totalReturnPrice = useMemo(() => {
     let price = 0;
 
@@ -127,25 +126,6 @@ export function RightContentReturn({
 
     return price;
   }, [orderObject, orderActive, getValuesReturn("discount"), getValuesReturn("returnFee"), orderDetail]);
-
-  // useEffect(() => {
-  //   // get discount from customer when customer change
-  //   if (getValuesReturn('customerId')) {
-  //     const customer = customers?.data?.items?.find(
-  //       (item) => item.id === getValuesReturn('customerId')
-  //     );
-
-  //     if (customer && customer?.groupCustomer?.discount) {
-  //       setValueReturn('discount', customer?.groupCustomer.discount ?? 0, { shouldValidate: true });
-  //       setValueReturn('discountType', EDiscountType.PERCENT, { shouldValidate: true });
-  //     }
-  //     else {
-  //       setValueReturn('discount', 0, { shouldValidate: true });
-  //       setValueReturn('discountType', EDiscountType.PERCENT, { shouldValidate: true });
-
-  //     }
-  //   }
-  // }, [getValuesReturn('customerId')])
 
   const customerMustPay = useMemo(() => {
     if (getValuesReturn("discount")) {
@@ -451,6 +431,11 @@ export function RightContentReturn({
                   quantity: batch.quantity,
                 })),
             }));
+            const productErr = errorsReturn.products?.some((product: any) => product?.quantity?.message);
+            if (productErr) {
+              message.error("Số lượng trả không được vượt quá số lượng mua");
+              return;
+            }
             setValueReturn("products", formatProducts, {
               shouldValidate: true,
             });

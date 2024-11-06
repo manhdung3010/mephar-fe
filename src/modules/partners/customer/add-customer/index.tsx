@@ -549,9 +549,8 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
           setOpenAddGroupCustomerModal(false);
         }}
         onSave={({ groupCustomerId, groupCustomerName }) => {
-          setValue("groupCustomerId", groupCustomerId, {
-            shouldValidate: true,
-          });
+          const oldGroupCustomerId: any = getValues("groupCustomerId");
+          setValue("groupCustomerId", [...oldGroupCustomerId, groupCustomerId], { shouldValidate: true });
           setGroupCustomerKeyword(groupCustomerName);
         }}
       />

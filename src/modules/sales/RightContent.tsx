@@ -490,13 +490,14 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
                     <Image
                       src={DiscountIcon}
                       onClick={() => {
-                        // if (
-                        //   productDiscount?.length > 0 &&
-                        //   !discountConfigDetail?.data?.data?.isMergeDiscount
-                        // )
-                        //   return message.error(
-                        //     "Bạn đã chọn khuyến mại hàng hóa. Mỗi hóa đơn chỉ đươc áp dụng 1 loại khuyến mại"
-                        //   );
+                        if (
+                          discountObject[orderActive]?.productDiscount?.length > 0 &&
+                          !discountConfigDetail?.data?.data?.isMergeDiscount
+                        ) {
+                          return message.error(
+                            "Bạn đã chọn khuyến mại hàng hóa. Mỗi hóa đơn chỉ đươc áp dụng 1 loại khuyến mại",
+                          );
+                        }
                         return setIsOpenDiscountModal(!isOpenDiscountModal);
                       }}
                       alt="discount-icon"
