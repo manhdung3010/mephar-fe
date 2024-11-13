@@ -106,6 +106,7 @@ export default function RightContent({ getValues, setValue, errors, handleSubmit
               marketProductId: item.id,
               quantity: item.realQuantity,
               price: item.price,
+              ...(item?.discountProductItemId && { discountProductItemId: item?.discountProductItemId }),
             })),
             ...(customer?.customerStoreId
               ? { toStoreId: customer?.customerStoreId }
@@ -145,7 +146,7 @@ export default function RightContent({ getValues, setValue, errors, handleSubmit
   const totalMoney = useMemo(() => {
     let total = 0;
     importProducts.forEach((item: any) => {
-      total += item.realQuantity * item.price;
+      total += item.realQuantity * (item.price - (item?.discountValue ?? 0));
     });
     return total;
   }, [importProducts, marketOrderDiscount]);
@@ -371,6 +372,7 @@ export default function RightContent({ getValues, setValue, errors, handleSubmit
               quantity: item.realQuantity,
               price: item.price,
               marketProductId: item.id,
+              ...(item?.discountProductItemId && { discountProductItemId: item?.discountProductItemId }),
             }));
 
             setValue("products", formatProducts, { shouldValidate: true });

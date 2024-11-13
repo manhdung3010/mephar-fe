@@ -19,14 +19,12 @@ export function ProductDiscountModal({
 }: {
   isOpen: boolean;
   onCancel: () => void;
-  onSave: (value, storeId) => void;
+  onSave: (value, storeId, productUnitId) => void;
   discountList?: any;
   productUnitId: number;
   storeId?: any;
 }) {
-  const branchId = useRecoilValue(branchState);
   const [paymentProduct, setPaymentProduct] = useRecoilState<any>(paymentProductState);
-  const [marketOrderDiscount, setMarketOrderDiscount] = useRecoilState(marketOrderDiscountState);
   const [listDiscount, setListDiscount] = useState<any[]>([]);
   useEffect(() => {
     if (discountList) {
@@ -138,32 +136,8 @@ export function ProductDiscountModal({
         <CustomButton
           onClick={() => {
             let selectedDiscount = listDiscount.find((batch) => batch.isSelected);
-            const fixPrice = selectedDiscount?.items[0]?.apply?.fixedPrice;
-            const changeType = selectedDiscount?.items[0]?.apply?.changeType;
-            // onSave(selectedDiscount, branchId);
-            let paymentProductClone = cloneDeep(paymentProduct);
-            paymentProductClone = paymentProductClone.map((item) => {
-              if (item.storeId === storeId) {
-                return {
-                  ...item,
-                  products: item.products.map((product) => {
-                    if (product?.marketProduct?.productUnitId === productUnitId) {
-                      return {
-                        ...product,
-                        discountItem: selectedDiscount,
-                        discount:
-                          changeType === "type_price"
-                            ? checkEndPrice(product?.discountPrice, product?.price) - fixPrice
-                            : fixPrice,
-                      };
-                    }
-                    return product;
-                  }),
-                };
-              }
-              return item;
-            });
-            setPaymentProduct(paymentProductClone);
+
+            onSave(selectedDiscount, storeId, productUnitId);
 
             onCancel();
           }}

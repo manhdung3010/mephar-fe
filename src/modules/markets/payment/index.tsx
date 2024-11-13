@@ -418,7 +418,34 @@ function Payment() {
       <ProductDiscountModal
         isOpen={openProductDiscountModal}
         onCancel={() => setOpenProductDiscountModal(false)}
-        onSave={(selectedDiscount) => {}}
+        onSave={(selectedDiscount, storeIdReceive, productUnitIdR) => {
+          const fixPrice = selectedDiscount?.items[0]?.apply?.fixedPrice;
+          const changeType = selectedDiscount?.items[0]?.apply?.changeType;
+          // onSave(selectedDiscount, branchId);
+          let paymentProductClone = cloneDeep(paymentProduct);
+          paymentProductClone = paymentProductClone.map((item) => {
+            if (item.storeId === storeIdReceive) {
+              return {
+                ...item,
+                products: item.products.map((product) => {
+                  if (product?.marketProduct?.productUnitId === productUnitIdR) {
+                    return {
+                      ...product,
+                      discountItem: selectedDiscount,
+                      discount:
+                        changeType === "type_price"
+                          ? checkEndPrice(product?.discountPrice, product?.price) - fixPrice
+                          : fixPrice,
+                    };
+                  }
+                  return product;
+                }),
+              };
+            }
+            return item;
+          });
+          setPaymentProduct(paymentProductClone);
+        }}
         discountList={selectedProductDiscount}
         productUnitId={productUnitId}
         storeId={storeIdSelect}

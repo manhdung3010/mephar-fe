@@ -126,13 +126,9 @@ export function OrderTransaction() {
     },
     {
       title: "Tổng tiền thanh toán",
-      dataIndex: "cashOfCustomer",
-      key: "cashOfCustomer",
-      render: (value, record) => (
-        <span className="text-red-main font-medium">
-          {formatMoney(record?.products?.reduce((acc, cur) => acc + cur.price * cur.quantity, 0))}
-        </span>
-      ),
+      dataIndex: "totalPrice",
+      key: "totalPrice",
+      render: (value, record) => <span className="text-red-main font-medium">{formatMoney(value)}</span>,
     },
     {
       title: "Người mua",

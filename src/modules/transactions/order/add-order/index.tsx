@@ -19,6 +19,10 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import RightContent from "./RightContent";
 import { schema } from "./schema";
 import { useRouter } from "next/router";
+import { getProductDiscountList } from "@/api/discount.service";
+import { EDiscountGoodsMethod } from "@/modules/settings/discount/add-discount/Info";
+import GiftIcon from "@/assets/gift.svg";
+import { ProductDiscountModal } from "@/modules/markets/payment/ProductDiscountModal";
 
 export default function AddOrder() {
   const {
@@ -39,6 +43,10 @@ export default function AddOrder() {
   const branchId = useRecoilValue(branchState);
   const [importProducts, setImportProducts] = useRecoilState(marketOrderState);
   const [marketOrderDiscount, setMarketOrderDiscount] = useRecoilState(marketOrderDiscountState);
+  const [openProductDiscountModal, setOpenProductDiscountModal] = useState(false);
+  const [discountList, setDiscountList] = useState([]);
+  const [productUnitId, setProductUnitId] = useState(0);
+  const [storeIdSelect, setStoreIdSelect] = useState(null);
 
   const [formFilter, setFormFilter] = useState<any>({
     page: 1,
@@ -171,7 +179,23 @@ export default function AddOrder() {
       title: "Tên hàng",
       dataIndex: "product",
       key: "product",
-      render: (product) => <div className="line-clamp-1">{sliceString(product.name, 70)}</div>,
+      render: (product, record) => (
+        <div className="flex items-center gap-1">
+          <span className="line-clamp-1">{sliceString(product.name, 70)} </span>
+          {record?.discountList?.length > 0 && (
+            <Image
+              src={GiftIcon}
+              className="cursor-pointer"
+              onClick={() => {
+                setOpenProductDiscountModal(true);
+                setDiscountList(record?.discountList);
+                setProductUnitId(record?.productUnitId);
+                setStoreIdSelect(record?.storeId);
+              }}
+            />
+          )}
+        </div>
+      ),
     },
     {
       title: "ĐVT",
@@ -221,27 +245,44 @@ export default function AddOrder() {
             onChangeValueProduct(record.productKey, "price", value);
           }}
           value={value}
-          disabled={!!details?.data?.item}
+          // disabled={!!details?.data?.item}
+          disabled={true}
           type="number"
         />
       ),
     },
     {
+      title: "Khuyến mại",
+      dataIndex: "discountValue",
+      key: "discountValue",
+      render: (discountValue) => <span className="text-red-main">{formatMoney(discountValue)}</span>,
+    },
+    {
       title: "Thành tiền",
       dataIndex: "diffAmount",
       key: "diffAmount",
-      render: (_, record) => formatNumber(Math.floor(record?.realQuantity * record?.price)),
+      render: (_, record) =>
+        formatNumber(Math.floor(record?.realQuantity * (record?.price - (record?.discountValue ?? 0)))),
     },
   ];
 
-  const handleSelectProduct = (value) => {
+  const handleSelectProduct = async (value) => {
     const product = JSON.parse(value);
+    const res = await getProductDiscountList(
+      {
+        productUnitId: product?.productUnitId,
+        branchId: branchId,
+        quantity: 1,
+      },
+      EDiscountGoodsMethod.PRICE_BY_BUY_NUMBER,
+    );
     let isSelectedUnit = true;
     const localProduct: any = {
       ...product,
       productKey: `${product.product.id}-${product.id}`,
       price: product?.discountPrice > 0 ? product?.discountPrice : product.price,
       inventory: product.quantity,
+      discountList: res?.data?.data?.items,
       realQuantity: 1,
       discountValue: 0,
       batches: product.batches?.map((batch) => {
@@ -367,6 +408,31 @@ export default function AddOrder() {
         handleSubmit={handleSubmit}
         reset={reset}
         orderDetail={details?.data?.item}
+      />
+
+      <ProductDiscountModal
+        isOpen={openProductDiscountModal}
+        onCancel={() => setOpenProductDiscountModal(false)}
+        onSave={(selectedDiscount, storeIdR, productUnitIdR) => {
+          console.log("selectedDiscount", selectedDiscount);
+          const changeType = selectedDiscount?.items[0]?.apply?.changeType;
+          const fixedPrice = selectedDiscount?.items[0]?.apply?.fixedPrice;
+          let productImportClone = cloneDeep(importProducts);
+          productImportClone = productImportClone.map((product) => {
+            if (product.productUnitId === productUnitIdR && product.storeId === storeIdR) {
+              return {
+                ...product,
+                discountProductItemId: selectedDiscount?.items[0]?.id,
+                discountValue: changeType === "type_price" ? product?.price - fixedPrice : fixedPrice,
+              };
+            }
+            return product;
+          });
+          setImportProducts(productImportClone);
+        }}
+        discountList={discountList}
+        productUnitId={productUnitId}
+        storeId={storeIdSelect}
       />
     </div>
   );

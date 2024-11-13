@@ -203,7 +203,10 @@ export function Info({ record }: { record: any }) {
               </div>
               <div className="flex gap-x-40">
                 <div className="w-10 flex-shrink-0">x{product.quantity}</div>
-                <div className="text-[#00B63E]">Tổng tiền: {formatMoney(product.price * product.quantity)}</div>
+                <div className="text-[#00B63E]">
+                  Tổng tiền:{" "}
+                  {formatMoney((product?.itemPrice > 0 ? product?.itemPrice : product.price) * product.quantity)}
+                </div>
                 {product?.series?.length > 0 && (
                   <button
                     className="cursor-pointer text-red-main underline"
