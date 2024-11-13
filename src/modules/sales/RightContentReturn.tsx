@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { message } from "antd";
-import { cloneDeep, debounce } from "lodash";
+import { cloneDeep, debounce, isArray } from "lodash";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
@@ -431,7 +431,10 @@ export function RightContentReturn({
                   quantity: batch.quantity,
                 })),
             }));
-            const productErr = errorsReturn.products?.some((product: any) => product?.quantity?.message);
+            console.log("errorsReturn", errorsReturn);
+            const productErr = isArray(errorsReturn.products)
+              ? errorsReturn.products?.some((product: any) => product?.quantity?.message)
+              : null;
             if (productErr) {
               message.error("Số lượng trả không được vượt quá số lượng mua");
               return;

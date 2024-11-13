@@ -85,6 +85,11 @@ export const marketOrderState = atom<any[]>({
   default: [],
   effects: [localStorageEffect("MARKET_ORDER_STATE")],
 });
+export const marketOrderDiscountState = atom<any>({
+  key: "MARKET_ORDER_DISCOUNT_STATE",
+  default: {},
+  effects: [localStorageEffect("MARKET_ORDER_DISCOUNT_STATE")],
+});
 
 export const productReturnState = atom<IImportProductLocal[]>({
   key: "PRODUCT_RETURN_STATE",

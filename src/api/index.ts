@@ -45,6 +45,7 @@ axiosClient.interceptors.response.use(
         "external/image/upload",
         "order",
         "discount/order",
+        "discount/order?type=ORDER_PRICE",
         "discount/product",
         "discount/config",
         "trip/geofencing?page=1&limit=999",

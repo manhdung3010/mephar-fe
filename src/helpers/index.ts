@@ -413,3 +413,8 @@ export const isCoordinates = (input) => {
   const regex = /^-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?$/;
   return regex.test(input.trim());
 };
+
+// market - check end price
+export const checkEndPrice = (discountPrice, price) => {
+  return discountPrice > 0 ? discountPrice : price;
+};

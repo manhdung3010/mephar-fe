@@ -49,7 +49,7 @@ export function SeriDetailModal({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-5 gap-6">
+        <div className="flex flex-wrap gap-3">
           {getValues("products") &&
             seriInfo &&
             getValues("products")

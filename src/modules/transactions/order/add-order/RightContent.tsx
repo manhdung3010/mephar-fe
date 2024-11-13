@@ -12,7 +12,13 @@ import { getEmployee } from "@/api/employee.service";
 import { debounce } from "lodash";
 import EmployeeIcon from "@/assets/employeeIcon.svg";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { branchState, checkInventoryState, marketOrderState, profileState } from "@/recoil/state";
+import {
+  branchState,
+  checkInventoryState,
+  marketOrderDiscountState,
+  marketOrderState,
+  profileState,
+} from "@/recoil/state";
 import { formatMoney, formatNumber } from "@/helpers";
 import { message, Radio, Spin } from "antd";
 import { createCheckInventory } from "@/api/check-inventory";
@@ -23,6 +29,8 @@ import CustomerIcon from "@/assets/customerIcon.svg";
 import { CreateCustomerModal } from "@/modules/sales/CreateCustomerModal";
 import { createMarketOrder, getShipAddress, updateMarketOrder } from "@/api/market.service";
 import AddAddressModal from "@/modules/markets/payment/AddAddressModal";
+import DiscountIcon from "@/assets/gift.svg";
+import { DiscountOrderModal } from "./DiscountOrderModal";
 
 export default function RightContent({ getValues, setValue, errors, handleSubmit, reset, orderDetail }: any) {
   const router = useRouter();
@@ -34,11 +42,12 @@ export default function RightContent({ getValues, setValue, errors, handleSubmit
   const [selectedAddress, setSelectedAddress] = useState<any>(null);
   const [openAddAddress, setOpenAddAddress] = useState(false);
   const [openAddNewAddress, setOpenAddNewAddress] = useState(false);
+  const [openDiscountOrder, setOpenDiscountOrder] = useState(false);
+  const [marketOrderDiscount, setMarketOrderDiscount] = useRecoilState(marketOrderDiscountState);
 
   const { data: employees } = useQuery(["EMPLOYEE_LIST", searchEmployeeText], () =>
     getEmployee({ page: 1, limit: 20, keyword: searchEmployeeText }),
   );
-
   const { data: customers } = useQuery(["CUSTOMER_LIST"], () =>
     getCustomer({
       page: 1,
@@ -65,6 +74,8 @@ export default function RightContent({ getValues, setValue, errors, handleSubmit
       });
     },
   );
+
+  console.log("marketOrderDiscount", marketOrderDiscount);
 
   useEffect(() => {
     if (orderDetail?.id) {
@@ -100,6 +111,7 @@ export default function RightContent({ getValues, setValue, errors, handleSubmit
               ? { toStoreId: customer?.customerStoreId }
               : { customerId: getValues("customerId") }),
             note: getValues("note"),
+            ...(marketOrderDiscount?.items && { discountOrderItemId: marketOrderDiscount?.items[0]?.id }),
           },
         ],
       };
@@ -136,7 +148,23 @@ export default function RightContent({ getValues, setValue, errors, handleSubmit
       total += item.realQuantity * item.price;
     });
     return total;
-  }, [importProducts]);
+  }, [importProducts, marketOrderDiscount]);
+
+  const totalDiscount = useMemo(() => {
+    let discount = 0;
+    const discountType = marketOrderDiscount?.items ? marketOrderDiscount?.items[0]?.apply?.discountType : "percent";
+    const discountValue = marketOrderDiscount?.items ? marketOrderDiscount?.items[0]?.apply?.discountValue : 0;
+    if (discountType === "percent") {
+      discount = (totalMoney * discountValue) / 100;
+    } else {
+      discount = discountValue;
+    }
+    return discount;
+  }, [marketOrderDiscount, totalMoney]);
+
+  const totalCustomerPay = useMemo(() => {
+    return totalMoney - totalDiscount;
+  }, [totalMoney, totalDiscount]);
 
   const onSubmit = () => {
     mutateCreateOrder();
@@ -216,25 +244,32 @@ export default function RightContent({ getValues, setValue, errors, handleSubmit
           </div>
         )}
       </div>
-
       <div className="my-6 h-[1px] w-full bg-[#E4E4E4]"></div>
-
       <div className="flex grow flex-col px-6">
         <div className="grow">
           <div className="mb-5 border-b-2 border-dashed border-[#E4E4E4]">
             <div className="mb-5 flex justify-between">
-              <div className=" leading-normal text-[#828487]">
-                Tổng tiền (<span className="text-red-main">{importProducts?.length}sp</span>)
+              <div className=" leading-normal text-[#828487] flex items-center gap-2">
+                <span>
+                  Tổng tiền (<span className="text-red-main">{importProducts?.length}sp</span>)
+                </span>
+                <Image
+                  src={DiscountIcon}
+                  className="inline-block ml-1 cursor-pointer"
+                  onClick={() => setOpenDiscountOrder(true)}
+                />
               </div>
               <div className=" leading-normal text-[#19191C]">{formatMoney(totalMoney)}</div>
             </div>
-
+            <div className="mb-5 flex justify-between">
+              <div className=" leading-normal text-[#828487]">Khuyến mại</div>
+              <div className=" leading-normal text-red-main">{formatMoney(totalDiscount)}</div>
+            </div>
             <div className="mb-5 flex justify-between">
               <div className=" leading-normal ">KHÁCH PHẢI TRẢ</div>
-              <div className=" leading-normal text-[#19191C]">{formatMoney(totalMoney)}</div>
+              <div className=" leading-normal text-[#19191C]">{formatMoney(totalCustomerPay)}</div>
             </div>
           </div>
-
           {/* <div className="mb-5">
             <div className="mb-5 font-medium">KIẾM GẦN ĐÂY</div>
 
@@ -246,7 +281,6 @@ export default function RightContent({ getValues, setValue, errors, handleSubmit
             </div>
           </div> */}
         </div>
-
         {getValues("customerId") && (
           <div className="mb-5 border-b-2 border-dashed border-[#E4E4E4]">
             <span>ĐỊA CHỈ GIAO HÀNG</span>
@@ -292,7 +326,6 @@ export default function RightContent({ getValues, setValue, errors, handleSubmit
                         </div>
                       </div>
                     ))}
-
                     <div className="w-fit">
                       <CustomButton
                         type="original"
@@ -311,7 +344,6 @@ export default function RightContent({ getValues, setValue, errors, handleSubmit
             )}
           </div>
         )}
-
         <div className="-mx-3">
           <CustomInput
             bordered={false}
@@ -325,9 +357,7 @@ export default function RightContent({ getValues, setValue, errors, handleSubmit
           />
         </div>
       </div>
-
       <div className="my-4 h-[1px] w-full bg-[#E4E4E4]"></div>
-
       <div className="grid grid-cols-1 gap-3 px-6 pb-4">
         {/* <CustomButton className="!h-12 text-lg font-semibold">
           Lưu tạm
@@ -352,7 +382,6 @@ export default function RightContent({ getValues, setValue, errors, handleSubmit
           Hoàn thành
         </CustomButton>
       </div>
-
       <CreateCustomerModal
         isOpen={isOpenAddCustomerModal}
         onCancel={() => setIsOpenAddCustomerModal(false)}
@@ -372,6 +401,14 @@ export default function RightContent({ getValues, setValue, errors, handleSubmit
         addressId={!openAddNewAddress ? selectedAddress : null}
         newBranchId={customers?.data?.items?.find((item) => item?.id === getValues("customerId"))?.customerStoreId}
         newCustomerId={getValues("customerId")}
+      />
+
+      <DiscountOrderModal
+        isOpen={openDiscountOrder}
+        onCancel={() => setOpenDiscountOrder(false)}
+        customerId={getValues("customerId")}
+        totalPrice={totalMoney}
+        onSave={() => {}}
       />
     </div>
   );

@@ -9,7 +9,7 @@ import CustomTable from "@/components/CustomTable";
 import { getConfigProductPrivate, getMarketOrderDetail } from "@/api/market.service";
 import { CustomAutocomplete } from "@/components/CustomAutocomplete";
 import { formatMoney, formatNumber, getImage, sliceString } from "@/helpers";
-import { branchState, marketOrderState } from "@/recoil/state";
+import { branchState, marketOrderDiscountState, marketOrderState } from "@/recoil/state";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useQuery } from "@tanstack/react-query";
 import { message } from "antd";
@@ -38,6 +38,7 @@ export default function AddOrder() {
   const [expandedRowKeys, setExpandedRowKeys] = useState<Record<string, boolean>>({});
   const branchId = useRecoilValue(branchState);
   const [importProducts, setImportProducts] = useRecoilState(marketOrderState);
+  const [marketOrderDiscount, setMarketOrderDiscount] = useRecoilState(marketOrderDiscountState);
 
   const [formFilter, setFormFilter] = useState<any>({
     page: 1,
@@ -131,6 +132,11 @@ export default function AddOrder() {
     setImportProducts(productImportClone);
   };
 
+  useEffect(() => {
+    if (!importProducts.length) return;
+    setMarketOrderDiscount({});
+  }, [importProducts]);
+
   const columns: any = [
     {
       title: "",
@@ -145,6 +151,7 @@ export default function AddOrder() {
             const index = productImportClone.findIndex((product) => product.id === id);
             productImportClone.splice(index, 1);
             setImportProducts(productImportClone);
+            setMarketOrderDiscount({});
           }}
         />
       ),

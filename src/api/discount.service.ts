@@ -30,11 +30,11 @@ export function getDiscountByIdOrder(id: number) {
   return axiosClient.get(`order/${id}/get-discount`);
 }
 
-export function getOrderDiscountList(payload) {
-  return axiosClient.post("discount/order", payload);
+export function getOrderDiscountList(payload, type?: string) {
+  return axiosClient.post(`discount/order?type=${type ? type : ""}`, payload);
 }
-export function getProductDiscountList(payload) {
-  return axiosClient.post("discount/product", payload);
+export function getProductDiscountList(payload, type?: string) {
+  return axiosClient.post(`discount/product${type && `?type=${type}`}`, payload);
 }
 export function getDiscountConfig() {
   return axiosClient.get("discount/config/detail");
