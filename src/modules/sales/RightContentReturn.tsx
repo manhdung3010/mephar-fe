@@ -431,7 +431,6 @@ export function RightContentReturn({
                   quantity: batch.quantity,
                 })),
             }));
-            console.log("errorsReturn", errorsReturn);
             const productErr = isArray(errorsReturn.products)
               ? errorsReturn.products?.some((product: any) => product?.quantity?.message)
               : null;
@@ -442,7 +441,6 @@ export function RightContentReturn({
             setValueReturn("products", formatProducts, {
               shouldValidate: true,
             });
-
             handleSubmitReturn(onSubmit)();
           }}
           className="!h-11"

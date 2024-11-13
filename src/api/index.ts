@@ -45,15 +45,15 @@ axiosClient.interceptors.response.use(
         "external/image/upload",
         "order",
         "discount/order",
-        "discount/order?type=ORDER_PRICE",
+        "discount/order",
         "discount/product",
         "discount/config",
-        "trip/geofencing?page=1&limit=999",
+        "trip/geofencing",
         "trip/map-routing",
         "sale-return",
       ];
 
-      if (!excludeUrl.includes(response.config?.url as string)) {
+      if (!excludeUrl.includes(response.config?.url?.split("?")[0] as string)) {
         message.success("Thêm mới thành công!");
       }
     } else if (response.config.method === "put" || response.config.method === "patch") {
