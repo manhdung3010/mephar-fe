@@ -1,28 +1,26 @@
-import { useQuery } from '@tanstack/react-query';
-import { DatePicker, Select, Tag } from 'antd';
-import dayjs from 'dayjs';
-import { debounce } from 'lodash';
-import Image from 'next/image';
-import { useState } from 'react';
+import { useQuery } from "@tanstack/react-query";
+import { DatePicker, Select, Tag } from "antd";
+import dayjs from "dayjs";
+import { debounce } from "lodash";
+import Image from "next/image";
+import { useState } from "react";
 
-import { getEmployee } from '@/api/employee.service';
-import ArrowDownGray from '@/assets/arrowDownGray.svg';
-import DateIcon from '@/assets/dateIcon.svg';
-import SearchIcon from '@/assets/searchIcon.svg';
-import { CustomInput } from '@/components/CustomInput';
-import { formatDate } from '@/helpers';
-import { billStatusData } from './interface';
+import { getEmployee } from "@/api/employee.service";
+import ArrowDownGray from "@/assets/arrowDownGray.svg";
+import DateIcon from "@/assets/dateIcon.svg";
+import SearchIcon from "@/assets/searchIcon.svg";
+import { CustomInput } from "@/components/CustomInput";
+import { formatDate } from "@/helpers";
+import { billStatusData } from "./interface";
 
 const { RangePicker } = DatePicker;
 
-const Search = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void, formFilter: any }) => {
-  const [searchEmployeeText, setSearchEmployeeText] = useState('');
+const Search = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void; formFilter: any }) => {
+  const [searchEmployeeText, setSearchEmployeeText] = useState("");
 
-  const { data: employees } = useQuery(
-    ['EMPLOYEE_LIST', searchEmployeeText],
-    () => getEmployee({ page: 1, limit: 20, keyword: searchEmployeeText })
+  const { data: employees } = useQuery(["EMPLOYEE_LIST", searchEmployeeText], () =>
+    getEmployee({ page: 1, limit: 20, keyword: searchEmployeeText }),
   );
-
 
   return (
     <div className="bg-white">
@@ -44,17 +42,17 @@ const Search = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void,
         <div className="flex grow rounded-l-[3px] border border-[#D3D5D7]">
           <RangePicker
             bordered={false}
-            placeholder={['Từ ngày', 'Đến ngày']}
+            placeholder={["Từ ngày", "Đến ngày"]}
             suffixIcon={<Image src={DateIcon} />}
             className="grow"
-            format={{ format: 'DD/MM/YYYY', type: 'mask' }}
+            format={{ format: "DD/MM/YYYY", type: "mask" }}
             onChange={(value) => {
               if (value) {
                 setFormFilter((preValue) => ({
                   ...preValue,
                   dateRange: JSON.stringify({
-                    startDate: dayjs(value[0]).format('YYYY-MM-DD'),
-                    endDate: dayjs(value[1]).format('YYYY-MM-DD'),
+                    startDate: dayjs(value[0]).format("YYYY-MM-DD"),
+                    endDate: dayjs(value[1]).format("YYYY-MM-DD"),
                   }),
                 }));
               } else {
@@ -78,8 +76,7 @@ const Search = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void,
                   ...preValue,
                   userId: value,
                 }));
-              }
-              else {
+              } else {
                 setFormFilter((preValue) => ({
                   ...preValue,
                   userId: undefined,
@@ -108,8 +105,7 @@ const Search = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void,
                   ...preValue,
                   status: value,
                 }));
-              }
-              else {
+              } else {
                 setFormFilter((preValue) => ({
                   ...preValue,
                   status: undefined,
@@ -134,73 +130,61 @@ const Search = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void,
           Lưu bộ lọc
         </CustomButton> */}
       </div>
-      <div className='flex items-center gap-4 p-4'>
-        {
-          Object.keys(formFilter).map((key, index) => {
-            if (formFilter[key] && key !== "page" && key !== "limit" && key !== "keyword" && key !== "branchId") {
-              if (key === "dateRange" && formFilter[key] !== null) {
-                // render date range to Tag
-                const dateRange = typeof formFilter[key] === "string" ? JSON?.parse(formFilter[key]) : formFilter[key];
-                return <>
-                  {dateRange?.startDate && dateRange?.endDate && <Tag
-                    key={index}
-                    style={{ userSelect: 'none' }}
-                    className='py-1 px-4'
-                  >
-                    <span>
-                      Từ ngày:
-                    </span>
-                    <span className='ml-1 font-semibold'>{formatDate(dateRange.startDate)}</span>
-                    <span className='mx-2'>-</span>
-                    <span>
-                      Đến ngày:
-                    </span>
-                    <span className='ml-1 font-semibold'>{formatDate(dateRange.endDate)}</span>
-                  </Tag>}
-                </>
-              }
+      <div className="flex items-center gap-4 p-4">
+        {Object.keys(formFilter).map((key, index) => {
+          if (formFilter[key] && key !== "page" && key !== "limit" && key !== "keyword" && key !== "branchId") {
+            if (key === "dateRange" && formFilter[key] !== null) {
+              // render date range to Tag
+              const dateRange = typeof formFilter[key] === "string" ? JSON?.parse(formFilter[key]) : formFilter[key];
               return (
-                <Tag
-                  key={index}
-                  closable={true}
-                  style={{ userSelect: 'none' }}
-                  onClose={() => {
-                    setFormFilter(prevState => {
-                      const newState = { ...prevState };
-                      newState[key] = null; // remove the key-value pair from the state
-                      return newState;
-                    });
-                  }}
-                  className='py-1 px-4'
-                >
-
-                  {
-                    key === "status" && (
-                      <>
-                        <span>
-                          Trạng thái:
-                        </span>
-                        <span className='ml-1 font-semibold'>{billStatusData.find((item) => item?.value === formFilter[key])?.label}</span>
-                      </>
-                    )
-                  }
-                  {
-                    key === "userId" && (
-                      <>
-                        <span>
-                          Người bán:
-                        </span>
-                        <span className='ml-1 font-semibold'>{employees?.data?.items?.find((item) => item?.id === formFilter[key])?.fullName}</span>
-                      </>
-                    )
-                  }
-
-                </Tag>
-              )
+                <>
+                  {dateRange?.startDate && dateRange?.endDate && (
+                    <Tag key={index} style={{ userSelect: "none" }} className="py-1 px-4">
+                      <span>Từ ngày:</span>
+                      <span className="ml-1 font-semibold">{formatDate(dateRange.startDate)}</span>
+                      <span className="mx-2">-</span>
+                      <span>Đến ngày:</span>
+                      <span className="ml-1 font-semibold">{formatDate(dateRange.endDate)}</span>
+                    </Tag>
+                  )}
+                </>
+              );
             }
-            return null;
-          })
-        }
+            return (
+              <Tag
+                key={index}
+                closable={true}
+                style={{ userSelect: "none" }}
+                onClose={() => {
+                  setFormFilter((prevState) => {
+                    const newState = { ...prevState };
+                    newState[key] = null; // remove the key-value pair from the state
+                    return newState;
+                  });
+                }}
+                className="py-1 px-4"
+              >
+                {key === "status" && (
+                  <>
+                    <span>Trạng thái:</span>
+                    <span className="ml-1 font-semibold">
+                      {billStatusData.find((item) => item?.value === formFilter[key])?.label}
+                    </span>
+                  </>
+                )}
+                {key === "userId" && (
+                  <>
+                    <span>Người bán:</span>
+                    <span className="ml-1 font-semibold">
+                      {employees?.data?.items?.find((item) => item?.id === formFilter[key])?.fullName}
+                    </span>
+                  </>
+                )}
+              </Tag>
+            );
+          }
+          return null;
+        })}
       </div>
     </div>
   );

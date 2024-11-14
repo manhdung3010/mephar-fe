@@ -1,11 +1,9 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
-
 import RemoveIcon from "@/assets/removeIcon.svg";
 import SearchIcon from "@/assets/searchIcon.svg";
 import { CustomInput } from "@/components/CustomInput";
 import CustomTable from "@/components/CustomTable";
-
 import { getConfigProductPrivate, getMarketOrderDetail } from "@/api/market.service";
 import { CustomAutocomplete } from "@/components/CustomAutocomplete";
 import { formatMoney, formatNumber, getImage, sliceString } from "@/helpers";
@@ -85,20 +83,35 @@ export default function AddOrder() {
           inventory: product.quantity,
           realQuantity: product.quantity,
           price: product.price,
-          discountValue: 0,
+          discountValue: product?.price - product?.itemPrice,
           marketProductId: product?.marketProductId,
           marketOrderProductId: product?.id,
+          ...(product?.discountItemId && {
+            discountProductItemId: product?.discountItemId,
+          }),
         };
       });
-      console.log("listProduct", listProduct);
       setImportProducts(listProduct);
       setValue("listProduct", listProduct);
       setValue("customerId", details?.data?.item?.customerId);
       setValue("note", details?.data?.item?.note);
+      const formatDiscount = {
+        ...details?.data?.item?.discountOrderItem?.discount,
+        items: [
+          {
+            id: details?.data?.item?.discountOrderItem?.id,
+            apply: {
+              ...details?.data?.item?.discountOrderItem,
+            },
+          },
+        ],
+      };
+      setMarketOrderDiscount(formatDiscount);
     }
   }, [details?.data?.item]);
 
   console.log("importProducts", importProducts);
+  console.log("marketOrderDiscount", marketOrderDiscount);
 
   const { data: products, isLoading: isLoadingConfigProductPrivate } = useQuery(
     ["CONFIG_PRODUCT_PRIVATE", JSON.stringify(formFilter), getValues("customerId")],
@@ -115,7 +128,6 @@ export default function AddOrder() {
 
   const onChangeValueProduct = (productKey, field, newValue) => {
     let productImportClone = cloneDeep(importProducts);
-
     productImportClone = productImportClone.map((product) => {
       if (product.productKey === productKey) {
         if (field === "realQuantity" && product.batches?.length === 1) {
@@ -136,12 +148,11 @@ export default function AddOrder() {
 
       return product;
     });
-
     setImportProducts(productImportClone);
   };
 
   useEffect(() => {
-    if (!importProducts.length) return;
+    if (!importProducts.length || details?.data?.item?.discountItemId) return;
     setMarketOrderDiscount({});
   }, [importProducts]);
 
@@ -287,7 +298,6 @@ export default function AddOrder() {
       discountValue: 0,
       batches: product.batches?.map((batch) => {
         const inventory = batch.quantity / product.productUnit.exchangeValue;
-
         const newBatch = {
           ...batch,
           inventory,
@@ -295,7 +305,6 @@ export default function AddOrder() {
           quantity: 0,
           isSelected: inventory >= 1 ? isSelectedUnit : false,
         };
-
         if (inventory >= 1 && isSelectedUnit) {
           isSelectedUnit = false;
           newBatch.quantity = 1;
@@ -303,9 +312,7 @@ export default function AddOrder() {
         return newBatch;
       }),
     };
-
     let cloneImportProducts = cloneDeep(importProducts);
-
     if (importProducts.find((p) => p.productKey === localProduct.productKey)) {
       cloneImportProducts = cloneImportProducts.map((product: any) => {
         if (product.productKey === localProduct.productKey) {
@@ -324,7 +331,6 @@ export default function AddOrder() {
             // }),
           };
         }
-
         return product;
       });
       setImportProducts(cloneImportProducts);
@@ -361,7 +367,6 @@ export default function AddOrder() {
                         <Image src={getImage(item.imageCenter?.path)} height={40} width={68} alt="" objectFit="cover" />
                       )}
                     </div>
-
                     <div>
                       <div className="mb-2 flex gap-x-3">
                         <div>
@@ -373,7 +378,6 @@ export default function AddOrder() {
                           <div className="rounded text-red-main py-[2px] italic">Hết hàng</div>
                         )}
                       </div>
-
                       <div className="flex gap-x-3">
                         <div>Số lượng: {formatNumber(item.quantity - item.quantitySold)}</div>
                         <div>|</div>
@@ -386,7 +390,6 @@ export default function AddOrder() {
             />
           </div>
         </div>
-
         <div className=" overflow-x-auto">
           <div className="min-w-[1000px]">
             <CustomTable
@@ -400,7 +403,6 @@ export default function AddOrder() {
           </div>
         </div>
       </div>
-
       <RightContent
         setValue={setValue}
         getValues={getValues}
@@ -409,7 +411,6 @@ export default function AddOrder() {
         reset={reset}
         orderDetail={details?.data?.item}
       />
-
       <ProductDiscountModal
         isOpen={openProductDiscountModal}
         onCancel={() => setOpenProductDiscountModal(false)}

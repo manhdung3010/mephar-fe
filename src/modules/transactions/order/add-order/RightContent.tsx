@@ -75,8 +75,6 @@ export default function RightContent({ getValues, setValue, errors, handleSubmit
     },
   );
 
-  console.log("marketOrderDiscount", marketOrderDiscount);
-
   useEffect(() => {
     if (orderDetail?.id) {
       setSelectedAddress(orderDetail?.addressId);
@@ -124,8 +122,10 @@ export default function RightContent({ getValues, setValue, errors, handleSubmit
             marketOrderProductId: item?.marketOrderProductId,
             quantity: item?.realQuantity,
             price: item?.price,
+            ...(item?.discountProductItemId && { discountProductItemId: item?.discountProductItemId }),
           })),
           note: getValues("note"),
+          ...(marketOrderDiscount?.items && { discountOrderItemId: marketOrderDiscount?.items[0]?.id }),
         };
         return updateMarketOrder(orderDetail?.id, payload);
       }
@@ -136,6 +136,7 @@ export default function RightContent({ getValues, setValue, errors, handleSubmit
         reset();
         router.push(`/transactions/order`);
         setImportProducts([]);
+        setMarketOrderDiscount({});
       },
       onError: (err: any) => {
         message.error(err?.message);

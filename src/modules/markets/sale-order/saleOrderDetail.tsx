@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 import React, { useMemo } from "react";
 import { useRecoilValue } from "recoil";
 import { EOrderMarketStatusLabel } from "../type";
-import { formatDateTime, formatMoney, formatNumber, getImage } from "@/helpers";
+import { checkEndPrice, formatDateTime, formatMoney, formatNumber, getImage } from "@/helpers";
 import Image from "next/image";
 import StickyNoteIcon from "@/assets/stickynote.svg";
 import { shipFee } from "../payment";
@@ -26,7 +26,11 @@ function SaleOrderDetail() {
 
   const totalMoney = useMemo(() => {
     return orderDetail?.data?.item?.products?.reduce((total, product) => {
-      return total + (product?.discountPrice > 0 ? product?.discountPrice : product?.price) * product?.quantity;
+      return (
+        total +
+        (product?.itemPrice ? product?.itemPrice : checkEndPrice(product?.discountPrice, product?.price)) *
+          product?.quantity
+      );
     }, 0);
   }, [orderDetail?.data?.item?.products]);
 
@@ -109,17 +113,17 @@ function SaleOrderDetail() {
                 <span className="text-base font-medium">{product?.marketProduct?.product?.name}</span>
               </div>
               <div className="col-span-2 flex items-center justify-center gap-1">
-                {product?.discountPrice > 0 && (
-                  <span className="text-[#999999] line-through">{formatMoney(product?.marketProduct?.price)}</span>
-                )}
                 <span className="text-base text-[#28293D] font-medium">
-                  {formatMoney(product?.discountPrice > 0 ? product?.discountPrice : product?.price)}
+                  {formatMoney(
+                    product?.itemPrice ? product?.itemPrice : checkEndPrice(product?.discountPrice, product?.price),
+                  )}
                 </span>
               </div>
               <div className="col-span-2">{"x" + formatNumber(product?.quantity)}</div>
               <div className="col-span-2 text-red-main text-base font-medium">
                 {formatMoney(
-                  (product?.discountPrice > 0 ? product?.discountPrice : product?.price) * product?.quantity,
+                  (product?.itemPrice ? product?.itemPrice : checkEndPrice(product?.discountPrice, product?.price)) *
+                    product?.quantity,
                 )}
               </div>
             </div>

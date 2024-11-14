@@ -1,27 +1,19 @@
+import { getOrderDiscountList } from "@/api/discount.service";
 import { CustomButton } from "@/components/CustomButton";
 import { CustomModal } from "@/components/CustomModal";
 import CustomTable from "@/components/CustomTable";
 import { formatMoney, formatNumber } from "@/helpers";
 import {
-  branchState,
-  discountState,
-  marketOrderDiscountState,
-  marketOrderState,
-  orderActiveState,
-} from "@/recoil/state";
+  EDiscountBillMethod,
+  EDiscountBillMethodLabel,
+  EDiscountGoodsMethodLabel,
+} from "@/modules/settings/discount/add-discount/Info";
+import { branchState, marketOrderDiscountState, marketOrderState } from "@/recoil/state";
+import { useQuery } from "@tanstack/react-query";
 import type { ColumnsType } from "antd/es/table";
 import { cloneDeep } from "lodash";
 import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { message } from "antd";
-import {
-  EDiscountBillMethod,
-  EDiscountBillMethodLabel,
-  EDiscountGoodsMethodLabel,
-  EDiscountType,
-} from "@/modules/settings/discount/add-discount/Info";
-import { useQuery } from "@tanstack/react-query";
-import { getOrderDiscountList } from "@/api/discount.service";
 
 /**
  * DiscountOrderModal component renders a modal for applying discounts to an order.
@@ -56,10 +48,6 @@ export function DiscountOrderModal({
   const [importProducts, setImportProducts] = useRecoilState(marketOrderState);
   const [marketOrderDiscount, setMarketOrderDiscount] = useRecoilState(marketOrderDiscountState);
   const [listDiscount, setListDiscount] = useState<any[]>([]);
-  const [discountObject, setDiscountObject] = useRecoilState(discountState);
-  const [orderActive, setOrderActive] = useRecoilState(orderActiveState);
-  const [giftProduct, setGiftProduct] = useState<any>([]);
-  const [discountProduct, setDiscountProduct] = useState<any>([]);
 
   const getDiscountPostData = () => {
     const products = importProducts?.map((product) => ({
@@ -96,7 +84,7 @@ export function DiscountOrderModal({
       });
       setListDiscount(listBatchClone);
     }
-  }, [discountList?.data?.data?.items, discountObject[orderActive]?.orderDiscount, isOpen]);
+  }, [discountList?.data?.data?.items, isOpen]);
   const columns: ColumnsType<any> = [
     {
       title: "Chương trình khuyến mại",
@@ -173,9 +161,6 @@ export function DiscountOrderModal({
 
               return { ...batch, isSelected: false };
             });
-            if (selectedRowKeys) {
-              setGiftProduct([]);
-            }
             setListDiscount(listBatchClone);
           },
         }}
@@ -184,7 +169,6 @@ export function DiscountOrderModal({
         <CustomButton
           onClick={() => {
             onCancel();
-            setGiftProduct([]);
           }}
           outline={true}
           className="h-[46px] min-w-[150px] py-2 px-4"

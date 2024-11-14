@@ -208,6 +208,8 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
     }
   }, [customerDetail]);
 
+  console.log("getValues", getValues());
+
   const onSearch = useCallback(
     debounce((value) => {
       setPlaceKeyword(value);
@@ -339,14 +341,14 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
               <Label infoText="" label="Ngày sinh" />
               <CustomDatePicker
                 placeholder="Ngày sinh"
-                suffixIcon={<Image src={DateIcon} alt="" />}
+                // suffixIcon={<Image src={DateIcon} alt="" />}
                 className="h-11 w-full"
+                value={getValues("birthday")}
                 onChange={(value) => {
-                  setValue("birthday", formatDate(value, "YYYY-MM-DD"), {
+                  setValue("birthday", value ? value.format("YYYY-MM-DD") : null, {
                     shouldValidate: true,
                   });
                 }}
-                value={dayjs(getValues("birthday"))}
               />
               <InputError error={errors.birthday?.message} />
             </div>
@@ -550,6 +552,12 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
         }}
         onSave={({ groupCustomerId, groupCustomerName }) => {
           const oldGroupCustomerId: any = getValues("groupCustomerId");
+          // check if oldGroupCustomerId has value
+          if (oldGroupCustomerId?.length > 0) {
+            setValue("groupCustomerId", [...oldGroupCustomerId, groupCustomerId], { shouldValidate: true });
+          } else {
+            setValue("groupCustomerId", [groupCustomerId], { shouldValidate: true });
+          }
           setValue("groupCustomerId", [...oldGroupCustomerId, groupCustomerId], { shouldValidate: true });
           setGroupCustomerKeyword(groupCustomerName);
         }}
