@@ -74,6 +74,10 @@ const AddDiscount = () => {
           isAll: true,
           ids: [],
         },
+        channel: {
+          isAll: true,
+          types: [],
+        },
       },
       time: {
         dateFrom: dateFromDefault,
