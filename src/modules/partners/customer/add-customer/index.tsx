@@ -310,7 +310,6 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
               />
               <InputError error={errors.groupCustomerId?.message} />
             </div>
-
             <div>
               <Label infoText="" label="Email" />
               <CustomInput

@@ -19,27 +19,15 @@ export const schema = yup.object().shape({
           from: yup
             .number()
             .required("Đây là trường bắt buộc!")
-            .test(
-              "check-value-from",
-              "Giá trị phải lớn hơn 0",
-              (value) => value > 0
-            ),
+            .test("check-value-from", "Giá trị phải lớn hơn 0", (value) => value > 0),
         }),
         product: yup.object({
           type: yup.string(),
           from: yup.number().when("type", ([type], schema) => {
-            if (
-              type === "PRODUCT_PRICE" ||
-              type === "GIFT" ||
-              type === "LOYALTY"
-            ) {
+            if (type === "PRODUCT_PRICE" || type === "GIFT" || type === "LOYALTY") {
               return schema
                 .required("Đây là trường bắt buộc!")
-                .test(
-                  "check-value-discount",
-                  "Giá trị phải lớn hơn 0",
-                  (value) => value > 0
-                );
+                .test("check-value-discount", "Giá trị phải lớn hơn 0", (value) => value > 0);
             }
             return schema.notRequired();
           }),
@@ -52,31 +40,21 @@ export const schema = yup.object().shape({
           }
           return schema
             .required("Đây là trường bắt buộc!")
-            .test(
-              "check-value-discount",
-              "Giá trị phải lớn hơn 0",
-              (value) => value > 0
-            );
+            .test("check-value-discount", "Giá trị phải lớn hơn 0", (value) => value > 0);
         }),
         discountType: yup.string(),
-        productUnitId: yup
-          .array()
-          .when(["type", "groupId"], ([type, groupId], schema) => {
-            if ((type === "PRODUCT_PRICE" || type === "GIFT") && !groupId) {
-              return schema.required("Đây là trường bắt buộc!");
-            }
-            return schema.notRequired();
-          }),
+        productUnitId: yup.array().when(["type", "groupId"], ([type, groupId], schema) => {
+          if ((type === "PRODUCT_PRICE" || type === "GIFT") && !groupId) {
+            return schema.required("Đây là trường bắt buộc!");
+          }
+          return schema.notRequired();
+        }),
         groupId: yup.array(),
         maxQuantity: yup.number().when("type", ([type], schema) => {
           if (type === "PRODUCT_PRICE" || type === "GIFT") {
             return schema
               .required("Đây là trường bắt buộc!")
-              .test(
-                "check-value-discount",
-                "Giá trị phải lớn hơn 0",
-                (value) => value > 0
-              );
+              .test("check-value-discount", "Giá trị phải lớn hơn 0", (value) => value > 0);
           }
           return schema.notRequired();
         }),
@@ -85,11 +63,7 @@ export const schema = yup.object().shape({
           if (type === "LOYALTY") {
             return schema
               .required("Đây là trường bắt buộc!")
-              .test(
-                "check-value-discount",
-                "Giá trị phải lớn hơn 0",
-                (value) => value > 0
-              );
+              .test("check-value-discount", "Giá trị phải lớn hơn 0", (value) => value > 0);
           }
           return schema.notRequired();
         }),
@@ -97,7 +71,7 @@ export const schema = yup.object().shape({
         type: yup.string(),
       }),
       childItems: yup.array(),
-    })
+    }),
   ),
 
   time: yup.object({
@@ -113,6 +87,7 @@ export const schema = yup.object().shape({
   scope: yup.object({
     customer: yup.object(),
     branch: yup.object(),
+    channel: yup.object(),
   }),
 });
 export const productSchema = yup.object().shape({
@@ -132,11 +107,7 @@ export const productSchema = yup.object().shape({
           from: yup
             .number()
             .required("Đây là trường bắt buộc!")
-            .test(
-              "check-value-from",
-              "Giá trị phải lớn hơn 0",
-              (value) => value > 0
-            ),
+            .test("check-value-from", "Giá trị phải lớn hơn 0", (value) => value > 0),
         }),
         productUnitId: yup.array(),
       }),
@@ -144,16 +115,12 @@ export const productSchema = yup.object().shape({
         discountValue: yup
           .number()
           .required("Đây là trường bắt buộc!")
-          .test(
-            "check-value-discount",
-            "Giá trị phải lớn hơn 0",
-            (value) => value > 0
-          ),
+          .test("check-value-discount", "Giá trị phải lớn hơn 0", (value) => value > 0),
         discountType: yup.string(),
         productUnitId: yup.array(),
         maxQuantity: yup.number(),
       }),
-    })
+    }),
   ),
 
   time: yup.object({

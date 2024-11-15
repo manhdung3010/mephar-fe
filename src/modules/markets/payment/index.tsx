@@ -68,6 +68,7 @@ function Payment() {
                       toStoreId: store?.storeId,
                     },
                     EDiscountGoodsMethod.PRICE_BY_BUY_NUMBER,
+                    "ONLINE",
                   );
                   return {
                     ...product,

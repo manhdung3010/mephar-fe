@@ -311,6 +311,13 @@ const AddDiscount = () => {
               ? dcDetail.discountBranch.map((customer: any) => customer.branchId)
               : [],
         },
+        channel: {
+          isAll: dcDetail.discountChannel?.length > 0 ? false : true,
+          types:
+            dcDetail.discountChannel?.length > 0
+              ? dcDetail.discountChannel.map((customer: any) => customer.channel?.toUpperCase())
+              : [],
+        },
       });
       setValue(
         "time",

@@ -30,11 +30,19 @@ export function getDiscountByIdOrder(id: number) {
   return axiosClient.get(`order/${id}/get-discount`);
 }
 
-export function getOrderDiscountList(payload, type?: string) {
-  return axiosClient.post(`discount/order?type=${type ? type : ""}`, payload);
+export function getOrderDiscountList(payload, type?: string, channel?: string) {
+  const queryParams = new URLSearchParams();
+  if (type) queryParams.append("type", type);
+  if (channel) queryParams.append("channel", channel);
+  const queryString = queryParams.toString();
+  return axiosClient.post(`discount/order${queryString ? `?${queryString}` : ""}`, payload);
 }
-export function getProductDiscountList(payload, type?: string) {
-  return axiosClient.post(`discount/product${type ? `?type=${type}` : ""}`, payload);
+export function getProductDiscountList(payload, type?: string, channel?: string) {
+  const queryParams = new URLSearchParams();
+  if (type) queryParams.append("type", type);
+  if (channel) queryParams.append("channel", channel);
+  const queryString = queryParams.toString();
+  return axiosClient.post(`discount/product${queryString ? `?${queryString}` : ""}`, payload);
 }
 export function getDiscountConfig() {
   return axiosClient.get("discount/config/detail");

@@ -82,7 +82,7 @@ export function DiscountOrderModal({
   const data: any = getDiscountPostData();
   const { data: discountList, isLoading } = useQuery(
     ["ORDER_DISCOUNT_LIST", customerId, totalPrice, EDiscountBillMethod.ORDER_PRICE],
-    () => getOrderDiscountList(data, EDiscountBillMethod.ORDER_PRICE),
+    () => getOrderDiscountList(data, EDiscountBillMethod.ORDER_PRICE, "ONLINE"),
     {
       enabled: totalPrice > 0 && !!isOpen,
     },
