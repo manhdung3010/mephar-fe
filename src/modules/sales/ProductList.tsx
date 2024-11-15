@@ -106,17 +106,17 @@ export function ProductList({
 
   const onChangeQuantity = async (productKey, newValue, product?: any) => {
     const orderObjectClone = cloneDeep(orderObject);
-    // const res = await getProductDiscountList({
-    //   productUnitId: product?.id,
-    //   branchId: branchId,
-    //   quantity: newValue,
-    // });
-    // let itemDiscountProduct = res?.data?.data?.items;
+    const res = await getProductDiscountList({
+      productUnitId: product?.id,
+      branchId: branchId,
+      quantity: newValue,
+    });
+    let itemDiscountProduct = res?.data?.data?.items;
     orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map((product: ISaleProductLocal) => {
       if (product.productKey === productKey) {
         return {
           ...product,
-          // itemDiscountProduct,
+          itemDiscountProduct,
           quantity: newValue,
         };
       }
@@ -134,22 +134,22 @@ export function ProductList({
   };
   const onExpandMoreBatches = async (productKey, quantity: number, product?: any) => {
     const orderObjectClone = cloneDeep(orderObject);
-    // const res = await getProductDiscountList({
-    //   productUnitId: product?.id,
-    //   branchId: branchId,
-    //   quantity: quantity,
-    // });
-    // let itemDiscountProduct = res?.data?.data?.items;
-    // orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map((product: ISaleProductLocal) => {
-    //   if (product.productKey === productKey) {
-    //     return {
-    //       ...product,
-    //       itemDiscountProduct,
-    //       quantity,
-    //     };
-    //   }
-    //   return product;
-    // });
+    const res = await getProductDiscountList({
+      productUnitId: product?.id,
+      branchId: branchId,
+      quantity: quantity,
+    });
+    let itemDiscountProduct = res?.data?.data?.items;
+    orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map((product: ISaleProductLocal) => {
+      if (product.productKey === productKey) {
+        return {
+          ...product,
+          itemDiscountProduct,
+          quantity,
+        };
+      }
+      return product;
+    });
     orderObjectClone[orderActive] = orderObjectClone[orderActive].map((product: ISaleProductLocal) => {
       if (product.productKey === productKey) {
         let sumQuantity = 0;

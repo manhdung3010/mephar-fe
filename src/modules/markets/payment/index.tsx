@@ -60,11 +60,12 @@ function Payment() {
               ...store,
               products: await Promise.all(
                 store.products.map(async (product) => {
+                  console.log("product", product);
                   const res = await getProductDiscountList(
                     {
                       productUnitId: product?.marketProduct?.productUnitId,
                       branchId: branchId,
-                      quantity: 1,
+                      quantity: product?.quantity,
                       toStoreId: store?.storeId,
                     },
                     EDiscountGoodsMethod.PRICE_BY_BUY_NUMBER,
@@ -102,7 +103,6 @@ function Payment() {
         );
       }, 0);
       if (discountType === "amount") {
-        console.log("amount");
         return total + storeTotal - discountValue;
       }
       if (discountType === "percent") {
