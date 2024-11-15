@@ -60,7 +60,6 @@ function Payment() {
               ...store,
               products: await Promise.all(
                 store.products.map(async (product) => {
-                  console.log("product", product);
                   const res = await getProductDiscountList(
                     {
                       productUnitId: product?.marketProduct?.productUnitId,
@@ -170,9 +169,6 @@ function Payment() {
     return "Chưa áp dụng khuyến mại";
   };
 
-  console.log("paymentProduct", paymentProduct);
-  console.log("selectedDiscount", selectedDiscount);
-
   return (
     <div className="bg-[#fafafc] text-[#28293D]">
       <div className="fluid-container">
@@ -194,7 +190,6 @@ function Payment() {
             </li>
           </ul>
         </nav>
-
         {/* Address Section */}
         <div className="bg-white my-4 p-6 border-t-4 border-[#FF3B3B] flex gap-2 items-center">
           <div className="w-3/4">

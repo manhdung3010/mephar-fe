@@ -47,6 +47,9 @@ export function getProductDiscountList(payload, type?: string, channel?: string)
 export function getDiscountConfig() {
   return axiosClient.get("discount/config/detail");
 }
+export function getDiscountCount(discountId: number, customerId: number) {
+  return axiosClient.get(`discount/countApply/${discountId}/${customerId}`);
+}
 export function updateDiscountConfig(payload) {
   return axiosClient.post("discount/config", payload);
 }

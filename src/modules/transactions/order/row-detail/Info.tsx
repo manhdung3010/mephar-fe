@@ -38,7 +38,7 @@ export function Info({ record }: { record: any }) {
 
   const totalPrice = useMemo(() => {
     return record.products.reduce((total, product) => {
-      return total + product.price * product.quantity;
+      return total + product.itemPrice * product.quantity;
     }, 0);
   }, [record.products]);
   const [openHistoryModal, setOpenHistoryModal] = useState(false);
@@ -174,8 +174,12 @@ export function Info({ record }: { record: any }) {
             <div className="col-span-2 text-black-main">{formatMoney(totalPrice)}</div>
           </div>
           <div className="mb-4 grid grid-cols-3 gap-5">
+            <div className="text-gray-main ">Khuyến mại hóa đơn:</div>
+            <div className="col-span-2 text-black-main">{formatMoney(totalPrice - Number(record?.totalPrice))}</div>
+          </div>
+          <div className="mb-4 grid grid-cols-3 gap-5">
             <div className="text-gray-main ">Tổng tiền thanh toán:</div>
-            <div className="col-span-2 text-black-main">{formatMoney(totalPrice)}</div>
+            <div className="col-span-2 text-black-main">{formatMoney(record?.totalPrice)}</div>
           </div>
         </div>
       </div>

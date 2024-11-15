@@ -25,7 +25,7 @@ import InputError from "@/components/InputError";
 import { EDiscountLabel, EDiscountType, EPaymentMethod, getEnumKeyByValue } from "@/enums";
 import { formatMoney, formatNumber, hasPermission, randomString } from "@/helpers";
 import { branchState, discountState, orderActiveState, orderState, profileState } from "@/recoil/state";
-import { getDiscountConfig } from "@/api/discount.service";
+import { getDiscountConfig, getDiscountCount } from "@/api/discount.service";
 import { getPointStatus } from "@/api/point.service";
 import { CustomSwitch } from "@/components/CustomSwitch";
 import { RoleAction, RoleModel } from "../settings/role/role.enum";
@@ -37,6 +37,7 @@ import { OrderSuccessModal } from "./OrderSuccessModal";
 import { ScanQrModal } from "./ScanQrModal";
 import type { ISaleProductLocal } from "./interface";
 import { RightContentStyled } from "./styled";
+import WarningDiscountModal from "./WarningDiscountModal";
 
 /**
  * Component for rendering the right content of the sales module.
@@ -78,9 +79,11 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
   const [searchEmployeeText, setSearchEmployeeText] = useState("");
   const [searchCustomerText, setSearchCustomerText] = useState("");
   const [saleInvoice, setSaleInvoice] = useState();
-  const [oldTotal, setOldTotal] = useState(0);
   const [checkPoint, setCheckPoint] = useState(false);
   const [discountOrder, setDiscountOrder] = useState(0); // tổng tiền được giảm giá
+  const [openWarningDiscount, setOpenWarningDiscount] = useState(false);
+  const [selectedOrderDiscount, setSelectedOrderDiscount] = useState<any>([]);
+  const [orderDiscountCount, setOrderDiscountCount] = useState(0);
 
   const { data: employees } = useQuery(["EMPLOYEE_LIST", searchEmployeeText], () =>
     getEmployee({ page: 1, limit: 20, keyword: searchEmployeeText }),
@@ -129,7 +132,6 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
         product.quantity;
     });
     oldTotal = oldTotal - discount;
-    setOldTotal(oldTotal);
     return price;
   }, [orderObject, orderActive, discountObject[orderActive]]);
 
@@ -373,7 +375,6 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
         orderClone[orderActive] = [];
         setOrderObject(orderClone);
         setIsOpenOrderSuccessModal(true);
-        setOldTotal(0);
         setDiscountObject({
           [orderActive]: {
             productDiscount: [],
@@ -391,6 +392,14 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
   const onSubmit = () => {
     mutateCreateOrder();
   };
+
+  const onSaveOrderDiscount = (selectedDiscount) => {
+    const discountObjectClone = cloneDeep(discountObject);
+    discountObjectClone[orderActive].orderDiscount = selectedDiscount;
+    setDiscountObject(discountObjectClone);
+    setIsOpenDiscountModal(false);
+  };
+
   return (
     <RightContentStyled className="flex w-[360px] min-w-[360px] flex-col">
       <div className="px-6 pt-5 ">
@@ -815,10 +824,29 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
       <OrderDiscountModal
         isOpen={isOpenDiscountModal}
         onCancel={() => setIsOpenDiscountModal(false)}
-        onSave={() => {
-          setIsOpenDiscountModal(false);
+        onSave={async (selectedDiscount) => {
+          setSelectedOrderDiscount(selectedDiscount);
+          if (getValues("customerId") && selectedDiscount?.length > 0 && selectedDiscount[0]?.time?.isWarning) {
+            const res = await getDiscountCount(selectedDiscount[0]?.id, getValues("customerId"));
+            if (+res?.data?.data?.count > 0) {
+              setOrderDiscountCount(+res?.data?.data?.count);
+              setOpenWarningDiscount(true);
+              return;
+            }
+          }
+          onSaveOrderDiscount(selectedDiscount);
         }}
         discountList={discountList}
+      />
+
+      <WarningDiscountModal
+        isOpen={openWarningDiscount}
+        onCancel={() => setOpenWarningDiscount(false)}
+        onSave={() => {
+          onSaveOrderDiscount(selectedOrderDiscount);
+          setOpenWarningDiscount(false);
+        }}
+        count={orderDiscountCount}
       />
     </RightContentStyled>
   );

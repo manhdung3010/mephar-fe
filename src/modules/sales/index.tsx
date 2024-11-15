@@ -791,7 +791,7 @@ const Index = () => {
           </div>
 
           <ProductList
-            useForm={{ errors, setError }}
+            useForm={{ errors, setError, getValues }}
             useFormReturn={{ errorsReturn, setErrorReturn }}
             orderDetail={orderDetail}
             listDiscount={discountList}

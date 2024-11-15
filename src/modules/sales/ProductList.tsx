@@ -14,7 +14,7 @@ import InputError from "@/components/InputError";
 import { formatMoney, formatNumber, roundNumber } from "@/helpers";
 import { branchState, discountState, orderActiveState, orderState, productDiscountSelected } from "@/recoil/state";
 
-import { getDiscountConfig, getProductDiscountList } from "@/api/discount.service";
+import { getDiscountConfig, getDiscountCount, getProductDiscountList } from "@/api/discount.service";
 import { useQuery } from "@tanstack/react-query";
 import { Tooltip, message } from "antd";
 import { ListBatchModal } from "./ListBatchModal";
@@ -22,6 +22,7 @@ import { ProductDiscountModal } from "./ProductDiscountModal";
 import { checkTypeOrder } from "./checkTypeOrder";
 import type { IBatch, IProductUnit, ISaleProductLocal } from "./interface";
 import { ProductTableStyled } from "./styled";
+import WarningDiscountModal from "./WarningDiscountModal";
 
 /**
  * Component for displaying and managing a list of products in a sales order.
@@ -51,7 +52,7 @@ export function ProductList({
   listDiscount: any;
   useFormReturn: any;
 }) {
-  const { errors, setError } = useForm;
+  const { errors, setError, getValues } = useForm;
   const { errorsReturn, setErrorReturn } = useFormReturn;
   const branchId = useRecoilValue(branchState);
   const [orderObject, setOrderObject] = useRecoilState(orderState);
@@ -63,6 +64,9 @@ export function ProductList({
   const [itemDiscount, setItemDiscount] = useState();
   const [productKeyAddBatch, setProductKeyAddBatch] = useState<string>();
   const [productUnitSelected, setProductUnitSelected] = useState<number>();
+  const [productDiscountCount, setProductDiscountCount] = useState<number>(0);
+  const [openWarningDiscount, setOpenWarningDiscount] = useState(false);
+  const [selectedProductDiscount, setSelectedProductDiscount] = useState();
 
   const checkDisplayListBatch = (product: ISaleProductLocal) => {
     return product.product.isBatchExpireControl;
@@ -639,7 +643,21 @@ export function ProductList({
     });
     setOrderObject(orderObjectClone);
   };
-  console.log("orderObject", orderObject[orderActive]);
+
+  const onSaveProductDiscount = (selectedDiscount) => {
+    const discountObjectClone = cloneDeep(discountObject);
+    const index = discountObjectClone[orderActive]?.productDiscount?.findIndex(
+      (item) => item?.productUnitSelected === selectedDiscount.productUnitSelected,
+    );
+    if (index !== -1) {
+      discountObjectClone[orderActive].productDiscount[index] = selectedDiscount;
+    } else {
+      discountObjectClone[orderActive].productDiscount.push(selectedDiscount);
+    }
+    setDiscountObject(discountObjectClone);
+    setOpenProductDiscountList(false);
+  };
+
   return (
     <ProductTableStyled className="p-4">
       <CustomTable
@@ -773,9 +791,32 @@ export function ProductList({
       <ProductDiscountModal
         isOpen={openProductDiscountList}
         onCancel={() => setOpenProductDiscountList(false)}
-        onSave={(selectedDiscount) => {}}
+        onSave={async (selectedDiscount) => {
+          setSelectedProductDiscount(selectedDiscount);
+          // check warning
+          if (getValues("customerId") && selectedDiscount && selectedDiscount?.time?.isWarning) {
+            const res = await getDiscountCount(selectedDiscount?.id, getValues("customerId"));
+            if (+res?.data?.data?.count > 0) {
+              setProductDiscountCount(+res?.data?.data?.count);
+              setOpenWarningDiscount(true);
+              return;
+            }
+          }
+          onSaveProductDiscount(selectedDiscount);
+        }}
         discountList={itemDiscount}
         productUnitSelected={productUnitSelected}
+      />
+
+      <WarningDiscountModal
+        isOpen={openWarningDiscount}
+        onCancel={() => setOpenWarningDiscount(false)}
+        onSave={() => {
+          onSaveProductDiscount(selectedProductDiscount);
+          setOpenWarningDiscount(false);
+        }}
+        count={productDiscountCount}
+        type="product"
       />
     </ProductTableStyled>
   );

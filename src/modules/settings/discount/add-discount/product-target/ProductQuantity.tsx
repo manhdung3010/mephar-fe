@@ -38,7 +38,7 @@ export const ProductQuantity = ({
 
   const [formFilter, setFormFilter] = useState({
     page: 1,
-    limit: 20,
+    limit: 99999,
     keyword: "",
     branchId,
   });

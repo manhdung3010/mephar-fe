@@ -70,8 +70,6 @@ export function ProductDiscountModal({
     }
   }, [discountList]);
 
-  console.log("discountObject", discountObject);
-
   const columns: ColumnsType<any> = [
     {
       title: "Chương trình khuyến mại",
@@ -226,20 +224,9 @@ export function ProductDiscountModal({
               message.error("Vui lòng chọn quà khuyến mại");
               return;
             }
-            const discountObjectClone = cloneDeep(discountObject);
-            const index = discountObjectClone[orderActive]?.productDiscount?.findIndex(
-              (item) => item?.productUnitSelected === selectedDiscount.productUnitSelected,
-            );
-            if (index !== -1) {
-              discountObjectClone[orderActive].productDiscount[index] = selectedDiscount;
-            } else {
-              discountObjectClone[orderActive].productDiscount.push(selectedDiscount);
-            }
-            setDiscountObject(discountObjectClone);
             onSave(selectedDiscount);
             setGiftProduct([]);
             setDiscountProduct([]);
-            onCancel();
           }}
           className="h-[46px] min-w-[150px] py-2 px-4"
           disabled={!listDiscount.some((batch) => batch.isSelected)}

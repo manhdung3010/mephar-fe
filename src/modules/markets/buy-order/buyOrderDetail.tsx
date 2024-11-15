@@ -140,12 +140,18 @@ function BuyOrderDetail() {
                   <span>{formatMoney(totalMoney)}</span>
                 </div>
                 <div className="flex justify-between items-center font-medium">
+                  <span>Khuyến mại hóa đơn</span>
+                  <span>{formatMoney(totalMoney - Number(orderDetail?.data?.item?.totalPrice))}</span>
+                </div>
+                <div className="flex justify-between items-center font-medium">
                   <span>Tổng tiền phí vận chuyển</span>
                   <span>{formatMoney(shipFee)}</span>
                 </div>
                 <div className="flex justify-between items-center font-medium">
                   <span className="text-base">Tổng thanh toán</span>
-                  <span className="text-red-main text-xl font-semibold">{formatMoney(totalMoney + shipFee)}</span>
+                  <span className="text-red-main text-xl font-semibold">
+                    {formatMoney(Number(orderDetail?.data?.item?.totalPrice) + shipFee)}
+                  </span>
                 </div>
               </div>
             </div>

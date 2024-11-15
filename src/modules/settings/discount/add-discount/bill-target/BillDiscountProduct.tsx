@@ -134,7 +134,7 @@ export const BillDiscountProduct = ({
         </div>
 
         {getValues("items")?.map((row, index) => (
-          <div className="flex items-center gap-3 border-b border-gray-100 py-3">
+          <div className="flex items-center gap-3 border-b border-gray-100 py-3 overflow-auto">
             <div className="flex flex-[2] flex-col px-4">
               <div className="w-full flex items-center gap-x-2">
                 Từ
@@ -154,7 +154,7 @@ export const BillDiscountProduct = ({
               <div className="w-full flex items-center gap-x-2">
                 Giảm
                 <CustomInput
-                  className="mt-0 h-10 w-full"
+                  className="mt-0 h-10 w-full min-w-[100px]"
                   wrapClassName="w-full"
                   type="number"
                   value={row?.apply?.discountValue || 0}
