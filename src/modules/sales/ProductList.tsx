@@ -138,50 +138,59 @@ export function ProductList({
   };
   const onExpandMoreBatches = async (productKey, quantity: number, product?: any) => {
     const orderObjectClone = cloneDeep(orderObject);
-    const res = await getProductDiscountList({
-      productUnitId: product?.id,
-      branchId: branchId,
-      quantity: quantity,
-    });
-    let itemDiscountProduct = res?.data?.data?.items;
-    orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map((product: ISaleProductLocal) => {
-      if (product.productKey === productKey) {
-        return {
-          ...product,
-          itemDiscountProduct,
-          quantity,
-        };
-      }
-      return product;
-    });
-    orderObjectClone[orderActive] = orderObjectClone[orderActive].map((product: ISaleProductLocal) => {
-      if (product.productKey === productKey) {
-        let sumQuantity = 0;
-        let batches = cloneDeep(product.batches);
-        batches = orderBy(batches, ["isSelected"], ["desc"]);
-        batches = batches.map((batch) => {
-          const remainQuantity = roundNumber(quantity) - roundNumber(sumQuantity);
-          if (remainQuantity && batch.inventory) {
-            const tempQuantity = batch.inventory <= remainQuantity ? batch.inventory : roundNumber(remainQuantity);
-            sumQuantity += tempQuantity;
-            return {
-              ...batch,
-              quantity: tempQuantity,
-              isSelected: true,
-            };
-          }
-          return { ...batch, quantity: 0, isSelected: false };
-        });
-        return {
-          ...product,
-          quantity: quantity,
-          batches,
-        };
-      }
-      return product;
-    });
+
+    // Process products and call API if needed
+    orderObjectClone[orderActive] = await Promise.all(
+      orderObjectClone[orderActive].map(async (product: ISaleProductLocal) => {
+        if (product.productKey === productKey) {
+          let sumQuantity = 0;
+          let batches = cloneDeep(product.batches);
+          batches = orderBy(batches, ["isSelected"], ["desc"]);
+
+          // Update batches and optionally call API
+          batches = await Promise.all(
+            batches.map(async (batch) => {
+              const remainQuantity = roundNumber(quantity) - roundNumber(sumQuantity);
+
+              if (remainQuantity && batch.inventory) {
+                const tempQuantity = batch.inventory <= remainQuantity ? batch.inventory : roundNumber(remainQuantity);
+                sumQuantity += tempQuantity;
+
+                // Example: Call API here if needed
+                const res = await getProductDiscountList({
+                  productUnitId: product?.id,
+                  branchId: branchId,
+                  quantity: tempQuantity, // Use tempQuantity or a suitable value
+                });
+
+                const itemDiscountProduct = res?.data?.data?.items;
+
+                return {
+                  ...batch,
+                  quantity: tempQuantity,
+                  isSelected: true,
+                  discount: itemDiscountProduct, // Store discount information
+                };
+              }
+
+              return { ...batch, quantity: 0, isSelected: false };
+            }),
+          );
+
+          return {
+            ...product,
+            quantity,
+            batches,
+          };
+        }
+
+        return product;
+      }),
+    );
+
     setOrderObject(orderObjectClone);
   };
+
   useEffect(() => {
     setErrorReturn("products", { message: undefined });
   }, [orderActive]);
