@@ -39,7 +39,6 @@ export function CustomUpload({
   fileUrl?: any;
 }) {
   const [files, setFiles] = useState<string[]>([]);
-
   const props: UploadProps = {
     async onChange(info: any) {
       // validate file size
@@ -62,7 +61,6 @@ export function CustomUpload({
         message.error("Không thể xem trước các tệp lớn hơn 2MB");
         return;
       }
-
       let src = file.url as string;
       if (!src) {
         src = await new Promise((resolve) => {
@@ -85,6 +83,8 @@ export function CustomUpload({
     maxCount,
     multiple: maxCount > 1,
   };
+
+  console.log("values", values);
 
   return (
     <ImgCrop rotationSlider>

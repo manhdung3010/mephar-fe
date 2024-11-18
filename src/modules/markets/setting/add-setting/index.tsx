@@ -1,5 +1,4 @@
 import Image from "next/image";
-
 import { createConfigProduct, getConfigProductDetail, updateConfigProduct } from "@/api/market.service";
 import { getSaleProducts } from "@/api/product.service";
 import ArrowDownIcon from "@/assets/arrowDownGray.svg";
@@ -53,9 +52,7 @@ export function AddMarketSetting() {
   const branchId = useRecoilValue(branchState);
   const queryClient = useQueryClient();
   const router = useRouter();
-
   const { id } = router.query;
-
   const [isAgency, setIsAgency] = useRecoilState(agencyState);
   const [formFilter, setFormFilter] = useState({
     page: 1,
@@ -70,7 +67,6 @@ export function AddMarketSetting() {
   const [listBatchSelected, setListBatchSelected] = useState<any[]>([]);
   const [listAgencySelected, setListAgencySelected] = useState<any[]>([]);
   const [noBatchInventory, setNoBatchInventory] = useState(0);
-
   const [imageCenterPath, setImageCenterPath] = useState<string>("");
   const {
     data: products,
@@ -117,14 +113,10 @@ export function AddMarketSetting() {
       setValue("price", rest.price, { shouldValidate: true });
       setValue("discountPrice", rest.discountPrice, { shouldValidate: true });
       setValue("quantity", rest.quantity, { shouldValidate: true });
-      setValue("description", rest.description || ""), { shouldValidate: true };
+      setValue("description", rest.description ? rest.description : "", { shouldValidate: true });
       setValue("marketType", rest.marketType, { shouldValidate: true });
       setValue("thumbnail", rest?.imageCenter?.id, { shouldValidate: true });
-      setValue(
-        "images",
-        rest.images?.map((item) => item.id),
-        { shouldValidate: true },
-      );
+      setValue("images", rest.images ? rest.images?.map((item) => item.id) : [], { shouldValidate: true });
       setValue("isDefaultPrice", rest.isDefaultPrice, { shouldValidate: true });
       setProductSelected(productDetail?.data?.item);
       setListAgencySelected(
@@ -158,14 +150,12 @@ export function AddMarketSetting() {
       if (!payload?.batches) {
         delete payload.batches;
       }
-
       return id ? updateConfigProduct(id, { ...payload }) : createConfigProduct({ ...payload });
     },
     {
       onSuccess: async () => {
         await queryClient.invalidateQueries(["CONFIG_PRODUCT"]);
         reset();
-
         router.push("/markets/setting");
       },
       onError: (err: any) => {
@@ -234,7 +224,7 @@ export function AddMarketSetting() {
         shouldValidate: true,
       });
     }
-    setValue("description", parseProduct?.product?.description, {
+    setValue("description", parseProduct?.product?.description ?? "", {
       shouldValidate: true,
     });
     setFormFilter((pre) => ({ ...pre, keyword: "" }));
@@ -662,7 +652,12 @@ export function AddMarketSetting() {
                 }
                 setValue("thumbnail", value, { shouldValidate: true });
               }}
-              values={[productDetail?.data?.item?.imageCenter?.path || imageCenterPath]}
+              fileUrl={productDetail?.data?.item?.imageCenter?.filePath || null}
+              values={
+                productDetail?.data?.item?.imageCenter?.filePath
+                  ? [productDetail?.data?.item?.imageCenter?.path || imageCenterPath]
+                  : [productDetail?.data?.item?.imageCenter?.filePath]
+              }
             >
               <div
                 className={
@@ -689,7 +684,7 @@ export function AddMarketSetting() {
                     images[index] = value;
                     setValue("images", images, { shouldValidate: true });
                   }}
-                  values={[productDetail?.data?.item?.images[index]?.path]}
+                  values={[productDetail?.data?.item?.images ? productDetail?.data?.item?.images[index]?.path : null]}
                 >
                   <div className="flex h-[90px] w-full items-center justify-center rounded-md border-2 border-dashed border-[#9CA1AD]">
                     <Image src={PhotographIcon} alt="" />
