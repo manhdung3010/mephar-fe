@@ -557,7 +557,6 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
           } else {
             setValue("groupCustomerId", [groupCustomerId], { shouldValidate: true });
           }
-          setValue("groupCustomerId", [...oldGroupCustomerId, groupCustomerId], { shouldValidate: true });
           setGroupCustomerKeyword(groupCustomerName);
         }}
       />

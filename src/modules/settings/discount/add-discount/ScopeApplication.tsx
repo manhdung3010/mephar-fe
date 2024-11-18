@@ -6,11 +6,11 @@ import { CustomSelect } from "@/components/CustomSelect";
 import { useQuery } from "@tanstack/react-query";
 import { Select } from "antd";
 import { get } from "lodash";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const ScopeApplication = ({ setValue, getValues }: any) => {
   // const [scope, setScope] = useState({
-  //   branch: {
+  //   branch: {l
   //     isAll: true,
   //     ids: [],
   //   },

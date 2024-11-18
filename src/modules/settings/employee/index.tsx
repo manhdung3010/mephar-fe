@@ -1,23 +1,23 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { message } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
-import cx from 'classnames';
-import _debounce from 'lodash/debounce';
-import Image from 'next/image';
-import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { message } from "antd";
+import type { ColumnsType } from "antd/es/table";
+import cx from "classnames";
+import _debounce from "lodash/debounce";
+import Image from "next/image";
+import { useRouter } from "next/router";
+import { useState } from "react";
 
-import { deleteEmployee, getEmployee } from '@/api/employee.service';
-import DeleteIcon from '@/assets/deleteRed.svg';
-import EditIcon from '@/assets/editGreenIcon.svg';
-import PlusIcon from '@/assets/plusWhiteIcon.svg';
-import SearchIcon from '@/assets/searchIcon.svg';
-import { CustomButton } from '@/components/CustomButton';
-import { CustomInput } from '@/components/CustomInput';
-import DeleteModal from '@/components/CustomModal/ModalDeleteItem';
-import CustomPagination from '@/components/CustomPagination';
-import CustomTable from '@/components/CustomTable';
-import { EEmployeeStatus, EEmployeeStatusLabel } from '@/enums';
+import { deleteEmployee, getEmployee } from "@/api/employee.service";
+import DeleteIcon from "@/assets/deleteRed.svg";
+import EditIcon from "@/assets/editGreenIcon.svg";
+import PlusIcon from "@/assets/plusWhiteIcon.svg";
+import SearchIcon from "@/assets/searchIcon.svg";
+import { CustomButton } from "@/components/CustomButton";
+import { CustomInput } from "@/components/CustomInput";
+import DeleteModal from "@/components/CustomModal/ModalDeleteItem";
+import CustomPagination from "@/components/CustomPagination";
+import CustomTable from "@/components/CustomTable";
+import { EEmployeeStatus, EEmployeeStatusLabel } from "@/enums";
 
 interface IRecord {
   key: number;
@@ -37,56 +37,54 @@ export function EmployeeInfo() {
   const [formFilter, setFormFilter] = useState({
     page: 1,
     limit: 20,
-    keyword: '',
+    keyword: "",
   });
   const [deletedId, setDeletedId] = useState<number>();
 
   const { data: employees, isLoading } = useQuery(
-    ['SETTING_EMPLOYEE', formFilter.page, formFilter.limit, formFilter.keyword],
-    () => getEmployee(formFilter)
+    ["SETTING_EMPLOYEE", formFilter.page, formFilter.limit, formFilter.keyword],
+    () => getEmployee(formFilter),
   );
 
   const columns: ColumnsType<IRecord> = [
     {
-      title: 'Tên nhân viên',
-      dataIndex: 'username',
-      key: 'username',
+      title: "Tên nhân viên",
+      dataIndex: "username",
+      key: "username",
     },
     {
-      title: 'Số điện thoại',
-      dataIndex: 'phone',
-      key: 'phone',
+      title: "Số điện thoại",
+      dataIndex: "phone",
+      key: "phone",
     },
     {
-      title: 'Email',
-      dataIndex: 'email',
-      key: 'email',
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
     },
     {
-      title: 'Vai trò',
-      dataIndex: 'role',
-      key: 'role',
-      render: (role) => role.name,
+      title: "Vai trò",
+      dataIndex: "role",
+      key: "role",
+      render: (role) => role?.name,
     },
     {
-      title: 'Ngày tạo',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
+      title: "Ngày tạo",
+      dataIndex: "createdAt",
+      key: "createdAt",
     },
     {
-      title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
       render: (_, { status }) => (
         <div
           className={cx(
             {
-              'text-[#00B63E] border border-[#00B63E] bg-[#DEFCEC]':
-                status === EEmployeeStatus.active,
-              'text-[##666666] border border-[##666666] bg-[#F5F5F5]':
-                status === EEmployeeStatus.inactive,
+              "text-[#00B63E] border border-[#00B63E] bg-[#DEFCEC]": status === EEmployeeStatus.active,
+              "text-[##666666] border border-[##666666] bg-[#F5F5F5]": status === EEmployeeStatus.inactive,
             },
-            'px-2 py-1 rounded-2xl w-max'
+            "px-2 py-1 rounded-2xl w-max",
           )}
         >
           {EEmployeeStatusLabel[status]}
@@ -94,20 +92,15 @@ export function EmployeeInfo() {
       ),
     },
     {
-      title: 'Thao tác',
-      dataIndex: 'action',
-      key: 'action',
+      title: "Thao tác",
+      dataIndex: "action",
+      key: "action",
       render: (_, { id }) => (
         <div className="flex gap-3">
           <div className=" cursor-pointer" onClick={() => setDeletedId(id)}>
             <Image src={DeleteIcon} />
           </div>
-          <div
-            className=" cursor-pointer"
-            onClick={() =>
-              router.push(`/settings/employee/add-employee?id=${id}`)
-            }
-          >
+          <div className=" cursor-pointer" onClick={() => router.push(`/settings/employee/add-employee?id=${id}`)}>
             <Image src={EditIcon} />
           </div>
         </div>
@@ -115,16 +108,18 @@ export function EmployeeInfo() {
     },
   ];
 
-  const { mutate: mutateDeleteEmployee, isLoading: isLoadingDeleteEmployee } =
-    useMutation(() => deleteEmployee(Number(deletedId)), {
+  const { mutate: mutateDeleteEmployee, isLoading: isLoadingDeleteEmployee } = useMutation(
+    () => deleteEmployee(Number(deletedId)),
+    {
       onSuccess: async () => {
-        await queryClient.invalidateQueries(['SETTING_EMPLOYEE']);
+        await queryClient.invalidateQueries(["SETTING_EMPLOYEE"]);
         setDeletedId(undefined);
       },
       onError: (err: any) => {
         message.error(err?.message);
       },
-    });
+    },
+  );
 
   const onSubmit = () => {
     mutateDeleteEmployee();
@@ -136,7 +131,7 @@ export function EmployeeInfo() {
         <CustomButton
           type="danger"
           prefixIcon={<Image src={PlusIcon} />}
-          onClick={() => router.push('/settings/employee/add-employee')}
+          onClick={() => router.push("/settings/employee/add-employee")}
         >
           Thêm mới nhân viên
         </CustomButton>
@@ -156,12 +151,7 @@ export function EmployeeInfo() {
         />
       </div>
 
-      <CustomTable
-        loading={isLoading}
-        dataSource={employees?.data?.items}
-        columns={columns}
-        pagination={false}
-      />
+      <CustomTable loading={isLoading} dataSource={employees?.data?.items} columns={columns} pagination={false} />
       <CustomPagination
         page={formFilter.page}
         pageSize={formFilter.limit}
