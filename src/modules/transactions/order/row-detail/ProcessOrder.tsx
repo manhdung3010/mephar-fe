@@ -204,13 +204,19 @@ export function ProcessOrder() {
         {getValues("products")?.map((product: any, index) => (
           <div className="mb-5 flex items-center gap-3" key={product.id}>
             <div className="border border-[#d7d8e1] rounded-xl w-20 h-20 overflow-hidden flex-shrink-0">
-              <Image
-                className=" object-cover"
-                src={getImage(product?.marketProduct?.imageCenter?.path)}
-                width={80}
-                height={80}
-                alt=""
-              />
+              {product?.marketProduct?.imageCenter && (
+                <Image
+                  className=" object-cover"
+                  src={
+                    product?.marketProduct?.imageCenter?.path
+                      ? getImage(product?.marketProduct?.imageCenter?.path)
+                      : product?.marketProduct?.imageCenter?.filePath
+                  }
+                  width={80}
+                  height={80}
+                  alt=""
+                />
+              )}
             </div>
             <div className="grow">
               <div

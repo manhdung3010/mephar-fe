@@ -317,7 +317,11 @@ function Cart() {
 
                       <div className="ml-12 mr-5 w-20 h-20 flex-shrink-0 rounded overflow-hidden border-[#E4E4EB] border-[1px] grid place-items-center">
                         <Image
-                          src={getImage(product?.marketProduct?.imageCenter?.path)}
+                          src={
+                            product?.marketProduct?.imageCenter?.path
+                              ? getImage(product?.marketProduct?.imageCenter?.path)
+                              : product?.marketProduct?.imageCenter?.filePath
+                          }
                           className="object-cover"
                           width={80}
                           height={80}

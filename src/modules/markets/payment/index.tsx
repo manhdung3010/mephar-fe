@@ -229,7 +229,11 @@ function Payment() {
                   <div className="col-span-4 flex items-center gap-5">
                     <div className="flex-shrink-0 h-20 w-20">
                       <Image
-                        src={getImage(product?.marketProduct?.imageCenter?.path || product?.imageCenter?.path)}
+                        src={
+                          product?.marketProduct?.imageCenter?.path || product?.imageCenter?.path
+                            ? getImage(product?.marketProduct?.imageCenter?.path || product?.imageCenter?.path)
+                            : product?.marketProduct?.imageCenter?.filePath || product?.imageCenter?.filePath
+                        }
                         width={80}
                         height={80}
                         className="object-cover rounded-lg border-[1px] border-[#E4E4EB]"

@@ -190,15 +190,19 @@ export function Info({ record }: { record: any }) {
         {record.products.map((product) => (
           <div key={product.productId} className="mb-5 flex items-center gap-x-3">
             <div className="rounded border border-gray-300 overflow-hidden w-[60px] h-[60px]">
-              {product.marketProduct?.imageCenter?.path && (
+              {(product.marketProduct?.imageCenter?.path || product.marketProduct?.imageCenter?.filePath) && (
                 <Image
                   width={60}
                   height={60}
-                  src={getImage(product.marketProduct?.imageCenter?.path)}
+                  src={
+                    product.marketProduct?.imageCenter?.path
+                      ? getImage(product.marketProduct?.imageCenter?.path)
+                      : product.marketProduct?.imageCenter?.filePath
+                  }
                   alt=""
                   objectFit="cover"
                 />
-              )}{" "}
+              )}
             </div>
             <div className="text-black-main">
               <div className="font-semibold text-gray-main line-clamp-1">{product?.marketProduct?.product?.name}</div>

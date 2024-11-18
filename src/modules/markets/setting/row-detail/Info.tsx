@@ -6,14 +6,7 @@ import EditIcon from "@/assets/editWhite.svg";
 import { CustomButton } from "@/components/CustomButton";
 import DeleteModal from "@/components/CustomModal/ModalDeleteItem";
 import { EProductSettingStatus, EProductSettingStatusLabel } from "@/enums";
-import {
-  formatDateTime,
-  formatMoney,
-  formatNumber,
-  getImage,
-  hasPermission,
-  sliceString,
-} from "@/helpers";
+import { formatDateTime, formatMoney, formatNumber, getImage, hasPermission, sliceString } from "@/helpers";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { message } from "antd";
 import cx from "classnames";
@@ -42,25 +35,21 @@ export function Info({ record }: { record: any }) {
       onError: (err: any) => {
         message.error(err?.message);
       },
-    }
+    },
   );
-  const { mutate: mutateUpdaetConfigStatus, isLoading: isLoadingUpdateStatus } =
-    useMutation(
-      () => {
-        return updateConfigStatus(
-          record?.id,
-          record?.status === "active" ? "inactive" : "active"
-        );
+  const { mutate: mutateUpdaetConfigStatus, isLoading: isLoadingUpdateStatus } = useMutation(
+    () => {
+      return updateConfigStatus(record?.id, record?.status === "active" ? "inactive" : "active");
+    },
+    {
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(["CONFIG_PRODUCT"]);
       },
-      {
-        onSuccess: async () => {
-          await queryClient.invalidateQueries(["CONFIG_PRODUCT"]);
-        },
-        onError: (err: any) => {
-          message.error(err?.message);
-        },
-      }
-    );
+      onError: (err: any) => {
+        message.error(err?.message);
+      },
+    },
+  );
 
   const handleDelete = () => {
     mutateDeleteConfigProduct();
@@ -74,7 +63,7 @@ export function Info({ record }: { record: any }) {
         <div className="w-[223px] flex-shrink-0">
           <div className="mb-2  flex">
             <Image
-              src={getImage(record?.imageCenter?.path)}
+              src={record?.imageCenter?.path ? getImage(record?.imageCenter?.path) : record?.imageCenter?.filePath}
               width={223}
               height={223}
               className="object-cover rounded-md border border-[#C9C6D9] py-1 overflow-hidden"
@@ -101,31 +90,23 @@ export function Info({ record }: { record: any }) {
         <div className="mb-4 grid grow grid-cols-2 gap-4 gap-x-9">
           <div className="grid grid-cols-3 gap-5">
             <div className="text-gray-main">Nhóm sản phẩm:</div>
-            <div className="col-span-2 text-black-main line-clamp-1">
-              {record?.product?.groupProduct?.name}
-            </div>
+            <div className="col-span-2 text-black-main line-clamp-1">{record?.product?.groupProduct?.name}</div>
           </div>
 
           <div className="grid grid-cols-3 gap-5">
             <div className="text-gray-main">Giá bán (VND):</div>
-            <div className="col-span-2  text-black-main">
-              {formatMoney(record?.price)}
-            </div>
+            <div className="col-span-2  text-black-main">{formatMoney(record?.price)}</div>
           </div>
 
           <div className="grid grid-cols-3 gap-5">
             <div className="text-gray-main">Sản phẩm:</div>
-            <div className="col-span-2 text-black-main line-clamp-1">
-              {record?.product?.name}
-            </div>
+            <div className="col-span-2 text-black-main line-clamp-1">{record?.product?.name}</div>
           </div>
 
           <div className="grid grid-cols-3 gap-5">
             <div className="text-gray-main">Giá khuyến mãi (VND):</div>
             <div className="col-span-2 text-black-main">
-              {record?.discountPrice > 0
-                ? formatMoney(record?.discountPrice)
-                : ""}
+              {record?.discountPrice > 0 ? formatMoney(record?.discountPrice) : ""}
             </div>
           </div>
 
@@ -138,9 +119,7 @@ export function Info({ record }: { record: any }) {
 
           <div className="grid grid-cols-3 gap-5">
             <div className="text-gray-main">Người tạo:</div>
-            <div className="col-span-2 text-black-main">
-              {record?.userCreated?.fullName}
-            </div>
+            <div className="col-span-2 text-black-main">{record?.userCreated?.fullName}</div>
           </div>
 
           <div className="grid grid-cols-3 items-center gap-5">
@@ -151,7 +130,7 @@ export function Info({ record }: { record: any }) {
                   record?.status === EProductSettingStatus.active
                     ? "text-[#00B63E] border border-[#00B63E] bg-[#DEFCEC]"
                     : "text-[#6D6D6D] border border-[#6D6D6D] bg-[#F0F1F1]",
-                  "px-2 py-1 rounded-2xl w-max"
+                  "px-2 py-1 rounded-2xl w-max",
                 )}
               >
                 {EProductSettingStatusLabel[record?.status]}
@@ -161,40 +140,28 @@ export function Info({ record }: { record: any }) {
 
           <div className="grid grid-cols-3 gap-5">
             <div className="text-gray-main">Thời gian cập nhật cuối:</div>
-            <div className="col-span-2 text-black-main">
-              {formatDateTime(record?.updatedAt)}
-            </div>
+            <div className="col-span-2 text-black-main">{formatDateTime(record?.updatedAt)}</div>
           </div>
 
           <div className="grid grid-cols-3 gap-5">
             <div className="text-gray-main">Số lượng tồn:</div>
-            <div className="col-span-2 text-black-main">
-              {formatNumber(+record?.quantity - +record?.quantitySold)}
-            </div>
+            <div className="col-span-2 text-black-main">{formatNumber(+record?.quantity - +record?.quantitySold)}</div>
           </div>
 
           <div className="grid grid-cols-3 gap-5">
             <div className="text-gray-main">Người cập nhật cuối:</div>
-            <div className="col-span-2 text-black-main">
-              {record?.userUpdated?.fullName}
-            </div>
+            <div className="col-span-2 text-black-main">{record?.userUpdated?.fullName}</div>
           </div>
 
           <div className="grid grid-cols-3 gap-5">
             <div className="text-gray-main">Số lượng đã bán:</div>
-            <div className="col-span-2 text-black-main">
-              {formatNumber(record?.quantitySold)}
-            </div>
+            <div className="col-span-2 text-black-main">{formatNumber(record?.quantitySold)}</div>
           </div>
         </div>
       </div>
 
       <div className="flex justify-end gap-4">
-        {hasPermission(
-          profile?.role?.permissions,
-          RoleModel.market_setting,
-          RoleAction.update
-        ) && (
+        {hasPermission(profile?.role?.permissions, RoleModel.market_setting, RoleAction.update) && (
           <CustomButton
             outline={true}
             prefixIcon={<Image src={DeleteIcon} alt="" />}
@@ -203,11 +170,7 @@ export function Info({ record }: { record: any }) {
             Xóa
           </CustomButton>
         )}
-        {hasPermission(
-          profile?.role?.permissions,
-          RoleModel.market_setting,
-          RoleAction.delete
-        ) && (
+        {hasPermission(profile?.role?.permissions, RoleModel.market_setting, RoleAction.delete) && (
           <CustomButton
             outline={true}
             onClick={() => setIsOpenUpdateStatus(true)}
@@ -216,17 +179,11 @@ export function Info({ record }: { record: any }) {
             {record?.status === "active" ? "Ngưng bán" : "Mở bán"}
           </CustomButton>
         )}
-        {hasPermission(
-          profile?.role?.permissions,
-          RoleModel.market_setting,
-          RoleAction.update
-        ) && (
+        {hasPermission(profile?.role?.permissions, RoleModel.market_setting, RoleAction.update) && (
           <CustomButton
             type="success"
             prefixIcon={<Image src={EditIcon} alt="" />}
-            onClick={() =>
-              router.push(`/markets/setting/add-setting?id=${record?.id}`)
-            }
+            onClick={() => router.push(`/markets/setting/add-setting?id=${record?.id}`)}
           >
             Cập nhật
           </CustomButton>

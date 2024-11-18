@@ -364,7 +364,13 @@ export default function AddOrder() {
                   <div className="flex items-center gap-x-4 p-2">
                     <div className=" flex h-12 w-[68px] flex-shrink-0 items-center rounded border border-gray-300 p-[2px]">
                       {item.imageCenter && (
-                        <Image src={getImage(item.imageCenter?.path)} height={40} width={68} alt="" objectFit="cover" />
+                        <Image
+                          src={item.imageCenter?.path ? getImage(item.imageCenter?.path) : item.imageCenter?.filePath}
+                          height={40}
+                          width={68}
+                          alt=""
+                          objectFit="cover"
+                        />
                       )}
                     </div>
                     <div>
