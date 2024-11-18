@@ -189,7 +189,6 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
       setValue("wardId", customerDetail?.data?.ward?.id);
       setValue("provinceId", customerDetail?.data?.province?.id);
       setValue("address", customerDetail?.data?.address);
-      setTempKeyword(customerDetail?.data?.address);
       if (customerDetail?.data?.lat && customerDetail?.data?.lng) {
         setValue("point", `${customerDetail?.data?.lat},${customerDetail?.data?.lng}`, {
           shouldValidate: true,
@@ -344,7 +343,7 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
                 className="h-11 w-full"
                 value={getValues("birthday")}
                 onChange={(value) => {
-                  setValue("birthday", value ? value.format("YYYY-MM-DD") : null, {
+                  setValue("birthday", value.format("YYYY-MM-DD"), {
                     shouldValidate: true,
                   });
                 }}

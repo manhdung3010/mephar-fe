@@ -84,8 +84,6 @@ export function CustomUpload({
     multiple: maxCount > 1,
   };
 
-  console.log("values", values);
-
   return (
     <ImgCrop rotationSlider>
       <>

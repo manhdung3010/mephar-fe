@@ -286,6 +286,7 @@ export default function AddOrder() {
         quantity: 1,
       },
       EDiscountGoodsMethod.PRICE_BY_BUY_NUMBER,
+      "ONLINE",
     );
     let isSelectedUnit = true;
     const localProduct: any = {

@@ -130,7 +130,7 @@ const Index = () => {
   const data: any = getDiscountPostData();
   const { data: discountList, isLoading } = useQuery(
     ["ORDER_DISCOUNT_LIST", orderObject[orderActive], getValues("customerId"), totalPrice],
-    () => getOrderDiscountList(data),
+    () => getOrderDiscountList(data, undefined, "OFFLINE"),
     {
       enabled: totalPrice > 0,
     },
@@ -454,12 +454,16 @@ const Index = () => {
     } else {
       let isSelectedUnit = true;
       let itemDiscountProduct;
-      const res = getProductDiscountList({
-        productUnitId: product?.id,
-        branchId: branchId,
-        quantity: 1,
-        customerId: getValues("customerId"),
-      }).then((res) => {
+      const res = getProductDiscountList(
+        {
+          productUnitId: product?.id,
+          branchId: branchId,
+          quantity: 1,
+          customerId: getValues("customerId"),
+        },
+        undefined,
+        "OFFLINE",
+      ).then((res) => {
         if (res?.data) {
           itemDiscountProduct = res?.data?.data?.items;
           const productLocal: any = {

@@ -225,6 +225,7 @@ const ProductDetail = () => {
                   const paymentProduct = [
                     {
                       branchId: configProduct?.data?.item?.branchId,
+                      storeId: configProduct?.data?.item?.storeId,
                       products: [
                         {
                           ...configProduct?.data?.item,
