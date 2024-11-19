@@ -1,6 +1,5 @@
 import type { ColumnsType } from "antd/es/table";
 import Image from "next/image";
-
 import BarcodeIcon from "@/assets/barcodeBlue.svg";
 import PlusIcon from "@/assets/plusWhiteIcon.svg";
 import PrintOrderIcon from "@/assets/printOrder.svg";

@@ -34,7 +34,7 @@ const ProductDetail = () => {
             width={83}
             height={83}
             className="object-cover h-full border-[#C7C9D9] border-[1px] rounded overflow-hidden"
-            src={getImage(images[i]?.path)}
+            src={images[i]?.path ? getImage(images[i]?.path) : images[i]?.filePath}
           />
         </a>
       );
@@ -62,7 +62,12 @@ const ProductDetail = () => {
 
   useEffect(() => {
     if (configProduct?.data?.item) {
-      const newImages = [...[configProduct?.data?.item.imageCenter], ...configProduct?.data?.item.images];
+      let newImages;
+      if (configProduct?.data?.item.images) {
+        newImages = [...[configProduct?.data?.item.imageCenter], ...configProduct?.data?.item.images];
+      } else {
+        newImages = [configProduct?.data?.item.imageCenter];
+      }
       setImages(newImages);
     }
   }, [configProduct]);
@@ -142,7 +147,10 @@ const ProductDetail = () => {
                   className="border-[#C7C9D9] border-[1px] rounded-lg overflow-hidden flex h-[450px] w-[450px]"
                   key={image?.id}
                 >
-                  <img src={getImage(image?.path)} className="w-full h-full object-cover" />
+                  <img
+                    src={image?.path ? getImage(image?.path) : image?.filePath}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               ))}
             </Slider>
