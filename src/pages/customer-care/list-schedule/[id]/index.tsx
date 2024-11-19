@@ -1,13 +1,11 @@
-import { Layout } from '@/layouts/Layout';
-import { Meta } from '@/layouts/Meta';
-import ScheduleList from '@/modules/customer-care';
-import TripDetail from '@/modules/customer-care/detail';
-import { Customer } from '@/modules/partners/customer';
+import { Layout } from "@/layouts/Layout";
+import { Meta } from "@/layouts/Meta";
+import TripDetail from "@/modules/customer-care/detail";
 
 const Index = () => {
   return (
     <Layout
-      meta={<Meta title="Pharm - Web dashboard" description="Chi tiết lịch trình" />}
+      meta={<Meta title="Pharm - Web dashboard" description="Chi tiết lịch trình" vietmap />}
       title="Chi tiết lịch trình"
     >
       <TripDetail />

@@ -155,13 +155,15 @@ export const ProductDiscountProduct = ({
     });
     setValue("items", newRowFormat, { shouldValidate: true });
   };
+
+  console.log("items", getValues("items"));
   return (
     <>
       <div className="my-5 flex flex-col gap-2">
         <div className="flex bg-[#FBECEE]">
-          <div className="flex-[3] p-4 font-semibold">Hàng/Nhóm hàng mua</div>
+          <div className="flex-[3] p-4 font-semibold">Hàng mua</div>
           <div className="flex-[2] p-4 font-semibold">Giá trị khuyến mại</div>
-          <div className="flex-[3] p-4 font-semibold">Hàng/nhóm hàng được giảm giá</div>
+          <div className="flex-[3] p-4 font-semibold">Hàng được giảm giá</div>
           <div className="flex-1 p-4"></div>
         </div>
 
@@ -198,8 +200,8 @@ export const ProductDiscountProduct = ({
                         handleChangeRow(index, isProduct ? "productId" : "groupId", value);
                       }}
                       loading={isLoadingProduct}
-                      defaultValue={row?.condition?.productId}
-                      value={isProduct ? row?.apply?.productId : row?.apply?.groupId}
+                      defaultValue={row?.condition?.productId || row?.condition?.productUnitId}
+                      value={isProduct ? row?.apply?.productId || row?.condition?.productUnitId : row?.apply?.groupId}
                       notFoundContent={
                         isLoadingProduct ? <Spin size="small" className="flex justify-center p-4 w-full" /> : null
                       }

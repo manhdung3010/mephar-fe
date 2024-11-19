@@ -1,11 +1,11 @@
-import { Layout } from '@/layouts/Layout';
-import { Meta } from '@/layouts/Meta';
-import Check from '@/modules/customer-care/check';
+import { Layout } from "@/layouts/Layout";
+import { Meta } from "@/layouts/Meta";
+import Check from "@/modules/customer-care/check";
 
 const Index = () => {
   return (
     <Layout
-      meta={<Meta title="Pharm - Web dashboard" description="Check điểm bán" />}
+      meta={<Meta title="Pharm - Web dashboard" description="Check điểm bán" vietmap={true} />}
       title="Check điểm bán"
     >
       <Check />

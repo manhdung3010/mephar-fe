@@ -208,8 +208,9 @@ export function ProductList({
         <div className="w-10 flex-shrink-0">
           <Image
             src={RemoveIcon}
-            className={"cursor-pointer"}
+            className={isDiscount ? "cursor-not-allowed" : "cursor-pointer"}
             onClick={() => {
+              if (isDiscount) return;
               const orderObjectClone = cloneDeep(orderObject);
               const productsClone = orderObjectClone[orderActive] || [];
               orderObjectClone[orderActive] = productsClone.filter((product) => {
