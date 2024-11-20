@@ -8,6 +8,7 @@ import "swiper/css";
 import { useQuery } from "@tanstack/react-query";
 import { getBanner } from "@/api/market.service";
 import { getImage } from "@/helpers";
+import MarketBannerSkeleton from "./MarketBannerSkeleton";
 
 const contentStyle: React.CSSProperties = {
   height: "160px",
@@ -28,6 +29,9 @@ function MarketBanner() {
     },
   });
 
+  if (isLoading) {
+    return <MarketBannerSkeleton />;
+  }
   return (
     <div className="fluid-container grid grid-cols-3 gap-5 py-7">
       <div className="col-span-2">

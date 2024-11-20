@@ -18,6 +18,7 @@ export interface IOrder {
   totalPrice: number;
   canReturn?: boolean;
   discountOrder?: number;
+  discountByPoint?: number;
   store?: any;
   products: {
     productId: number;

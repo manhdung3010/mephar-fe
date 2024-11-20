@@ -2,17 +2,14 @@ import { Input } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
-
 import CloseIcon from "@/assets/closeIcon.svg";
 import DiscountIcon from "@/assets/gift.svg";
-
 import PrintOrderIcon from "@/assets/printOrder.svg";
 import { CustomButton } from "@/components/CustomButton";
 import CustomTable from "@/components/CustomTable";
 import { EGenderLabel, EOrderStatusLabel } from "@/enums";
 import { formatDate, formatMoney, formatNumber, hasPermission } from "@/helpers";
 import { message } from "antd";
-
 import { deleteOrder } from "@/api/order.service";
 import PlusIconWhite from "@/assets/PlusIconWhite.svg";
 import { RoleAction, RoleModel } from "@/modules/settings/role/role.enum";
@@ -26,9 +23,7 @@ import InvoicePrint from "./InvoicePrint";
 import styles from "./invoicePrint.module.css";
 import { useRouter } from "next/router";
 import { getDiscountByIdOrder } from "@/api/discount.service";
-
 const { TextArea } = Input;
-
 interface IRecord {
   key: number;
   code: string;
@@ -350,7 +345,12 @@ export function Info({ record }: { record: IOrder }) {
             <div className="text-gray-main">Tổng tiền hàng:</div>
             <div className="text-black-main">{getDiscount(record)}</div>
           </div>
-
+          {Number(record?.discountByPoint ?? 0) > 0 && (
+            <div className=" mb-3 grid grid-cols-2">
+              <div className="text-gray-main">Giảm giá điểm:</div>
+              <div className="text-black-main">{formatMoney(record?.discountByPoint)}</div>
+            </div>
+          )}
           <div className=" mb-3 grid grid-cols-2">
             <div className="text-gray-main">Giảm giá hóa đơn:</div>
             <div className="text-black-main">{formatMoney(record?.discountOrder)}</div>

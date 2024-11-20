@@ -1,6 +1,7 @@
 import { Layout } from "@/layouts/Layout";
 import { Meta } from "@/layouts/Meta";
-import Check from "@/modules/customer-care/check";
+import dynamic from "next/dynamic";
+const Check = dynamic(() => import("@/modules/customer-care/check"));
 
 const Index = () => {
   return (

@@ -155,6 +155,9 @@ const Index = () => {
             const productKey = `${product?.productId}-${product.productUnit?.id}`;
             return {
               ...product,
+              isDiscount: product?.itemPrice !== product?.price,
+              itemPrice: product?.itemPrice,
+              price: product?.itemPrice > 0 ? product?.itemPrice : product?.price,
               productKey,
               productUnit: {
                 ...product.productUnit,
