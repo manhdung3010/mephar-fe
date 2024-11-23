@@ -23,6 +23,8 @@ import InvoicePrint from "./InvoicePrint";
 import styles from "./invoicePrint.module.css";
 import { useRouter } from "next/router";
 import { getDiscountByIdOrder } from "@/api/discount.service";
+import { EDiscountGoodsMethod } from "@/modules/settings/discount/add-discount/Info";
+import { DiscountDetailModal } from "./DiscountDetailModal";
 const { TextArea } = Input;
 interface IRecord {
   key: number;
@@ -42,6 +44,8 @@ export function Info({ record }: { record: IOrder }) {
   const [expandedRowKeys, setExpandedRowKeys] = useState<Record<string, boolean>>({});
   const [openCancelBill, setOpenCancelBill] = useState(false);
   const profile = useRecoilValue(profileState);
+  const [discountId, setDiscountId] = useState<any>("");
+  const [openDiscountDetail, setOpenDiscountDetail] = useState(false);
 
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -52,7 +56,7 @@ export function Info({ record }: { record: IOrder }) {
     { enabled: !!record?.id },
   );
 
-  console.log(record);
+  console.log("discountDetail", discountDetail);
 
   const { mutate: mutateCancelImportProduct, isLoading: isLoadingDeleteProduct } = useMutation(
     () => deleteOrder(Number(record.id)),
@@ -331,7 +335,16 @@ export function Info({ record }: { record: IOrder }) {
                 <span> Khuyến mại</span>
               </div>
               {discountDetail?.data?.map((item, index) => (
-                <div key={index}>- {item.discount.name}</div>
+                <div
+                  key={index}
+                  onClick={() => {
+                    setDiscountId(item?.discountId);
+                    setOpenDiscountDetail(true);
+                  }}
+                  className="cursor-pointer text-blue-400"
+                >
+                  - {item.discount.name}
+                </div>
               ))}
             </div>
           </div>
@@ -405,6 +418,11 @@ export function Info({ record }: { record: IOrder }) {
         onCancel={() => setOpenCancelBill(false)}
         onSubmit={onSubmit}
         isLoading={isLoadingDeleteProduct}
+      />
+      <DiscountDetailModal
+        isOpen={openDiscountDetail}
+        onCancel={() => setOpenDiscountDetail(false)}
+        discountId={discountId}
       />
     </div>
   );

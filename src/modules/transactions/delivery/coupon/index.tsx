@@ -492,7 +492,7 @@ export function DeliveryCoupon() {
                                 >
                                   <span className="mr-2">
                                     {batch.batch.name} - {batch.batch.expiryDate} - SL:{" "}
-                                    {record.fromBatches[index].quantity}
+                                    {moveDetail ? record?.quantity : record.fromBatches[index].quantity}
                                   </span>{" "}
                                   {/* <Image
                         className=" cursor-pointer"

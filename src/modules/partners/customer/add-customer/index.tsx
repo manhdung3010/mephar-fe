@@ -1,6 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { message, Select, Spin } from "antd";
+import { DatePicker, message, Select, Spin } from "antd";
 import { debounce } from "lodash";
 import Image from "next/image";
 import { useRouter } from "next/router";
@@ -28,16 +28,18 @@ import MarkIcon from "@/assets/markIcon.svg";
 import { AddGroupCustomerModal } from "../../group-customer/AddGroupCustomerModal";
 import { schema } from "./schema";
 import { useRecoilValue } from "recoil";
-import { profileState } from "@/recoil/state";
+import { branchState, profileState } from "@/recoil/state";
 import { RoleAction, RoleModel } from "@/modules/settings/role/role.enum";
 import { getAddress, getLatLng, searchPlace } from "@/api/trip.service";
 import dayjs from "dayjs";
 import { CustomAutocomplete } from "@/components/CustomAutocomplete";
+import moment from "moment";
 const { Option } = Select;
 
 export function AddCustomer({ customerId }: { customerId?: string }) {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const branchId = useRecoilValue(branchState);
   const [placeKeyword, setPlaceKeyword] = useState("");
   const [refId, setRefId] = useState("");
   const [tempKeyword, setTempKeyword] = useState("");
@@ -130,7 +132,10 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
 
   const { mutate: mutateCreateCustomer, isLoading: isLoadingCreateCustomer } = useMutation(
     () => {
-      const customerData = getValues();
+      const customerData = {
+        ...getValues(),
+        branchId,
+      };
       if (customerData.point) {
         const [lat, lng]: any = customerData.point.split(",");
         customerData.lat = lat;
@@ -206,8 +211,6 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
       );
     }
   }, [customerDetail]);
-
-  console.log("getValues", getValues());
 
   const onSearch = useCallback(
     debounce((value) => {
@@ -341,12 +344,12 @@ export function AddCustomer({ customerId }: { customerId?: string }) {
                 placeholder="Ngày sinh"
                 // suffixIcon={<Image src={DateIcon} alt="" />}
                 className="h-11 w-full"
-                value={getValues("birthday")}
                 onChange={(value) => {
                   setValue("birthday", value.format("YYYY-MM-DD"), {
                     shouldValidate: true,
                   });
                 }}
+                value={getValues("birthday") ? moment(getValues("birthday"), "YYYY-MM-DD") : null}
               />
               <InputError error={errors.birthday?.message} />
             </div>

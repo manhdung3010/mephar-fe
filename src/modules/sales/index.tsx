@@ -162,7 +162,8 @@ const Index = () => {
               productUnit: {
                 ...product.productUnit,
                 code: product.product?.code,
-                returnPrice: product.productUnit.price,
+                price: product?.itemPrice > 0 ? product?.itemPrice : product?.price,
+                returnPrice: product?.itemPrice > 0 ? product?.itemPrice : product?.price,
                 marketPrice: product?.price / product?.quantity,
                 marketOriginalPrice: product?.price / product?.quantity,
               },

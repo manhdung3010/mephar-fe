@@ -1,10 +1,4 @@
-import {
-  convertMoneyToString,
-  formatDate,
-  formatDateTime,
-  formatMoney,
-  formatNumber,
-} from "@/helpers";
+import { convertMoneyToString, formatDate, formatDateTime, formatMoney, formatNumber } from "@/helpers";
 import Image from "next/image";
 import React from "react";
 import Logo from "@/public/apple-touch-icon.png";
@@ -25,8 +19,7 @@ function InvoicePrint({ saleInvoice, totalNumber }: any) {
         <p>
           Địa chỉ:
           <span>
-            {saleInvoice?.branch?.ward?.name} -{" "}
-            {saleInvoice?.branch?.district?.name} -{" "}
+            {saleInvoice?.branch?.ward?.name} - {saleInvoice?.branch?.district?.name} -{" "}
             {saleInvoice?.branch?.province?.name}
           </span>
         </p>
@@ -43,15 +36,13 @@ function InvoicePrint({ saleInvoice, totalNumber }: any) {
       </div>
       <div className="mt-5">
         <p>
-          Khách hàng:{" "}
-          <span className="ml-1">{saleInvoice?.customer?.fullName}</span>
+          Khách hàng: <span className="ml-1">{saleInvoice?.customer?.fullName}</span>
         </p>
         <p>
           SĐT: <span className="ml-1">{saleInvoice?.customer?.phone}</span>
         </p>
         <p>
-          Địa chỉ:{" "}
-          <span className="ml-1">{saleInvoice?.customer?.address}</span>
+          Địa chỉ: <span className="ml-1">{saleInvoice?.customer?.address}</span>
         </p>
       </div>
 
@@ -62,6 +53,7 @@ function InvoicePrint({ saleInvoice, totalNumber }: any) {
               <th className="border-black border-y-[1px] py-2">Tên sản phẩm</th>
               <th className="border-black border-y-[1px] py-2">Số lượng</th>
               <th className="border-black border-y-[1px] py-2">Đơn giá</th>
+              <th className="border-black border-y-[1px] py-2">Giảm giá</th>
               <th className="border-black border-y-[1px] py-2">Thành tiền</th>
             </tr>
           </thead>
@@ -70,25 +62,23 @@ function InvoicePrint({ saleInvoice, totalNumber }: any) {
               return (
                 <>
                   <tr key={index}>
+                    <td className="border-b-[1px] border-black border-dotted py-2">{product?.product?.name}</td>
+                    <td className="border-b-[1px] border-black border-dotted py-2">{formatNumber(product.quantity)}</td>
+                    <td className="border-b-[1px] border-black border-dotted py-2">{formatMoney(product.price)}</td>
                     <td className="border-b-[1px] border-black border-dotted py-2">
-                      {product?.product?.name}
+                      {formatMoney(product.price - Number(product?.itemPrice ?? 0))}
                     </td>
                     <td className="border-b-[1px] border-black border-dotted py-2">
-                      {formatNumber(product.quantity)}
-                    </td>
-                    <td className="border-b-[1px] border-black border-dotted py-2">
-                      {formatMoney(product.price)}
-                    </td>
-                    <td className="border-b-[1px] border-black border-dotted py-2">
-                      {formatMoney(product.quantity * product.price)}
+                      {formatMoney(
+                        product.quantity * Number(product?.itemPrice > 0 ? product?.itemPrice : product?.price),
+                      )}
                     </td>
                   </tr>
                   <div className="flex items-center py-2 gap-2">
                     {product?.batches?.map((b, index) => (
                       <div className="flex items-center rounded  py-1 px-2 border-[1px] ">
                         <span className="mr-2">
-                          {b.batch?.name} - {formatDate(b?.batch?.expiryDate)} -
-                          SL: {formatNumber(b?.quantity)}
+                          {b.batch?.name} - {formatDate(b?.batch?.expiryDate)} - SL: {formatNumber(b?.quantity)}
                         </span>
                       </div>
                     ))}
@@ -138,38 +128,27 @@ function InvoicePrint({ saleInvoice, totalNumber }: any) {
         <div className=" mb-3 grid grid-cols-2">
           <div className="text-gray-main">Giảm giá hóa đơn:</div>
           <div className="text-black-main">
-            {saleInvoice?.discountType === 1
-              ? saleInvoice?.discount + "%"
-              : formatMoney(saleInvoice?.discount)}
+            {saleInvoice?.discountType === 1 ? saleInvoice?.discount + "%" : formatMoney(saleInvoice?.discount)}
           </div>
         </div>
 
         <div className=" mb-3 grid grid-cols-2">
           <div className="text-gray-main">Khách cần trả:</div>
-          <div className="text-black-main">
-            {formatMoney(saleInvoice?.totalPrice)}
-          </div>
+          <div className="text-black-main">{formatMoney(saleInvoice?.totalPrice)}</div>
         </div>
 
         <div className=" mb-3 grid grid-cols-2">
           <div className="text-gray-main">Khách đã trả:</div>
-          <div className="text-black-main">
-            {formatMoney(saleInvoice?.cashOfCustomer)}
-          </div>
+          <div className="text-black-main">{formatMoney(saleInvoice?.cashOfCustomer)}</div>
         </div>
         <div className=" mb-3 grid grid-cols-2">
           <div className="text-gray-main">Dư nợ hiện tại:</div>
-          <div className="text-black-main">
-            {formatMoney(saleInvoice?.cashOfCustomer - saleInvoice?.totalPrice)}
-          </div>
+          <div className="text-black-main">{formatMoney(saleInvoice?.cashOfCustomer - saleInvoice?.totalPrice)}</div>
         </div>
       </div>
       <div className="text-center">
         <p className="italic mt-4">
-          (Bằng chữ:{" "}
-          <span className="">
-            {convertMoneyToString(+saleInvoice?.totalPrice)} đồng)
-          </span>
+          (Bằng chữ: <span className="">{convertMoneyToString(+saleInvoice?.totalPrice)} đồng)</span>
         </p>
         <p>
           <span className="font-bold text-center">Quét mã thanh toán</span>

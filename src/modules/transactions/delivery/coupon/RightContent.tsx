@@ -69,6 +69,7 @@ export function RightContent({
   const { mutate: mutateReceiveProductImport, isLoading: isLoadingReceiveProductImport } = useMutation(
     () => {
       const products = getValues("items").map(({ isBatchExpireControl, ...product }) => product);
+      console.log("values", getValues());
       return createReceiveMoveProduct({ ...getValues() }, moveId);
     },
     {
@@ -137,20 +138,23 @@ export function RightContent({
         batches: moveId
           ? toBatches?.map((item, index) => ({
               id: item.batch.id,
-              quantity: fromBatches[index].quantity,
+              // quantity: fromBatches[index].quantity,
+              quantity: quantity,
               expiryDate: item.batch.expiryDate,
               isSelected: item.isSelected,
             }))
-          : batches?.map(({ id, quantity, expiryDate, isSelected }) => ({
-              id,
-              quantity,
-              expiryDate,
-              isSelected,
+          : batches?.map((b) => ({
+              id: b.id,
+              quantity: b?.quantity,
+              expiryDate: b.expiryDate,
+              isSelected: b.isSelected,
             })),
       }),
     );
     moveId ? setValue("items", products) : setValue("products", products);
   };
+
+  console.log("productsImport", productsImport);
 
   const onSubmit = () => {
     if (moveId) {

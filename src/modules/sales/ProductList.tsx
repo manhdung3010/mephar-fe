@@ -622,6 +622,7 @@ export function ProductList({
         ),
     },
   ];
+  console.log("products", orderObject[orderActive]);
   const handleRemoveBatch = (productKey: string, batchId: number) => {
     const orderObjectClone = cloneDeep(orderObject);
     orderObjectClone[orderActive] = orderObjectClone[orderActive]?.map((product: ISaleProductLocal) => {

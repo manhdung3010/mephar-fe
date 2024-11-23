@@ -55,6 +55,7 @@ export function CustomDatePicker({
         }
       }
       defaultValue={value ? dayjs(value) : undefined}
+      value={value ? dayjs(value) : undefined}
       showTime={showTime}
     />
   );
