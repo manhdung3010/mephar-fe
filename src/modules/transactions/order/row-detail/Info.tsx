@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import CloseIcon from "@/assets/closeIcon.svg";
 import DeliveryIcon from "@/assets/deliveryIcon.svg";
 import DocumentIcon from "@/assets/documentBlueIcon.svg";
@@ -24,7 +24,10 @@ import PaymentModal from "./PaymentModal";
 import SelectBranchModal from "./SelectBranchModal";
 import CancleModal from "./CancleModal";
 import { SeriModal } from "./SeriModal";
-
+import PrintOrderIcon from "@/assets/printOrder.svg";
+import { useReactToPrint } from "react-to-print";
+import OrderPrint from "./OrderPrint";
+import styles from "./orderPrint.module.css";
 export function Info({ record }: { record: any }) {
   const router = useRouter();
   const profile = useRecoilValue(profileState);
@@ -35,6 +38,7 @@ export function Info({ record }: { record: any }) {
   const [statusTemp, setStatusTemp] = useState<string>("");
   const [isShowSeriModal, setIsShowSeriModal] = useState(false);
   const [seriList, setSeriList] = useState<any>([]);
+  const invoiceComponentRef = useRef(null);
 
   const totalPrice = useMemo(() => {
     return record.products.reduce((total, product) => {
@@ -78,12 +82,19 @@ export function Info({ record }: { record: any }) {
     mutateCreateGroupProduct({ id, status: status, note });
   };
 
+  const handlePrintInvoice = useReactToPrint({
+    content: () => invoiceComponentRef.current,
+  });
+
   console.log("record", record);
 
   return (
     <div className="gap-12 ">
       <div className="mb-4 grid grid-cols-2 border-b border-[#E8EAEB]">
         <div>
+          <div ref={invoiceComponentRef} className={styles.invoicePrint}>
+            <OrderPrint saleInvoice={record} />
+          </div>
           <div className="mb-4 font-semibold text-black-main">Thông tin đơn hàng</div>
           <div className="mb-4 grid grid-cols-3 gap-5">
             <div className="text-gray-main ">Mã đơn hàng:</div>
@@ -235,6 +246,16 @@ export function Info({ record }: { record: any }) {
       <div className="flex justify-end gap-4">
         {hasPermission(profile?.role?.permissions, RoleModel.order, RoleAction.update) && (
           <>
+            {record?.status === EOrderMarketStatus.DONE && (
+              <CustomButton
+                outline={true}
+                type="primary"
+                prefixIcon={<Image src={PrintOrderIcon} alt="" />}
+                onClick={handlePrintInvoice}
+              >
+                In phiếu
+              </CustomButton>
+            )}
             {record?.status === EOrderMarketStatus.PENDING && (
               <CustomButton
                 type="danger"

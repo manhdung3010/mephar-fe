@@ -1,0 +1,19 @@
+.invoicePrint {
+  position: fixed;
+  top: 0;
+  right: -300px;
+  width: 100%;
+  z-index: -10;
+  visibility: hidden;
+}
+
+@media print {
+  .invoicePrint {
+    visibility: visible;
+    position: relative;
+    right: 0;
+    padding: 50px;
+    z-index: 1000;
+    font-size: 16px;
+  }
+}
