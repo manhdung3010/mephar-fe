@@ -155,15 +155,18 @@ const Index = () => {
             const productKey = `${product?.productId}-${product.productUnit?.id}`;
             return {
               ...product,
-              isDiscount: product?.itemPrice !== product?.price,
+              // isDiscount: product?.itemPrice !== product?.price,
               itemPrice: product?.itemPrice,
-              price: product?.itemPrice > 0 ? product?.itemPrice : product?.price,
+              price:
+                product?.itemPrice > 0 ? product?.itemPrice / product?.quantity : product?.price / product?.quantity,
               productKey,
               productUnit: {
                 ...product.productUnit,
                 code: product.product?.code,
-                price: product?.itemPrice > 0 ? product?.itemPrice : product?.price,
-                returnPrice: product?.itemPrice > 0 ? product?.itemPrice : product?.price,
+                price:
+                  product?.itemPrice > 0 ? product?.itemPrice / product?.quantity : product?.price / product?.quantity,
+                returnPrice:
+                  product?.itemPrice > 0 ? product?.itemPrice / product?.quantity : product?.price / product?.quantity,
                 marketPrice: product?.price / product?.quantity,
                 marketOriginalPrice: product?.price / product?.quantity,
               },
@@ -256,7 +259,7 @@ const Index = () => {
       const discountType = discountObject[orderActive]?.orderDiscount[0]?.items[0]?.apply?.discountType;
       const discountValue = discountObject[orderActive]?.orderDiscount[0]?.items[0]?.apply?.discountValue;
       // reset product discount
-      if (haveProductDiscount) {
+      if (haveProductDiscount && !id) {
         orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
         setOrderObject(orderObjectClone);
       }
@@ -420,7 +423,11 @@ const Index = () => {
     } else {
       // reset product discount
       const orderObjectClone = cloneDeep(orderObject);
-      orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
+      if (!id) {
+        // do sth
+      } else {
+        orderObjectClone[orderActive] = orderObjectClone[orderActive]?.filter((product) => !product.isDiscount);
+      }
       setOrderObject(orderObjectClone);
     }
   }, [discountObject[orderActive]?.productDiscount]);

@@ -4,7 +4,6 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-
 import CashbookIcon from "@/assets/cashbookIcon.svg";
 import HomeIcon from "@/assets/homeIcon1.svg";
 import MarketIcon from "@/assets/marketIcon.svg";
@@ -21,10 +20,8 @@ import { RoleAction, RoleModel } from "@/modules/settings/role/role.enum";
 import Logo from "@/public/logo.png";
 import BarIcon from "@/assets/barIcon.svg";
 import { agencyState, collapsedState, profileState } from "@/recoil/state";
-
 import { SideBarStyled } from "./styled";
 import Link from "next/link";
-
 type MenuItem = Required<MenuProps>["items"][number];
 
 function getItem(

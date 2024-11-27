@@ -265,10 +265,12 @@ export function RightContentReturn({
               </div>
               <div className="text-lg leading-normal text-[#19191C]">{formatMoney(totalPrice)}</div>
             </div>
-            <div className="text-[#828487] text-base flex justify-end items-center my-3 gap-1">
-              <span className="text-red-500 px-2  bg-[#fde6f8] rounded">KM</span>{" "}
-              {formatMoney(orderDetail?.order?.discountOrder ?? 0)}
-            </div>
+            {orderDetail?.order?.discountOrder && (
+              <div className="text-[#828487] text-base flex justify-end items-center my-3 gap-1">
+                <span className="text-red-500 px-2  bg-[#fde6f8] rounded">KM</span>{" "}
+                {formatMoney(orderDetail?.order?.discountOrder)}
+              </div>
+            )}
             <div className="mb-3 flex justify-between">
               <div className="text-lg leading-normal text-[#828487]">
                 Tổng tiền hàng trả (<span className="text-lg">{orderObject[orderActive]?.length ?? 0} sp</span>)

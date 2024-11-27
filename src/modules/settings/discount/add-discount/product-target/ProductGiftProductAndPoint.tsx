@@ -17,7 +17,7 @@ import { useQuery } from "@tanstack/react-query";
 import { debounce, set } from "lodash";
 const { Option } = Select;
 
-export const ProductGiftProduct = ({
+export const ProductGiftProductAndPoint = ({
   setValue,
   getValues,
   errors,
@@ -152,6 +152,7 @@ export const ProductGiftProduct = ({
         <div className="flex bg-[#FBECEE]">
           <div className="flex-[3] p-4 font-semibold">Hàng/Nhóm hàng mua</div>
           <div className="flex-[3] p-4 font-semibold">Hàng/nhóm hàng được giảm giá</div>
+          <div className="flex-[1] p-4 font-semibold">Điểm tặng</div>
           <div className="flex-1 p-4"></div>
         </div>
         {getValues("items")?.map((row, index) => (
@@ -249,6 +250,12 @@ export const ProductGiftProduct = ({
                   <InputError className="" error={errors?.items[index]?.apply?.productUnitId?.message} />
                 )}
               </div>
+            </div>
+            <div
+              onClick={() => handleDeleteRow(index)}
+              className="flex flex-1 items-center justify-center px-4 cursor-pointer"
+            >
+              <CustomInput onChange={() => {}} />
             </div>
             <div
               onClick={() => handleDeleteRow(index)}

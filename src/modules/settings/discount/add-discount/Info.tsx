@@ -17,6 +17,7 @@ import { ProductDiscountProduct } from "./product-target/ProductDiscountProduct"
 import { ProductGiftProduct } from "./product-target/ProductGiftProduct";
 import { ProductGiftPoint } from "./product-target/ProductGiftPoint";
 import { ProductQuantity } from "./product-target/ProductQuantity";
+import { ProductGiftProductAndPoint } from "./product-target/ProductGiftProductAndPoint";
 
 export enum EDiscountType {
   ORDER = "ORDER",
@@ -47,6 +48,7 @@ export enum EDiscountGoodsMethod {
   GIFT = "GIFT",
   LOYALTY = "LOYALTY",
   PRICE_BY_BUY_NUMBER = "PRICE_BY_BUY_NUMBER",
+  GIFT_AND_POINT = "GIFT_AND_POINT",
 }
 
 export enum EDiscountGoodsMethodLabel {
@@ -54,6 +56,7 @@ export enum EDiscountGoodsMethodLabel {
   GIFT = "Mua hàng tặng hàng",
   LOYALTY = "Mua hàng tặng điểm",
   PRICE_BY_BUY_NUMBER = "Giảm giá theo số lượng mua",
+  GIFT_AND_POINT = "Mua hàng tặng hàng tặng điểm",
 }
 
 export enum EDiscountUnit {
@@ -275,6 +278,9 @@ const Info = ({ setValue, getValues, errors }: any) => {
       )}
       {getValues("target") === EDiscountType.PRODUCT && getValues("type") === EDiscountGoodsMethod.GIFT && (
         <ProductGiftProduct setValue={setValue} getValues={getValues} errors={errors} />
+      )}
+      {getValues("target") === EDiscountType.PRODUCT && getValues("type") === EDiscountGoodsMethod.GIFT_AND_POINT && (
+        <ProductGiftProductAndPoint setValue={setValue} getValues={getValues} errors={errors} />
       )}
       {getValues("target") === EDiscountType.PRODUCT && getValues("type") === EDiscountGoodsMethod.LOYALTY && (
         <ProductGiftPoint setValue={setValue} getValues={getValues} errors={errors} />

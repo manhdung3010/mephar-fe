@@ -161,7 +161,7 @@ export const ProductDiscountProduct = ({
     <>
       <div className="my-5 flex flex-col gap-2">
         <div className="flex bg-[#FBECEE]">
-          <div className="flex-[3] p-4 font-semibold">Hàng mua</div>
+          <div className="flex-[4] p-4 font-semibold">Hàng mua</div>
           <div className="flex-[2] p-4 font-semibold">Giá trị khuyến mại</div>
           <div className="flex-[3] p-4 font-semibold">Hàng được giảm giá</div>
           <div className="flex-1 p-4"></div>
@@ -169,9 +169,9 @@ export const ProductDiscountProduct = ({
 
         {getValues("items")?.map((row, index) => (
           <div key={index} className="flex items-center gap-2 border-b border-gray-100 py-3">
-            <div className="flex flex-[3] flex-col px-4">
+            <div className="flex flex-[4] flex-col px-4 max-w-full">
               <div className="w-full flex items-center gap-x-2">
-                <div className="w-52">
+                <div className="w-20 flex-shrink-0">
                   <CustomInput
                     className="mt-0 h-10"
                     value={row?.condition?.product?.from}
@@ -182,7 +182,7 @@ export const ProductDiscountProduct = ({
                     <InputError className="" error={errors?.items[index]?.condition?.product?.from?.message} />
                   )}
                 </div>
-                <div className="w-full">
+                <div className="flex-1">
                   <div className="flex gap-2">
                     <Select
                       mode="multiple"

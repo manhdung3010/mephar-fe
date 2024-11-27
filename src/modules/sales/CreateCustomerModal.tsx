@@ -232,7 +232,7 @@ export function CreateCustomerModal({
                 // prefixIcon={<Image src={SearchIcon} alt="" />}
                 wrapClassName="w-full !rounded bg-white"
                 onSelect={(value) => {
-                  const addressName = places?.data?.find((item) => item.ref_id === value)?.name;
+                  const addressName = places?.data?.find((item) => item.ref_id === value)?.display;
                   setTempKeyword(addressName);
                   setValue("address", addressName, { shouldValidate: true });
                   setRefId(value);
@@ -433,9 +433,13 @@ export function CreateCustomerModal({
           setGroupCustomer(false);
         }}
         onSave={({ groupCustomerId, groupCustomerName }) => {
-          setValue("groupCustomerId", groupCustomerId, {
-            shouldValidate: true,
-          });
+          const oldGroupCustomerId: any = getValues("groupCustomerId");
+          // check if oldGroupCustomerId has value
+          if (oldGroupCustomerId?.length > 0) {
+            setValue("groupCustomerId", [...oldGroupCustomerId, groupCustomerId], { shouldValidate: true });
+          } else {
+            setValue("groupCustomerId", [groupCustomerId], { shouldValidate: true });
+          }
           setGroupCustomerKeyword(groupCustomerName);
         }}
       />
