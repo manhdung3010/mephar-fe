@@ -255,27 +255,6 @@ const Info = ({ record, onChangeUnit }: { record: IProduct; onChangeUnit: any })
             {record?.status === EProductStatus.inactive ? "Mở bán" : "Ngưng kinh doanh"}
           </CustomButton>
         )}
-        <CustomButton type="primary" outline={true} prefixIcon={<Image src={MarketBlueIcon} alt="" />}>
-          Đẩy lên chợ
-        </CustomButton>
-        <CustomButton
-          type="primary"
-          outline={true}
-          prefixIcon={<Image src={BarcodeBlueIcon} alt="" />}
-          onClick={handlePrintBarcode}
-        >
-          In mã vạch
-        </CustomButton>
-        {hasPermission(profile?.role?.permissions, RoleModel.list_product, RoleAction.create) && (
-          <CustomButton
-            type="primary"
-            outline={true}
-            prefixIcon={<Image src={CopyBlueIcon} alt="" />}
-            onClick={redirectCopy}
-          >
-            Sao chép
-          </CustomButton>
-        )}
 
         {hasPermission(profile?.role?.permissions, RoleModel.list_product, RoleAction.delete) && (
           <CustomButton

@@ -9,12 +9,7 @@ import { CustomButton } from "@/components/CustomButton";
 import { CustomInput } from "@/components/CustomInput";
 import { CustomSelect } from "@/components/CustomSelect";
 import CustomTable from "@/components/CustomTable";
-import {
-  formatDateTime,
-  formatMoney,
-  formatNumber,
-  hasPermission,
-} from "@/helpers";
+import { formatDateTime, formatMoney, formatNumber, hasPermission } from "@/helpers";
 import { useRef, useState } from "react";
 import DeleteModal from "./DeleteModal";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -58,9 +53,7 @@ export function Info({ record }: { record: any }) {
   const [selectIdProduct, setIdProduct] = useState();
   const [productDetail, setProductDetail] = useState();
 
-  const [expandedRowKeys, setExpandedRowKeys] = useState<
-    Record<string, boolean>
-  >({});
+  const [expandedRowKeys, setExpandedRowKeys] = useState<Record<string, boolean>>({});
 
   const handleChangeUnitValue = (value, record) => {
     setValueChange(value);
@@ -80,31 +73,23 @@ export function Info({ record }: { record: any }) {
         },
       ]?.sort(function (a, b) {
         return b.id - a.id;
-      })
+      }),
     );
   };
 
-  const { data } = useQuery(
-    ["DETAIL_PRODUCT", selectIdProduct],
-    () => getProductDetail(Number(selectIdProduct)),
-    {
-      enabled: !!selectIdProduct,
-      onSuccess: (data) => {
-        setProductDetail(data?.data);
-      },
-    }
-  );
+  const { data } = useQuery(["DETAIL_PRODUCT", selectIdProduct], () => getProductDetail(Number(selectIdProduct)), {
+    enabled: !!selectIdProduct,
+    onSuccess: (data) => {
+      setProductDetail(data?.data);
+    },
+  });
 
   const columns: ColumnsType<IRecord> = [
     {
       title: "Mã hàng",
       dataIndex: "productUnit",
       key: "productUnit",
-      render: (productUnit) => (
-        <span className="cursor-pointer text-[#0070F4]">
-          {productUnit?.code}
-        </span>
-      ),
+      render: (productUnit) => <span className="cursor-pointer text-[#0070F4]">{productUnit?.code}</span>,
     },
     {
       title: "Tên hàng",
@@ -127,7 +112,7 @@ export function Info({ record }: { record: any }) {
           {formatNumber(
             record?.difference >= 0
               ? record?.realQuantity - record?.difference
-              : Math.abs(record?.difference) + record?.realQuantity
+              : Math.abs(record?.difference) + record?.realQuantity,
           )}
         </span>
       ),
@@ -148,24 +133,22 @@ export function Info({ record }: { record: any }) {
       title: "Giá trị lệch",
       dataIndex: "diffAmount",
       key: "diffAmount",
-      render: (_, record) =>
-        formatNumber(record?.difference * record?.productUnit?.price),
+      render: (_, record) => formatNumber(record?.difference * record?.productUnit?.price),
     },
   ];
 
-  const { mutate: mutateDeleteInventory, isLoading: isLoadingDeleteInventory } =
-    useMutation(
-      () => deleteInventoryChecking(Number(record.id), Number(branchId)),
-      {
-        onSuccess: async () => {
-          await queryClient.invalidateQueries(["INVENTORY_CHECKING"]);
-          setOpenDelete(false);
-        },
-        onError: (err: any) => {
-          message.error(err?.message);
-        },
-      }
-    );
+  const { mutate: mutateDeleteInventory, isLoading: isLoadingDeleteInventory } = useMutation(
+    () => deleteInventoryChecking(Number(record.id), Number(branchId)),
+    {
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(["INVENTORY_CHECKING"]);
+        setOpenDelete(false);
+      },
+      onError: (err: any) => {
+        message.error(err?.message);
+      },
+    },
+  );
 
   const handlePrint = useReactToPrint({
     content: () => invoiceComponentRef.current,
@@ -173,10 +156,7 @@ export function Info({ record }: { record: any }) {
 
   return (
     <div className="gap-12 ">
-      <div
-        ref={invoiceComponentRef}
-        className={`${styles.invoicePrint} invoice-print`}
-      >
+      <div ref={invoiceComponentRef} className={`${styles.invoicePrint} invoice-print`}>
         <InvoicePrint data={record} columns={columns} />
       </div>
       <div className="mb-4 grid flex-1 grid-cols-2 gap-4">
@@ -195,9 +175,7 @@ export function Info({ record }: { record: any }) {
 
         <div className="grid grid-cols-2 gap-5">
           <div className="text-gray-main">Thời gian:</div>
-          <div className="text-black-main">
-            {formatDateTime(record?.createdAt)}
-          </div>
+          <div className="text-black-main">{formatDateTime(record?.createdAt)}</div>
         </div>
 
         <div className="grid grid-cols-2 gap-5">
@@ -239,9 +217,7 @@ export function Info({ record }: { record: any }) {
 
             setExpandedRowKeys((prevKeys) => {
               const { [record.key]: value, ...remainingKeys } = prevKeys;
-              return value
-                ? remainingKeys
-                : { ...prevKeys, [record.key]: true };
+              return value ? remainingKeys : { ...prevKeys, [record.key]: true };
             });
           },
         })}
@@ -254,9 +230,7 @@ export function Info({ record }: { record: any }) {
                 {productDetail && (
                   <ProductDetail
                     record={productDetail}
-                    onChangeUnit={(value) =>
-                      handleChangeUnitValue(value, productDetail)
-                    }
+                    onChangeUnit={(value) => handleChangeUnitValue(value, productDetail)}
                     branchId={branchId}
                   />
                 )}
@@ -270,82 +244,38 @@ export function Info({ record }: { record: any }) {
 
       <div className="ml-auto mb-5 w-[380px]">
         <div className=" mb-3 grid grid-cols-2">
-          <div className="text-gray-main">
-            Tổng thực tế {"(" + record?.totalRealQuantity + ")"}:
-          </div>
+          <div className="text-gray-main">Tổng thực tế {"(" + record?.totalRealQuantity + ")"}:</div>
           <div className="text-black-main">{formatMoney(record?.totalVal)}</div>
         </div>
 
         <div className=" mb-3 grid grid-cols-2">
-          <div className="text-gray-main">
-            Tổng lệch tăng {"(" + formatNumber(record?.totalIncrease) + ")"}:
-          </div>
-          <div className="text-black-main">
-            {formatMoney(record?.increaseVal)}
-          </div>
+          <div className="text-gray-main">Tổng lệch tăng {"(" + formatNumber(record?.totalIncrease) + ")"}:</div>
+          <div className="text-black-main">{formatMoney(record?.increaseVal)}</div>
+        </div>
+
+        <div className=" mb-3 grid grid-cols-2">
+          <div className="text-gray-main">Tổng lệch giảm {"(" + formatNumber(record?.totalDecrease) + ")"}:</div>
+          <div className="text-black-main">{formatMoney(record?.decreaseVal)}</div>
         </div>
 
         <div className=" mb-3 grid grid-cols-2">
           <div className="text-gray-main">
-            Tổng lệch giảm {"(" + formatNumber(record?.totalDecrease) + ")"}:
+            Tổng chênh lệch {"(" + formatNumber(record?.totalIncrease + record?.totalDecrease) + ")"}:
           </div>
-          <div className="text-black-main">
-            {formatMoney(record?.decreaseVal)}
-          </div>
-        </div>
-
-        <div className=" mb-3 grid grid-cols-2">
-          <div className="text-gray-main">
-            Tổng chênh lệch{" "}
-            {"(" +
-              formatNumber(record?.totalIncrease + record?.totalDecrease) +
-              ")"}
-            :
-          </div>
-          <div className="text-black-main">
-            {formatMoney(record?.increaseVal + record?.decreaseVal)}
-          </div>
+          <div className="text-black-main">{formatMoney(record?.increaseVal + record?.decreaseVal)}</div>
         </div>
       </div>
 
       <div className="flex justify-end gap-4">
-        <CustomButton
-          outline={true}
-          type="primary"
-          prefixIcon={<Image src={PrintOrderIcon} alt="" />}
-          onClick={handlePrint}
-        >
-          In phiếu
-        </CustomButton>
-        {hasPermission(
-          profile?.role?.permissions,
-          RoleModel.check_inventory,
-          RoleAction.create
-        ) && (
-            <CustomButton
-              type="primary"
-              outline={true}
-              prefixIcon={<Image src={CopyBlueIcon} alt="" />}
-              onClick={() =>
-                router.push(`/products/check-inventory/coupon?id=${record.id}`)
-              }
-            >
-              Sao chép
-            </CustomButton>
-          )}
-        {hasPermission(
-          profile?.role?.permissions,
-          RoleModel.check_inventory,
-          RoleAction.delete
-        ) && (
-            <CustomButton
-              outline={true}
-              prefixIcon={<Image src={CloseIcon} alt="" />}
-              onClick={() => setOpenDelete(true)}
-            >
-              Hủy bỏ
-            </CustomButton>
-          )}
+        {hasPermission(profile?.role?.permissions, RoleModel.check_inventory, RoleAction.delete) && (
+          <CustomButton
+            outline={true}
+            prefixIcon={<Image src={CloseIcon} alt="" />}
+            onClick={() => setOpenDelete(true)}
+          >
+            Hủy bỏ
+          </CustomButton>
+        )}
       </div>
 
       <DeleteModal

@@ -26,10 +26,7 @@ const RowDetail = ({ record, branchId }: { record: ICustomer; branchId: number }
     "Nợ cần thu từ khách",
     "Lịch sử  mua hàng",
     // 'Lịch sử trả hàng',
-    "Lịch sử tích điểm",
-    "Ghi chú",
     "Lịch sử thanh toán",
-    hasPermission(profile?.role?.permissions, RoleModel.map, RoleAction.read) && "Lịch sử ghé thăm",
   ];
 
   return (

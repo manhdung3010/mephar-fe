@@ -1,28 +1,25 @@
-import type { ColumnsType } from 'antd/es/table';
-import cx from 'classnames';
-import Image from 'next/image';
-import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import type { ColumnsType } from "antd/es/table";
+import cx from "classnames";
+import Image from "next/image";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 
-import ExportIcon from '@/assets/exportIcon.svg';
-import PlusIcon from '@/assets/plusWhiteIcon.svg';
-import { CustomButton } from '@/components/CustomButton';
-import CustomTable from '@/components/CustomTable';
-import {
-  EDeliveryTransactionStatus,
-  EDeliveryTransactionStatusLabel,
-} from '@/enums';
+import ExportIcon from "@/assets/exportIcon.svg";
+import PlusIcon from "@/assets/plusWhiteIcon.svg";
+import { CustomButton } from "@/components/CustomButton";
+import CustomTable from "@/components/CustomTable";
+import { EDeliveryTransactionStatus, EDeliveryTransactionStatusLabel } from "@/enums";
 
-import ReturnDetail from './row-detail';
-import Search from './Search';
-import CustomPagination from '@/components/CustomPagination';
-import { useRecoilValue } from 'recoil';
-import { branchState, profileState } from '@/recoil/state';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getMove } from '@/api/move';
-import { formatDateTime, hasPermission } from '@/helpers';
-import { debounce, set } from 'lodash';
-import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
+import ReturnDetail from "./row-detail";
+import Search from "./Search";
+import CustomPagination from "@/components/CustomPagination";
+import { useRecoilValue } from "recoil";
+import { branchState, profileState } from "@/recoil/state";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getMove } from "@/api/move";
+import { formatDateTime, hasPermission } from "@/helpers";
+import { debounce, set } from "lodash";
+import { RoleAction, RoleModel } from "@/modules/settings/role/role.enum";
 
 interface IRecord {
   key: number;
@@ -41,9 +38,7 @@ interface IRecord {
 }
 
 export function DeliveryTransaction() {
-  const [expandedRowKeys, setExpandedRowKeys] = useState<
-    Record<string, boolean>
-  >({});
+  const [expandedRowKeys, setExpandedRowKeys] = useState<Record<string, boolean>>({});
 
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -64,7 +59,8 @@ export function DeliveryTransaction() {
     receivedBy: null,
   });
   const { data: moveList, isLoading } = useQuery(
-    ['MOVE_LIST',
+    [
+      "MOVE_LIST",
       formFilter.page,
       formFilter.limit,
       formFilter.keyword,
@@ -75,21 +71,21 @@ export function DeliveryTransaction() {
       formFilter.movedAt,
       formFilter.receivedAt,
       formFilter.receivedBy,
-      branchId
+      branchId,
     ],
-    () => getMove({ ...formFilter, branchId })
+    () => getMove({ ...formFilter, branchId }),
   );
 
   const columns: ColumnsType<IRecord> = [
     {
-      title: 'STT',
-      dataIndex: 'key',
-      key: 'key',
+      title: "STT",
+      dataIndex: "key",
+      key: "key",
     },
     {
-      title: 'Mã chuyển hàng',
-      dataIndex: 'code',
-      key: 'code',
+      title: "Mã chuyển hàng",
+      dataIndex: "code",
+      key: "code",
       render: (value, _, index) => (
         <span
           className="cursor-pointer text-[#0070F4]"
@@ -109,45 +105,43 @@ export function DeliveryTransaction() {
       ),
     },
     {
-      title: 'Từ chi nhánh',
-      dataIndex: 'fromBranch',
-      key: 'fromBranch',
+      title: "Từ chi nhánh",
+      dataIndex: "fromBranch",
+      key: "fromBranch",
       render: (_, { fromBranch }) => <div>{fromBranch?.name}</div>,
     },
     {
-      title: 'Tới chi nhánh',
-      dataIndex: 'toBranch',
-      key: 'toBranch',
+      title: "Tới chi nhánh",
+      dataIndex: "toBranch",
+      key: "toBranch",
       render: (_, { toBranch }) => <div>{toBranch?.name}</div>,
     },
     {
-      title: 'Ngày chuyển',
-      dataIndex: 'movedAt',
-      key: 'movedAt',
-      render: (moveAt) => formatDateTime(moveAt)
+      title: "Ngày chuyển",
+      dataIndex: "movedAt",
+      key: "movedAt",
+      render: (moveAt) => formatDateTime(moveAt),
     },
     {
-      title: 'Ngày nhận',
-      dataIndex: 'receivedAt',
-      key: 'receivedAt',
-      render: (receivedAt) => receivedAt ? formatDateTime(receivedAt) : ''
+      title: "Ngày nhận",
+      dataIndex: "receivedAt",
+      key: "receivedAt",
+      render: (receivedAt) => (receivedAt ? formatDateTime(receivedAt) : ""),
     },
 
     {
-      title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
       render: (_, { status }) => (
         <div
           className={cx(
             {
-              'text-[#00B63E] border border-[#00B63E] bg-[#DEFCEC]':
-                status === EDeliveryTransactionStatus.RECEIVED,
-              'text-[#0070F4] border border-[#0070F4] bg-[#E4F0FE]':
-                status === EDeliveryTransactionStatus.MOVING,
+              "text-[#00B63E] border border-[#00B63E] bg-[#DEFCEC]": status === EDeliveryTransactionStatus.RECEIVED,
+              "text-[#0070F4] border border-[#0070F4] bg-[#E4F0FE]": status === EDeliveryTransactionStatus.MOVING,
             },
 
-            'px-2 py-1 rounded-2xl w-max'
+            "px-2 py-1 rounded-2xl w-max",
           )}
         >
           {EDeliveryTransactionStatusLabel[status]}
@@ -158,22 +152,15 @@ export function DeliveryTransaction() {
   return (
     <div>
       <div className="my-3 flex justify-end gap-4">
-        {
-          hasPermission(profile?.role?.permissions, RoleModel.delivery, RoleAction.create) && (
-            <CustomButton
-              onClick={() => router.push('/transactions/delivery/coupon')}
-              type="success"
-              prefixIcon={<Image src={PlusIcon} />}
-            >
-              Chuyển hàng
-            </CustomButton>
-          )
-        }
-
-
-        <CustomButton prefixIcon={<Image src={ExportIcon} />}>
-          Xuất file
-        </CustomButton>
+        {hasPermission(profile?.role?.permissions, RoleModel.delivery, RoleAction.create) && (
+          <CustomButton
+            onClick={() => router.push("/transactions/delivery/coupon")}
+            type="success"
+            prefixIcon={<Image src={PlusIcon} />}
+          >
+            Chuyển hàng
+          </CustomButton>
+        )}
       </div>
 
       <Search
@@ -194,7 +181,7 @@ export function DeliveryTransaction() {
 
       <CustomTable
         rowSelection={{
-          type: 'checkbox',
+          type: "checkbox",
         }}
         dataSource={moveList?.data.items?.map((item, index) => ({
           ...item,
@@ -204,7 +191,7 @@ export function DeliveryTransaction() {
         loading={isLoading}
         onRow={(record, rowIndex) => {
           return {
-            onClick: event => {
+            onClick: (event) => {
               // Toggle expandedRowKeys state here
               if (expandedRowKeys[record.key]) {
                 const { [record.key]: value, ...remainingKeys } = expandedRowKeys;
@@ -212,14 +199,12 @@ export function DeliveryTransaction() {
               } else {
                 setExpandedRowKeys({ [record.key]: true });
               }
-            }
+            },
           };
         }}
         expandable={{
           // eslint-disable-next-line @typescript-eslint/no-shadow
-          expandedRowRender: (record: IRecord) => (
-            <ReturnDetail branchId={branchId} record={record} />
-          ),
+          expandedRowRender: (record: IRecord) => <ReturnDetail branchId={branchId} record={record} />,
           expandIcon: () => <></>,
           expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key),
         }}

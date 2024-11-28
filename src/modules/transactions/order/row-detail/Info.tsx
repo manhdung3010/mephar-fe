@@ -246,16 +246,6 @@ export function Info({ record }: { record: any }) {
       <div className="flex justify-end gap-4">
         {hasPermission(profile?.role?.permissions, RoleModel.order, RoleAction.update) && (
           <>
-            {record?.status === EOrderMarketStatus.DONE && (
-              <CustomButton
-                outline={true}
-                type="primary"
-                prefixIcon={<Image src={PrintOrderIcon} alt="" />}
-                onClick={handlePrintInvoice}
-              >
-                In phiếu
-              </CustomButton>
-            )}
             {record?.status === EOrderMarketStatus.PENDING && (
               <CustomButton
                 type="danger"

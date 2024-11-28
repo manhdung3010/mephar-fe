@@ -43,12 +43,10 @@ const ProductList = () => {
       formFilter.type,
       formFilter.inventoryType,
     ],
-    () => getProduct({ ...formFilter, branchId })
+    () => getProduct({ ...formFilter, branchId }),
   );
 
-  const [expandedRowKeys, setExpandedRowKeys] = useState<
-    Record<string, boolean>
-  >({});
+  const [expandedRowKeys, setExpandedRowKeys] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     setSelectedList(
@@ -56,16 +54,12 @@ const ProductList = () => {
         ?.map((item) => ({
           ...item,
           unitId: item?.productUnit?.find((unit) => unit.isBaseUnit)?.id,
-          unitQuantity:
-            item?.inventory /
-            item?.productUnit?.find((unit) => unit.isBaseUnit)?.exchangeValue,
-          tempPrimePrice:
-            item?.primePrice *
-            item?.productUnit?.find((unit) => unit.isBaseUnit)?.exchangeValue,
+          unitQuantity: item?.inventory / item?.productUnit?.find((unit) => unit.isBaseUnit)?.exchangeValue,
+          tempPrimePrice: item?.primePrice * item?.productUnit?.find((unit) => unit.isBaseUnit)?.exchangeValue,
         }))
         ?.sort(function (a, b) {
           return b.id - a.id;
-        })
+        }),
     );
   }, [formFilter, products?.data?.items]);
 
@@ -129,8 +123,7 @@ const ProductList = () => {
       title: "Loại hàng",
       dataIndex: "type",
       key: "type",
-      render: (value) =>
-        EProductTypeLabel[getEnumKeyByValue(EProductType, value)],
+      render: (value) => EProductTypeLabel[getEnumKeyByValue(EProductType, value)],
     },
     {
       title: "Giá bán",
@@ -166,11 +159,9 @@ const ProductList = () => {
         },
       ]?.sort(function (a, b) {
         return b.id - a.id;
-      })
+      }),
     );
   };
-
-
 
   return (
     <div>
@@ -187,9 +178,6 @@ const ProductList = () => {
         }, 300)}
       />
       <CustomTable
-        rowSelection={{
-          type: "checkbox",
-        }}
         dataSource={selectedList?.map((item, index) => ({
           ...item,
           key: index,
@@ -202,16 +190,13 @@ const ProductList = () => {
               // Check if the click came from the action column
               if (
                 (event.target as Element).closest(".ant-table-cell.unit-col") ||
-                (event.target as Element).closest(
-                  ".rc-virtual-list-holder-inner"
-                )
+                (event.target as Element).closest(".rc-virtual-list-holder-inner")
               ) {
                 return;
               }
               // Toggle expandedRowKeys state here
               if (expandedRowKeys[record.key]) {
-                const { [record.key]: value, ...remainingKeys } =
-                  expandedRowKeys;
+                const { [record.key]: value, ...remainingKeys } = expandedRowKeys;
                 setExpandedRowKeys(remainingKeys);
               } else {
                 setExpandedRowKeys({ [record.key]: true });

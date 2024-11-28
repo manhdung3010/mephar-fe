@@ -157,10 +157,6 @@ export function ImportProduct() {
             Nhập hàng
           </CustomButton>
         )}
-
-        <CustomButton prefixIcon={<Image src={ExportIcon} />} onClick={exportToExcel}>
-          Xuất file
-        </CustomButton>
       </div>
 
       <Search setFormFilter={setFormFilter} formFilter={formFilter} />

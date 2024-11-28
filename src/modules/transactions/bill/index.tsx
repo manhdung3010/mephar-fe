@@ -277,10 +277,6 @@ export function BillTransaction() {
             Thêm hóa đơn
           </CustomButton>
         )}
-
-        <Dropdown menu={{ items }} trigger={["click"]}>
-          <CustomButton prefixIcon={<Image src={ExportIcon} />}>File</CustomButton>
-        </Dropdown>
       </div>
 
       <Search setFormFilter={setFormFilter} formFilter={formFilter} />

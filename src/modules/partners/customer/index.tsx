@@ -275,14 +275,6 @@ export function Customer() {
         </div>
       ),
     },
-    {
-      key: "1",
-      label: (
-        <div className="flex items-center gap-2 cursor-pointer" onClick={downloadExamExcelKiot}>
-          <Image src={ExportIcon} /> Xuất file mẫu KiotViet
-        </div>
-      ),
-    },
   ];
 
   return (

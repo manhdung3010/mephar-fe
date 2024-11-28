@@ -147,30 +147,7 @@ const ScopeApplication = ({ setValue, getValues }: any) => {
               value: 1,
               label: "Toàn bộ các kênh bán",
             },
-            {
-              value: 2,
-              label: "Kênh bán",
-            },
           ]}
-        />
-        <Select
-          mode="multiple"
-          disabled={channel === 1}
-          onChange={(value) => handleChange("channel", value)}
-          defaultValue={getValues("scope")?.channel?.types || "OFFLINE"}
-          className=" border-underline grow"
-          placeholder="Chọn kênh bán hàng"
-          options={[
-            {
-              value: "OFFLINE",
-              label: "Bán trực tiếp",
-            },
-            {
-              value: "ONLINE",
-              label: "Chợ",
-            },
-          ]}
-          size="large"
         />
       </div>
     </div>

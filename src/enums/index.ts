@@ -240,12 +240,9 @@ export enum ESaleReportConcerns {
   SALE_RETURN = "SALE_RETURN",
   EMPLOYEE = "EMPLOYEE",
 }
-export const saleReportLabels: Record<ESaleReportConcerns, string> = {
+export const saleReportLabels: Record<any, string> = {
   [ESaleReportConcerns.TIME]: "Thời gian",
   [ESaleReportConcerns.REVENUE]: "Lợi nhuận",
-  [ESaleReportConcerns.DISCOUNT]: "Giảm giá hóa đơn",
-  [ESaleReportConcerns.SALE_RETURN]: "Trả hàng",
-  [ESaleReportConcerns.EMPLOYEE]: "Nhân viên",
 };
 export enum EProductReportConcerns {
   SALE = "SALE",

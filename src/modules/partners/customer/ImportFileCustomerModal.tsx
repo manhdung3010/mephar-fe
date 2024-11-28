@@ -27,7 +27,6 @@ export function ImportFileCustomerModal({
           className="-mr-4 flex"
           options={[
             { value: "default", label: "Nhập file hệ thống" },
-            { value: "kiot", label: "Nhập file từ KiotViet " },
           ]}
           onChange={(value) => setTypeImport(value)}
           value={typeImport}

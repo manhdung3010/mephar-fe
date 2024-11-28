@@ -35,12 +35,10 @@ export function ReturnProduct() {
 
   const { data: returnProducts, isLoading } = useQuery(
     ["LIST_RETURN_PRODUCT", JSON.stringify(formFilter), branchId],
-    () => getReturnProduct({ ...formFilter, branchId })
+    () => getReturnProduct({ ...formFilter, branchId }),
   );
 
-  const [expandedRowKeys, setExpandedRowKeys] = useState<
-    Record<string, boolean>
-  >({});
+  const [expandedRowKeys, setExpandedRowKeys] = useState<Record<string, boolean>>({});
 
   const columns: ColumnsType<IRecord> = [
     {
@@ -137,11 +135,7 @@ export function ReturnProduct() {
   return (
     <div>
       <div className="my-3 flex justify-end gap-4">
-        {hasPermission(
-          profile?.role?.permissions,
-          RoleModel.return_product,
-          RoleAction.create
-        ) && (
+        {hasPermission(profile?.role?.permissions, RoleModel.return_product, RoleAction.create) && (
           <CustomButton
             onClick={() => router.push("/products/return/coupon")}
             type="success"
@@ -150,12 +144,6 @@ export function ReturnProduct() {
             Trả hàng nhập
           </CustomButton>
         )}
-
-        <CustomButton
-          prefixIcon={<Image src={ExportIcon} onClick={downloadExcel} />}
-        >
-          Xuất file
-        </CustomButton>
       </div>
 
       <Search setFormFilter={setFormFilter} formFilter={formFilter} />
@@ -175,8 +163,7 @@ export function ReturnProduct() {
             onClick: (event) => {
               // Toggle expandedRowKeys state here
               if (expandedRowKeys[record.key - 1]) {
-                const { [record.key - 1]: value, ...remainingKeys } =
-                  expandedRowKeys;
+                const { [record.key - 1]: value, ...remainingKeys } = expandedRowKeys;
                 setExpandedRowKeys(remainingKeys);
               } else {
                 setExpandedRowKeys({ [record.key - 1]: true });
@@ -186,9 +173,7 @@ export function ReturnProduct() {
         }}
         expandable={{
           // eslint-disable-next-line @typescript-eslint/no-shadow
-          expandedRowRender: (record: IRecord) => (
-            <ProductDetail record={record} />
-          ),
+          expandedRowRender: (record: IRecord) => <ProductDetail record={record} />,
           expandIcon: () => <></>,
           expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key + 1),
         }}

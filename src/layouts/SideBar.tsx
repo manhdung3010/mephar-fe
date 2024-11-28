@@ -156,34 +156,13 @@ const items = (permissions: { model: string; action: string }[], isAgency?: bool
     getItem("Sản phẩm", keyMenu.PRODUCT, <Image src={ProductIcon} />, [
       hasPermission(permissions, RoleModel.list_product, RoleAction.read) &&
         getItem("Danh sách sản phẩm", keyMenu.PRODUCT_LIST),
-      hasPermission(permissions, RoleModel.list_product, RoleAction.read) &&
-        getItem("Danh sách đơn thuốc mẫu", keyMenu.PRODUCT_MEDICINE_SAMPLE),
+
       hasPermission(permissions, RoleModel.import_product, RoleAction.read) &&
         getItem("Nhập sản phẩm", keyMenu.PRODUCT_IMPORT),
       hasPermission(permissions, RoleModel.return_product, RoleAction.read) &&
         getItem("Trả hàng nhập", keyMenu.PRODUCT_RETURN),
       hasPermission(permissions, RoleModel.check_inventory, RoleAction.read) &&
         getItem("Kiểm kho", keyMenu.PRODUCT_CHECK),
-      hasPermission(permissions, RoleModel.price_setting, RoleAction.read) &&
-        getItem("Thiết lập giá", keyMenu.PRODUCT_PRICE),
-    ]),
-
-  hasMultiplePermission(permissions, [RoleModel.market_common, RoleModel.market_store, RoleModel.market_setting]) &&
-    getItem("Chợ", keyMenu.MARKET, <Image src={MarketIcon} />, [
-      hasPermission(permissions, RoleModel.market_common, RoleAction.read) &&
-        getItem(
-          <Link href={"/markets"} passHref>
-            <a target="_blank">Chợ</a>
-          </Link>,
-          keyMenu.MARKET_COMMON,
-        ),
-      hasPermission(permissions, RoleModel.market_store, RoleAction.read) &&
-        getItem("Chợ hàng điểm", keyMenu.MARKET_STORE),
-      hasPermission(permissions, RoleModel.market_store, RoleAction.read) &&
-        isAgency &&
-        getItem("Đại lý bán điểm", keyMenu.MARKET_AGENCY),
-      hasPermission(permissions, RoleModel.market_setting, RoleAction.read) &&
-        getItem("Cấu hình sản phẩm", keyMenu.MARKET_SETTING),
     ]),
 
   hasPermission(permissions, RoleModel.medicine_category, RoleAction.read) &&
@@ -192,9 +171,7 @@ const items = (permissions: { model: string; action: string }[], isAgency?: bool
   hasMultiplePermission(permissions, [RoleModel.bill, RoleModel.order, RoleModel.return, RoleModel.delivery]) &&
     getItem("Giao dịch", keyMenu.TRANSACTION, <Image src={TransactionIcon} />, [
       hasPermission(permissions, RoleModel.bill, RoleAction.read) && getItem("Hóa đơn", keyMenu.BILL),
-      hasPermission(permissions, RoleModel.order, RoleAction.read) && getItem("Đơn hàng", keyMenu.ORDER),
       hasPermission(permissions, RoleModel.return, RoleAction.read) && getItem("Trả hàng", keyMenu.RETURN),
-      hasPermission(permissions, RoleModel.delivery, RoleAction.read) && getItem("Chuyển hàng", keyMenu.DELIVERY),
     ]),
 
   hasMultiplePermission(permissions, [
@@ -213,18 +190,7 @@ const items = (permissions: { model: string; action: string }[], isAgency?: bool
         getItem("Nhà cung cấp", keyMenu.PARTNERS_PROVIDER),
       hasPermission(permissions, RoleModel.group_provider, RoleAction.read) &&
         getItem("Nhóm nhà cung cấp", keyMenu.PARTNERS_GROUP_PROVIDER),
-      hasPermission(permissions, RoleModel.doctor, RoleAction.read) && getItem("Bác sĩ", keyMenu.PARTNERS_DOCTOR_LIST),
     ]),
-  hasPermission(permissions, RoleModel.map, RoleAction.read) &&
-    getItem("Chăm sóc khách hàng", keyMenu.CUSTOMER_CARE, <Image src={CSIcon} />, [
-      hasPermission(permissions, RoleModel.map, RoleAction.read) &&
-        getItem("Check điểm bán", keyMenu.CUSTOMER_CARE_CHECK),
-      hasPermission(permissions, RoleModel.map, RoleAction.read) &&
-        getItem("Danh sách lịch trình", keyMenu.CUSTOMER_CARE_LIST),
-    ]),
-
-  hasPermission(permissions, RoleModel.cashbook, RoleAction.read) &&
-    getItem("Sổ quỹ", keyMenu.CASHBOOK, <Image src={CashbookIcon} />),
 
   hasMultiplePermission(permissions, [
     RoleModel.customer_report,
@@ -236,14 +202,6 @@ const items = (permissions: { model: string; action: string }[], isAgency?: bool
     getItem("Báo cáo", keyMenu.REPORT, <Image src={ReportIcon} />, [
       hasPermission(permissions, RoleModel.sale_report, RoleAction.read) &&
         getItem("Báo cáo bán hàng", keyMenu.REPORTS_SALE),
-      hasPermission(permissions, RoleModel.customer_report, RoleAction.read) &&
-        getItem("Báo cáo khách hàng", keyMenu.REPORTS_CUSTOMER),
-      hasPermission(permissions, RoleModel.product_report, RoleAction.read) &&
-        getItem("Báo cáo sản phẩm", keyMenu.REPORTS_PRODUCT),
-      hasPermission(permissions, RoleModel.provider_report, RoleAction.read) &&
-        getItem("Báo cáo nhà cung cấp", keyMenu.REPORTS_PROVIDER),
-      hasPermission(permissions, RoleModel.employee_report, RoleAction.read) &&
-        getItem("Báo cáo nhân viên", keyMenu.REPORTS_EMPLOYEE),
     ]),
 
   hasMultiplePermission(permissions, [

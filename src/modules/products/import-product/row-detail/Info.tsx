@@ -1,9 +1,9 @@
-import type { ColumnsType } from 'antd/es/table';
-import Image from 'next/image';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import type { ColumnsType } from "antd/es/table";
+import Image from "next/image";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { message } from 'antd';
+import { message } from "antd";
 import { deleteImportProduct, getImportProductDetail } from "@/api/import-product.service";
 import BarcodeBlueIcon from "@/assets/barcodeBlue.svg";
 import CloseIcon from "@/assets/closeIcon.svg";
@@ -16,15 +16,15 @@ import { EImportProductStatus, EImportProductStatusLabel } from "@/enums";
 import { formatMoney, formatNumber, hasPermission } from "@/helpers";
 import PrintBarcodeModal from "../../list-product/row-detail/PrintBarcodeModal";
 
-import type { IProduct, IRecord } from '../interface';
-import CancelProductModal from './CancelProduct';
-import { useRouter } from 'next/router';
-import InvoicePrint from './InvoicePrint';
-import { useReactToPrint } from 'react-to-print';
-import styles from "./invoice.module.css"
-import { useRecoilState, useRecoilValue } from 'recoil';
-import { productReturnState, profileState } from '@/recoil/state';
-import { RoleAction, RoleModel } from '@/modules/settings/role/role.enum';
+import type { IProduct, IRecord } from "../interface";
+import CancelProductModal from "./CancelProduct";
+import { useRouter } from "next/router";
+import InvoicePrint from "./InvoicePrint";
+import { useReactToPrint } from "react-to-print";
+import styles from "./invoice.module.css";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { productReturnState, profileState } from "@/recoil/state";
+import { RoleAction, RoleModel } from "@/modules/settings/role/role.enum";
 
 export function Info({ record }: { record: IRecord }) {
   const [openPrintBarcodeModal, setOpenPrintBarcodeModal] = useState(false);
@@ -32,45 +32,42 @@ export function Info({ record }: { record: IRecord }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const profile = useRecoilValue(profileState);
-  const [returnProducts, setReturnProducts] =
-    useRecoilState(productReturnState);
+  const [returnProducts, setReturnProducts] = useRecoilState(productReturnState);
 
   const { data: importProductDetail, isLoading } = useQuery<{
     data: { inbound: IRecord; products: any };
-  }>(["IMPORT_PRODUCT_DETAIL", record.id], () =>
-    getImportProductDetail(record.id)
-  );
+  }>(["IMPORT_PRODUCT_DETAIL", record.id], () => getImportProductDetail(record.id));
 
   const handleOpenOrderClick = () => {
     router.push(`/products/import/coupon/?id=${record.id}`);
   };
   const invoiceComponentRef = useRef(null);
 
-  const { mutate: mutateCancelImportProduct, isLoading: isLoadingDeleteProduct } =
-    useMutation(() => deleteImportProduct(Number(record.id)), {
+  const { mutate: mutateCancelImportProduct, isLoading: isLoadingDeleteProduct } = useMutation(
+    () => deleteImportProduct(Number(record.id)),
+    {
       onSuccess: async () => {
-        await queryClient.invalidateQueries(['LIST_IMPORT_PRODUCT']);
+        await queryClient.invalidateQueries(["LIST_IMPORT_PRODUCT"]);
         setOpenCancelPrintProduct(false);
       },
       onError: (err: any) => {
         message.error(err?.message);
       },
-    });
+    },
+  );
 
-  const onSubmit = () => { mutateCancelImportProduct() };
+  const onSubmit = () => {
+    mutateCancelImportProduct();
+  };
 
-  const [expandedRowKeys, setExpandedRowKeys] = useState<
-    Record<string, boolean>
-  >({});
+  const [expandedRowKeys, setExpandedRowKeys] = useState<Record<string, boolean>>({});
 
   const columns: ColumnsType<IProduct> = [
     {
       title: "Mã hàng",
       dataIndex: "id",
       key: "id",
-      render: (_, { product }) => (
-        <span className="cursor-pointer text-[#0070F4]">{product.code}</span>
-      ),
+      render: (_, { product }) => <span className="cursor-pointer text-[#0070F4]">{product.code}</span>,
     },
     {
       title: "Tên hàng",
@@ -88,10 +85,7 @@ export function Info({ record }: { record: IRecord }) {
       title: "Số lượng",
       dataIndex: "quantity",
       key: "quantity",
-      render: (quantity) =>
-        formatNumber(
-          quantity
-        ),
+      render: (quantity) => formatNumber(quantity),
     },
     // {
     //   title: 'Đơn giá',
@@ -102,22 +96,19 @@ export function Info({ record }: { record: IRecord }) {
       title: "Giảm giá",
       dataIndex: "discount",
       key: "discount",
-      render: (discount) =>
-        formatMoney(discount),
+      render: (discount) => formatMoney(discount),
     },
     {
       title: "Giá nhập",
       dataIndex: "price",
       key: "price",
-      render: (price) =>
-        formatMoney(+price),
+      render: (price) => formatMoney(+price),
     },
     {
       title: "Thành tiền",
       dataIndex: "totalPrice",
       key: "totalPrice",
-      render: (_, record: any) =>
-        formatMoney(record.price * record.quantity - record.discount),
+      render: (_, record: any) => formatMoney(record.price * record.quantity - record.discount),
     },
   ];
 
@@ -144,16 +135,14 @@ export function Info({ record }: { record: IRecord }) {
     return total;
   }, [importProductDetail]);
 
-
-
   const handlePrintInvoice = useReactToPrint({
     content: () => invoiceComponentRef.current,
   });
 
   const handleRouterReturn = () => {
-    setReturnProducts([])
-    router.push(`/products/return/coupon/?id=${record.id}`)
-  }
+    setReturnProducts([]);
+    router.push(`/products/return/coupon/?id=${record.id}`);
+  };
 
   return (
     <div className="gap-12 ">
@@ -163,61 +152,45 @@ export function Info({ record }: { record: IRecord }) {
       <div className="mb-4 grid flex-1 grid-cols-2 gap-4">
         <div className="grid grid-cols-2 gap-5">
           <div className="text-gray-main">Mã nhập hàng:</div>
-          <div className="text-black-main">
-            {importProductDetail?.data?.inbound?.code}
-          </div>
+          <div className="text-black-main">{importProductDetail?.data?.inbound?.code}</div>
         </div>
 
         <div className="grid grid-cols-2 gap-5">
           <div className="text-gray-main">Trạng thái:</div>
           <div
-            className={`${importProductDetail?.data?.inbound?.status ===
-              EImportProductStatus.SUCCEED
-              ? 'text-[#00B63E]'
-              : 'text-gray-main'
-              }`}
+            className={`${
+              importProductDetail?.data?.inbound?.status === EImportProductStatus.SUCCEED
+                ? "text-[#00B63E]"
+                : "text-gray-main"
+            }`}
           >
-            {
-              EImportProductStatusLabel[
-              importProductDetail?.data?.inbound?.status as string
-              ]
-            }
+            {EImportProductStatusLabel[importProductDetail?.data?.inbound?.status as string]}
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-5">
           <div className="text-gray-main">Nhà cung cấp:</div>
-          <div className="text-black-main">
-            {importProductDetail?.data?.inbound?.supplier?.name}
-          </div>
+          <div className="text-black-main">{importProductDetail?.data?.inbound?.supplier?.name}</div>
         </div>
 
         <div className="grid grid-cols-2 gap-5">
           <div className="text-gray-main">Thời gian:</div>
-          <div className="text-black-main">
-            {importProductDetail?.data?.inbound?.createdAt}
-          </div>
+          <div className="text-black-main">{importProductDetail?.data?.inbound?.createdAt}</div>
         </div>
 
         <div className="grid grid-cols-2 gap-5">
           <div className="text-gray-main">Người tạo:</div>
-          <div className="text-black-main">
-            {importProductDetail?.data?.inbound?.creator?.fullName}
-          </div>
+          <div className="text-black-main">{importProductDetail?.data?.inbound?.creator?.fullName}</div>
         </div>
 
         <div className="grid grid-cols-2 gap-5">
           <div className="text-gray-main">Chi nhánh:</div>
-          <div className="text-black-main">
-            {importProductDetail?.data?.inbound?.branch?.name}
-          </div>
+          <div className="text-black-main">{importProductDetail?.data?.inbound?.branch?.name}</div>
         </div>
 
         <div className="grid grid-cols-2 gap-5">
           <div className="text-gray-main">Người nhập:</div>
-          <div className="text-black-main">
-            {importProductDetail?.data?.inbound?.user?.fullName}
-          </div>
+          <div className="text-black-main">{importProductDetail?.data?.inbound?.user?.fullName}</div>
         </div>
       </div>
 
@@ -237,23 +210,17 @@ export function Info({ record }: { record: IRecord }) {
               {record.product?.isBatchExpireControl && (
                 <div className="bg-[#FFF3E6] px-6 py-2 ">
                   <div className="flex items-center gap-x-3">
-                    {record?.batches?.map(
-                      ({ batch, quantity }) => (
-                        <>
-                          {batch && (
-                            <div
-                              key={batch.id}
-                              className="flex items-center rounded bg-red-main py-1 px-2 text-white"
-                            >
-                              <span className="mr-2">
-                                {batch.name} - {batch.expiryDate} - SL:{" "}
-                                {quantity}
-                              </span>{" "}
-                            </div>
-                          )}
-                        </>
-                      )
-                    )}
+                    {record?.batches?.map(({ batch, quantity }) => (
+                      <>
+                        {batch && (
+                          <div key={batch.id} className="flex items-center rounded bg-red-main py-1 px-2 text-white">
+                            <span className="mr-2">
+                              {batch.name} - {batch.expiryDate} - SL: {quantity}
+                            </span>{" "}
+                          </div>
+                        )}
+                      </>
+                    ))}
                   </div>
                 </div>
               )}
@@ -272,89 +239,40 @@ export function Info({ record }: { record: IRecord }) {
 
         <div className=" mb-3 grid grid-cols-2">
           <div className="text-gray-main">Tổng số mặt hàng:</div>
-          <div className="text-black-main">
-            {importProductDetail?.data?.products?.length}
-          </div>
+          <div className="text-black-main">{importProductDetail?.data?.products?.length}</div>
         </div>
 
         <div className=" mb-3 grid grid-cols-2">
           <div className="text-gray-main">Tổng cộng:</div>
-          <div className="text-black-main">
-            {formatMoney(importProductDetail?.data?.inbound?.totalPrice)}
-          </div>
+          <div className="text-black-main">{formatMoney(importProductDetail?.data?.inbound?.totalPrice)}</div>
         </div>
 
         <div className=" mb-3 grid grid-cols-2">
           <div className="text-gray-main">Giảm giá:</div>
-          <div className="text-black-main">
-            {formatMoney(importProductDetail?.data?.inbound?.discount)}
-          </div>
+          <div className="text-black-main">{formatMoney(importProductDetail?.data?.inbound?.discount)}</div>
         </div>
 
         <div className=" mb-3 grid grid-cols-2">
           <div className="text-gray-main">Tiền đã trả NCC:</div>
-          <div className="text-black-main">
-            {formatMoney(importProductDetail?.data?.inbound?.paid)}
-          </div>
+          <div className="text-black-main">{formatMoney(importProductDetail?.data?.inbound?.paid)}</div>
         </div>
 
         <div className=" mb-3 grid grid-cols-2">
           <div className="text-gray-main">Nợ:</div>
-          <div className="text-black-main">
-            {formatMoney(importProductDetail?.data?.inbound?.debt)}
-          </div>
+          <div className="text-black-main">{formatMoney(importProductDetail?.data?.inbound?.debt)}</div>
         </div>
       </div>
 
       <div className="flex justify-end gap-4">
-        <CustomButton
-          outline={true}
-          type="primary"
-          prefixIcon={<Image src={BarcodeBlueIcon} alt="" />}
-          onClick={() => setOpenPrintBarcodeModal(true)}
-        >
-          In mã vạch
-        </CustomButton>
-        {/* <CustomButton
-          outline={true}
-          type="primary"
-          prefixIcon={<Image src={OpenOrderIcon} alt="" />}
-        >
-          Mở phiếu
-        </CustomButton> */}
-
-        <CustomButton
-          outline={true}
-          type="primary"
-          prefixIcon={<Image src={PrintOrderIcon} alt="" />}
-          onClick={handlePrintInvoice}
-        >
-          In phiếu
-        </CustomButton>
-
-        {
-          hasPermission(profile?.role?.permissions, RoleModel.import_product, RoleAction.delete) && (
-            <CustomButton
-              outline={true}
-              prefixIcon={<Image src={CloseIcon} alt="" />}
-              onClick={() => setOpenCancelPrintProduct(true)}
-            >
-              Hủy bỏ
-            </CustomButton>
-          )
-        }
-        {
-          hasPermission(profile?.role?.permissions, RoleModel.return_product, RoleAction.create) && (
-            <CustomButton
-              type="success"
-              prefixIcon={<Image src={PlusIcon} alt="" />}
-              onClick={handleRouterReturn}
-            >
-              Trả hàng nhập
-            </CustomButton>
-          )
-        }
-
+        {hasPermission(profile?.role?.permissions, RoleModel.import_product, RoleAction.delete) && (
+          <CustomButton
+            outline={true}
+            prefixIcon={<Image src={CloseIcon} alt="" />}
+            onClick={() => setOpenCancelPrintProduct(true)}
+          >
+            Hủy bỏ
+          </CustomButton>
+        )}
       </div>
 
       <CancelProductModal

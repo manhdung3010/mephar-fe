@@ -198,14 +198,6 @@ export function Info({ record, branchId }: { record: any; branchId: number }) {
         <CustomButton
           outline={true}
           type="primary"
-          prefixIcon={<Image src={PrintOrderIcon} alt="" />}
-          onClick={handlePrintInvoice}
-        >
-          In phiếu
-        </CustomButton>
-        <CustomButton
-          outline={true}
-          type="primary"
           prefixIcon={<Image src={BarcodeIcon} alt="" />}
           onClick={() => setIsOpenModal(true)}
         >

@@ -717,26 +717,6 @@ const Index = () => {
                   )}
                 </div>
 
-                <CustomButton outline disabled={orderActive.split("-")[1] === "RETURN"}>
-                  <Popover content={"Quét mã vạch"}>
-                    <div
-                      className={`flex cursor-pointer items-center ${
-                        isScanBarcode ? "rounded border border-blue-500" : ""
-                      }`}
-                    >
-                      <Image
-                        src={BarcodeIcon}
-                        className={`w-[24px] h-[24px] cursor-pointer text-[#D64457]`}
-                        alt=""
-                        onClick={(e) => {
-                          setIsScanBarcode((pre) => !pre);
-                          e.stopPropagation();
-                        }}
-                      />
-                    </div>
-                  </Popover>
-                </CustomButton>
-
                 {Object.keys(orderObject).map((order: any, index) => (
                   <div key={order} className="flex">
                     <div className="mx-6 h-[62px] w-[1px] bg-[#E4E4E4]" />

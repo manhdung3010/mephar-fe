@@ -51,12 +51,16 @@ export enum EDiscountGoodsMethod {
   GIFT_AND_POINT = "GIFT_AND_POINT",
 }
 
+export enum EDiscountGoodsMethod111 {
+  PRODUCT_PRICE = "PRODUCT_PRICE",
+  GIFT = "GIFT",
+  LOYALTY = "LOYALTY",
+}
+
 export enum EDiscountGoodsMethodLabel {
   PRODUCT_PRICE = "Mua hàng giảm giá hàng",
   GIFT = "Mua hàng tặng hàng",
   LOYALTY = "Mua hàng tặng điểm",
-  PRICE_BY_BUY_NUMBER = "Giảm giá theo số lượng mua",
-  GIFT_AND_POINT = "Mua hàng tặng hàng tặng điểm",
 }
 
 export enum EDiscountUnit {
@@ -98,7 +102,6 @@ export const productOptionData = [
   },
   {
     value: EDiscountGoodsMethod.PRICE_BY_BUY_NUMBER,
-    label: EDiscountGoodsMethodLabel.PRICE_BY_BUY_NUMBER,
   },
 ];
 
@@ -231,7 +234,7 @@ const Info = ({ setValue, getValues, errors }: any) => {
                     value,
                     label: EDiscountBillMethodLabel[value],
                   }))
-                : Object.values(EDiscountGoodsMethod).map((value) => ({
+                : Object.values(EDiscountGoodsMethod111).map((value) => ({
                     value,
                     label: EDiscountGoodsMethodLabel[value],
                   }))

@@ -12,11 +12,7 @@ import { useRecoilValue } from "recoil";
 import { branchState, profileState } from "@/recoil/state";
 import { hasPermission } from "@/helpers";
 import { RoleAction, RoleModel } from "@/modules/settings/role/role.enum";
-import {
-  getProductExample,
-  getProductExampleKiot,
-  getProductExcel,
-} from "@/api/export.service";
+import { getProductExample, getProductExampleKiot, getProductExcel } from "@/api/export.service";
 import { useRef, useState } from "react";
 import { uploadProductExcel } from "@/api/import.service";
 import { ImportFileProductModal } from "./ImportFileProductModal";
@@ -44,11 +40,6 @@ const AddNew = () => {
       key: "2",
       onClick: () => router.push("/products/list/add-package"),
     },
-    {
-      label: "Thêm mới combo - đóng gói",
-      key: "3",
-      onClick: () => router.push("/products/list/add-combo"),
-    },
   ];
 
   const menuProps = {
@@ -58,11 +49,7 @@ const AddNew = () => {
 
   return (
     <Dropdown menu={menuProps} trigger={["click"]}>
-      {hasPermission(
-        profile?.role?.permissions,
-        RoleModel.list_product,
-        RoleAction.create
-      ) ? (
+      {hasPermission(profile?.role?.permissions, RoleModel.list_product, RoleAction.create) ? (
         <CustomButton onClick={handleButtonClick} type="danger" className="p-0">
           <div className="flex items-center justify-center border-r border-[#EE6274] py-[8px] px-4">
             <Image src={PlusIconWhite} alt="" />
@@ -185,10 +172,7 @@ const Header = ({ data }: any) => {
         </Button>
         <div className="mx-2 h-5 w-[1px] bg-[#D3D5D7]"></div>
         <Dropdown menu={{ items }} trigger={["click"]}>
-          <Button
-            type="text"
-            className="flex h-auto items-center justify-center py-[6px] px-[5px] text-black-main"
-          >
+          <Button type="text" className="flex h-auto items-center justify-center py-[6px] px-[5px] text-black-main">
             <Image src={DocumentUpload} alt="" />
             <span className="pl-[6px]">Xuất file mẫu</span>
           </Button>

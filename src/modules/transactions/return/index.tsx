@@ -43,9 +43,7 @@ export function ReturnTransaction() {
   const router = useRouter();
   const branchId = useRecoilValue(branchState);
 
-  const [expandedRowKeys, setExpandedRowKeys] = useState<
-    Record<string, boolean>
-  >({});
+  const [expandedRowKeys, setExpandedRowKeys] = useState<Record<string, boolean>>({});
 
   const [formFilter, setFormFilter] = useState({
     page: 1,
@@ -59,9 +57,8 @@ export function ReturnTransaction() {
     customerId: undefined,
   });
 
-  const { data: saleReturn, isLoading } = useQuery(
-    ["SALE_RETURN", formFilter, branchId],
-    () => getSaleReturn({ ...formFilter, branchId })
+  const { data: saleReturn, isLoading } = useQuery(["SALE_RETURN", formFilter, branchId], () =>
+    getSaleReturn({ ...formFilter, branchId }),
   );
 
   const columns: ColumnsType<IRecord> = [
@@ -133,7 +130,7 @@ export function ReturnTransaction() {
             status === EReturnProductStatus.SUCCEED
               ? "text-[#00B63E] border border-[#00B63E] bg-[#DEFCEC]"
               : "text-[#6D6D6D] border border-[#6D6D6D] bg-[#F0F1F1]",
-            "px-2 py-1 rounded-2xl w-max"
+            "px-2 py-1 rounded-2xl w-max",
           )}
         >
           {EReturnProductStatusLabel[status]}
@@ -172,12 +169,6 @@ export function ReturnTransaction() {
         >
           Thêm phiếu trả hàng
         </CustomButton>
-
-        <CustomButton
-          prefixIcon={<Image src={ExportIcon} onClick={downloadExcel} />}
-        >
-          Xuất file
-        </CustomButton>
       </div>
 
       <Search setFormFilter={setFormFilter} formFilter={formFilter} />
@@ -197,8 +188,7 @@ export function ReturnTransaction() {
             onClick: (event) => {
               // Toggle expandedRowKeys state here
               if (expandedRowKeys[record.key]) {
-                const { [record.key]: value, ...remainingKeys } =
-                  expandedRowKeys;
+                const { [record.key]: value, ...remainingKeys } = expandedRowKeys;
                 setExpandedRowKeys(remainingKeys);
               } else {
                 setExpandedRowKeys({ [record.key]: true });
@@ -208,9 +198,7 @@ export function ReturnTransaction() {
         }}
         expandable={{
           // eslint-disable-next-line @typescript-eslint/no-shadow
-          expandedRowRender: (record: IRecord) => (
-            <ReturnDetail record={record} />
-          ),
+          expandedRowRender: (record: IRecord) => <ReturnDetail record={record} />,
           expandIcon: () => <></>,
           expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key),
         }}

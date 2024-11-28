@@ -65,12 +65,10 @@ export function Provider() {
 
   const { data: providers, isLoading } = useQuery(
     ["PROVIDER_LIST", formFilter.page, formFilter.limit, formFilter.keyword],
-    () => getProvider(formFilter)
+    () => getProvider(formFilter),
   );
 
-  const [expandedRowKeys, setExpandedRowKeys] = useState<
-    Record<string, boolean>
-  >({});
+  const [expandedRowKeys, setExpandedRowKeys] = useState<Record<string, boolean>>({});
 
   const columns: ColumnsType<IRecord> = [
     {
@@ -132,26 +130,13 @@ export function Provider() {
       key: "action",
       render: (_, { id }) => (
         <div className="flex gap-3">
-          {hasPermission(
-            profile?.role?.permissions,
-            RoleModel.provider,
-            RoleAction.delete
-          ) && (
+          {hasPermission(profile?.role?.permissions, RoleModel.provider, RoleAction.delete) && (
             <div className=" cursor-pointer" onClick={() => setDeletedId(id)}>
               <Image src={DeleteIcon} />
             </div>
           )}
-          {hasPermission(
-            profile?.role?.permissions,
-            RoleModel.provider,
-            RoleAction.update
-          ) && (
-            <div
-              className=" cursor-pointer"
-              onClick={() =>
-                router.push(`/partners/provider/add-provider?id=${id}`)
-              }
-            >
+          {hasPermission(profile?.role?.permissions, RoleModel.provider, RoleAction.update) && (
+            <div className=" cursor-pointer" onClick={() => router.push(`/partners/provider/add-provider?id=${id}`)}>
               <Image src={EditIcon} />
             </div>
           )}
@@ -160,8 +145,9 @@ export function Provider() {
     },
   ];
 
-  const { mutate: mutateDeleteProvider, isLoading: isLoadingDeleteProvider } =
-    useMutation(() => deleteProvider(Number(deletedId)), {
+  const { mutate: mutateDeleteProvider, isLoading: isLoadingDeleteProvider } = useMutation(
+    () => deleteProvider(Number(deletedId)),
+    {
       onSuccess: async () => {
         await queryClient.invalidateQueries(["PROVIDER_LIST"]);
         setDeletedId(undefined);
@@ -169,7 +155,8 @@ export function Provider() {
       onError: (err: any) => {
         message.error(err?.message);
       },
-    });
+    },
+  );
 
   const onSubmit = () => {
     mutateDeleteProvider();
@@ -178,12 +165,7 @@ export function Provider() {
   return (
     <div className="mb-2">
       <div className="my-3 flex items-center justify-end gap-4">
-        <ActionFile />
-        {hasPermission(
-          profile?.role?.permissions,
-          RoleModel.provider,
-          RoleAction.create
-        ) && (
+        {hasPermission(profile?.role?.permissions, RoleModel.provider, RoleAction.create) && (
           <CustomButton
             prefixIcon={<Image src={PlusIcon} />}
             onClick={() => router.push("/partners/provider/add-provider")}
@@ -203,9 +185,6 @@ export function Provider() {
       />
 
       <CustomTable
-        rowSelection={{
-          type: "checkbox",
-        }}
         dataSource={providers?.data?.items?.map((item, key) => ({
           ...item,
           key: key + 1,
@@ -216,16 +195,13 @@ export function Provider() {
           return {
             onClick: (event) => {
               // Check if the click came from the action column
-              if (
-                (event.target as Element).closest(".ant-table-cell:last-child")
-              ) {
+              if ((event.target as Element).closest(".ant-table-cell:last-child")) {
                 return;
               }
 
               // Toggle expandedRowKeys state here
               if (expandedRowKeys[record.key - 1]) {
-                const { [record.key - 1]: value, ...remainingKeys } =
-                  expandedRowKeys;
+                const { [record.key - 1]: value, ...remainingKeys } = expandedRowKeys;
                 setExpandedRowKeys(remainingKeys);
               } else {
                 setExpandedRowKeys({ [record.key - 1]: true });

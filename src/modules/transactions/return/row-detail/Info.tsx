@@ -1,15 +1,15 @@
-import { Input } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
-import Image from 'next/image';
+import { Input } from "antd";
+import type { ColumnsType } from "antd/es/table";
+import Image from "next/image";
 
-import CloseIcon from '@/assets/closeIcon.svg';
-import PrintOrderIcon from '@/assets/printOrder.svg';
-import { CustomButton } from '@/components/CustomButton';
-import CustomTable from '@/components/CustomTable';
-import { formatDate, formatDateTime, formatMoney, formatNumber } from '@/helpers';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { useReactToPrint } from 'react-to-print';
-import InvoicePrint from './InvoicePrint';
+import CloseIcon from "@/assets/closeIcon.svg";
+import PrintOrderIcon from "@/assets/printOrder.svg";
+import { CustomButton } from "@/components/CustomButton";
+import CustomTable from "@/components/CustomTable";
+import { formatDate, formatDateTime, formatMoney, formatNumber } from "@/helpers";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useReactToPrint } from "react-to-print";
+import InvoicePrint from "./InvoicePrint";
 
 const { TextArea } = Input;
 
@@ -26,56 +26,52 @@ interface IRecord {
 
 export function Info({ record }: { record: any }) {
   const invoiceComponentRef = useRef(null);
-  const [expandedRowKeys, setExpandedRowKeys] = useState<
-    Record<string, boolean>
-  >({});
+  const [expandedRowKeys, setExpandedRowKeys] = useState<Record<string, boolean>>({});
 
   const columns: ColumnsType<any> = [
     {
-      title: 'Mã hàng',
-      dataIndex: 'code',
-      key: 'code',
+      title: "Mã hàng",
+      dataIndex: "code",
+      key: "code",
       render: (value, { productUnit }, index) => (
         <span className="cursor-pointer text-[#0070F4]">{productUnit?.code}</span>
       ),
     },
     {
-      title: 'Tên hàng',
-      dataIndex: 'name',
-      key: 'name',
-      render: (value, { productUnit }, index) => (
-        <span>{productUnit.product.name}</span>
-      )
+      title: "Tên hàng",
+      dataIndex: "name",
+      key: "name",
+      render: (value, { productUnit }, index) => <span>{productUnit.product.name}</span>,
     },
     {
-      title: 'Đơn vị',
-      dataIndex: 'productUnit',
-      key: 'productUnit',
-      render: (productUnit) => (productUnit?.unitName)
+      title: "Đơn vị",
+      dataIndex: "productUnit",
+      key: "productUnit",
+      render: (productUnit) => productUnit?.unitName,
     },
     {
-      title: 'Số lượng',
-      dataIndex: 'quantity',
-      key: 'quantity',
-      render: (value) => formatNumber(value)
+      title: "Số lượng",
+      dataIndex: "quantity",
+      key: "quantity",
+      render: (value) => formatNumber(value),
     },
     {
-      title: 'Đơn giá',
-      dataIndex: 'price',
-      key: 'price',
-      render: (value) => formatMoney(value)
+      title: "Đơn giá",
+      dataIndex: "price",
+      key: "price",
+      render: (value) => formatMoney(value),
     },
     {
-      title: 'Giảm giá',
-      dataIndex: 'discount',
-      key: 'discount',
-      render: (value) => formatMoney(value)
+      title: "Giảm giá",
+      dataIndex: "discount",
+      key: "discount",
+      render: (value) => formatMoney(value),
     },
     {
-      title: 'Thành tiền',
-      dataIndex: 'totalPrice',
-      key: 'totalPrice',
-      render: (value, { quantity, price, discount }) => formatMoney(quantity * price - discount)
+      title: "Thành tiền",
+      dataIndex: "totalPrice",
+      key: "totalPrice",
+      render: (value, { quantity, price, discount }) => formatMoney(quantity * price - discount),
     },
   ];
 
@@ -94,12 +90,12 @@ export function Info({ record }: { record: any }) {
     return record?.items?.reduce((acc: number, item: any) => {
       return acc + item.quantity * item.price;
     }, 0);
-  }, [record?.items])
+  }, [record?.items]);
   const totalReturnPrice = useMemo(() => {
     return record?.items?.reduce((acc: number, item: any) => {
       return acc + item.quantity * item.price - item.discount;
     }, 0);
-  }, [record?.items])
+  }, [record?.items]);
 
   const handlePrintInvoice = useReactToPrint({
     content: () => invoiceComponentRef.current,
@@ -150,38 +146,37 @@ export function Info({ record }: { record: any }) {
       </div>
 
       <CustomTable
-        dataSource={record?.items?.map((item, index) => (
-          {
-            key: index,
-            ...item,
-          }
-        ))
-        }
+        dataSource={record?.items?.map((item, index) => ({
+          key: index,
+          ...item,
+        }))}
         columns={columns}
         pagination={false}
         className="mb-4"
         expandable={{
           defaultExpandAllRows: true,
           // eslint-disable-next-line @typescript-eslint/no-shadow
-          expandedRowRender: (row: IRecord) => row?.batches?.length > 0 && (
-            <div className="flex items-center bg-[#FFF3E6] px-6 py-2 gap-2">
-              {
-                row?.batches?.map((b, index) => (
+          expandedRowRender: (row: IRecord) =>
+            row?.batches?.length > 0 && (
+              <div className="flex items-center bg-[#FFF3E6] px-6 py-2 gap-2">
+                {row?.batches?.map((b, index) => (
                   <div className="flex items-center rounded bg-red-main py-1 px-2 text-white">
-                    <span className="mr-2">{b.batch?.name} - {formatDate(b?.batch?.expiryDate)} - SL: {formatNumber(b?.quantity)} </span>
+                    <span className="mr-2">
+                      {b.batch?.name} - {formatDate(b?.batch?.expiryDate)} - SL: {formatNumber(b?.quantity)}{" "}
+                    </span>
                   </div>
-                ))
-              }
-            </div>
-          ),
+                ))}
+              </div>
+            ),
           expandIcon: () => <></>,
-          expandedRowKeys: Object.keys(expandedRowKeys).map(
-            (key) => +key
-          ),
+          expandedRowKeys: Object.keys(expandedRowKeys).map((key) => +key),
         }}
       />
 
-      <div ref={invoiceComponentRef} className='fixed top-0 right-[-300px] w-full -z-10 invisible print:relative print:visible print:right-0 print:p-[50px] print:z-10 print:text-base'>
+      <div
+        ref={invoiceComponentRef}
+        className="fixed top-0 right-[-300px] w-full -z-10 invisible print:relative print:visible print:right-0 print:p-[50px] print:z-10 print:text-base"
+      >
         <InvoicePrint record={record} />
       </div>
 
@@ -217,18 +212,7 @@ export function Info({ record }: { record: any }) {
       </div>
 
       <div className="flex justify-end gap-4">
-        <CustomButton
-          outline={true}
-          type="primary"
-          prefixIcon={<Image src={PrintOrderIcon} alt="" />}
-          onClick={handlePrintInvoice}
-        >
-          In phiếu
-        </CustomButton>
-        <CustomButton
-          outline={true}
-          prefixIcon={<Image src={CloseIcon} alt="" />}
-        >
+        <CustomButton outline={true} prefixIcon={<Image src={CloseIcon} alt="" />}>
           Hủy bỏ
         </CustomButton>
       </div>

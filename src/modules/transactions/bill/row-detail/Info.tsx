@@ -382,14 +382,6 @@ export function Info({ record }: { record: IOrder }) {
       </div>
 
       <div className="flex justify-end gap-4">
-        <CustomButton
-          outline={true}
-          type="primary"
-          prefixIcon={<Image src={PrintOrderIcon} alt="" />}
-          onClick={handlePrintInvoice}
-        >
-          In phiếu
-        </CustomButton>
         {hasPermission(profile?.role?.permissions, RoleModel.bill, RoleAction.delete) && (
           <CustomButton
             outline={true}
