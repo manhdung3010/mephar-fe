@@ -196,9 +196,6 @@ export function Info({ record }: { record: any }) {
       </div>
 
       <CustomTable
-        rowSelection={{
-          type: "checkbox",
-        }}
         dataSource={record?.inventoryCheckingProduct.map((item, index) => ({
           ...item,
           key: index,

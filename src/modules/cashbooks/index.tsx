@@ -39,9 +39,7 @@ export function Cashbook() {
   const [openAddCashbookModal, setOpenAddCashbookModal] = useState(false);
   const [cashbookType, setCashbookType] = useState<string>("");
 
-  const [expandedRowKeys, setExpandedRowKeys] = useState<
-    Record<string, boolean>
-  >({});
+  const [expandedRowKeys, setExpandedRowKeys] = useState<Record<string, boolean>>({});
 
   const [formFilter, setFormFilter] = useState({
     page: 1,
@@ -54,18 +52,15 @@ export function Cashbook() {
     userId: undefined,
   });
 
-  const { data: transactions, isLoading } = useQuery(
-    ["TRANSACTION", JSON.stringify(formFilter), branchId],
-    () => getTransaction({ ...formFilter, branchId })
+  const { data: transactions, isLoading } = useQuery(["TRANSACTION", JSON.stringify(formFilter), branchId], () =>
+    getTransaction({ ...formFilter, branchId }),
   );
   const columns: any = [
     {
       title: "Mã phiếu",
       dataIndex: "code",
       key: "code",
-      render: (value, _, index) => (
-        <span className="cursor-pointer text-[#0070F4]">{value}</span>
-      ),
+      render: (value, _, index) => <span className="cursor-pointer text-[#0070F4]">{value}</span>,
     },
     {
       title: "Thời gian",
@@ -107,14 +102,8 @@ export function Cashbook() {
     createdAt: formatDateTime(item.createdAt), // Định dạng lại thời gian tạo
     typeTransaction: item.typeTransaction?.name, // Lấy tên loại thu phí
     targetCustomer:
-      item.targetCustomer?.fullName ||
-      item.targetSupplier?.name ||
-      item.targetOther?.name ||
-      item.targetUser?.fullName, // Lấy tên người nộp/nhận
-    value:
-      item.ballotType === "income"
-        ? formatMoney(item.value)
-        : `-${formatMoney(item.value)}`, // Định dạng lại giá trị
+      item.targetCustomer?.fullName || item.targetSupplier?.name || item.targetOther?.name || item.targetUser?.fullName, // Lấy tên người nộp/nhận
+    value: item.ballotType === "income" ? formatMoney(item.value) : `-${formatMoney(item.value)}`, // Định dạng lại giá trị
   }));
 
   const columnMapping = {
@@ -125,11 +114,7 @@ export function Cashbook() {
     value: "Giá trị",
   };
 
-  const { exported, exportToExcel } = useExportToExcel(
-    transformedData,
-    columnMapping,
-    `SOQUY_${Date.now()}.xlsx`
-  );
+  const { exported, exportToExcel } = useExportToExcel(transformedData, columnMapping, `SOQUY_${Date.now()}.xlsx`);
 
   return (
     <div className="mb-2">
@@ -140,9 +125,7 @@ export function Cashbook() {
           </div>
           <div>
             <div className="text-xs text-[#15171A]">Quỹ đầu kỳ</div>
-            <div className="text-[22px] text-[#0070F4]">
-              {formatMoney(transactions?.data?.totalBefore)}
-            </div>
+            <div className="text-[22px] text-[#0070F4]">{formatMoney(transactions?.data?.totalBefore)}</div>
           </div>
         </div>
 
@@ -154,9 +137,7 @@ export function Cashbook() {
           </div>
           <div>
             <div className="text-xs text-[#15171A]">Tổng thu</div>
-            <div className="text-[22px] text-[#00B63E]">
-              {formatMoney(transactions?.data?.totalIncome)}
-            </div>
+            <div className="text-[22px] text-[#00B63E]">{formatMoney(transactions?.data?.totalIncome)}</div>
           </div>
         </div>
 
@@ -168,9 +149,7 @@ export function Cashbook() {
           </div>
           <div>
             <div className="text-xs text-[#15171A]">Tổng chi</div>
-            <div className="text-[22px] text-[#F32B2B]">
-              {formatMoney(transactions?.data?.totalExpenses)}
-            </div>
+            <div className="text-[22px] text-[#F32B2B]">{formatMoney(transactions?.data?.totalExpenses)}</div>
           </div>
         </div>
 
@@ -183,20 +162,13 @@ export function Cashbook() {
           <div>
             <div className="text-xs text-[#15171A]">Tồn quỹ</div>
             <div className="text-[22px] text-[#FF8800]">
-              {formatMoney(
-                transactions?.data?.totalIncome -
-                  transactions?.data?.totalExpenses
-              )}
+              {formatMoney(transactions?.data?.totalIncome - transactions?.data?.totalExpenses)}
             </div>
           </div>
         </div>
       </div>
 
-      {hasPermission(
-        profile?.role?.permissions,
-        RoleModel.cashbook,
-        RoleAction.create
-      ) && (
+      {hasPermission(profile?.role?.permissions, RoleModel.cashbook, RoleAction.create) && (
         <div className="mb-3 flex justify-end">
           <CustomButton
             type="success"
@@ -220,20 +192,13 @@ export function Cashbook() {
           >
             Lập phiếu chi
           </CustomButton>
-          <CustomButton
-            prefixIcon={<Image src={ExportIcon} />}
-            wrapClassName="mx-2"
-            onClick={exportToExcel}
-          >
+          <CustomButton prefixIcon={<Image src={ExportIcon} />} wrapClassName="mx-2" onClick={exportToExcel}>
             Xuất file
           </CustomButton>
         </div>
       )}
       <Search setFormFilter={setFormFilter} formFilter={formFilter} />
       <CustomTable
-        rowSelection={{
-          type: "checkbox",
-        }}
         dataSource={transactions?.data?.items.map((item, index) => ({
           ...item,
           key: index,
@@ -244,8 +209,7 @@ export function Cashbook() {
             onClick: (event) => {
               // Toggle expandedRowKeys state here
               if (expandedRowKeys[record.key]) {
-                const { [record.key]: value, ...remainingKeys } =
-                  expandedRowKeys;
+                const { [record.key]: value, ...remainingKeys } = expandedRowKeys;
                 setExpandedRowKeys(remainingKeys);
               } else {
                 setExpandedRowKeys({ [record.key]: true });

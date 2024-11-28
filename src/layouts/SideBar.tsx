@@ -259,7 +259,7 @@ const SideBar = () => {
       className={`h-screen min-h-screen overflow-y-auto bg-[#182537] ${collapsedVal ? "" : "pr-5"}`}
     >
       <div className={`flex items-center ${collapsedVal ? "justify-center" : "justify-between"} py-3 px-4`}>
-        {!collapsedVal && <Image src={Logo} alt="Logo" />}
+        {!collapsedVal && <Image width={50} height={50} src={Logo} alt="Logo" />}
         <Image src={BarIcon} className="cursor-pointer" onClick={() => setCollapsedVal(!collapsedVal)} alt="bar-icon" />
       </div>
 

@@ -180,9 +180,6 @@ export function DeliveryTransaction() {
       />
 
       <CustomTable
-        rowSelection={{
-          type: "checkbox",
-        }}
         dataSource={moveList?.data.items?.map((item, index) => ({
           ...item,
           key: index + 1,

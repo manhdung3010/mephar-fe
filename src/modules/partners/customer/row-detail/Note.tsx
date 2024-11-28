@@ -39,13 +39,9 @@ export function Note({ record }: { record: any }) {
     });
   };
   const [isOpenNoteModal, setIsOpenNoteModal] = useState(false);
-  const { data: notes, isLoading } = useQuery(
-    ["NOTE_LIST", record?.id],
-    () => getNoteList(record?.id),
-    {
-      enabled: !!record?.id,
-    }
-  );
+  const { data: notes, isLoading } = useQuery(["NOTE_LIST", record?.id], () => getNoteList(record?.id), {
+    enabled: !!record?.id,
+  });
 
   const columns: ColumnsType<IRecord> = [
     {
@@ -58,10 +54,7 @@ export function Note({ record }: { record: any }) {
           return (
             <>
               {value.slice(0, 60)}
-              <span
-                style={{ color: "blue", cursor: "pointer" }}
-                onClick={() => toggleExpand(record.note)}
-              >
+              <span style={{ color: "blue", cursor: "pointer" }} onClick={() => toggleExpand(record.note)}>
                 ... Xem thêm
               </span>
             </>
@@ -70,10 +63,7 @@ export function Note({ record }: { record: any }) {
           return (
             <>
               {value}
-              <span
-                style={{ color: "blue", cursor: "pointer" }}
-                onClick={() => toggleExpand(record.note)}
-              >
+              <span style={{ color: "blue", cursor: "pointer" }} onClick={() => toggleExpand(record.note)}>
                 {" "}
                 Thu gọn
               </span>
@@ -100,15 +90,7 @@ export function Note({ record }: { record: any }) {
 
   return (
     <div className="gap-12 ">
-      <CustomTable
-        dataSource={notes?.data?.items}
-        columns={columns}
-        pagination={false}
-        className="mb-4"
-        rowSelection={{
-          type: "checkbox",
-        }}
-      />
+      <CustomTable dataSource={notes?.data?.items} columns={columns} pagination={false} className="mb-4" />
 
       <div className="flex justify-end gap-4">
         <CustomButton
@@ -120,11 +102,7 @@ export function Note({ record }: { record: any }) {
         </CustomButton>
       </div>
 
-      <CreateCustomerNote
-        isOpen={isOpenNoteModal}
-        onCancle={() => setIsOpenNoteModal(false)}
-        customerId={record?.id}
-      />
+      <CreateCustomerNote isOpen={isOpenNoteModal} onCancle={() => setIsOpenNoteModal(false)} customerId={record?.id} />
     </div>
   );
 }
@@ -159,7 +137,7 @@ const CreateCustomerNote = ({
       onError: (err: any) => {
         message.error(err?.message);
       },
-    }
+    },
   );
   const onSubmit = () => {
     mutateCreateNote();
@@ -184,9 +162,7 @@ const CreateCustomerNote = ({
                   rows={6}
                   placeholder="Nhập ghi chú"
                   value={noteValue}
-                  onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) =>
-                    setNoteValue(event.target.value)
-                  }
+                  onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => setNoteValue(event.target.value)}
                 />
               </span>
             </div>

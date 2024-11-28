@@ -64,12 +64,10 @@ export function Doctor() {
 
   const { data: doctors, isLoading } = useQuery(
     ["DOCTOR_LIST", formFilter.page, formFilter.limit, formFilter.keyword],
-    () => getDoctor(formFilter)
+    () => getDoctor(formFilter),
   );
 
-  const [expandedRowKeys, setExpandedRowKeys] = useState<
-    Record<string, boolean>
-  >({});
+  const [expandedRowKeys, setExpandedRowKeys] = useState<Record<string, boolean>>({});
 
   const columns: ColumnsType<IRecord> = [
     {
@@ -131,12 +129,10 @@ export function Doctor() {
         <div
           className={cx(
             {
-              "text-[#00B63E] border border-[#00B63E] bg-[#DEFCEC]":
-                status === EDoctorStatus.active,
-              "text-[##666666] border border-[##666666] bg-[#F5F5F5]":
-                status === EDoctorStatus.inactive,
+              "text-[#00B63E] border border-[#00B63E] bg-[#DEFCEC]": status === EDoctorStatus.active,
+              "text-[##666666] border border-[##666666] bg-[#F5F5F5]": status === EDoctorStatus.inactive,
             },
-            "px-2 py-1 rounded-2xl w-max"
+            "px-2 py-1 rounded-2xl w-max",
           )}
         >
           {EDoctorStatusLabel[getEnumKeyByValue(EDoctorStatus, status)]}
@@ -207,41 +203,23 @@ export function Doctor() {
   return (
     <div className="mb-2">
       <div className="my-3 flex items-center justify-end gap-4">
-        <div
-          className="flex items-center gap-2 cursor-pointer"
-          onClick={downloadDoctorExcel}
-        >
+        <div className="flex items-center gap-2 cursor-pointer" onClick={downloadDoctorExcel}>
           <Image src={ExportIcon} /> Xuất file
         </div>
 
-        <div
-          className="flex items-center gap-2 cursor-pointer"
-          onClick={downloadDoctoExamrExcel}
-        >
+        <div className="flex items-center gap-2 cursor-pointer" onClick={downloadDoctoExamrExcel}>
           <Image src={ExportIcon} /> Xuất file mẫu
         </div>
 
         <div className="h-5 w-[1px] bg-[#D3D5D7]"></div>
 
-        <div
-          className="flex items-center gap-2 cursor-pointer"
-          onClick={handleImportClick}
-        >
+        <div className="flex items-center gap-2 cursor-pointer" onClick={handleImportClick}>
           <Image src={ImportIcon} alt="Import Icon" />
           Nhập file
-          <input
-            type="file"
-            ref={fileInputRef}
-            style={{ display: "none" }}
-            onChange={handleFileChange}
-          />
+          <input type="file" ref={fileInputRef} style={{ display: "none" }} onChange={handleFileChange} />
         </div>
 
-        {hasPermission(
-          profile?.role?.permissions,
-          RoleModel.doctor,
-          RoleAction.create
-        ) && (
+        {hasPermission(profile?.role?.permissions, RoleModel.doctor, RoleAction.create) && (
           <CustomButton
             prefixIcon={<Image src={PlusIcon} />}
             onClick={() => router.push("/partners/doctor/add-doctor")}
@@ -261,9 +239,6 @@ export function Doctor() {
       />
 
       <CustomTable
-        rowSelection={{
-          type: "checkbox",
-        }}
         dataSource={doctors?.data?.items?.map((item, index) => ({
           ...item,
           key: index,
@@ -275,8 +250,7 @@ export function Doctor() {
             onClick: (event) => {
               // Toggle expandedRowKeys state here
               if (expandedRowKeys[record.key]) {
-                const { [record.key]: value, ...remainingKeys } =
-                  expandedRowKeys;
+                const { [record.key]: value, ...remainingKeys } = expandedRowKeys;
                 setExpandedRowKeys(remainingKeys);
               } else {
                 setExpandedRowKeys({ [record.key]: true });

@@ -282,9 +282,6 @@ export function BillTransaction() {
       <Search setFormFilter={setFormFilter} formFilter={formFilter} />
 
       <CustomTable
-        rowSelection={{
-          type: "checkbox",
-        }}
         dataSource={orders?.data?.items?.map((item, index) => ({
           ...item,
           key: index + 1,

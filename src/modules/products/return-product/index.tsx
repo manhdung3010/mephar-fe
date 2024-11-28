@@ -149,9 +149,6 @@ export function ReturnProduct() {
       <Search setFormFilter={setFormFilter} formFilter={formFilter} />
 
       <CustomTable
-        rowSelection={{
-          type: "checkbox",
-        }}
         dataSource={returnProducts?.data?.items?.map((item, index) => ({
           ...item,
           key: index + 1,

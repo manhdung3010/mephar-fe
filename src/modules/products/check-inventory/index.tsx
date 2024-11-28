@@ -175,9 +175,6 @@ export function CheckInventory() {
         }, 300)}
       />
       <CustomTable
-        rowSelection={{
-          type: "checkbox",
-        }}
         dataSource={inventoryList}
         columns={columns}
         onRow={(record, rowIndex) => {
