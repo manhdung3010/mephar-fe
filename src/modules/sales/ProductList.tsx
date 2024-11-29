@@ -211,6 +211,7 @@ export function ProductList({
             className={isDiscount ? "cursor-not-allowed" : "cursor-pointer"}
             onClick={() => {
               if (isDiscount) return;
+
               const orderObjectClone = cloneDeep(orderObject);
               const productsClone = orderObjectClone[orderActive] || [];
               orderObjectClone[orderActive] = productsClone.filter((product) => {
@@ -221,15 +222,31 @@ export function ProductList({
               });
               setOrderObject(orderObjectClone);
 
-              // remove productDiscount if this product is in productDiscount
+              // Kiểm tra discountObject và orderActive
               const discountObjectClone = cloneDeep(discountObject);
-              discountObjectClone[orderActive].productDiscount = discountObjectClone[
-                orderActive
-              ].productDiscount.filter((item) => item.productUnitSelected !== productUnitId);
-              // reset orderDiscount
-              discountObjectClone[orderActive].orderDiscount = [];
+              if (
+                discountObjectClone &&
+                discountObjectClone[orderActive] &&
+                discountObjectClone[orderActive].productDiscount
+              ) {
+                // Lọc productDiscount
+                discountObjectClone[orderActive].productDiscount = discountObjectClone[
+                  orderActive
+                ].productDiscount.filter((item) => item.productUnitSelected !== productUnitId);
+              }
+              // Đảm bảo reset orderDiscount nếu discountObject[orderActive] tồn tại
+              if (discountObjectClone && discountObjectClone[orderActive]) {
+                discountObjectClone[orderActive].orderDiscount = [];
+              }
               setDiscountObject(discountObjectClone);
-              if (errorsReturn?.products[index]?.quantity) {
+
+              // Kiểm tra lỗi trả về trước khi đặt lại
+              if (
+                errorsReturn &&
+                errorsReturn.products &&
+                errorsReturn.products[index] &&
+                errorsReturn.products[index].quantity
+              ) {
                 setErrorReturn(`products.${index}.quantity`, undefined);
               }
             }}
