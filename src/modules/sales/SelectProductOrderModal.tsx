@@ -145,7 +145,6 @@ function SelectProductOrderModal({ isOpen, onCancel, onSave, discountItem, type 
         scroll={{ x: 600 }}
         loading={isLoadingProduct}
         rowSelection={{
-          type: "checkbox",
           selectedRowKeys: [...listProduct.filter((batch) => batch.isSelected).map((batch: any) => batch.id)],
           onChange(selectedRowKeys) {
             let listBatchClone = cloneDeep(listProduct);

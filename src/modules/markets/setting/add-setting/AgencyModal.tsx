@@ -38,27 +38,25 @@ function AgencyModal({
     () => getAgency({ keyword: agencyKeyword, status: "active" }),
     {
       enabled: agencyType === "agency",
-    }
+    },
   );
   const { data: angencyGroup, isLoading: isLoadingAgencyGroup } = useQuery(
     ["AGENCY_GROUP_LIST", agencyKeyword],
     () => getAgencyGroup({ keyword: agencyKeyword }),
     {
       enabled: agencyType === "agencyGroup",
-    }
+    },
   );
 
   useEffect(() => {
     if (angency && agencyType === "agency") {
-      setAgencyList(
-        angency?.data?.items?.map((item: any) => ({ ...item, isGroup: false }))
-      );
+      setAgencyList(angency?.data?.items?.map((item: any) => ({ ...item, isGroup: false })));
     } else if (angencyGroup && agencyType === "agencyGroup") {
       setAgencyList(
         angencyGroup?.data?.items?.map((item: any) => ({
           ...item,
           isGroup: true,
-        }))
+        })),
       );
     }
   }, [angency, angencyGroup, agencyType]);
@@ -147,12 +145,7 @@ function AgencyModal({
           columns={columns}
           loading={isLoading}
           rowSelection={{
-            type: "checkbox",
-            selectedRowKeys: [
-              ...agencyList
-                .filter((batch) => batch.isSelected)
-                .map((batch: any) => batch.id),
-            ],
+            selectedRowKeys: [...agencyList.filter((batch) => batch.isSelected).map((batch: any) => batch.id)],
             onChange(selectedRowKeys) {
               let listBatchClone = cloneDeep(agencyList);
               console.log("selectedRowKeys", selectedRowKeys);
@@ -174,11 +167,7 @@ function AgencyModal({
         />
 
         <div className="mt-5 flex justify-end gap-x-4">
-          <CustomButton
-            onClick={onCancel}
-            outline={true}
-            className="h-[46px] min-w-[150px] py-2 px-4"
-          >
+          <CustomButton onClick={onCancel} outline={true} className="h-[46px] min-w-[150px] py-2 px-4">
             Đóng
           </CustomButton>
           <CustomButton
@@ -190,7 +179,7 @@ function AgencyModal({
                   agencyList.map((item: any) => ({
                     ...item,
                     isSelected: false,
-                  }))
+                  })),
                 );
               } else {
                 message.error("Vui lòng chọn đại lý");

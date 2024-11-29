@@ -454,7 +454,7 @@ const Info = ({ useForm, setSelectedMedicineCategory, selectedMedicineCategory, 
             value={getValues('baseUnit')}
           />
 
-          <div className="absolute bottom-0 left-[calc((100%-42px)/2+12px)] flex gap-2">
+          {/* <div className="absolute bottom-0 left-[calc((100%-42px)/2+12px)] flex gap-2">
             <CustomCheckbox
               onChange={(e) =>
                 setValue('isDirectSale', e.target.checked, {
@@ -465,7 +465,7 @@ const Info = ({ useForm, setSelectedMedicineCategory, selectedMedicineCategory, 
             />
             <div>Bán trực tiếp</div>
             <Image src={InfoIcon} alt="" />
-          </div>
+          </div> */}
           {
             pointStatus?.data?.type === "product" && (
               <div className="absolute bottom-6 left-[calc((100%-42px)/2+12px)] flex gap-2">
@@ -552,7 +552,7 @@ const Info = ({ useForm, setSelectedMedicineCategory, selectedMedicineCategory, 
               />
 
               <div className="flex flex-[2] items-end justify-center gap-4">
-                <div className="flex gap-2">
+                {/* <div className="flex gap-2">
                   <CustomCheckbox
                     onChange={(e) =>
                       onChangeUnit(unitKey, 'isDirectSale', e.target.checked)
@@ -561,7 +561,7 @@ const Info = ({ useForm, setSelectedMedicineCategory, selectedMedicineCategory, 
                   />
                   <div>Bán trực tiếp</div>
                   <Image src={InfoIcon} alt="" />
-                </div>
+                </div> */}
 
                 <Image
                   src={DeleteRedIcon}

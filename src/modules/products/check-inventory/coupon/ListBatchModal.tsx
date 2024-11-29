@@ -135,7 +135,6 @@ export function ListBatchModal({
         columns={columns}
         scroll={{ x: 600 }}
         rowSelection={{
-          type: "checkbox",
           selectedRowKeys: [
             ...listBatch.filter((batch) => batch.isSelected).map((batch: any) => batch.batchId || batch.id),
           ],

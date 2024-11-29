@@ -36,9 +36,7 @@ export function ListBatchModal({
 
   useEffect(() => {
     if (productKeyAddBatch) {
-      const product = returnProducts?.find(
-        (product) => product.productKey === productKeyAddBatch
-      );
+      const product = returnProducts?.find((product) => product.productKey === productKeyAddBatch);
 
       if (product?.batches) {
         setListBatchSelected(product.batches);
@@ -56,9 +54,7 @@ export function ListBatchModal({
     const result = productKeyAddBatch?.split("-") ?? [];
 
     const exchangeValue =
-      returnProducts?.find(
-        (product) => product.productKey === productKeyAddBatch
-      )?.exchangeValue ?? 1;
+      returnProducts?.find((product) => product.productKey === productKeyAddBatch)?.exchangeValue ?? 1;
 
     return {
       productId: Number(result[0]),
@@ -75,7 +71,7 @@ export function ListBatchModal({
         productId,
         branchId,
       }),
-    { enabled: isOpen }
+    { enabled: isOpen },
   );
 
   useEffect(() => {
@@ -154,9 +150,7 @@ export function ListBatchModal({
         <div
           className=" cursor-pointer"
           onClick={() => {
-            const records = listBatchSelected.filter(
-              (batch) => batch.id !== id
-            );
+            const records = listBatchSelected.filter((batch) => batch.id !== id);
             setListBatchSelected(records);
           }}
         >
@@ -176,9 +170,7 @@ export function ListBatchModal({
       }
 
       if (batch.isSelected && batch.quantity > (batch.originalInventory ?? 0)) {
-        message.error(
-          "Số lượng sản phẩm chọn phải nhỏ hơn hoặc bằng số lượng đã nhập"
-        );
+        message.error("Số lượng sản phẩm chọn phải nhỏ hơn hoặc bằng số lượng đã nhập");
         return false;
       }
     }
@@ -254,11 +246,8 @@ export function ListBatchModal({
         columns={columns}
         scroll={{ x: 600 }}
         rowSelection={{
-          type: "checkbox",
           selectedRowKeys: [
-            ...listBatchSelected
-              .filter((batch) => batch.isSelected)
-              .map((batch: any) => batch.batchId || batch.id),
+            ...listBatchSelected.filter((batch) => batch.isSelected).map((batch: any) => batch.batchId || batch.id),
           ],
           onChange(selectedRowKeys) {
             let listBatchClone = cloneDeep(listBatchSelected);

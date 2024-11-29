@@ -162,10 +162,6 @@ export function ImportProduct() {
       <Search setFormFilter={setFormFilter} formFilter={formFilter} />
 
       <CustomTable
-        rowSelection={{
-          type: "checkbox",
-          onChange: handleCheckboxChange,
-        }}
         dataSource={importProducts?.data?.items?.map((item, index) => ({
           ...item,
           key: index + 1,

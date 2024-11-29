@@ -50,7 +50,7 @@ const Search = ({ onChange }: { onChange: (value) => void }) => {
       <div className="flex items-center gap-4 p-4">
         <div className="flex-1">
           <CustomInput
-            placeholder="Tìm kiếm theo mã sản phẩm, tên sản phẩm, barcode"
+            placeholder="Tìm kiếm theo mã khuyến mãi, tên khuyến mãi"
             prefixIcon={<Image src={SearchIcon} alt="" />}
             className=""
             value={formFilter.keyword}

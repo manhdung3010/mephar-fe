@@ -168,7 +168,7 @@ const AddPackage = ({ productId, isCopy }: { productId?: string; isCopy?: boolea
           <CustomButton outline={true} onClick={() => router.push("/products/list")}>
             Hủy bỏ
           </CustomButton>
-          <CustomButton outline={true}>Lưu và đưa sản phẩm lên chợ</CustomButton>
+          {/* <CustomButton outline={true}>Lưu và đưa sản phẩm lên chợ</CustomButton> */}
           <CustomButton
             disabled={isLoadingCreatePackage}
             onClick={() => {

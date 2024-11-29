@@ -313,9 +313,6 @@ export function Customer() {
             <Search setFormFilter={setFormFilter} formFilter={formFilter} />
 
             <CustomTable
-              rowSelection={{
-                type: "checkbox",
-              }}
               dataSource={customers?.data?.items?.map((item, index) => ({
                 ...item,
                 key: index + 1,

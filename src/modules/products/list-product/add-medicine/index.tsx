@@ -199,7 +199,7 @@ const AddMedicine = ({ productId, isCopy }: { productId?: string; isCopy?: boole
           <CustomButton outline={true} onClick={() => router.push("/products/list")}>
             Hủy bỏ
           </CustomButton>
-          <CustomButton outline={true}>Lưu và đưa sản phẩm lên chợ</CustomButton>
+          {/* <CustomButton outline={true}>Lưu và đưa sản phẩm lên chợ</CustomButton> */}
           <CustomButton
             disabled={isLoadingCreateMedicine}
             onClick={() => {

@@ -470,7 +470,7 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
           </div>
         )}
 
-        <CustomCheckbox
+        {/* <CustomCheckbox
           className="mt-3"
           onChange={(e) => {
             if (e.target.checked) {
@@ -482,7 +482,7 @@ export function RightContent({ useForm, discountList }: { useForm: any; discount
           checked={!!getValues("prescriptionId")}
         >
           Bán thuốc theo đơn
-        </CustomCheckbox>
+        </CustomCheckbox> */}
       </div>
 
       <div className="my-6 h-[1px] w-full bg-[#E4E4E4]"></div>

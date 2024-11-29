@@ -99,7 +99,7 @@ export function GroupCustomer() {
 
       <div className="bg-white p-4">
         <CustomInput
-          placeholder="Tìm kiếm mã, tên hoặc sđt khách hàng"
+          placeholder="Tìm kiếm theo tên"
           prefixIcon={<Image src={SearchIcon} alt="" />}
           className=""
           onChange={debounce((value) => {

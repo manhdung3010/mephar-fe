@@ -9,12 +9,7 @@ import { CustomInput } from "@/components/CustomInput";
 import { CustomModal } from "@/components/CustomModal";
 import CustomTable from "@/components/CustomTable";
 import { formatNumber } from "@/helpers";
-import {
-  checkInventoryState,
-  orderActiveState,
-  orderState,
-  productMoveState,
-} from "@/recoil/state";
+import { checkInventoryState, orderActiveState, orderState, productMoveState } from "@/recoil/state";
 import { IBatch } from "@/modules/sales/interface";
 
 // import type { IBatch, ISaleProductLocal } from './interface';
@@ -45,10 +40,8 @@ export function ListBatchModal({
             batchId: batch.id,
             productKey: product.productKey,
             productId: product.productId,
-            newInventory: Math.floor(
-              batch.originalInventory / product.productUnit.exchangeValue
-            ),
-          }))
+            newInventory: Math.floor(batch.originalInventory / product.productUnit.exchangeValue),
+          })),
         );
       }
     });
@@ -86,9 +79,7 @@ export function ListBatchModal({
                   //   return { ...batch, quantity: saleQuantity };
                   // }
                   // set error with key and value to batchErr, filter duplicate key
-                  setBatchErr(
-                    batchErr.filter((item) => item[batchId] !== true)
-                  );
+                  setBatchErr(batchErr.filter((item) => item[batchId] !== true));
                   return { ...batch, quantity: value };
                 }
 
@@ -97,10 +88,7 @@ export function ListBatchModal({
 
               setListBatch(batchesClone);
             }}
-            value={
-              listBatch.find((batch) => batch.batchId === batchId)?.quantity ||
-              0
-            }
+            value={listBatch.find((batch) => batch.batchId === batchId)?.quantity || 0}
             wrapClassName="w-[100px]"
             type="number"
             defaultValue={quantity}
@@ -125,9 +113,7 @@ export function ListBatchModal({
       }
 
       if (batch.isSelected && batch.quantity > batch.inventory) {
-        message.error(
-          "Số lượng sản phẩm chọn phải nhỏ hơn hoặc bằng số lượng tồn"
-        );
+        message.error("Số lượng sản phẩm chọn phải nhỏ hơn hoặc bằng số lượng tồn");
         return false;
       }
     }
@@ -154,11 +140,8 @@ export function ListBatchModal({
         columns={columns}
         scroll={{ x: 600 }}
         rowSelection={{
-          type: "checkbox",
           selectedRowKeys: [
-            ...listBatch
-              .filter((batch) => batch.isSelected)
-              .map((batch: any) => batch.batchId || batch.id),
+            ...listBatch.filter((batch) => batch.isSelected).map((batch: any) => batch.batchId || batch.id),
           ],
           onChange(selectedRowKeys) {
             let listBatchClone = cloneDeep(listBatch);
@@ -181,11 +164,7 @@ export function ListBatchModal({
       />
 
       <div className="mt-5 flex justify-end gap-x-4">
-        <CustomButton
-          onClick={onCancel}
-          outline={true}
-          className="h-[46px] min-w-[150px] py-2 px-4"
-        >
+        <CustomButton onClick={onCancel} outline={true} className="h-[46px] min-w-[150px] py-2 px-4">
           Đóng
         </CustomButton>
         <CustomButton

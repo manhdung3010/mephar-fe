@@ -91,19 +91,6 @@ export function Info({ record }: { record: any }) {
           </div>
         </div>
       </div>
-
-      <div className="flex justify-end gap-2">
-        {hasPermission(profile?.role?.permissions, RoleModel.discount, RoleAction.create) && (
-          <CustomButton
-            type="primary"
-            outline={true}
-            prefixIcon={<Image src={CopyBlueIcon} alt="" />}
-            onClick={() => router.push(`/settings/discount/add-discount?id=${record?.id}&copy=true`)}
-          >
-            Sao chép
-          </CustomButton>
-        )}
-      </div>
     </div>
   );
 }

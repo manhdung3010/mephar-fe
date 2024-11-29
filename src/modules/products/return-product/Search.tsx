@@ -44,7 +44,7 @@ const Search = ({ setFormFilter, formFilter }: { setFormFilter: (value) => void;
       <div className="flex items-center gap-4 p-4">
         <div className="w-1/2">
           <CustomInput
-            placeholder="Tìm kiếm theo mã nhập hàng"
+            placeholder="Tìm kiếm theo mã trả hàng"
             prefixIcon={<Image src={SearchIcon} alt="" />}
             className=""
             onChange={debounce((value) => {

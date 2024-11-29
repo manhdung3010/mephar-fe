@@ -346,7 +346,7 @@ export function SaleReport() {
     <div>
       <div className="my-3 flex justify-end gap-4"></div>
       <div className="grid grid-cols-12 gap-6 ">
-        <div className="col-span-2">
+        <div className="col-span-2 flex items-center">
           <Search formFilter={formFilter} setFormFilter={setFormFilter} branches={branches} />
         </div>
         <div className="col-span-10">

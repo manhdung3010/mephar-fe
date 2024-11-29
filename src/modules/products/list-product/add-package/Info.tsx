@@ -488,7 +488,7 @@ const Info = ({
               </div>
             )
           }
-          <div className="mt-2 flex gap-x-2">
+          {/* <div className="mt-2 flex gap-x-2">
             <CustomCheckbox
               onChange={(e) =>
                 setValue('isDirectSale', e.target.checked, {
@@ -498,7 +498,7 @@ const Info = ({
               checked={getValues('isDirectSale')}
             />
             <div>Bán trực tiếp</div>
-          </div>
+          </div> */}
         </div>
       </div>
 
@@ -515,7 +515,7 @@ const Info = ({
             }
             value={getValues('baseUnit')}
           />
-          <div className="absolute bottom-0 left-[calc((100%-42px)/2+12px)] flex gap-2">
+          {/* <div className="absolute bottom-0 left-[calc((100%-42px)/2+12px)] flex gap-2">
             <CustomCheckbox
               onChange={(e) =>
                 setValue('isDirectSale', e.target.checked, {
@@ -526,7 +526,7 @@ const Info = ({
             />
             <div>Bán trực tiếp</div>
             <Image src={InfoIcon} alt="" />
-          </div>
+          </div> */}
         </div>
         <InputError error={errors.baseUnit?.message} />
       </div>
@@ -599,7 +599,7 @@ const Info = ({
               />
 
               <div className="flex flex-[2] items-end justify-center gap-4">
-                <div className="flex gap-2">
+                {/* <div className="flex gap-2">
                   <CustomCheckbox
                     onChange={(e) =>
                       onChangeUnit(unitKey, 'isDirectSale', e.target.checked)
@@ -608,7 +608,7 @@ const Info = ({
                   />
                   <div>Bán trực tiếp</div>
                   <Image src={InfoIcon} alt="" />
-                </div>
+                </div> */}
 
                 <Image
                   src={RemoveGrayIcon}
